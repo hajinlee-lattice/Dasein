@@ -6,40 +6,61 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
+import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    @PostConstruct
+    public void init() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -49,6 +70,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -84,7 +108,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public Map<String, Long> updateRatingEngineCounts(String engineId) {
         RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
         if (ratingEngine != null) {
-            //TODO: only update rule based for now
+            // TODO: only update rule based for now
             if (RatingEngineType.RULE_BASED.equals(ratingEngine.getType())) {
                 RatingModel ratingModel = ratingEngine.getActiveModel();
                 Map<String, Long> counts = updateRatingCount(ratingEngine, ratingModel);
@@ -179,6 +203,55 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
         evictRatingEngineCaches();
         return updatedModel;
+    }
+
+    @Override
+    public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType) {
+        if (ratingEngine.getType() == RatingEngineType.AI_BASED && ratingModel instanceof AIModel) {
+            AIModelService aiModelService = (AIModelService) RatingModelServiceBase
+                    .getRatingModelService(ratingEngine.getType());
+            return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,
+                    modelingQueryType);
+        } else {
+            throw new LedpException(LedpCode.LEDP_40009,
+                    new String[] { ratingEngine.getId(), ratingModel.getId(), customerSpace });
+        }
+    }
+
+    @Override
+    public String modelRatingEngine(String tenantId, RatingEngine ratingEngine, RatingModel ratingModel) {
+        if (ratingModel instanceof AIModel) {
+            ApplicationId jobId = ((AIModel) ratingModel).getModelingJobId();
+            if (jobId == null) {
+                internalResourceProxy.setModelSummaryDownloadFlag(tenantId);
+                RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
+                parameters.setName(ratingModel.getId());
+                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
+                parameters.setDescription(ratingEngine.getDisplayName());
+                parameters.setModuleName("Module");
+                parameters.setUserId(MultiTenantContext.getEmailAddress());
+                parameters.setTargetFilterQuery(
+                        getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.TARGET));
+                parameters.setTrainFilterQuery(
+                        getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.TRAINING));
+                parameters.setEventFilterQuery(
+                        getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.EVENT));
+
+                if (((AIModel) ratingModel).getPredictionType() == PredictionType.EXPECTED_VALUE) {
+                    parameters.setExpectedValue(true);
+                }
+
+                log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
+                jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
+
+                ((AIModel) ratingModel).setModelingJobId(jobId.toString());
+                updateRatingModel(ratingEngine.getId(), ratingModel.getId(), ratingModel);
+            }
+            return jobId.toString();
+        } else {
+            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+        }
     }
 
     private Map<String, Long> updateRatingCount(RatingEngine ratingEngine, RatingModel ratingModel) {

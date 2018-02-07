@@ -1,5 +1,9 @@
 package com.latticeengines.apps.cdl.rating;
 
+import java.util.Collections;
+
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -15,9 +19,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import org.apache.commons.collections4.CollectionUtils;
-
-import java.util.Collections;
 
 public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilder {
 
@@ -37,6 +38,11 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
         if (!CollectionUtils.isEmpty(aiModel.getTrainingProducts())) {
             productIds = String.join(",", aiModel.getTrainingProducts());
         }
+    }
+
+    @Override
+    protected void removeTimeWindowRestrictions() {
+        // to be implemented
     }
 
     @Override

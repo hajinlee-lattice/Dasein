@@ -28,6 +28,8 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
 
     protected abstract void handleProxyProducts();
 
+    protected abstract void removeTimeWindowRestrictions();
+
     protected abstract void buildProductTransactionRestrictions();
 
     protected abstract void handleCustomTrainingPeriod();
@@ -37,15 +39,12 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         handleProxyProducts();
         removeTimeWindowRestrictions();
         buildProductTransactionRestrictions();
-        buildEventFrontEndQuery();
+        buildRatingFrontEndQuery();
         handleCustomTrainingPeriod();
         return ratingFrontEndQuery;
     }
 
-    private void removeTimeWindowRestrictions() {
-    }
-
-    private void buildEventFrontEndQuery() {
+    private void buildRatingFrontEndQuery() {
         RestrictionBuilder restrictionBuilder = Restriction.builder();
 
         Restriction finalQueryRestriction = restrictionBuilder

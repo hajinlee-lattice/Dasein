@@ -45,6 +45,7 @@ import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -113,7 +114,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 import com.latticeengines.security.exposed.service.InternalTestUserService;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
-import com.latticeengines.db.exposed.service.ReportService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -382,9 +382,8 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/modelsummarydownloadflag/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get list of model summary need for refresh in Scoringapi cachce")
+    @ApiOperation(value = "Set model summary download flag")
     public void setModelSummaryDownloadFlag(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info(String.format("Set model summary download flag for tenant %s", tenantId));
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
@@ -1483,20 +1482,21 @@ public class InternalResource extends InternalResourceBase {
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
 
-    @RequestMapping(value = "/plscomponent/invoketime/" + TENANT_ID_PATH, method = RequestMethod.GET,
-            headers = "Accept=application/json")
+    @RequestMapping(value = "/plscomponent/invoketime/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get actions for a tenant")
-    public int getInvokeTime(@PathVariable("tenantId") String tenantId,  HttpServletRequest request) {
+    public int getInvokeTime(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         log.debug(String.format("Retrieve pls component invoke time for tenant: %s", tenantId));
         CustomerSpace customer_space = CustomerSpace.parse(tenantId);
 
         Camille camille = CamilleEnvironment.getCamille();
-        Path contractPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer_space.getContractId(),
-                customer_space.getTenantId(), customer_space.getSpaceId()).append(
-                new Path(TenantConfigServiceImpl.SERVICES_ZNODE + TenantConfigServiceImpl.PLS_ZNODE
+        Path contractPath = PathBuilder
+                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer_space.getContractId(),
+                        customer_space.getTenantId(), customer_space.getSpaceId())
+                .append(new Path(TenantConfigServiceImpl.SERVICES_ZNODE + TenantConfigServiceImpl.PLS_ZNODE
                         + TenantConfigServiceImpl.INVOKE_TIME));
         try {
             return Integer.parseInt(camille.get(contractPath).getData());

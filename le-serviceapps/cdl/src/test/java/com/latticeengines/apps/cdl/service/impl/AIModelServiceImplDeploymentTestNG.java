@@ -17,9 +17,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -30,7 +33,11 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
@@ -56,11 +63,15 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     private RatingEngineService ratingEngineService;
 
     @Inject
+    private AIModelService aiModelService;
+
+    @Inject
     private CDLTestDataService cdlTestDataService;
 
     protected MetadataSegment reTestSegment;
 
     protected RatingEngine aiRatingEngine;
+    protected AIModel aimodel;
     protected String aiRatingEngineId;
     protected String aiRatingModelId;
 
@@ -100,9 +111,14 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         ratingEngineService.deleteById(ratingEngine.getId());
     }
 
+    protected EventFrontEndQuery getRatingEngineModelingQueries(RatingEngine ratingEngine, AIModel aiModel,
+            ModelingQueryType queryType) {
+        return aiModelService.getModelingQuery(mainTestTenant.getId(), ratingEngine, aiModel, queryType);
+    }
+
     @Test(groups = "deployment")
     public void testCreate() {
-        aiRatingEngine = createRatingEngine(RatingEngineType.AI_BASED);
+        aiRatingEngine = createTestRatingEngine(RatingEngineType.AI_BASED);
         Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.AI_BASED);
         aiRatingEngineId = aiRatingEngine.getId();
 
@@ -110,16 +126,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(ratingModels.size(), 1);
         aiRatingModelId = ratingModels.get(0).getId();
         Assert.assertNotNull(aiRatingModelId, "AIRatingModel is null");
-    }
-
-    protected RatingEngine createRatingEngine(RatingEngineType type) {
-        RatingEngine ratingEngine = new RatingEngine();
-        ratingEngine.setSegment(reTestSegment);
-        ratingEngine.setCreatedBy(CREATED_BY);
-        ratingEngine.setType(type);
-        // test basic creation
-        ratingEngine = createRatingEngine(ratingEngine);
-        return ratingEngine;
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
@@ -135,14 +141,6 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         updateRatingModel(aiModel);
         assertUpdatedAIModelWithBasicFields(getSpecificRatingModel());
-    }
-
-    private AIModel getSpecificRatingModel() {
-        RatingModel rm = getRatingModel();
-        Assert.assertNotNull(rm);
-        Assert.assertTrue(rm instanceof AIModel);
-        AIModel aiModel = (AIModel) rm;
-        return aiModel;
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindAndUpdateRatingModelBasicFields" })
@@ -167,17 +165,33 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
                 ComparisonType.LESS_OR_EQUAL, 1500);
         ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
                 ComparisonType.LESS_OR_EQUAL, 10);
+        ModelingConfigFilter trainFilter = new ModelingConfigFilter(ModelingConfig.TRAINING_SET_PERIOD,
+                ComparisonType.PRIOR_ONLY, 4);
 
-        Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
-        configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
-        configFitlers.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
-        aiModel.setModelingConfigFilters(configFitlers);
+        Map<ModelingConfig, ModelingConfigFilter> configFilters = new HashMap<>();
+        configFilters.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
+        configFilters.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
+        configFilters.put(ModelingConfig.TRAINING_SET_PERIOD, trainFilter);
+        aiModel.setModelingConfigFilters(configFilters);
 
         updateRatingModel(aiModel);
-        assertUpdatedModelWithConfigFilters(getSpecificRatingModel(), configFitlers);
+        assertUpdatedModelWithConfigFilters(getSpecificRatingModel(), configFilters);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingModelConfigFitlers" })
+    private void testGetModelingQueries() {
+        AIModel aiModel = (AIModel) getRatingModel();
+        EventFrontEndQuery targetQuery = getRatingEngineModelingQueries(aiRatingEngine, aiModel,
+                ModelingQueryType.TARGET);
+        EventFrontEndQuery trainingQuery = getRatingEngineModelingQueries(aiRatingEngine, aiModel,
+                ModelingQueryType.TRAINING);
+        EventFrontEndQuery eventQuery = getRatingEngineModelingQueries(aiRatingEngine, aiModel,
+                ModelingQueryType.EVENT);
+
+        assertModelingQueries(targetQuery, trainingQuery, eventQuery);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetModelingQueries" })
     private void testUpdateRatingModelWithModelSummary() {
         String uuid = UUID.randomUUID().toString();
         String applicationId = "application_1111111111111_1111";
@@ -219,6 +233,24 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         List<RatingEngineSummary> ratingEngineList = getAllRatingEngineSummaries();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
+    }
+
+    protected RatingEngine createTestRatingEngine(RatingEngineType type) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setSegment(reTestSegment);
+        ratingEngine.setCreatedBy(CREATED_BY);
+        ratingEngine.setType(type);
+        // test basic creation
+        ratingEngine = createRatingEngine(ratingEngine);
+        return ratingEngine;
+    }
+
+    private AIModel getSpecificRatingModel() {
+        RatingModel rm = getRatingModel();
+        Assert.assertNotNull(rm);
+        Assert.assertTrue(rm instanceof AIModel);
+        AIModel aiModel = (AIModel) rm;
+        return aiModel;
     }
 
     private List<String> generateSeletedProducts() {
@@ -299,6 +331,52 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         deleteRatingEngine(ratingEngine);
         ratingEngine = getRatingEngineById(ratingEngineId);
         Assert.assertNull(ratingEngine);
+    }
+
+    private void assertModelingQueries(EventFrontEndQuery targetQuery, EventFrontEndQuery trainingQuery,
+            EventFrontEndQuery eventQuery) {
+        Assert.assertNotNull(targetQuery);
+        Assert.assertNotNull(targetQuery.getAccountRestriction());
+        Assert.assertNotNull(targetQuery.getAccountRestriction().getRestriction());
+        Assert.assertTrue(targetQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
+        LogicalRestriction lr = (LogicalRestriction) targetQuery.getAccountRestriction().getRestriction();
+        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
+        Assert.assertEquals(lr.getChildren().size(), 2);
+        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
+        Bucket bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
+        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID1 + "," + PRODUCT_ID2);
+        Assert.assertNull(bkt.getTransaction().getSpentFilter());
+        Assert.assertNull(bkt.getTransaction().getUnitFilter());
+        Assert.assertEquals(targetQuery.getPeriodCount(), -1);
+
+        Assert.assertNotNull(trainingQuery);
+        Assert.assertNotNull(trainingQuery.getAccountRestriction());
+        Assert.assertNotNull(trainingQuery.getAccountRestriction().getRestriction());
+        Assert.assertTrue(trainingQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
+        lr = (LogicalRestriction) trainingQuery.getAccountRestriction().getRestriction();
+        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
+        Assert.assertEquals(lr.getChildren().size(), 2);
+        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
+        bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
+        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID3);
+        Assert.assertNull(bkt.getTransaction().getSpentFilter());
+        Assert.assertNull(bkt.getTransaction().getUnitFilter());
+        Assert.assertEquals(trainingQuery.getPeriodCount(), 4);
+
+        Assert.assertNotNull(eventQuery);
+        Assert.assertNotNull(eventQuery.getAccountRestriction());
+        Assert.assertNotNull(eventQuery.getAccountRestriction().getRestriction());
+        Assert.assertTrue(eventQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
+        lr = (LogicalRestriction) eventQuery.getAccountRestriction().getRestriction();
+        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
+        Assert.assertEquals(lr.getChildren().size(), 2);
+        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
+        bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
+        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID3);
+        Assert.assertNotNull(bkt.getTransaction().getSpentFilter());
+        Assert.assertNotNull(bkt.getTransaction().getUnitFilter());
+        Assert.assertEquals(eventQuery.getPeriodCount(), 4);
+
     }
 
 }

@@ -18,7 +18,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.common.exposed.util.NameValidationUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -29,7 +32,6 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
@@ -44,10 +46,8 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
-import com.latticeengines.pls.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -61,9 +61,6 @@ public class ModelResource {
 
     @Autowired
     private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
-
-    @Autowired
-    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
     @Autowired
     private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
@@ -98,6 +95,9 @@ public class ModelResource {
     @Autowired
     private ModelCleanUpService modelCleanUpService;
 
+    @Autowired
+    private CDLModelProxy cdlModelProxy;
+
     @Value("${common.test.microservice.url}")
     private String microserviceEndpoint;
 
@@ -123,16 +123,9 @@ public class ModelResource {
     @ApiOperation(value = "Generate a Rating Engine model from the table name(or query) and parameters. Returns the job id.")
     public ResponseDocument<String> ratingEngineModel(@PathVariable String modelName, //
             @RequestBody RatingEngineModelingParameters parameters) {
-        if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
-            log.error(message);
-            throw new RuntimeException(message);
-        }
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         parameters.setUserId(MultiTenantContext.getEmailAddress());
-        log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
-        return ResponseDocument.successResponse( //
-                ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters).toString());
+        return ResponseDocument
+                .successResponse(cdlModelProxy.model(MultiTenantContext.getTenant().getId(), modelName, parameters));
     }
 
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)

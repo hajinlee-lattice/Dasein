@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-
 import static org.testng.Assert.assertEquals;
 
 import java.util.Collections;
@@ -15,10 +14,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.ModelingParameters;
-import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -36,7 +34,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.PlsModelProxy;
 public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CreateAIModelDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "LETest1517442258201";
     private static final boolean EV_MODEL = false;
 
@@ -86,7 +84,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         return modelingParameters;
     }
 
-    private void model(ModelingParameters parameters) {
+    private void model(RatingEngineModelingParameters parameters) {
         log.info("Start modeling ...");
         System.out.println("json=" + JsonUtils.serialize(parameters));
         ApplicationId modelingWorkflowApplicationId = plsModelProxy.createRatingModel(parameters);

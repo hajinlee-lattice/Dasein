@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +19,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
-import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -41,9 +36,7 @@ import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
-import com.latticeengines.pls.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -70,9 +63,6 @@ public class RatingEngineResource {
 
     @Autowired
     private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
-
-    @Autowired
-    private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -230,34 +220,6 @@ public class RatingEngineResource {
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
-        RatingModel ratingModel = ratingEngineProxy.getRatingModel(tenant.getId(), ratingEngineId, ratingModelId);
-
-        if (ratingModel instanceof AIModel) {
-            ApplicationId jobId = ((AIModel) ratingModel).getModelingJobId();
-            if (jobId == null) {
-                modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
-                RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
-                parameters.setName(ratingModelId);
-                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
-                parameters.setDescription(ratingEngine.getDisplayName());
-                parameters.setModuleName("Module");
-                parameters.setUserId(MultiTenantContext.getEmailAddress());
-                parameters.setTargetFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
-                        ratingModel.getId(), ModelingQueryType.TARGET));
-                parameters.setTrainFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
-                        ratingModel.getId(), ModelingQueryType.TRAINING));
-                parameters.setEventFilterQuery(ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngine.getId(),
-                        ratingModel.getId(), ModelingQueryType.EVENT));
-                log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
-                jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
-
-                ((AIModel) ratingModel).setModelingJobId(jobId.toString());
-                updateRatingModel(ratingModel, ratingEngineId, ratingModelId);
-            }
-            return jobId.toString();
-        } else {
-            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
-        }
+        return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId);
     }
 }

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.rating;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -12,7 +14,6 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import org.apache.commons.collections4.CollectionUtils;
 
 public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBuilder {
 
@@ -35,6 +36,11 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
     }
 
     @Override
+    protected void removeTimeWindowRestrictions() {
+        // to be implemented
+    }
+
+    @Override
     protected void handleCustomTrainingPeriod() {
         ModelingConfigFilter filter = aiModel.getModelingConfigFilters().get(ModelingConfig.TRAINING_SET_PERIOD);
         if (filter != null) {
@@ -44,7 +50,7 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds); // Does'nt
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds); // Doesn't
         // matter
         Bucket.Transaction txn;
         if (aiModel.getModelingStrategy() == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {

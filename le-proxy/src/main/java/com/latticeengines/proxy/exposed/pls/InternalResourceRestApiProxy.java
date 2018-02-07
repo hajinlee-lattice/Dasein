@@ -455,6 +455,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public void setModelSummaryDownloadFlag(String tenantId) {
+        try {
+            String url = constructUrl("pls/internal/modelsummarydownloadflag", tenantId);
+            log.info(String.format("Posting to %s", url));
+            restTemplate.exchange(url, HttpMethod.POST, null, Object.class);
+        } catch (Exception e) {
+            throw new RuntimeException("set model summary flag: Remote call failure", e);
+        }
+    }
+
     private String augumentEnrichmentAttributesUrl(String url, String attributeDisplayNameFilter, Category category,
             String subcategory, Boolean onlySelectedAttributes, Integer offset, Integer max,
             Boolean considerInternalAttributes) {
@@ -530,7 +540,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
                     "pls/internal/datacollection/attributes/" + predefined.getName() + "/" + customerSpace);
             return restTemplate.getForObject(url, List.class);
         } catch (Exception e) {
-            throw new RuntimeException("getReport: Remote call failure: " + e.getMessage(), e);
+            throw new RuntimeException("getAttributesInPredefinedGroup: Remote call failure: " + e.getMessage(), e);
         }
     }
 

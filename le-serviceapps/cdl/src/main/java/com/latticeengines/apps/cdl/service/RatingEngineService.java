@@ -3,9 +3,11 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public interface RatingEngineService {
 
@@ -32,5 +34,10 @@ public interface RatingEngineService {
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);
 
     RatingModel updateRatingModel(String ratingEngineId, String ratingModelId, RatingModel ratingModel);
+
+    EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType);
+
+    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, RatingModel ratingModel);
 
 }

@@ -11,7 +11,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
@@ -171,7 +171,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
             ModelingQueryType modelingQueryType) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
                 + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
-        return get("getTargetQuery", url, EventFrontEndQuery.class);
+        return get("getModelingQuery", url, EventFrontEndQuery.class);
+    }
+
+    public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+        return post("modelRatingEngine", url, null, String.class);
     }
 
 }

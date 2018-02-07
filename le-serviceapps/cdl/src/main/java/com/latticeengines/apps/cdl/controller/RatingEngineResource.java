@@ -6,8 +6,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,21 +16,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.apps.cdl.service.impl.RatingModelServiceBase;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -50,7 +46,8 @@ public class RatingEngineResource {
 
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService,
-            RatingEngineNoteService ratingEngineNoteService) {
+            RatingEngineNoteService ratingEngineNoteService,
+            RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
     }
@@ -187,15 +184,18 @@ public class RatingEngineResource {
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
+        return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType);
+    }
 
-        if (ratingEngine.getType() == RatingEngineType.AI_BASED && ratingModel instanceof AIModel) {
-            AIModelService aiModelService = (AIModelService) RatingModelServiceBase
-                    .getRatingModelService(ratingEngine.getType());
-            return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,
-                    modelingQueryType);
-        } else {
-            throw new LedpException(LedpCode.LEDP_40009, new String[] { ratingEngineId, ratingModelId, customerSpace });
-        }
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
+    public String modelRatingEngine(@PathVariable String tenantId, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
+        RatingEngine ratingEngine = getRatingEngine(tenantId, ratingEngineId);
+        RatingModel ratingModel = getRatingModel(tenantId, ratingEngineId, ratingModelId);
+
+        return ratingEngineService.modelRatingEngine(tenantId, ratingEngine, ratingModel);
     }
 
 }

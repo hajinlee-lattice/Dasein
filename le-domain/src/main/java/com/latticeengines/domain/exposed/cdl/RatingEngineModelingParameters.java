@@ -1,7 +1,8 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.cdl;
 
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public class RatingEngineModelingParameters extends ModelingParameters {
@@ -104,5 +105,4 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     public void setLiftChart(boolean liftChart) {
         this.liftChart = liftChart;
     }
-
 }

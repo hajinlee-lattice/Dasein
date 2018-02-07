@@ -10,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import javax.annotation.Nullable;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
@@ -24,8 +22,6 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -33,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -42,7 +39,6 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
-import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -103,7 +99,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
     @BeforeClass(groups = { "deployment.lp" })
     public void setup() throws Exception {
         log.info("Bootstrapping test tenants using tenant console ...");
-        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.LPA3);
+        setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         firstTenant = testBed.getMainTestTenant();
 
         modelingParameters = new RatingEngineModelingParameters();

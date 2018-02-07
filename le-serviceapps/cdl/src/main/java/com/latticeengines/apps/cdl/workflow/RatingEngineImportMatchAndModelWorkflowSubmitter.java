@@ -1,4 +1,4 @@
-package com.latticeengines.pls.workflow;
+package com.latticeengines.apps.cdl.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +8,14 @@ import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -21,19 +25,18 @@ import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.pls.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
-public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
-
+public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(RatingEngineImportMatchAndModelWorkflowSubmitter.class);
 
     @Autowired
@@ -41,6 +44,15 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Autowired
+    protected MetadataProxy metadataProxy;
+
+    @Autowired
+    protected BatonService batonService;
+
+    @Value("${pls.modelingservice.basedir}")
+    protected String modelingServiceHdfsBaseDir;
 
     public RatingEngineImportMatchAndModelWorkflowConfiguration generateConfiguration(
             RatingEngineModelingParameters parameters) {
@@ -52,10 +64,10 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
 
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
-        Predefined predefinedSelection = Predefined.getDefaultSelection();
+        ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
-            predefinedSelection = Predefined.fromName(predefinedSelectionName);
+            predefinedSelection = ColumnSelection.Predefined.fromName(predefinedSelectionName);
             if (predefinedSelection == null) {
                 throw new IllegalArgumentException("Cannot parse column selection named " + predefinedSelectionName);
             }
@@ -91,8 +103,8 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
                 .enableV2Profiling(false) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
-                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled,
-                        plsFeatureFlagService.isFuzzyMatchEnabled()) //
+                .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
+                // TODO: plsFeatureFlagService.isFuzzyMatchEnabled()) //
                 .moduleName(moduleName != null ? moduleName : null) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
@@ -134,14 +146,16 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
         if (StringUtils.isNotEmpty(parameters.getDataCloudVersion())) {
             return parameters.getDataCloudVersion();
         }
-        if (plsFeatureFlagService.useDnBFlagFromZK()) {
+        if (true) {
+            // TODO: if (plsFeatureFlagService.useDnBFlagFromZK()) {
             return columnMetadataProxy.latestVersion(null).getVersion();
         }
         return null;
     }
 
     public ApplicationId submit(RatingEngineModelingParameters parameters) {
-        TransformationGroup transformationGroup = plsFeatureFlagService.getTransformationGroupFromZK();
+        TransformationGroup transformationGroup = TransformationGroup.STANDARD; // TODO:
+                                                                                // plsFeatureFlagService.getTransformationGroupFromZK();
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
         }
@@ -149,5 +163,4 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends BaseModelW
         ApplicationId applicationId = workflowJobService.submit(configuration);
         return applicationId;
     }
-
 }
