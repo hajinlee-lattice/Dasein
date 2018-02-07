@@ -46,7 +46,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
             popd
         else
             echo "You are on ${UNAME}"
-            sudo apt-get install -y make libssl-dev libapr1-dev
+            sudo apt-get install -y make gcc libssl-dev libapr1-dev
             pushd $CATALINA_HOME/bin
             tar xzf tomcat-native.tar.gz
             cd tomcat-native-*-src/native
