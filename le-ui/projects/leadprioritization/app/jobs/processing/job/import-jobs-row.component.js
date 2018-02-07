@@ -4,6 +4,7 @@ angular.module('lp.jobs.import.row', [])
         var controller = ['$scope', '$q', '$timeout', 'JobsStore', function ($scope, $q, $timeout, JobsStore) {
 
             $scope.disableButton = false;
+            $scope.maxRowsTooltip = 3;
             $scope.expanded = false;
             $scope.chevronConfig = {
                 0: { name: 'Merging, De-duping & matching to Lattice Data Cloud', lable: 'Merging, De-duping & Matching' },
@@ -18,7 +19,7 @@ angular.module('lp.jobs.import.row', [])
                 'Scoring': { position: 4, label: 'Scoring' }
             };
 
-           
+
             function callbackModalWindow(action) {
                 if (action && action.action === 'run') {
                     $scope.disableButton = true;
@@ -28,8 +29,8 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
             function init() {
-                
-                if($scope.vm.rowStatus[$scope.index] != undefined  && $scope.vm.rowStatus[$scope.index] == true){
+
+                if ($scope.vm.rowStatus[$scope.index] != undefined && $scope.vm.rowStatus[$scope.index] == true) {
                     $scope.expanded = true;
                 }
                 $scope.vm.callback = callbackModalWindow;
@@ -45,7 +46,7 @@ angular.module('lp.jobs.import.row', [])
                     return '-';
                 }
             }
-            
+
             function getRecordUploaded(subjob) {
                 if (subjob.reports && subjob.reports.length > 0) {
                     var json = subjob.reports[0].json.Payload;
@@ -56,20 +57,29 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
-            $scope.getSubJobsPartialSuccess = function(){
+            $scope.getSubJobsPartialSuccess = function () {
                 var listPartialSuccess = [];
-                for(var i = 0; i < $scope.job.subJobs.length; i++){
+                for (var i = 0; i < $scope.job.subJobs.length; i++) {
                     var found = getRecordFound($scope.job.subJobs[i]);
                     var uploaded = getRecordUploaded($scope.job.subJobs[i]);
-                    if(found != uploaded && $scope.job.subJobs[i].inputs != undefined){
-                        var fileName = $scope.job.subJobs[i].inputs.SOURCE_DISPLAY_NAME;
-                        listPartialSuccess.push(fileName);
+                    if (found != uploaded && $scope.job.subJobs[i].inputs != undefined) {
+                        // var fileName = $scope.job.subJobs[i].inputs.SOURCE_DISPLAY_NAME;
+                        listPartialSuccess.push($scope.job.subJobs[i]);
                     }
                 }
                 return listPartialSuccess;
             }
 
-            $scope.isOneActionCompleted = function() {
+            $scope.getSubjobActionName = function (index, subjob) {
+                var name = index +'. '+ subjob.inputs.SOURCE_DISPLAY_NAME;
+                if (name.length > 40) {
+                    name = name.substring(0, 40);
+                    name = name + '...';
+                }
+                return name;
+            }
+
+            $scope.isOneActionCompleted = function () {
                 var subJobs = $scope.job.subJobs;
                 var oneCompleted = false;
                 if (subJobs) {
@@ -101,7 +111,7 @@ angular.module('lp.jobs.import.row', [])
 
             $scope.showWarningRun = function () {
                 var subJobs = $scope.job.subJobs;
-               
+
                 var allCompleted = true;
                 if (subJobs) {
                     for (var i = 0; i < subJobs.length; i++) {
@@ -114,11 +124,11 @@ angular.module('lp.jobs.import.row', [])
                 return !allCompleted;
             }
 
-            $scope.disableRunButton = function(){
+            $scope.disableRunButton = function () {
                 var oneCompleted = $scope.isOneActionCompleted();
                 var canRun = $scope.vm.canLastJobRun();
                 var disable = false;
-                if($scope.disableButton || !canRun || !oneCompleted){
+                if ($scope.disableButton || !canRun || !oneCompleted) {
                     disable = true;
                 }
                 return disable;

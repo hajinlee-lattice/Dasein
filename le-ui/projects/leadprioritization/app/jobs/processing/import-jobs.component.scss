@@ -54,8 +54,6 @@ section.import-jobs {
 .le-tooltip:hover .tooltip-content {
     visibility: visible;
     opacity: 1;
-    
-
     display:block;
     position:fixed;
     overflow:hidden;
@@ -84,6 +82,8 @@ section.import-jobs {
     }
     li {
         font-size: 10px;
+        padding-top: 2px;
+        padding-bottom: 2px;
     }
    
 }

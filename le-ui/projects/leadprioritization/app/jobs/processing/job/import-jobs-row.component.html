@@ -18,7 +18,8 @@
                     <h3>Partial Success</h3>
                     <p>The following actions are partially validated and will not be taken into data processing:</p>
                     <ol>
-                        <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess())">{{$index+1}}. {{subjob}}</li>
+                        <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
+                        <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
                     </ol>
                 </div>
             </i>
