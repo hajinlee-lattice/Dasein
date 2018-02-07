@@ -129,7 +129,7 @@ angular.module('lp.ratingsengine')
                     state: 'segment.products.prioritization.training', 
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
-                        RatingsEngineStore.nextLaunchAIModel(nextState);
+                        RatingsEngineStore.nextSaveAIRatingModel(nextState);
                     } 
                 },
                 { 
@@ -160,9 +160,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.getWizardProgressItems = function(step) {
-
-        console.log(step);
-
         return this.wizardProgressItems[(step || 'rulesprospects')];
     }
 
@@ -578,7 +575,12 @@ angular.module('lp.ratingsengine')
 
     
     this.setModelingConfigFilters = function(modelingConfigFilters) {
-        this.modelingConfigFilters = modelingConfigFilters;
+        var currentConfig = this.modelingConfigFilters;
+        if(currentConfig != null){
+            this.modelingConfigFilters = angular.extend(currentConfig, modelingConfigFilters);
+        } else {
+            this.modelingConfigFilters = modelingConfigFilters;
+        }
     }
     this.getModelingConfigFilters = function() {
         return this.modelingConfigFilters;
@@ -630,7 +632,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveAIRatingModel = function(nextState){
-
         var currentRating = RatingsEngineStore.getCurrentRating(),
             ratingId = $stateParams.rating_id,
             targetProducts = RatingsEngineStore.getProductsSelectedIds(),
@@ -651,28 +652,38 @@ angular.module('lp.ratingsengine')
                     trainingProducts: trainingProducts
                 }
             };
-            
-            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
-                
-                console.log("Model Updated", model);
-                if(nextState) {
-                    $state.go(nextState, { rating_id: ratingId });
+            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {              
+                var route = nextState,
+                    lastRoute = route.split(/[\.]+/);
+
+                if (lastRoute[lastRoute.length-1] === 'creation') {
+                    // console.log("Model Updated & Launch", model);
+                    RatingsEngineStore.nextLaunchAIModel(nextState, model);
+                } else {
+                    // console.log("Model Updated", model);
+                    if(nextState) {
+                        $state.go(nextState, { rating_id: ratingId });
+                    }
                 }
             });
         });
         
-    }    
+    }
 
-    this.nextLaunchAIModel = function(nextState){
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        var obj = currentRating.activeModel.AI;
+    this.nextLaunchAIModel = function(nextState, model){
+        var currentRating = RatingsEngineStore.getCurrentRating(),
+            obj = model.AI,
+            opts = {};
+
+        console.log(obj);
+        
         RatingsEngineStore.tmpId = obj.id;
-        var opts = {};
+
         console.log('Launching the model');
         RatingsEngineService.createAIModel(currentRating.id, obj.id, opts).then(function(applicationid) {
+            
             console.log('Application id', applicationid);
             var id = applicationid.Result;//RatingsEngineStore.tmpId;
-            var obj = currentRating.activeModel.AI;
             obj.modelingJobId = id;
             var opts = {
                 AI: obj
@@ -683,7 +694,6 @@ angular.module('lp.ratingsengine')
             RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(aiModel) {
                 console.log('Job id', aiModel.AI, aiModel.AI.modelingJobId);
                 $state.go(nextState, { ai_model_job_id: aiModel.AI.modelingJobId });
-                
             });
         });
     }

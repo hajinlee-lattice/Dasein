@@ -14,9 +14,10 @@
             font-size: 18px;
             font-weight: normal;
             margin-top: 20px;
+            padding-bottom: 2px;
+            margin-bottom: 12px;
         }
         dl {
-            margin-top: 10px;
             &:after {
                 clear: both;
                 content: "";

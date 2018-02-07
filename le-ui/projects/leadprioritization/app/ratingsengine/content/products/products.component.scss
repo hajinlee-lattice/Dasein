@@ -2,6 +2,7 @@
     .header {
         h2 {
             padding-left: 0;
+            margin-bottom: 0;
             // background-image: url('/assets/images/ico-segments.png');
         }
     }
@@ -24,5 +25,16 @@
         margin-top: 20px;
         font-size: 14px;
         color: #717171;
+    }
+    .resell-product-option {
+        margin-bottom: 20px;
+        p, .form-control {
+            display: inline-block;
+        }
+        .form-control {
+            display: inline-block;
+            height: 30px;
+            width: auto;
+        }
     }
 }

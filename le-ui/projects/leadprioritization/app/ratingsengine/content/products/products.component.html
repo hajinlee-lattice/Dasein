@@ -1,92 +1,93 @@
 <div class="ratingengine-products playbook-content container">
     <div class="inner-container">
-        <form name="segment_form">
         
-            <div class="header">
-                <h2 ng-if="vm.type.engineType === 'CROSS_SELL_FIRST_PURCHASE'">What product(s) do you want to sell?</h2>
-                <h2 ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'">What product(s) do you want to re-sell?</h2>
+        <div class="header">
+            <h2 ng-if="vm.type.engineType === 'CROSS_SELL_FIRST_PURCHASE'">What product(s) do you want to sell?</h2>
+            <h2 ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'">What product(s) do you want to re-sell?</h2>
+        </div>
+
+        <div class="content-body no-data" ng-if="!vm.products">
+            There are currently no products to select.
+        </div>
+
+        <div class="content-body" ng-if="vm.products">
+
+            <form
+                class="resell-product-option" 
+                ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'"
+                form-on-change="vm.resellFormOnChange()">
+                <p>Only sell to accounts that have not purchased the selected products in the last</p>
+                <select 
+                    class="form-control"
+                    ng-model="vm.purchasedBeforePeriod">
+                    <option value="6">6 months</option>
+                    <option value="12">12 months</option>
+                    <option value="24">24 months</option>
+                </select>
+            </form>
+
+            <div class="filters">
+                <div class="ng-search">
+                    <input type="text" class="form-control" placeholder="Search {{vm.products.length}} Products" ng-model="vm.search" />
+                    <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
+                        <span class="fa fa-search" ng-show="!vm.search.length"></span>
+                        <span class="fa fa-times" ng-show="vm.search.length"></span>
+                    </a>
+                </div>
             </div>
 
-            <div class="content-body no-data" ng-if="!vm.products">
-                There are currently no products to select.
+            <table>
+                <thead>
+                    <tr>
+                        <th>
+                            <input 
+                                type="checkbox"
+                                ng-model="vm.selectedAll" 
+                                ng-click="vm.selectAll()" />
+                        </th>
+                        <th>Product</th>
+                        <!--<th>Accounts to be scored<sup>*</sup></th>-->
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr 
+                        ng-repeat="product in (filteredList = (vm.products | filter: {'ProductName': vm.search})) 
+                                | orderBy: vm.sortBy
+                                | startFrom: (vm.currentPage - 1) * vm.pageSize 
+                                | limitTo: vm.pageSize"
+                        class="item product">
+                        <td>
+                            <!-- ng-click="vm.selectProduct($index)" 
+                            ng-checked="{{product.selected}}" -->
+                            <input 
+                                type="checkbox"
+                                ng-click="vm.selectProduct($index)"
+                                ng-model="product.Selected" \>
+                        </td>
+                        <td>
+                            <label for="{{product.ProductId}}">{{product.ProductName}}</label>
+                        </td>
+                        <!--<td>
+                            <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
+                            <span ng-if="!segment.numAccounts">0</span>
+                        </td>
+                        -->
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="selected-total pull-left">
+                Selected <strong>{{vm.getProductsSelectedCount()}}</strong> of {{vm.getTotalProductsCount()}}
             </div>
 
-            <div class="content-body" ng-if="vm.products">
+            <div class="pd-pagination-container-margin-top pull-right">
+                <pd-pagination-controls
+                    current="vm.currentPage"
+                    max="filteredList.length / vm.pageSize"
+                    ng-if="vm.showPagination">
+                </pd-pagination-controls>
+            </div>
+        </div><!-- End .content-body -->
 
-                <div
-                    class="resell-product-option" 
-                    ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'">
-                    <p>Only sell to accounts that have not purchased the selected products in the last</p>
-                    <select class="form-control">
-                        <option>6 months</option>
-                        <option>12 months</option>
-                        <option>24 months</option>
-                    </select>
-                </div>
-
-                <div class="filters">
-                    <div class="ng-search">
-                        <input type="text" class="form-control" placeholder="Search {{vm.products.length}} Products" ng-model="vm.search" />
-                        <a class="button icon-button white-button" ng-click="vm.search.length ? vm.search = '' : ''">
-                            <span class="fa fa-search" ng-show="!vm.search.length"></span>
-                            <span class="fa fa-times" ng-show="vm.search.length"></span>
-                        </a>
-                    </div>
-                </div>
-
-                <table>
-                    <thead>
-                        <tr>
-                            <th>
-                                <input 
-                                    type="checkbox"
-                                    ng-model="vm.selectedAll" 
-                                    ng-click="vm.selectAll()" />
-                            </th>
-                            <th>Product</th>
-                            <!--<th>Accounts to be scored<sup>*</sup></th>-->
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr 
-                            ng-repeat="product in (filteredList = (vm.products | filter: {'ProductName': vm.search})) 
-                                    | orderBy: vm.sortBy
-                                    | startFrom: (vm.currentPage - 1) * vm.pageSize 
-                                    | limitTo: vm.pageSize"
-                            class="item product">
-                            <td>
-                                <!-- ng-click="vm.selectProduct($index)" 
-                                ng-checked="{{product.selected}}" -->
-                                <input 
-                                    type="checkbox"
-                                    ng-click="vm.selectProduct($index)"
-                                    ng-model="product.Selected" \>
-                            </td>
-                            <td>
-                                <label for="{{product.ProductId}}">{{product.ProductName}}</label>
-                            </td>
-                            <!--<td>
-                                <span ng-if="segment.numAccounts">{{segment.numAccounts|number}}</span>
-                                <span ng-if="!segment.numAccounts">0</span>
-                            </td>
-                            -->
-                        </tr>
-                    </tbody>
-                </table>
-
-                <div class="selected-total pull-left">
-                    Selected <strong>{{vm.getProductsSelectedCount()}}</strong> of {{vm.getTotalProductsCount()}}
-                </div>
-
-                <div class="pd-pagination-container-margin-top pull-right">
-                    <pd-pagination-controls
-                        current="vm.currentPage"
-                        max="filteredList.length / vm.pageSize"
-                        ng-if="vm.showPagination">
-                    </pd-pagination-controls>
-                </div>
-            </div><!-- End .content-body -->
-
-        </form>
     </div>
 </div>

@@ -1,4 +1,6 @@
-angular.module('lp.ratingsengine.wizard.products', [])
+angular.module('lp.ratingsengine.wizard.products', [
+    'mainApp.appCommon.directives.formOnChange'
+])
 .controller('RatingsEngineProducts', function (
     $scope, RatingsEngineStore, RatingsEngineService, Products) {
         var vm = this;
@@ -11,7 +13,9 @@ angular.module('lp.ratingsengine.wizard.products', [])
             sortBy: 'ProductName',
             showPagination: true,
             selectedAll: false,
-            type: RatingsEngineStore.getType()
+            type: RatingsEngineStore.getType(),
+            modelingConfigFilters: {},
+            purchasedBeforePeriod: '6'
         });
 
         $scope.$watch('vm.search', function(newValue, oldValue) {
@@ -30,6 +34,10 @@ angular.module('lp.ratingsengine.wizard.products', [])
         vm.productsCount = vm.products.length;
 
         vm.validateNextStep();
+
+        if (vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
+            vm.resellFormOnChange();    
+        };
 
     }
 
@@ -84,6 +92,16 @@ angular.module('lp.ratingsengine.wizard.products', [])
     vm.setValidation = function (type, validated) {
         RatingsEngineStore.setValidation(type, validated);
     }
+
+    vm.resellFormOnChange = function(){
+        vm.modelingConfigFilters.PURCHASED_BEFORE_PERIOD = {
+            "configName": "PURCHASED_BEFORE_PERIOD",
+            "criteria": "PRIOR",
+            "value": parseInt(vm.purchasedBeforePeriod)
+        };
+
+        RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
+    };
 
     vm.init();
 });

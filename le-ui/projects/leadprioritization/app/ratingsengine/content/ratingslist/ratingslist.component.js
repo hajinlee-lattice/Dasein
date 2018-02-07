@@ -46,7 +46,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-        console.log(vm.current);
+        // console.log(vm.current);
 
         RatingsEngineStore.clear();
 

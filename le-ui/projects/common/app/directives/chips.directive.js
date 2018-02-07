@@ -10,7 +10,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             singleSelection: '=', 
             id: '@', 
             displayname: '@' ,
-            model: '='
+            model: '@'
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -22,7 +22,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.mouseOut = true;
             scope.blur = true;
             scope.showQueryList = false;
-            scope.id = scope.id || 'id';
+            scope.id = scope.itemId || scope.itemName || scope.ProductId;
             scope.displayName = scope.displayname || 'displayName';
 
             scope.getDisplayName = function(item){
@@ -91,7 +91,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
             }
             scope.chooseItem = function (item) {
-                if (item) {
+                if (item) { 
                     if (scope.chips[item[scope.id]] === undefined) {
                         scope.chips[item[scope.id]] = item;
                     }
@@ -105,7 +105,6 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
             }
             scope.removeItem = function (val) {
-
                 delete scope.chips[val[scope.id]];
                 scope.callCallback();
             }

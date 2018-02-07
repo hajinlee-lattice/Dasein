@@ -6,7 +6,7 @@
         </div>
         <div class="content-body">
             
-            <h3>Summary (Jon's work in progress)</h3>
+            <h3>Summary</h3>
             <dl>
                 <dt>Rating Engine Type:</dt>
                 <dd>{{ vm.ratingEngineType }}</dd>
@@ -14,8 +14,8 @@
                 <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
                 
                 <dt>Products:</dt>
-                <dd ng-if="vm.products.length === 1">{{ vm.productName }}</dd>
-                <dd ng-if="vm.products.length > 1">{{ vm.products.length }} selected
+                <dd ng-if="vm.targetProducts.length === 1">{{ vm.productName }}</dd>
+                <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
 
                 <dt>Prioritize by:</dt>
                 <dd>{{ vm.prioritizeBy }}</dd>
@@ -23,20 +23,31 @@
                 <dt>Rating Engine Settings:</dt>
                 <dd>
                     <ul>
-                        <li>
-                            Spend in the quarter was at least $1500
+                        <li 
+                            ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">
+                            Only sell to products that haven't purchased selected products in the last {{ vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'].value }} months
                         </li>
-                        <li>
-                            Quantity bought was at least 10 units
+                        <li 
+                            ng-if="vm.modelingConfigFilters['SPEND_IN_PERIOD']">
+                            Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.modelingConfigFilters['SPEND_IN_PERIOD'].value | number }}
                         </li>
-                        <li>
-                            2 months of historical records
+                        <li
+                            ng-if="vm.modelingConfigFilters['QUANTITY_IN_PERIOD']">
+                            Quantity bought was {{ vm.quantityCriteria }} {{ vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].value }} units
                         </li>
-                        <li>
-                            Model with similar segment: SegmentName
+                        <li
+                            ng-if="vm.modelingConfigFilters['TRAINING_SET_PERIOD']">
+                            {{ vm.modelingConfigFilters['TRAINING_SET_PERIOD'].value }} months of historical records
                         </li>
-                        <li>
-                            Model with similar product(s): ProductName or number selected
+                        <li
+                            ng-if="vm.trainingSegment !== null">
+                            Model with similar segment: {{ vm.trainingSegment.display_name }}
+                        </li>
+                        <li
+                            ng-if="vm.trainingProducts !== null">
+                            Model with similar product(s): 
+                            <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProducts }}</span>
+                            <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
                         </li>
                     </ul>
                 </dd>

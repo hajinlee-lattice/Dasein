@@ -1,6 +1,6 @@
 angular.module('lp.ratingsengine.wizard.creation', [])
 .controller('RatingsEngineCreation', function (
-    $q, $state, $stateParams, Rating, JobsStore
+    $q, $state, $stateParams, Rating, RatingsEngineStore, JobsStore
 ) {
     var vm = this;
 
@@ -10,24 +10,55 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     vm.init = function() {
 
-    	vm.products = vm.ratingEngine.activeModel.AI.targetProducts;
-    	if (vm.products.length === 1) {
-    		vm.productName = vm.products;
-    	}
+    	console.log(vm.ratingEngine);
 
-    	if (vm.ratingEngine.activeModel.AI.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
+    	var model = vm.ratingEngine.activeModel.AI;
+
+    	vm.targetProducts = model.targetProducts;
+        vm.modelingStrategy = model.modelingStrategy;
+        vm.predictionType = model.predictionType;
+        vm.modelingConfigFilters = model.modelingConfigFilters;
+        vm.trainingSegment = model.trainingSegment;
+        vm.trainingProducts = model.trainingProducts;
+
+        console.log(vm.targetProducts);
+
+    	if (vm.targetProducts.length === 1) {
+    		var productId = vm.targetProducts[0].toString(),
+    			cachedProducts = RatingsEngineStore.getCachedProducts(),
+    			product = cachedProducts.find(function(obj) { return obj.ProductId === productId });
+
+    		vm.productName = product.ProductName;
+    	};
+
+    	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
         	vm.ratingEngineType = 'First Purchase Cross-Sell'
-        } else if (vm.ratingEngine.activeModel.AI.modelingStrategy === 'CROSS_SELL_RETURNING_PURCHASE') {
+        } else if (vm.modelingStrategy === 'CROSS_SELL_RETURNING_PURCHASE') {
         	vm.ratingEngineType = 'Returning Purchase Cross-Sell'
         }
 
-    	if (vm.ratingEngine.activeModel.AI.predictionType === 'PROPENSITY') {
+    	if (vm.predictionType === 'PROPENSITY') {
     		vm.prioritizeBy = 'Likely to buy';
-    	} else if (vm.ratingEngine.activeModel.AI.predictionType === 'EXPECTED_VALUE') {
+    	} else if (vm.predictionType === 'EXPECTED_VALUE') {
     		vm.prioritizeBy = 'Likely to spend';
     	}
 
-    	console.log(vm.ratingEngine.activeModel.AI.modelingConfigFilters);
+    	if (vm.modelingConfigFilters['SPEND_IN_PERIOD']) {
+    		if (vm.modelingConfigFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+	    		vm.spendCriteria = 'at least';
+	    	} else {
+	    		vm.spendCriteria = 'at most';
+	    	}
+	    }
+
+	    if (vm.modelingConfigFilters['QUANTITY_IN_PERIOD']) {
+	    	if (vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+	    		vm.quantityCriteria = 'at least';
+	    	} else {
+	    		vm.quantityCriteria = 'at most';
+	    	}
+	    }
+
 
         JobsStore.getJob(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
             console.log(result);

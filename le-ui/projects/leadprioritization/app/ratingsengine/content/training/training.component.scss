@@ -36,9 +36,9 @@
                         width: auto;
                     }
                 }
-            }
-            .chip div {
-                width: auto;
+                &.chip {
+                    width: auto;    
+                }
             }
             &.auto-select-group > div {
                 margin-left: 0;
@@ -50,6 +50,7 @@
     }
     .dropdown-content {
         height: 218px;
+        margin-top: -1px;
         overflow: auto;
     }
     .data {
