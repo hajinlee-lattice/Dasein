@@ -5,13 +5,8 @@ ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
-    TOMCAT_MAJOR=8
-    TOMCAT_VERSION=8.5.27
-
-    if [ "${USE_HTTP2}" == "true" ]; then
-        TOMCAT_MAJOR=9
-        TOMCAT_VERSION=9.0.4
-    fi
+    TOMCAT_MAJOR=9
+    TOMCAT_VERSION=9.0.4
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
@@ -30,24 +25,17 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/docs
     rm -rf ${CATALINA_HOME}/webapps/ROOT
 
-    if [ "${USE_HTTP2}" == "true" ]; then
-        cd $CATALINA_HOME/bin
-        tar xzf tomcat-native.tar.gz
-        cd tomcat-native-1.2.16-src/native
-        ./configure \
-            --with-java-home=$JAVA_HOME \
-            --with-apr=/usr/local/Cellar/apr/1.6.3/ \
-            --with-ssl=/usr/local/Cellar/openssl/1.0.2n \
-            --prefix=$CATALINA_HOME
-        make && make install
-
-        rm ${ARTIFACT_DIR}/server.crt || true
-        rm ${ARTIFACT_DIR}/server.key || true
-        rm ${ARTIFACT_DIR}/ledp_keystore.jks || true
-        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt ${ARTIFACT_DIR}/server.crt
-        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key ${ARTIFACT_DIR}/server.key
-        aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks ${ARTIFACT_DIR}/ledp_keystore.jks
-
+    if [ "${USE_HTTPS}" == "true" ]; then
+        sudo mkdir -p /etc/ledp/tls
+        sudo chown -R $USER /etc/ledp/tls
+        rm -rf /etc/ledp/tls/*
+        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt /etc/ledp/tls/server.crt
+        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key /etc/ledp/tls/server.key
+        aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
+        aws s3 cp s3://latticeengines-dev-chef/tls/cacerts /etc/ledp/tls/cacerts
+        chmod 600 /etc/ledp/tls/server.crt
+        chmod 600 /etc/ledp/tls/server.key
+        chmod 600 /etc/ledp/tls/ledp_keystore.jks
     fi
 fi
 
@@ -56,16 +44,7 @@ for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-u
     cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
 done
 
-if [ "${USE_HTTP2}" == "true" ]; then
-    sudo mkdir -p /etc/ledp/tls
-    sudo chown -R $USER /etc/ledp/tls
-    cp -f ${ARTIFACT_DIR}/server.crt /etc/ledp/tls/server.crt
-    cp -f ${ARTIFACT_DIR}/server.key /etc/ledp/tls/server.key
-    cp -f ${ARTIFACT_DIR}/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
-    chmod 600 /etc/ledp/tls/server.crt
-    chmod 600 /etc/ledp/tls/server.key
-    chmod 600 /etc/ledp/tls/ledp_keystore.jks
-
+if [ "${USE_HTTPS}" == "true" ]; then
     cp -f ${WSHOME}/le-dev/tomcat/server-http2.xml ${CATALINA_HOME}/conf/server.xml
 fi
 
