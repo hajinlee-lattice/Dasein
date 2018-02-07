@@ -1,10 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
@@ -23,6 +21,8 @@ import com.latticeengines.apps.cdl.service.PlayService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -31,15 +31,11 @@ import com.latticeengines.domain.exposed.pls.LaunchHistory;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
-import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
-import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {
@@ -198,24 +194,18 @@ public class PlayServiceImpl implements PlayService {
     private void populateCoverageInfo(Play play, LaunchHistory launchHistory, RatingEngine ratingEngine) {
         try {
             PlayLaunch mostRecentSuccessfulPlayLaunch = launchHistory.getPlayLaunch();
-            RatingsCountRequest request = new RatingsCountRequest();
-            request.setRatingEngineIds(Arrays.asList(ratingEngine.getId()));
-            RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
-            Map<String, CoverageInfo> ratingEngineIdCoverageMap = response.getRatingEngineIdCoverageMap();
-            Long accountCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount() == null ? 0L
-                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getAccountCount();
-            Long contactCount = ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount() == null ? 0L
-                    : ratingEngineIdCoverageMap.get(ratingEngine.getId()).getContactCount();
-            List<RatingBucketCoverage> ratingBucketCoverage = ratingEngineIdCoverageMap.get(ratingEngine.getId())
-                    .getBucketCoverageCounts();
-            play.setRatings(ratingBucketCoverage);
+
+            CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
+            Long accountCount = coverageInfo.getAccountCount();
+            Long contactCount = coverageInfo.getContactCount();
+            play.setRatings(coverageInfo.getBucketCoverageCounts());
 
             log.info(String.format("For play %s, new account number and contact number are %d and %d, respectively",
                     play.getName(), accountCount, contactCount));
 
-            Long mostRecentSucessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0l
+            Long mostRecentSucessfulLaunchAccountNum = mostRecentSuccessfulPlayLaunch == null ? 0L
                     : mostRecentSuccessfulPlayLaunch.getAccountsLaunched();
-            Long mostRecentSucessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0l
+            Long mostRecentSucessfulLaunchContactNum = mostRecentSuccessfulPlayLaunch == null ? 0L
                     : mostRecentSuccessfulPlayLaunch.getContactsLaunched();
 
             Long newAccountsNum = mostRecentSucessfulLaunchAccountNum == null ? accountCount

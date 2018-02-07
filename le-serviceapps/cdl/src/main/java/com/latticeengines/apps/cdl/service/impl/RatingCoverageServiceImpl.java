@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ForkJoinPool;
 import java.util.stream.Collectors;
@@ -17,7 +16,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,16 +29,17 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelIdPair;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
 import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -50,7 +49,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("ratingCoverageService")
 public class RatingCoverageServiceImpl implements RatingCoverageService {
@@ -111,27 +109,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
 
         return result;
-    }
-
-    @Override
-    public CoverageInfo getCoverageInfo(RatingEngine ratingEngine) {
-        CoverageInfo coverageInfo = new CoverageInfo();
-        MetadataSegment segment = ratingEngine.getSegment();
-        if (segment != null) {
-            coverageInfo.setAccountCount(segment.getAccounts());
-            coverageInfo.setContactCount(segment.getContacts());
-        }
-        if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
-            Map<String, Long> ratingCounts = new TreeMap<>(ratingEngine.getCountsAsMap());
-            List<RatingBucketCoverage> coverages = ratingCounts.entrySet().stream().map(entry -> {
-                RatingBucketCoverage bktCvg = new RatingBucketCoverage();
-                bktCvg.setBucket(entry.getKey());
-                bktCvg.setCount(entry.getValue());
-                return bktCvg;
-            }).collect(Collectors.toList());
-            coverageInfo.setBucketCoverageCounts(coverages);
-        }
-        return coverageInfo;
     }
 
     private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {

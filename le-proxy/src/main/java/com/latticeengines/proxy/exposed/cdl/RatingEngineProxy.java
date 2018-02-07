@@ -28,6 +28,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
+import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -178,6 +180,11 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("modelRatingEngine", url, null, String.class);
+    }
+
+    public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace, RatingsCountRequest ratingModelSegmentIds) {
+        String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
+        return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }
 
 }

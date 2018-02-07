@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -15,11 +16,11 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("ratingEngineDashboardService")
 public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate implements RatingEngineDashboardService {
@@ -49,7 +50,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         log.info(String.format("Step 1 - Loading rating engine summary completed for : %s", ratingEngineId));
 
         // get coverage info
-        CoverageInfo coverageInfo = ratingCoverageService.getCoverageInfo(ratingEngine);
+        CoverageInfo coverageInfo = RatingEngineUtils.getCoverageInfo(ratingEngine);
         log.info(String.format("Step 2 - Loading ratings coverage completed for : %s", ratingEngineId));
 
         // get segment info

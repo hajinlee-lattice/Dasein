@@ -400,6 +400,7 @@ public abstract class BaseRestApiProxy {
     private <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
                                               boolean kryoContent, boolean kryoResponse) {
         HttpHeaders headers = new HttpHeaders();
+
         if (clz != null) {
             // set headers for response
             if (kryoResponse) {

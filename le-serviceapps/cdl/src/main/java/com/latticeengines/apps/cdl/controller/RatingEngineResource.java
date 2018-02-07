@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -27,6 +28,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
+import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -44,13 +47,17 @@ public class RatingEngineResource {
 
     private final RatingEngineNoteService ratingEngineNoteService;
 
+    private final RatingCoverageService ratingCoverageService;
+
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService,
-            RatingEngineNoteService ratingEngineNoteService,
-            RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter) {
+                                RatingEngineNoteService ratingEngineNoteService,
+                                RatingCoverageService ratingCoverageService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
+        this.ratingCoverageService = ratingCoverageService;
     }
+
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -196,6 +203,13 @@ public class RatingEngineResource {
         RatingModel ratingModel = getRatingModel(tenantId, ratingEngineId, ratingModelId);
 
         return ratingEngineService.modelRatingEngine(tenantId, ratingEngine, ratingModel);
+    }
+
+    @PostMapping(value = "/coverage")
+    @ResponseBody
+    @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
+    public RatingsCountResponse getRatingEngineCoverageInfo(@RequestBody RatingsCountRequest ratingModelSegmentIds) {
+        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 
 }

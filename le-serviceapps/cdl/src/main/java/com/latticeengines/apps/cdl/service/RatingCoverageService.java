@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service;
 
-import com.latticeengines.domain.exposed.pls.CoverageInfo;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 
@@ -16,7 +14,5 @@ public interface RatingCoverageService {
     String RATING_IDS_ERROR_MAP_KEY = "processRatingIdsErrorMap";
 
     RatingsCountResponse getCoverageInfo(RatingsCountRequest request);
-
-    CoverageInfo getCoverageInfo(RatingEngine ratingEngine);
 
 }
