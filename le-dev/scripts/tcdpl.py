@@ -161,7 +161,7 @@ def deployMsModule(module):
     os.rename(webappDir + ".copy", webappDir)
     logger.info('deployed %s to %s' % (moduleWar, webappDir))
 
-def deployMgrApp(app):
+def deployMgrApp(app, wait=False):
     webappName = 'oauth' if (app == 'oauth2') else app
     webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName)
 
@@ -171,15 +171,16 @@ def deployMgrApp(app):
     if not os.path.isdir(os.path.join(webappDir, 'manager')):
         if os.path.isdir(os.path.join(CATALINA_HOME, 'webapps', 'manager')):
             copytree(os.path.join(CATALINA_HOME, 'webapps', 'manager'), os.path.join(webappDir, 'manager'))
-            for i in range(10):
-                logger.info("Wait %d sec for manager app to start ..." % (10 - i))
-                time.sleep(1)
+            if wait:
+                for i in range(10):
+                    logger.info("Wait %d sec for manager app to start ..." % (10 - i))
+                    time.sleep(1)
 
 
 def undeployApp(app, modules):
     global APP_URL
 
-    deployMgrApp(app)
+    deployMgrApp(app, wait=True)
 
     app_url = APP_URL[app]
     mgr_url = app_url + "/manager"
