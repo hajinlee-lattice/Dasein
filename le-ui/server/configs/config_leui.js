@@ -6,6 +6,12 @@ module.exports = {
         https: parseInt(process.env.HTTPS_PORT) || undefined
     },
     proxies: {
+        '/pls/ws': {
+            'local_path': '/pls/ws',
+            'remote_host': process.env.API_URL || 'http://localhost:8081',
+            'remote_path': '/pls/ws',
+            'type': 'websocket'
+        },
         '/pls': {
             'local_path': '/pls',
             'remote_host': process.env.API_URL || 'http://localhost:8081',

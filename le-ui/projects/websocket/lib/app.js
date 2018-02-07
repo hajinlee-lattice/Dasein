@@ -18,7 +18,7 @@
 
     function connect() {
         console.log('Connecting webscoket');
-        var socket = new SockJS('https://localhost:9081/pls/sockjs-endpoint');
+        var socket = new SockJS('/pls/ws/sockjs-endpoint');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             setConnected(true);

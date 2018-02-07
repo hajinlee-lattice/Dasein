@@ -15,6 +15,7 @@ const helmet    = require('helmet');
 const compress  = require('compression');
 const chalk     = require('chalk');
 const cors      = require('cors');
+const wsproxy   = require('http-proxy-middleware');
 /*
 const proxy     = require('express-http-proxy');
 const session   = require('express-session');
@@ -168,6 +169,9 @@ class Server {
         for (let path in options.config.proxies) {
             const proxy = options.config.proxies[path];
             switch (proxy.type) {
+                case 'websocket':
+                    this.createWsProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
+                    break;
                 case 'file_pipe':
                     this.createFileProxy(proxy.remote_host, proxy.local_path, proxy.remote_path);
                     break;
@@ -177,6 +181,29 @@ class Server {
                 default:
                     // throw error invalid configuration?
                     break;
+            }
+        }
+    }
+
+    // forward Websocket requests for dev
+    createWsProxy(API_URL, API_LOCAL_PATH, API_PATH) {
+        // check if internal IP
+
+        if (API_URL) {
+            API_PATH = API_PATH || '/pls';
+            const remoteUrl = API_URL + API_PATH;
+            console.log(chalk.white('>') + ' WS PROXY\t', API_LOCAL_PATH, '\n\t' + remoteUrl + '\n');
+            try {
+                const websocketProxy = wsproxy(API_LOCAL_PATH, {
+                    target: API_URL,
+                    changeOrigin: true,
+                    ws: true,
+                    secure: false,
+                    proxyTimeout: 60000
+                });
+                this.app.use(websocketProxy);
+            } catch (err) {
+                console.log(chalk.red(DateUtil.getTimeStamp() + ':wsproxy>') + err);
             }
         }
     }
