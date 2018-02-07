@@ -54,7 +54,7 @@ def aggregate_props(dir, keys, quiet=False):
                             else:
                                 continue
                         keys[key] = prop_file
-                    if "USE_HTTPS" in os.environ and os.environ["USE_HTTP2"] == "true":
+                    if "USE_HTTPS" in os.environ and os.environ["USE_HTTPS"] == "true":
                         aggregated += replace_for_https(line)
                     else:
                         aggregated += line
