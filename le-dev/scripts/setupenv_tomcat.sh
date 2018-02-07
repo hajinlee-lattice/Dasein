@@ -25,6 +25,23 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/docs
     rm -rf ${CATALINA_HOME}/webapps/ROOT
 
+    UNAME=`uname`
+    if [[ "${UNAME}" == 'Darwin' ]]; then
+        echo "You are on Mac"
+        brew install -y tomcat-native
+    else
+        echo "You are on ${UNAME}"
+        sudo apt-get install -y make libssl-dev libapr1-dev
+        pushd $CATALINA_HOME/bin
+        tar xzf tomcat-native.tar.gz
+        cd tomcat-native-*-src/native
+        ./configure \
+            --with-java-home=$JAVA_HOME \
+            --prefix=$CATALINA_HOME
+        make && make install
+        popd
+    fi
+
     if [ "${USE_HTTPS}" == "true" ]; then
         sudo mkdir -p /etc/ledp/tls
         sudo chown -R $USER /etc/ledp/tls
