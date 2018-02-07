@@ -38,15 +38,17 @@ public class ManualSeedCleanFlow
         source = dollarInSalesCleanup(source, config.getSalesVolumeInUSDollars());
         source = totalEmployeesCleanup(source, config.getEmployeesTotal());
 
-        // de-dup by duns and keep the one with highest sales volume
-        source = source //
-                .groupByAndLimit(new FieldList(config.getManSeedDuns()),
-                        new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
+        if (!config.isNoDedup()) {
+            // de-dup by duns and keep the one with highest sales volume
+            source = source //
+                    .groupByAndLimit(new FieldList(config.getManSeedDuns()),
+                            new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
 
-        // de-dup by domain and keep the one with highest sales volume
-        source = source //
-                .groupByAndLimit(new FieldList(config.getManSeedDomain()),
-                        new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
+            // de-dup by domain and keep the one with highest sales volume
+            source = source //
+                    .groupByAndLimit(new FieldList(config.getManSeedDomain()),
+                            new FieldList(config.getSalesVolumeInUSDollars()), 1, true, false);
+        }
 
         return source;
     }

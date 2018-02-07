@@ -16,6 +16,9 @@ public class ManualSeedCleanTransformerConfig extends TransformerConfig {
     @JsonProperty("ManSeedDuns")
     private String manSeedDuns;
 
+    @JsonProperty("NoDedup")
+    private boolean noDedup;
+
     public String getSalesVolumeInUSDollars() {
         return salesVolumeInUSDollars;
     }
@@ -46,6 +49,14 @@ public class ManualSeedCleanTransformerConfig extends TransformerConfig {
 
     public void setManSeedDuns(String manSeedDuns) {
         this.manSeedDuns = manSeedDuns;
+    }
+
+    public boolean isNoDedup() {
+        return noDedup;
+    }
+
+    public void setNoDedup(boolean noDedup) {
+        this.noDedup = noDedup;
     }
 
 }
