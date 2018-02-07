@@ -236,6 +236,13 @@ angular.module('common.datacloud.explorer', [
         return '';
     }
 
+    vm.checkEmptyCategory = function(category, count, isEnabled) {
+        if (vm.category && !vm.categoryCount(vm.category) && count && isEnabled) {
+            vm.setCategory(category);
+        }
+        return false;
+    }
+
     vm.updateStateParams = function() {
         $state.go('.', {
             category: vm.category,
@@ -1218,6 +1225,10 @@ angular.module('common.datacloud.explorer', [
 
     vm.hasSubcategories = function(category) {
         return vm._subcategories[category].length != 1 || vm._subcategories[category][0] != 'Other';
+    }
+
+    vm.checkSelectedRatingEngineAttrs = function() {
+        return (typeof vm.metadata.toggle.show.selected_ratingsengine_attributes === 'undefined') ? false : vm.metadata.toggle.show.selected_ratingsengine_attributes;
     }
 
     vm.percentage = function(number, total, suffix, limit) {
