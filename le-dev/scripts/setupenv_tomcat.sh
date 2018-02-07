@@ -33,8 +33,10 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
             APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
             echo "You installed apr ${APR_VERSION}"
             OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
-            echo "You installed apr ${OPENSSL_VERSION}"
+            echo "You installed openssl ${OPENSSL_VERSION}"
             pushd $CATALINA_HOME/bin
+            tar xzf tomcat-native.tar.gz
+            cd tomcat-native-*-src/native
             ./configure \
                 --with-java-home=$JAVA_HOME \
                 --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
