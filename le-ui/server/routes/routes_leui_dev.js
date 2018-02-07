@@ -103,4 +103,16 @@ module.exports = [{
         '/demo/img': '/img',
         '/demo/fonts': '/fonts'
     }
+},{
+    path: '/projects/websocket',
+    html5mode: true,
+    pages: {
+        '/websocket/': 'index.html',
+        '/websocket/index': 'index.html'
+    },
+    folders: {
+        '/websocket/app': '/app',
+        '/websocket/assets': '/assets',
+        '/websocket/lib': '/lib',
+    }
 }];

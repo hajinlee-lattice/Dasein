@@ -76,4 +76,15 @@ module.exports = [{
         '/lp2/assets': '/assets',
         '/lp2/lib': '/lib'
     }
+},{
+    path: '/projects/websocket',
+    pages: {
+        '/websocket/': 'index.html',
+        '/websocket/index': 'index.html'
+    },
+    folders: {
+        '/websocket/app': '/app',
+        '/websocket/assets': '/assets',
+        '/websocket/lib': '/lib',
+    }
 }];
