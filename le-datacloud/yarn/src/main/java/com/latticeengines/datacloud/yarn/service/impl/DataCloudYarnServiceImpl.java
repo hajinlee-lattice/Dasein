@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.yarn.service.impl;
 
+import java.io.File;
 import java.util.Properties;
 
 import javax.annotation.Resource;
@@ -112,7 +113,7 @@ public class DataCloudYarnServiceImpl implements DataCloudYarnService {
 
         JacocoUtils.setJacoco(containerProperties, "datacloud");
 
-        if (StringUtils.isNotBlank(trustStoreJks)) {
+        if (StringUtils.isNotBlank(trustStoreJks) && new File(trustStoreJks).exists()) {
             containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
         }
 
