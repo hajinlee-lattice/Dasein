@@ -215,7 +215,7 @@ public class DefaultYarnClientCustomization extends YarnClientCustomization {
 
     private String getTrustStoreOpts(Properties properties) {
         String trustStore = properties.getProperty(ContainerProperty.TRUST_STORE.name());
-        if (StringUtils.isNotBlank(trustStore) && new File(trustStore).exists()) {
+        if (StringUtils.isNotBlank(trustStore) && !trustStore.contains("#") && new File(trustStore).exists()) {
             return String.format(" -Djavax.net.ssl.trustStore=%s", trustStore);
         }
         return "";
