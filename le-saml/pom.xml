@@ -10,6 +10,7 @@
     <properties>
         <component-name>saml</component-name>
         <jetty.port>8087</jetty.port>
+        <jetty.ssl.port>9087</jetty.ssl.port>
         <jetty.stop.port>10987</jetty.stop.port>
     </properties>
 

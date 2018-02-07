@@ -10,6 +10,7 @@
     <properties>
         <component-name>ulysses</component-name>
         <jetty.port>8075</jetty.port>
+        <jetty.ssl.port>9075</jetty.ssl.port>
         <jetty.stop.port>10975</jetty.stop.port>
     </properties>
 

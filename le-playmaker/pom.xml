@@ -10,6 +10,7 @@
     <properties>
         <component-name>playmaker</component-name>
         <jetty.port>8071</jetty.port>
+        <jetty.ssl.port>9071</jetty.ssl.port>
     </properties>
 
     <parent>

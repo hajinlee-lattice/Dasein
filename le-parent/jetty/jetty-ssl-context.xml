@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!DOCTYPE Configure PUBLIC "-//Jetty//Configure//EN" "http://www.eclipse.org/jetty/configure_9_3.dtd">
+
+<!-- ============================================================= -->
+<!-- SSL ContextFactory configuration                              -->
+<!-- ============================================================= -->
+
+<!--
+  To configure Includes / Excludes for Cipher Suites or Protocols see tweak-ssl.xml example at
+     https://www.eclipse.org/jetty/documentation/current/configuring-ssl.html#configuring-sslcontextfactory-cipherSuites
+-->
+
+<Configure id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory">
+    <Set name="Provider"><Property name="jetty.sslContext.provider"/></Set>
+    <Set name="KeyStorePath"><Property name="jetty.sslContext.keyStorePath" deprecated="jetty.keystore" default="etc/keystore"/></Set>
+    <Set name="KeyStorePassword"><Property name="jetty.sslContext.keyStorePassword" deprecated="jetty.keystore.password" default="OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4"/></Set>
+    <Set name="ExcludeProtocols">
+        <Array type="String">
+            <Item>SSL</Item>
+            <Item>SSLv2</Item>
+            <Item>SSLv2Hello</Item>
+            <Item>SSLv3</Item>
+        </Array>
+    </Set>
+
+</Configure>

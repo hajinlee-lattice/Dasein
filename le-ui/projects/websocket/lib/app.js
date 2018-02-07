@@ -30,7 +30,7 @@
                 authenticate()
             }
 
-            stompClient.subscribe('/topic/greetings', function (greeting) {
+            stompClient.subscribe('/topic/{tenantId}/greetings', function (greeting) {
                 showMessage(JSON.parse(greeting.body).content);
             });
         }, function(e) {

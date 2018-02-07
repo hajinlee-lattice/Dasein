@@ -22,6 +22,7 @@
         <jetty.use.test.cp>false</jetty.use.test.cp>
         <jetty.ks.path>/etc/ledp/tls/ledp_keystore.jks</jetty.ks.path>
         <jetty.ks.password>Lattice1</jetty.ks.password>
+        <alpn.version>8.1.11.v20170118</alpn.version>
     </properties>
 
     <profiles>
@@ -42,10 +43,18 @@
                                 ${jetty.conf.dir}/jetty-ssl-context.xml,
                                 ${jetty.conf.dir}/jetty-alpn.xml,
                                 ${jetty.conf.dir}/jetty-http2c.xml,
+                                ${jetty.conf.dir}/jetty-http.xml,
                                 ${jetty.conf.dir}/jetty-http2.xml,
                                 ${jetty.conf.dir}/jetty-https.xml
                             </jettyXml>
                             -->
+                            <jettyXml>
+                                ${jetty.conf.dir}/jetty.xml,
+                                ${jetty.conf.dir}/jetty-env.xml,
+                                ${jetty.conf.dir}/jetty-ssl.xml,
+                                ${jetty.conf.dir}/jetty-ssl-context.xml,
+                                ${jetty.conf.dir}/jetty-https.xml
+                            </jettyXml>
                             <httpConnector>
                                 <port>${jetty.port}</port>
                             </httpConnector>
@@ -108,14 +117,9 @@
                         </executions>
                         <dependencies>
                             <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm</artifactId>
-                                <version>5.0.2</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.ow2.asm</groupId>
-                                <artifactId>asm-commons</artifactId>
-                                <version>5.0.2</version>
+                                <groupId>com.mchange</groupId>
+                                <artifactId>c3p0</artifactId>
+                                <version>${c3p0.version}</version>
                             </dependency>
                             <dependency>
                                 <groupId>com.sun.mail</groupId>

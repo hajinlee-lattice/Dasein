@@ -10,6 +10,7 @@
     <properties>
         <component-name>pls</component-name>
         <jetty.port>8081</jetty.port>
+        <jetty.ssl.port>9081</jetty.ssl.port>
         <jetty.stop.port>10981</jetty.stop.port>
         <jetty.use.test.cp>false</jetty.use.test.cp>
     </properties>

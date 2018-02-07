@@ -11,6 +11,7 @@
     <properties>
         <component-name>sqoop</component-name>
         <jetty.port>8080</jetty.port>
+        <jetty.ssl.port>9080</jetty.ssl.port>
         <jetty.stop.port>10980</jetty.stop.port>
     </properties>
 

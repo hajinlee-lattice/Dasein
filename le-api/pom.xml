@@ -11,6 +11,7 @@
     <properties>
         <component-name>le-api</component-name>
         <jetty.port>8074</jetty.port>
+        <jetty.ssl.port>9074</jetty.ssl.port>
         <jett.stop.port>10974</jett.stop.port>
     </properties>
 
