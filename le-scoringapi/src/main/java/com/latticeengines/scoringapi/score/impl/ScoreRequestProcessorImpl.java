@@ -639,8 +639,9 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     }
                 } else {
                     if (log.isInfoEnabled()) {
-                        log.info("Skip scoring for " + tuple.getRecord().getRecordId() + "_" + tuple.getModelId()
-                                + " as it already has error: " + tuple.getException().getMessage());
+                        log.info(String.format("Skip scoring for recordId=%s, modelId=%s, as it already has error=%s", 
+                            tuple.getRecord().getRecordId(), tuple.getModelId(),
+                            tuple.getException().getMessage()));
                     }
                 }
 
