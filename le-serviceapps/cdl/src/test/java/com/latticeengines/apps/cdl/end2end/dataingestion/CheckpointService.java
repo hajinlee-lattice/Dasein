@@ -59,7 +59,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -77,7 +76,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "10";
+    private static final String S3_CHECKPOINTS_VERSION = "11";
     static final String CHECKPOINT_DATASET_VDB = "vdb";
     static final String CHECKPOINT_DATASET_CSV = "csv";
 

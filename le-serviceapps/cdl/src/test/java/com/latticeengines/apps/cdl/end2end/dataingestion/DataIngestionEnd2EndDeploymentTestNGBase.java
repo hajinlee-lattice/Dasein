@@ -128,18 +128,18 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_CONTACT_4 = 68;
 
     static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
-    static final long SEGMENT_2_ACCOUNT_1 = 24;
-    static final long SEGMENT_2_CONTACT_1 = 27;
-    static final long SEGMENT_2_ACCOUNT_2 = 67;
-    static final long SEGMENT_2_CONTACT_2 = 81;
+    static final long SEGMENT_2_ACCOUNT_1 = 11;
+    static final long SEGMENT_2_CONTACT_1 = 11;
+    static final long SEGMENT_2_ACCOUNT_2 = 47;
+    static final long SEGMENT_2_CONTACT_2 = 51;
 
     static final long RATING_A_COUNT_1 = 6;
-    static final long RATING_D_COUNT_1 = 17;
-    static final long RATING_F_COUNT_1 = 1;
+    static final long RATING_D_COUNT_1 = 5;
+    static final long RATING_F_COUNT_1 = 0;
 
     static final long RATING_A_COUNT_2 = 20;
-    static final long RATING_D_COUNT_2 = 45;
-    static final long RATING_F_COUNT_2 = 2;
+    static final long RATING_D_COUNT_2 = 27;
+    static final long RATING_F_COUNT_2 = 0;
 
     static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";
 
@@ -801,10 +801,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Map<String, Long> counts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(counts));
         expectedCounts.forEach((bkt, count) -> {
-            Assert.assertNotNull(counts.get(bkt.getName()),
-                    "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
-            Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName() + " expected "
-                    + counts.get(bkt.getName()) + " found " + count);
+            if (count > 0) {
+                Assert.assertNotNull(counts.get(bkt.getName()),
+                        "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
+                Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName() + " expected "
+                        + counts.get(bkt.getName()) + " found " + count);
+            }
         });
     }
 

@@ -25,24 +25,36 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/docs
     rm -rf ${CATALINA_HOME}/webapps/ROOT
 
-    UNAME=`uname`
-    if [[ "${UNAME}" == 'Darwin' ]]; then
-        echo "You are on Mac"
-        brew install -y tomcat-native
-    else
-        echo "You are on ${UNAME}"
-        sudo apt-get install -y make libssl-dev libapr1-dev
-        pushd $CATALINA_HOME/bin
-        tar xzf tomcat-native.tar.gz
-        cd tomcat-native-*-src/native
-        ./configure \
-            --with-java-home=$JAVA_HOME \
-            --prefix=$CATALINA_HOME
-        make && make install
-        popd
-    fi
-
     if [ "${USE_HTTPS}" == "true" ]; then
+        UNAME=`uname`
+        if [[ "${UNAME}" == 'Darwin' ]]; then
+            echo "You are on Mac"
+            brew install -y apr openssl
+            APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
+            echo "You installed apr ${APR_VERSION}"
+            OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
+            echo "You installed apr ${OPENSSL_VERSION}"
+            pushd $CATALINA_HOME/bin
+            ./configure \
+                --with-java-home=$JAVA_HOME \
+                --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
+                --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
+                --prefix=$CATALINA_HOME
+            make && make install
+            popd
+        else
+            echo "You are on ${UNAME}"
+            sudo apt-get install -y make libssl-dev libapr1-dev
+            pushd $CATALINA_HOME/bin
+            tar xzf tomcat-native.tar.gz
+            cd tomcat-native-*-src/native
+            ./configure \
+                --with-java-home=$JAVA_HOME \
+                --prefix=$CATALINA_HOME
+            make && make install
+            popd
+        fi
+
         sudo mkdir -p /etc/ledp/tls
         sudo chown -R $USER /etc/ledp/tls
         rm -rf /etc/ledp/tls/*

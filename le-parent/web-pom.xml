@@ -40,6 +40,9 @@
                                 ${jetty.conf.dir}/jetty-env.xml,
                                 ${jetty.conf.dir}/jetty-ssl.xml,
                                 ${jetty.conf.dir}/jetty-ssl-context.xml,
+                                ${jetty.conf.dir}/jetty-alpn.xml,
+                                ${jetty.conf.dir}/jetty-http2c.xml,
+                                ${jetty.conf.dir}/jetty-http2.xml,
                                 ${jetty.conf.dir}/jetty-https.xml
                             </jettyXml>
                             -->
