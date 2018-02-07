@@ -11,6 +11,14 @@
         <div class="col-md-6">
             <form class="form-inline">
                 <div class="form-group">
+                    <label for="token">Set Tenant Id</label>
+                    <input type="text" id="tenantId" class="form-control" placeholder="Set your singular tenant id">
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <form class="form-inline">
+                <div class="form-group">
                     <label for="connect">WebSocket connection:</label>
                     <button id="connect" class="btn btn-default" type="submit">Connect</button>
                     <button id="disconnect" class="btn btn-default" type="submit" disabled="disabled">Disconnect
@@ -18,7 +26,9 @@
                 </div>
             </form>
         </div>
-        <div class="col-md-6">
+    </div>
+    <div class="row">
+        <div class="col-md-12">
             <form class="form-inline">
                 <div class="form-group">
                     <label for="token">Send GA Token</label>

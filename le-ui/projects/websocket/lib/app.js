@@ -18,7 +18,7 @@
 
     function connect() {
         console.log('Connecting webscoket');
-        var socket = new SockJS('/pls/sockjs-endpoint');
+        var socket = new SockJS('https://localhost:9081/pls/sockjs-endpoint');
         stompClient = Stomp.over(socket);
         stompClient.connect({}, function (frame) {
             setConnected(true);
@@ -30,7 +30,8 @@
                 authenticate()
             }
 
-            stompClient.subscribe('/topic/{tenantId}/greetings', function (greeting) {
+            var tenantId = $("#tenantId").val();
+            stompClient.subscribe('/topic/' + tenantId+ '/greetings', function (greeting) {
                 showMessage(JSON.parse(greeting.body).content);
             });
         }, function(e) {
