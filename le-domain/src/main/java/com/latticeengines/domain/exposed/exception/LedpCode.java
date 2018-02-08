@@ -109,8 +109,7 @@ public enum LedpCode {
     LEDP_17014("Import table metadata error! {0}"), //
     LEDP_17015("Import table data error! {0}"), //
     LEDP_17016("Failed to get data from DL!"), //
-    LEDP_17017("The id {0} is duplicated."),
-    LEDP_17018("Entity {0} cannot apply merge rule {1}!"),
+    LEDP_17017("The id {0} is duplicated."), LEDP_17018("Entity {0} cannot apply merge rule {1}!"),
 
     // le-pls 18000-18999
     LEDP_18000("Problem with Global Auth URL {0}."), //
@@ -291,6 +290,7 @@ public enum LedpCode {
     LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with Id = {2}."), //
     LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
     LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
+    LEDP_18177("Websocket session {0} has associated with tenant {1} and cannot subscribe topic for tenant {2}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
