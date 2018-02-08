@@ -60,7 +60,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 	    }
 
 
-        JobsStore.getJob(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
+        JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
             console.log(result);
         });
     	

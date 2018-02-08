@@ -642,6 +642,8 @@ angular.module('lp.ratingsengine')
             obj = {};
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
+            console.log(rating.activeModel.AI.id);
+            
             obj = {
                 AI: {
                     id: rating.activeModel.AI.id,

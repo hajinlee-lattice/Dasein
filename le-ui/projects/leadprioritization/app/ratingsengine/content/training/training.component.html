@@ -87,7 +87,9 @@
                                 datasource="vm.segments" 
                                 callback-function="vm.segmentCallback(args)"
                                 single-selection="true"
+                                id="name"
                                 displayname="display_name"
+                                query-scope="display_name"
                                 ng-model="trainingSegment"></chips>
                         </div>
                     </li>
@@ -99,7 +101,9 @@
                                 datasource="vm.products"
                                 callback-function="vm.productsCallback(args)"
                                 single-selection="false"
+                                id="ProductId"
                                 displayname="ProductName"
+                                query-scope="ProductName"
                                 ng-model="trainingProducts"></chips>
                         </div>
                     </li>

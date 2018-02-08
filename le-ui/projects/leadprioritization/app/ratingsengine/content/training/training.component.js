@@ -14,12 +14,11 @@ angular.module('lp.ratingsengine.wizard.training', [
         periodsCriteria: "WITHIN",
         periodsValue: 2,
         modelingConfigFilters: {},
-        trainingSegment: {},
-        trainingProducts: []
+        trainingSegment: null,
+        trainingProducts: null
     });
 
     vm.init = function () {
-
     }
 
     vm.segmentCallback = function(selectedSegment) {
@@ -27,15 +26,13 @@ angular.module('lp.ratingsengine.wizard.training', [
     }
 
     vm.productsCallback = function(selectedProducts) {
+        vm.trainingProducts = [];
         angular.forEach(selectedProducts, function(product){
             vm.trainingProducts.push(product.ProductId);
         });
     }
 
     vm.formOnChange = function(){
-
-        console.log($scope);
-
         if($scope.checkboxModel) {
             if($scope.checkboxModel.spend) {
                 vm.modelingConfigFilters.SPEND_IN_PERIOD = {

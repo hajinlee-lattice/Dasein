@@ -28,7 +28,7 @@
             ng-class="(showQueryList) ?'show-dropdown' : ''">
             <div 
                 class="query-result-row" 
-                ng-repeat="item in (filteredItems = (queryItems | filter:query))" 
+                ng-repeat="item in (filteredItems = (queryItems | filter: filterFunction ))" 
                 ng-class="(isRowSelected($index)) ?'query-result-row-selected-test' : ''"
                 ng-click="chooseItem(item)" 
                 ng-mouseover="hoverIn()" 

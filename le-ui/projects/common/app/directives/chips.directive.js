@@ -10,7 +10,8 @@ angular.module('mainApp.appCommon.directives.chips', [])
             singleSelection: '=', 
             id: '@', 
             displayname: '@' ,
-            model: '@'
+            model: '@',
+            queryScope: '@'
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -18,12 +19,17 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.positionInQueryList = 0;
             scope.query = '';
             scope.filteredItems = [];
-            scope.queryItems = scope.datasource;
             scope.mouseOut = true;
             scope.blur = true;
             scope.showQueryList = false;
-            scope.id = scope.itemId || scope.itemName || scope.ProductId;
+            scope.id = scope.itemId || scope.itemName || scope.name || scope.ProductId;
             scope.displayName = scope.displayname || 'displayName';
+            scope.queryItems = scope.datasource;
+            scope.queryscope = scope.queryScope;
+
+            scope.filterFunction = function(item) {
+                return item[scope.queryscope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
+            };
 
             scope.getDisplayName = function(item){
                 if(item){
@@ -55,7 +61,6 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
 
             scope.showQueryResult = function () {
-
                 if (scope.query.length > 0) {
                     scope.showQueryList = true;
                 } else {
@@ -91,15 +96,18 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 }
             }
             scope.chooseItem = function (item) {
-                if (item) { 
+                if (item) {
+                    if(scope.singleSelection) {
+                        scope.chips = {};
+                    }
                     if (scope.chips[item[scope.id]] === undefined) {
                         scope.chips[item[scope.id]] = item;
                     }
-                    if(scope.singleSelection){
+                    if (scope.singleSelection){
                         scope.query = '';
                     }
                     scope.callCallback();
-                    if(scope.singleSelection === true){
+                    if (scope.singleSelection){
                         scope.setListVisibility(false);
                     }
                 }

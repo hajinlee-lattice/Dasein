@@ -52,6 +52,31 @@ angular
         return deferred.promise;
     };
 
+    this.getJobFromApplicationId = function(jobApplicationId) {
+        var deferred = $q.defer();
+
+        JobsService.getJobStatusFromApplicationId($scope.applicationId).then(function(response) {
+            deferred.resolve(response);
+
+            // if (response.success) {
+            //     var resultObj = response.resultObj;
+
+            //     $scope.jobStatus = resultObj.jobStatus;
+            //     $scope.jobId = resultObj.id;
+
+            //     if ($scope.jobStatus == "Completed" || $scope.jobStatus == "Failed" || $scope.jobStatus == "Cancelled") {
+            //         ServiceErrorUtility.process({ data: resultObj });
+            //         cancelPeriodJobStatusQuery();
+            //     }
+
+            //     updateStatesBasedOnJobStatus(resultObj);
+            //     performCalc(resultObj);
+            // }
+        });
+
+        return deferred.promise;
+    }
+
 
     this.getJobs = function(use_cache, modelId) {
         JobsStore.loadingJobs = true;
