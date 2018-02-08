@@ -60,6 +60,7 @@ alias cleanuptesttenants='python $WSHOME/le-dev/scripts/cleanup.py'
 alias pytests='cd $WSHOME/le-dataplatform/src/test/python && PYTHONPATH=../../main/python:../../main/python/pipeline:$PYTHONPATH $ANACONDA_HOME/envs/lattice/bin/py.test'
 
 alias runjetty='runtest -p jetty -c jetty:run'
+alias runjetty2='runtest -p jetty2 -c jetty:run-forked'
 
 alias uibld='pushd $WSHOME/le-ui && npm install && popd'
 alias uirunlpi='cd $WSHOME/le-ui && npm run local'

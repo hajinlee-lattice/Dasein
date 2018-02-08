@@ -17,14 +17,6 @@
                 <Arg name="server"><Ref refid="Server" /></Arg>
                 <Arg name="acceptors" type="int"><Property name="jetty.ssl.acceptors" deprecated="ssl.acceptors" default="-1"/></Arg>
                 <Arg name="selectors" type="int"><Property name="jetty.ssl.selectors" deprecated="ssl.selectors" default="-1"/></Arg>
-                <Arg name="factories">
-                    <Array type="org.eclipse.jetty.server.ConnectionFactory">
-                        <!-- uncomment to support proxy protocol
-                        <Item>
-                          <New class="org.eclipse.jetty.server.ProxyConnectionFactory"/>
-                        </Item>-->
-                    </Array>
-                </Arg>
 
                 <Set name="host"><Property name="jetty.ssl.host" deprecated="jetty.host" /></Set>
                 <Set name="port"><Property name="jetty.ssl.port" deprecated="ssl.port" default="8443" /></Set>

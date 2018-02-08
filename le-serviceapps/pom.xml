@@ -9,6 +9,7 @@
 
     <properties>
         <component-name>serviceapps</component-name>
+        <jetty.conf.dir>../../le-parent/jetty</jetty.conf.dir>
     </properties>
 
     <parent>
