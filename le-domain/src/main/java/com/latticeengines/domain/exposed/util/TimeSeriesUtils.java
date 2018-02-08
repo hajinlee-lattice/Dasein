@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +9,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
@@ -23,6 +25,7 @@ import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -176,7 +179,12 @@ public class TimeSeriesUtils {
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, inputDir);
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir);
-            Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<>();
+            Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<Integer, List<GenericRecord>>();
+            List<Future<Boolean>> pendingWrites = new ArrayList<Future<Boolean>>();
+            ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("periodDataDistributor", 16);
+
+            int totalRecords = 0;
+            int pendingRecords = 0;
             while (iter.hasNext()) {
                 GenericRecord record = iter.next();
                 Integer period = (Integer) record.get(periodField);
@@ -184,19 +192,57 @@ public class TimeSeriesUtils {
                     dateRecordMap.put(period, new ArrayList<>());
                 }
                 dateRecordMap.get(period).add(record);
-                if (dateRecordMap.get(period).size() >= 128) {
-                    writeDataBuffer(yarnConfiguration, schema, period, periodFileMap, dateRecordMap);
+                totalRecords++;
+                pendingRecords++;
+                if (pendingRecords > 128 * 1024) {
+                    log.info("Schedule " + pendingRecords + "records to write");
+                    dateRecordMap = writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
+                    pendingRecords = 0;
                 }
             }
-            for (Map.Entry<Integer, List<GenericRecord>> entry : dateRecordMap.entrySet()) {
-                writeDataBuffer(yarnConfiguration, schema, entry.getKey(), periodFileMap, dateRecordMap);
-            }
+
+            log.info("Schedule the remaining " + pendingRecords + " out of " + totalRecords + " records to write");
+            writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
+            syncWrites(pendingWrites);
             return true;
         } catch (Exception e) {
             log.error("Failed to distribute to period store", e);
             return false;
         }
     }
+
+    private static Map<Integer, List<GenericRecord>> writeRecords(Configuration yarnConfiguration, ExecutorService executor,
+                                                           List<Future<Boolean>> pendingWrites, Schema schema,
+                                                           Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) {
+        syncWrites(pendingWrites);
+        for (Integer period : dateRecordMap.keySet()) {
+           List<GenericRecord> records = dateRecordMap.get(period);
+           String fileName = periodFileMap.get(period);
+           if( fileName == null) {
+               log.info("Failed to find file for " + period);
+               continue;
+           }
+           if ((records == null) || (records.size() == 0)) {
+               continue;
+           }
+           PeriodDataCallable callable = new PeriodDataCallable(yarnConfiguration, schema, fileName, records);
+           pendingWrites.add(executor.submit(callable));
+       }
+
+       return new HashMap<Integer, List<GenericRecord>>();
+    }
+
+    private static void syncWrites(List<Future<Boolean>> pendingWrites) {
+        for (Future<Boolean> pendingWrite : pendingWrites) {
+            try {
+                pendingWrite.get();
+            } catch (Exception e) {
+                log.error("Error waiting for pending writes", e);
+                continue;
+            }
+        }
+        pendingWrites.clear();
+   }
 
     public static Integer getEarliestPeriod(Configuration yarnConfiguration, Table transactionTable) {
         try {
@@ -232,20 +278,34 @@ public class TimeSeriesUtils {
         return productMap;
     }
 
-    private static void writeDataBuffer(Configuration yarnConfiguration, Schema schema, Integer period,
-            Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) throws IOException {
-        List<GenericRecord> records = dateRecordMap.get(period);
-        String fileName = periodFileMap.get(period);
-        if (fileName == null) {
-            log.info("Failed to find file for " + period);
-        }
-        if (!HdfsUtils.fileExists(yarnConfiguration, fileName)) {
-            AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fileName, records);
-        } else {
-            AvroUtils.appendToHdfsFile(yarnConfiguration, fileName, records);
-        }
-        records.clear();
+    static class PeriodDataCallable implements Callable<Boolean> {
+        private Configuration yarnConfiguration;
+        private Schema schema;
+        private String fileName;
+        private List<GenericRecord> records;
 
+        PeriodDataCallable(Configuration yarnConfiguration, Schema schema, String fileName, List<GenericRecord> records) {
+
+            this.yarnConfiguration = yarnConfiguration;
+            this.schema = schema;
+            this.fileName = fileName;
+            this.records = records;
+        }
+
+        @Override
+        public Boolean call() throws Exception {
+            try {
+                log.info("Write " + records.size() + " records to " + fileName);
+                if (!HdfsUtils.fileExists(yarnConfiguration, fileName)) {
+                    AvroUtils.writeToHdfsFile(yarnConfiguration, schema, fileName, records);
+                } else {
+                    AvroUtils.appendToHdfsFile(yarnConfiguration, fileName, records);
+                }
+            } catch (Exception e) {
+                log.error("Failed to distribute period data to " + fileName, e);
+            }
+            return Boolean.TRUE;
+       }
     }
 
     private static PeriodBuilder getPeriodBuilder(PeriodStrategy strategy, String minDateStr) {
