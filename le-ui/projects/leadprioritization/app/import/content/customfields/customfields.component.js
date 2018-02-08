@@ -1,19 +1,19 @@
 angular.module('lp.import.wizard.customfields', [])
 .controller('ImportWizardCustomFields', function(
-    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, FieldDocument
+    $state, $stateParams, $scope, ResourceUtility, ImportWizardStore, FieldDocument, mergedFieldDocument
 ) {
     var vm = this;
     angular.extend(vm, {
         AvailableFields: [],
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
+        mergedFields: mergedFieldDocument,
         fieldMappingIgnore: {}
     });
 
     vm.init = function() {
-        vm.size= vm.AvailableFields.length;
-
-        vm.fieldMappings.forEach(function(item){
+        vm.size = vm.AvailableFields.length;
+        vm.mergedFields.forEach(function(item){
             if(item.mappedField == null) {
         	    vm.AvailableFields.push(item);
             }

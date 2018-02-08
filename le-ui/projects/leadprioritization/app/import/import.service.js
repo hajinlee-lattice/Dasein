@@ -199,7 +199,6 @@ angular.module('lp.import')
     }
 
     this.nextSaveMapping = function(nextState) {
-        //console.log(this.saveObjects);
         // this.saveObjects.forEach(function(item, index) {
         //     ImportWizardStore.remapMap(item.userField, item.mappedField, item.cdlExternalSystemType, item.unmap);
         // });
@@ -210,40 +209,44 @@ angular.module('lp.import')
         var callback = (typeof callback === 'function' ? callback : function(){});
 
         ImportWizardStore.mergeFieldDocument().then(function(fieldDocument) {
-            console.log(ImportWizardStore.getFieldDocument());
-            // ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
-            //     entity: ImportWizardStore.getEntityType()
-            // }).then(callback);
-            //$state.go(nextState);
+            ImportWizardService.SaveFieldDocuments( ImportWizardStore.getCsvFileName(), ImportWizardStore.getFieldDocument(), {
+                entity: ImportWizardStore.getEntityType()
+            }).then(callback);
+            $state.go(nextState);
         })
 
     }
 
-    this.mergeFieldDocument = function() {
+    this.mergeFieldDocument = function(opts) {
             var deferred = $q.defer(),
-                append = [];
+                append = [],
+                tmpFieldMappings = angular.copy(ImportWizardStore.fieldDocument.fieldMappings),
+                opts = opts || {};
+
+            opts.append = (opts.append === false ? false : true);
+            opts.save = (opts.save === false ? false : true);
+
             for(var i in this.saveObjects) {
                 var name = i,
                     items = this.saveObjects[name];
                 
-                console.log(name, this.saveObjects[name]);
-
                 if(items) {
                     items.forEach(function(item, key) {
                         var mappedItem = {},
                             _mappedItem = {},
                             newitem = {},
                             _newItem = {};
+
                         if(item.originalUserField) {
                             /**
                              * if it has an orginal user field, like in the ID step, find the original field mapping and unmap it and set up the new mapping to be appended
                              */
-                            mappedItem = ImportWizardStore.fieldDocument.fieldMappings.find(function(field) {
+                            mappedItem = tmpFieldMappings.find(function(field) {
                                 return (field.userField === item.originalUserField && field.mappedField === item.mappedField);
                             });
                             _mappedItem = angular.copy(mappedItem);
 
-                            if(item.userField !== mappedItem.userField || item.mappedField !== mappedItem.mappedField) { 
+                            if(item && mappedItem && (item.userField !== mappedItem.userField || item.mappedField !== mappedItem.mappedField)) { 
                                 mappedItem.mappedField = null; // if it's different, unmap it here
                                 mappedItem.mappedToLatticeField = false;
                                 if(item.append) { // and set it up to be append to fieldMappings later
@@ -256,7 +259,7 @@ angular.module('lp.import')
                             /**
                              * if it's new item, such as a third party id, append it
                              */
-                            newItem = _.findWhere(ImportWizardStore.fieldDocument.fieldMappings, {userField: item.userField});
+                            newItem = _.findWhere(tmpFieldMappings, {userField: item.userField});
                             _newItem = angular.copy(newItem);
 
                             var __newItem = angular.extend(_newItem, item);
@@ -266,25 +269,35 @@ angular.module('lp.import')
                             /**
                              * here we update fields instead of appending them.
                              */
-                            var unMappedItem = ImportWizardStore.fieldDocument.fieldMappings.find(function(field) {
+                            var unMappedItem = tmpFieldMappings.find(function(field) {
                                 return (field.mappedField === item.mappedField);
                             });
-                            mappedItem = ImportWizardStore.fieldDocument.fieldMappings.find(function(field) {
-                                return (field.userField === item.originalUserField);
+                            mappedItem = tmpFieldMappings.find(function(field) {
+                                return (field.userField === item.userField);
                             });
-                            unMappedItem.mappedField = null;
-                            unMappedItem.mappedToLatticeField = false;
-
-                            mappedItem.mappedField = item.mappedField;
-                            mappedItem.mappedToLatticeField = true;
+                            if(unMappedItem) {
+                                unMappedItem.mappedField = null;
+                                unMappedItem.mappedToLatticeField = false;
+                            }
+                            if(mappedItem) {
+                                mappedItem.mappedField = item.mappedField;
+                                mappedItem.mappedToLatticeField = true;
+                            }
 
                         }
                     });
                 }
-             }
-             ImportWizardStore.fieldDocument.fieldMappings = ImportWizardStore.fieldDocument.fieldMappings.concat(append); // append
+            }
 
-            deferred.resolve(ImportWizardStore.fieldDocument.fieldMappings);
+            if(opts.append) {
+                tmpFieldMappings = tmpFieldMappings.concat(append); // append
+            }
+
+            if(opts.save) {
+                ImportWizardStore.fieldDocument.fieldMappings = tmpFieldMappings;
+            }
+
+            deferred.resolve(tmpFieldMappings);
             return deferred.promise;
     }
 

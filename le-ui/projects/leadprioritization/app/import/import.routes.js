@@ -215,6 +215,9 @@ angular
             resolve: {
                 FieldDocument: function($q, ImportWizardStore) {
                     return ImportWizardStore.getFieldDocument();
+                },
+                mergedFieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.mergeFieldDocument({append: false, save: false});
                 }
             },
             views: {
@@ -307,6 +310,9 @@ angular
                 },
                 UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
                     return ImportWizardStore.getUnmappedFields();
+                },
+                mergedFieldDocument: function($q, ImportWizardStore) {
+                    return ImportWizardStore.mergeFieldDocument({append: false, save: false});
                 },
                 Type: function(){
                     return "Contacts";

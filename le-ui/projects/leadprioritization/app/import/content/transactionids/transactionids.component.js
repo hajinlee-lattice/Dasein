@@ -20,7 +20,8 @@ angular.module('lp.import.wizard.transactionids', [])
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
-        keyMap: {}
+        keyMap: {},
+        saveMap: {}
     });
 
     vm.init = function() {
@@ -40,6 +41,8 @@ angular.module('lp.import.wizard.transactionids', [])
         });
         if(vm.savedFields) {
             vm.savedFields.forEach(function(fieldMapping, index) {
+                vm.saveMap[fieldMapping.originalMappedField] = fieldMapping;
+
                 vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
                 vm.AvailableFields.push(fieldMapping);
                 for(var i in vm.mappedFieldMap) {
@@ -59,8 +62,8 @@ angular.module('lp.import.wizard.transactionids', [])
                 map = {
                     userField: userField, 
                     mappedField: vm.mappedFieldMap[key],
-                    originalUserField: vm.keyMap[vm.mappedFieldMap[key]],
-                    originalMappedField: vm.mappedFieldMap[key],
+                    originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
+                    originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
                     append: true
                 };
             mapped.push(map);
