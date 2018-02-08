@@ -133,6 +133,7 @@ public abstract class AbstractTransformer<T extends TransformerConfig> implement
             }
             return transformInternal(pipelineProgress, workflowDir, step);
         } catch (Exception e) {
+            //TODO: investigate why it won't fail the whole workflow here.
             log.error("Transformer failed to transform", e);
             updateStatusToFailed(pipelineProgress, "Failed to transform data.", e);
             return false;

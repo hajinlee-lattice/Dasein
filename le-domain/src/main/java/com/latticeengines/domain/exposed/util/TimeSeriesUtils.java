@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.util;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -41,7 +43,7 @@ public class TimeSeriesUtils {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
             while (iter.hasNext()) {
                 GenericRecord record = iter.next();
-                Integer period = (Integer)record.get(periodField);
+                Integer period = (Integer) record.get(periodField);
                 periodSet.add(period);
             }
         } catch (Exception e) {
@@ -56,7 +58,7 @@ public class TimeSeriesUtils {
     }
 
     public static Long cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods,
-                                         boolean countRows) {
+            boolean countRows) {
         avroDir = getPath(avroDir);
         log.info("Clean periods from " + avroDir);
         Long rowCounts = 0L;
@@ -78,7 +80,7 @@ public class TimeSeriesUtils {
                         String avroName = dirs[dirs.length - 1];
                         Integer period = getPeriodFromFileName(avroName);
                         if ((period != null) && periods.contains(period)) {
-                            if(countRows) {
+                            if (countRows) {
                                 try {
                                     rowCounts += AvroUtils.count(yarnConfiguration, fileName);
                                 } catch (Exception e) {
@@ -121,13 +123,14 @@ public class TimeSeriesUtils {
         return avroDir;
     }
 
-    public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir, Set<Integer> periods) {
+    public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir,
+            Set<Integer> periods) {
         collectPeriodData(yarnConfiguration, targetDir, avroDir, periods, null, null);
 
     }
 
-    public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir, Set<Integer> periods,
-                                         PeriodStrategy periodStrategy, String earliestTransaction) {
+    public static void collectPeriodData(YarnConfiguration yarnConfiguration, String targetDir, String avroDir,
+            Set<Integer> periods, PeriodStrategy periodStrategy, String earliestTransaction) {
         PeriodBuilder periodBuilder = null;
         avroDir = getPath(avroDir);
         targetDir = getPath(targetDir);
@@ -151,7 +154,7 @@ public class TimeSeriesUtils {
                     period = periodBuilder.toPeriodId(DateTimeUtils.dayPeriodToDate(period));
                 }
                 if (periods.contains(period)) {
-                   HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
+                    HdfsUtils.copyFiles(yarnConfiguration, fileName, targetDir);
                 }
             }
         } catch (Exception e) {
@@ -159,7 +162,9 @@ public class TimeSeriesUtils {
         }
     }
 
-    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir, String targetDir, Set<Integer> periods, String periodField) {
+    public static boolean distributePeriodData(Configuration yarnConfiguration, String inputDir, String targetDir,
+            Set<Integer> periods, String periodField) {
+        verifySchemaCompatibility(yarnConfiguration, inputDir, targetDir);
         inputDir = getPath(inputDir) + "/*.avro";
         targetDir = getPath(targetDir);
         log.info("Distribute period data from " + inputDir + " to " + targetDir);
@@ -174,7 +179,7 @@ public class TimeSeriesUtils {
             Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<>();
             while (iter.hasNext()) {
                 GenericRecord record = iter.next();
-                Integer period = (Integer)record.get(periodField);
+                Integer period = (Integer) record.get(periodField);
                 if (!dateRecordMap.containsKey(period)) {
                     dateRecordMap.put(period, new ArrayList<>());
                 }
@@ -197,15 +202,15 @@ public class TimeSeriesUtils {
         try {
             String avroDir = transactionTable.getExtracts().get(0).getPath();
             avroDir = getPath(avroDir);
-            log.info("Looking for earliest period table " + transactionTable.getName() + " path " + avroDir); 
-            List<String>  avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
+            log.info("Looking for earliest period table " + transactionTable.getName() + " path " + avroDir);
+            List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
             Collections.sort(avroFiles);
             log.info("Get period from file " + avroFiles.get(0));
             return getPeriodFromFileName(avroFiles.get(0));
-         } catch (Exception e) {
+        } catch (Exception e) {
             log.error("Failed to find earlies period", e);
             return null;
-         }
+        }
     }
 
     public static Map<String, Product> loadProductMap(Configuration yarnConfiguration, Table productTable) {
@@ -227,8 +232,8 @@ public class TimeSeriesUtils {
         return productMap;
     }
 
-    private static void writeDataBuffer(Configuration yarnConfiguration, Schema schema, Integer period, Map<Integer, String> periodFileMap,
-            Map<Integer, List<GenericRecord>> dateRecordMap) throws IOException {
+    private static void writeDataBuffer(Configuration yarnConfiguration, Schema schema, Integer period,
+            Map<Integer, String> periodFileMap, Map<Integer, List<GenericRecord>> dateRecordMap) throws IOException {
         List<GenericRecord> records = dateRecordMap.get(period);
         String fileName = periodFileMap.get(period);
         if (fileName == null) {
@@ -260,4 +265,39 @@ public class TimeSeriesUtils {
     private static String getFileNameFromPeriod(Integer period) {
         return "Period-" + period + "-data.avro";
     }
+
+    private static void verifySchemaCompatibility(Configuration yarnConfiguration, String sourceDir,
+            String targetDir) {
+        String sourceGlob = getPath(sourceDir) + "/*.avro";
+        String targetGlob = getPath(targetDir) + "/*.avro";
+        try {
+            if (!AvroUtils.iterator(yarnConfiguration, targetGlob).hasNext()) {
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check non-emptiness of target glob " + targetGlob);
+            return;
+        }
+        Schema sourceSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, sourceGlob);
+        Schema targetSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, targetGlob);
+        if (!areCompatibleSchemas(sourceSchema, targetSchema)) {
+            throw new IllegalStateException(String.format(
+                    "Source schema and target schema are incompatible:\nSource Schema:%s\nTarget Schema:%s\n", //
+                    sourceSchema.toString(true), targetSchema.toString(true)));
+        } else {
+            log.info(String.format("Source Schema:%s\nTarget Schema:%s\n", sourceSchema.toString(true),
+                    targetSchema.toString(true)));
+        }
+    }
+
+    private static boolean areCompatibleSchemas(Schema schema1, Schema schema2) {
+        List<String> cols1 = schema1.getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+        List<String> cols2 = schema2.getFields().stream().map(Schema.Field::name).collect(Collectors.toList());
+        if (cols1.size() != cols2.size()) {
+            return false;
+        }
+        int size = cols1.size();
+        return Arrays.equals(cols1.toArray(new String[size]), cols2.toArray(new String[size]));
+    }
+
 }

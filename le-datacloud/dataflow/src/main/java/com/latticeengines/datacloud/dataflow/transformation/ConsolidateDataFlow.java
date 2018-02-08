@@ -49,13 +49,13 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         }
         ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
         dedupeSource(config, sources, groupByKey);
+        if (config.isMergeOnly()) {
+            addIdColumn(sources, UUID);
+            groupByKey = UUID;
+        }
         if (sources.size() <= 1) {
             result = sources.get(0);
         } else {
-            if (config.isMergeOnly()) {
-                addIdColumn(sources, UUID);
-                groupByKey = UUID;
-            }
             Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
             List<String> fieldToRetain = new ArrayList<>();
             Set<String> commonFields = new HashSet<>();

@@ -10,6 +10,7 @@
     <properties>
         <component-name>matchapi</component-name>
         <jetty.port>8076</jetty.port>
+        <jetty.ssl.port>9076</jetty.ssl.port>
         <jetty.stop.port>10976</jetty.stop.port>
     </properties>
 
