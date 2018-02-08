@@ -4,7 +4,7 @@
     "version": "v01",
     "title": "Lattice Scoring API"
   },
-  "host": "czas9n05ji.execute-api.us-east-1.amazonaws.com",
+  "host": "testapigw.lattice-engines.com",
   "basePath": "/v01",
   "schemes": [
     "https"
@@ -47,9 +47,18 @@
             "schema": {
               "$ref": "#/definitions/EnrichResponse"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -58,6 +67,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -71,68 +86,84 @@
         }
       }
     },
-      "/enrichment" : {
-      "get" : {
-        "tags" : [ "enrichment" ],
-        "summary" : "Get list of attributes with specified query parameters",
-        "description" : "",
-        "operationId" : "getLeadEnrichmentAttributes",
-        "parameters" : [ {
-          "name": "Authorization",
-          "in": "header",
-          "required": true,
-          "type": "string"
-        }, {
-          "name" : "attributeDisplayNameFilter",
-          "in" : "query",
-          "description" : "Get attributes with name containing specified text for attributeDisplayNameFilter",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "category",
-          "in" : "query",
-          "description" : "Get attributes with specified category",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "subcategory",
-          "in" : "query",
-          "description" : "Get attributes with specified subcategory",
-          "required" : false,
-          "type" : "string"
-        }, {
-          "name" : "onlySelectedAttributes",
-          "in" : "query",
-          "description" : "Should get only selected attribute",
-          "required" : false,
-          "type" : "boolean"
-        }, {
-          "name" : "offset",
-          "in" : "query",
-          "description" : "Offset for pagination of matching attributes",
-          "required" : false,
-          "type" : "integer",
-          "format" : "int32"
-        }, {
-          "name" : "max",
-          "in" : "query",
-          "description" : "Maximum number of matching attributes in page",
-          "required" : false,
-          "type" : "integer",
-          "format" : "int32"
-        } ],
-        "responses" : {
-          "200" : {
-            "description" : "successful operation",
-            "schema" : {
-              "type" : "array",
-              "items" : {
-                "$ref" : "#/definitions/LeadEnrichmentAttribute"
-              }
+    "/enrichment": {
+      "get": {
+        "tags": [
+          "enrichment"
+        ],
+        "summary": "Get list of attributes with specified query parameters",
+        "operationId": "getLeadEnrichmentAttributes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Get attributes with specified category",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "description": "Offset for pagination of matching attributes",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "subcategory",
+            "in": "query",
+            "description": "Get attributes with specified subcategory",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "attributeDisplayNameFilter",
+            "in": "query",
+            "description": "Get attributes with name containing specified text for attributeDisplayNameFilter",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "onlySelectedAttributes",
+            "in": "query",
+            "description": "Should get only selected attribute",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "max",
+            "in": "query",
+            "description": "Maximum number of matching attributes in page",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ArrayOfLeadEnrichmentAttribute"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -141,16 +172,22 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
             "integration.request.querystring.subcategory": "method.request.querystring.subcategory",
             "integration.request.querystring.attributeDisplayNameFilter": "method.request.querystring.attributeDisplayNameFilter",
+            "integration.request.querystring.max": "method.request.querystring.max",
             "integration.request.header.Authorization": "method.request.header.Authorization",
             "integration.request.querystring.category": "method.request.querystring.category",
-            "integration.request.querystring.onlySelectedAttributes": "method.request.querystring.onlySelectedAttributes",
             "integration.request.querystring.offset": "method.request.querystring.offset",
-            "integration.request.querystring.max": "method.request.querystring.max"
+            "integration.request.querystring.onlySelectedAttributes": "method.request.querystring.onlySelectedAttributes"
           },
           "uri": "https://${stageVariables.integrationurl}/enrichment",
           "passthroughBehavior": "when_no_match",
@@ -179,9 +216,18 @@
             "schema": {
               "$ref": "#/definitions/ArrayOfEmpty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -190,6 +236,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -212,24 +264,28 @@
           {
             "name": "subcategory",
             "in": "query",
+            "description": "Get attributes with specified subcategory",
             "required": false,
             "type": "string"
           },
           {
             "name": "category",
             "in": "query",
+            "description": "Get attributes with specified category",
             "required": false,
             "type": "string"
           },
           {
             "name": "attributeDisplayNameFilter",
             "in": "query",
+            "description": "Get attributes with name containing specified text for attributeDisplayNameFilter",
             "required": false,
             "type": "string"
           },
           {
             "name": "onlySelectedAttributes",
             "in": "query",
+            "description": "Should get only selected attribute",
             "required": false,
             "type": "string"
           },
@@ -246,9 +302,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -257,6 +322,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -293,9 +364,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -304,6 +384,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -336,9 +422,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -347,6 +442,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -379,9 +480,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -390,6 +500,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -412,6 +528,7 @@
           {
             "name": "category",
             "in": "query",
+            "description": "Get attributes with specified category",
             "required": true,
             "type": "string"
           },
@@ -428,9 +545,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -439,6 +565,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -502,9 +634,18 @@
             "schema": {
               "$ref": "#/definitions/ArrayOfModelDetail"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -513,6 +654,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -568,9 +715,18 @@
             "schema": {
               "$ref": "#/definitions/Empty"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -579,6 +735,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -619,9 +781,18 @@
             "schema": {
               "$ref": "#/definitions/ArrayOfModel"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -630,6 +801,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -669,9 +846,18 @@
             "schema": {
               "$ref": "#/definitions/Fields"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -680,6 +866,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -724,9 +916,18 @@
             "schema": {
               "$ref": "#/definitions/ScoreResponse"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -735,6 +936,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -778,9 +985,18 @@
             "schema": {
               "$ref": "#/definitions/ScoreResponse"
             }
+          },
+          "400": {
+            "description": "400 response"
+          },
+          "500": {
+            "description": "500 response"
           }
         },
         "security": [
+          {
+            "OAuthApiKeyAuthorizer": []
+          },
           {
             "api_key": []
           }
@@ -789,6 +1005,12 @@
           "responses": {
             "default": {
               "statusCode": "200"
+            },
+            "4\\d{2}": {
+              "statusCode": "400"
+            },
+            "5\\d{2}": {
+              "statusCode": "500"
             }
           },
           "requestParameters": {
@@ -803,6 +1025,17 @@
     }
   },
   "securityDefinitions": {
+    "OAuthApiKeyAuthorizer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header",
+      "x-amazon-apigateway-authtype": "custom",
+      "x-amazon-apigateway-authorizer": {
+        "authorizerUri": "arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-1:028036828464:function:ApiGateway_Authorizer/invocations",
+        "authorizerResultTtlInSeconds": 0,
+        "type": "token"
+      }
+    },
     "api_key": {
       "type": "apiKey",
       "name": "x-api-key",
@@ -851,54 +1084,17 @@
         }
       }
     },
+    "ArrayOfLeadEnrichmentAttribute": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/LeadEnrichmentAttribute"
+      }
+    },
     "EnrichResponse": {
       "type": "object",
       "properties": {
         "enrich_response_metadata": {
           "$ref": "#/definitions/EnrichResponseMetadata"
-        }
-      }
-    },
-    "RecordScoreResponse": {
-      "type": "object",
-      "required": [
-        "id",
-        "latticeID",
-        "timestamp"
-      ],
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Record ID"
-        },
-        "latticeID": {
-          "type": "string",
-          "description": "Lattice ID for record"
-        },
-        "scoreModelTuple": {
-          "type": "array",
-          "description": "List of score and model tuple",
-          "items": {
-            "$ref": "#/definitions/ScoreModelTuple"
-          }
-        },
-        "enrichmentAttributeValues": {
-          "type": "object",
-          "description": "Enrichment attribute values",
-          "additionalProperties": {
-            "type": "object",
-            "properties": {}
-          }
-        },
-        "warnings": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Warning"
-          }
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "The UTC timestamp of this score in ISO8601 format"
         }
       }
     },
@@ -942,10 +1138,146 @@
         }
       }
     },
-    "ArrayOfRecordScoreResponse": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/RecordScoreResponse"
+    "LeadEnrichmentAttribute": {
+      "type": "object",
+      "properties": {
+        "DisplayName": {
+          "type": "string"
+        },
+        "FieldName": {
+          "type": "string"
+        },
+        "FieldNameInTarget": {
+          "type": "string"
+        },
+        "FieldType": {
+          "type": "string"
+        },
+        "FieldJavaType": {
+          "type": "string"
+        },
+        "ColumnId": {
+          "type": "string"
+        },
+        "JavaClass": {
+          "type": "string"
+        },
+        "CustomerColumnName": {
+          "type": "string"
+        },
+        "DataSource": {
+          "type": "string"
+        },
+        "Description": {
+          "type": "string"
+        },
+        "IsSelected": {
+          "type": "boolean"
+        },
+        "IsPremium": {
+          "type": "boolean"
+        },
+        "Category": {
+          "type": "string"
+        },
+        "Subcategory": {
+          "type": "string"
+        },
+        "IsInternal": {
+          "type": "boolean"
+        },
+        "AttributeFlagsMap": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/JsonNode"
+          }
+        },
+        "ImportanceOrdering": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "FundamentalType": {
+          "type": "string"
+        }
+      }
+    },
+    "JsonNode": {
+      "type": "object",
+      "properties": {
+        "array": {
+          "type": "boolean"
+        },
+        "null": {
+          "type": "boolean"
+        },
+        "number": {
+          "type": "boolean"
+        },
+        "int": {
+          "type": "boolean"
+        },
+        "object": {
+          "type": "boolean"
+        },
+        "valueNode": {
+          "type": "boolean"
+        },
+        "containerNode": {
+          "type": "boolean"
+        },
+        "missingNode": {
+          "type": "boolean"
+        },
+        "pojo": {
+          "type": "boolean"
+        },
+        "integralNumber": {
+          "type": "boolean"
+        },
+        "floatingPointNumber": {
+          "type": "boolean"
+        },
+        "short": {
+          "type": "boolean"
+        },
+        "long": {
+          "type": "boolean"
+        },
+        "double": {
+          "type": "boolean"
+        },
+        "bigDecimal": {
+          "type": "boolean"
+        },
+        "bigInteger": {
+          "type": "boolean"
+        },
+        "textual": {
+          "type": "boolean"
+        },
+        "boolean": {
+          "type": "boolean"
+        },
+        "binary": {
+          "type": "boolean"
+        },
+        "nodeType": {
+          "type": "string",
+          "enum": [
+            "ARRAY",
+            "BINARY",
+            "BOOLEAN",
+            "MISSING",
+            "NULL",
+            "NUMBER",
+            "OBJECT",
+            "POJO",
+            "STRING"
+          ]
+        },
+        "float": {
+          "type": "boolean"
+        }
       }
     },
     "ScoreResponse": {
@@ -995,36 +1327,6 @@
             "type": "object",
             "properties": {}
           }
-        }
-      }
-    },
-    "ScoreModelTuple": {
-      "type": "object",
-      "properties": {
-        "probability": {
-          "type": "number",
-          "format": "double"
-        },
-        "modelId": {
-          "type": "string",
-          "description": "Model ID"
-        },
-        "score": {
-          "type": "integer",
-          "format": "int32",
-          "description": "Score"
-        },
-        "rating": {
-          "type": "string",
-          "description": "Bucket Information Based on Score"
-        },
-        "error": {
-          "type": "string",
-          "description": "Error"
-        },
-        "errorDescription": {
-          "type": "string",
-          "description": "ErrorDescription"
         }
       }
     },
@@ -1088,157 +1390,6 @@
         }
       }
     },
-    "JsonNode" : {
-      "type" : "object",
-      "properties" : {
-        "array" : {
-          "type" : "boolean"
-        },
-        "null" : {
-          "type" : "boolean"
-        },
-        "number" : {
-          "type" : "boolean"
-        },
-        "int" : {
-          "type" : "boolean"
-        },
-        "object" : {
-          "type" : "boolean"
-        },
-        "valueNode" : {
-          "type" : "boolean"
-        },
-        "containerNode" : {
-          "type" : "boolean"
-        },
-        "missingNode" : {
-          "type" : "boolean"
-        },
-        "pojo" : {
-          "type" : "boolean"
-        },
-        "integralNumber" : {
-          "type" : "boolean"
-        },
-        "floatingPointNumber" : {
-          "type" : "boolean"
-        },
-        "short" : {
-          "type" : "boolean"
-        },
-        "long" : {
-          "type" : "boolean"
-        },
-        "double" : {
-          "type" : "boolean"
-        },
-        "bigDecimal" : {
-          "type" : "boolean"
-        },
-        "bigInteger" : {
-          "type" : "boolean"
-        },
-        "textual" : {
-          "type" : "boolean"
-        },
-        "boolean" : {
-          "type" : "boolean"
-        },
-        "binary" : {
-          "type" : "boolean"
-        },
-        "nodeType" : {
-          "type" : "string",
-          "enum" : [ "ARRAY", "BINARY", "BOOLEAN", "MISSING", "NULL", "NUMBER", "OBJECT", "POJO", "STRING" ]
-        },
-        "float" : {
-          "type" : "boolean"
-        }
-      }
-    },
-    "LeadEnrichmentAttribute" : {
-      "type" : "object",
-      "properties" : {
-        "DisplayName" : {
-          "type" : "string"
-        },
-        "FieldName" : {
-          "type" : "string"
-        },
-        "FieldNameInTarget" : {
-          "type" : "string"
-        },
-        "FieldType" : {
-          "type" : "string"
-        },
-        "FieldJavaType" : {
-          "type" : "string"
-        },
-        "ColumnId" : {
-          "type" : "string"
-        },
-        "JavaClass" : {
-          "type" : "string"
-        },
-        "CustomerColumnName" : {
-          "type" : "string"
-        },
-        "DataSource" : {
-          "type" : "string"
-        },
-        "Description" : {
-          "type" : "string"
-        },
-        "IsSelected" : {
-          "type" : "boolean"
-        },
-        "IsPremium" : {
-          "type" : "boolean"
-        },
-        "Category" : {
-          "type" : "string"
-        },
-        "Subcategory" : {
-          "type" : "string"
-        },
-        "IsInternal" : {
-          "type" : "boolean"
-        },
-        "AttributeFlagsMap" : {
-          "type" : "object",
-          "additionalProperties" : {
-            "$ref" : "#/definitions/JsonNode"
-          }
-        },
-        "ImportanceOrdering" : {
-          "type" : "integer",
-          "format" : "int32"
-        },
-        "FundamentalType" : {
-          "type" : "string"
-        }
-      }
-    },
-    "BulkRecordScoreRequest": {
-      "type": "object",
-      "required": [
-        "records"
-      ],
-      "properties": {
-        "source": {
-          "type": "string",
-          "description": "Name of the source system that originated this score request."
-        },
-        "records": {
-          "type": "array",
-          "description": "List of records",
-          "items": {
-            "$ref": "#/definitions/Record"
-          }
-        }
-      }
-    },
     "ArrayOfModel": {
       "type": "array",
       "items": {
@@ -1293,41 +1444,6 @@
         "lastModifiedTimestamp": {
           "type": "string",
           "description": "Last modified timestamp in ISO8601 format "
-        }
-      }
-    },
-    "Record": {
-      "type": "object",
-      "required": [
-        "modelAttributeValuesMap"
-      ],
-      "properties": {
-        "recordId": {
-          "type": "string",
-          "description": "Record ID"
-        },
-        "idType": {
-          "type": "string",
-          "description": "Type of record ID"
-        },
-        "modelAttributeValuesMap": {
-          "type": "object",
-          "description": "Map of model ID and attributeValues. In attributeValues (Map < String, Object > ) for a corresponding model ID, field names and values should be specified. At the minimum, in case of lead type model, make sure to specify 'Email' field and for non-lead type model specify either 'Website' or 'Domain' fields. If these fields are not specified then specify both 'CompanyName' and 'State' fields",
-          "additionalProperties": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "properties": {}
-            }
-          }
-        },
-        "performEnrichment": {
-          "type": "boolean",
-          "description": "Should perform enrichment or not"
-        },
-        "rule": {
-          "type": "string",
-          "description": "Name of the rule that initiated score request for this record"
         }
       }
     },

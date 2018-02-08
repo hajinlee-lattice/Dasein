@@ -1,7 +1,5 @@
 package com.latticeengines.ulysses.controller;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.RequestEntity;
@@ -36,6 +34,7 @@ public class ApiGatewayResource {
         PlaymakerTenant oAuthTenant = oauth2RestApiProxy.getOAuthTenant(tenantName);
         
         GatewayPolicyConfiguration gwPolicyConfig = new GatewayPolicyConfiguration();
+        gwPolicyConfig.setPrincipal(tenantName);
         gwPolicyConfig.setApiKey(oAuthTenant.getGwApiKey());
         
         return gwPolicyConfig;
