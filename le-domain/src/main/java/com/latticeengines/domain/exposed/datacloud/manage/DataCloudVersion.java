@@ -46,6 +46,10 @@ public class DataCloudVersion implements HasPid, Serializable {
     @Column(name = "MajorVersion", nullable = false, length = 10)
     private String majorVersion;
 
+    @JsonProperty("RefreshVersion")
+    @Column(name = "RefreshVersion", nullable = false, length = 100)
+    private String refreshVersion;
+
     @JsonProperty("CreateDate")
     @Column(name = "CreateDate", nullable = false)
     private Date createDate;
@@ -126,6 +130,14 @@ public class DataCloudVersion implements HasPid, Serializable {
         this.majorVersion = majorVersion;
     }
 
+    public String getRefreshVersionVersion() {
+        return refreshVersion;
+    }
+
+    public void setRefreshVersion(String refreshVersion) {
+        this.refreshVersion = refreshVersion;
+    }
+
     public Date getCreateDate() {
         return createDate;
     }
@@ -188,5 +200,9 @@ public class DataCloudVersion implements HasPid, Serializable {
 
     public enum Mode {
         FULL, MINI
+    }
+
+    public String getDataCloudBuildNumber() {
+        return version + "." + refreshVersion;
     }
 }
