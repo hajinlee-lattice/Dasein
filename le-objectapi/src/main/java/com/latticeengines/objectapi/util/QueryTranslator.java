@@ -172,8 +172,11 @@ public class QueryTranslator {
                 }
             }
         }
-        queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
-                decorator.getFreeTextSearchAttrs());
+
+        if (decorator != null) {
+            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
+                    decorator.getFreeTextSearchAttrs());
+        }
 
         if (!BusinessEntity.Product.equals(mainEntity)) {
             if (frontEndQuery.getPageFilter() == null) {
