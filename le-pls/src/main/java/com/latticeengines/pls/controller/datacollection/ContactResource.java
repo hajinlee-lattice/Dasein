@@ -2,6 +2,8 @@ package com.latticeengines.pls.controller.datacollection;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +29,8 @@ import io.swagger.annotations.ApiOperation;
 @PreAuthorize("hasRole('View_PLS_CDL_Data')")
 public class ContactResource extends BaseFrontEndEntityResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ContactResource.class);
+
     @Inject
     public ContactResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
         super(entityProxy, segmentProxy, dataCollectionProxy);
@@ -40,10 +44,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     public Long getCount(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getCount(frontEndQuery);
-        } catch (LedpException e) {
-            throw e;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_36002, e);
+            log.error("Failed to get contact count", e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
     }
 
@@ -54,10 +57,9 @@ public class ContactResource extends BaseFrontEndEntityResource {
     public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
         try {
             return super.getData(frontEndQuery);
-        } catch (LedpException e) {
-            throw e;
         } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_36002, e);
+            log.error("Failed to get contact data", e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
     }
 

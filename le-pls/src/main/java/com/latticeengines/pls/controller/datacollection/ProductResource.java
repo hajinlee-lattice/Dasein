@@ -2,6 +2,8 @@ package com.latticeengines.pls.controller.datacollection;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
@@ -27,6 +31,8 @@ import io.swagger.annotations.ApiParam;
 @PreAuthorize("hasRole('View_PLS_CDL_Data')")
 public class ProductResource extends BaseFrontEndEntityResource {
 
+    private static final Logger log = LoggerFactory.getLogger(ProductResource.class);
+
     @Inject
     public ProductResource(EntityProxy entityProxy, SegmentProxy segmentProxy, DataCollectionProxy dataCollectionProxy) {
         super(entityProxy, segmentProxy, dataCollectionProxy);
@@ -42,12 +48,17 @@ public class ProductResource extends BaseFrontEndEntityResource {
             @ApiParam(value = "Maximum number of products in page")//
             @RequestParam(value = "max", required = false)//
             Integer max) {
-        FrontEndQuery query = new FrontEndQuery();
-        if (offset != null || max != null) {
-            offset = offset == null ? 0 : offset;
-            query.setPageFilter(new PageFilter(offset, max));
+        try {
+            FrontEndQuery query = new FrontEndQuery();
+            if (offset != null || max != null) {
+                offset = offset == null ? 0 : offset;
+                query.setPageFilter(new PageFilter(offset, max));
+            }
+            return super.getData(query);
+        } catch (Exception e) {
+            log.error("Failed to get product data", e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
-        return super.getData(query);
     }
 
     @Override
