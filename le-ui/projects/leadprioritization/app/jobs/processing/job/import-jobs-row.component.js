@@ -71,12 +71,17 @@ angular.module('lp.jobs.import.row', [])
             }
 
             $scope.getSubjobActionName = function (index, subjob) {
-                var name = index +'. '+ subjob.inputs.SOURCE_DISPLAY_NAME;
-                if (name.length > 40) {
-                    name = name.substring(0, 40);
-                    name = name + '...';
+                // var name = index +'. '+ subjob.inputs.SOURCE_DISPLAY_NAME;
+                // if (name.length > 40) {
+                //     name = name.substring(0, 40);
+                //     name = name + '...';
+                // }
+                // return name;
+                if (subjob.inputs != undefined) {
+                    return index + '. ' + subjob.inputs.SOURCE_DISPLAY_NAME;
+                } else {
+                    return index + '. Unknown';
                 }
-                return name;
             }
 
             $scope.isOneActionCompleted = function () {

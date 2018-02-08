@@ -10,10 +10,9 @@
     </span>
 </div>
 <div class="le-cell le-col-start-5 le-col-span-1">
-    <span>
+    <span ng-class="getSubJobsPartialSuccess().length > 0 ? 'le-tooltip' : ''">
         {{getActionsCount()}}
-        <span class="le-tooltip" ng-if="getSubJobsPartialSuccess().length > 0">
-            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true">
+            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0">
                 <div class="tooltip-content">
                     <h3>Partial Success</h3>
                     <p>The following actions are partially validated and will not be taken into data processing:</p>
@@ -23,8 +22,6 @@
                     </ol>
                 </div>
             </i>
-        </span>
-
     </span>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">

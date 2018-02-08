@@ -40,7 +40,7 @@ section.import-jobs {
 }
 
 .le-tooltip {
-    position:relative;
+    position:absolute;
 }
 
 .le-tooltip .tooltip-content {
@@ -48,14 +48,14 @@ section.import-jobs {
     visibility: hidden;
     opacity: 0;  
     border-radius: 10px;
-    padding: 20px;
+    padding: 18px;
     transition: visibility 1s ease-in;
 }
 .le-tooltip:hover .tooltip-content {
     visibility: visible;
     opacity: 1;
     display:block;
-    position:fixed;
+    position:absolute;
     overflow:hidden;
     z-index: 999;
     background-color: #4A4A4A;
@@ -71,7 +71,7 @@ section.import-jobs {
     transform: translate(-40%, -103%);
     h3{
         color: white;
-        font-size: 12px;
+        font-size: 14px;
         font-weight: bold;
         padding-bottom: 5px;
 
@@ -79,11 +79,16 @@ section.import-jobs {
     p{
         color: white;
         padding-bottom: 8px;
+        font-size: 12px;
     }
     li {
-        font-size: 10px;
+        font-size: 11px;
         padding-top: 2px;
         padding-bottom: 2px;
+        width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
    
 }
