@@ -179,20 +179,6 @@
         </Engine>
     </Service>
 
-    <Service name="Job">
-        <Connector port="8077" protocol="HTTP/1.1" connectionTimeout="20000"
-                   compression="on"
-                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
-        <Engine name="JobEngine" defaultHost="localhost">
-            <Realm className="org.apache.catalina.realm.LockOutRealm">
-                <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
-                       resourceName="UserDatabase"/>
-            </Realm>
-            <Host name="localhost" appBase="webapps/job" unpackWARs="true" autoDeploy="true"
-                  undeployOldVersions="true"/>
-        </Engine>
-    </Service>
-
     <Service name="MS">
         <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000"
                    compression="on"
