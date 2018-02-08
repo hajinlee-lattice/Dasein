@@ -1,5 +1,7 @@
 package com.latticeengines.app.exposed.controller;
 
+import static com.latticeengines.domain.exposed.exception.LedpCode.LEDP_36002;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
@@ -35,7 +38,11 @@ public class DataLakeAttributeResource {
     @ResponseBody
     @ApiOperation(value = "Get number of attributes")
     public long getAttributesCount() {
-        return dataLakeService.getAttributesCount();
+        try {
+            return dataLakeService.getAttributesCount();
+        } catch (Exception e) {
+            throw new LedpException(LEDP_36002);
+        }
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -48,14 +55,22 @@ public class DataLakeAttributeResource {
                                                 @ApiParam(value = "Maximum number of matching attributes in page")//
                                                 @RequestParam(value = "max", required = false)//
                                                         Integer max) {
-        return dataLakeService.getAttributes(offset, max);
+        try {
+            return dataLakeService.getAttributes(offset, max);
+        } catch (Exception e) {
+            throw new LedpException(LEDP_36002);
+        }
     }
 
     @RequestMapping(value = "/predefined/{groupName}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get list of attributes in a group")
     public List<ColumnMetadata> getAttributesInPredefinedGroup(@PathVariable ColumnSelection.Predefined groupName) {
-        return dataLakeService.getAttributesInPredefinedGroup(groupName);
+        try {
+            return dataLakeService.getAttributesInPredefinedGroup(groupName);
+        } catch (Exception e) {
+            throw new LedpException(LEDP_36002);
+        }
     }
 
 }
