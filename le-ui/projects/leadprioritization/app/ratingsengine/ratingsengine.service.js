@@ -877,7 +877,7 @@ angular.module('lp.ratingsengine')
 
         $http({
             method: 'POST',
-            url: '/pls/models/rating/'+modelid,
+            url: '/pls/ratingengines/'+ratingid+'/ratingmodels/'+modelid+'/model',
             data: opts
         }).then(
             function(response){
