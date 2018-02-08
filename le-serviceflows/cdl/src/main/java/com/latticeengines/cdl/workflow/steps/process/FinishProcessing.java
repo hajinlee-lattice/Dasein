@@ -237,14 +237,18 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
         return owner;
     }
 
-    private ObjectNode updateReport(ObjectNode report) {
+    private void updateReport(ObjectNode report) {
         Map<BusinessEntity, Long> previousCnts = retrievePreviousEntityCnts();
         Map<BusinessEntity, Long> currentCnts = retrieveCurrentEntityCnts();
 
 
-        ObjectNode entitiesSummaryNode = (ObjectNode)report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
-        BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
-                BusinessEntity.Transaction };
+        ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        if (entitiesSummaryNode == null) {
+            log.info("No entity summary reports found.");
+            return;
+        }
+        BusinessEntity[] entities = {BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
+                BusinessEntity.Transaction};
         for (BusinessEntity entity : entities) {
             ObjectNode entityNode = entitiesSummaryNode.get(entity.name()) != null
                     ? (ObjectNode) entitiesSummaryNode.get(entity.name())
@@ -261,7 +265,6 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
             entitiesSummaryNode.set(entity.name(), entityNode);
         }
-        return report;
     }
 
     private ObjectNode initEntityReport(BusinessEntity entity) {
