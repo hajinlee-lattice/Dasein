@@ -59,7 +59,6 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         importData();
         processAnalyze();
         verifyProcess();
-        verifyConsolidateReport(processAnalyzeAppId, null);
     }
 
     private void importData() throws Exception {
@@ -77,6 +76,8 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
     private void verifyProcess() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
+
+        verifyProcessAnalyzeReport(processAnalyzeAppId, null);
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");

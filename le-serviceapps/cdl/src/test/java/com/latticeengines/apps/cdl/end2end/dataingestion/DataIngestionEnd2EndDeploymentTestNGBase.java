@@ -457,18 +457,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return checkpointService.countInRedshift(entity);
     }
 
-    void verifyFirstProfileCheckpoint() throws IOException {
-        checkpointService.verifyFirstProfileCheckpoint();
-    }
-
-    void verifySecondConsolidateCheckpoint() throws IOException {
-        checkpointService.verifySecondConsolidateCheckpoint();
-    }
-
-    void verifySecondProfileCheckpoint() throws IOException {
-        checkpointService.verifySecondProfileCheckpoint();
-    }
-
     void resumeVdbCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_VDB);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
@@ -481,25 +469,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     void saveCheckpoint(String checkpoint) throws IOException {
         checkpointService.saveCheckPoint(checkpoint);
-    }
-
-    boolean exportEntityToRedshift(BusinessEntity entity) {
-        TableRoleInCollection role = entity.getServingStore();
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role);
-
-        logger.info("Started exporting " + role + " to redshift ...");
-        ExportConfiguration exportConfiguration = setupExportConfig(table, table.getName(), role);
-        AppSubmission submission = eaiProxy.submitEaiJob(exportConfiguration);
-        int timeout = new Long(TimeUnit.MINUTES.toSeconds(60)).intValue();
-        logger.info("Waiting for " + submission.getApplicationIds().get(0));
-        Level jobServiceLogLevel = LogManager.getLogger(JobServiceImpl.class).getLevel();
-        LogManager.getLogger(JobServiceImpl.class).setLevel(Level.WARN);
-        try (PerformanceTimer timer = new PerformanceTimer("Finished exporting " + role + " to redshift.")) {
-            JobStatus completedStatus = jobService.waitFinalJobStatus(submission.getApplicationIds().get(0), timeout);
-            LogManager.getLogger(JobServiceImpl.class).setLevel(jobServiceLogLevel);
-            Assert.assertEquals(completedStatus.getStatus(), FinalApplicationStatus.SUCCEEDED);
-        }
-        return true;
     }
 
     // Copied from ExportDataToRedshift
@@ -539,7 +508,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return exportConfig;
     }
 
-    List<Report> retrieveReport(String appId) {
+    private List<Report> retrieveReport(String appId) {
         Job job = testBed.getRestTemplate().getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", deployedHostPort, appId), //
                 Job.class);
@@ -557,21 +526,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
     }
 
-    void verifyConsolidateReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
+    void verifyProcessAnalyzeReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
         List<Report> reports = retrieveReport(appId);
         assertEquals(reports.size(), 2);
         Report summaryReport = reports.get(0);
         verifyConsolidateSummaryReport(summaryReport);
         Report publishReport = reports.get(1);
         // verifyExportToRedshiftReport(publishReport, expectedCounts); Will resume later
-    }
-
-    void verifyProfileReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
-        List<Report> reports = retrieveReport(appId);
-        logger.info("Profil reports size " + reports.size());
-        assertEquals(reports.size(), 1);
-        Report publishReport = reports.get(0);
-        verifyExportToRedshiftReport(publishReport, expectedCounts);
     }
 
     void verifyConsolidateSummaryReport(Report summaryReport) {
