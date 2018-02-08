@@ -1,11 +1,11 @@
 package com.latticeengines.app.exposed.controller;
 
-import static com.latticeengines.domain.exposed.exception.LedpCode.LEDP_36002;
-
 import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.app.exposed.service.DataLakeService;
+import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -26,6 +27,8 @@ import io.swagger.annotations.ApiParam;
 @RestController
 @RequestMapping("/datacollection/attributes")
 public class DataLakeAttributeResource {
+
+    private static final Logger log = LoggerFactory.getLogger(DataLakeAttributeResource.class);
 
     private final DataLakeService dataLakeService;
 
@@ -41,7 +44,8 @@ public class DataLakeAttributeResource {
         try {
             return dataLakeService.getAttributesCount();
         } catch (Exception e) {
-            throw new LedpException(LEDP_36002);
+            log.error("Failed to get attribute count", e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
     }
 
@@ -58,7 +62,8 @@ public class DataLakeAttributeResource {
         try {
             return dataLakeService.getAttributes(offset, max);
         } catch (Exception e) {
-            throw new LedpException(LEDP_36002);
+            log.error("Failed to get attributes", e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
     }
 
@@ -69,7 +74,8 @@ public class DataLakeAttributeResource {
         try {
             return dataLakeService.getAttributesInPredefinedGroup(groupName);
         } catch (Exception e) {
-            throw new LedpException(LEDP_36002);
+            log.error("Failed to get attributes in predefined group " + groupName, e);
+            throw new LedpException(LedpCode.LEDP_36002);
         }
     }
 
