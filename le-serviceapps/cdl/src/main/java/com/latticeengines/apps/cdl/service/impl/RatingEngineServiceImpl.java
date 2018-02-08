@@ -124,7 +124,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate,
             boolean populateActiveModel) {
         Tenant tenant = MultiTenantContext.getTenant();
-        RatingEngine ratingEngine = null;
+        RatingEngine ratingEngine;
         if (populateActiveModel) {
             ratingEngine = ratingEngineEntityMgr.findById(ratingEngineId, true);
         } else {
@@ -224,7 +224,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (ratingModel instanceof AIModel) {
             ApplicationId jobId = ((AIModel) ratingModel).getModelingJobId();
             if (jobId == null) {
-                internalResourceProxy.setModelSummaryDownloadFlag(tenantId);
+                internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(tenantId).toString());
                 RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
                 parameters.setName(ratingModel.getId());
                 parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
@@ -233,10 +233,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 parameters.setUserId(MultiTenantContext.getEmailAddress());
                 parameters.setTargetFilterQuery(
                         getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.TARGET));
+                parameters.setTargetFilterTableName(ratingModel.getId() + "_target");
                 parameters.setTrainFilterQuery(
                         getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.TRAINING));
+                parameters.setTrainFilterTableName(ratingModel.getId() + "_train");
                 parameters.setEventFilterQuery(
                         getModelingQuery(tenantId, ratingEngine, ratingModel, ModelingQueryType.EVENT));
+                parameters.setEventFilterTableName(ratingModel.getId() + "_event");
 
                 if (((AIModel) ratingModel).getPredictionType() == PredictionType.EXPECTED_VALUE) {
                     parameters.setExpectedValue(true);

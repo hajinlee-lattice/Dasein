@@ -51,13 +51,11 @@ public class RatingEngineResource {
 
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService,
-                                RatingEngineNoteService ratingEngineNoteService,
-                                RatingCoverageService ratingCoverageService) {
+            RatingEngineNoteService ratingEngineNoteService, RatingCoverageService ratingCoverageService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
         this.ratingCoverageService = ratingCoverageService;
     }
-
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -197,12 +195,12 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
-    public String modelRatingEngine(@PathVariable String tenantId, @PathVariable String ratingEngineId,
+    public String modelRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
-        RatingEngine ratingEngine = getRatingEngine(tenantId, ratingEngineId);
-        RatingModel ratingModel = getRatingModel(tenantId, ratingEngineId, ratingModelId);
+        RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
+        RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 
-        return ratingEngineService.modelRatingEngine(tenantId, ratingEngine, ratingModel);
+        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, ratingModel);
     }
 
     @PostMapping(value = "/coverage")

@@ -50,8 +50,7 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds); // Doesn't
-        // matter
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds);
         Bucket.Transaction txn;
         if (aiModel.getModelingStrategy() == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             ModelingConfigFilter config = aiModel.getModelingConfigFilters()

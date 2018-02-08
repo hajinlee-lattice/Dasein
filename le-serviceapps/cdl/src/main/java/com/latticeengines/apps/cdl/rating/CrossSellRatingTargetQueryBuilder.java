@@ -21,23 +21,19 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
 
     @Override
     protected void handleCustomSegment() {
-        // Do Nothing
     }
 
     @Override
     protected void handleProxyProducts() {
-        // Do Nothing
     }
 
     @Override
     protected void removeTimeWindowRestrictions() {
-        // Do Nothing
     }
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds); // Doesn't
-        // matter
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds);
         Bucket.Transaction txn;
         if (aiModel.getModelingStrategy() == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
             ModelingConfigFilter config = aiModel.getModelingConfigFilters()

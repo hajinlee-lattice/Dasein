@@ -15,6 +15,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToOne;
 
+import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -172,7 +173,7 @@ public class AIModel extends RatingModel {
 
     @JsonProperty("modelingConfigFilters")
     public Map<ModelingConfig, ModelingConfigFilter> getModelingConfigFilters() {
-        Map<ModelingConfig, ModelingConfigFilter> filters = null;
+        Map<ModelingConfig, ModelingConfigFilter> filters = new HashedMap<>();
         if (StringUtils.isNotBlank(this.modelingConfigFilters)) {
             Map<?, ?> attrListIntermediate = JsonUtils.deserialize(this.modelingConfigFilters, Map.class);
             filters = JsonUtils.convertMap(attrListIntermediate, ModelingConfig.class, ModelingConfigFilter.class);
