@@ -1617,8 +1617,8 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.sun.jersey</groupId>
-                        <artifactId>jersey-server</artifactId>
+                        <groupId>asm</groupId>
+                        <artifactId>asm</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -1660,8 +1660,8 @@
                         <artifactId>commons-logging</artifactId>
                     </exclusion>
                     <exclusion>
-                        <groupId>com.sun.jersey</groupId>
-                        <artifactId>jersey-server</artifactId>
+                        <groupId>asm</groupId>
+                        <artifactId>asm</artifactId>
                     </exclusion>
                     <exclusion>
                         <groupId>com.squareup.okhttp</groupId>
