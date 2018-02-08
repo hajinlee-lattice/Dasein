@@ -171,9 +171,9 @@ public class QueryTranslator {
                     appendRuleLookups(frontEndQuery, queryBuilder);
                 }
             }
-            queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
-                    decorator.getFreeTextSearchAttrs());
         }
+        queryBuilder.freeText(frontEndQuery.getFreeFormTextSearch(), decorator.getFreeTextSearchEntity(),
+                decorator.getFreeTextSearchAttrs());
 
         if (!BusinessEntity.Product.equals(mainEntity)) {
             if (frontEndQuery.getPageFilter() == null) {
