@@ -105,6 +105,7 @@ import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
+import com.latticeengines.pls.workflow.RatingEngineBucketBuilder;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -769,8 +770,35 @@ public class InternalResource extends InternalResourceBase {
     @RequestMapping(value = "/bucketmetadata/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create default abcd scored buckets")
-    public List<BucketMetadata> createDefaultABCDBuckets(@PathVariable String modelId, @RequestBody String userId,
-            HttpServletRequest request) throws Exception {
+    public List<BucketMetadata> createDefaultABCDBuckets(@PathVariable String modelId,
+            @RequestParam(value = "cdl", required = false, defaultValue = "false") boolean cdl, //
+            @RequestParam(value = "expectedValue", required = false, defaultValue = "false") boolean expectedValue, //
+            @RequestParam(value = "liftChart", required = false, defaultValue = "false") boolean liftChart, //
+            @RequestBody String userId, HttpServletRequest request) throws Exception {
+
+        BucketName bucketNameA = BucketName.A;
+        BucketName bucketNameB = BucketName.B;
+        BucketName bucketNameC = BucketName.C;
+        BucketName bucketNameD = BucketName.D;
+        Integer bucket0 = BUCKET_0;
+        Integer bucket1 = BUCKET_1;
+        Integer bucket2 = BUCKET_2;
+        Integer bucket3 = BUCKET_3;
+        Integer bucket4 = BUCKET_4;
+        if (cdl) {
+            List<BucketMetadata> metaDatas = new RatingEngineBucketBuilder().build(expectedValue, liftChart);
+            bucketNameA = metaDatas.get(0).getBucket();
+            bucketNameB = metaDatas.get(1).getBucket();
+            bucketNameC = metaDatas.get(2).getBucket();
+            bucketNameD = metaDatas.get(3).getBucket();
+            bucket0 = metaDatas.get(0).getLeftBoundScore();
+            bucket1 = metaDatas.get(1).getLeftBoundScore();
+            bucket2 = metaDatas.get(2).getLeftBoundScore();
+            bucket3 = metaDatas.get(3).getLeftBoundScore();
+            bucket4 = metaDatas.get(3).getRightBoundScore();
+            log.info("Creating abcd buckets for Cdl.");
+        }
+
         BucketMetadata bucketMetadata1 = new BucketMetadata();
         BucketMetadata bucketMetadata2 = new BucketMetadata();
         BucketMetadata bucketMetadata3 = new BucketMetadata();
@@ -785,59 +813,59 @@ public class InternalResource extends InternalResourceBase {
         BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
         Double overallLift = bucketedScoreSummary.getOverallLift();
 
-        bucketMetadata1.setBucket(BucketName.A);
-        bucketMetadata1.setLeftBoundScore(BUCKET_0);
-        bucketMetadata1.setRightBoundScore(BUCKET_1);
+        bucketMetadata1.setBucket(bucketNameA);
+        bucketMetadata1.setLeftBoundScore(bucket0);
+        bucketMetadata1.setRightBoundScore(bucket1);
         bucketMetadata1.setLastModifiedByUser(userId);
-        bucketMetadata1.setNumLeads(
-                bucketedScores[BUCKET_1 - 1].getLeftNumLeads() - bucketedScores[BUCKET_0].getLeftNumLeads());
+        bucketMetadata1
+                .setNumLeads(bucketedScores[bucket1 - 1].getLeftNumLeads() - bucketedScores[bucket0].getLeftNumLeads());
         if (bucketMetadata1.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata1.setLift(0);
         } else {
-            bucketMetadata1.setLift(((bucketedScores[BUCKET_1 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_0].getLeftNumConverted()) / (double) bucketMetadata1.getNumLeads())
-                    / overallLift);
+            bucketMetadata1.setLift(
+                    ((bucketedScores[bucket1 - 1].getLeftNumConverted() - bucketedScores[bucket0].getLeftNumConverted())
+                            / (double) bucketMetadata1.getNumLeads()) / overallLift);
         }
 
-        bucketMetadata2.setBucket(BucketName.B);
-        bucketMetadata2.setLeftBoundScore(BUCKET_1 - 1);
-        bucketMetadata2.setRightBoundScore(BUCKET_2);
+        bucketMetadata2.setBucket(bucketNameB);
+        bucketMetadata2.setLeftBoundScore(bucket1 - 1);
+        bucketMetadata2.setRightBoundScore(bucket2);
         bucketMetadata2.setLastModifiedByUser(userId);
         bucketMetadata2.setNumLeads(
-                bucketedScores[BUCKET_2 - 1].getLeftNumLeads() - bucketedScores[BUCKET_1 - 1].getLeftNumLeads());
+                bucketedScores[bucket2 - 1].getLeftNumLeads() - bucketedScores[bucket1 - 1].getLeftNumLeads());
         if (bucketMetadata2.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata2.setLift(0);
         } else {
-            bucketMetadata2.setLift(((bucketedScores[BUCKET_2 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_1 - 1].getLeftNumConverted()) / (double) bucketMetadata2.getNumLeads())
+            bucketMetadata2.setLift(((bucketedScores[bucket2 - 1].getLeftNumConverted()
+                    - bucketedScores[bucket1 - 1].getLeftNumConverted()) / (double) bucketMetadata2.getNumLeads())
                     / overallLift);
         }
 
-        bucketMetadata3.setBucket(BucketName.C);
-        bucketMetadata3.setLeftBoundScore(BUCKET_2 - 1);
-        bucketMetadata3.setRightBoundScore(BUCKET_3);
+        bucketMetadata3.setBucket(bucketNameC);
+        bucketMetadata3.setLeftBoundScore(bucket2 - 1);
+        bucketMetadata3.setRightBoundScore(bucket3);
         bucketMetadata3.setLastModifiedByUser(userId);
         bucketMetadata3.setNumLeads(
-                bucketedScores[BUCKET_3 - 1].getLeftNumLeads() - bucketedScores[BUCKET_2 - 1].getLeftNumLeads());
+                bucketedScores[bucket3 - 1].getLeftNumLeads() - bucketedScores[bucket2 - 1].getLeftNumLeads());
         if (bucketMetadata3.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata3.setLift(0);
         } else {
-            bucketMetadata3.setLift(((bucketedScores[BUCKET_3 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_2 - 1].getLeftNumConverted()) / (double) bucketMetadata3.getNumLeads())
+            bucketMetadata3.setLift(((bucketedScores[bucket3 - 1].getLeftNumConverted()
+                    - bucketedScores[bucket2 - 1].getLeftNumConverted()) / (double) bucketMetadata3.getNumLeads())
                     / overallLift);
         }
 
-        bucketMetadata4.setBucket(BucketName.D);
-        bucketMetadata4.setLeftBoundScore(BUCKET_3 - 1);
-        bucketMetadata4.setRightBoundScore(BUCKET_4);
+        bucketMetadata4.setBucket(bucketNameD);
+        bucketMetadata4.setLeftBoundScore(bucket3 - 1);
+        bucketMetadata4.setRightBoundScore(bucket4);
         bucketMetadata4.setLastModifiedByUser(userId);
         bucketMetadata4.setNumLeads(
-                bucketedScores[BUCKET_4 - 1].getLeftNumLeads() - bucketedScores[BUCKET_3 - 1].getLeftNumLeads());
+                bucketedScores[bucket4 - 1].getLeftNumLeads() - bucketedScores[bucket3 - 1].getLeftNumLeads());
         if (bucketMetadata4.getNumLeads() == 0 || overallLift == 0) {
             bucketMetadata4.setLift(0);
         } else {
-            bucketMetadata4.setLift(((bucketedScores[BUCKET_4 - 1].getLeftNumConverted()
-                    - bucketedScores[BUCKET_3 - 1].getLeftNumConverted()) / (double) bucketMetadata4.getNumLeads())
+            bucketMetadata4.setLift(((bucketedScores[bucket4 - 1].getLeftNumConverted()
+                    - bucketedScores[bucket3 - 1].getLeftNumConverted()) / (double) bucketMetadata4.getNumLeads())
                     / overallLift);
         }
 

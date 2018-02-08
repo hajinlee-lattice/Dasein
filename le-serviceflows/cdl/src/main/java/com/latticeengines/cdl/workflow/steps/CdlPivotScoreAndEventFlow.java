@@ -57,8 +57,9 @@ public class CdlPivotScoreAndEventFlow extends RunDataFlow<CdlPivotScoreAndEvent
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
         try {
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy
-                    .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId());
+            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
+                    getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), true,
+                    false, false);
 
             log.info(String.format("Created A bucket (%s - %s) with %s leads and %s lift,"
                     + "B bucket (%s - %s) with %s leads and %s lift," + "C bucket (%s - %s) with %s leads and %s lift,"

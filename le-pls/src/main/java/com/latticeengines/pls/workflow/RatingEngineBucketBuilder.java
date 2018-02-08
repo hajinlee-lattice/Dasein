@@ -35,7 +35,8 @@ public class RatingEngineBucketBuilder {
             buckets.add(addBucket(95, 85, BucketName.A));
             buckets.add(addBucket(85, 75, BucketName.B));
             buckets.add(addBucket(75, 50, BucketName.C));
-            buckets.add(addBucket(50, 0, BucketName.D));
+            buckets.add(addBucket(50, 5, BucketName.D)); // TODO: playmaker 50,
+                                                         // 0
             return buckets;
         }
         return buckets;

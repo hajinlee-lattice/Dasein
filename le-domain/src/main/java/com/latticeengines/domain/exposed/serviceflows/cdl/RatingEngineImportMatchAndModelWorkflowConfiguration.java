@@ -283,6 +283,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder liftChart(boolean liftChart) {
             combineInputWithScores.setLiftChart(liftChart);
+            pivotScoreAndEvent.setLiftChart(liftChart);
             return this;
         }
 

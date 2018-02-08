@@ -376,9 +376,11 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public List<BucketMetadata> createDefaultABCDBuckets(String modelId, String userId) {
+    public List<BucketMetadata> createDefaultABCDBuckets(String modelId, String userId, boolean cdl,
+            boolean expectedValue, boolean liftChart) {
         try {
             String url = constructUrl("pls/internal/bucketmetadata", modelId);
+            url = url + String.format("?cdl=%b&expectedValue=%b&liftChart=%b", cdl, expectedValue, liftChart);
             List<?> abcdBuckets = restTemplate.postForObject(url, userId, List.class);
             return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
         } catch (Exception e) {

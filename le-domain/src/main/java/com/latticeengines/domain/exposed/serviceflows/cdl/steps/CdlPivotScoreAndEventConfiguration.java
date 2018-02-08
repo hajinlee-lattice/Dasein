@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 public class CdlPivotScoreAndEventConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private boolean expectedValue;
+    private boolean liftChart;
 
     public CdlPivotScoreAndEventConfiguration() {
         setBeanName("cdlPivotScoreAndEvent");
@@ -14,6 +15,14 @@ public class CdlPivotScoreAndEventConfiguration extends BaseCDLDataFlowStepConfi
 
     public void setExpectedValue(boolean expectedValue) {
         this.expectedValue = expectedValue;
+    }
+
+    public boolean isLiftChart() {
+        return liftChart;
+    }
+
+    public void setLiftChart(boolean liftChart) {
+        this.liftChart = liftChart;
     }
 
 }
