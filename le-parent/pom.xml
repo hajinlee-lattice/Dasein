@@ -76,8 +76,7 @@
         <jackson.fasterxml.version>2.9.2</jackson.fasterxml.version>
         <jackson.codehaus.version>1.9.13</jackson.codehaus.version> <!-- spring-security-oauth2 2.1.1.RELEASE -->
         <hibernate.version>5.2.12.Final</hibernate.version>
-        <!-- hibernate.jpa.version>1.0.1.Final</hibernate.jpa.version-->
-        <jetty.version>9.3.14.v20161028</jetty.version> <!-- camel-salesforce 2.19.1 -->
+        <jetty.version>9.3.22.v20171030</jetty.version> <!-- camel-salesforce 2.19.1 -->
         <javax.servlet.version>3.1.0</javax.servlet.version> <!-- just keep up with tomcat version -->
         <javax.jsp.version>2.2</javax.jsp.version> <!-- just keep up with tomcat version -->
         <redshift.jdbc.version>1.2.8.1005</redshift.jdbc.version> <!-- we upload to nexus -->
