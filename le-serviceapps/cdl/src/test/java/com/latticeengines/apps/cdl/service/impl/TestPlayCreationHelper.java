@@ -7,11 +7,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -19,6 +20,8 @@ import org.testng.Assert;
 
 import com.latticeengines.apps.cdl.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -40,8 +43,6 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -50,22 +51,22 @@ public class TestPlayCreationHelper {
 
     private static final Logger log = LoggerFactory.getLogger(TestPlayCreationHelper.class);
 
-    @Autowired
-    @Qualifier(value = "deploymentTestBed")
-    protected GlobalAuthDeploymentTestBed deploymentTestBed;
+    @Resource(name = "deploymentTestBed")
+    private GlobalAuthDeploymentTestBed deploymentTestBed;
 
-    @Autowired
+    @Inject
     private PlayResourceDeploymentTestNG playResourceDeploymentTestNG;
 
-    @Autowired
+    @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
-    @Autowired
+
+    @Inject
     private SegmentService segmentService;
 
-    @Autowired
+    @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Autowired
+    @Inject
     private CDLTestDataService cdlTestDataService;
 
     private String tenantIdentifier;

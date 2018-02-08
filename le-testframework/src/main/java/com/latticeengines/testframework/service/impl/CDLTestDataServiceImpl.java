@@ -39,14 +39,15 @@ import com.latticeengines.testframework.exposed.service.TestArtifactService;
 public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private static final String S3_DIR = "le-testframework/cdl";
-    private static final String S3_VERSION = "1";
+    private static final String S3_VERSION = "2";
     private static final Date DATE = new Date();
 
     private static final ImmutableMap<BusinessEntity, String> srcTables = ImmutableMap.of( //
-            BusinessEntity.Account, "query_test_account2", //
-            BusinessEntity.Contact, "query_test_contact2", //
-            BusinessEntity.Product, "query_test_product2", //
-            BusinessEntity.Transaction, "query_test_transaction2" //
+            BusinessEntity.Account, "cdl_test_account_2", //
+            BusinessEntity.Contact, "cdl_test_contact_2", //
+            BusinessEntity.Product, "cdl_test_product_2", //
+            BusinessEntity.Transaction, "cdl_test_transaction_2", //
+            BusinessEntity.PeriodTransaction, "cdl_test_period_transaction_2" //
     );
 
     private final TestArtifactService testArtifactService;
@@ -137,7 +138,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 BusinessEntity.Account, //
                 BusinessEntity.Contact, //
                 BusinessEntity.Product, //
-                BusinessEntity.Transaction //
+                BusinessEntity.Transaction, //
+                BusinessEntity.PeriodTransaction
         ).contains(entity)) {
             String customerSpace = CustomerSpace.parse(tenantId).toString();
             Table table = readTableFromS3(tenantId, entity);
