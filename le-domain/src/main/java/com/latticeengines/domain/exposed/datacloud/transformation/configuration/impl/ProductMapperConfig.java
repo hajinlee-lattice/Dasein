@@ -10,6 +10,7 @@ public class ProductMapperConfig extends TransformerConfig {
 
     @JsonProperty("ProductField")
     private String productField;
+
     @JsonProperty("ProductMap")
     private Map<String, Product> productMap;
 

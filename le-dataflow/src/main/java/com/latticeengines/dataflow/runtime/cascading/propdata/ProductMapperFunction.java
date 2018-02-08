@@ -27,7 +27,7 @@ public class ProductMapperFunction extends BaseOperation implements Function {
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String productId = arguments.getString(productField).toString();
+        String productId = arguments.getString(productField);
         Product product = productMap.get(productId);
         if ((product != null) && (product.getBundleId() != null)) {
             productId = product.getBundleId();
