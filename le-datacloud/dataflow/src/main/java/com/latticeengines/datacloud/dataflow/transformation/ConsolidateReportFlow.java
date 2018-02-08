@@ -63,6 +63,8 @@ public class ConsolidateReportFlow
             break;
         case Transaction:
             totalReport = reportTotal(source);
+            totalReport = totalReport.discard(REPORT_TOPIC).addColumnWithFixedValue(REPORT_TOPIC, REPORT_TOPIC_NEW,
+                    String.class); // All the rows are NEW for current consolidation of transaction
             reports.add(totalReport);
             break;
         default:

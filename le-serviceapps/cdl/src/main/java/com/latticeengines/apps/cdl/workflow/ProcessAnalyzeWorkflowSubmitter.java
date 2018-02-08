@@ -130,6 +130,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         String currentDataCloudBuildNumber = "";
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                 actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
+
         return workflowJobService.submit(configuration);
     }
 

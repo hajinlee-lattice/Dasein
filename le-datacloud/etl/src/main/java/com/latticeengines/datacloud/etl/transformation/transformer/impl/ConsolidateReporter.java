@@ -89,7 +89,7 @@ public class ConsolidateReporter
         ObjectNode json = JsonUtils.createObjectNode();
         json.put(ConsolidateReportFlow.REPORT_TOPIC_NEW, "0");
         json.put(ConsolidateReportFlow.REPORT_TOPIC_UPDATE, "0");
-        json.put(ConsolidateReportFlow.REPORT_TOPIC_UPDATE, "0");
+        json.put(ConsolidateReportFlow.REPORT_TOPIC_UNMATCH, "0");
         return json;
     }
 
@@ -109,7 +109,7 @@ public class ConsolidateReporter
 
     private ObjectNode getDefaultTransactionReportItems() {
         ObjectNode json = JsonUtils.createObjectNode();
-        json.put(ConsolidateReportFlow.REPORT_TOPIC_TOTAL, "0");
+        json.put(ConsolidateReportFlow.REPORT_TOPIC_NEW, "0");
         return json;
     }
 

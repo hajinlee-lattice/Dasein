@@ -59,6 +59,7 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         importData();
         processAnalyze();
         verifyProcess();
+        verifyConsolidateReport(processAnalyzeAppId, null);
     }
 
     private void importData() throws Exception {
@@ -108,5 +109,4 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
         verifyUpdateActions();
     }
-
 }

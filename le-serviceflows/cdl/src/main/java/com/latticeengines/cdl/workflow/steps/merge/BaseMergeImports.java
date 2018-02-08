@@ -204,7 +204,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
                 consolidateSummaryNode = ((ObjectNode) entityNode)
                         .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             }
-            ((ObjectNode) consolidateSummaryNode).setAll(newItem);
+            ((ObjectNode) consolidateSummaryNode).setAll((ObjectNode) newItem.get(entity.name()));
 
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
