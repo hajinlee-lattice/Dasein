@@ -23,7 +23,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.blur = true;
             scope.showQueryList = false;
             scope.id = scope.itemId || scope.itemName || scope.name || scope.ProductId;
-            scope.displayName = scope.displayname || 'displayName';
+            scope.displayName = scope.displayname;
             scope.queryItems = scope.datasource;
             scope.queryscope = scope.queryScope;
 
@@ -103,9 +103,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     if (scope.chips[item[scope.id]] === undefined) {
                         scope.chips[item[scope.id]] = item;
                     }
-                    if (scope.singleSelection){
-                        scope.query = '';
-                    }
+                    
+                    scope.query = '';
+                    
                     scope.callCallback();
                     if (scope.singleSelection){
                         scope.setListVisibility(false);

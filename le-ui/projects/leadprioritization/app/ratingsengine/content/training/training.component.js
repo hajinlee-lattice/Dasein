@@ -23,6 +23,7 @@ angular.module('lp.ratingsengine.wizard.training', [
 
     vm.segmentCallback = function(selectedSegment) {
         vm.trainingSegment = selectedSegment[0];
+        RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
     }
 
     vm.productsCallback = function(selectedProducts) {
@@ -30,6 +31,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         angular.forEach(selectedProducts, function(product){
             vm.trainingProducts.push(product.ProductId);
         });
+        RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
     }
 
     vm.formOnChange = function(){
@@ -69,12 +71,6 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
         }
 
-        if($scope.vm.trainingSegment) {
-            RatingsEngineStore.setTrainingSegment(vm.trainingSegment);   
-        }
-        if($scope.vm.trainingProducts) {
-            RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
-        }
     };
 
     vm.init();

@@ -643,7 +643,7 @@ angular.module('lp.ratingsengine')
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
             console.log(rating.activeModel.AI.id);
-            
+
             obj = {
                 AI: {
                     id: rating.activeModel.AI.id,
@@ -676,13 +676,11 @@ angular.module('lp.ratingsengine')
         var currentRating = RatingsEngineStore.getCurrentRating(),
             obj = model.AI,
             opts = {};
-
-        console.log(obj);
         
         RatingsEngineStore.tmpId = obj.id;
 
-        console.log('Launching the model');
-        RatingsEngineService.createAIModel(currentRating.id, obj.id, opts).then(function(applicationid) {
+        console.log('Launching the model', obj);
+        RatingsEngineService.createAIModel(currentRating.id, obj.id).then(function(applicationid) {
             
             console.log('Application id', applicationid);
             var id = applicationid.Result;//RatingsEngineStore.tmpId;
@@ -874,18 +872,16 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.createAIModel = function(ratingid, modelid, opts){
+    this.createAIModel = function(ratingid, modelid){
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
-            url: '/pls/ratingengines/'+ratingid+'/ratingmodels/'+modelid+'/model',
-            data: opts
-        }).then(
-            function(response){
-                deferred.resolve(response.data);
-            }
-        );
+            url: '/pls/ratingengines/' + ratingid + '/ratingmodels/' + modelid + '/model'
+        }).then(function(response){
+            console.log(response);
+            deferred.resolve(response);
+        });
 
         return deferred.promise;
     }
