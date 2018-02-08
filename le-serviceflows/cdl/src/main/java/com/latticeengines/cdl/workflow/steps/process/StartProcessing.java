@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -75,14 +76,27 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @PostConstruct
     public void init() {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        customerSpace = configuration.getCustomerSpace();
+    }
+
+    @VisibleForTesting
+    StartProcessing(DataCollectionProxy dataCollectionProxy, CustomerSpace customerSpace) {
+        this.dataCollectionProxy = dataCollectionProxy;
+        this.customerSpace = customerSpace;
+        this.reportJson = JsonUtils.createObjectNode();
+    }
+
+    @VisibleForTesting
+    StartProcessing(InternalResourceRestApiProxy internalResourceProxy, CustomerSpace customerSpace) {
+        this.internalResourceProxy = internalResourceProxy;
+        this.customerSpace = customerSpace;
     }
 
     @Override
     public void execute() {
         determineVersions();
 
-        DataFeedExecution execution = dataFeedProxy
-                .updateExecutionWorkflowId(configuration.getCustomerSpace().toString(), jobId);
+        DataFeedExecution execution = dataFeedProxy.updateExecutionWorkflowId(customerSpace.toString(), jobId);
         log.info(String.format("current running execution %s", execution));
 
         DataFeed datafeed = dataFeedProxy.getDataFeed(configuration.getCustomerSpace().toString());
@@ -106,8 +120,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void setRebuildEntities() {
-        Set<BusinessEntity> rebuildEntities = new HashSet<>();
-        RebuildDecoratorProvider.decorate(this, rebuildEntities);
+        Set<BusinessEntity> rebuildEntities = RebuildEntitiesProvider.getRebuildEntities(this);
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
@@ -129,7 +142,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private void determineVersions() {
-        customerSpace = configuration.getCustomerSpace();
         activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         inactiveVersion = activeVersion.complement();
         putObjectInContext(CDL_ACTIVE_VERSION, activeVersion);
@@ -174,63 +186,76 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         dataCollectionProxy.removeStats(customerSpace.toString(), inactiveVersion);
     }
 
-    public static class RebuildDecoratorProvider {
-
-        public static void decorate(StartProcessing st, Set<BusinessEntity> entities) {
-            Collection<Class<? extends RebuildDecorator>> decrators = Arrays.asList(RebuildOnDLVersionDecorator.class,
-                    RebuildOnDeleteJobDecorator.class);
-            for (Class<? extends RebuildDecorator> c : decrators) {
+    public static class RebuildEntitiesProvider {
+        public static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
+            Set<BusinessEntity> rebuildEntities = new HashSet<>();
+            Collection<Class<? extends RebuildEntitiesTemplate>> decrators = Arrays
+                    .asList(RebuildOnDLVersionTemplate.class, RebuildOnDeleteJobTemplate.class);
+            for (Class<? extends RebuildEntitiesTemplate> c : decrators) {
                 try {
-                    ((RebuildDecorator) c.getDeclaredConstructor(StartProcessing.class, Set.class).newInstance(st,
-                            entities)).decorate();
+                    RebuildEntitiesTemplate template = ((RebuildEntitiesTemplate) c
+                            .getDeclaredConstructor(StartProcessing.class).newInstance(st));
+                    rebuildEntities.addAll(template.getRebuildEntities());
+                    if (template.hasEntityToRebuild()) {
+                        template.executeRebuildAction();
+                        log.info(String.format("%s enabled: %s entities to rebuild", c.getSimpleName(),
+                                rebuildEntities.toString()));
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
+            return rebuildEntities;
         }
     }
 
-    abstract class RebuildDecorator {
-        protected Set<BusinessEntity> entities;
+    abstract class RebuildEntitiesTemplate {
 
-        public RebuildDecorator(Set<BusinessEntity> entities) {
-            this.entities = entities;
+        protected boolean hasEntityToRebuild;
+
+        public abstract Set<BusinessEntity> getRebuildEntities();
+
+        public boolean hasEntityToRebuild() {
+            return hasEntityToRebuild;
         }
 
-        public void decorate() {
-            log.info(String.format("after decoration: %s", entities.toString()));
+        protected void setEntityToRebuild() {
+            hasEntityToRebuild = true;
+        }
+
+        public void executeRebuildAction() {
         }
     }
 
-    class RebuildOnDLVersionDecorator extends RebuildDecorator {
-
-        public RebuildOnDLVersionDecorator(Set<BusinessEntity> entities) {
-            super(entities);
-        }
+    class RebuildOnDLVersionTemplate extends RebuildEntitiesTemplate {
 
         @Override
-        public void decorate() {
+        public Set<BusinessEntity> getRebuildEntities() {
+            Set<BusinessEntity> rebuildEntities = new HashSet<>();
             String currentBuildNumber = configuration.getDataCloudBuildNumber();
             DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
             if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
                     && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
-                ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
-                systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
-                putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
-                entities.add(BusinessEntity.Account);
+
+                rebuildEntities.add(BusinessEntity.Account);
+                setEntityToRebuild();
             }
-            super.decorate();
-        }
-    }
-
-    class RebuildOnDeleteJobDecorator extends RebuildDecorator {
-
-        public RebuildOnDeleteJobDecorator(Set<BusinessEntity> entities) {
-            super(entities);
+            return rebuildEntities;
         }
 
         @Override
-        public void decorate() {
+        public void executeRebuildAction() {
+            ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
+            systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
+            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
+        }
+    }
+
+    class RebuildOnDeleteJobTemplate extends RebuildEntitiesTemplate {
+
+        @Override
+        public Set<BusinessEntity> getRebuildEntities() {
+            Set<BusinessEntity> rebuildEntities = new HashSet<>();
             try {
                 List<Job> deleteJobs = getDeleteJobs();
                 for (Job job : deleteJobs) {
@@ -239,11 +264,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                         continue;
                     }
                     List<String> entityStrs = Arrays.asList(str.split(","));
-                    entities.addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+                    rebuildEntities
+                            .addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+                    setEntityToRebuild();
                 }
-                super.decorate();
+                return rebuildEntities;
             } catch (Exception e) {
                 log.error("Failed to set rebuild entities based on delete actions.", e);
+                throw new RuntimeException(e);
             }
         }
     }

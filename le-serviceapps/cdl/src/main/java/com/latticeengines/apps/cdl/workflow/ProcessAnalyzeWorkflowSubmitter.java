@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflow
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -64,12 +65,15 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final WorkflowProxy workflowProxy;
 
+    private final ColumnMetadataProxy columnMetadataProxy;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy) {
+            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
+        this.columnMetadataProxy = columnMetadataProxy;
     }
 
     @Value("${common.pls.url}")
@@ -127,7 +131,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
         updateActions(customerSpace, actionAndJobIds.getLeft());
 
-        String currentDataCloudBuildNumber = "";
+        String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
         ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                 actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
 
