@@ -1,7 +1,12 @@
 package com.latticeengines.apps.cdl.rating;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -56,6 +61,16 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
         ratingFrontEndQuery.setPeriodName(TimeFilter.Period.Month.name());
+        ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
+    }
+
+    private List<String> getProductsAsList() {
+        List<String> productList = new ArrayList<>();
+        if (StringUtils.isNotBlank(productIds)) {
+            List<?> attrListIntermediate = JsonUtils.deserialize(productIds, List.class);
+            productList = JsonUtils.convertList(attrListIntermediate, String.class);
+        }
+        return productList;
     }
 
     protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel) {

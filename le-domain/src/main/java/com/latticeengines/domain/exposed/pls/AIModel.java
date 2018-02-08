@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -95,7 +96,7 @@ public class AIModel extends RatingModel {
 
     @JsonProperty("targetProducts")
     public List<String> getTargetProducts() {
-        List<String> productList = null;
+        List<String> productList = new ArrayList<>();
         if (StringUtils.isNotBlank(this.targetProducts)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.targetProducts, List.class);
             productList = JsonUtils.convertList(attrListIntermediate, String.class);
@@ -139,7 +140,7 @@ public class AIModel extends RatingModel {
 
     @JsonProperty("trainingProducts")
     public List<String> getTrainingProducts() {
-        List<String> trainingProductList = null;
+        List<String> trainingProductList = new ArrayList<>();
         if (StringUtils.isNotBlank(this.trainingProducts)) {
             List<?> attrListIntermediate = JsonUtils.deserialize(this.trainingProducts, List.class);
             trainingProductList = JsonUtils.convertList(attrListIntermediate, String.class);
