@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobDetail;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLJobStatus;
@@ -98,14 +99,14 @@ public class CDLJobServiceImpl implements CDLJobService {
     }
 
     private void orchestrateJob(int runningProcessAnalyzeJobs) {
-        List<DataFeed> allDataFeeds = dataFeedProxy.getAllDataFeeds();
+        List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
         log.info(String.format("data feeds count: %d", allDataFeeds.size()));
 
-        List<Map.Entry<Date, Map.Entry<DataFeed, CDLJobDetail>>> list = new ArrayList<>();
+        List<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>> list = new ArrayList<>();
         long currentTimeMillis = System.currentTimeMillis();
         log.info(String.format("current time: %s", (new Date(currentTimeMillis)).toString()));
 
-        for (DataFeed dataFeed : allDataFeeds) {
+        for (SimpleDataFeed dataFeed : allDataFeeds) {
             Tenant tenant = dataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
             log.debug(String.format("tenant: %s", tenant.getId()));
@@ -132,17 +133,17 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
 
-        Collections.sort(list, new Comparator<Map.Entry<Date, Map.Entry<DataFeed, CDLJobDetail>>>() {
+        Collections.sort(list, new Comparator<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>>() {
             @Override
-            public int compare(Map.Entry<Date, Map.Entry<DataFeed, CDLJobDetail>> o1,
-                               Map.Entry<Date, Map.Entry<DataFeed, CDLJobDetail>> o2) {
+            public int compare(Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> o1,
+                               Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> o2) {
                 return o1.getKey().compareTo(o2.getKey());
             }
         });
 
         log.info(String.format("need to submit process analyze jobs count: %d", list.size()));
-        for (Map.Entry<Date, Map.Entry<DataFeed, CDLJobDetail>> entry : list) {
-            DataFeed dataFeed = entry.getValue().getKey();
+        for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
+            SimpleDataFeed dataFeed = entry.getValue().getKey();
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
             if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs)
             {
@@ -207,7 +208,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         return runningJobs;
     }
 
-    private boolean meetProcessAnalyzeRule(DataFeed dataFeed, CDLJobDetail processAnalyzeJobDetail) {
+    private boolean meetProcessAnalyzeRule(SimpleDataFeed dataFeed, CDLJobDetail processAnalyzeJobDetail) {
         log.info(String.format("data feed status: %s", dataFeed.getStatus().toString()));
         if (dataFeed.getStatus() == DataFeed.Status.Initing || dataFeed.getStatus() == DataFeed.Status.Initialized) {
             return false;

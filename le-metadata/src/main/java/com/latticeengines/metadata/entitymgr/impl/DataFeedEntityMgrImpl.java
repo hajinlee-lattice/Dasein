@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.metadata.dao.DataFeedDao;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
@@ -287,4 +288,9 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         return dataFeeds;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<SimpleDataFeed> getAllSimpleDataFeeds() {
+        return datafeedDao.findAllSimpleDataFeeds();
+    }
 }

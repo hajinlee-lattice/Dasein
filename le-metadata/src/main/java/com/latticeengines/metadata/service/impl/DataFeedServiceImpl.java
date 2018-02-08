@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
@@ -237,6 +238,11 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<DataFeed> getAllDataFeeds() {
         return datafeedEntityMgr.getAllDataFeeds();
+    }
+
+    @Override
+    public List<SimpleDataFeed> getAllSimpleDataFeeds() {
+        return datafeedEntityMgr.getAllSimpleDataFeeds();
     }
 
     @Override

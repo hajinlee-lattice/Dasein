@@ -57,7 +57,8 @@ public class SetTenantAspect {
     }
 
     @Before("execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.*(..)) " +
-            "&& !execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.getAllDataFeeds(..))")
+            "&& !execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.getAllDataFeeds(..))" +
+            "&& !execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..))")
     public void allMethodsDataFeedService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace);

@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("dataFeedProxy")
@@ -35,6 +36,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/datafeed/internal/list");
         List<?> list = get("get all data feeds", url, List.class);
         return JsonUtils.convertList(list, DataFeed.class);
+    }
+
+    public List<SimpleDataFeed> getAllSimpleDataFeeds() {
+        String url = constructUrl("/datafeed/internal/simpledatafeedlist");
+        List<?> list = get("get all simple data feeds", url, List.class);
+        return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
     public DataFeedExecution startExecution(String customerSpace) {
