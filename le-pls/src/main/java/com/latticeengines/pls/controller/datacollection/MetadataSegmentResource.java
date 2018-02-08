@@ -1,6 +1,7 @@
 package com.latticeengines.pls.controller.datacollection;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +47,9 @@ public class MetadataSegmentResource {
     @ResponseBody
     @ApiOperation(value = "Get all segments")
     public List<MetadataSegment> getSegments() {
-        return metadataSegmentService.getSegments();
+        return metadataSegmentService.getSegments().stream() //
+                .filter(s -> !Boolean.TRUE.equals(s.getMasterSegment())) //
+                .collect(Collectors.toList());
     }
 
     @RequestMapping(value = "/{segmentName}", method = RequestMethod.GET, headers = "Accept=application/json")
