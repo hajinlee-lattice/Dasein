@@ -2,6 +2,7 @@ package com.latticeengines.datafabric.service.message.impl;
 
 import java.util.Properties;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -149,7 +150,7 @@ public class FabricMessageProducerImpl implements FabricMessageProducer {
     @Override
     public void close() {
         if (producer != null) {
-            producer.close();
+            producer.close(2L, TimeUnit.MINUTES);
         }
     }
 }

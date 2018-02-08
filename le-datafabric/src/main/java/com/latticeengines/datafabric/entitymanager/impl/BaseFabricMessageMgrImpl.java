@@ -170,8 +170,15 @@ public class BaseFabricMessageMgrImpl<T extends HasId<String>> implements BaseFa
 
     @Override
     public void close() {
-        if (producer != null)
-            producer.close();
+        if (producer != null) {
+            try {
+                producer.close();
+            } catch (Exception ex) {
+                log.warn("Can not close producer!", ex);
+            } finally {
+                producer = null;
+            }
+        }
     }
 
     public static class Builder {
