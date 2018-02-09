@@ -68,6 +68,9 @@
     </GlobalNamingResources>
 
     <Service name="MatchAPI">
+        <Connector port="8076" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9076" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -94,6 +97,9 @@
     </Service>
 
     <Service name="Admin">
+        <Connector port="8085" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9085" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -120,6 +126,9 @@
     </Service>
 
     <Service name="PlayMaker">
+        <Connector port="8071" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9071" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -146,6 +155,9 @@
     </Service>
 
     <Service name="OAuth">
+        <Connector port="8072" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="8072" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -172,6 +184,9 @@
     </Service>
 
     <Service name="ScoringAPI">
+        <Connector port="8073" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9073" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -198,6 +213,9 @@
     </Service>
 
     <Service name="SAML">
+        <Connector port="8087" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9087" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -224,6 +242,9 @@
     </Service>
 
     <Service name="API">
+        <Connector port="8074" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9074" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -250,6 +271,9 @@
     </Service>
 
     <Service name="Ulysses">
+        <Connector port="8075" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9075" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -276,6 +300,9 @@
     </Service>
 
     <Service name="MS">
+        <Connector port="8080" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9080" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
@@ -302,6 +329,9 @@
     </Service>
 
     <Service name="PLS">
+        <Connector port="8081" protocol="HTTP/1.1" connectionTimeout="20000" redirectPort="9076"
+                   compression="on"
+                   compressibleMimeType="text/html,text/xml,text/plain,text/css,text/javascript,application/xhtml+xml,application/javascript,application/json"/>
         <Connector port="9081" protocol="org.apache.coyote.http11.Http11NioProtocol" executor="tomcatThreadPool"
                    SSLEnabled="true" scheme="https" secure="true"
                    sslImplementationName="org.apache.tomcat.util.net.openssl.OpenSSLImplementation"
