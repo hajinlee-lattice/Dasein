@@ -3,8 +3,8 @@ package com.latticeengines.datacloud.core.dao.impl;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.dao.DataCloudVersionDao;
@@ -23,7 +23,7 @@ public class DataCloudVersionDaoImpl extends BaseDaoWithAssignedSessionFactoryIm
     public DataCloudVersion latestApprovedForMajorVersion(String majorVersion) {
         Session session = sessionFactory.getCurrentSession();
         String queryStr = String.format(
-                "from %s where MajorVersion = :majorVersion and Status = '%s' order by Version desc",
+                "from %s where MajorVersion = :majorVersion and Status = '%s' order by CONVERT(SUBSTRING_INDEX(Version, '.', -1), UNSIGNED) desc",
                 getEntityClass().getSimpleName(), DataCloudVersion.Status.APPROVED);
         Query query = session.createQuery(queryStr);
         query.setString("majorVersion", majorVersion);

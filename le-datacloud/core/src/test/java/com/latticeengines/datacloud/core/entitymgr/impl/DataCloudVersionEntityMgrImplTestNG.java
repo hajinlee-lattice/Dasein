@@ -46,19 +46,19 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         DataCloudVersion version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("98.0.12345");
         Assert.assertNotNull(version);
         Assert.assertEquals(version.getMajorVersion(), "98.0");
-        Assert.assertEquals(version.getVersion(), "98.0.1");
+        Assert.assertEquals(version.getVersion(), "98.0.10");
         Assert.assertEquals(version.getMode(), DataCloudVersion.Mode.FULL);
 
         version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion("98.0");
         Assert.assertNotNull(version);
         Assert.assertEquals(version.getMajorVersion(), "98.0");
-        Assert.assertEquals(version.getVersion(), "98.0.1");
+        Assert.assertEquals(version.getVersion(), "98.0.10");
         Assert.assertEquals(version.getMode(), DataCloudVersion.Mode.FULL);
     }
 
     private List<DataCloudVersion> prepareVersions() {
         DataCloudVersion version1 = new DataCloudVersion();
-        version1.setVersion("98.0.0");
+        version1.setVersion("98.0.2");
         version1.setCreateDate(new Date());
         version1.setAccountMasterHdfsVersion("version1");
         version1.setAccountLookupHdfsVersion("version1");
@@ -66,9 +66,10 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version1.setStatus(DataCloudVersion.Status.APPROVED);
         version1.setMetadataRefreshDate(new Date());
         version1.setMode(DataCloudVersion.Mode.MINI);
+        version1.setRefreshVersion(String.valueOf(System.currentTimeMillis()));
 
         DataCloudVersion version2 = new DataCloudVersion();
-        version2.setVersion("98.0.1");
+        version2.setVersion("98.0.10");
         version2.setCreateDate(new Date());
         version2.setAccountMasterHdfsVersion("version2");
         version2.setAccountLookupHdfsVersion("version2");
@@ -76,6 +77,7 @@ public class DataCloudVersionEntityMgrImplTestNG extends DataCloudCoreFunctional
         version2.setStatus(DataCloudVersion.Status.APPROVED);
         version2.setMetadataRefreshDate(new Date());
         version2.setMode(DataCloudVersion.Mode.FULL);
+        version2.setRefreshVersion(String.valueOf(System.currentTimeMillis()));
 
         return Arrays.asList(version1, version2);
     }
