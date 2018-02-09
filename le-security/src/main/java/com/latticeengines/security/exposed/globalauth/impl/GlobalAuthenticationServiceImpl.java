@@ -78,7 +78,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
             return ticket;
         }
 
-        log.error("The credentials provided for login are incorrect.");
+        log.warn("The credentials provided for login are incorrect.");
         return null;
     }
 
