@@ -79,17 +79,16 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         customerSpace = configuration.getCustomerSpace();
     }
 
-    @VisibleForTesting
-    StartProcessing(DataCollectionProxy dataCollectionProxy, CustomerSpace customerSpace) {
-        this.dataCollectionProxy = dataCollectionProxy;
-        this.customerSpace = customerSpace;
-        this.reportJson = JsonUtils.createObjectNode();
+    public StartProcessing() {
     }
 
     @VisibleForTesting
-    StartProcessing(InternalResourceRestApiProxy internalResourceProxy, CustomerSpace customerSpace) {
+    StartProcessing(DataCollectionProxy dataCollectionProxy, InternalResourceRestApiProxy internalResourceProxy,
+            CustomerSpace customerSpace) {
+        this.dataCollectionProxy = dataCollectionProxy;
         this.internalResourceProxy = internalResourceProxy;
         this.customerSpace = customerSpace;
+        this.reportJson = JsonUtils.createObjectNode();
     }
 
     @Override

@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
-public class StartProcessingTestNG {
+public class StartProcessingUnitTestNG {
 
     @Test(groups = { "unit" })
     public void testRebuildOnDLVersionTemplate() {
@@ -35,7 +35,7 @@ public class StartProcessingTestNG {
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
         when(dataCollectionProxy.getDefaultDataCollection(anyString())).thenReturn(dataCollection);
 
-        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy,
+        StartProcessing startProcessing = new StartProcessing(dataCollectionProxy, null,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
@@ -57,7 +57,7 @@ public class StartProcessingTestNG {
         InternalResourceRestApiProxy internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
-        StartProcessing startProcessing = new StartProcessing(internalResourceProxy,
+        StartProcessing startProcessing = new StartProcessing(null, internalResourceProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
         ProcessStepConfiguration config = new ProcessStepConfiguration();
@@ -78,7 +78,7 @@ public class StartProcessingTestNG {
         internalResourceProxy = mock(InternalResourceRestApiProxy.class);
         when(internalResourceProxy.findJobsBasedOnActionIdsAndType(any(), any(), any())).thenReturn(jobs);
 
-        startProcessing = new StartProcessing(internalResourceProxy,
+        startProcessing = new StartProcessing(null, internalResourceProxy,
                 CustomerSpace.parse(this.getClass().getSimpleName()));
         startProcessing.setExecutionContext(new ExecutionContext());
 
