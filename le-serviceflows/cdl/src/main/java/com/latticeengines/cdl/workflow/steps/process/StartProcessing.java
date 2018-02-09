@@ -136,12 +136,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     private List<Job> getDeleteJobs() {
-        if (CollectionUtils.isNotEmpty(configuration.getActionIds())) {
-            return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
-                    configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
-        } else {
-            return Collections.emptyList();
-        }
+        return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
+                configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
     }
 
     private void determineVersions() {

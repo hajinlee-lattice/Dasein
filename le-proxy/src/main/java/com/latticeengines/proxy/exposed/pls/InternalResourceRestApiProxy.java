@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed.pls;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -642,6 +643,9 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, List<Long> actionPids,
             ActionType actionType) {
         try {
+            if (CollectionUtils.isEmpty(actionPids)) {
+                return Collections.emptyList();
+            }
             String url = generateFindJobsBasedOnActionIdsAndTypeUrl(customerSpace, actionPids, actionType);
             List<?> listObj = restTemplate.getForObject(url, List.class);
             return JsonUtils.convertList(listObj, Job.class);
