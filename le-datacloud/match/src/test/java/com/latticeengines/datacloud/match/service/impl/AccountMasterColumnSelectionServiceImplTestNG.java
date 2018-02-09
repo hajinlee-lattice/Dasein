@@ -47,7 +47,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
         List<Column> columnList = new ArrayList<>();
         columnList.add(new Column("TechIndicator_Aastra"));
         columnList.add(new Column("TechIndicator_3GIS"));
-        columnList.add(new Column("TechIndicator_Google"));
+        columnList.add(new Column("TechIndicator_Autodesk"));
         columnList.add(new Column("TechIndicator_Apple"));
         columnList.add(new Column("TechIndicator_BidRun"));
         columnList.add(new Column("TechIndicator_Artemis"));
@@ -66,7 +66,7 @@ public class AccountMasterColumnSelectionServiceImplTestNG extends DataCloudMatc
 
         pair = parameters.get("HGData_SupplierTechIndicators");
         bitPosExpected = new HashMap<>();
-        bitPosExpected.put("TechIndicator_Google", getBitPosition("TechIndicator_Google"));
+        bitPosExpected.put("TechIndicator_Autodesk", getBitPosition("TechIndicator_Autodesk"));
         bitPosExpected.put("TechIndicator_Apple", getBitPosition("TechIndicator_Apple"));
         verifyCodeBookParameters(pair, bitPosExpected);
 
