@@ -1,11 +1,13 @@
 import argparse
 import atexit
+import contextlib
 import logging
 import os
 import psutil
+import requests
 import signal
 import subprocess
-import time
+import warnings
 from shutil import copyfile, rmtree, copytree
 
 logger = logging.getLogger(__name__)
@@ -16,6 +18,20 @@ try:
     import time
 except Exception:
     ENABLE_HOT_SWAP = False
+
+try:
+    from functools import partialmethod
+except ImportError:
+    # Python 2 fallback: https://gist.github.com/carymrobbins/8940382
+    from functools import partial
+
+    class partialmethod(partial):
+        def __get__(self, instance, owner):
+            if instance is None:
+                return self
+
+            return partial(self.func, instance, *(self.args or ()), **(self.keywords or {}))
+
 
 tomcatPid = None
 tomcatProc = None
@@ -79,6 +95,16 @@ PRESETS = {
                     'objectapi']
     }
 }
+
+
+@contextlib.contextmanager
+def no_ssl_verification():
+    old_request = requests.Session.request
+    requests.Session.request = partialmethod(old_request, verify=False)
+    warnings.filterwarnings('ignore', 'Unverified HTTPS request')
+    yield
+    warnings.resetwarnings()
+    requests.Session.request = old_request
 
 
 def cleanupWars():
@@ -183,17 +209,21 @@ def undeployApp(app, modules):
     deployMgrApp(app, wait=True)
 
     app_url = APP_URL[app]
+    if "USE_HTTPS" in os.environ and os.environ["USE_HTTPS"]:
+        app_url = app_url.replace("http://localhost:8", "https://localhost:9")
+
     mgr_url = app_url + "/manager"
-    tomcat = tm.TomcatManager()
-    logger.info("Connecting to %s's manager app at %s ..." % (app, mgr_url))
-    r = tomcat.connect(mgr_url, 'admin', 'admin')
-    if r.ok:
-        logger.info("Connected!")
-    if app == 'microservice':
-        for module in modules:
-            undeployPath(tomcat, '/%s' % module)
-    else:
-        undeployPath(tomcat, '/')
+    with no_ssl_verification():
+        tomcat = tm.TomcatManager()
+        logger.info("Connecting to %s's manager app at %s ..." % (app, mgr_url))
+        r = tomcat.connect(mgr_url, 'admin', 'admin')
+        if r.ok:
+            logger.info("Connected!")
+        if app == 'microservice':
+            for module in modules:
+                undeployPath(tomcat, '/%s' % module)
+        else:
+            undeployPath(tomcat, '/')
 
 
 def undeployPath(tomcat, path):
@@ -249,7 +279,7 @@ def deploy_cli(args):
 def swap_cli(args):
     global ENABLE_HOT_SWAP
     if not ENABLE_HOT_SWAP:
-        logger.warn("Cannot import tomcat manager, hot swap functionality is disabled.")
+        logger.warning("Cannot import tomcat manager, hot swap functionality is disabled.")
         return
 
     apps, modules = parseApps(args)
@@ -257,7 +287,7 @@ def swap_cli(args):
         undeployApp(app, modules)
 
     for i in range(5):
-        logger.warn('Sleep %d second ...' % (5 - i))
+        logger.info('Sleep %d second ...' % (5 - i))
         time.sleep(1)
 
     for app in apps:
