@@ -10,6 +10,7 @@
     <filter>
         <filter-name>springSecurityFilterChain</filter-name>
         <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter-mapping>
@@ -20,6 +21,7 @@
     <filter>
         <filter-name>cors</filter-name>
         <filter-class>com.latticeengines.pls.filter.CorsFilter</filter-class>
+        <async-supported>true</async-supported>
     </filter>
 
     <filter-mapping>
@@ -44,6 +46,7 @@
             <param-value>300000</param-value>
         </init-param>
         <load-on-startup>2</load-on-startup>
+        <async-supported>true</async-supported>
     </servlet>
 
     <servlet-mapping>

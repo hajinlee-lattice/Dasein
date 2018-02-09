@@ -74,6 +74,7 @@ create table TENANT (
     JDBC_USERNAME varchar(256) null,
     JDBC_PASSWORD varchar(256) null,
     JDBC_PASSWORD_ENCRYPT varchar(256) null,
+    GW_API_KEY varchar(256) null,
     primary key(PID)
 );
 CREATE UNIQUE INDEX tenant_name_idx ON TENANT (TENANT_NAME);
