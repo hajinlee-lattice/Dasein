@@ -113,7 +113,7 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
         // add ROOT_DUNS to amSeedFiltered
         ComputeRootDunsAndTypeFunction computeRootDuns = new ComputeRootDunsAndTypeFunction(
                 new Fields(amSeedFiltered.getFieldNamesArray()), DataCloudConstants.ATTR_GU_DUNS,
-                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE);
+                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS);
 
         Node amSeedWithRootDuns = amSeedFiltered //
                 .apply(computeRootDuns, new FieldList(amSeedFiltered.getFieldNames()), amSeedFiltered.getSchema(),

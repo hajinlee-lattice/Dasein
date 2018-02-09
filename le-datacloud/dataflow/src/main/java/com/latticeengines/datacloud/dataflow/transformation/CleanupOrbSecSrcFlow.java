@@ -78,7 +78,7 @@ public class CleanupOrbSecSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
         // add ROOT_DUNS to amSeedFiltered
         ComputeRootDunsAndTypeFunction computeRootDuns = new ComputeRootDunsAndTypeFunction(
                 new Fields(orbSecSrcJoinAmSeed.getFieldNamesArray()), DataCloudConstants.ATTR_GU_DUNS,
-                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE);
+                DataCloudConstants.ATTR_DU_DUNS, DataCloudConstants.AMS_ATTR_DUNS);
 
         Node orbSecSrcWithRootDuns = orbSecSrcJoinAmSeed //
                 .apply(computeRootDuns, new FieldList(orbSecSrcJoinAmSeed.getFieldNames()),
