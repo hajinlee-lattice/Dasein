@@ -272,10 +272,11 @@ public class TimeSeriesUtils {
                     product.setBundleId(null);
                 }
                 product.setProductName(record.get(InterfaceName.ProductName.name()).toString());
-                product.setDescription(record.get("Description").toString());
-                product.setProductLine(record.get("ProductLine").toString());
-                product.setProductFamily(record.get("ProductFamily").toString());
-                product.setProductCategory(record.get("ProductCategory").toString());
+                //todo: uncomment after release tag
+//                product.setDescription(record.get("Description").toString());
+//                product.setProductLine(record.get("ProductLine").toString());
+//                product.setProductFamily(record.get("ProductFamily").toString());
+//                product.setProductCategory(record.get("ProductCategory").toString());
                 productMap.put(product.getProductId(), product);
             }
         }

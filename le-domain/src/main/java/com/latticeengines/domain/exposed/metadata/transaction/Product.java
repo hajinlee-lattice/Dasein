@@ -15,17 +15,18 @@ public class Product implements Serializable {
     @JsonProperty("BundleId")
     private String bundleId;
 
-    @JsonProperty("ProductDescription")
-    private String description;
-
-    @JsonProperty("ProductLine")
-    private String productLine;
-
-    @JsonProperty("ProductFamily")
-    private String productFamily;
-
-    @JsonProperty("ProductCategory")
-    private String productCategory;
+    //todo: uncomment after release tag
+//    @JsonProperty("ProductDescription")
+//    private String description;
+//
+//    @JsonProperty("ProductLine")
+//    private String productLine;
+//
+//    @JsonProperty("ProductFamily")
+//    private String productFamily;
+//
+//    @JsonProperty("ProductCategory")
+//    private String productCategory;
 
     public String getProductId() {
         return productId;
@@ -51,35 +52,36 @@ public class Product implements Serializable {
         this.bundleId = bundleId;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getProductLine() {
-        return productLine;
-    }
-
-    public void setProductLine(String productLine) {
-        this.productLine = productLine;
-    }
-
-    public String getProductFamily() {
-        return productFamily;
-    }
-
-    public void setProductFamily(String productFamily) {
-        this.productFamily = productFamily;
-    }
-
-    public String getProductCategory() {
-        return productCategory;
-    }
-
-    public void setProductCategory(String productCategory) {
-        this.productCategory = productCategory;
-    }
+    //todo: uncomment after release tag
+//    public String getDescription() {
+//        return description;
+//    }
+//
+//    public void setDescription(String description) {
+//        this.description = description;
+//    }
+//
+//    public String getProductLine() {
+//        return productLine;
+//    }
+//
+//    public void setProductLine(String productLine) {
+//        this.productLine = productLine;
+//    }
+//
+//    public String getProductFamily() {
+//        return productFamily;
+//    }
+//
+//    public void setProductFamily(String productFamily) {
+//        this.productFamily = productFamily;
+//    }
+//
+//    public String getProductCategory() {
+//        return productCategory;
+//    }
+//
+//    public void setProductCategory(String productCategory) {
+//        this.productCategory = productCategory;
+//    }
 }
