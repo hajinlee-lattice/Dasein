@@ -15,8 +15,11 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.RetryCallback;
 import org.springframework.retry.RetryContext;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
@@ -41,6 +44,8 @@ import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 @Service("cdlTestDataService")
 public class CDLTestDataServiceImpl implements CDLTestDataService {
+
+    private static final Logger log = LoggerFactory.getLogger(CDLTestDataServiceImpl.class);
 
     private static final String S3_DIR = "le-testframework/cdl";
     private static final String S3_VERSION = "2";
@@ -136,14 +141,23 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             String tgtTable = servingStoreName(tenantId, entity);
             RetryTemplate retry = new RetryTemplate();
             SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-            retryPolicy.setMaxAttempts(2);
+            retryPolicy.setMaxAttempts(3);
             retry.setRetryPolicy(retryPolicy);
+            ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+            backOffPolicy.setInitialInterval(5000);
+            backOffPolicy.setMultiplier(2.0);
+            retry.setBackOffPolicy(backOffPolicy);
             retry.setThrowLastExceptionOnExhausted(true);
             retry.execute(new RetryCallback<Void, RuntimeException>() {
                 @Override
                 public Void doWithRetry(RetryContext context) {
-                    redshiftService.cloneTable(srcTable, tgtTable);
-                    return  null;
+                    log.info(String.format("(Attempt=%d) copying %s to %s", context.getRetryCount() + 1, srcTable, tgtTable));
+                    if (!redshiftService.hasTable(tgtTable)) {
+                        redshiftService.cloneTable(srcTable, tgtTable);
+                    } else {
+                        log.info("Seems table " + tgtTable + " already exists.");
+                    }
+                    return null;
                 }
             });
         }
