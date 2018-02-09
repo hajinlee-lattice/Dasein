@@ -76,7 +76,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @PostConstruct
     public void init() {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-        customerSpace = configuration.getCustomerSpace();
     }
 
     public StartProcessing() {
@@ -93,6 +92,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
+        customerSpace = configuration.getCustomerSpace();
         determineVersions();
 
         DataFeedExecution execution = dataFeedProxy.updateExecutionWorkflowId(customerSpace.toString(), jobId);
