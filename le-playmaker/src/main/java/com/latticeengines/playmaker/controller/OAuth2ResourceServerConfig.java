@@ -62,21 +62,12 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/playmaker/swagger-resources", //
                         "/playmaker/configuration/**")
                 .and().authorizeRequests() //
-                .antMatchers("/playmaker/health", //
+                .antMatchers(
                         "/health", //
-                        "/v2/api-docs", //
-                        "/swagger-ui.html", //
-                        "/webjars/**", //
+                        "/playmaker/health", //
+                        "/playmaker/v2/api-docs/**", //
                         "/**/favicon.ico", //
-                        "/swagger-resources", //
-                        "/configuration/**", //
-                        "/playmaker/v2/api-docs", //
-                        "/playmaker/swagger-ui.html", //
-                        "/playmaker/webjars/**", //
-                        "/playmaker/**/favicon.ico", //
-                        "/playmaker/swagger-resources", //
-                        "/playmaker/configuration/**")
-                .permitAll()
+                        "/swagger-resources/**").permitAll() //
                 .antMatchers(HttpMethod.POST, "/tenants", "/playmaker/tenants").permitAll() //
                 .antMatchers("/tenants/**", "/playmaker/tenants/**")
                 .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))") //

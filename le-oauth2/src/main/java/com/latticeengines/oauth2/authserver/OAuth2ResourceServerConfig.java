@@ -15,13 +15,9 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     public void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests().antMatchers(
                 "/oauth/**", //
-                "/v2/api-docs",
-                "/swagger-ui.html", //
-                "/webjars/**", //
+                "/swagger-resources/**", //
                 "/**/favicon.ico", //
-                "/swagger-resources", //
-                "/configuration/**" //
-        ).permitAll();
+                "/health").permitAll();
     }
 
 }
