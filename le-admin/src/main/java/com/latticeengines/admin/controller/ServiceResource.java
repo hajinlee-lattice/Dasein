@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.ServiceService;
+import com.latticeengines.admin.util.NodesSort;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationDocument;
 import com.latticeengines.domain.exposed.admin.SelectableConfigurationField;
@@ -59,6 +60,7 @@ public class ServiceResource {
     @ApiOperation(value = "Get default config for a service")
     public SerializableDocumentDirectory getServiceDefaultConfig(@PathVariable String serviceName) {
         SerializableDocumentDirectory dir = serviceService.getDefaultServiceConfig(serviceName);
+        NodesSort.sortByServiceName(dir, serviceName);
         dir.setRootPath("/" + serviceName);
         return dynamicOptionsService.bind(dir);
     }
