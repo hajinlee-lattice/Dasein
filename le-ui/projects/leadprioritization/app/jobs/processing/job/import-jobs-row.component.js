@@ -71,12 +71,6 @@ angular.module('lp.jobs.import.row', [])
             }
 
             $scope.getSubjobActionName = function (index, subjob) {
-                // var name = index +'. '+ subjob.inputs.SOURCE_DISPLAY_NAME;
-                // if (name.length > 40) {
-                //     name = name.substring(0, 40);
-                //     name = name + '...';
-                // }
-                // return name;
                 if (subjob.inputs != undefined) {
                     return index + '. ' + subjob.inputs.SOURCE_DISPLAY_NAME;
                 } else {
@@ -104,8 +98,8 @@ angular.module('lp.jobs.import.row', [])
                 $scope.vm.rowStatus[$scope.index] = $scope.expanded;
             };
 
-            $scope.vm.run = function () {
-                var show = $scope.showWarningRun();
+            $scope.vm.run = function (job) {
+                var show = $scope.showWarningRun(job);
                 if (show) {
                     $scope.vm.toggleModal();
 
@@ -114,8 +108,8 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
-            $scope.showWarningRun = function () {
-                var subJobs = $scope.job.subJobs;
+            $scope.showWarningRun = function (job) {
+                var subJobs = job.subJobs;
 
                 var allCompleted = true;
                 if (subJobs) {

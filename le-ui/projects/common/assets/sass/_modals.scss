@@ -425,6 +425,10 @@ Popovers
   overflow: auto;
   background-color: rgb(0, 0, 0);
   background-color: rgba(0, 0, 0, 0.5);
+
+  .le-orange-style {
+    background-color: orange;
+  }
   /* Modal Content Box */
   .le-modal-content {
       font-family: 'ProximaNova-Regular', Arial, sans-serif;
@@ -433,7 +437,7 @@ Popovers
       flex-direction: column;
       background-color: #fefefe;
       margin: 4% auto;
-      padding: 2px;
+      padding: 0px;
       border: 1px solid #888;
       width: 50%;
       max-height: 80vh;
@@ -457,12 +461,15 @@ Popovers
           display: flex;
           flex-direction: row-reverse;
           align-items: center;
+          border-top-left-radius: 6px;
+          border-top-right-radius: 6px;
           /* The Close Button */
           .close {
               color: #aaa;
               font-size: 28px;
               font-weight: bold;
               padding: 10px;
+              padding-right: 17px;
               &:hover,
               &:focus {
                   color: black;
@@ -476,6 +483,10 @@ Popovers
               padding: 17px;
               display: flex;
               align-items: center;
+
+              .ico-container{
+                background-color: white;
+              }
               .title-icon {
                   // padding-right: 10px;
               }

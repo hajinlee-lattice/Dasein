@@ -64,10 +64,11 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
             var name = scope.config['name'] || Date().now();
 
             modalStore.set(name, scope);
-
+            console.log('Color', scope.config.headerconfig )
             scope.modalConfig = {
                 "type": scope.config.type || "md",
                 "icon": scope.config.icon || scope.iconSupported.warning,
+                "iconstyle" : scope.config.iconstyle || {'background-color':'black'},
                 "title": scope.config.title || "Default Title",
                 "titlelength": scope.config.titlelength || 100,
                 "showclose": typeof scope.config.showclose === 'undefined' ? true : scope.config.showclose,
@@ -76,7 +77,9 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
                 "confirmtext": scope.config.confirmtext || "OK",
                 "confirmaction" : scope.config.confirmaction || 'ok',
                 "contenturl": scope.config.contenturl || '',
-                "confirmcolor": scope.config.confirmcolor || 'blue-button'
+                "headerconfig": scope.config.headerconfig || {},
+                "confirmstyle" : scope.config.confirmstyle || {},
+                "confirmcolor": scope.config.confirmstyle === undefined ? (scope.config.confirmcolor || 'blue-button') : '',
             };
 
             scope.toggle = function () {

@@ -1,11 +1,11 @@
 <div class="le_modal" ng-class="opened ? 'opened' : 'closed'">
 
     <div class="le-modal-content" ng-class="modalConfig.type">
-        <div class="le-modal-header">
+        <div class="le-modal-header" ng-style="modalConfig.headerconfig">
             <span class="close" ng-if="modalConfig.showclose" ng-click="forceDischarge()">&times;</span>
             <div class="le-title-container">
-                <span class="ico-container">
-                    <i class="title-icon" ng-class="modalConfig.icon" aria-hidden="true"></i>
+                <span class="ico-container" ng-style="modalConfig.headerconfig">
+                    <i class="title-icon" ng-class="modalConfig.icon" aria-hidden="true" ng-style="modalConfig.iconstyle"></i>
                 </span>
                 <p class="le-title">
                     {{modalConfig.title | cut:true:config.titlelength:' ...'}}
@@ -21,7 +21,7 @@
             </div>
         </div>
         <div class="le-modal-footer">
-            <button ng-click="confirm()" class="button" ng-class="modalConfig.confirmcolor" ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
+            <button ng-click="confirm()" class="button" ng-style ="modalConfig.confirmstyle" ng-class="modalConfig.confirmcolor" ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
             <button ng-click="discharge()" class="button  gray-button" ng-disabled="dischargeDisabled">{{modalConfig.dischargetext}}</button>
 
         </div>

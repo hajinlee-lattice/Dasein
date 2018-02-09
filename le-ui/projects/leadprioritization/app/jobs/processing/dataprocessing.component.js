@@ -100,15 +100,18 @@ angular.module('lp.jobs.import', ['lp.jobs.import.row', 'lp.jobs.row.subjobs', '
             vm.config = {
                 'name': "import_jobs",
                 'type': 'sm',
-                'title': 'Run Job',
+                'title': 'Warning',
                 'titlelength': 100,
-                'dischargetext': 'CANCEL',
+                'dischargetext': 'Cancel',
                 'dischargeaction': 'cancel',
-                'confirmtext': 'Proceed',
+                'confirmtext': 'Yes, Run Now',
                 'confirmaction': 'proceed',
-                'icon': 'ico ico-cog',
+                'icon': 'fa fa-exclamation-triangle',
+                'iconstyle': {'color': 'white'},
                 'confirmcolor': 'blue-button',
-                'showclose': false
+                'showclose': true,
+                'headerconfig': {'background-color':'#FDC151', 'color':'white'},
+                'confirmstyle' : {'background-color':'#FDC151'}
             };
 
             vm.modalCallback = function (args) {
