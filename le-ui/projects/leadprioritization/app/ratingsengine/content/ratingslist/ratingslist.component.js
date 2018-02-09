@@ -72,19 +72,27 @@ angular.module('lp.ratingsengine.ratingslist', [
      * { label: 'Contacts', icon: 'numeric', property: 'contactCount' }
      * to sort object above
      */
-    // var checkForBuckets = $interval(function() {
-    //     if(vm.current.bucketCountMap && vm.current.ratings) {
-    //         angular.forEach(vm.current.ratings, function(rating, key) {
-    //             rating.accountCount = vm.current.bucketCountMap[rating.id].accountCount || 0;
-    //             rating.contactCount = vm.current.bucketCountMap[rating.id].contactCount || 0;
-    //         })
-    //         $interval.cancel(checkForBuckets);
-    //     }
-    // }, 1000);
+    var checkForBuckets = $interval(function() {
+        if(vm.current.bucketCountMap && vm.current.ratings) {
+            angular.forEach(vm.current.ratings, function(rating, key) {
+                rating.accountCount = vm.current.bucketCountMap[rating.id].accountCount || 0;
+                rating.contactCount = vm.current.bucketCountMap[rating.id].contactCount || 0;
+            })
+            $interval.cancel(checkForBuckets);
+        }
+    }, 1000);
     vm.init();
 
     vm.hasRules = function(rating) {
-        return RatingsEngineStore.hasRules(rating);
+        var hasRules = RatingsEngineStore.hasRules(rating);
+        return hasRules;
+    }
+
+    vm.isAIRating = function(rating){
+        if(rating && rating.type === "AI_BASED"){
+            return true;
+        }
+        return false;
     }
 
     vm.customMenuClick = function ($event, rating) {
@@ -121,18 +129,18 @@ angular.module('lp.ratingsengine.ratingslist', [
         if(tileState.editRating !== true){
             if (rating.type === 'AI_BASED') {
                 if (rating.activeModelId) {
-                    console.log(rating);
+                    // console.log(rating);
                     // $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);    
                 } else {
                     url = 'home.ratingsengine.productpurchase.segment'
                 }
-                console.log(rating);
+                // console.log(rating);
             } else if (rating.type === 'RULE_BASED') {
                 url = RatingsEngineStore.hasRules(rating) 
                     ? 'home.ratingsengine.dashboard'
                     : 'home.ratingsengine.rulesprospects.segment';
 
-                console.log(rating.id);
+                // console.log(rating.id);
 
                 $state.go(url, { rating_id: rating.id });
             } 
@@ -162,7 +170,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
         
-        if (disable) {
+        if (disable && !vm.isAIRating(rating)) {
             return false;
         }
 
