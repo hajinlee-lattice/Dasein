@@ -49,7 +49,7 @@ public class SwaggerConfig {
         return new ApiInfoBuilder() //
                 .title("Lattice Engines OAuth2 API") //
                 .description("This is the REST API for oauth2 services.") //
-                .version("1") //
+                .version(docVersionManager.getCurrentVersion()) //
                 .termsOfServiceUrl("termsofservice.html") //
                 .license("License") //
                 .licenseUrl("http://www.apache.org/licenses/LICENSE-2.0") //
