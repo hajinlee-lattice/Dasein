@@ -19,11 +19,12 @@ import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -45,8 +46,6 @@ import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
@@ -147,7 +146,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull List<Long> actionPids, @NonNull ActionType actionType) {
+    public List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
+        if (CollectionUtils.isEmpty(actionPids)) {
+            return Collections.emptyList();
+        }
         List<Action> actionsWithType = getActions(actionPids).stream()
                 .filter(action -> action.getType().equals(actionType)).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(actionsWithType)) {
@@ -187,11 +189,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             return Collections.emptyList();
         }
 
-        jobs.removeIf(job ->
-                (job == null) ||
-                (job.getJobType() == null) ||
-                (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase()))
-        );
+        jobs.removeIf(job -> (job == null) || (job.getJobType() == null)
+                || (NON_DISPLAYED_JOB_TYPES.contains(job.getJobType().toLowerCase())));
         updateAllJobs(jobs);
         Job unstartedPnAJob = generateUnstartedProcessAnalyzeJob(true);
         if (unstartedPnAJob != null) {

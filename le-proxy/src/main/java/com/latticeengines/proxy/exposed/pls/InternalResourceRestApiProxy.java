@@ -1,10 +1,13 @@
 package com.latticeengines.proxy.exposed.pls;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -635,8 +639,8 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, @NonNull List<Long> actionPids,
-            @NonNull ActionType actionType) {
+    public List<Job> findJobsBasedOnActionIdsAndType(@NonNull String customerSpace, List<Long> actionPids,
+            ActionType actionType) {
         try {
             String url = generateFindJobsBasedOnActionIdsAndTypeUrl(customerSpace, actionPids, actionType);
             List<?> listObj = restTemplate.getForObject(url, List.class);
@@ -646,14 +650,25 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    private String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
+    @VisibleForTesting
+    String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
             ActionType actionType) {
         StringBuilder urlStr = new StringBuilder();
-        urlStr.append("pls/internal/jobs/all/").append(customerSpace).append("?");
-        for (Long pid : actionPids) {
-            urlStr.append(String.format("pid=%s&", pid));
+        urlStr.append("pls/internal/jobs/all/").append(shortenCustomerSpace(customerSpace));
+        if (CollectionUtils.isNotEmpty(actionPids) || actionType != null) {
+            urlStr.append("?");
+            if (CollectionUtils.isNotEmpty(actionPids)) {
+                for (Long pid : actionPids) {
+                    urlStr.append(String.format("pid=%s&", pid));
+                }
+            }
+            if (actionType != null) {
+                urlStr.append(String.format("type=%s", actionType));
+            }
         }
-        urlStr.append(String.format("type=%s", actionType));
+        if (urlStr.charAt(urlStr.length() - 1) == '&') {
+            urlStr.setLength(urlStr.length() - 1);
+        }
         return constructUrl(urlStr.toString());
     }
 

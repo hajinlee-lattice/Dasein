@@ -26,6 +26,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -39,8 +41,6 @@ import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class WorkflowJobServiceImplUnitTestNG {
 
@@ -175,6 +175,9 @@ public class WorkflowJobServiceImplUnitTestNG {
                 ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         Assert.assertFalse(CollectionUtils.isEmpty(jobs));
         Assert.assertEquals(jobs.size(), 3);
+        jobs = workflowJobService.findJobsBasedOnActionIdsAndType(null, null);
+        Assert.assertNotNull(jobs);
+        Assert.assertEquals(jobs.size(), 0);
     }
 
     @Test(groups = "unit")

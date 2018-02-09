@@ -1501,8 +1501,8 @@ public class InternalResource extends InternalResourceBase {
     @ApiOperation(value = "Get actions for a tenant")
     public List<Job> getJobsBasedOnActionIdsAndType( //
             @PathVariable("tenantId") String customerSpace, //
-            @RequestParam(value = "pid", required = true) List<Long> pids, //
-            @RequestParam(value = "type", required = true) ActionType actionType, //
+            @RequestParam(value = "pid") List<Long> pids, //
+            @RequestParam(value = "type") ActionType actionType, //
             HttpServletRequest request) {
         checkHeader(request);
         log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s", customerSpace, actionType));
