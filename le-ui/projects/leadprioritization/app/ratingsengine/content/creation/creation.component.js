@@ -1,6 +1,7 @@
 angular.module('lp.ratingsengine.wizard.creation', [])
 .controller('RatingsEngineCreation', function (
-    $q, $state, $stateParams, Rating, RatingsEngineStore, JobsStore
+    $q, $state, $stateParams, $interval,
+    Rating, RatingsEngineStore, JobsStore
 ) {
     var vm = this;
 
@@ -10,7 +11,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     vm.init = function() {
 
-    	console.log(vm.ratingEngine);
+    	// console.log(vm.ratingEngine);
 
     	var model = vm.ratingEngine.activeModel.AI;
 
@@ -20,16 +21,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.modelingConfigFilters = model.modelingConfigFilters;
         vm.trainingSegment = model.trainingSegment;
         vm.trainingProducts = model.trainingProducts;
-
-        console.log(vm.targetProducts);
-
-    	if (vm.targetProducts.length === 1) {
-    		var productId = vm.targetProducts[0].toString(),
-    			cachedProducts = RatingsEngineStore.getCachedProducts(),
-    			product = cachedProducts.find(function(obj) { return obj.ProductId === productId });
-
-    		vm.productName = product.ProductName;
-    	};
 
     	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
         	vm.ratingEngineType = 'First Purchase Cross-Sell'
@@ -59,11 +50,27 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 	    	}
 	    }
 
+        if (vm.targetProducts.length === 1) {
+            vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
+        };
+        if (vm.trainingProducts.length === 1) {
+            vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
+        };
 
-        JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
-            console.log(result);
-        });
-    	
+
+        $interval(function() { 
+            JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
+                console.log("!!!!!!!!!!!!!!!!!!!!!", result);
+            });
+        }, 10 * 1000);
+
+    };
+
+    vm.returnProductNameFromId = function(productId) {
+        var cachedProducts = RatingsEngineStore.getCachedProducts(),
+            product = cachedProducts.find(function(obj) { return obj.ProductId === productId.toString() });
+
+        return product.ProductName;
     };
 
     vm.init();

@@ -53,14 +53,14 @@
                         <button 
                             type="button" 
                             class="button icon-button white-button"
-                            ng-click="editingNote = !editingNote"
+                            ng-click="vm.refreshEditingContents(note); editingNote = !editingNote"
                             ng-show="!editingNote">
                             <i class="fa fa-edit"></i>
                         </button>
                         <button 
                             type="button" 
                             class="button icon-button white-button"
-                            ng-click="vm.cancelNoteEdit(note.NotesContents); editingNote = !editingNote"
+                            ng-click="editingNote = !editingNote"
                             ng-show="editingNote">
                             <i class="fa fa-remove"></i>
                         </button>
@@ -76,13 +76,13 @@
                         class="edit-note"
                         ng-show="editingNote">
                         <form name="editNoteForm">
-                            <textarea ng-model="note.NotesContents"></textarea>
+                            <textarea ng-model="note.editContents"></textarea>
                         </form>
 
                         <button 
                             type="button" 
                             class="button white-button"
-                            ng-click="vm.cancelNoteEdit(note.NotesContents); editingNote = !editingNote">
+                            ng-click="editingNote = !editingNote">
                             {{vm.ResourceUtility.getString('BUTTON_CANCEL_CHANGES_LABEL')}}
                         </button>
                         <button 

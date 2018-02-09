@@ -877,10 +877,12 @@ angular.module('lp.ratingsengine')
 
         $http({
             method: 'POST',
-            url: '/pls/ratingengines/' + ratingid + '/ratingmodels/' + modelid + '/model'
+            url: '/pls/ratingengines/' + ratingid + '/ratingmodels/' + modelid + '/model',
+            headers: {
+                'Accept': 'text/plain'
+            }
         }).then(function(response){
-            console.log(response);
-            deferred.resolve(response);
+            deferred.resolve(response.data);
         });
 
         return deferred.promise;

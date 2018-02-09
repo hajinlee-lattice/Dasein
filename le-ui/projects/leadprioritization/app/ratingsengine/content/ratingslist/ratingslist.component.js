@@ -54,13 +54,14 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.activeCount = vm.count('ACTIVE');
         vm.inactiveCount = vm.count('INACTIVE');
 
-        angular.forEach(vm.current.ratings, function(rating) {
-            if(vm.current.bucketCountMap[rating.id].bucketCoverageCounts.length === 0) {
-                rating.hasBuckets = false;
-            } else {
-                rating.hasBuckets = true;
-            }
-        });
+        // angular.forEach(vm.current.ratings, function(rating) {
+        //     console.log(vm.current.bucketCountMap[rating.id].bucketCoverageCounts);
+        //     // if(vm.current.bucketCountMap[rating.id].bucketCoverageCounts.length === 0) {
+        //     //     rating.hasBuckets = false;
+        //     // } else {
+        //     //     rating.hasBuckets = true;
+        //     // }
+        // });
         
         $scope.$watch('vm.current.ratings', function() {
             vm.header.filter.unfiltered = vm.current.ratings;
@@ -129,13 +130,12 @@ angular.module('lp.ratingsengine.ratingslist', [
         if(tileState.editRating !== true){
             if (rating.type === 'AI_BASED') {
                 if (rating.activeModelId) {
-                    // console.log(rating);
+                    console.log(rating);
                     // $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);    
                 } else {
                     url = 'home.ratingsengine.productpurchase.segment'
                 }
-                // console.log(rating);
-            } else if (rating.type === 'RULE_BASED') {
+            } else {
                 url = RatingsEngineStore.hasRules(rating) 
                     ? 'home.ratingsengine.dashboard'
                     : 'home.ratingsengine.rulesprospects.segment';

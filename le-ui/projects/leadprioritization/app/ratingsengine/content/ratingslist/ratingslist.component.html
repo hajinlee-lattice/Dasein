@@ -93,7 +93,7 @@
                         
                         <div 
                             ng-class="{'inactive': rating.status === 'INACTIVE'}"
-                            ng-if="rating.hasBuckets">
+                            ng-if="rating.type != 'AI_BASED'">
                             <barchart 
                                 header="Account Ratings"
                                 ratings="true" 
@@ -101,9 +101,9 @@
                             </barchart>
                         </div>
 
-                        <div ng-if="!rating.hasBuckets && rating.type != 'AI_BASED'">
+                        <!-- <div ng-if="!rating.hasBuckets && rating.type != 'AI_BASED'">
                             <h4>No Ratings Available</h4>
-                        </div>
+                        </div> -->
 
                         <div 
                             ng-if="rating.type === 'AI_BASED'"

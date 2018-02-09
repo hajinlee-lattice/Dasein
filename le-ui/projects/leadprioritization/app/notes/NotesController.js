@@ -23,11 +23,21 @@ angular.module('lp.notes', [
 
     vm.init = function($q) {
 
+        console.log(vm.notes);
+
+        angular.forEach(vm.notes, function(note) {
+            note.editContents = angular.copy(note.NotesContents);
+        });
+
         vm.id = vm.isRating ? $stateParams.rating_id : $stateParams.modelId;
         vm.referModelName = vm.isRating ? '' : Model.ModelDetails.Name.slice(0, -7)
 
     }
     vm.init();
+
+    vm.refreshEditingContents = function(note) {
+        note.editContents = angular.copy(note.NotesContents);
+    };
 
     vm.addNote = function(note){
 
@@ -56,6 +66,8 @@ angular.module('lp.notes', [
     }
 
     vm.updateNote = function(note) {
+        
+        note.NotesContents = note.editContents;
 
         NotesService.UpdateNote(vm.id, vm.userName, note).then(function(result){
             if (result != null && result.success === true) {
@@ -72,12 +84,6 @@ angular.module('lp.notes', [
                 vm.showAddNoteError = true;
             }
         });
-    }
-
-    vm.cancelNoteEdit = function(content) {
-        console.log(content);
-        $scope.NotesContents = content;
-
     }
 
     vm.deleteNote = function($event, noteId) {

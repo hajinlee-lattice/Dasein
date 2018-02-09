@@ -543,18 +543,23 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    var canceler = $q.defer();
+
     this.playLaunches = function(params) {
-        var deferred = $q.defer();
+
+        canceler.resolve("cancelled");
+        canceler = $q.defer();
+
         $http({
             method: 'GET',
             url: this.host + '/play/launches/dashboard/',
             params: params
         }).then(function(response){
-            deferred.resolve(response.data);
+            canceler.resolve(response.data);
         }, function(response) {
-            deferred.resolve(response.data);
+            canceler.resolve(response.data);
         });
-        return deferred.promise;
+        return canceler.promise;
     }
 
     this.launchPlay = function(play) {
