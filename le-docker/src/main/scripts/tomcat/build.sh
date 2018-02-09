@@ -19,10 +19,10 @@ pushd le-microservice
 bash build.sh $MICROSERVICES
 popd
 
-for img in 'playmaker' 'oauth2'; do
+for img in 'oauth2'; do
 
     if [[ $MICROSERVICES == *"${img}"* ]]; then
-    pushd le-${img} &&
+        pushd le-${img} &&
         build_docker latticeengines/${img} &&
         popd &
     fi

@@ -100,7 +100,7 @@ if [ "${MICROSERVICES}" = "" ]; then
     MICROSERVICES="${MICROSERVICES},objectapi"
     MICROSERVICES="${MICROSERVICES},dante"
     MICROSERVICES="${MICROSERVICES},saml"
-
+    MICROSERVICES="${MICROSERVICES},playmaker"
 fi
 
 mkdir -p /tmp/latticeengines || true
@@ -108,11 +108,11 @@ mkdir tmp || true
 
 for service in $(echo $MICROSERVICES | sed "s/,/ /g"); do
     WAR=${service} &&
-    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ] || [ "${WAR}" = "saml" ]; then
+    if [ "${WAR}" = "api" ] || [ "${WAR}" = "admin" ] || [ "${WAR}" = "pls" ] || [ "${WAR}" = "matchapi" ] || [ "${WAR}" = "scoringapi" ] || [ "${WAR}" = "ulysses" ] || [ "${WAR}" = "saml" ] || [ "${WAR}" = "playmaker" ]; then
         WAR=ROOT
     fi &&
     IMAGE=latticeengines/${service} &&
-    if [ "${service}" != "playmaker" ] && [ "${service}" != "oauth2" ]; then
+    if [ "${service}" != "oauth2" ]; then
         build_docker ${IMAGE} ${service} ${WAR}
     fi
 done

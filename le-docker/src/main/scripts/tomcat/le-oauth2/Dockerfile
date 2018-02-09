@@ -16,5 +16,4 @@ RUN mkdir ROOT \
     && cp -r /META-INF ROOT \
     && rm -r -f ${CATALINA_HOME}/webapps/ROOT* \
     && cp -r ROOT ${CATALINA_HOME}/webapps/ROOT \
-    && cp /application.properties ROOT/WEB-INF/classes/application.properties \
-    && cp -r ROOT ${CATALINA_HOME}/webapps/oauth2
+    && cp /application.properties ROOT/WEB-INF/classes/application.properties
