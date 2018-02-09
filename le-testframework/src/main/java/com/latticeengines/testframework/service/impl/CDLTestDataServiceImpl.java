@@ -15,6 +15,10 @@ import java.util.concurrent.TimeoutException;
 import javax.inject.Inject;
 
 import org.apache.commons.io.IOUtils;
+import org.springframework.retry.RetryCallback;
+import org.springframework.retry.RetryContext;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -122,6 +126,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
         DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
         container.setVersion(activeVersion);
+        container.setName(NamingUtils.timestamp("Stats"));
         dataCollectionProxy.upsertStats(customerSpace, container);
     }
 
@@ -129,7 +134,18 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         if (srcTables.containsKey(entity)) {
             String srcTable = srcTables.get(entity);
             String tgtTable = servingStoreName(tenantId, entity);
-            redshiftService.cloneTable(srcTable, tgtTable);
+            RetryTemplate retry = new RetryTemplate();
+            SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+            retryPolicy.setMaxAttempts(2);
+            retry.setRetryPolicy(retryPolicy);
+            retry.setThrowLastExceptionOnExhausted(true);
+            retry.execute(new RetryCallback<Void, RuntimeException>() {
+                @Override
+                public Void doWithRetry(RetryContext context) {
+                    redshiftService.cloneTable(srcTable, tgtTable);
+                    return  null;
+                }
+            });
         }
     }
 
@@ -139,8 +155,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 BusinessEntity.Contact, //
                 BusinessEntity.Product, //
                 BusinessEntity.Transaction, //
-                BusinessEntity.PeriodTransaction
-        ).contains(entity)) {
+                BusinessEntity.PeriodTransaction).contains(entity)) {
             String customerSpace = CustomerSpace.parse(tenantId).toString();
             Table table = readTableFromS3(tenantId, entity);
             metadataProxy.createTable(customerSpace, table.getName(), table);
