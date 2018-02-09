@@ -206,7 +206,7 @@ public class RatingEngineResource {
     @PostMapping(value = "/coverage")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingsCountResponse getRatingEngineCoverageInfo(@RequestBody RatingsCountRequest ratingModelSegmentIds) {
+    public RatingsCountResponse getRatingEngineCoverageInfo(@PathVariable String customerSpace, @RequestBody RatingsCountRequest ratingModelSegmentIds) {
         return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 
