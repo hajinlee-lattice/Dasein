@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.db.exposed.schemagen.postprocess.PostProcessor;
 import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcessor;
+import com.latticeengines.db.naming.LEImplicitNamingStrategy;
 
 public class SchemaGenerator {
 
@@ -82,8 +83,8 @@ public class SchemaGenerator {
 		hibernateProperties.put(AvailableSettings.GLOBALLY_QUOTED_IDENTIFIERS, true);
 		hibernateProperties.put(AvailableSettings.AUTOCOMMIT, true);
 		hibernateProperties.put(AvailableSettings.DIALECT, dialect.getDialectClass());
-		
-		return hibernateProperties;
+        hibernateProperties.put(AvailableSettings.IMPLICIT_NAMING_STRATEGY, LEImplicitNamingStrategy.INSTANCE);
+        return hibernateProperties;
     }
 
     private void init(String... packages) throws Exception {
