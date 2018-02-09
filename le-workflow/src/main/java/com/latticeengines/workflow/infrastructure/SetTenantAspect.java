@@ -21,17 +21,23 @@ public class SetTenantAspect {
 
     @Before("@annotation(com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace)")
     public void allMethodsWorkflowJobService(JoinPoint joinPoint) {
-        String customerSpace = String.valueOf(joinPoint.getArgs()[0]);
-        if (!customerSpace.equalsIgnoreCase("null")) {
+        if (joinPoint.getArgs()[0] != null) {
+            String customerSpace = String.valueOf(joinPoint.getArgs()[0]);
             setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
+        } else {
+            setMultiTenantContext(null);
         }
     }
 
     private void setMultiTenantContext(String customerSpace) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
-        if (tenant == null) {
-            throw new RuntimeException(String.format("No tenant found with id %s", customerSpace));
+        if (customerSpace != null) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+            if (tenant == null) {
+                throw new RuntimeException(String.format("No tenant found with id %s", customerSpace));
+            }
+            MultiTenantContext.setTenant(tenant);
+        } else {
+            MultiTenantContext.setTenant(null);
         }
-        MultiTenantContext.setTenant(tenant);
     }
 }

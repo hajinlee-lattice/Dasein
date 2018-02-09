@@ -250,13 +250,11 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         MultiTenantContext.setTenant(tenant3);
         workflowExecutionTypes.add("application_10000");
         jobs = workflowJobService.getJobs(null, null, workflowExecutionTypes, true, null, null);
-        Assert.assertEquals(jobs.size(), 2);
-        Assert.assertEquals(jobs.get(0).getApplicationId(), "application_30000");
-        Assert.assertEquals(jobs.get(0).getSteps().size(), 1);
-        Assert.assertEquals(jobs.get(0).getSteps().get(0).getJobStepType(), "step3_1");
-        Assert.assertEquals(jobs.get(1).getApplicationId(), "application_30001");
-        Assert.assertEquals(jobs.get(1).getSteps().size(), 4);
-        Assert.assertEquals(jobs.get(1).getSteps().get(3).getJobStepType(), "step31_1");
+        Assert.assertEquals(jobs.size(), 3);
+        jobs.forEach(job -> {
+            Assert.assertTrue(workflowExecutionTypes.contains(job.getApplicationId()));
+            Assert.assertTrue(job.getSteps().size() > 0);
+        });
 
         jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds,
                 Collections.singletonList("application_10002"), true, false, -1L);
