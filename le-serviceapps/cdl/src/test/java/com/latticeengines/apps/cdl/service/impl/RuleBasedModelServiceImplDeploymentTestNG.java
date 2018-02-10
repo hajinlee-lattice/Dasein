@@ -19,12 +19,12 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -34,9 +34,9 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     private static final Logger log = LoggerFactory.getLogger(RuleBasedModelServiceImplDeploymentTestNG.class);
 
     private static final String CREATED_BY = "lattice@lattice-engines.com";
-    private static final Long RATING_A_COUNT = 4L;
-    private static final Long RATING_D_COUNT = 190L;
-    private static final Long RATING_F_COUNT = 9L;
+    private static final Long RATING_A_COUNT = 2L;
+    private static final Long RATING_D_COUNT = 212L;
+    private static final Long RATING_F_COUNT = 10L;
 
     @Inject
     private SegmentProxy segmentProxy;

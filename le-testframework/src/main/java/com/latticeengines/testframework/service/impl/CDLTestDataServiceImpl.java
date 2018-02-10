@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.zip.GZIPInputStream;
 
 import javax.inject.Inject;
 
@@ -48,7 +49,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private static final Logger log = LoggerFactory.getLogger(CDLTestDataServiceImpl.class);
 
     private static final String S3_DIR = "le-testframework/cdl";
-    private static final String S3_VERSION = "2";
+    private static final String S3_VERSION = "3";
     private static final Date DATE = new Date();
 
     private static final ImmutableMap<BusinessEntity, String> srcTables = ImmutableMap.of( //
@@ -77,7 +78,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     public void populateData(String tenantId) {
         final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
         dataCollectionProxy.getDefaultDataCollection(shortTenantId);
-        ExecutorService executors = ThreadPoolUtils.getCachedThreadPool("cdl-test-data");
+        ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
         Set<Future> futures = new HashSet<>();
         futures.add(executors.submit(() -> {
             populateStats(shortTenantId);
@@ -121,8 +122,9 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         StatisticsContainer container;
         try {
-            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, "stats_container.json");
-            String content = IOUtils.toString(is, Charset.forName("UTF-8"));
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, "stats_container.json.gz");
+            GZIPInputStream gis = new GZIPInputStream(is);
+            String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
             content = content.replace("$$StatsName$$", NamingUtils.timestamp("Stats", DATE));
             ObjectMapper om = new ObjectMapper();
             container = om.readValue(content, StatisticsContainer.class);
@@ -144,7 +146,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             retryPolicy.setMaxAttempts(3);
             retry.setRetryPolicy(retryPolicy);
             ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-            backOffPolicy.setInitialInterval(5000);
+            backOffPolicy.setInitialInterval(2000);
             backOffPolicy.setMultiplier(2.0);
             retry.setBackOffPolicy(backOffPolicy);
             retry.setThrowLastExceptionOnExhausted(true);
@@ -180,10 +182,11 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
 
     private Table readTableFromS3(String tenantId, BusinessEntity entity) {
         TableRoleInCollection role = entity.getServingStore();
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json");
+        InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json.gz");
         Table table;
         try {
-            String content = IOUtils.toString(is, Charset.forName("UTF-8"));
+            GZIPInputStream gis = new GZIPInputStream(is);
+            String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
             content = content.replace("$$TableName$$", servingStoreName(tenantId, entity));
             ObjectMapper om = new ObjectMapper();
             table = om.readValue(content, Table.class);

@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -274,7 +275,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID1));
         Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID2));
         Assert.assertEquals(aiModel.getWorkflowType(), ModelWorkflowType.CROSS_SELL);
-        Assert.assertNotNull(aiModel.getTrainingProducts());
+        Assert.assertFalse(CollectionUtils.isEmpty(aiModel.getTrainingProducts()));
         Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
         Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
     }
@@ -316,12 +317,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel.getId());
         Assert.assertEquals(aiModel.getIteration(), 1);
 
-        Assert.assertNull(aiModel.getTargetProducts());
-        Assert.assertNull(aiModel.getTrainingProducts());
+        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTargetProducts()));
+        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTrainingProducts()));
         Assert.assertNull(aiModel.getTrainingSegment());
         Assert.assertNull(aiModel.getWorkflowType());
-        Assert.assertNull(aiModel.getTargetProducts());
-        Assert.assertNull(aiModel.getTrainingProducts());
         Assert.assertNull(aiModel.getModelingJobId());
     }
 
