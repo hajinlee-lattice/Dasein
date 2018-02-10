@@ -43,7 +43,7 @@ public class ModelResource {
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Get all notes for single rating engine via rating engine id.")
+    @ApiOperation(value = "Kick off a modeling job given the RatingEngineModelingParameters")
     public String modelByParameters(@PathVariable String customerSpace, @PathVariable String modelName,
             @RequestBody RatingEngineModelingParameters ratingEngineModelingParameters) {
         if (!NameValidationUtils.validateModelName(modelName)) {
