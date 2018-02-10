@@ -75,7 +75,9 @@ public class StatsCubeUtils {
             InterfaceName.AccountId.name(), //
             InterfaceName.ContactId.name(), //
             InterfaceName.ProductId.name(), //
-            InterfaceName.CustomerParentAccountID.name());
+            InterfaceName.CustomerParentAccountID.name(), //
+            InterfaceName.CDLCreatedTime.name(), //
+            InterfaceName.CDLUpdatedTime.name());
 
     public static StatsCube parseAvro(Iterator<GenericRecord> records) {
         final AtomicLong maxCount = new AtomicLong(0L);
