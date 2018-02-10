@@ -226,6 +226,16 @@ public class RatingEngineResource {
         return ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngineId, ratingModelId, modelingQueryType);
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    public Long getModelingQueryCount(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getModelingQueryCount(tenant.getId(), ratingEngineId, ratingModelId,
+                modelingQueryType);
+    }
+
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")

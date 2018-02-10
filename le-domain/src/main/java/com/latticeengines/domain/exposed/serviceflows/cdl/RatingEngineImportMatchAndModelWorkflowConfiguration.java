@@ -287,6 +287,16 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder aiModelId(String aiModelId) {
+            model.setAiModelId(aiModelId);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            model.setRatingEngineId(ratingEngineId);
+            return this;
+        }
+
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
             return this;

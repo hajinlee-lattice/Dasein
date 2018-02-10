@@ -62,6 +62,10 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean activateModelSummaryByDefault = false;
 
+    private String aiModelId;
+
+    private String ratingEngineId;
+
     @JsonProperty
     public List<DataRule> getDataRules() {
         return dataRules;
@@ -268,5 +272,17 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     public void setActivateModelSummaryByDefault(boolean activateModelSummaryByDefault) {
         this.activateModelSummaryByDefault = activateModelSummaryByDefault;
     }
+
+    @JsonProperty
+    public String getAiModelId() { return aiModelId; }
+
+    @JsonProperty
+    public void setAiModelId(String aiModelId) { this.aiModelId = aiModelId; }
+
+    @JsonProperty
+    public String getRatingEngineId() { return ratingEngineId; }
+
+    @JsonProperty
+    public void setRatingEngineId(String ratingEngineId) { this.ratingEngineId = ratingEngineId; }
 
 }

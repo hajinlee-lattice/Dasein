@@ -123,6 +123,8 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .bucketMetadata(
                         new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .liftChart(parameters.isLiftChart()) //
+                .aiModelId(parameters.getAiModelId()) //
+                .ratingEngineId(parameters.getRatingEngineId()) //
                 .notesContent(parameters.getNotesContent());
         return builder.build();
     }
@@ -137,9 +139,8 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
 
     private String getTrainPath(RatingEngineModelingParameters parameters) {
         String outputFileName = "file_" + getTableName(parameters) + ".csv";
-        String outputPath = PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), getCustomerSpace()).toString()
-                + "/" + outputFileName;
-        return outputPath;
+        return PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), getCustomerSpace()).toString() + "/"
+                + outputFileName;
     }
 
     private String getDataCloudVersion(ModelingParameters parameters) {
@@ -160,7 +161,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
             parameters.setTransformationGroup(transformationGroup);
         }
         RatingEngineImportMatchAndModelWorkflowConfiguration configuration = generateConfiguration(parameters);
-        ApplicationId applicationId = workflowJobService.submit(configuration);
-        return applicationId;
+        return workflowJobService.submit(configuration);
     }
 }

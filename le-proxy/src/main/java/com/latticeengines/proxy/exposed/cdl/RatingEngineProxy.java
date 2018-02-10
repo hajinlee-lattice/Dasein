@@ -176,13 +176,21 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return get("getModelingQuery", url, EventFrontEndQuery.class);
     }
 
+    public Long getModelingQueryCount(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
+                + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        return get("getModelingQueryCount", url, Long.class);
+    }
+
     public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("modelRatingEngine", url, null, String.class);
     }
 
-    public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace, RatingsCountRequest ratingModelSegmentIds) {
+    public RatingsCountResponse getRatingEngineCoverageInfo(String customerSpace,
+            RatingsCountRequest ratingModelSegmentIds) {
         String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
         return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }

@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component("ratingEngineService")
@@ -70,6 +71,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private EntityProxy entityProxy;
+
+    @Inject
+    private EventProxy eventProxy;
 
     @Inject
     private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
@@ -220,9 +224,27 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
+    public Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType) {
+
+        EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType);
+        switch (modelingQueryType) {
+        case TARGET:
+            return eventProxy.getScoringCount(customerSpace, efeq);
+        case TRAINING:
+            return eventProxy.getTrainingCount(customerSpace, efeq);
+        case EVENT:
+            return eventProxy.getEventCount(customerSpace, efeq);
+        default:
+            throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
+        }
+    }
+
+    @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel) {
         if (ratingModel instanceof AIModel) {
-            ApplicationId jobId = ((AIModel) ratingModel).getModelingJobId();
+            AIModel aiModel = (AIModel) ratingModel;
+            ApplicationId jobId = aiModel.getModelingJobId();
             if (jobId == null) {
                 if (CollectionUtils.isEmpty(((AIModel) ratingModel).getTargetProducts())) {
                     throw new LedpException(LedpCode.LEDP_40012,
@@ -235,6 +257,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 parameters.setDescription(ratingEngine.getDisplayName());
                 parameters.setModuleName("Module");
                 parameters.setUserId(MultiTenantContext.getEmailAddress());
+                parameters.setRatingEngineId(ratingEngine.getId());
+                parameters.setAiModelId(aiModel.getId());
                 parameters.setTargetFilterQuery(
                         getModelingQuery(customerSpace, ratingEngine, ratingModel, ModelingQueryType.TARGET));
                 parameters.setTargetFilterTableName(ratingModel.getId() + "_target");

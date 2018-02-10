@@ -34,6 +34,12 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     @JsonProperty
     private boolean liftChart = true;
 
+    @JsonProperty
+    private String aiModelId;
+
+    @JsonProperty
+    private String ratingEngineId;
+
     public String getTableName() {
         return tableName;
     }
@@ -105,4 +111,14 @@ public class RatingEngineModelingParameters extends ModelingParameters {
     public void setLiftChart(boolean liftChart) {
         this.liftChart = liftChart;
     }
+
+    public String getAiModelId() {
+        return aiModelId;
+    }
+
+    public void setAiModelId(String aiModelId) { this.aiModelId = aiModelId; }
+
+    public String getRatingEngineId() { return ratingEngineId; }
+
+    public void setRatingEngineId(String ratingEngineId) { this.ratingEngineId = ratingEngineId; }
 }

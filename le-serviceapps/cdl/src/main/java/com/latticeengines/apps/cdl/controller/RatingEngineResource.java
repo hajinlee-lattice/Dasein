@@ -192,6 +192,18 @@ public class RatingEngineResource {
         return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType);
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    public Long getModelingQueryCount(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+        RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
+        RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
+        return ratingEngineService.getModelingQueryCount(customerSpace, ratingEngine, ratingModel, modelingQueryType);
+
+    }
+
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
@@ -206,7 +218,8 @@ public class RatingEngineResource {
     @PostMapping(value = "/coverage")
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
-    public RatingsCountResponse getRatingEngineCoverageInfo(@PathVariable String customerSpace, @RequestBody RatingsCountRequest ratingModelSegmentIds) {
+    public RatingsCountResponse getRatingEngineCoverageInfo(@PathVariable String customerSpace,
+            @RequestBody RatingsCountRequest ratingModelSegmentIds) {
         return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
     }
 

@@ -38,6 +38,9 @@ public interface RatingEngineService {
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType);
 
+    Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            ModelingQueryType modelingQueryType);
+
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, RatingModel ratingModel);
 
 }

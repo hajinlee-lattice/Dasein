@@ -7,11 +7,14 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
@@ -22,6 +25,9 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
     private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
 
     private InternalResourceRestApiProxy proxy = null;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -48,9 +54,26 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             String modelId = eventToModelId.get(event);
             proxy.updateModelSummary(modelId, attrMap);
 
-            saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID.toString(), modelId);
+            saveOutputValue(WorkflowContextConstants.Inputs.MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_ID, modelId);
             putStringValueInContext(SCORING_MODEL_TYPE, eventToModelSummary.get(event).getModelType());
+        }
+
+        RatingModel ratingModel = ratingEngineProxy.getRatingModel(configuration.getCustomerSpace().toString(),
+                configuration.getRatingEngineId(), configuration.getAiModelId());
+
+        if (ratingModel != null && ratingModel instanceof AIModel) {
+            AIModel aiModel = (AIModel) ratingModel;
+            for (String event : eventToModelId.keySet()) {
+                aiModel.setModelSummary(eventToModelSummary.get(event));
+            }
+            ratingEngineProxy.updateRatingModel(configuration.getCustomerSpace().toString(),
+                    configuration.getRatingEngineId(), configuration.getAiModelId(), aiModel);
+            log.info("Attaching model summary: " + aiModel.getModelSummary().getId() + " to RatingEngine: "
+                    + configuration.getRatingEngineId() + ", AIModel: " + configuration.getAiModelId());
+        } else {
+            log.info("No model found for RatingEngine: " + configuration.getRatingEngineId() + ", AIModel: "
+                    + configuration.getAiModelId());
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);
