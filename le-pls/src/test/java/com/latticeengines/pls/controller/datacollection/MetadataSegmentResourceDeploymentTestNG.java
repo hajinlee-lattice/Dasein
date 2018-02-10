@@ -64,7 +64,7 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
     @Test(groups = "deployment")
     public void testCreate() {
         List<MetadataSegment> segments = testSegmentProxy.getSegments();
-        Assert.assertEquals(segments.size(), 1);
+        Assert.assertEquals(segments.size(), 0);
 
         Date preCreationTime = new Date();
 
