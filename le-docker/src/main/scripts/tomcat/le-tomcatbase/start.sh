@@ -11,7 +11,6 @@ if [ -f "/etc/ledp/ledp_keystore.jks" ]; then
     echo "copying jks file from /etc/ledp/ledp_keystore.jks"
     cp -f /etc/ledp/ledp_keystore.jks /etc/pki/java/tomcat.jks
     chmod 600 /etc/pki/java/tomcat.jks
-    rm -rf /etc/pki/java/cacerts || true
     cp -f /etc/ledp/cacerts /etc/pki/java/cacerts
     chmod 600 /etc/pki/java/cacerts
 fi
@@ -20,7 +19,7 @@ if [ -f "/etc/ledp/lattice.crt" ]; then
     echo "Copying /etc/ledp/lattice.crt to /etc/pki/tls/server.crt"
     cp -f /etc/ledp/lattice.crt /etc/pki/tls/server.crt
 fi
-chmod 600 /etc/pki/tls/star.lattice.local.crt
+chmod 600 /etc/pki/tls/server.crt
 
 if [ -f "/etc/ledp/lattice.pem" ]; then
     echo "Copying /etc/ledp/lattice.pem /etc/pki/tls/server.key"
