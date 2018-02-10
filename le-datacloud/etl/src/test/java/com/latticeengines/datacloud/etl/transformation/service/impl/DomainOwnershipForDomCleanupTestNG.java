@@ -17,8 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
-import com.latticeengines.datacloud.dataflow.transformation.CleanupAmSeedSrcFlow;
-import com.latticeengines.datacloud.dataflow.transformation.CleanupOrbSecSrcFlow;
 import com.latticeengines.datacloud.dataflow.transformation.DomainOwnershipRebuildFlow;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -46,8 +44,8 @@ public class DomainOwnershipForDomCleanupTestNG
         progress = transformData(progress);
         finish(progress);
         confirmResultFile(progress);
-        confirmIntermediateSource(domOwnTable, targetVersion);
-        confirmIntermediateSource(amSeedCleanup, targetVersion);
+        //confirmIntermediateSource(domOwnTable, targetVersion);
+        //confirmIntermediateSource(amSeedCleanup, targetVersion);
         cleanupProgressTables();
     }
 
@@ -145,7 +143,9 @@ public class DomainOwnershipForDomCleanupTestNG
             step1.setTransformer(DomainOwnershipRebuildFlow.TRANSFORMER_NAME);
             String confParamStr1 = getDomOwnershipTableConfig();
             step1.setConfiguration(confParamStr1);
-            step1.setTargetSource(domOwnTable.getSourceName());
+            step1.setTargetSource(source.getSourceName());
+            
+            /*
 
             // -----------------
             TransformationStepConfig step2 = new TransformationStepConfig();
@@ -170,13 +170,13 @@ public class DomainOwnershipForDomCleanupTestNG
             step3.setBaseSources(cleanupOrbSecSrc);
             step3.setTransformer(CleanupOrbSecSrcFlow.TRANSFORMER_NAME);
             step3.setConfiguration(confParamStr1);
-            step3.setTargetSource(source.getSourceName());
+            step3.setTargetSource(source.getSourceName());*/
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
-            steps.add(step2);
-            steps.add(step3);
+            //steps.add(step2);
+            //steps.add(step3);
 
             configuration.setSteps(steps);
             return configuration;
@@ -303,23 +303,40 @@ public class DomainOwnershipForDomCleanupTestNG
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
+        /*
         Map<String, Object[]> orbSecSrcExpValues = new HashMap<>();
         for (Object[] data : orbSecSrcCleanedupValues) {
             orbSecSrcExpValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
+        */
+        Map<String, Object[]> expectedData = new HashMap<>();
+        for (Object[] data : expectedDataValues) {
+            expectedData.put(String.valueOf(data[0]), data);
+        }
         while (records.hasNext()) {
+            /*
             GenericRecord record = records.next();
             log.info("record : " + record);
             String primDomain = String.valueOf(record.get(0));
             String secDomain = String.valueOf(record.get(1));
             Object[] expectedVal = orbSecSrcExpValues.get(primDomain + secDomain);
-            /*
             Assert.assertTrue(isObjEquals(record.get(0), expectedVal[0]));
             Assert.assertTrue(isObjEquals(record.get(1), expectedVal[1]));*/
+            GenericRecord record = records.next();
+            log.info("record : " + record);
+            String domain = String.valueOf(record.get(0));
+            Object[] expected = expectedData.get(domain);
+            Assert.assertTrue(isObjEquals(record.get(0), expected[0]));
+            Assert.assertTrue(isObjEquals(record.get(1), expected[1]));
+            Assert.assertTrue(isObjEquals(record.get(2), expected[2]));
+            Assert.assertTrue(isObjEquals(record.get(3), expected[3]));
+            Assert.assertTrue(isObjEquals(record.get(4), expected[4]));
+            Assert.assertTrue(isObjEquals(record.get(5), expected[5]));
             rowCount++;
         }
-        System.out.println("rowCount : " + rowCount);
+        Assert.assertEquals(rowCount, 8);
+        rowCount++;
+        }
+        //System.out.println("rowCount : " + rowCount);
         //Assert.assertEquals(rowCount, 11);
     }
-
-}
