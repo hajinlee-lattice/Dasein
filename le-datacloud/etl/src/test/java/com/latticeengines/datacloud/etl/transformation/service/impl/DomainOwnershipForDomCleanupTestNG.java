@@ -36,7 +36,7 @@ public class DomainOwnershipForDomCleanupTestNG
     private static final String ACC_MASTER_SEED_CLEANUP = "AccountMasterSeedCleanedUp";
     private static final Logger log = LoggerFactory.getLogger(DomainOwnershipForDomCleanupTestNG.class);
 
-    @Test(groups = "pipeline1", enabled = true)
+    @Test(groups = "pipeline1", enabled = false)
     public void testTransformation() {
         prepareAmSeed();
         prepareOrbSeedSecondaryDom();
