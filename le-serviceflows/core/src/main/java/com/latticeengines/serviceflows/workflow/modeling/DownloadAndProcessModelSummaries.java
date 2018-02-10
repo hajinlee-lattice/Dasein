@@ -2,6 +2,7 @@ package com.latticeengines.serviceflows.workflow.modeling;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -59,21 +60,22 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             putStringValueInContext(SCORING_MODEL_TYPE, eventToModelSummary.get(event).getModelType());
         }
 
-        RatingModel ratingModel = ratingEngineProxy.getRatingModel(configuration.getCustomerSpace().toString(),
-                configuration.getRatingEngineId(), configuration.getAiModelId());
-
-        if (ratingModel != null && ratingModel instanceof AIModel) {
-            AIModel aiModel = (AIModel) ratingModel;
-            for (String event : eventToModelId.keySet()) {
-                aiModel.setModelSummary(eventToModelSummary.get(event));
+        if (StringUtils.isNotBlank(configuration.getRatingEngineId())) {
+            RatingModel ratingModel = ratingEngineProxy.getRatingModel(configuration.getCustomerSpace().toString(),
+                    configuration.getRatingEngineId(), configuration.getAiModelId());
+            if (ratingModel != null && ratingModel instanceof AIModel) {
+                AIModel aiModel = (AIModel) ratingModel;
+                for (String event : eventToModelId.keySet()) {
+                    aiModel.setModelSummary(eventToModelSummary.get(event));
+                }
+                ratingEngineProxy.updateRatingModel(configuration.getCustomerSpace().toString(),
+                        configuration.getRatingEngineId(), configuration.getAiModelId(), aiModel);
+                log.info("Attaching model summary: " + aiModel.getModelSummary().getId() + " to RatingEngine: "
+                        + configuration.getRatingEngineId() + ", AIModel: " + configuration.getAiModelId());
+            } else {
+                log.info("No model found for RatingEngine: " + configuration.getRatingEngineId() + ", AIModel: "
+                        + configuration.getAiModelId());
             }
-            ratingEngineProxy.updateRatingModel(configuration.getCustomerSpace().toString(),
-                    configuration.getRatingEngineId(), configuration.getAiModelId(), aiModel);
-            log.info("Attaching model summary: " + aiModel.getModelSummary().getId() + " to RatingEngine: "
-                    + configuration.getRatingEngineId() + ", AIModel: " + configuration.getAiModelId());
-        } else {
-            log.info("No model found for RatingEngine: " + configuration.getRatingEngineId() + ", AIModel: "
-                    + configuration.getAiModelId());
         }
 
         putObjectInContext(EVENT_TO_MODELID, eventToModelId);
