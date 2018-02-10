@@ -14,7 +14,7 @@ if [ -f "/etc/ledp/lattice.key" ]; then
     echo "Copying /etc/ledp/lattice.key /etc/pki/tls/private/private.key"
     cp -f /etc/ledp/lattice.pem /etc/pki/tls/private/private.key
     chmod 600 /etc/pki/tls/private/private.key
-    cp -f /etc/ledp/lattice.pem /etc/pki/tls/private.key
+    cp -f /etc/ledp/lattice.pem /etc/pki/tls/server.key
     chmod 600 /etc/pki/tls/server.key
 fi
 
