@@ -6,6 +6,7 @@ import java.util.List;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ActionType;
 
 public class InternalResourceRestApiProxyUnitTestNG {
@@ -22,14 +23,15 @@ public class InternalResourceRestApiProxyUnitTestNG {
 
     @Test(groups = "unit")
     public void testGenerateFindJobsBasedOnActionIdsAndTypeUrl() {
+        String customerSpace = CustomerSpace.parse(tenantId).toString();
         String url = internalProxy.generateFindJobsBasedOnActionIdsAndTypeUrl(tenantId, null, null);
-        Assert.assertEquals(url, expectedPrefix + tenantId);
+        Assert.assertEquals(url, expectedPrefix + customerSpace);
         url = internalProxy.generateFindJobsBasedOnActionIdsAndTypeUrl(tenantId, null, actionType);
-        Assert.assertEquals(url, expectedPrefix + tenantId + "?type=" + actionType.name());
+        Assert.assertEquals(url, expectedPrefix + customerSpace + "?type=" + actionType.name());
         url = internalProxy.generateFindJobsBasedOnActionIdsAndTypeUrl(tenantId, actionIds, null);
-        Assert.assertEquals(url, expectedPrefix + tenantId + "?pid=1&pid=2&pid=3");
+        Assert.assertEquals(url, expectedPrefix + customerSpace + "?pid=1&pid=2&pid=3");
         url = internalProxy.generateFindJobsBasedOnActionIdsAndTypeUrl(tenantId, actionIds, actionType);
-        Assert.assertEquals(url, expectedPrefix + tenantId + "?pid=1&pid=2&pid=3&type=" + actionType.name());
+        Assert.assertEquals(url, expectedPrefix + customerSpace + "?pid=1&pid=2&pid=3&type=" + actionType.name());
     }
 
 }

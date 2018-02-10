@@ -1,7 +1,5 @@
 package com.latticeengines.proxy.exposed.pls;
 
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
-
 import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
@@ -658,7 +656,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     String generateFindJobsBasedOnActionIdsAndTypeUrl(String customerSpace, List<Long> actionPids,
             ActionType actionType) {
         StringBuilder urlStr = new StringBuilder();
-        urlStr.append("pls/internal/jobs/all/").append(shortenCustomerSpace(customerSpace));
+        urlStr.append("pls/internal/jobs/all/").append(CustomerSpace.parse(customerSpace).toString());
         if (CollectionUtils.isNotEmpty(actionPids) || actionType != null) {
             urlStr.append("?");
             if (CollectionUtils.isNotEmpty(actionPids)) {
