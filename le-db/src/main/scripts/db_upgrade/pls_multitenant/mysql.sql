@@ -39,7 +39,7 @@ DELIMITER ;
 
 CREATE PROCEDURE `AddWorkflowJobUpdate`()
     BEGIN
-        CREATE TABLE `WORKFLOW_JOB_UPDATE` (
+        CREATE TABLE IF NOT EXISTS `WORKFLOW_JOB_UPDATE` (
             `PID` bigint(20) NOT NULL AUTO_INCREMENT,
             `LAST_UPDATE_TIME` bigint(20) NOT NULL,
             `WORKFLOW_PID` bigint(20) NOT NULL,
