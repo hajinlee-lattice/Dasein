@@ -36,7 +36,6 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -135,47 +134,6 @@ public class CheckpointService {
 
     void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
-    }
-
-    void verifyFirstProfileCheckpoint() throws IOException {
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
-                (long) ACCOUNT_IMPORT_SIZE_1, TableRoleInCollection.ConsolidatedContact, (long) CONTACT_IMPORT_SIZE_1,
-                TableRoleInCollection.ConsolidatedProduct, (long) PRODUCT_IMPORT_SIZE_1,
-                TableRoleInCollection.CalculatedPurchaseHistory, (long) NUM_PURCHASE_HISTORY_1);
-        verifyCheckpoint(expectedCounts);
-    }
-
-    void verifySecondConsolidateCheckpoint() throws IOException {
-        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
-        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
-                numAccounts, TableRoleInCollection.ConsolidatedContact, numContacts,
-                TableRoleInCollection.ConsolidatedProduct, numProducts);
-        verifyCheckpoint(expectedCounts);
-    }
-
-    void verifySecondProfileCheckpoint() throws IOException {
-        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
-        long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
-        Map<TableRoleInCollection, Long> expectedCounts = ImmutableMap.of(TableRoleInCollection.ConsolidatedAccount,
-                numAccounts, TableRoleInCollection.ConsolidatedContact, numContacts,
-                TableRoleInCollection.ConsolidatedProduct, numProducts, TableRoleInCollection.CalculatedPurchaseHistory,
-                (long) NUM_PURCHASE_HISTORY_2);
-        verifyCheckpoint(expectedCounts);
-    }
-
-    private void verifyCheckpoint(Map<TableRoleInCollection, Long> expectedCounts) throws IOException {
-        verifyHdfsCheckpoint();
-        DataFeed dataFeed = dataFeedProxy.getDataFeed(mainTestTenant.getId());
-        Assert.assertEquals(DataFeed.Status.Active, dataFeed.getStatus());
-        Assert.assertNotNull(dataFeed.getActiveExecution(), "Should have active execution.");
-        Assert.assertNotNull(dataFeed.getActiveProfile(), "Should have active profile.");
-
-        verifyStatistics();
-
-        expectedCounts.forEach((role, count) -> Assert.assertEquals(countTableRole(role), count.longValue()));
     }
 
     void resumeCheckpoint(String checkpoint, String dataset) throws IOException {
