@@ -39,6 +39,7 @@ import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 @Component
 public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
@@ -64,6 +65,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private PlayProxy playProxy;
 
     @Inject
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     private boolean shouldSkipAutoTenantCreation = false;
@@ -77,6 +81,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             tenant = testBed.getMainTestTenant();
         }
         switchToSuperAdmin();
+        cdlTestDataService.populateData(tenant.getId());
 
         MetadataSegment retrievedSegment = createSegment();
 
