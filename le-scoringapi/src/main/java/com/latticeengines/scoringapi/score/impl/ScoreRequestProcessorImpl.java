@@ -347,8 +347,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         handleBulkEnrichOnly(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
                 uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-                originalOrderModelSummaryList, unorderedCombinedRecordMap, unorderedLeadEnrichmentMap, unorderedMatchLogMap,
-                unorderedMatchErrorLogMap);
+                originalOrderModelSummaryList, unorderedCombinedRecordMap, unorderedLeadEnrichmentMap,
+                unorderedMatchLogMap, unorderedMatchErrorLogMap);
 
         handleBulkNoMatchAndEnrich(uniqueFieldSchemasMap, originalOrderParsedTupleList,
                 partiallyOrderedParsedRecordWithoutMatchReqList, unorderedCombinedRecordMap);
@@ -673,7 +673,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     score.setProbability(((DebugScoreResponse) resp).getProbability());
                 }
             } else {
-                score.setError(exception.getCode().getExternalCode());
+                score.setError(exception.getCode().toString());
                 score.setErrorDescription(exception.getMessage());
             }
             scores.add(score);
@@ -794,8 +794,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         if (ex instanceof ScoringApiException) {
             missingEssentialFieldsOrBadModelException = (ScoringApiException) ex;
         } else {
-            missingEssentialFieldsOrBadModelException = new ScoringApiException(ex.getCode(),
-                    new String[] { ex.getMessage() });
+            missingEssentialFieldsOrBadModelException = new ScoringApiException(ex.getCode(), ex.getMessage());
         }
         return missingEssentialFieldsOrBadModelException;
     }

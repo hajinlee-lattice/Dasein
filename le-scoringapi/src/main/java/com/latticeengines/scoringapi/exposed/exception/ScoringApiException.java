@@ -13,6 +13,10 @@ public class ScoringApiException extends LedpException {
         super(code);
     }
 
+    public ScoringApiException(LedpCode code, String msg) {
+        super(code, msg, null);
+    }
+
     public ScoringApiException(LedpCode code, String[] params) {
         super(code, params);
     }
