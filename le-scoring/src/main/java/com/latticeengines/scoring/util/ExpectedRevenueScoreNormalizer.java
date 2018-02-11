@@ -6,6 +6,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+
 public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
 
     private static final Logger log = LoggerFactory.getLogger(ExpectedRevenueScoreNormalizer.class);
@@ -26,7 +29,11 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
         normalizationBuckets = buckets;
         minimumScore = defaultMinimumScorePercent;
         maximumScore = defaultMaximumScorePercent;
-        initialize();
+        try {
+            initialize();
+        } catch (Exception e) {
+            log.error(new LedpException(LedpCode.LEDP_20042, new String[] { e.getMessage() }).getMessage());
+        }
     }
 
     @Override

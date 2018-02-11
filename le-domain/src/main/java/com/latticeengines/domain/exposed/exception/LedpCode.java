@@ -352,6 +352,7 @@ public enum LedpCode {
     LEDP_20039("Lead enrichment columns {0} does not have corresponding type in the lead enrichment attribute map."), //
     LEDP_20040("Convert the sql type to avro type encounters illegal argument exception."), //
     LEDP_20041("Convert the sql type to avro type encounters illegal access exception."), //
+    LEDP_20042("Unable to Initialize Score normalizer due to error: \n {0}"),
 
     // le-remote 21000-21999
     LEDP_21000("Problem parsing segment name or model ID from segment spec: {0}"), //
