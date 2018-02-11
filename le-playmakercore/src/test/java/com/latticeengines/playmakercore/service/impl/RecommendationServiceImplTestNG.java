@@ -15,13 +15,11 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
-import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.service.RecommendationService;
-import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })
@@ -29,11 +27,6 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
 
     @Autowired
     private RecommendationService recommendationService;
-
-    @Autowired
-    private TenantService tenantService;
-
-    private Play play;
 
     private Recommendation recommendation;
 
@@ -51,7 +44,7 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
     private Tenant tenant;
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
+    public void setup() {
 
         recommendation = new Recommendation();
         recommendation.setDescription(LAUNCH_DESCRIPTION);
@@ -70,7 +63,7 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
     }
 
     @Test(groups = "functional")
