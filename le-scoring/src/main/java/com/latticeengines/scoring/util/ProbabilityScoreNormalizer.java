@@ -17,6 +17,7 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
     private double maximumScore;
     private double minimumProbability;
     private double maximumProbability;
+    private boolean initialized;
 
     private List<Double> startProbabilities;
     private List<Double> endProbabilities;
@@ -30,6 +31,10 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
 
     @Override
     public double normalize(double rawScore, InterpolationFunctionType interpFunction) {
+        if (!isInitialized()) {
+            return -1;
+        }
+
         if (rawScore <= minimumProbability) {
             return minimumProbability == 0 ? 0
                     : interpolate(rawScore / minimumProbability, interpFunction) * minimumScore;
@@ -76,6 +81,8 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
             throw new RuntimeException(
                     "Failed to Create Probability Score Normalizer, NormalizationBucket values all equal");
         }
+
+        initialized = true;
     }
 
     private double interpolate(double score, InterpolationFunctionType interpFunction) {
@@ -106,6 +113,9 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
     public double getMaximumProbability() {
         return maximumProbability;
     }
-    
+
+    public boolean isInitialized() {
+        return initialized;
+    }
 
 }

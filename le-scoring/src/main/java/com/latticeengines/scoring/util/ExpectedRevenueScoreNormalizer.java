@@ -17,6 +17,7 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
     private double maximumScore;
     private double minimumExpectedRevenue;
     private double maximumExpectedRevenue;
+    private boolean initialized;
 
     private List<Double> startExpectedRevenues;
     private List<Double> endExpectedRevenues;
@@ -30,6 +31,9 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
 
     @Override
     public double normalize(double expectedRevenue, InterpolationFunctionType interpFunction) {
+        if (!isInitialized()) {
+            return -1;
+        }
         if (expectedRevenue <= minimumExpectedRevenue) {
             return minimumExpectedRevenue == 0 ? 0
                     : minimumScore * Math.max(0, expectedRevenue) / minimumExpectedRevenue;
@@ -75,8 +79,9 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
             log.error("Failed to Create ExpectedRevenue Score Normalizer, NormalizationBucket values are all equal");
             throw new RuntimeException(
                     "Failed to Create ExpectedRevenue Score Normalizer, NormalizationBucket values all equal");
-
         }
+
+        initialized = true;
     }
 
     public double getMinimumScore() {
@@ -109,6 +114,10 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
 
     public void setMaximumExpectedRevenue(double maximumExpectedRevenue) {
         this.maximumExpectedRevenue = maximumExpectedRevenue;
+    }
+
+    public boolean isInitialized() {
+        return initialized;
     }
 
 }
