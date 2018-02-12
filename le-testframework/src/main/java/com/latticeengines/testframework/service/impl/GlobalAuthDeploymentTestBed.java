@@ -245,7 +245,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     }
 
     private void waitForTenantConsoleUninstall(CustomerSpace customerSpace) {
-        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5L);
+        Long timeout = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(10L);
         while (System.currentTimeMillis() < timeout) {
             try {
                 if (!SpaceLifecycleManager.exists(customerSpace.getContractId(), customerSpace.getTenantId(),
@@ -260,7 +260,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
                 throw new RuntimeException(e);
             }
         }
-        throw new IllegalStateException("Tenant console uninstall did not finish with in 5 min.");
+        throw new IllegalStateException("Tenant console uninstall did not finish with in 10 min.");
     }
 
     /**
