@@ -99,10 +99,11 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
     }
 
     @Test(groups = "functional")
-    public void resetAndModifyLatticeCredentials() {
+    public void resetAndModifyLatticeCredentials() throws InterruptedException {
         String newPassword = globalUserManagementService.resetLatticeCredentials(testUsername);
         assertNotNull(newPassword);
 
+        Thread.sleep(500);
         Ticket ticket = globalAuthenticationService.authenticateUser(testUsername, DigestUtils.sha256Hex(newPassword));
         assertNotNull(ticket);
         assertEquals(ticket.getTenants().size(), 1);
@@ -110,6 +111,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
         assertTrue(changePassword(ticket, testUsername, DigestUtils.sha256Hex(newPassword), DigestUtils.sha256Hex
                 ("admin")));
 
+        Thread.sleep(500);
         boolean result = globalAuthenticationService.discard(ticket);
         assertTrue(result);
     }
