@@ -37,7 +37,9 @@ angular.module('common.datacloud.query.builder', [
         segmentInputTree: [],
         rulesInputTree: [],
         accountRulesTree: [],
-        contactRulesTree: []
+        contactRulesTree: [],
+        mouseDownTimer: false,
+        heights: {}
     });
 
     vm.init = function() {
@@ -331,7 +333,6 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.pushItem = function(item, tree) {
-
         if (item) {
             var attributeEntity = item.Entity,
                 cube = vm.cube[attributeEntity].Stats[item.ColumnId];
@@ -461,7 +462,6 @@ angular.module('common.datacloud.query.builder', [
             }
         }
     }
-
 
     // vm.setState = function(newState) {
     //     console.log('set',newState);
@@ -642,6 +642,33 @@ angular.module('common.datacloud.query.builder', [
         $state.go(state);
     }
 
+    vm.mouseUp = function(event) {
+        var dragged = vm.draggedItem,
+            dropped = vm.droppedItem;
+
+        if (dragged && (!dropped || (dropped && dropped.uniqueId !== dragged.uniqueId))) {
+            vm.droppedItem = vm;
+            
+            if (dropped) {
+                this.saveState();
+                vm.dropMoveItem(dragged, dropped);
+            }
+        }
+
+        $timeout.cancel(vm.mouseDownTimer);
+        vm.mouseDownTimer = false;
+
+        vm.draggedItem = null;
+        vm.droppedItem = null;
+
+        if (vm.draggedClone) {
+            vm.draggedClone.remove();
+        }
+
+        delete vm.droppedItemAppend;
+        delete vm.draggedClone;
+    }
+
     vm.dropMoveItem = function(dragged, dropped, endMove) {
         var items = dropped.parent 
                 ? dropped.parent.logicalRestriction.restrictions
@@ -657,9 +684,17 @@ angular.module('common.datacloud.query.builder', [
                 draggedItem = angular.copy(dragged.tree);
 
             if (dropped.tree.logicalRestriction) {
-                dropped.tree.logicalRestriction.restrictions.splice(droppedIndex + 1, 0, draggedItem);
+                var restrictions = dropped.tree.logicalRestriction.restrictions;
+
+                if (vm.droppedItemAppend) {
+                    restrictions.push(draggedItem);
+                } else {
+                    restrictions.splice(0, 0, draggedItem);
+                }
             } else {
-                droppedParent.splice(droppedIndex + 1, 0, draggedItem);
+                var inc = vm.droppedItemAppend ? 1 : 0;
+                
+                droppedParent.splice(droppedIndex + inc, 0, draggedItem);
             }
 
             draggedParent.splice(draggedParent.indexOf(dragged.tree), 1);

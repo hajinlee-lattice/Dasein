@@ -41,8 +41,6 @@ angular.module('common.datacloud.valuepicker', [])
                 }
             })
         }
-
-        // console.log('PickerBuckets', PickerBuckets, vm.picker_object);
     }
 
     vm.changeBucketState = function(bucket) {
@@ -57,8 +55,6 @@ angular.module('common.datacloud.valuepicker', [])
 
         if (bucket.checked) {
             var entity = vm.item.Entity.toLowerCase();
-
-            // console.log(entity, 'add' + entity + 'Restriction', bucket, bucket.checked);
 
             if (!bkt || !vals) {
                 QueryStore['add' + vm.item.Entity + 'Restriction']({
@@ -78,8 +74,6 @@ angular.module('common.datacloud.valuepicker', [])
                     "labelGlyph": restrictions.length
                 }
 
-                // console.log(vm.picker_object.restriction, restrictions, restriction);
-
                 bkt = vm.bucketRestriction.bkt;
                 vals = bkt.Vals;
             } else {
@@ -96,15 +90,23 @@ angular.module('common.datacloud.valuepicker', [])
         }
 
         if (vm.controller) {
-            vm.updateCounts();
+            vm.updateCounts(vals);
+
+            if (vals.length == 0) {
+                vm.controller.unused = true;
+            } else {
+                vm.controller.unused = false;
+            }
         }
+        
+        QueryStore.setPublicProperty('enableSaveSegmentButton', true);
     }
 
     vm.getBucketLabel = function(bucket) {
         return bucket.labelGlyph;
     }
 
-    vm.updateCounts = function() {
+    vm.updateCounts = function(vals) {
         QueryStore.setEntitiesProperty('loading', true);
 
         var segment = { 
@@ -123,7 +125,9 @@ angular.module('common.datacloud.valuepicker', [])
             QueryStore.setResourceTypeCount('contacts', false, result['Contact']);
         });
 
-        vm.controller.updateBucketCount();
+        if (vals && vals.length > 0) {
+            vm.controller.updateBucketCount();
+        }
     }
 
     vm.pushItem = function(item, bucketRestriction, controller) {

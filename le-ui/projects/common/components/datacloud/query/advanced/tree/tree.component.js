@@ -31,10 +31,9 @@ angular
                 range: [],
                 operation: '',
                 unused: false,
-                uniqueId: $scope.tree.$$hashKey,
+                uniqueId: Date.now(),
                 editMode: 'Custom',
                 records_updating: false,
-                mouseDownTimer: false,
                 numerical_operations: QueryTreeService.numerical_operations,
                 enum_operations: QueryTreeService.enum_operations,
                 no_inputs: QueryTreeService.no_inputs,
@@ -54,7 +53,7 @@ angular
 
                         vm.item = $filter('filter')(vm.enrichments, {Entity: bucketEntity, ColumnId: bucketColumnId}, true)[0];
 
-                        if (!vm.item || typeof vm.tree.bucketRestriction.bkt.Id != "number") {
+                        if (!vm.item || !vm.isBucketUsed(bucket)) {
                             vm.unused = true;
                         }
 
@@ -71,6 +70,10 @@ angular
                         vm.range = vm.tree.bucketRestriction.bkt.Vals;
                     }
                 });
+            }
+
+            vm.isBucketUsed = function(bucket) {
+                return typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
             }
 
             vm.checkSelected = function(bucket) {
@@ -106,7 +109,7 @@ angular
                     if (restriction.Vals[1]) {
                         restriction.Vals[1] = bkt.Vals[1];
                     } else {
-                        restriction.Vals.push(bkt.Vals[1])
+                        restriction.Vals.push(bkt.Vals[1]);
                     }
                 } else if (restriction.Vals[1]) {
                     restriction.Vals.splice(1,1);
@@ -198,38 +201,61 @@ angular
                 this.root.goAttributes();
             }
 
-            vm.mouseDown = function() {
+            vm.mouseDown = function(event) {
                 vm.root.draggedItem = null;
 
-                vm.mouseDownTimer = $timeout(function() {
+                vm.root.mouseDownTimer = $timeout(function() {
                     vm.root.draggedItem = vm;
-                    vm.mouseDownTimer = false;
+                    vm.root.mouseDownTimer = false;
+                    vm.mouseMove(event);
                 }, 150);
             }
 
-            vm.mouseUp = function() {
+            vm.mouseMove = function(event, dashedItem, append) {
                 var dragged = vm.root.draggedItem,
                     dropped = vm.root.droppedItem;
 
-                if (dragged && (!dropped || (dropped && dropped.uniqueId !== dragged.uniqueId))) {
-                    vm.root.droppedItem = vm;
+                if (dragged) {
+                    var rect = event.currentTarget.getBoundingClientRect(),
+                        offsetY = event.clientY - rect.top;
                     
-                    if (dropped) {
-                        this.root.saveState();
-                        vm.root.dropMoveItem(dragged, dropped);
+                    if (!dashedItem) {
+                        vm.root.droppedItemAppend = (offsetY / rect.height) >= 0.5;
+                    } else if (append) {
+                        vm.root.droppedItemAppend = append || false;
                     }
+                    
+                    if (!vm.root.draggedClone || !vm.root.draggedContainer) {
+                        vm.root.draggedContainer = angular.element('.advanced-query-builder');
+
+                        vm.root.draggedClone = angular.element(event.currentTarget.parentNode.cloneNode(false));
+                        vm.root.draggedClone.append(event.currentTarget.cloneNode(true));
+
+                        vm.root.draggedContainer.append(vm.root.draggedClone);
+                        vm.root.draggedClone.addClass('query-section');
+                    }
+
+                    vm.rect = vm.root.draggedContainer[0].getBoundingClientRect();
+
+                    var x = event.clientX - vm.rect.left + 10;
+                    var y = event.clientY - vm.rect.top - 51;
+                    var t = 'translate(' + x + 'px,' + y + 'px) scale(.75,.75)';
+
+                    vm.root.draggedClone.css({
+                        'pointer-events': 'none',
+                        'position': 'absolute',
+                        'top': 0 + 'px',
+                        'left': 0 + 'px',
+                        'transition': 'none',
+                        'transform-origin': 'bottom left',
+                        'transform': t,
+                        'opacity': .666,
+                        'z-index': 999
+                    });
                 }
-
-                $timeout(function() {
-                    vm.root.draggedItem = null;
-                    vm.root.droppedItem = null;
-                }, 100)
-
-                $timeout.cancel(vm.mouseDownTimer);
-                vm.mouseDownTimer = false;
             }
 
-            vm.mouseOver = function() {
+            vm.mouseOver = function(event) {
                 var dragged = vm.root.draggedItem,
                     dropped = vm.root.droppedItem;
 

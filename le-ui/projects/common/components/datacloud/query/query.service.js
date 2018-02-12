@@ -358,6 +358,11 @@ angular.module('common.datacloud.query.service',[
         var deferred = $q.defer();
 
         this.GetEntitiesCountsByQuery(query).then(function(data){
+            data = data || {
+                Account: 0,
+                Contact: 0
+            };
+
             QueryStore.setResourceTypeCount('accounts', false, data['Account']);
             QueryStore.setResourceTypeCount('contacts', false, data['Contact']);
             QueryStore.setEntitiesProperty('loading', false);
@@ -597,7 +602,7 @@ angular.module('common.datacloud.query.service',[
     this.GetEntitiesCounts = function(query, cancelPrevious) {
         var deferred = $q.defer();
 
-        if (this.cancelerCounts && cancelPrevious) {
+        if (this.cancelerCounts) {
             this.cancelerCounts.resolve("cancelled");
         }
         

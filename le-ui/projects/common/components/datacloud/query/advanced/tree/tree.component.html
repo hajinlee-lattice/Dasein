@@ -1,16 +1,18 @@
+<div    class="query-section-type-dotline"
+        ng-if="!vm.unused && vm.root.draggedItem != vm"
+        ng-class="{ 'operation': vm.tree.logicalRestriction.operator }"></div>
+
 <div    ng-if="vm.tree.logicalRestriction"
         class="row query-section noselect-children"
         ng-class="{
             'query-section-all': vm.tree.logicalRestriction.operator == 'AND',
             'query-section-any': vm.tree.logicalRestriction.operator == 'OR'
         }"
-        ng-mousedown="vm.mouseDown()"
-        ng-mouseup="vm.mouseUp()"
-        ng-mouseover="vm.mouseOver()">
+        ng-mouseover="vm.mouseOver($event)"
+        ng-mousemove="vm.mouseMove($event, true)">
 
     <div class="query-section-operator label-operator item-operator-and">and</div>
     <div class="query-section-operator label-operator item-operator-or">or</div>
-    <div class="query-section-type-dotline"></div>
     
     <div    class="query-section-label"
             ng-class="{ 
@@ -55,16 +57,24 @@
     </div>
 </div>
 
+<div    class="dashed dashed-top query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+        ng-style="{ 'marginBottom': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
+        ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == false && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
+        ng-mouseover="vm.mouseOver($event)"
+        ng-mousemove="vm.mouseMove($event, true)">
+    <div class="query-section-item-label"><strong>{{vm.root.draggedItem.root.getBucketLabel(vm.root.draggedItem.tree) || '-'}}</strong></div>
+</div>
+
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
         ng-class="{ 
-            'dragging': vm.root.draggedItem == vm,
-            'dropped': vm.root.droppedItem == vm
+            'dragging': vm.root.draggedItem == vm
         }"
-        ng-if="vm.tree.bucketRestriction" 
+        ng-if="vm.tree.bucketRestriction && vm.root.draggedItem != vm"" 
         ng-init="data = vm.enrichments['LatticeAccount.'+vm.tree.bucketRestriction.attr]"
-        ng-mousedown="vm.mouseDown()"
-        ng-mouseup="vm.mouseUp()"
-        ng-mouseover="vm.mouseOver()">
+        ng-mousedown="vm.mouseDown($event)"
+        ng-mouseover="vm.mouseOver($event)"
+        ng-mousemove="vm.mouseMove($event)">
+
     <div class="query-section-operator item-operator item-operator-and">and</div>
     <div class="query-section-operator item-operator item-operator-or">or</div>
 
@@ -105,9 +115,9 @@
     </div>
 
     <div class="query-section-item-records" ng-if="!vm.unused && !vm.editing">
-        <span class="query-section-item-records-label">RECORDS</span>
-        
         <span class="query-section-item-records-number">
+            <span class="query-section-item-records-label">RECORDS</span>
+
             <div class="expanding-bars-init" ng-class="{'expanding-bars-spinner':vm.records_updating || vm.tree.bucketRestriction.bkt.Cnt == -1}">
                 <div ng-repeat="number in (vm.tree.bucketRestriction.bkt.Cnt|number).toString() track by $index">{{ number }}</div>
             </div>
@@ -121,13 +131,33 @@
     </div>
 </div>
 
+<div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+        ng-style="{ 'marginTop': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
+        ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == true && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
+        ng-mouseover="vm.mouseOver($event)"
+        ng-mousemove="vm.mouseMove($event, true)">
+    <div class="query-section-item-label"><strong>{{vm.root.draggedItem.root.getBucketLabel(vm.root.draggedItem.tree) || '-'}}</strong></div>
+</div>
+
 <ul ng-if="vm.tree.logicalRestriction && !vm.tree.collapsed">
+    <li     class="query-section-item-box"
+            ng-if="vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem))">
+        <div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
+                ng-mouseover="vm.mouseOver($event)"
+                ng-mousemove="vm.mouseMove($event, true)">
+            <div class="query-section-item-label"><strong>{{vm.root.draggedItem.root.getBucketLabel(vm.root.draggedItem.tree) || '-'}}</strong></div>
+        </div>
+    </li>
+
     <li     ng-repeat="item in vm.tree.logicalRestriction.restrictions"
+            class="query-section-item-box"
             ng-class="{
                 'query-section-item-box-subtree':item.logicalRestriction,
-                'item-unused': item.bucketRestriction && !item.bucketRestriction.bkt.Id
+                'item-unused': item.bucketRestriction ? !vm.isBucketUsed(item.bucketRestriction) : false
             }" 
-            class="query-section-item-box">
+            ng-if="!(vm.root.draggedItem.tree == item && (vm.root.droppedItem && vm.root.droppedItem.tree != item))"
+            ng-style="{ 'xdisplay': false ? 'none' : 'block'  }"
+            ng-mouseup="vm.root.mouseUp($event)">
         <query-tree-directive 
                 class="{{ vm.tree.logicalRestriction ? 'query-section-type-' + vm.tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                 items="vm.items" tree="item" root="vm.root" parent="vm.tree" entity="vm.entity">
@@ -135,7 +165,9 @@
     </li>
 
     <li class="query-section-item-box query-section-item-end" ng-repeat-end>
-        <div class="query-section-item query-section-item-end noselect-children">
+        <div    class="query-section-item query-section-item-end noselect-children"
+                ng-mouseover="vm.mouseOver($event)"
+                ng-mousemove="vm.mouseMove($event, true, true)">
             <span>
                 <i class="fa fa-plus"></i> Add 
                 <a href="javascript:void(0)" ng-click="vm.addAttribute(vm.tree)">attribute</a> 
