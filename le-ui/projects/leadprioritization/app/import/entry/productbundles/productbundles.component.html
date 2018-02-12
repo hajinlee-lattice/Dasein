@@ -1,14 +1,17 @@
-<p>Please provide product bundle names Lattice platform should use to aggregate your products into logical groupings you would like to use to run sales plays and marketing campaigns.  The csv file should contain one row for each product x product bundle combination.</p>
+<p>
+    Upload a CSV file containing one row for each product with its attributes in separate columns.
+    You can always update and add new products later.
+</p>
 
 <a href="assets/downloads/product-sample.csv" target="_self" class="download-link"><i class="fa fa-download"></i> Download a sample CSV file that has all of the required fields.</a>
 
-<p>Please use the same data structure:</p>
+<p>{{vm.ResourceUtility.getString('IMPORT_SAMPLE_FILE_LABEL')}}:</p>
 <div class="table example-table">
     <table>
         <thead>
             <tr>
                 <th>Product_ID</th>
-                <th>Product_Bundle_ID</th>
+                <th>ProductName</th>
                 <th>Description</th>
             </tr>
         </thead>

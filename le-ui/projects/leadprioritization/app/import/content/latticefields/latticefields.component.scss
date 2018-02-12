@@ -1,7 +1,18 @@
 .lattice-fields {
 	
-	h2 {
-		background-image: url('/assets/images/ico-small-lattice-logo-color.png');
+	&.file-import-content {
+		.header {
+			h2 {
+				background-image: url('/assets/images/ico-small-lattice-logo-color.png');
+				background-repeat: no-repeat;
+				padding: 5px;
+				padding-left: 40px;
+			}
+			strong {
+				font-weight: bold;
+				color: dark-gray;
+			}
+		}
 	}
 
 	h3 {

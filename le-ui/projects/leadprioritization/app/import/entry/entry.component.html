@@ -13,10 +13,10 @@
           <div class="button contact {{ vm.goState == 'contacts' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Contact', 'contacts');" ui-sref="home.import.entry.contacts">
             <span>Contacts</span>
           </div>
-          <div class="button eloqua {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases">
+          <div class="button purchases {{ vm.goState == 'product_purchases' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Transaction', 'product_purchases');" ui-sref="home.import.entry.product_purchases">
             <span>Product Purchases</span>
           </div>
-          <div class="button eloqua {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles');" ui-sref="home.import.entry.product_bundles">
+          <div class="button products {{ vm.goState == 'product_bundles' ? 'blue' : 'white' }}-button" ng-click="vm.changeEntityType('Product', 'product_bundles');" ui-sref="home.import.entry.product_bundles">
             <span>Product Bundles</span>
           </div>
         </div>
@@ -54,7 +54,7 @@
                 class="button blue-button"
                 ng-disabled="!vm.next"
                 ng-click="vm.click()">
-              Next, Configure the Import
+              Next, Field Mappings
             </button>
         </div>
       </div>

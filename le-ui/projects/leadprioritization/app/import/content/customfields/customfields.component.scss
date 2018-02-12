@@ -62,6 +62,15 @@
                     }
                 }
             }
+            &.customfield-header {
+                .field {
+                    & > li {
+                        overflow: visible;
+                        white-space: normal;
+                    }
+                }
+            }
         }
+
     }
 }

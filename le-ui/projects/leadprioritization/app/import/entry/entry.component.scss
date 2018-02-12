@@ -19,6 +19,7 @@
             color: #333;
             height: auto;
             line-height: normal;
+            border-radius: 8px;
             &.account {
                 background-image: url('/assets/images/ico-accounts-dark.png');
             }
@@ -27,6 +28,12 @@
             }
             &.eloqua {
                 background-image: url('/assets/images/ico-eloqua-dark.png');
+            }
+            &.products {
+                background-image: url('/assets/images/ico-products-dark.png');
+            }
+            &.purchases {
+                background-image: url('/assets/images/ico-purchases-dark.png');
             }
             &.blue-button {
                 color: #fff;
@@ -39,6 +46,12 @@
                 &.eloqua {
                     background-image: url('/assets/images/ico-eloqua-white.png');
                 } 
+                &.products {
+                    background-image: url('/assets/images/ico-products-white.png');
+                }
+                &.purchases {
+                    background-image: url('/assets/images/ico-purchases-white.png');
+                }
             }
         }
     }
@@ -56,12 +69,14 @@
             color: #333 !important;
             font-size: 12px;
             font-weight: bold;
+            padding-left: 8px;
         }
         tbody td {
             background: #fafbfb;
             font-size: 12px;
             font-weight: normal;
             padding: 4px;
+            padding-left: 8px;
         }
     }
     .form-group {

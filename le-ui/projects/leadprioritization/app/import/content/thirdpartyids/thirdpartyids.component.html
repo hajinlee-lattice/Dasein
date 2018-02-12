@@ -1,19 +1,23 @@
 <div class="third-party-ids container file-import-content">
-    
-    <p>Please provide other external identifiers you would like to use to reference your account records.  For example, you can provide account IDs used in your CRM systems, ERP systems and MAP systems.  These identifiers will not be used to de-duplicate your accounts.  They will be stored in Lattice platform so you can retrieve the records using these IDs via Lattice APIs or applications.</p>
+    <div class="header">
+        <h2>Other IDs</h2>
+        <p>
+            Provide CRM/MAP IDs to reference your account records via Lattice APIs. These are not used to de-duplicate your accounts. 
+        </p>
+    </div>
 
     <form name="form">
-        <ul class="field-mapping" ng-if="vm.fields">
+        <ul class="field-mapping" ng-if="vm.fields.length">
             <li class="header">
                 <ul>
-                    <li>External System Name</li>
-                    <li>External System Type</li>
-                    <li>Fields in the uploaded file</li>
+                    <li class="system-name">External System Name</li>
+                    <li class="system-type">External System Type</li>
+                    <li class="fields-in-file">Fields in the uploaded file</li>
                 </ul>
             </li>
             <li class="field" ng-repeat="field in vm.fields track by $index" ng-init="vm.fieldMapping[$index] = vm.fieldMapping[$index] || {}">
                 <ul>
-                    <li>
+                    <li class="system-name">
                         <input 
                             type="text" 
                             ng-model="vm.fieldMapping[$index].mappedField" 
@@ -21,7 +25,7 @@
                             ng-init="vm.checkValidDelay(form)"
                             ng-required="true" />
                     </li>
-                    <li>
+                    <li class="system-type">
                         <select
                             ng-model="vm.fieldMapping[$index].cdlExternalSystemType"
                             ng-required="true"
@@ -32,7 +36,7 @@
                             </option>
                         </select>
                     </li>
-                    <li>
+                    <li class="fields-in-file">
                         <select 
                             ng-model="vm.fieldMapping[$index].userField" 
                             ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
@@ -40,15 +44,15 @@
                             ng-options="item disable when (vm.unavailableFields.indexOf(item) !== -1) for item in vm.availableFields | filter: vm.hiddenFilter">
                         </select>
                     </li>
-                    <li>
-                        <span ng-click="vm.removeIdentifier($index, form)"i title="remove mapping"><i class="fa fa-times-circle"></i></span>
+                    <li class="remove-button">
+                        <span ng-click="vm.removeIdentifier($index, form)"i title="remove mapping"><i class="fa fa-times"></i></span>
                     </li>
                 </ul>
             </li>
         </ul>
     </form>
  	<button 
-		class="button white-button" 
+		class="button gray-button" 
 		type="button"
 		ng-click="vm.addIdentifier($event)">
             Add An{{vm.fields.length ? 'other' : ''}} Identifier

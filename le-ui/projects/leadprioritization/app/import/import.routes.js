@@ -182,23 +182,25 @@ angular
                 MatchingFields: function() {
                     return [
                         { name: 'Website' },
+                        { name: 'DUNS', displayName: 'D-U-N-S' },
                         { name: 'CompanyName', displayName: 'Company Name' },
+                        { name: 'PhoneNumber', displayName: 'Phone Number'},
                         { name: 'City' },
-                        { name: 'State' },
                         { name: 'Country' },
-                        { name: 'PostalCode', displayName: 'Postal Code'},
-                        { name: 'DUNS' },
-                        { name: 'PhoneNumber', displayName: 'Phone Number'}
+                        { name: 'State' },
+                        { name: 'PostalCode', displayName: 'Postal Code'}
                     ];
                 },
                 AnalysisFields: function() {
                     return [
-                        { name: 'Industry' },
-                        { name: 'AnnualRevenue', displayName: 'Annual Revenue' },
-                        { name: 'NumberOfEmployees', displayName: 'Number Of Employees' },
                         { name: 'Type' },
-                        { name: 'AnnualRevenueCurrency', displayName: 'Annual Revenue Currency' },
-                        { name: 'SpendAnalyticsSegment', displayName: 'Spend Analytics Segment' }
+                        { name: 'Industry' },
+                        { name: 'SpendAnalyticsSegment', displayName: 'Account Business Segment' },
+                        { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue' },
+                        { name: 'Longitude' },
+                        { name: 'AnnualRevenueCurrency', displayName: 'Estimated Yearly Revenue Currency' },
+                        { name: 'Lattitude' }
+                        //{ name: 'NumberOfEmployees', displayName: 'Number Of Employees' },
                     ];
                 }
             },
@@ -320,23 +322,26 @@ angular
                 MatchingFields: function() {
                     return [
                         { name: 'ContactName', displayName: 'Contact Name' },
-                        { name: 'Email', displayName: '' },
-                        { name: 'CompanyName', displayName: 'Company Name' },
-                        { name: 'City', displayName: '' },
-                        { name: 'State', displayName: '' },
-                        { name: 'Country', displayName: '' },
-                        { name: 'PostalCode', displayName: 'Postal Code' },
-                        { name: 'DUNS', displayName: '' },
-                        { name: 'Website', displayName: '' }
+                        { name: 'Title', displayName: '' },
+                        { name: 'Email', displayName: '' }
+                        // { name: 'CompanyName', displayName: 'Company Name' },
+                        // { name: 'City', displayName: '' },
+                        // { name: 'State', displayName: '' },
+                        // { name: 'Country', displayName: '' },
+                        // { name: 'PostalCode', displayName: 'Postal Code' },
+                        // { name: 'DUNS', displayName: 'D-U-N-S' },
+                        // { name: 'Website', displayName: '' },
                    ];
                 },
                AnalysisFields: function() {
                     return [
-                        { name: 'Title', displayName: '' },
+                        { name: 'LeadStatus', displayName: 'Lead Status' },
                         { name: 'LeadSource', displayName: 'Lead Source' },
+                        { name: 'LeadType', displayName: 'Lead Type' },
+                        { name: 'CreatedDate', displayName: 'Created Date' },
+                        { name: 'LastModifiedDate', displayName: 'Last Modified Date' },
                         { name: 'DoNotMail', displayName: 'Do Not Mail' },
-                        { name: 'DoNotCall', displayName: 'Do Not Call' },
-                        { name: 'LeadStatus', displayName: 'Lead Status' }
+                        { name: 'DoNotCall', displayName: 'Do Not Call' }
                     ];
                 }
             },
@@ -445,11 +450,11 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'Quantity', displayName: '', required: true },
-                        { name: 'Amount', displayName: '', required: true },
-                        { name: 'TransactionTime', displayName: 'Transaction Time', required: true },
-                        { name: 'TransactionType', displayName: 'Transaction Type' },
-                        { name: 'Cost', displayName: '' }
+                        { name: 'TransactionTime', displayName: 'Transaction Date', required: true },
+                        { name: 'Amount', required: true },
+                        { name: 'Quantity', required: true },
+                        { name: 'Cost', }
+                        //{ name: 'TransactionType', displayName: 'Transaction Type' },
                     ];
                 },
                 AnalysisFields: function() {
@@ -553,9 +558,10 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'ProductName', displayName: 'Product Name' },
-                        { name: 'ProductFamily', displayName: 'Product Family' },
-                        { name: 'ProductBundle', displayName: 'Product Bundle' }
+                        { name: 'ProductBundle', displayName: 'Product Bundle Name' },
+                        { name: 'Description', displayName: 'Product Description' }
+                        // { name: 'ProductName', displayName: 'Product Name' },
+                        // { name: 'ProductFamily', displayName: 'Product Family' },
                     ];
                 },
                 AnalysisFields: function() {

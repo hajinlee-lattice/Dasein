@@ -45,28 +45,28 @@ angular.module('lp.import')
                 label: 'Account IDs', 
                 state: 'accounts.ids', 
                 backState: 'home.segment.explorer.attributes',
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Add Other IDs',
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Other IDs', 
                 state: 'accounts.ids.thirdpartyids', 
-                nextLabel: 'Next',
+                nextLabel: 'Next, Map to Lattice Fields',
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'accounts.ids.thirdpartyids.latticefields', 
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Add Custom Fields',
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields', 
-                nextLabel: 'Import File', 
+                nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function() {
                         ImportWizardStore.setValidation('jobstatus', true);                

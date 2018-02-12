@@ -27,7 +27,6 @@ angular.module('lp.import.wizard.accountids', [])
     });
 
     vm.init = function() {
-
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);

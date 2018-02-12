@@ -2,11 +2,16 @@
     
     <div class="header">
         <h2>Lattice Fields</h2>
+        <p>
+            <strong>Please review the mapping between your data and Lattice Fields.</strong>
+            <!-- {{vm.latticeFieldsDescription(vm.importType)}} -->
+        </p>
     </div>
-    <p>{{vm.latticeFieldsDescription(vm.importType)}}</p>
 
     <h3 class="{{vm.importType}}-matching">{{vm.importType + (vm.importType == 'Contacts' ? ' Fields' : ' Matching Fields')}}</h3>
-    <p ng-if="vm.importType == 'Account'">These fields are used to match accounts. If you are using Lattice Deduplication, only one method is required, but the more you provide the better as account data is often misleading or inaccurate.</p>
+    <p ng-if="vm.importType == 'Account'">
+        These fields are used to match to Lattice Data Cloud. Mapping as many as possible will allow for a better match.
+    </p>
     <form name="form">
         <ul ng-init="vm.fieldMapping = vm.fieldMapping || {}; vm.checkFieldsDelay(form)">
         	<li ng-repeat="field in vm.matchingFieldsList">

@@ -1,28 +1,38 @@
 .third-party-ids {
+	form {
+		padding: 20px 0;
+	}
 	ul.field-mapping {
+		width: 100%;
 		li.header {
 			border-bottom: 1px solid #d0d0d0;
 		}
 		li.field, li.header {
+			position: relative;
 			margin: 10px 0;
 			& > ul {
 				@include flex-container;
 				margin-bottom: 10px;
 				& > li {
 					@incluide flex-item(1 0 auto);
-					margin-right: 10px;
-					input {
-						padding: 2px;
+					input, select {
+						max-width: 100%;
 					}
-					// &:nth-child(1) {
-					// 	width: 200px;
-					// }
-					// &:nth-child(2) {
-					// 	width: 150px;
-					// }
-					// &:nth-child(3) {
-					// 	width: 200px;
-					// }
+					&.system-name{
+						width: 25%;
+					}
+					&.system-type {
+						width: 25%;
+					}
+					&.fields-in-file {
+						width: 50%;
+					}
+					&.remove-button {
+						position: absolute;
+						top: 50%;
+						transform: translateY(-50%);
+						right: 0;
+					} 
 				}
 			}
 		}
