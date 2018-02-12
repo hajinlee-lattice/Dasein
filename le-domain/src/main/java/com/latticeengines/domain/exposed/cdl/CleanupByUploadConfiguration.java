@@ -13,6 +13,9 @@ public class CleanupByUploadConfiguration extends CleanupOperationConfiguration 
     @JsonProperty("file_name")
     private String fileName;
 
+    @JsonProperty("file_display_name")
+    private String fileDisplayName;
+
     @JsonProperty("use_dl_data")
     private boolean useDLData = false;
 
@@ -38,6 +41,14 @@ public class CleanupByUploadConfiguration extends CleanupOperationConfiguration 
 
     public void setFileName(String fileName) {
         this.fileName = fileName;
+    }
+
+    public String getFileDisplayName() {
+        return this.fileDisplayName;
+    }
+
+    public void setFileDisplayName(String displayName) {
+        this.fileDisplayName = displayName;
     }
 
     public boolean isUseDLData() {

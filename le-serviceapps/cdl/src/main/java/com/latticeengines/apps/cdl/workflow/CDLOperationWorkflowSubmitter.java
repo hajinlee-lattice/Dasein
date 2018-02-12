@@ -82,6 +82,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         String filePath = "";
         String tableName = "";
         String fileName = "";
+        String fileDisplayName = "";
         boolean isUseDLData = false;
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
             log.info("Configuratin is CleanupByUpload");
@@ -89,6 +90,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
             filePath = cleanupByUploadConfiguration.getFilePath();
             tableName = cleanupByUploadConfiguration.getTableName();
             fileName = cleanupByUploadConfiguration.getFileName();
+            fileDisplayName = cleanupByUploadConfiguration.getFileDisplayName();
             isUseDLData = cleanupByUploadConfiguration.isUseDLData();
         }
         return new CDLOperationWorkflowConfiguration.Builder() //
@@ -103,6 +105,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
+                        .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
                         .build())
                 .build();
     }

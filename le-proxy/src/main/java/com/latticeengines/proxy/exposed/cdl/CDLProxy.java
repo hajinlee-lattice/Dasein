@@ -6,7 +6,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.util.ConverterUtils;
@@ -23,6 +22,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("cdlProxy")
 public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -169,12 +169,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupByUpload(String customerSpace, SourceFile sourceFile,
-            BusinessEntity entity, CleanupOperationType operationType, String initiator) {
+    public ApplicationId cleanupByUpload(String customerSpace, SourceFile sourceFile, BusinessEntity entity,
+            CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(sourceFile.getTableName());
         configuration.setFilePath(sourceFile.getPath());
         configuration.setFileName(sourceFile.getName());
+        configuration.setFileDisplayName(sourceFile.getDisplayName());
         configuration.setEntity(entity);
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);
@@ -190,19 +191,19 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException(
-                    "Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 
     @SuppressWarnings("unchecked")
-    public ApplicationId cleanupByUpload(String customerSpace, String tableName,
-                                         BusinessEntity entity, CleanupOperationType operationType, String initiator) {
+    public ApplicationId cleanupByUpload(String customerSpace, String tableName, BusinessEntity entity,
+            CleanupOperationType operationType, String initiator) {
         CleanupByUploadConfiguration configuration = new CleanupByUploadConfiguration();
         configuration.setTableName(tableName);
         configuration.setUseDLData(true);
         configuration.setFilePath("");
         configuration.setFileName("VisiDB_Import");
+        configuration.setFileDisplayName("VisiDB_Import");
         configuration.setEntity(entity);
         configuration.setCleanupOperationType(operationType);
         configuration.setOperationInitiator(initiator);
@@ -218,8 +219,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
             String appIdStr = responseDoc.getResult();
             return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
         } else {
-            throw new RuntimeException(
-                    "Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
+            throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
     }
 }
