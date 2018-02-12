@@ -14,6 +14,7 @@
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
         <property name="maxPoolSize" value="64"/>
+        <property name="enableDebugSlowSql" value="false" />
     </bean>
 	
 	<!-- Hibernate session factory -->

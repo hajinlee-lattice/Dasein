@@ -26,6 +26,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private String jdbcUrl;
     private String user;
     private String password;
+    private Boolean enableDebugSlowSql;
     private int minPoolSize = -1;
     private int maxPoolSize = -1;
     private int acquireIncrement = -1;
@@ -81,8 +82,11 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setMaxIdleTime(30);
         cpds.setMaxIdleTimeExcessConnections(10);
 
-        cpds.setUnreturnedConnectionTimeout(30);
-        cpds.setDebugUnreturnedConnectionStackTraces(true);
+        Boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
+        if (enableDebugSlowSql) {
+            cpds.setUnreturnedConnectionTimeout(30);
+            cpds.setDebugUnreturnedConnectionStackTraces(true);
+        }
 
         return cpds;
     }
@@ -162,4 +166,11 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         this.acquireIncrement = acquireIncrement;
     }
 
+    public Boolean getEnableDebugSlowSql() {
+        return enableDebugSlowSql;
+    }
+
+    public void setEnableDebugSlowSql(Boolean enableDebugSlowSql) {
+        this.enableDebugSlowSql = enableDebugSlowSql;
+    }
 }
