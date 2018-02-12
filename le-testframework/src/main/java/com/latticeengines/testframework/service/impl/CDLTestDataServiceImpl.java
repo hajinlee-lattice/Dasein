@@ -122,10 +122,10 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
         StatisticsContainer container;
         try {
-            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, "stats_container.json.gz");
+            InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION,
+                    "stats_container.json.gz");
             GZIPInputStream gis = new GZIPInputStream(is);
             String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
-            content = content.replace("$$StatsName$$", NamingUtils.timestamp("Stats", DATE));
             ObjectMapper om = new ObjectMapper();
             container = om.readValue(content, StatisticsContainer.class);
         } catch (IOException e) {
@@ -153,7 +153,8 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             retry.execute(new RetryCallback<Void, RuntimeException>() {
                 @Override
                 public Void doWithRetry(RetryContext context) {
-                    log.info(String.format("(Attempt=%d) copying %s to %s", context.getRetryCount() + 1, srcTable, tgtTable));
+                    log.info(String.format("(Attempt=%d) copying %s to %s", context.getRetryCount() + 1, srcTable,
+                            tgtTable));
                     if (!redshiftService.hasTable(tgtTable)) {
                         redshiftService.cloneTable(srcTable, tgtTable);
                     } else {
@@ -173,21 +174,23 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 BusinessEntity.Transaction, //
                 BusinessEntity.PeriodTransaction).contains(entity)) {
             String customerSpace = CustomerSpace.parse(tenantId).toString();
-            Table table = readTableFromS3(tenantId, entity);
-            metadataProxy.createTable(customerSpace, table.getName(), table);
+            Table table = readTableFromS3(entity);
+            String tableName = servingStoreName(tenantId, entity);
+            table.setName(tableName);
+            table.setDisplayName(entity.getServingStore().name());
+            metadataProxy.createTable(customerSpace, tableName, table);
             DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
-            dataCollectionProxy.upsertTable(customerSpace, table.getName(), entity.getServingStore(), activeVersion);
+            dataCollectionProxy.upsertTable(customerSpace, tableName, entity.getServingStore(), activeVersion);
         }
     }
 
-    private Table readTableFromS3(String tenantId, BusinessEntity entity) {
+    private Table readTableFromS3(BusinessEntity entity) {
         TableRoleInCollection role = entity.getServingStore();
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json.gz");
         Table table;
         try {
             GZIPInputStream gis = new GZIPInputStream(is);
             String content = IOUtils.toString(gis, Charset.forName("UTF-8"));
-            content = content.replace("$$TableName$$", servingStoreName(tenantId, entity));
             ObjectMapper om = new ObjectMapper();
             table = om.readValue(content, Table.class);
         } catch (IOException e) {

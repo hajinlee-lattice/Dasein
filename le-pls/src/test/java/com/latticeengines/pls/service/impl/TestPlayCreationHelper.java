@@ -60,6 +60,7 @@ public class TestPlayCreationHelper {
 
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
+
     @Autowired
     private SegmentService segmentService;
 
@@ -86,17 +87,20 @@ public class TestPlayCreationHelper {
         setupSecurityContext(tenant);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
-
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         MultiTenantContext.setTenant(tenant);
     }
 
     public void setupTenantAndCreatePlay() throws Exception {
-        setupTenant();
+        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
+        setupSecurityContext(tenant);
+        tenantIdentifier = tenant.getId();
+        tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
+        MultiTenantContext.setTenant(tenant);
 
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
-        playResourceDeploymentTestNG.setup();
+        playResourceDeploymentTestNG.setup(); // This will populate cdl test data, so don't populate again
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
