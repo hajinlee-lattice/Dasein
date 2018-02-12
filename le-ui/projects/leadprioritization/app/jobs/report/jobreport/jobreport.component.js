@@ -8,6 +8,7 @@ angular
 	angular.extend(vm, {
         jobId: $stateParams.jobId,
         job: InitJob,
+        systemActions: [],
         entities: [
         	'Account',
         	'Contact',
@@ -28,34 +29,23 @@ angular
         }
     });
 
-	console.log(vm.job);
+	// console.log(vm.job);
 
 	vm.init = function() {
 
 		vm.actions = vm.job.subJobs;
-		console.log(vm.actions);
 		vm.reports = vm.job['reports'];
 		vm.reports.forEach(function(report) {
 			var payload = JSON.parse(report['json']['Payload']);
-			if (report['purpose'] == 'PUBLISH_DATA_SUMMARY') {
-				if (payload['BucketedAccount']) {
-					vm.counts['Account'] = payload['BucketedAccount'];
+			if (report['purpose'] == 'PROCESS_ANALYZE_RECORDS_SUMMARY') {
+				vm.entities.forEach(function(entity) {
+					vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'];
+					vm.summaries[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary;
+				});
+				if (payload['SystemActions']) {
+					vm.systemActionTimestamp = report.created;
+					vm.systemActions = payload['SystemActions'];
 				}
-				if (payload['SortedProduct']) {
-					vm.counts['Product'] = payload['SortedProduct'];
-				}
-				if (payload['SortedContact']) {
-					vm.counts['Contact'] = payload['SortedContact'];
-				}
-				if (payload['AggregatedTransaction']) {
-					vm.counts['Transaction'] = payload['AggregatedTransaction'];
-				}
-			}
-			if (report['purpose'] == 'CONSOLIDATE_RECORDS_SUMMARY') {
-				vm.summaries['Account'] = payload['Account'];
-				vm.summaries['Contact'] = payload['Contact'];
-				vm.summaries['Product'] = payload['Product'];
-				vm.summaries['Transaction'] = payload['Transaction'];
 			}
 		});
 

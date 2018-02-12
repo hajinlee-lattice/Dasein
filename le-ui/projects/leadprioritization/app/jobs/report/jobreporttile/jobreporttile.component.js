@@ -32,17 +32,10 @@ angular
         		if (vm.report) {
         			vm.newRecords = vm.report['NEW'] ? vm.report['NEW'] : 0;
         			vm.updatedRecords = vm.report['UPDATE'] ? vm.report['UPDATE']: 0;
-        			vm.matchedRecords = vm.report['MATCH'] ? vm.report['MATCH'] : 0;
-        			vm.deletedRecords = 0;
-        			vm.unmatchedRecords = vm.getUnmatchedRecords();
+        			vm.deletedRecords = vm.report['DELETE'] ? vm.report['DELETE']: 0;
+        			vm.unmatchedRecords = vm.report['UNMATCH'] ? vm.report['UNMATCH'] : 0;
         		}
         		vm.setFilteredActions();
-        	}
-
-        	vm.getUnmatchedRecords = function() {
-        		if (vm.report) {
-        			return vm.newRecords - vm.matchedRecords;
-        		}
         	}
 
         	vm.format = function(entity) {
@@ -65,7 +58,7 @@ angular
                 	case 'Transaction':
                 		return path + 'ico-transactions.png';
                 	default:
-                		return path + 'enrichments/subcategories/contactattributes.png'
+                		return path + 'enrichments/subcategories/contactattributes.png';
 	            }
 
                 return path + icon;
@@ -74,7 +67,7 @@ angular
 			vm.setFilteredActions = function() {
 				vm.filteredActions = [];
 				vm.actions.forEach(function(action) {
-					if (vm.parsePayload(action, vm.entity) != undefined) {
+					if (action.reports.length > 0 && vm.parsePayload(action, vm.entity) != undefined) {
 						vm.filteredActions.push(action)
 					}
 				});

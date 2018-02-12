@@ -18,7 +18,7 @@
                     report="vm.summaries[entity]" entity="entity" count="vm.counts[entity]" actions="vm.actions">
                 </li>
 
-                <li class="system-action-summary-tile">
+                <li class="system-action-summary-tile" ng-if="vm.systemActions.length">
                     <div class="jobs-tile-body columns two panel ">
                         <h2> System Actions </h2>
                         <h2> 
@@ -33,12 +33,12 @@
                                     <div class="le-cell le-col-start-3 le-col-span-4">Type</div>
                                 </div>
                                 
-                                <div class="le-row">
+                                <div class="le-row" ng-repeat="systemAction in vm.systemActions">
                                     <div class="le-cell le-col-start-1 le-col-span-2">
-                                        1/30/2018 4:55pm
+                                        {{vm.systemActionTimestamp | date : 'MM/dd/yyyy h:mma'}}
                                     </div>
-                                    <div class="le-cell le-col-start-3 le-col-span-4">
-                                        Automated re-scoring because of new data
+                                    <div class="le-cell le-col-start-3 le-col-span-10">
+                                        {{systemAction}}
                                     </div>
                                 </div>
                             </div>
