@@ -287,10 +287,11 @@ public enum LedpCode {
     LEDP_18171("Could not create valid session for External User {0}."), //
     LEDP_18172("Action Ids for job {0} is empty."), //
     LEDP_18173("SchemaInterpretation {0} not supported for cleanup file template!"), //
-    LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with Id = {2}."), //
+    LEDP_18174("Status {0} cannot transit to {1} for Rating Engine with name = {2}."), //
     LEDP_18175("There are Plays associated with the current Rating Engine {0} and thus it cannot be deleted."), //
     LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
-    LEDP_18177("Websocket session {0} has associated with tenant {1} and cannot subscribe topic for tenant {2}."), //
+    LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
+    LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

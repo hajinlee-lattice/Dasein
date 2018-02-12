@@ -28,6 +28,7 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -49,7 +50,6 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("ratingEngineEntityMgr")
 public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> implements RatingEngineEntityMgr {
@@ -202,15 +202,18 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     void validateForStatusUpdate(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine) {
         // Check transition diagram
         if (!RatingEngineStatus.canTransit(retrievedRatingEngine.getStatus(), ratingEngine.getStatus())) {
+            log.error(String.format("Status transition of the Rating Engine %s is invalid.",
+                    retrievedRatingEngine.getId()));
             throw new LedpException(LedpCode.LEDP_18174, new String[] { retrievedRatingEngine.getStatus().name(),
-                    ratingEngine.getStatus().name(), ratingEngine.getId() });
+                    ratingEngine.getStatus().name(), ratingEngine.getDisplayName() });
         }
 
         // Check dependency of Rating Engine
         if (ratingEngine.getStatus() == RatingEngineStatus.DELETED) {
             if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(retrievedRatingEngine,
                     Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
-                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getId() });
+                log.error(String.format("Dependency check failed for Rating Engine=%s", retrievedRatingEngine.getId()));
+                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getDisplayName() });
             }
         }
     }
