@@ -19,7 +19,7 @@ angular.module('lp.import.wizard.thirdpartyids', [])
             'MAP',
             'CRM',
             //'ERP',
-            'Other'
+            'OTHER'
         ], field: ''}
     });
 
