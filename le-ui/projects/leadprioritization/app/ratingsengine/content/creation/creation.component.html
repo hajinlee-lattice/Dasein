@@ -58,7 +58,7 @@
                 <span class="indeterminate"></span>
             </div>
             <div>
-                <p><i class="fa fa-check" data-ng-if="jobStatus == 'Completed' && !isPMMLJob"></i> Running{{jobStatus}}</p>
+                <p><i class="fa fa-check" data-ng-if="vm.status == 'Completed'"></i> {{ vm.status }}</p>
             </div>
             
         </div>

@@ -129,9 +129,13 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         if(tileState.editRating !== true){
             if (rating.type === 'AI_BASED') {
+
+                rating.activeModelId = 'ai_psrcylhsskadco5r5wd_pg';
+
                 if (rating.activeModelId) {
-                    console.log(rating);
-                    // $rootScope.$broadcast(NavUtility.MODEL_DETAIL_NAV_EVENT, data);    
+                    RatingsEngineStore.getRatingModel(rating.id, rating.activeModelId).then(function(model){
+                        $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });
+                    });
                 } else {
                     url = 'home.ratingsengine.productpurchase.segment'
                 }

@@ -654,7 +654,8 @@ angular.module('lp.ratingsengine')
                     trainingProducts: trainingProducts
                 }
             };
-            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {              
+            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
+
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);
 
@@ -671,30 +672,29 @@ angular.module('lp.ratingsengine')
         });
         
     }
+    
+    this.getRatingModel = function(engineId, modelId) {
+        var deferred = $q.defer();
+
+        console.log(engineId, modelId);
+        RatingsEngineService.getRatingModel(engineId, modelId).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
 
     this.nextLaunchAIModel = function(nextState, model){
         var currentRating = RatingsEngineStore.getCurrentRating(),
-            obj = model.AI,
-            opts = {};
+            obj = model.AI;
         
         RatingsEngineStore.tmpId = obj.id;
 
-        console.log('Launching the model', obj);
+        // console.log('Launching the model', obj);
         RatingsEngineService.createAIModel(currentRating.id, obj.id).then(function(applicationid) {
-            
-            console.log('Application id', applicationid);
-            var id = applicationid.Result;//RatingsEngineStore.tmpId;
-            obj.modelingJobId = id;
-            var opts = {
-                AI: obj
-            };
-
-            console.log('Model Launched', id, nextState);
-            // $state.go(nextState, { ai_model: id });
-            RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(aiModel) {
-                console.log('Job id', aiModel.AI, aiModel.AI.modelingJobId);
-                $state.go(nextState, { ai_model_job_id: aiModel.AI.modelingJobId });
-            });
+            var id = applicationid.Result;
+            // console.log('Model Launched', id, nextState);
+            $state.go(nextState, { ai_model_job_id: id });
         });
     }
 
@@ -894,6 +894,19 @@ angular.module('lp.ratingsengine')
             method: 'POST',
             url:  '/pls/ratingengines/'+ratingid+'/ratingmodels/'+modelid,
             data: opts
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+       
+
+        return deferred.promise;
+    }
+    this.getRatingModel = function(ratingId, modelId){
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId
         }).then(function(response){
             deferred.resolve(response.data);
         });

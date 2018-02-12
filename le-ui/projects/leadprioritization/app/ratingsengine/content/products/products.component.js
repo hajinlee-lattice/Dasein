@@ -26,7 +26,7 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     vm.init = function () {
 
-        // console.log(vm.products);
+        console.log(vm.products);
 
         RatingsEngineStore.setCachedProducts(vm.products);
 

@@ -60,7 +60,13 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         $interval(function() { 
             JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
-                console.log("!!!!!!!!!!!!!!!!!!!!!", result);
+                // console.log(result);
+
+                if(result.id) {
+                    vm.status = result.jobStatus;
+                } else {
+                    vm.status = 'Preparing Modeling Job';
+                }
             });
         }, 10 * 1000);
 
