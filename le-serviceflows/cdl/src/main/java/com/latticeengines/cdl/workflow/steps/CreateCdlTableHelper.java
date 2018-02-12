@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -45,7 +47,12 @@ public class CreateCdlTableHelper {
     protected Configuration yarnConfiguration;
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
-            EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue) {
+                                EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue) {
+        return getFilterTable(customerSpace, recordType, tableSuffix, tableName, query, type, targetTableName, expectedValue, null);
+    }
+
+    public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
+                                EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue, DataCollection.Version version) {
         Table filterTable = null;
         log.info("Table Name:" + tableName);
         if (StringUtils.isNotBlank(tableName)) {
@@ -60,13 +67,13 @@ public class CreateCdlTableHelper {
         tableName = targetTableName + tableSuffix;
         log.info("Table Name:" + tableName);
         filePath += "/" + tableName + "/" + "/part-00000.avro";
-        filterTable = runQueryToTable(customerSpace, schema, tableName, filePath, query, type, expectedValue);
+        filterTable = runQueryToTable(customerSpace, schema, tableName, filePath, query, type, expectedValue, version);
         metadataProxy.updateTable(customerSpace.toString(), filterTable.getName(), filterTable);
         return filterTable;
     }
 
     private Table runQueryToTable(CustomerSpace customerSpace, Schema schema, String tableName, String filePath,
-            EventFrontEndQuery query, InterfaceName type, boolean expectedValue) {
+            EventFrontEndQuery query, InterfaceName type, boolean expectedValue, DataCollection.Version version) {
 
         String accountIdKey = InterfaceName.AccountId.name().toLowerCase();
         String periodIdKey = InterfaceName.PeriodId.name().toLowerCase();
@@ -78,14 +85,14 @@ public class CreateCdlTableHelper {
             DataPage dataPage = null;
             switch (type) {
             case Train:
-                dataPage = eventProxy.getTrainingTuples(customerSpace.toString(), query);
+                dataPage = eventProxy.getTrainingTuples(customerSpace.toString(), query, version);
                 break;
             case Event:
                 query.setCalculateProductRevenue(expectedValue);
-                dataPage = eventProxy.getEventTuples(customerSpace.toString(), query);
+                dataPage = eventProxy.getEventTuples(customerSpace.toString(), query, version);
                 break;
             default:
-                dataPage = eventProxy.getScoringTuples(customerSpace.toString(), query);
+                dataPage = eventProxy.getScoringTuples(customerSpace.toString(), query, version);
             }
 
             List<Map<String, Object>> rows = dataPage.getData();
