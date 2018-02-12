@@ -12,7 +12,8 @@
 
 <Configure id="sslContextFactory" class="org.eclipse.jetty.util.ssl.SslContextFactory">
     <Set name="keyStorePath"><Property name="jetty.sslContext.keyStorePath" deprecated="jetty.keystore" default="/etc/ledp/tls/ledp_keystore.jks"/></Set>
-    <Set name="keyStorePassword"><Property name="jetty.sslContext.keyStorePassword" deprecated="jetty.keystore.password" default="Lattice1"/></Set><Set name="ExcludeProtocols">
+    <Set name="keyStorePassword"><Property name="jetty.sslContext.keyStorePassword" deprecated="jetty.keystore.password" default="Lattice1"/></Set>
+    <Set name="ExcludeProtocols">
         <Array type="String">
             <Item>SSL</Item>
             <Item>SSLv2</Item>

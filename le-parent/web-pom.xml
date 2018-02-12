@@ -38,8 +38,8 @@
                         <configuration>
                             <jettyXml>
                                 ${jetty.conf.dir}/jetty.xml,
-                                ${jetty.conf.dir}/jetty-ssl-context.xml,
                                 ${jetty.conf.dir}/jetty-ssl.xml,
+                                ${jetty.conf.dir}/jetty-ssl-context.xml,
                                 ${jetty.conf.dir}/jetty-https.xml
                             </jettyXml>
                             <httpConnector>
@@ -57,6 +57,10 @@
                                 <systemProperty>
                                     <name>com.latticeengines.registerBootstrappers</name>
                                     <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jdk.tls.ephemeralDHKeySize</name>
+                                    <value>2048</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>jetty.ssl.port</name>
@@ -150,15 +154,12 @@
                         <configuration>
                             <jettyXml>
                                 ${jetty.conf.dir}/jetty.xml,
-                                ${jetty.conf.dir}/jetty-ssl-context.xml,
                                 ${jetty.conf.dir}/jetty-ssl.xml,
+                                ${jetty.conf.dir}/jetty-ssl-context.xml,
                                 ${jetty.conf.dir}/jetty-alpn.xml,
                                 ${jetty.conf.dir}/jetty-http2.xml,
                                 ${jetty.conf.dir}/jetty-https.xml
                             </jettyXml>
-                            <httpConnector>
-                                <port>${jetty.port}</port>
-                            </httpConnector>
                             <webAppConfig>
                                 <extraClasspath>${env.HADOOP_CONF_DIR};${env.JAVA_HOME}/lib/tools.jar
                                 </extraClasspath>
@@ -171,6 +172,14 @@
                                 <systemProperty>
                                     <name>com.latticeengines.registerBootstrappers</name>
                                     <value>true</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jdk.tls.ephemeralDHKeySize</name>
+                                    <value>2048</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <name>jetty.httpConfig.securePort</name>
+                                    <value>${jetty.ssl.port}</value>
                                 </systemProperty>
                                 <systemProperty>
                                     <name>jetty.ssl.port</name>
