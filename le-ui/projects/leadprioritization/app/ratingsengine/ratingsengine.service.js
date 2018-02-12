@@ -676,7 +676,7 @@ angular.module('lp.ratingsengine')
     this.getRatingModel = function(engineId, modelId) {
         var deferred = $q.defer();
 
-        console.log(engineId, modelId);
+        // console.log(engineId, modelId);
         RatingsEngineService.getRatingModel(engineId, modelId).then(function(result) {
             deferred.resolve(result);
         });

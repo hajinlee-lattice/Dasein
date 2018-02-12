@@ -52,10 +52,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         if (vm.targetProducts.length === 1) {
             vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
-        };
+        }
         if (vm.trainingProducts.length === 1) {
             vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
-        };
+        }
 
 
         $interval(function() { 

@@ -129,22 +129,20 @@ angular.module('lp.ratingsengine.ratingslist', [
 
         if(tileState.editRating !== true){
             if (rating.type === 'AI_BASED') {
-
-                rating.activeModelId = 'ai_psrcylhsskadco5r5wd_pg';
-
-                if (rating.activeModelId) {
-                    RatingsEngineStore.getRatingModel(rating.id, rating.activeModelId).then(function(model){
-                        $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });
+                RatingsEngineStore.getRating(rating.id).then(function(engine){
+                    RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
+                        if(model.AI.modelSummary) {
+                            $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });
+                        } else {
+                            RatingsEngineStore.setType('productpurchase', model.AI.modelingStrategy);
+                            $state.go('home.ratingsengine.productpurchase', { rating_id: rating.id });
+                        }
                     });
-                } else {
-                    url = 'home.ratingsengine.productpurchase.segment'
-                }
+                });                
             } else {
                 url = RatingsEngineStore.hasRules(rating) 
                     ? 'home.ratingsengine.dashboard'
                     : 'home.ratingsengine.rulesprospects.segment';
-
-                // console.log(rating.id);
 
                 $state.go(url, { rating_id: rating.id });
             } 
