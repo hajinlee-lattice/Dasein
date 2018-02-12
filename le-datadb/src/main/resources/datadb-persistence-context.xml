@@ -8,28 +8,11 @@
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
     <bean id="dataDbSource" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory">
-        <property name="jndiName" value="java:comp/env/jdbc/Data_MultiTenant"/>
         <property name="driverClass" value="${datadb.datasource.driver}"/>
         <property name="jdbcUrl" value="${datadb.datasource.url}"/>
         <property name="user" value="${datadb.datasource.user}" />
         <property name="password" value="${datadb.datasource.password.encrypted}" />
     </bean>
-
-    <!-- Hibernate session factory 
-    <bean id="dataSessionFactory"
-        class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="dataDbSource" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">${datadb.datasource.dialect}</prop>
-                <prop key="hibernate.show_sql">${datadb.datasource.show_sql:false}</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-            </props>
-        </property>
-    </bean>
-
-	-->
 	
 	<!-- Hibernate session factory -->
     <bean id="dataSessionFactory" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">
