@@ -127,7 +127,7 @@ public class SamlLoginResource {
             redirectView.setAttributesMap(attributeMap);
 
         } catch (LedpException e) {
-            log.error(e.getMessage(), e);
+            log.info(e.getMessage(), e);
             redirectView.setUrl(String.format("%s/login/saml/%s/error", baseLoginURL, tenantDeploymentId));
         }
 
