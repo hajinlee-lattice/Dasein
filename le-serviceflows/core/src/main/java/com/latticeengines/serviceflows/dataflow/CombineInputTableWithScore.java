@@ -3,6 +3,7 @@ package com.latticeengines.serviceflows.dataflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,6 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
@@ -44,14 +44,15 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         }
 
         Node combinedResultTable = null;
-        String idColumn;
+        String idColumn = InterfaceName.InternalId.name();
         String groupByColumn = InterfaceName.InternalId.name();
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
             idColumn = InterfaceName.Id.name();
         } else if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
             idColumn = InterfaceName.InternalId.name();
-        } else {
-            idColumn = inputTable.getSourceSchema().getAttributes(LogicalDataType.InternalId).get(0).getName();
+        }
+        if (StringUtils.isNotEmpty(parameters.getIdColumn())) {
+            idColumn = parameters.getIdColumn();
             groupByColumn = idColumn;
         }
 

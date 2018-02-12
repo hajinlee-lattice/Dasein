@@ -43,6 +43,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         params.setScoreMultiplier(multiplier);
         if (configuration.isLiftChart())
             params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
+        params.setIdColumn(InterfaceName.AnalyticPurchaseState_ID.toString());
     }
 
     private void configureExport() {

@@ -33,6 +33,9 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("avg_score")
     private Double avgScore;
 
+    @JsonProperty("id_column")
+    private String idColumn;
+
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
     }
@@ -111,6 +114,14 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setAvgScore(Double avgScore) {
         this.avgScore = avgScore;
+    }
+
+    public String getIdColumn() {
+        return idColumn;
+    }
+
+    public void setIdColumn(String idColumn) {
+        this.idColumn = idColumn;
     }
 
     @Override
