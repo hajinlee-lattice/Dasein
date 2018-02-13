@@ -38,13 +38,16 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
 
     private final CacheManager cacheManager;
 
+    private final RatingProxy _ratingProxy;
+
     private LocalCacheManager<String, Map<String, Long>> coverageCache;
 
     @Inject
-    public RatingProxy(CacheManager cacheManager) {
+    public RatingProxy(CacheManager cacheManager, RatingProxy ratingProxy) {
         super("objectapi/customerspaces");
         setMaxAttempts(2);
         this.cacheManager = cacheManager;
+        this._ratingProxy = ratingProxy;
         coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, str -> {
             String[] tokens = str.split("\\|");
             return getCoverageFromApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
@@ -63,7 +66,6 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return getDataFromObjectApi(shortenCustomerSpace(customerSpace), frontEndQuery, null);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery) {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
@@ -78,6 +80,11 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
+        return _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    public Map<String, Long> getCoverageFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         return getCoverageFromApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }

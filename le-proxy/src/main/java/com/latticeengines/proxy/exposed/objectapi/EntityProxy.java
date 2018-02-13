@@ -38,6 +38,8 @@ public class EntityProxy extends MicroserviceRestApiProxy {
 
     private final CacheManager cacheManager;
 
+    private final EntityProxy _entityProxy;
+
     private LocalCacheManager<String, Long> countCache;
 
     private LocalCacheManager<String, DataPage> dataCache;
@@ -45,9 +47,10 @@ public class EntityProxy extends MicroserviceRestApiProxy {
     private LocalCacheManager<String, Map<String, Long>> ratingCache;
 
     @Inject
-    public EntityProxy(CacheManager cacheManager) {
+    public EntityProxy(CacheManager cacheManager, EntityProxy entityProxy) {
         super("objectapi/customerspaces");
         setMaxAttempts(2);
+        this._entityProxy = entityProxy;
         this.cacheManager = cacheManager;
         countCache = new LocalCacheManager<>(CacheName.EntityCountCache, o -> {
             String str = (String) o;
@@ -80,19 +83,27 @@ public class EntityProxy extends MicroserviceRestApiProxy {
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return Long.valueOf(getCountFromCache(customerSpace, frontEndQuery));
+        return Long.valueOf(_entityProxy.getCountFromCache(customerSpace, frontEndQuery));
+    }
+
+    public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
+        optimizeRestrictions(frontEndQuery);
+        return _entityProxy.getDataFromCache(customerSpace, frontEndQuery);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
-    public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
+    public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         return getDataFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
         frontEndQuery = getRatingCountQuery(frontEndQuery);
+        return _entityProxy.getRatingCountFromCache(customerSpace, frontEndQuery);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.EntityRatingCountCacheName, key = "T(java.lang.String).format(\"%s|%s|ratingcount\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
+    public Map<String, Long> getRatingCountFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
         return getRatingCountFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), JsonUtils.serialize(frontEndQuery)));
     }

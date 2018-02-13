@@ -184,7 +184,7 @@ public class TestPlayCreationHelper {
 
     public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        RatingProxy ratingProxy = new RatingProxy(null);
+        RatingProxy ratingProxy = new RatingProxy(null, null);
 
         Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
@@ -203,7 +203,7 @@ public class TestPlayCreationHelper {
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        EntityProxy entityProxy = new EntityProxy(null);
+        EntityProxy entityProxy = new EntityProxy(null, null);
 
         Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
