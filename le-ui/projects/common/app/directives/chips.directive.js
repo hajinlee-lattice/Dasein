@@ -74,7 +74,12 @@ angular.module('mainApp.appCommon.directives.chips', [])
                 if (scope.query.length >= 0) {
                     scope.showQueryList = true;
                 }
-
+                if(('Backspace' === keyEvent.key || 'Delete' === keyEvent.key) && scope.query.length === 0){
+                    scope.mouseOverRow = false;
+                    scope.blur = true;
+                    scope.clearPositionInQueryList();
+                    scope.showQueryList = false;
+                }
                 if ('ArrowDown' === keyEvent.key) {
                     keyEvent.preventDefault()
                     var items = scope.filteredItems;
@@ -103,8 +108,9 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     if (scope.chips[item[scope.id]] === undefined) {
                         scope.chips[item[scope.id]] = item;
                     }
-                    
-                    scope.query = '';
+                    if(scope.singleSelection === true){
+                        scope.query = '';
+                    }
                     
                     scope.callCallback();
                     if (scope.singleSelection){

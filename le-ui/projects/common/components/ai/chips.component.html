@@ -19,7 +19,7 @@
             class="query" 
             type="text" 
             placeholder="{{placeholder}}" 
-            ng-keydown="queryKeyPressed($event)" 
+            ng-keyup="queryKeyPressed($event)" 
             ng-model="query" 
             ng-blur="blurText()"
             >
