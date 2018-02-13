@@ -439,11 +439,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
-            if (!bucketRestriction.bkt.Vals[0]) {
-                bucketRestriction.bkt.Vals[0] = null;
-            } else {
-                bucketRestriction.bkt.Vals[0] = booleanValue;
-            }
+            bucketRestriction.bkt.Vals[0] = booleanValue.length ? booleanValue : null;
         }
         this.changeEnumCmpValue = function (bucketRestriction, value) {
             bucketRestriction.bkt.Cmp = value;
