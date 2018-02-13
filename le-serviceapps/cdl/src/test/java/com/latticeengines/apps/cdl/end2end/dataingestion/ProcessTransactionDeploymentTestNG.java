@@ -5,6 +5,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -55,6 +56,8 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private void verifyProcess() {
         runCommonPAVerifications();
 
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1;
@@ -89,6 +92,15 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
                 RatingBucketName.F, RATING_F_COUNT_1
         );
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+    }
+
+    private Map<TableRoleInCollection, Long> getExpectedCnts() {
+        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
+        expectedCnts.put(TableRoleInCollection.AggregatedTransaction,
+                Long.valueOf(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2));
+        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction,
+                Long.valueOf(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2));
+        return expectedCnts;
     }
 
 }
