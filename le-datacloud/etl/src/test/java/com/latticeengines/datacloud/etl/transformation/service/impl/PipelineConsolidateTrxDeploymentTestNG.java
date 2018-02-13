@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -22,7 +23,6 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -30,6 +30,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
@@ -123,10 +124,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     public void testTableToTable() {
         targetVersion = HdfsPathBuilder.dateFormat.format(new Date());
 
-        uploadAndRegisterTableSource(accountTableName, accountTableName, null, null);
-        uploadAndRegisterTableSource(tableName1, tableName1, null, null);
-        uploadAndRegisterTableSource(tableName2, tableName2, null, null);
-        uploadAndRegisterTableSource(tableName3, tableName3, null, null);
+        uploadAndRegisterAccountTable();
+        uploadAndRegisterTable1();
+        uploadAndRegisterTable2();
+        uploadAndRegisterTable3();
         initializeTsStores();
 
         currentConfig = getTransformationConfig();
@@ -772,14 +773,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Assert.assertEquals(keyboardRecord.get("TotalQuantity").toString(), "1");
     }
 
-    @Test(groups = "deployment", enabled = false)
-    public void createData() {
-        uploadAccountTable();
-        uploadTable1();
-        uploadTable2();
-        uploadTable3();
-    }
-
     private void initProductTable() {
         productMap.put("1", createProduct("1", "product1", null));
         productMap.put("2", createProduct("2", "product2", null));
@@ -840,40 +833,50 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
 
-    private void uploadAccountTable() {
+    private void uploadAndRegisterAccountTable() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (int i = 0; i < accountFieldNames.size(); i++) {
+            columns.add(Pair.of(accountFieldNames.get(i), accountClz.get(i)));
+        }
         Object[][] data = { { "1" }, { "2" }, { "3" }, { "4" }, { "5" } };
-
-        uploadDataToHdfs(data, accountFieldNames, accountClz,
-                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + accountTableName + ".avro", accountTableName);
+        uploadAndRegisterTableSource(columns, data, accountTableName);
     }
 
-    private void uploadTable1() {
+    private void uploadAndRegisterTable1() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (int i = 0; i < fieldNames.size(); i++) {
+            columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
+        }
         Object[][] data = {
                 { "1", "1", null, "PurchaseHistory", "1" /* " Disk" */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
                 { "3", "2", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
                 { "4", "2", null, "PurchaseHistory", "2" /* Monitor */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
         };
-
-        uploadDataToHdfs(data, fieldNames, clz,
-                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName1 + ".avro", tableName1);
+        uploadAndRegisterTableSource(columns, data, tableName1);
     }
 
-    private void uploadTable2() {
+    private void uploadAndRegisterTable2() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (int i = 0; i < fieldNames.size(); i++) {
+            columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
+        }
         Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200000L, "Ext2" }, //
                 { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001576000L, "Ext2" }, //
         };
-        uploadDataToHdfs(data, fieldNames, clz,
-                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName2 + ".avro", tableName2);
+        uploadAndRegisterTableSource(columns, data, tableName2);
     }
 
-    private void uploadTable3() {
+    private void uploadAndRegisterTable3() {
+        List<Pair<String, Class<?>>> columns = new ArrayList<>();
+        for (int i = 0; i < fieldNames.size(); i++) {
+            columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
+        }
         Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576000L, "Ext3" }, //
                 { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001577000L, "Ext3" }, //
                 { "6", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
                 { "7", "3", null, "PurchaseHistory", "3" /* Keyboard */, 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
         };
-        uploadDataToHdfs(data, fieldNames, clz,
-                "/" + "PipelineConsolidateTrxDeploymentTestNG" + "/" + tableName3 + ".avro", tableName3);
+        uploadAndRegisterTableSource(columns, data, tableName3);
     }
 
 }
