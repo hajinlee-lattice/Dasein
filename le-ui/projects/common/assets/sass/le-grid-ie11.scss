@@ -153,4 +153,7 @@ $font-size:12px;
     .le-cell-centered{
         justify-content: space-around;
     }
+    .le-cell-right-align {
+        justify-content: flex-end;
+    }
 }

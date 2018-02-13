@@ -12,16 +12,16 @@
 <div class="le-cell le-col-start-5 le-col-span-1">
     <span ng-class="getSubJobsPartialSuccess().length > 0 ? 'le-tooltip' : ''">
         {{getActionsCount()}}
-            <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0">
-                <div class="tooltip-content">
-                    <h3>Partial Success</h3>
-                    <p>The following actions are partially validated and will not be taken into data processing:</p>
-                    <ol>
-                        <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
-                        <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
-                    </ol>
-                </div>
-            </i>
+        <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="getSubJobsPartialSuccess().length > 0">
+            <div class="tooltip-content">
+                <h3>Partial Success</h3>
+                <p>The following actions are partially validated and will not be taken into data processing:</p>
+                <ol>
+                    <li ng-repeat="subjob in (actions = getSubJobsPartialSuccess()) | limitTo : maxRowsTooltip">{{getSubjobActionName($index+1, subjob)}}</li>
+                    <li ng-if="actions.length > maxRowsTooltip ">And {{actions.length - maxRowsTooltip}} other partial success</li>
+                </ol>
+            </div>
+        </i>
     </span>
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
@@ -36,7 +36,7 @@
         Schedule at {{job.startTimestamp ? (job.startTimestamp | date : 'MM/dd/yyyy h:mma') : ''}}
     </span>
 </div>
-<div class="le-cell le-col-start-9 le-col-span-1">
+<div class="le-cell le-col-start-9 le-col-span-3">
     <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="disableRunButton()">
         Run Now
     </button>
@@ -44,11 +44,12 @@
     <a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="!showRunButton(job) && !isJobRunning(job) && !isJobFailed(job)">
         Report
     </a>
-</div>
-<div class="le-cell le-col-start-10 le-col-span-3">
     <span>
         <span ng-if="isJobFailed(job)">Please Contact Lattice Support</span>
     </span>
+</div>
+<div class="le-cell le-col-start-10 le-col-span-1 le-cell-right-align">
+
     <a href="javascript:void(0)" data-toggle="collapse" ng-click="expandRow()" ng-show="!expanded">
         <span>
             <i class="fa fa-angle-double-down fa-lg"></i>

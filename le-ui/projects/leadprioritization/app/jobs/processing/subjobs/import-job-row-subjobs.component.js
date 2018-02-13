@@ -24,7 +24,8 @@ angular.module('lp.jobs.row.subjobs', [])
             }
             $scope.getActionName = function (subjob) {
                 if (subjob.inputs && subjob.inputs != null) {
-                    return subjob.inputs['SOURCE_DISPLAY_NAME'];
+                    var ret = subjob.inputs['SOURCE_DISPLAY_NAME'];
+                    return ret;
                 }
             }
 

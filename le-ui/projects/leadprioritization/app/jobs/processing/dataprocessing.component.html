@@ -4,7 +4,7 @@
         <p>Some actions are not completed yet. If you wish to run the Data Processing Job now, only the completed actions will
             be taken. </p>
         <p>The actions are still running the validation will be queued to the next Processing Job.</p>
-        <p>You won’t be able to run the next job until the current job is done.</p>
+        <p>You won't be able to run the next job until the current job is done.</p>
         <br>
     </div>
 </le-modal-window>
@@ -34,8 +34,8 @@
                 <div class="le-cell le-col-start-5 le-col-span-1">Actions</div>
                 <div class="le-cell le-col-start-6 le-col-span-1">Status</div>
                 <div class="le-cell le-col-start-7 le-col-span-2"></div>
-                <div class="le-cell le-col-start-9 le-col-span-1"></div>
-                <div class="le-cell le-col-start-10 le-col-span-3"></div>
+                <div class="le-cell le-col-start-9 le-col-span-3"></div>
+                <div class="le-cell le-col-start-10 le-col-span-1"></div>
 
             </div>
             <import-job-row class="le-row" ng-if="!vm.loading" ng-repeat="job in vm.header.filter.filtered |
