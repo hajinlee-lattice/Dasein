@@ -48,26 +48,32 @@ angular.module('lp.ratingsengine.wizard.products', [
     vm.selectAll = function(){
         if (vm.selectedAll) {
             vm.selectedAll = true;
-            vm.products.forEach(function (product) {
-                product.Selected = vm.selectedAll;
-                RatingsEngineStore.selectProduct(product.ProductId, product.ProductName);
+            angular.forEach(vm.products, function(product, index) {
+                if(!RatingsEngineStore.isProductSelected(product.ProductId)){
+                    vm.selectProduct(index, product.ProductId);
+                }
             });
         } else {
             vm.selectedAll = false;
-            vm.products.forEach(function (product) {
-                product.Selected = vm.selectedAll;
+            angular.forEach(vm.products, function(product, index) {
+                if(RatingsEngineStore.isProductSelected(product.ProductId)){
+                    vm.selectProduct(index, product.ProductId);
+                }
             });
             RatingsEngineStore.clearSelection();
         }
 
         vm.productsSelected = RatingsEngineStore.getProductsSelected();
-    }
-    vm.selectProduct = function (index) {
-        vm.products[index]['Selected'] = (vm.products[index]['Selected'] == undefined ? true : !vm.products[index]['Selected']);
-        var productId = vm.products[index].ProductId;
-        RatingsEngineStore.selectProduct(productId, vm.products[index].ProductName);
-        vm.validateNextStep();
 
+        vm.validateNextStep();
+    }
+    vm.selectProduct = function (index, productId) {
+
+        vm.products[index]['Selected'] = (vm.products[index]['Selected'] == undefined ? true : !vm.products[index]['Selected']);
+
+        RatingsEngineStore.selectProduct(productId, vm.products[index].ProductName);
+        
+        vm.validateNextStep();
         vm.productsSelected = RatingsEngineStore.getProductsSelected();
         
         if (RatingsEngineStore.getProductsSelectedCount() === vm.products.length) {

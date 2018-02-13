@@ -33,7 +33,7 @@
                         </li>
                         <li
                             ng-if="vm.modelingConfigFilters['QUANTITY_IN_PERIOD']">
-                            Quantity bought was {{ vm.quantityCriteria }} {{ vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].value }} units
+                            Quantity bought was {{ vm.quantityCriteria }} {{ vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].value | number }} units
                         </li>
                         <li
                             ng-if="vm.modelingConfigFilters['TRAINING_SET_PERIOD']">
@@ -55,7 +55,7 @@
 
             <h3>Job Status</h3>
             <div class="meter bar">
-                <span class="indeterminate"></span>
+                <span class="indeterminate" style="width:1%"></span>
             </div>
             <div>
                 <p><i class="fa fa-check" data-ng-if="vm.status == 'Completed'"></i> {{ vm.status }}</p>

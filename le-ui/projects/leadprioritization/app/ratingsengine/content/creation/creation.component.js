@@ -6,7 +6,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     var vm = this;
 
     angular.extend(vm, {
-        ratingEngine: Rating
+        ratingEngine: Rating,
+        status: 'Preparing Modeling Job'
     });
 
     vm.init = function() {
@@ -22,9 +23,11 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.trainingSegment = model.trainingSegment;
         vm.trainingProducts = model.trainingProducts;
 
+        console.log(vm.modelingStrategy);
+
     	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
         	vm.ratingEngineType = 'First Purchase Cross-Sell'
-        } else if (vm.modelingStrategy === 'CROSS_SELL_RETURNING_PURCHASE') {
+        } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
         	vm.ratingEngineType = 'Returning Purchase Cross-Sell'
         }
 
@@ -61,11 +64,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         $interval(function() { 
             JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
                 // console.log(result);
-
                 if(result.id) {
                     vm.status = result.jobStatus;
-                } else {
-                    vm.status = 'Preparing Modeling Job';
                 }
             });
         }, 10 * 1000);

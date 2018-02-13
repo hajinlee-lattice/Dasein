@@ -602,6 +602,8 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveRatingEngineAI = function(nextState){
 
+        console.log(RatingsEngineStore.getType());
+
         var type = RatingsEngineStore.getType(),
             opts =  {
                 type: "AI_BASED",
@@ -618,18 +620,18 @@ angular.module('lp.ratingsengine')
         });
     }
     
-    this.nextSaveTypeModel = function(nextState){
-        var currentRating = RatingsEngineStore.getCurrentRating();
+    // this.nextSaveTypeModel = function(nextState){
+    //     var currentRating = RatingsEngineStore.getCurrentRating();
 
-        var obj = currentRating.ratingModels[0].AI;
-        obj.workflowType = RatingsEngineAIStore.aiModelOptions.workflowType;//'CROSS_SELL';
-        var opts = {
-            AI: obj
-        };
-        RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
-            $state.go(nextState, { rating_id: model.id });
-        });
-    }
+    //     var obj = currentRating.ratingModels[0].AI;
+    //     obj.workflowType = RatingsEngineAIStore.aiModelOptions.workflowType;//'CROSS_SELL';
+    //     var opts = {
+    //         AI: obj
+    //     };
+    //     RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
+    //         $state.go(nextState, { rating_id: model.id });
+    //     });
+    // }
 
     this.nextSaveAIRatingModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating(),
@@ -637,23 +639,30 @@ angular.module('lp.ratingsengine')
             targetProducts = RatingsEngineStore.getProductsSelectedIds(),
             predictionType = RatingsEngineStore.getPredictionType(),
             modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
+            type = RatingsEngineStore.getType(),
+            modelingStrategy = type.engineType,
             trainingSegment = RatingsEngineStore.getTrainingSegment(),
             trainingProducts = RatingsEngineStore.getTrainingProducts(),
             obj = {};
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
-            console.log(rating.activeModel.AI.id);
+
+            console.log(rating);
+            console.log(predictionType);
+            console.log(modelingStrategy);
 
             obj = {
                 AI: {
                     id: rating.activeModel.AI.id,
                     targetProducts: targetProducts,
                     predictionType: predictionType,
+                    modelingStrategy: modelingStrategy,
                     modelingConfigFilters: modelingConfigFilters,
                     trainingSegment: trainingSegment,
                     trainingProducts: trainingProducts
                 }
             };
+
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
 
                 var route = nextState,
@@ -688,6 +697,8 @@ angular.module('lp.ratingsengine')
         var currentRating = RatingsEngineStore.getCurrentRating(),
             obj = model.AI;
         
+        console.log(model);
+
         RatingsEngineStore.tmpId = obj.id;
 
         // console.log('Launching the model', obj);
