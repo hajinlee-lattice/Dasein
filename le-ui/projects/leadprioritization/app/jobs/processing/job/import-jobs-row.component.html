@@ -1,6 +1,6 @@
 <div class="le-cell le-col-start-1 le-col-span-2">
 
-    <span ng-if="!isJobPending(job)">
+    <span ng-if="!isJobReady(job)">
         {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
     </span>
 </div>

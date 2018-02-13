@@ -150,6 +150,13 @@ angular.module('lp.jobs.import.row', [])
                     return false;
                 }
             }
+            $scope.isJobReady = function(job){
+                if (job.jobStatus === 'Ready') {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
 
             $scope.isJobPending = function (job) {
                 if (job.jobStatus === 'Pending') {

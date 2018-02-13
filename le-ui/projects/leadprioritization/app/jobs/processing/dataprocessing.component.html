@@ -39,7 +39,7 @@
 
             </div>
             <import-job-row class="le-row" ng-if="!vm.loading" ng-repeat="job in vm.header.filter.filtered |
-                                        filter: vm.query |
+                                        filter: vm.query | orderBy:'-startTimestamp' |
                                         orderBy: vm.header.sort.order + vm.header.sort.property |
                                         startFrom: (vm.currentPage - 1) * vm.pagesize |
                                         limitTo: vm.pagesize" class="le-row" job="job" vm="vm" index="$index"
