@@ -12,7 +12,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -24,9 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
-import org.apache.log4j.Level;
-import org.apache.log4j.LogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,13 +43,11 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
-import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.eai.ExportConfiguration;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -93,7 +87,6 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
@@ -106,7 +99,6 @@ import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentPro
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 import com.latticeengines.yarn.exposed.service.JobService;
-import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
 public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
@@ -532,7 +524,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Report summaryReport = reports.get(0);
         verifyConsolidateSummaryReport(summaryReport);
         Report publishReport = reports.get(1);
-        // verifyExportToRedshiftReport(publishReport, expectedCounts); Will resume later
+        verifyExportToRedshiftReport(publishReport, expectedCounts);
     }
 
     void verifyConsolidateSummaryReport(Report summaryReport) {
@@ -582,9 +574,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 });
         logger.info("Redshift report size is " + map.entrySet().size() + ", expected " + expectedCounts.size()
                 + " reports for redshift exporting.");
-        // assertEquals(map.entrySet().size(), expectedCounts.size(),
-        // "Should have " + expectedCounts.size() + " reports for redshift
-        // exporting.");
+        assertEquals(map.entrySet().size(), expectedCounts.size(),
+                "Should have " + expectedCounts.size() + " reports for redshift exporting.");
         expectedCounts.forEach((role, count) -> logger.info("Redshit report role " + role + " count "
                 + map.get(role.name()).longValue() + " should have " + count.longValue()));
         expectedCounts.forEach((role, count) -> assertEquals(map.get(role.name()).longValue(), count.longValue(),

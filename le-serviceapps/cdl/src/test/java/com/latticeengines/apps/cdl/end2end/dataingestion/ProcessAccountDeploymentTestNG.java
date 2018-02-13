@@ -4,6 +4,7 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -77,7 +79,7 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, null);
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
@@ -109,5 +111,16 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
                 RatingBucketName.F, RATING_F_COUNT_1);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
         verifyUpdateActions();
+    }
+
+    private Map<TableRoleInCollection, Long> getExpectedCnts() {
+        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
+        expectedCnts.put(TableRoleInCollection.BucketedAccount,
+                Long.valueOf(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2));
+        expectedCnts.put(TableRoleInCollection.SortedContact,
+                Long.valueOf(CONTACT_IMPORT_SIZE_1_1 + CONTACT_IMPORT_SIZE_1_2));
+        expectedCnts.put(TableRoleInCollection.SortedProduct,
+                Long.valueOf(PRODUCT_IMPORT_SIZE_1_1 + PRODUCT_IMPORT_SIZE_1_2));
+        return expectedCnts;
     }
 }
