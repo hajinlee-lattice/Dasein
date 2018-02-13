@@ -93,13 +93,13 @@ public class Tenant implements HasName, HasId<String>, HasPid {
     }
 
     @Override
-    @JsonIgnore
+    @JsonProperty("Pid")
     public Long getPid() {
         return pid;
     }
 
     @Override
-    @JsonIgnore
+    @JsonProperty("Pid")
     public void setPid(Long pid) {
         this.pid = pid;
     }
