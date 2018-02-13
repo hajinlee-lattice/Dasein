@@ -148,8 +148,10 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
 
         List<FieldMetadata> fmsForDomRowSelect = fieldMetadataWithReason(config);
 
+        String filterNullDomain = DataCloudConstants.AMS_ATTR_DOMAIN + " != null";
         String filterRowsInSingleTree = TREE_NUMBER + " != 1";
         Node domainOwnershipTable = mergDomDunsWithRootTypePop //
+                .filter(filterNullDomain, new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN)) //
                 .groupByAndAggregate(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN), agg, fmsForDomRowSelect) //
                 .filter(filterRowsInSingleTree, new FieldList(TREE_NUMBER)) //
                 .renamePipe("DomainRowSelect");
