@@ -71,7 +71,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
             scope.queryKeyPressed = function (keyEvent) {
                 scope.blur = false;
-                if (scope.query.length >= 0) {
+                if (scope.query.length > 0) {
                     scope.showQueryList = true;
                 }
                 if(('Backspace' === keyEvent.key || 'Delete' === keyEvent.key) && scope.query.length === 0){
@@ -80,7 +80,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
                     scope.clearPositionInQueryList();
                     scope.showQueryList = false;
                 }
-                if ('ArrowDown' === keyEvent.key) {
+                if ('ArrowDown' === keyEvent.key && scope.query.length > 0) {
                     keyEvent.preventDefault()
                     var items = scope.filteredItems;
                     var l = items.length;
@@ -88,13 +88,13 @@ angular.module('mainApp.appCommon.directives.chips', [])
                         scope.positionInQueryList = scope.positionInQueryList + 1;
                     }
                 }
-                if ('ArrowUp' === keyEvent.key) {
+                if ('ArrowUp' === keyEvent.key && scope.query.length > 0) {
                     keyEvent.preventDefault()
                     if (scope.positionInQueryList > 0) {
                         scope.positionInQueryList = scope.positionInQueryList - 1;
                     }
                 }
-                if (keyEvent.key === 'Enter') {
+                if (keyEvent.key === 'Enter' && scope.query.length > 0) {
                     scope.chooseItem(scope.filteredItems[scope.positionInQueryList]);
                     scope.positionInQueryList = -1;
 
