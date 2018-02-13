@@ -6,16 +6,17 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-
-import java.util.Map;
 
 public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
@@ -50,6 +51,8 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private void verifyProcess() {
         runCommonPAVerifications();
 
+        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1;
         long numProducts = PRODUCT_IMPORT_SIZE_1;
@@ -68,6 +71,12 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_2,
                 BusinessEntity.Product, numProducts);
         verifyTestSegment1Counts(segment1Counts);
+    }
+
+    private Map<TableRoleInCollection, Long> getExpectedCnts() {
+        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
+        expectedCnts.put(TableRoleInCollection.BucketedAccount, Long.valueOf(ACCOUNT_IMPORT_SIZE_2));
+        return expectedCnts;
     }
 
 }
