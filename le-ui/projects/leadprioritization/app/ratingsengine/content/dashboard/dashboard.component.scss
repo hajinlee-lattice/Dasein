@@ -65,6 +65,14 @@ section.ratingsengine.dashboard-layout.dashboard.container {
         p em {
             color: blue;
         }
+        .dashboard-section-header {
+            .title{
+                word-wrap: break-word;
+                overflow:hidden;
+                white-space:nowrap;
+                text-overflow:ellipsis;
+            }
+        }
     }
     .status-toggle {
         text-align: left;
