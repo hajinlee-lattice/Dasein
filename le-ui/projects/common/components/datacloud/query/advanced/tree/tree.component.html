@@ -1,7 +1,3 @@
-<div    class="query-section-type-dotline"
-        ng-if="!vm.unused && vm.root.draggedItem != vm"
-        ng-class="{ 'operation': vm.tree.logicalRestriction.operator }"></div>
-
 <div    ng-if="vm.tree.logicalRestriction"
         class="row query-section noselect-children"
         ng-class="{
@@ -10,6 +6,10 @@
         }"
         ng-mouseover="vm.mouseOver($event)"
         ng-mousemove="vm.mouseMove($event, true)">
+
+    <div    class="query-section-type-dotline"
+            ng-if="!vm.unused && vm.root.draggedItem != vm"
+            ng-class="{ 'operation': vm.tree.logicalRestriction.operator }"></div>
 
     <div class="query-section-operator label-operator item-operator-and">and</div>
     <div class="query-section-operator label-operator item-operator-or">or</div>
@@ -35,15 +35,16 @@
                 <span ng-if="vm.tree.logicalRestriction.operator == 'OR'">Any</span>
             </button>
         </div-->
-
+        
+        <span class="query-helper-text">Build a segment with <strong>{{vm.entity.toLowerCase()}}s</strong> that have</span>
         <select class="query-section-operator-dropdown" 
                 ng-model="vm.tree.logicalRestriction.operator"
                 ng-change="vm.clickOperator()">
             <option value="OR">
-                Any of the selected attribute value combinations (OR)
+                ALL of these conditions (AND)
             </option>
             <option value="AND">
-                All of the selected attribute value combinations (AND)
+                ANY of these conditions (OR)
             </option>
         </select>
 
@@ -51,7 +52,7 @@
             of the selected attribute value combinations ({{ vm.tree.logicalRestriction.operator }})
         </span-->
 
-        <div class="query-section-controls pull-right">
+        <div class="query-section-controls">
             <i class="fa fa-close" ng-click="vm.clickDelete()"></i>
         </div>
     </div>
@@ -74,6 +75,10 @@
         ng-mousedown="vm.mouseDown($event)"
         ng-mouseover="vm.mouseOver($event)"
         ng-mousemove="vm.mouseMove($event)">
+
+    <div    class="query-section-type-dotline"
+            ng-if="!vm.unused && vm.root.draggedItem != vm"
+            ng-class="{ 'operation': vm.tree.logicalRestriction.operator }"></div>
 
     <div class="query-section-operator item-operator item-operator-and">and</div>
     <div class="query-section-operator item-operator item-operator-or">or</div>

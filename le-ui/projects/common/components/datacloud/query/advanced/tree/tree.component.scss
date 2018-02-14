@@ -1,8 +1,8 @@
 div.advanced-query-builder {
     .query-helper-text-one {
-        font-size: 1.2em;
-        padding-left: 8px;
-        margin-bottom: .8em;
+//         padding-left: 8px;
+        margin-bottom: .5em;
+        margin-left: 0.15em;
     }
 
     .query-section-divider {
@@ -32,24 +32,39 @@ div.advanced-query-builder {
 
     .query-section-type-dotline {
         position: absolute;
-        margin-top: 24px;
-        left: 0;
+        margin-top: 25px;
+        left: -1.8em;
         width: 1.5em;
         border-bottom: 1px dashed #888;
 
         &.operation {
             margin-top: 16px;
+            left: 0em;
         }
     }
 
     .query-section {
         li {
             position: relative;
-            margin-left: 1.5em;
+            margin-left: 1.15em;
+        }
+        
+        &.query-tree-root {
+            span.query-helper-text {
+                display: none;
+                font-size: 13px;
+            }
+
+            & > li > query-tree-directive > ul > li {
+//                 margin-left: 1.5em;
+            }
         }
 
         &.query-tree-root > li > query-tree-directive:first-child {
-            > .query-section-type-dotline {
+            & > div > div.query-section-label > span.query-helper-text {
+                display: inline;
+            }
+            > div > .query-section-type-dotline {
                 display: none;
             }
         }
@@ -77,6 +92,7 @@ div.advanced-query-builder {
             width: 2em;
             text-align: center;
             z-index: 2;
+            display: none !important;
         }
         
         .query-section-operator.label-operator {
@@ -94,7 +110,7 @@ div.advanced-query-builder {
 
         >li {
             margin-left: 0em;
-            margin-bottom: 2em;
+            margin-bottom: 1em;
         }
 
         .query-section-item-unused {
@@ -105,7 +121,8 @@ div.advanced-query-builder {
             position: relative;
             background: white;
 //             border: 1px solid #ccc;
-//             border-left: 5px solid #999;
+            border-left: 5px solid #999;
+            border-right: 1px solid #ddd;
             display: flex;
             cursor: default;
             z-index: 1;
@@ -131,7 +148,7 @@ div.advanced-query-builder {
                 
                 > span {
                     display: inline-block;
-                    margin: 1.2em 0em 0 0.2em;
+                    margin: 1em 0em 0 0.25em;
                     vertical-align: baseline;
                     font-size: .9em;
                     
@@ -147,16 +164,19 @@ div.advanced-query-builder {
             }
 
             .query-section-item-label {
-                background-color: #33bdb7;
+//                 background-color: #33bdb7;
 //                 border-right: 1px solid #ccc;
-                min-width: 2.5em;
+                min-width: 3em;
                 text-align: center;
                 z-index: 1;
+                border: 1px solid #ddd;
+                border-left: none;
+                border-right: none;
                 
                 strong {
                     cursor: move;
                     display: inline-block;
-                    color: #fff;
+                    color: #222;
                 }
 
                 & {
@@ -164,12 +184,14 @@ div.advanced-query-builder {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    padding: .5em .75em;
+                    padding: .5em 0em;
                 }
             }
 
             .query-section-item-unused {
-                margin-top: 0.85em;
+                position: absolute;
+                right: 0;
+                margin-top: 1em;
                 margin-right: 7.75em;
                 color: red;
                 font-weight: bold;
@@ -179,8 +201,8 @@ div.advanced-query-builder {
                 position: relative;
                 width: 100%;
                 line-height: 1.3em;
-                padding: .5em 1em;
-                border: 1px solid #ececec;
+                padding: .5em 1em .5em 0;
+                border: 1px solid #ddd;
                 border-left: none;
                 
                 span.item-edit-controls {
@@ -319,7 +341,7 @@ div.advanced-query-builder {
  
             .query-section-item-records {
                 position: relative;
-                background: #ececec; 
+//                 background: #ececec; 
 //                 border-left: #ddd solid 1px;
                 width: 10em;
                 padding: .5em 1em;
@@ -327,6 +349,9 @@ div.advanced-query-builder {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                border: 1px solid #ddd;
+                border-left: none;
+                border-right: none;
                 
                 span {
                     float: left;
@@ -355,18 +380,18 @@ div.advanced-query-builder {
                 }
             } 
  
-            &.category-contact_attributes .query-section-item-label { background: #457eba; }
-            &.category-product .query-section-item-label { background: #cd80bc; }
-            &.category-firmographics .query-section-item-label { background: #33bdb7; }
-            &.category-intent .query-section-item-label { background: #f15a5a; }
-            &.category-technology_profile .query-section-item-label { background: #70bf4a; }
-            &.category-website_profile .query-section-item-label { background: #26649b; }
-            &.category-growth_trends .query-section-item-label { background: #65b7e6; }
-            &.category-engagement .query-section-item-label { background: #aac43b; }
-            &.category-online_presence .query-section-item-label { background: #8e71b2; }
-            &.category-website_keywords .query-section-item-label { background: #fdbc49; }
-            &.category-product_spend .query-section-item-label { background: #cd80bc; }
-            &.category-my_attributes .query-section-item-label { background: #457eba; }
+            &.category-contact_attributes { border-left-color: #457eba; }
+            &.category-product { border-left-color: #cd80bc; }
+            &.category-firmographics { border-left-color: #33bdb7; }
+            &.category-intent { border-left-color: #f15a5a; }
+            &.category-technology_profile { border-left-color: #70bf4a; }
+            &.category-website_profile { border-left-color: #26649b; }
+            &.category-growth_trends { border-left-color: #65b7e6; }
+            &.category-engagement { border-left-color: #aac43b; }
+            &.category-online_presence { border-left-color: #8e71b2; }
+            &.category-website_keywords { border-left-color: #fdbc49; }
+            &.category-product_spend { border-left-color: #cd80bc; }
+            &.category-my_attributes { border-left-color: #457eba; }
         }
 
         .query-section-item-box {
@@ -408,11 +433,12 @@ div.advanced-query-builder {
 
         .query-section-item-box-subtree {
             border-bottom: none;
+            padding-top: 3px;
         }
 
         .query-section-all,
         .query-section-any {
-            margin: 0.5em 0 0;
+            margin: 0.1em 0 0;
         }
 
         .query-section-item-end {
@@ -421,13 +447,15 @@ div.advanced-query-builder {
 
         .query-section-item-end {
             border-color: #bbb;
+            margin-bottom: 1em;
+            padding-bottom: 0;
         }
 
         .query-section-label {
-            display: block;
-            background: #E2E3E5;
-//             border: 1px solid #d0d0d0;
-            padding-left: 0.8em;
+    display: block;
+    /* background: #E2E3E5; */
+//     padding-left: 0.15em;
+    padding-top: 3px;
             
             &, & * {
                 -webkit-transition: none;
@@ -440,23 +468,33 @@ div.advanced-query-builder {
                 border-radius: 3px;
             }
 
+            .query-section-controls {
+                border-radius: 100%;
+                border: 1px dashed #666;
+                padding: 0;
+                margin: 0;
+                margin-left: 3px;
+                margin-right: 0.3em;
+                float: left;
+            }
+
             .query-section-label-expand.fa {
                 position: absolute;
                 left: -0.6em;
-                top: 10px;
+                top: 13px;
                 font-size: 10pt;
-                border: 2px solid white;
+                border: 2px solid #f9f9f9;
                 border-bottom: transparent;
-                background: white;
+                background: #f9f9f9;
                 cursor: pointer;
                 color: #666;
             }
 
             select.query-section-operator-dropdown {
-                font-size: 1.0em;
+                font-size: 12px;
                 background: transparent;
                 border: none;
-                margin: 0.5em 0em;
+                margin: 0.55em 0em;
             }
 
             .query-section-label-text {
@@ -466,7 +504,7 @@ div.advanced-query-builder {
             
             .query-section-controls i.fa {
                 display: inline-block;
-                padding: 0.7em 1.0em;
+                padding: 0.5em 0.6em;
                 cursor: pointer;
                 font-size: 13px;
             }
@@ -503,6 +541,7 @@ div.advanced-query-builder {
     
     .query-section-item-box:first-child {
         padding-top: .75em;
+        margin-top: 2px;
 
         &> query-tree-directive {
             &> div > .query-section-operator {
@@ -521,7 +560,9 @@ div.advanced-query-builder {
 
     hr {
         margin-top: -0.9em;
-        display: none;
+        margin-left: 2.5em;
+        border: none;
+        border-top: 1px dashed #aaa;
     }
 
     .dragging,

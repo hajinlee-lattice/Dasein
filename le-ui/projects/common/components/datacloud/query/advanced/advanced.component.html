@@ -100,16 +100,11 @@
             </span>
         </div> -->
 
-        <div class="row query-helper-text-one" >
-            <span>
-                Build {{vm.mode == "rules" ? "rules" : "a segment"}} with <strong>accounts</strong> that have:
-            </span>
-        </div>
-
         <ul class="query-section query-tree-root"
             ng-mouseleave="vm.mouseOut()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
-                    ng-repeat="tree in (vm.mode == 'rules' ? vm.accountRulesTree : vm.getAccountTree())">
+                    ng-repeat="tree in (vm.mode == 'rules' ? vm.accountRulesTree : vm.getAccountTree())"
+                    ng-mouseup="vm.mouseUp($event)">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                         items="vm.items" tree="tree" root="vm" entity=" 'Account' ">
@@ -119,20 +114,15 @@
 
         <div class="row query-helper-text-one">
             <span>
-                <strong>AND</strong>
-            </span>
-        </div>
-
-        <div class="row query-helper-text-one">
-            <span>
-                <strong>contacts</strong> that have:
+                <strong>AND</strong><hr></hr>
             </span>
         </div>
 
         <ul class="query-section query-tree-root"
             ng-mouseleave="vm.mouseOut()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
-                    ng-repeat="tree in (vm.mode == 'rules' ? vm.contactRulesTree : vm.getContactTree())">
+                    ng-repeat="tree in (vm.mode == 'rules' ? vm.contactRulesTree : vm.getContactTree())"
+                    ng-mouseup="vm.mouseUp($event)">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                         items="vm.items" tree="tree" root="vm" entity=" 'Contact' ">
