@@ -110,6 +110,10 @@ angular
         })
         .state('home.jobs.summary', {
             url: '/:jobId/summary',
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'View Report'
+            },
             views: {
                 "main@": {
                     controller: 'JobsSummaryController',
