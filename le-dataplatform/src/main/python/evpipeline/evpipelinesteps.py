@@ -1,15 +1,13 @@
-from collections import OrderedDict
-import re
+from __future__ import print_function
 
-from sklearn.decomposition import PCA
-
-import encoder
 import numpy as np
 import pandas as pd
+import random as rd
+import re
+from collections import OrderedDict
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
-import random as rd
-
+from sklearn.decomposition import PCA
 
 logger = get_logger("evpipeline")
     
@@ -171,12 +169,12 @@ class ImputationStep(PipelineStep):
             if column in nullValues and nullValues[column] == 0:
                 continue
             if column in dret['noImputation']:
-                print 'Not imputed column:' + column
+                print('Not imputed column:' + column)
                 continue
             if column in dret['zeroValues']:
                 self.imputationValues[column] = 0
                 outputFrame[column] = outputFrame[column].fillna(0)
-                print 'Zero imputed column:' + column
+                print('Zero imputed column:' + column)
                 continue
             if column in dret['max']:
                 if column in self.columnsMax:
@@ -185,11 +183,11 @@ class ImputationStep(PipelineStep):
                 else:
                     self.imputationValues[column] = 0
                     outputFrame[column] = outputFrame[column].fillna(0)
-                print 'Max imputed column:' + column
+                print('Max imputed column:' + column)
                 continue
             self.imputationValues[column] = 0
             outputFrame[column] = outputFrame[column].fillna(0)
-            print 'Zero imputed column (rarely):' + column
+            print('Zero imputed column (rarely):' + column)
         return outputFrame
     
     def defaultValuesForNumerical(self, hd):  # includes float,integer,double

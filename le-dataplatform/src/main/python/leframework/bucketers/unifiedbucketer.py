@@ -1,11 +1,12 @@
+from __future__ import print_function
+
 import logging
 import math
-
-from numpy.random import choice
 from itertools import compress
+from leframework.codestyle import overrides
+from numpy.random import choice
 
 from bucketer import Bucketer
-from leframework.codestyle import overrides
 
 
 class UnifiedBucketer(Bucketer):
@@ -157,7 +158,7 @@ class UnifiedBucketer(Bucketer):
         while currNumBuckets > minNumBucket:
             minSig = min(sigList)
             if minSig >= sigThreshold:
-                print "all buckets have significance larger than current threshold %s" % sigThreshold
+                print("all buckets have significance larger than current threshold %s" % sigThreshold)
                 break
             else:
                 # find an index to delete, to avoid bias, delete a random one of multiple mins exist

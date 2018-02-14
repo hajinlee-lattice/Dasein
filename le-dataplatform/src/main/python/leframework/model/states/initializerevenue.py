@@ -1,9 +1,7 @@
 import logging
-import math
-
+import pandas as pd
 from leframework.codestyle import overrides
 from leframework.model.state import State
-import pandas as pd
 
 
 class InitializeRevenue(State):
@@ -16,12 +14,12 @@ class InitializeRevenue(State):
     def execute(self):
         mediator = self.getMediator()
         
-        if mediator.revenueColumn == None:
+        if mediator.revenueColumn is None:
             return
         # Get revenue and Update Data
 #         dataRevenues = ScoringUtil.(mediator, mediator.data, self.logger)
         dataRevenues = mediator.clf.predict_regression(mediator.data[mediator.schema["features"]])
-        if dataRevenues == None:
+        if dataRevenues is None or dataRevenues.all(None):
             return
         dataRevenueSeries = pd.Series(dataRevenues, index=mediator.data.index)
         mediator.data[mediator.schema["reserved"]["predictedrevenue"]].update(dataRevenueSeries)

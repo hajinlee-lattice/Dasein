@@ -1,12 +1,10 @@
+from __future__ import print_function
 
-import os, sys, shutil
-from trainingtestbase import TrainingTestBase
 import logging
-from unittest import TestCase
-import pandas as pd
 import numpy as np
-
+import pandas as pd
 from leframework.util.precisionutil import PrecisionUtil
+from unittest import TestCase
 
 logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -38,7 +36,7 @@ class PrecisionTest(TestCase):
         ]
 
         valuesAtPrecision3 = [3.14, -3.14, 2.72e15, -2.72e15, 2.72e-15, 5.76e-4, 2.48e4, 0.333, 0.333]
-        print valuesAtPrecision3
+        print(valuesAtPrecision3)
 
         vs = pd.DataFrame(data=[{'value':v} for v in valuesToTest])
         vss = vs[['value']].apply(lambda x : PrecisionUtil.setPrecision(x, 3))

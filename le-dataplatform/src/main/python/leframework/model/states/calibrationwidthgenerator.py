@@ -1,11 +1,11 @@
-from collections import OrderedDict
 import logging
 import math
-
+from collections import Counter
+from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
-from collections import Counter
+from leframework.util.pdversionutil import pd_before_17
 
 startingNumberBuckets = 100
 minimumBucketPopulation = 100
@@ -30,7 +30,10 @@ class CalibrationWithWidthGenerator(State, JsonGenBase):
         schema = mediator.schema
 
         orderedScore = self.mediator.data[[schema["reserved"]["score"], schema["target"]]]
-        orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        else:
+            orderedScore.sort_values([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
 
         # convert pd array into simple lists
         score = list(orderedScore.iloc[:, 0].values)

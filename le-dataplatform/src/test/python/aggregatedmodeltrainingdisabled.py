@@ -1,12 +1,15 @@
+from __future__ import print_function
+
 import filecmp
 import glob
 import json
 import pickle
-from random import random
 import sys
-
 from leframework import scoringengine as se
+from random import random
+
 from trainingtestbase import TrainingTestBase
+
 
 class AggregatedModelTrainingTest(TrainingTestBase):
 
@@ -65,7 +68,7 @@ class AggregatedModelTrainingTest(TrainingTestBase):
 
         scores = self.getPredictScore(pipeline, typeDict, values)
         for i in range(len(scores)):
-            print str(i + 1) + ", " + str(scores[i])
+            print(str(i + 1) + ", " + str(scores[i]))
         self.createCSV(inputColumns, values)
 
         # self.__generateScoringInput(pipeline, t, inputColumns, typeDict)
@@ -76,11 +79,11 @@ class AggregatedModelTrainingTest(TrainingTestBase):
         i = 0;
         values = []
         dataValues = t.as_matrix(inputColumns)
-        print "size of the inputColumns: " + str(len(inputColumns))
-        print "length of t0 " + str(len(dataValues[0]))
+        print("size of the inputColumns: " + str(len(inputColumns)))
+        print("length of t0 " + str(len(dataValues[0])))
         for data in dataValues:
             if len(data) != 100:
-                print "not equal to 100 " + str(data)
+                print("not equal to 100 " + str(data))
             if i >= 100:
                 break;
             line = self.getLineToScore2(inputColumns, typeDict, data)
@@ -88,7 +91,7 @@ class AggregatedModelTrainingTest(TrainingTestBase):
             w.write(line + "\n")
             lines.append(line)
             i = i + 1
-        print i
+        print(i)
         w.close()
         rowDicts = []
         for line in lines:

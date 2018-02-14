@@ -1,11 +1,12 @@
+from __future__ import print_function
+
 import numpy as np
 import pandas as pd
 import random as rd
-
+from collections import OrderedDict
 from pipelinefwk import PipelineStep
 from pipelinefwk import get_logger
 from sklearn.decomposition import PCA
-from collections import OrderedDict
 
 logger = get_logger("evpipeline")
 
@@ -170,7 +171,7 @@ class ImputationStep(PipelineStep):
 
     def __createBins(self, x, y, numBins=20):
         if len(x) != len(y):
-            print "Warning: Number of records and number of labels are different."
+            print("Warning: Number of records and number of labels are different.")
 
         pairs = []
         numberOfPoints = min(len(x), len(y))

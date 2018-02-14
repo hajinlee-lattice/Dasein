@@ -4,6 +4,7 @@ import logging
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
+from leframework.util.pdversionutil import pd_before_17
 
 
 class PercentileBucketGenerator(State, JsonGenBase):
@@ -16,7 +17,10 @@ class PercentileBucketGenerator(State, JsonGenBase):
     def execute(self):
         mediator = self.getMediator()
         scoredSorted = mediator.allDataPreTransform[[mediator.schema["reserved"]["score"]]]
-        scoredSorted.sort([mediator.schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            scoredSorted.sort([mediator.schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
+        else:
+            scoredSorted.sort_values([mediator.schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
         scoredSortedLen = scoredSorted.shape[0]
         numElementsInBucket = int(scoredSortedLen/100.0)
 

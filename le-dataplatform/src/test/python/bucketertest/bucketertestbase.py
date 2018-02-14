@@ -1,3 +1,4 @@
+from __future__ import print_function
 from leframework.argumentparser import ArgumentParser
 from leframework.bucketers.bucketerdispatcher import BucketerDispatcher
 
@@ -19,7 +20,6 @@ class BucketerTestBase(object):
         bandsList = []
         colnames = list(self.data.columns.values)
         for colname in colnames:
-            print colname
             if colname in self.features and colname not in self.stringcols:
                 b = self.dispatcher.bucketColumn(self.data[colname], self.target, methodType, methodParams)
                 print(b)

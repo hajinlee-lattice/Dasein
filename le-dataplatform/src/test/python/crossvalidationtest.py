@@ -1,13 +1,14 @@
+from __future__ import print_function
+
 import glob
 import json
+import numpy as np
 import sys
 import time
-
+from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
 from sklearn import cross_validation
 from sklearn import ensemble
 
-from leframework.model.states.crossvalidationgenerator import CrossValidationGenerator
-import numpy as np
 from trainingtestbase import TrainingTestBase
 
 
@@ -110,7 +111,7 @@ class CrossValidationTest(TrainingTestBase):
             with Timer() as t:
                 clf.fit(fake_train_X, fake_train_Y)
         finally:
-                print 'Time to fit', t.interval
+                print('Time to fit', t.interval)
 
         try:
             with Timer() as t:
@@ -121,4 +122,4 @@ class CrossValidationTest(TrainingTestBase):
 
                 self.assertAlmostEqual(accuracyWithCrossValidation, accuracyWithoutCrossValidation, None , "Cross Validated Accuracy not close enough to Non-Cross-Validated Accuracy", delta=0.1)
         finally:
-                print 'Time', t.interval
+                print('Time', t.interval)

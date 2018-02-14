@@ -5,6 +5,7 @@ import pandas as pd
 from leframework.codestyle import overrides
 from leframework.model.state import State
 from leframework.util.reservedfieldutil import ReservedFieldUtil
+from leframework.util.pdversionutil import pd_before_17
 
 class SampleGenerator(State):
 
@@ -18,7 +19,10 @@ class SampleGenerator(State):
 
         # Sort PreTransform
         scoreColumnName = self.mediator.schema["reserved"]["score"]
-        preTransform.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            preTransform.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
+        else:
+            preTransform.sort_values(scoreColumnName, axis=0, ascending=False, inplace=True)
 
         # Generate Samples
         readoutSample = self.generateReadoutSample(preTransform, scoreColumnName)

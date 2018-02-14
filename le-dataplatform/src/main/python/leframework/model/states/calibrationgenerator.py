@@ -1,10 +1,10 @@
-from collections import OrderedDict
 import logging
 import math
-
+from collections import OrderedDict
 from leframework.codestyle import overrides
 from leframework.model.jsongenbase import JsonGenBase
 from leframework.model.state import State
+from leframework.util.pdversionutil import pd_before_17
 
 
 class CalibrationGenerator(State, JsonGenBase):
@@ -19,7 +19,10 @@ class CalibrationGenerator(State, JsonGenBase):
         schema = mediator.schema
 
         orderedScore = self.mediator.data[[schema["reserved"]["score"], schema["target"]]]
-        orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            orderedScore.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        else:
+            orderedScore.sort_values([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
             
         # get test size and range width 
         numTest = orderedScore.shape[0]

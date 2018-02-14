@@ -4,6 +4,8 @@ import pandas
 import sys
 import glob
 
+
+from leframework.util.pdversionutil import pd_before_17
 from trainingtestbase import TrainingTestBase
 
 class ReadoutSampleTest(TrainingTestBase):
@@ -101,6 +103,9 @@ class ReadoutSampleTest(TrainingTestBase):
 
         # Sorted as Expected?
         dataFrameCopy = dataFrame.copy()
-        dataFrameCopy.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            dataFrameCopy.sort(scoreColumnName, axis=0, ascending=False, inplace=True)
+        else:
+            dataFrameCopy.sort_values(scoreColumnName, axis=0, ascending=False, inplace=True)
         for value, copyValue in zip(dataFrame[scoreColumnName].as_matrix(), dataFrameCopy[scoreColumnName].as_matrix()):
             self.assertAlmostEqual(value, copyValue, delta=0.1)

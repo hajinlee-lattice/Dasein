@@ -4,23 +4,24 @@ Created on Thu Jan 26 10:21:26 2017
 
 @author: SLakshmipathy
 """
+from __future__ import print_function
 
-import math
 import csv
-import pandas as pd
+import fastavro as avro
+import json
+import math
 import numpy as np
 import os.path
+import pandas as pd
 from collections import Counter
+from itertools import chain
 from itertools import groupby
 from itertools import izip
-from itertools import chain
-import json
-from openpyxl.workbook import Workbook
 from openpyxl import load_workbook
+from openpyxl.workbook import Workbook
 
 from Params_ReviewReport import revParam
 
-import fastavro as avro
 
 def loadCSVfile(fileName):
     df = pd.read_csv(fileName, engine='c', dtype=str)
@@ -191,7 +192,7 @@ def loadEventtable(train, test):
             data = data_1+data_2
             colNames = colNames_1
         else:
-            print ('Training and test data format are different')
+            print('Training and test data format are different')
             #return []
         del data_1,data_2
     else:
@@ -207,7 +208,7 @@ def findDomain(emailStr):
     try:
         position = emailStr.index('@')+1
         if emailStr[position:] is None:
-            print '***{}***'.format(emailStr)
+            print('***{}***'.format(emailStr))
         return emailStr[position:]
     except ValueError:
         return ''
@@ -1089,7 +1090,7 @@ def modelReviewReport():
             try:
                 origColName = [x for x in colNameList if colName.startswith(x)][0]
             except IndexError:
-                print "{} doesn't exist in the event table. Report it to the data science team".format(colName)
+                print("{} doesn't exist in the event table. Report it to the data science team".format(colName))
            
         colType = colTypeDict[origColName]
 

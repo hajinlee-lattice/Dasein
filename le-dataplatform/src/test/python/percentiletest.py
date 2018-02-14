@@ -4,6 +4,7 @@ import sys
 
 from trainingtestbase import TrainingTestBase
 
+
 class PercentileTest(TrainingTestBase):
 
 	percentileBucketsNum = 100
@@ -24,7 +25,6 @@ class PercentileTest(TrainingTestBase):
 		jsonDict = json.loads(open(glob.glob("./results/*.json")[0]).read())
 
 		percentileNum = len(jsonDict["PercentileBuckets"])
-		print percentileNum
 		self.assertEquals(percentileNum, self.percentileBucketsNum)
 		for index in range(0, percentileNum):
 			percentileScore = jsonDict["PercentileBuckets"][index]["Percentile"]

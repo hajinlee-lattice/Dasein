@@ -1,8 +1,10 @@
-from trainingtestbase import TrainingTestBase
-import numpy as np
-import pandas as pd
+from __future__ import print_function
 
+import pandas as pd
 from cleancategoricalcolumn import CleanCategoricalColumn
+
+from trainingtestbase import TrainingTestBase
+
 
 class CleanCategoricalColumnTransformTest(TrainingTestBase):
 
@@ -29,7 +31,7 @@ class CleanCategoricalColumnTransformTest(TrainingTestBase):
         cleanedColumns = cleanCategoricalColumn.transform(trainingDataFrame, configMetadata=None, test=None)
 
         includedKeys = cleanCategoricalColumn.getIncludedKeys()
-        print includedKeys
+        print(includedKeys)
 
         for index, convertedValue in cleanedColumns[columnsToPivot.keys()].itertuples():
             originalValueBeforeConversion = copyOfTraining['A'].iloc[index]

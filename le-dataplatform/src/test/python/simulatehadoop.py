@@ -1,3 +1,4 @@
+from __future__ import print_function
 import atexit
 import glob
 import os
@@ -21,7 +22,7 @@ sys.path.append(pipelinefwkdir)
 sys.path.append(evpipelinefwkdir)
 
 def setup(filesToCopy):
-    print 'Simulating HDFS'
+    print('Simulating HDFS')
     # These properties won't really be used since these are just unit tests.
     # Functional and end-to-end tests should be done from java
     os.environ["CONTAINER_ID"] = "container_1425511391553_3644_01_000001"
@@ -57,38 +58,38 @@ def setup(filesToCopy):
         shutil.rmtree(swlibdir)
 
     for d in [fwkdir + "/leframework", pipelinefwkdir, evpipelinefwkdir, swlibdir]:
-        print 'Making directory {}'.format(d)
+        print('Making directory {}'.format(d))
         os.makedirs(d)
 
     for (src, tgt) in filesToCopy.iteritems():
         if os.path.isfile(tgt):
             os.remove(tgt)
-        print 'Copying: ', src, '-->', tgt
+        print('Copying: ', src, '-->', tgt)
         shutil.copy(src, tgt)
 
     for filename in glob.glob(os.path.join(basePath, "main", "python", "pipeline", "*.py")):
-        print 'Copying: ', filename, '==>', pipelinefwkdir
+        print('Copying: ', filename, '==>', pipelinefwkdir)
         shutil.copy(filename, pipelinefwkdir)
 
     for filename in glob.glob(os.path.join(basePath, "main", "python", "datarules", "*.py")):
-        print 'Copying: ', filename, '==>', pipelinefwkdir
+        print('Copying: ', filename, '==>', pipelinefwkdir)
         shutil.copy(filename, pipelinefwkdir)
 
     for filename in glob.glob(os.path.join(basePath, "main", "python", "evpipeline", "*.py")):
-        print 'Copying: ', filename, '==>', evpipelinefwkdir
+        print('Copying: ', filename, '==>', evpipelinefwkdir)
         shutil.copy(filename, evpipelinefwkdir)
 
     for (root, dirs, files) in os.walk(os.path.join(basePath, "main", "python", "leframework")):
         for dsrc in dirs:
             dtgt = os.path.join(root.replace(os.path.join(basePath, "main", "python"), os.path.join(".", "leframework.tar.gz"), 1), dsrc)
-            print 'Making directory {}'.format(dtgt)
+            print('Making directory {}'.format(dtgt))
             os.makedirs(dtgt)
         for f in files:
             if f[-3:] != '.py':
                 continue
             src = os.path.join(root, f)
             tgt = os.path.join(root.replace(os.path.join(basePath, "main", "python"), os.path.join(".", "leframework.tar.gz"), 1), f)
-            print 'Copying: ', src, '==>', tgt
+            print('Copying: ', src, '==>', tgt)
             shutil.copy(src, tgt)
 
 
@@ -100,21 +101,21 @@ def setup(filesToCopy):
 
     for m in otherFilesToCopy:
         for (src, tgt) in m.iteritems():
-            print 'Copying: ', src, '==>', tgt
+            print('Copying: ', src, '==>', tgt)
             shutil.copy(src, tgt)
 
     for filename in glob.glob(os.path.join(basePath + "/main/python/configurablepipelinetransformsfromfile", "*")):
         if filename.find("/pipelinenullconversionrate.json") >= 0:
             continue
-        print 'Copying: ', filename, '==>', pipelinefwkdir
+        print('Copying: ', filename, '==>', pipelinefwkdir)
         shutil.copy(filename, pipelinefwkdir)
-        print 'Copying: ', filename, '==>', evpipelinefwkdir
+        print('Copying: ', filename, '==>', evpipelinefwkdir)
         shutil.copy(filename, evpipelinefwkdir)
 
     __unzipSoftwareLibJar()
 
 def tearDown(filesToCopy):
-    print 'Cleaning up simulated HDFS'
+    print('Cleaning up simulated HDFS')
     for _, tgt in filesToCopy.iteritems():
         os.remove(tgt)
     if os.path.exists(fwkdir):

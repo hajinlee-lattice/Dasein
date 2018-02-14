@@ -16,7 +16,7 @@ The module structure is the following:
 
 """
 
-from __future__ import division
+from __future__ import division, print_function
 
 import os
 import numpy as np
@@ -67,8 +67,8 @@ class AggregatedModel(object):
     
     def __init__(self):
         self.__build_model()
-        print "Number of aggregated models:" + str(len(self.models))
-        print "Number of aggregated regression models:" + str(len(self.regressionModels))
+        print("Number of aggregated models:" + str(len(self.models)))
+        print("Number of aggregated regression models:" + str(len(self.regressionModels)))
 
     def __is_pickle_file(self, filename):
         return (filename.endswith('.p') or filename.endswith('.pkl') or filename.endswith('.pickle')) and ("STP" not in filename)

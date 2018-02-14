@@ -1,8 +1,10 @@
-from sklearn import ensemble
-from sklearn import tree
 import pandas as pd
 from leframework.consolecapture import Capture
 from leframework.consolecapture import CaptureMonitor
+from leframework.util.pdversionutil import pd_before_14
+from sklearn import ensemble
+from sklearn import tree
+
 from pipelinefwk import get_logger
 
 logger = get_logger("algorithm")
@@ -53,7 +55,10 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
 def exportTrainingData(trainingData):
     columns = list(trainingData.columns.values)
     columns = [x for x in columns if not x.startswith("###") and not x.startswith("__")]
-    trainingData.to_csv("exportrftrain.csv", sep=',', encoding='utf-8', cols=columns, index=False, float_format='%.10f')
+    if pd_before_14():
+        trainingData.to_csv("exportrftrain.csv", sep=',', encoding='utf-8', cols=columns, index=False, float_format='%.10f')
+    else:
+        trainingData.to_csv("exportrftrain.csv", sep=',', encoding='utf-8', columns=columns, index=False, float_format='%.10f')
     
 def writeModel(schema, modelDir, clf):
     estimators = clf.estimators_

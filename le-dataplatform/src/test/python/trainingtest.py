@@ -1,3 +1,4 @@
+from __future__ import print_function
 import filecmp
 import glob
 import json
@@ -32,7 +33,7 @@ class TrainingTest(TrainingTestBase):
             self.decodeBase64ThenDecompressToFile(entry["Value"], fileName)
             if entry["Key"].find('STPipelineBinary') >= 0:
                 pipeline = pickle.load(open(fileName, "r"))
-                print pipeline.getPipeline()
+                print(pipeline.getPipeline())
                 self.assertTrue(isinstance(self.getModelStep(pipeline).getModel(), RandomForestClassifier), \
                                 "clf not instance of sklearn RandomForestClassifier.")
             elif entry["Key"].find('encoder') >= 0 or \

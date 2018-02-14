@@ -1,3 +1,4 @@
+from __future__ import print_function
 from array import array
 import imp
 import json
@@ -43,7 +44,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                     columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
                                                                             "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
                 except Exception as e:
-                    print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
+                    print("Caught Exception:", e, "while RUNNING class initialization from pipeline")
                     raise
 
                 mainClassName = value["MainClassName"]
@@ -55,7 +56,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 try:
                     getattr(columnTransformObject["LoadedModule"], mainClassName)(*args, **kwargs)
                 except Exception as e:
-                    print "Caught Exception:", e, "while RUNNING transform from pipeline"
+                    print("Caught Exception:", e, "while RUNNING transform from pipeline")
                     raise
 
     def assertThatEachMemberOfPipelineHasTransformMethod(self, pipeline):
@@ -72,7 +73,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
         with open(pipelineFilePath[0]) as pipelineFile:
             pipelineFileAsJSON = json.load(pipelineFile)
             for _, value in pipelineFileAsJSON[colTransform.columnTransformKey].iteritems():
-                print value["Name"]
+                print(value["Name"])
                 self.assertTrue(value["Name"] in keys, "Couldn't find expected transform name %s in file" % value["Name"])
 
                 uniqueColumnTransformName = value["Name"]
@@ -83,7 +84,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                         columnTransformObject["LoadedModule"] = imp.load_source(uniqueColumnTransformName,
                                                                                 "./lepipeline.tar.gz/" + value["ColumnTransformFilePath"])
                     except Exception as e:
-                        print "Caught Exception:", e, "while RUNNING class initialization from pipeline"
+                        print("Caught Exception:", e, "while RUNNING class initialization from pipeline")
                         raise
                 else:
                     columnTransformObject["LoadedModule"] = None
@@ -98,7 +99,7 @@ class ConversionRateCategoricalColumnTransformTest(TrainingTestBase):
                 try:
                     getattr(columnTransformObject["LoadedModule"], mainClassName)(*args, **kwargs)
                 except Exception as e:
-                    print "Caught Exception:", e, "while RUNNING transform from pipeline"
+                    print("Caught Exception:", e, "while RUNNING transform from pipeline")
                     raise
 
     def aTestBuildKwArgs(self, namedParameterListAsJSON):

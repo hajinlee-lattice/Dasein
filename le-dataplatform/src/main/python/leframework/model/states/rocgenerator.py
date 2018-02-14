@@ -1,9 +1,10 @@
-import logging
 import itertools
+import logging
 import numpy as np
-
 from leframework.codestyle import overrides
 from leframework.model.state import State
+from leframework.util.pdversionutil import pd_before_17
+
 
 class ROCGenerator(State):
 
@@ -20,7 +21,10 @@ class ROCGenerator(State):
         rows = score.shape[0]
 
         # Sort by target
-        score.sort([schema["target"], schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            score.sort([schema["target"], schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
+        else:
+            score.sort_values([schema["target"], schema["reserved"]["score"]], axis=0, ascending=False, inplace=True)
         theoreticalBestCounter = 0
         theoreticalBestArea = 0
         for i in xrange(rows):
@@ -28,7 +32,10 @@ class ROCGenerator(State):
             theoreticalBestArea += theoreticalBestCounter
 
         # Sort by score
-        score.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        if pd_before_17():
+            score.sort([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
+        else:
+            score.sort_values([schema["reserved"]["score"], schema["target"]], axis=0, ascending=False, inplace=True)
         weightedEventDict = {k : np.mean(map(lambda x: x[1], rows)) for k, rows in itertools.groupby(score.as_matrix(), lambda x: x[0])}
 
         actualBestCounter = 0

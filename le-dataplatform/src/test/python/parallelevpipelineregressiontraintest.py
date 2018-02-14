@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import csv
 import glob
 import json
@@ -67,6 +69,6 @@ class ParallelEVPipelineRegressionTrainingTest(TrainingTestBase):
                          stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print("Scoring done.")
         _, stderr = popen.communicate()
-        print stderr
+        print(stderr)
         tokens = csv.reader(open("./results/scoreoutputfile.txt", "r")).next()
-        self.assertEquals(len(tokens), 3, "Length != 3")
+        self.assertEquals(len(tokens), 3, "Length != 3: " + ','.join(tokens))

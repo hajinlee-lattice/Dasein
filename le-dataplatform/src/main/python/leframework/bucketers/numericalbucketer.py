@@ -1,13 +1,12 @@
-from __future__ import division
+from __future__ import division, print_function
 
+import math
 from bisect import bisect_left
 from itertools import compress, product
-import math
-from sklearn.metrics.cluster.supervised import entropy
-
-from numpy import floor, log10, ceil, sign, fabs
+from numpy import floor, log10, ceil, sign, fabs, nan
 from numpy.random import choice
 from scipy.stats import kurtosis
+from sklearn.metrics.cluster.supervised import entropy
 
 
 # generates the ordering of column data so we can sort event vector the same way
@@ -143,10 +142,10 @@ def findWhereValueChanges(xList, xListLen, idx, direction):
              xList[idx]
     """
     if idx < 0 or idx >= xListLen:
-        print "invalid searching starting point"
+        print("invalid searching starting point")
         return None
     if direction not in [-1, 1]:
-        print "invalid searching direction"
+        print("invalid searching direction")
         return idx
     while idx + direction > 0 and idx + direction < xListLen:
         if xList[idx + direction] == xList[idx]:
@@ -516,7 +515,7 @@ def addVariablesToOutput(bandsDict, eventVector):
     miComponents = calculateMutualInfoBinary(bandsDict["sampleCount"], bandsDict["eventCount"])
     bandsDict["uncertaintyCoefficient"] = [uncertaintyCoeff(mi, entropyVal) for mi in miComponents]
     convRates = [float(x[0]) / x[1] for x in zip(bandsDict["eventCount"], bandsDict["sampleCount"])]
-    bandsDict["lift"] = [x / avgProbability for x in convRates]    
+    bandsDict["lift"] = [x / avgProbability if avgProbability > 0 else nan for x in convRates]
     # add global values that don't change by band
     bandsDict["mi"] = sum(miComponents)
     bandsDict["entropyValue"] = entropyVal

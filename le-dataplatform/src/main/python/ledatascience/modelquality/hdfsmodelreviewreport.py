@@ -1,31 +1,25 @@
 # coding: utf-8
+from __future__ import print_function
 
-import sys
-import traceback
-import math
 import csv
+import fastavro as avro
+import json
 import logging
-import pandas as pd
+import math
 import numpy as np
 import os.path
-import uuid
-
+import pandas as pd
+import sys
+import traceback
 from collections import Counter
+from itertools import chain
 from itertools import groupby
 from itertools import izip
-from itertools import chain
-import json
 from openpyxl.workbook import Workbook
-from openpyxl import load_workbook
 from openpyxl.writer.excel import save_virtual_workbook
-
 
 from HDFS_Params_ReviewReport import hdfsRevParam
 from webhdfsagent import WebHDFSAgent
-
-from Params_ReviewReport import revParam
-
-import fastavro as avro
 
 logger = logging.getLogger(name='hdfsmodelreviewreport')
 
@@ -35,7 +29,7 @@ class WrappedExcelFile(object):
         self.sheetNumber = 1
 
     def printOutResults(self, data, cols, sheetName, set_width=False):
-        print "Printing sheet number: " + str(self.sheetNumber) + " name: " + sheetName
+        print("Printing sheet number: " + str(self.sheetNumber) + " name: " + sheetName)
         if self.sheetNumber == 1:
             ws1 = self.wb.active
             ws1.title = sheetName
@@ -109,7 +103,7 @@ class ModelingEnvironment(object):
             rows = map(list, df.values)
             return (cols, rows)
         except:
-            print "Failed to read CSV File: " + sourceFileName
+            print("Failed to read CSV File: " + sourceFileName)
             raise Exception("Could not read file: " + sourceFileName)
 
     # Extract data needed from the json file
@@ -123,11 +117,11 @@ class ModelingEnvironment(object):
             liftData = jsondata['Segmentations'][0]['Segments']
             convRate = float(jsondata['ModelDetails']['TotalConversions'])/jsondata['ModelDetails']['TotalLeads']
             colList = [p['Name'] for p in jsondata['Predictors']]
-            print "Successfully read json file: " + jFile
+            print("Successfully read json file: " + jFile)
 
             return auc, liftData, convRate,colList
         except:
-            print "Could not read json file: " + jFile
+            print("Could not read json file: " + jFile)
             raise Exception("Could not read file: " + jFile)
 
     def read_avro_file(self, avroFile):
@@ -281,7 +275,7 @@ def loadEventtable(train, test):
             data = data_1+data_2
             colNames = colNames_1
         else:
-            print ('Training and test data format are different')
+            print('Training and test data format are different')
             #return []
         del data_1,data_2
     else:
@@ -297,7 +291,7 @@ def findDomain(emailStr):
     try:
         position = emailStr.index('@')+1
         if emailStr[position:] is None:
-            print '***{}***'.format(emailStr)
+            print('***{}***'.format(emailStr))
         return emailStr[position:]
     except ValueError:
         return ''
@@ -340,7 +334,7 @@ def getColTypes(params, data, colNames, colNameList, rf_data):
             varType = [x for x in f_csv]
 
     except:
-        print "Could not read var file handle: " + params.varType_file
+        print("Could not read var file handle: " + params.varType_file)
         raise Exception("Could not read var file: " + params.varType_file)
 
     varType = dict(varType)
@@ -930,7 +924,7 @@ def Flag_Lift_Segment(Column_name, Column_Value, ColumnName_Event, lift_limit,df
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-        print ''.join('!! ' + line for line in lines)
+        print(''.join('!! ' + line for line in lines))
 
     return []
 
@@ -1150,7 +1144,7 @@ def hdfsModelReviewReport( modelName, modelDirectoryPath, trainingFilePath, conf
             sampleSplitting.extend(empSize_splitting)
     except:
         empSize_splitting = []
-        print "Could not extract company size"
+        print("Could not extract company size")
 
     # Region grouping
     countryGroup_data = {x[0].lower():x[1] for x in countryGroup_data}
@@ -1168,7 +1162,7 @@ def hdfsModelReviewReport( modelName, modelDirectoryPath, trainingFilePath, conf
         if param.employeeRangecolumn in evtTable_col:
             overAllTab.append(['Lifts of companies of different sizes', ' '.join(['[{0} - {1}% {2}x] '.format(x[1], round(x[8]*100,1), round(x[2],1)) for x in empSize_splitting])])
     except:
-        print "Could not manage company sizes"
+        print("Could not manage company sizes")
 
     wrappedWB = WrappedExcelFile()
 
@@ -1204,7 +1198,7 @@ def hdfsModelReviewReport( modelName, modelDirectoryPath, trainingFilePath, conf
             try:
                 origColName = [x for x in colNameList if colName.startswith(x)][0]
             except IndexError:
-                print "{} doesn't exist in the event table. Report it to the data science team".format(colName)
+                print("{} doesn't exist in the event table. Report it to the data science team".format(colName))
 
         colType = colTypeDict[origColName]
 
@@ -1343,7 +1337,7 @@ def hdfsModelReviewReport( modelName, modelDirectoryPath, trainingFilePath, conf
 
 if __name__ == "__main__":
     if len(sys.argv) < 5:
-        print "Usage: hdfsmodelreviewreport.py modelName modelDirectoryPath trainingFilePath configDirectoryPath"
+        print("Usage: hdfsmodelreviewreport.py modelName modelDirectoryPath trainingFilePath configDirectoryPath")
         sys.exit(1)
 
     hdfsModelReviewReport(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4] )

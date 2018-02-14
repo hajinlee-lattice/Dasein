@@ -1,8 +1,8 @@
 import logging
+import numpy as np
+from leframework.codestyle import overrides
 
 from bucketer import Bucketer
-from leframework.codestyle import overrides
-import numpy as np
 
 
 class GeometricBucketer(Bucketer):
