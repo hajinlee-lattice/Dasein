@@ -23,8 +23,6 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.cache.Weigher;
 import com.google.common.primitives.Ints;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
@@ -174,8 +172,10 @@ public class ScoreArtifactCache {
     @VisibleForTesting
     long throttleLargePmmlFileBasedOnWeight(long weight, String modelId) {
         if (weight >= maxCacheThreshold * scoreArtifactCacheMaxWeight) {
-            log.error(String.format("The pmml file is too big to be loaded into the cache with modelId=%s", modelId));
-            throw new LedpException(LedpCode.LEDP_31026, new String[] { modelId });
+            log.warn(String.format("The pmml file is too big to be loaded into the cache with modelId=%s, weight=%d",
+                    modelId, weight));
+            // throw new LedpException(LedpCode.LEDP_31026, new String[] {
+            // modelId });
         }
         if (weight > Integer.MAX_VALUE) {
             log.warn(String.format(
