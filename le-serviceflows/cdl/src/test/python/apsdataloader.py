@@ -1,6 +1,7 @@
 import logging
 import os
 import pandas as pd
+import numpy as np
 import fastavro as avro
 import json
 import glob
@@ -9,11 +10,43 @@ import shutil
 from pandas import DataFrame
 from urlparse import urlparse
 from leframework.webhdfs import WebHDFS
+import multiprocessing
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='ApsDataLoader')
 
+class FileWriterProcess (multiprocessing.Process):
+    def __init__(self, df, schema, localDir, file):
+        super(FileWriterProcess, self).__init__()
+        self.df = df
+        self.schema = schema
+        self.localDir = localDir
+        self.file = file
+    def run(self):
+        logger.info("Start writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
+        print self.df.shape
+        with open(self.file, "wb") as fp:
+            records = []
+            for record in self.df.itertuples(index=False, name=None):
+               datum = {self.schema['fields'][i]['name']:(record[i] if pd.notnull(record[i]) else None) for i in range(len(self.schema['fields']))}
+               records.append(datum)
+            avro.writer(fp, self.schema, records)
+        logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
+
+class UploadFromLocalProcess(multiprocessing.Process):
+    def __init__(self, outputFile, outputPath, hdfs):
+        super(UploadFromLocalProcess, self).__init__()
+        self.outputFile = outputFile
+        self.outputPath = outputPath
+        self.hdfs = hdfs
+    def run(self):
+        logger.info("Uploading file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
+        filePath, fileName = os.path.split(self.outputFile)
+        self.hdfs.copyFromLocal(self.outputFile, self.outputPath + "/" + fileName)
+        logger.info("Uploaded file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
+        
+              
 class ApsDataLoader(object):
     def __init__(self):
         logger.info("Start data loader.")
@@ -63,6 +96,15 @@ class ApsDataLoader(object):
             logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, self.outputPath))
         logger.info("Finished uploadFromLocal data.")
 
+    def parallelUploadFromLocal(self, localDir='./output'):
+        logger.info("Start to uploadFromLocal data.")
+        outputFiles = glob.glob("%s/*.avro" % localDir)
+        processes = []
+        for outputFile in outputFiles:
+            processes.append(UploadFromLocalProcess(outputFile, self.outputPath, self.hdfs))
+        self.parallelExecute(processes)
+        logger.info("Finished uploadFromLocal data.")
+
     def readDataFrameFromAvro(self, localDir='./input'):
         logger.info("Start to read Dataframe from avro file.")
         inputFiles = glob.glob("%s/*.avro" % localDir)
@@ -88,6 +130,25 @@ class ApsDataLoader(object):
             avro.writer(fp, schema, records)
         logger.info("Finished writing Dataframe to avro file in directory=%s" % localDir)
 
+    def parallelWriteDataFrameToAvro(self, dataFrame, localDir='./output', parallel=8):
+        logger.info("Start to write Dataframe to avro file.")
+        schemaStr = self._getSchema(dataFrame)
+        schema = json.loads(schemaStr)
+        dfs = np.array_split(dataFrame, parallel)
+        index = 0;
+        processes = []
+        for df in dfs:
+            processes.append(FileWriterProcess(df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index)))
+            index += 1
+        self.parallelExecute(processes)
+        logger.info("Finished writing Dataframe to avro file.")
+        
+    def parallelExecute(self, processes):
+        for process in processes:
+            process.start()
+        for process in processes:
+            process.join()
+            
     def _getSchema(self, dataFrame):
         schema = """{
         "name": "APS",
@@ -120,7 +181,7 @@ if __name__ == '__main__':
     loader = ApsDataLoader()
     loader.downloadToLocal()
     df = loader.readDataFrameFromAvro()
-    loader.writeDataFrameToAvro(df)
+    loader.parallelWriteDataFrameToAvro(df)
     print df.shape
     assert df.shape == (873967, 24)
     csvdf = pd.read_csv("./AnalyticTransaction.csv")
