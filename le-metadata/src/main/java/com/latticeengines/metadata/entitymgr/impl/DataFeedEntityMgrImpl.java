@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
@@ -31,7 +30,6 @@ import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
-import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -46,9 +44,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
-
-    @Autowired
-    private DataFeedProfileEntityMgr datafeedProfileEntityMgr;
 
     @Autowired
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
@@ -111,10 +106,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
         if (execution != null) {
             datafeed.setActiveExecution(execution);
-        }
-        DataFeedProfile profile = datafeedProfileEntityMgr.findByProfileId(datafeed.getActiveProfileId());
-        if (profile != null) {
-            datafeed.setActiveProfile(profile);
         }
         return datafeed;
     }
@@ -248,25 +239,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public DataFeedProfile startProfile(String datafeedName) {
-        DataFeed datafeed = findByNameInflated(datafeedName);
-        if (datafeed == null) {
-            return null;
-        }
-        Long executionId = datafeed.getActiveExecutionId();
-        DataFeedProfile profile = new DataFeedProfile();
-        profile.setDataFeed(datafeed);
-        profile.setLatestDataFeedExecutionId(executionId);
-        datafeedProfileEntityMgr.create(profile);
-        datafeed.setActiveProfileId(profile.getPid());
-        datafeed.setActiveProfile(profile);
-        datafeed.setStatus(Status.Profiling);
-        update(datafeed);
-        return profile;
-    }
-
-    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DataFeed> getAllDataFeeds() {
         List<DataFeed> dataFeeds = datafeedDao.findAll();
@@ -279,10 +251,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             DataFeedExecution execution = datafeedExecutionEntityMgr.findByExecutionId(datafeed.getActiveExecutionId());
             if (execution != null) {
                 datafeed.setActiveExecution(execution);
-            }
-            DataFeedProfile profile = datafeedProfileEntityMgr.findByProfileId(datafeed.getActiveProfileId());
-            if (profile != null) {
-                datafeed.setActiveProfile(profile);
             }
         }
         return dataFeeds;

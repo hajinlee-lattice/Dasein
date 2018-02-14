@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -13,13 +12,11 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
-import com.latticeengines.metadata.entitymgr.DataFeedProfileEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.metadata.service.DataFeedTaskService;
@@ -34,9 +31,6 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Autowired
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
-
-    @Autowired
-    private DataFeedProfileEntityMgr datafeedProfileEntityMgr;
 
     @Autowired
     private DataCollectionService dataCollectionService;
@@ -192,26 +186,6 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeedProfile startProfile(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.startProfile(datafeedName);
-    }
-
-    @Override
-    public DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr) {
-        DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
-        if (datafeed == null) {
-            throw new NullPointerException("Datafeed is null. Cannot update status.");
-        } else {
-            Status status = Status.fromName(statusStr);
-            datafeed.setStatus(status);
-            datafeed.setLastProfiled(new Date());
-            datafeed.setLastPublished(new Date());
-            datafeedEntityMgr.update(datafeed);
-        }
-        return datafeed;
-    }
-
-    @Override
     public DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod) {
         DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
         if (datafeed == null) {
@@ -243,18 +217,6 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         return datafeedEntityMgr.getAllSimpleDataFeeds();
-    }
-
-    @Override
-    public DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
-        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        if (datafeed == null) {
-            return null;
-        }
-        DataFeedProfile profile = datafeed.getActiveProfile();
-        profile.setWorkflowId(workflowId);
-        datafeedProfileEntityMgr.update(profile);
-        return profile;
     }
 
     @Override
