@@ -36,11 +36,6 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
     }
 
     @Override
-    protected void removeTimeWindowRestrictions() {
-        // to be implemented
-    }
-
-    @Override
     protected void handleCustomTrainingPeriod() {
         ModelingConfigFilter filter = aiModel.getModelingConfigFilters().get(ModelingConfig.TRAINING_SET_PERIOD);
         if (filter != null) {

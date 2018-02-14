@@ -7,7 +7,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -33,8 +36,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
 
     protected abstract void handleProxyProducts();
 
-    protected abstract void removeTimeWindowRestrictions();
-
     protected abstract void buildProductTransactionRestrictions();
 
     protected abstract void handleCustomTrainingPeriod();
@@ -47,6 +48,19 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         buildRatingFrontEndQuery();
         handleCustomTrainingPeriod();
         return ratingFrontEndQuery;
+    }
+
+    protected void removeTimeWindowRestrictions() {
+        DepthFirstSearch dfs = new DepthFirstSearch();
+        dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
+            GraphNode node = (GraphNode) object;
+            if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
+                Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
+                if (transaction.getNegate() && transaction.getTimeFilter().getRelation() != ComparisonType.EVER) {
+                    ((BucketRestriction) node).setDeleted(true);
+                }
+            }
+        });
     }
 
     private void buildRatingFrontEndQuery() {
