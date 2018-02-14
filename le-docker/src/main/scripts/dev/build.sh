@@ -10,9 +10,9 @@ build_docker() {
 }
 
 
-pushd le-tomcat-dev
-build_docker latticeengines/tomcat-dev
-popd
+#pushd le-tomcat-dev
+#build_docker latticeengines/tomcat-dev
+#popd
 
 #pushd le-tez-ui
 #build_docker latticeengines/tez-ui
@@ -21,10 +21,10 @@ popd
 #pushd le-dynamo
 #build_docker latticeengines/dynamo
 #popd
-#
-#pushd le-mysql
-#build_docker latticeengines/mysql
-#popd
+
+pushd le-mysql
+build_docker latticeengines/mysql
+popd
 
 #pushd le-zookeeper
 #build_docker latticeengines/zookeeper

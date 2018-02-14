@@ -1,4 +1,4 @@
-FROM latticeengines/centos
+FROM latticeengines/centos7
 RUN yum install -y unzip wget && yum clean all
 RUN mkdir /usr/java && chmod 755 /usr/java
 WORKDIR /usr/java

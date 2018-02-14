@@ -1,4 +1,4 @@
-FROM latticeengines/tomcatc7
+FROM latticeengines/tomcat:8.5
 
 RUN yum install -y haproxy && yum clean all
 
