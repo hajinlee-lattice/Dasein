@@ -96,7 +96,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
     private TestMatchInputService testMatchInputService;
 
     @Test(groups = "functional", dataProvider = "TestData")
-    public void testMatchCorrectness(Object... row) {
+    public void testMatchCorrectness(Object[] row) {
         Object[][] data = addRowId(new Object[][]{ row });
         MatchInput input = testMatchInputService.prepareSimpleAMMatchInput(data, inputFields);
         input.setPredefinedSelection(null);
