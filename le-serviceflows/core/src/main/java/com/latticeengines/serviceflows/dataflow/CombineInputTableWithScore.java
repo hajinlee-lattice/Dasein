@@ -30,20 +30,19 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         Node scoreWithRating = scoreTable;
         boolean noRatingColumnInScoreTable = scoreWithRating
-                .getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true : false;
-        boolean notPMMLModel = parameters.getModelType() == null ? true
-                : parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
+                .getSourceAttribute(ScoreResultField.Rating.displayName) == null;
+        boolean notPMMLModel = parameters.getModelType() == null
+                || parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
 
         if (noRatingColumnInScoreTable && notPMMLModel) {
             scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(parameters.getScoreFieldName(),
-                            ScoreResultField.Rating.displayName, parameters.getBucketMetadata(),
-                            parameters.getScoreMultiplier(), parameters.getAvgScore()),
+                    new AddRatingColumnFunction(parameters.getScoreFieldName(), ScoreResultField.Rating.displayName,
+                            parameters.getBucketMetadata(), parameters.getScoreMultiplier(), parameters.getAvgScore()),
                     new FieldList(parameters.getScoreFieldName()),
                     new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         }
 
-        Node combinedResultTable = null;
+        Node combinedResultTable;
         String idColumn = InterfaceName.InternalId.name();
         String groupByColumn = InterfaceName.InternalId.name();
         if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {

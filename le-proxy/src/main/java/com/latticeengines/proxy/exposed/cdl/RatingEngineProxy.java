@@ -169,18 +169,32 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("Update the content of a certain note via note id.", url, noteParams, Boolean.class);
     }
 
-    public EventFrontEndQuery getModelingQuery(String customerSpace, String ratingEngineId, String aiModelId,
+    public EventFrontEndQuery getModelingQueryByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
                 + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return get("getModelingQuery", url, EventFrontEndQuery.class);
     }
 
-    public Long getModelingQueryCount(String customerSpace, String ratingEngineId, String aiModelId,
+    public EventFrontEndQuery getModelingQueryByRating(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery" + "?querytype="
+                + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        return post("getModelingQuery", url, ratingEngine, EventFrontEndQuery.class);
+    }
+
+    public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
                 + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
         return get("getModelingQueryCount", url, Long.class);
+    }
+
+    public Long getModelingQueryCountByRating(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
+                + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        return post("getModelingQueryCount", url, ratingEngine, Long.class);
     }
 
     public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId) {

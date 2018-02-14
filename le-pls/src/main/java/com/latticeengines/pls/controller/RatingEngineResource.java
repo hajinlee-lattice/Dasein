@@ -217,23 +217,26 @@ public class RatingEngineResource {
         return ratingEngineProxy.updateNote(tenant.getId(), ratingEngineId, noteId, noteParams);
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.GET)
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
     public EventFrontEndQuery getModelingQuery(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+            @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQuery(tenant.getId(), ratingEngineId, ratingModelId, modelingQueryType);
+        return ratingEngineProxy.getModelingQueryByRating(tenant.getId(), ratingEngineId, ratingModelId,
+                modelingQueryType, ratingEngine);
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.POST)
     @ResponseBody
-    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    @ApiOperation(value = "Return a the number of results for the modelingquerytype corresponding to the given rating engine, rating model")
     public Long getModelingQueryCount(@PathVariable String ratingEngineId, @PathVariable String ratingModelId,
-            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+            @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getModelingQueryCount(tenant.getId(), ratingEngineId, ratingModelId,
-                modelingQueryType);
+        return ratingEngineProxy.getModelingQueryCountByRating(tenant.getId(), ratingEngineId, ratingModelId,
+                modelingQueryType, ratingEngine);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/model", method = RequestMethod.POST)

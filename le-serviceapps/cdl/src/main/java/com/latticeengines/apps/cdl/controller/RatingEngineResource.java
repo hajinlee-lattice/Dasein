@@ -22,6 +22,8 @@ import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
@@ -184,22 +186,53 @@ public class RatingEngineResource {
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public EventFrontEndQuery getModelingQuery(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId,
+    public EventFrontEndQuery getModelingQueryByRatingId(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
+        return getModelingQueryByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType, ratingEngine);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    public EventFrontEndQuery getModelingQueryByRating(@PathVariable String customerSpace,
+            @PathVariable String ratingEngineId, @PathVariable String ratingModelId,
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+            @RequestBody RatingEngine ratingEngine) {
+        RatingModel ratingModel;
+        if (ratingEngine == null) {
+            throw new LedpException(LedpCode.LEDP_40013);
+        } else {
+            ratingModel = ratingEngine.getActiveModel();
+        }
         return ratingEngineService.getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
-    public Long getModelingQueryCount(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+    public Long getModelingQueryCountByRatingId(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId,
             @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
-        RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
+        return getModelingQueryCountByRating(customerSpace, ratingEngineId, ratingModelId, modelingQueryType,
+                ratingEngine);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}/modelingquery/count", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Return a EventFrontEndQuery corresponding to the given rating engine, rating model and modelingquerytype")
+    public Long getModelingQueryCountByRating(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId,
+            @RequestParam(value = "querytype", required = true) ModelingQueryType modelingQueryType,
+            @RequestBody RatingEngine ratingEngine) {
+        RatingModel ratingModel;
+        if (ratingEngine == null) {
+            throw new LedpException(LedpCode.LEDP_40013);
+        } else {
+            ratingModel = ratingEngine.getActiveModel();
+        }
         return ratingEngineService.getModelingQueryCount(customerSpace, ratingEngine, ratingModel, modelingQueryType);
 
     }

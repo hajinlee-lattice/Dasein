@@ -212,6 +212,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType) {
+        if (ratingModel == null) {
+            throw new LedpException(LedpCode.LEDP_40014, new String[] { ratingEngine.getId(), customerSpace });
+        }
+
         if (ratingEngine.getType() == RatingEngineType.AI_BASED && ratingModel instanceof AIModel) {
             AIModelService aiModelService = (AIModelService) RatingModelServiceBase
                     .getRatingModelService(ratingEngine.getType());
