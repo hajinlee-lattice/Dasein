@@ -62,9 +62,6 @@ public enum TableRoleInCollection {
         AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
 
-        AggregatedTransaction.primaryKey = InterfaceName.__Composite_Key__;
-        AggregatedTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
-
         AggregatedPeriodTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedPeriodTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
 

@@ -30,11 +30,7 @@ public class ConsolidateAddCompositeColumnFuction extends BaseOperation implemen
         for (String fieldName : fieldNames) {
             Integer fieldLoc = namePositionMap.get(fieldName);
             Object value = arguments.getObject(fieldLoc);
-            if (value == null) {
-                result.append("null");
-            } else {
-                result.append(value.toString());
-            }
+            result.append(String.valueOf(value));
         }
         functionCall.getOutputCollector().add(new Tuple(result.toString()));
     }

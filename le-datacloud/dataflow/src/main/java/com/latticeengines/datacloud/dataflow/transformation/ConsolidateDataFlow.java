@@ -26,8 +26,11 @@ import cascading.tuple.Fields;
 /**
  * Used by mergeInputs and mergeMaster steps
  */
-@Component("consolidateDataFlow")
+@Component(ConsolidateDataFlow.DATAFLOW_BEAN_NAME)
 public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
+
+    public static final String DATAFLOW_BEAN_NAME = "consolidateDataFlow";
+    public static final String TRANSFORMER_NAME = "consolidateDataTransformer";
 
     private static final String UUID = "__Id__";
 
@@ -47,7 +50,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
             groupByKey = buildNewIdColumn(config, sources);
         }
-        ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
+        //ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
         dedupeSource(config, sources, groupByKey);
         if (config.isMergeOnly()) {
             addIdColumn(sources, UUID);
@@ -59,9 +62,9 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
             Map<String, Map<String, String>> dupeFieldMap = new LinkedHashMap<>();
             List<String> fieldToRetain = new ArrayList<>();
             Set<String> commonFields = new HashSet<>();
-            consolidateHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
+            ConsolidateDataHelper.preProcessSources(sourceNames, sources, dupeFieldMap, fieldToRetain, commonFields);
 
-            List<FieldList> groupFieldLists = consolidateHelper.getGroupFieldList(sourceNames, sourceTables,
+            List<FieldList> groupFieldLists = ConsolidateDataHelper.getGroupFieldList(sourceNames, sourceTables,
                     dupeFieldMap, groupByKey);
 
             result = sources.get(0).coGroup(groupFieldLists.get(0), sources.subList(1, sources.size()),
@@ -70,14 +73,14 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
             List<String> allFieldNames = result.getFieldNames();
             Function<?> function = new ConsolidateDataFuction(allFieldNames, commonFields, dupeFieldMap,
                     config.getColumnsFromRight());
-            result = result.apply(function, new FieldList(allFieldNames), getMetadata(result.getIdentifier()),
+            result = result.apply(function, new FieldList(allFieldNames), result.getSchema(),
                     new FieldList(allFieldNames), Fields.REPLACE);
 
             result = result.retain(new FieldList(fieldToRetain));
         }
 
         if (config.isAddTimestamps()) {
-            result = consolidateHelper.addTimestampColumns(result);
+            result = ConsolidateDataHelper.addTimestampColumns(result);
         }
         return result;
     }
@@ -113,12 +116,12 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
 
     @Override
     public String getDataFlowBeanName() {
-        return "consolidateDataFlow";
+        return ConsolidateDataFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "consolidateDataTransformer";
+        return ConsolidateDataFlow.TRANSFORMER_NAME;
 
     }
 

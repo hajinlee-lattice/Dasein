@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.impl.TableSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.dataflow.transformation.ConsolidateDataFlow;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -304,7 +305,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         baseTables.put(tableName1, sourceTable1);
         baseTables.put(tableName2, sourceTable2);
         step1.setBaseTables(baseTables);
-        step1.setTransformer("consolidateDataTransformer");
+        step1.setTransformer(ConsolidateDataFlow.TRANSFORMER_NAME);
 
         step1.setConfiguration(getConsolidateDataConfig());
 

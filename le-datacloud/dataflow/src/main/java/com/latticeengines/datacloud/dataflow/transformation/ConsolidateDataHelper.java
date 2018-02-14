@@ -22,7 +22,8 @@ public class ConsolidateDataHelper {
 
     private static final Logger log = LoggerFactory.getLogger(ConsolidateDataHelper.class);
 
-    void preProcessSources(List<String> sourceNames, List<Node> sources, Map<String, Map<String, String>> dupeFieldMap,
+    static void preProcessSources(List<String> sourceNames, List<Node> sources,
+            Map<String, Map<String, String>> dupeFieldMap,
             List<String> fieldToRetain, Set<String> commonFields) {
         List<String> dupeFields = new ArrayList<>();
         for (int i = 0; i < sourceNames.size(); i++) {
@@ -52,13 +53,14 @@ public class ConsolidateDataHelper {
         }
     }
 
-    private Map<String, String> checkAndSetDupeMap(String sourceName, Map<String, Map<String, String>> dupeFieldMap) {
-        dupeFieldMap.putIfAbsent(sourceName, new HashMap<String, String>());
+    private static Map<String, String> checkAndSetDupeMap(String sourceName,
+            Map<String, Map<String, String>> dupeFieldMap) {
+        dupeFieldMap.putIfAbsent(sourceName, new HashMap<>());
         Map<String, String> dupeFieldMapPerTable = dupeFieldMap.get(sourceName);
         return dupeFieldMapPerTable;
     }
 
-    List<FieldList> getGroupFieldList(List<String> sourceNames, List<Table> sourceTables,
+    static List<FieldList> getGroupFieldList(List<String> sourceNames, List<Table> sourceTables,
             Map<String, Map<String, String>> dupeFieldMap, String srcIdField) {
         List<FieldList> fieldLists = new ArrayList<>();
         if (StringUtils.isNotEmpty(srcIdField)) {
@@ -84,7 +86,7 @@ public class ConsolidateDataHelper {
         return fieldLists;
     }
 
-    Node addTimestampColumns(Node input) {
+    static Node addTimestampColumns(Node input) {
         Date now = new Date();
         Node output = dropReservedColumns(input);
         output = output.addTimestamp(InterfaceName.CDLCreatedTime.name(), now);
@@ -92,7 +94,7 @@ public class ConsolidateDataHelper {
         return output;
     }
 
-    private Node dropReservedColumns(Node input) {
+    private static Node dropReservedColumns(Node input) {
         List<String> inputFields = input.getFieldNames().stream().map(String::toLowerCase).collect(Collectors.toList());
         List<String> fieldsToDrop = new ArrayList<>();
         for (String reserved: Arrays.asList(InterfaceName.CDLCreatedTime.name(), InterfaceName.CDLUpdatedTime.name())) {
