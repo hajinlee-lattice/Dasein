@@ -19,7 +19,7 @@ public class PeriodDataAggregaterConfig extends TransformerConfig {
     @JsonProperty("CountOutputFields")
     private List<String> countOutputFields;
     @JsonProperty("GroupByFields")
-    private List<String> goupByFields;
+    private List<String> groupByFields;
 
     public List<String> getSumFields() {
         return this.sumFields;
@@ -69,11 +69,11 @@ public class PeriodDataAggregaterConfig extends TransformerConfig {
         this.countOutputFields = countOutputFields;
     }
 
-    public List<String> getGoupByFields() {
-        return goupByFields;
+    public List<String> getGroupByFields() {
+        return groupByFields;
     }
 
-    public void setGoupByFields(List<String> goupByFields) {
-        this.goupByFields = goupByFields;
+    public void setGroupByFields(List<String> groupByFields) {
+        this.groupByFields = groupByFields;
     }
 }

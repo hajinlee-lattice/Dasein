@@ -253,7 +253,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("Quantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList( //
+        config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -304,7 +304,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList( //
+        config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //

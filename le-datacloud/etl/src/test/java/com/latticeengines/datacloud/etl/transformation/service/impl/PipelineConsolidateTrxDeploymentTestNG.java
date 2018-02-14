@@ -525,7 +525,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumOutputFields(Arrays.asList("TotalAmount"));
         config.setSumLongFields(Arrays.asList("TotalQuantity"));
         config.setSumLongOutputFields(Arrays.asList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
+        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.PeriodId.name()));
         step2.setConfiguration(JsonUtils.serialize(config));
@@ -585,7 +585,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumOutputFields(Arrays.asList("TotalAmount"));
         config.setSumLongFields(Arrays.asList("Quantity"));
         config.setSumLongOutputFields(Arrays.asList("TotalQuantity"));
-        config.setGoupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
+        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name(),
                 InterfaceName.PeriodId.name(),

@@ -25,8 +25,8 @@ import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -171,7 +171,7 @@ public class TimeSeriesUtils {
         inputDir = getPath(inputDir) + "/*.avro";
         targetDir = getPath(targetDir);
         log.info("Distribute period data from " + inputDir + " to " + targetDir);
-        Map<Integer, String> periodFileMap = new HashMap<Integer, String>();
+        Map<Integer, String> periodFileMap = new HashMap<>();
         for (Integer period : periods) {
             periodFileMap.put(period, targetDir + "/" + getFileNameFromPeriod(period));
             log.info("Add period " + period + " File" + targetDir + "/" + getFileNameFromPeriod(period));
@@ -179,8 +179,8 @@ public class TimeSeriesUtils {
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, inputDir);
             Schema schema = AvroUtils.getSchemaFromGlob(yarnConfiguration, inputDir);
-            Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<Integer, List<GenericRecord>>();
-            List<Future<Boolean>> pendingWrites = new ArrayList<Future<Boolean>>();
+            Map<Integer, List<GenericRecord>> dateRecordMap = new HashMap<>();
+            List<Future<Boolean>> pendingWrites = new ArrayList<>();
             ExecutorService executor = ThreadPoolUtils.getFixedSizeThreadPool("periodDataDistributor", 16);
 
             int totalRecords = 0;

@@ -14,8 +14,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 
-@Component("periodDateConvertFlow")
+@Component(PeriodDateConvertFlow.DATAFLOW_BEAN_NAME)
 public class PeriodDateConvertFlow extends ConfigurableFlowBase<PeriodDateConvertorConfig> {
+
+    public static final String DATAFLOW_BEAN_NAME = "periodDateConvertFlow";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -44,7 +46,7 @@ public class PeriodDateConvertFlow extends ConfigurableFlowBase<PeriodDateConver
 
     @Override
     public String getDataFlowBeanName() {
-        return "periodDateConvertFlow";
+        return PeriodDateConvertFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override

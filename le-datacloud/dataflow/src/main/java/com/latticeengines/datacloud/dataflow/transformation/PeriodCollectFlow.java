@@ -9,8 +9,10 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodCollectorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component("periodCollectFlow")
+@Component(PeriodCollectFlow.DATAFLOW_BEAN_NAME)
 public class PeriodCollectFlow extends ConfigurableFlowBase<PeriodCollectorConfig> {
+
+    public static final String DATAFLOW_BEAN_NAME = "periodCollectFlow";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -33,7 +35,7 @@ public class PeriodCollectFlow extends ConfigurableFlowBase<PeriodCollectorConfi
 
     @Override
     public String getDataFlowBeanName() {
-        return "periodCollectFlow";
+        return PeriodCollectFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override

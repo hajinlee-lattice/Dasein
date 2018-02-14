@@ -19,8 +19,10 @@ import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 
-@Component("periodDataAggregateFlow")
+@Component(PeriodDataAggregateFlow.DATAFLOW_BEAN_NAME)
 public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggregaterConfig> {
+
+    public static final String DATAFLOW_BEAN_NAME = "periodDataAggregateFlow";
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
@@ -37,8 +39,8 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
             }
         }
         result = aggregate(config, result);
-        result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGoupByFields(), COMPOSITE_KEY),
-                new FieldList(config.getGoupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
+        result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGroupByFields(), COMPOSITE_KEY),
+                new FieldList(config.getGroupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
 
         // TODO: a temp way of adding period name
         result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(), "Month", String.class);
@@ -69,7 +71,7 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
                 aggregations.add(new Aggregation(countFields.get(i), countOutputFields.get(i), AggregationType.COUNT));
             }
         }
-        result = result.groupBy(new FieldList(config.getGoupByFields()), aggregations);
+        result = result.groupBy(new FieldList(config.getGroupByFields()), aggregations);
         return result;
     }
 
@@ -80,7 +82,7 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
 
     @Override
     public String getDataFlowBeanName() {
-        return "periodDataAggregateFlow";
+        return PeriodDataAggregateFlow.DATAFLOW_BEAN_NAME;
     }
 
     @Override

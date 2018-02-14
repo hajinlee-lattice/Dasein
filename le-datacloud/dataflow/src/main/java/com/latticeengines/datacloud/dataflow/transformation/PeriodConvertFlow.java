@@ -23,6 +23,8 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
 
     private static final String MIN_COLUMN = "__MIN__";
 
+    public static final String DATAFLOW_BEAN_NAME = "periodConvertFlow";
+
     @Override
     public Node construct(TransformationFlowParameters parameters) {
 
@@ -66,7 +68,7 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
 
     @Override
     public String getDataFlowBeanName() {
-        return "periodConvertFlow";
+        return DATAFLOW_BEAN_NAME;
     }
 
     @Override
