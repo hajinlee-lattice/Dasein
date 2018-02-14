@@ -20,8 +20,10 @@
                 <dt>Prioritize by:</dt>
                 <dd>{{ vm.prioritizeBy }}</dd>
 
-                <dt>Rating Engine Settings:</dt>
-                <dd>
+                <dt 
+                    ng-if="vm.modelingConfigFilters !== {} && vm.trainingSegment !== null && vm.trainingProducts.length !== 0">Rating Engine Settings:</dt>
+                <dd
+                    ng-if="vm.modelingConfigFilters !== {} && vm.trainingSegment !== null && vm.trainingProducts.length !== 0">
                     <ul>
                         <li 
                             ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">
@@ -44,7 +46,7 @@
                             Model with similar segment: {{ vm.trainingSegment.display_name }}
                         </li>
                         <li
-                            ng-if="vm.trainingProducts !== []">
+                            ng-if="vm.trainingProducts.length !== 0">
                             Model with similar product(s): 
                             <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
                             <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
@@ -54,11 +56,11 @@
             </dl>
 
             <h3>Job Status</h3>
-            <div class="meter bar">
-                <span class="indeterminate" style="width:1%"></span>
+            <div class="meter bar" ng-if="vm.status !== 'Completed'">
+                <span class="indeterminate" ng-style="{ 'width': vm.progress }"></span>
             </div>
             <div>
-                <p><i class="fa fa-check" data-ng-if="vm.status == 'Completed'"></i> {{ vm.status }}</p>
+                <p><i class="fa fa-check" ng-if="vm.status === 'Completed'"></i> {{ vm.status }}</p>
             </div>
             
         </div>

@@ -2,11 +2,12 @@ angular
 .module('pd.navigation.sidebar.model', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.utilities.StringUtility',
-    'mainApp.core.services.FeatureFlagService'
+    'mainApp.core.services.FeatureFlagService',
+    'lp.ratingsengine'
 ])
 .controller('SidebarModelController', function(
     $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
-    StateHistory, Model, IsPmml, HasRatingsAvailable
+    StateHistory, Model, IsPmml, IsRatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
 
@@ -20,6 +21,7 @@ angular
 
     vm.init = function() {
         vm.IsPmml = IsPmml,
+        vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
@@ -45,6 +47,10 @@ angular
             vm.showReviewModel = FeatureFlagService.FlagIsEnabled(flags.REVIEW_MODEL);
             vm.showSampleLeads = FeatureFlagService.FlagIsEnabled(flags.VIEW_SAMPLE_LEADS);
         });
+    }
+
+    vm.goToRatingEngineRoute = function() {
+        $state.go('home.ratingsengine.list');
     }
 
     vm.checkToState = function(toState) {

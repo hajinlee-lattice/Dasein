@@ -165,6 +165,13 @@ Body Copy
   }
 }
 
+.text-ellipsis {
+    word-wrap: break-word;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+
 
 /*
 Text Selection Styles

@@ -601,9 +601,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
-
-        console.log(RatingsEngineStore.getType());
-
         var type = RatingsEngineStore.getType(),
             opts =  {
                 type: "AI_BASED",
@@ -647,10 +644,6 @@ angular.module('lp.ratingsengine')
 
         RatingsEngineStore.getRating(ratingId).then(function(rating){
 
-            console.log(rating);
-            console.log(predictionType);
-            console.log(modelingStrategy);
-
             obj = {
                 AI: {
                     id: rating.activeModel.AI.id,
@@ -693,12 +686,20 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getTrainingCounts = function(engineId, modelId, ratingEngine, queryType) {
+        var deferred = $q.defer();
+
+        RatingsEngineService.getTrainingCounts(engineId, modelId, ratingEngine, queryType).then(function(result) {
+            deferred.resolve(result);
+        });
+
+        return deferred.promise;
+    }
+
     this.nextLaunchAIModel = function(nextState, model){
         var currentRating = RatingsEngineStore.getCurrentRating(),
             obj = model.AI;
         
-        console.log(model);
-
         RatingsEngineStore.tmpId = obj.id;
 
         // console.log('Launching the model', obj);
@@ -921,8 +922,26 @@ angular.module('lp.ratingsengine')
         }).then(function(response){
             deferred.resolve(response.data);
         });
-       
+    
+        return deferred.promise;
+    }
 
+    this.getTrainingCounts = function(ratingId, modelId, ratingEngine, queryType){
+        var deferred = $q.defer();
+
+        console.log(ratingEngine);
+
+        $http({
+            method: 'POST',
+            url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId + '/modelingquery/count',
+            params: {
+                querytype: queryType
+            },
+            data: ratingEngine
+        }).then(function(response){
+            deferred.resolve(response.data);
+        });
+    
         return deferred.promise;
     }
 });

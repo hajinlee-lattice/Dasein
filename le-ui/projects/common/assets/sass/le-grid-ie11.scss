@@ -26,13 +26,6 @@ $font-size:12px;
     background-color: white;
 }
 
-.text-ellipsis {
-    word-wrap: break-word;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
-}
-
 .le-grid {
     @include display-grid;
     @include columns-grid;

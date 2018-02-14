@@ -606,6 +606,17 @@ angular
             })
             .state('home.ratingsengine.productpurchase.segment.products.prioritization.training', {
                 url: '/training',
+                resolve: {
+                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                            deferred.resolve(result)
+                        });
+
+                        return deferred.promise;
+                    }
+                },
                 views: {
                     'wizard_content@home.ratingsengine.productpurchase': {
                         controller: 'RatingsEngineAITraining',

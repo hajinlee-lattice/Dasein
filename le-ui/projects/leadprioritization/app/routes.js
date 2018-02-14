@@ -248,6 +248,9 @@ angular
 
                     return deferred.promise;
                 },
+                IsRatingEngine: function(Model) {
+                    return Model.ModelDetails.Name.substring(0,2) == 'ai';
+                },
                 IsPmml: function(Model) {
                     return Model.ModelDetails.ModelType == 'PmmlModel';
                 },

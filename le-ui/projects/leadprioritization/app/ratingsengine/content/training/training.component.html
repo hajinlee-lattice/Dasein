@@ -29,7 +29,8 @@
                                     type="text" 
                                     class="form-control"
                                     ng-disabled="!checkboxModel.spend"
-                                    ng-model="vm.spendValue" />
+                                    ng-model="vm.spendValue"
+                                    ng-model-options="{ debounce: 750 }" />
                             </div>
                         </div>
                     </li>
@@ -52,7 +53,8 @@
                                     type="text" 
                                     class="form-control"
                                     ng-disabled="!checkboxModel.quantity"
-                                    ng-model="vm.quantityValue" />
+                                    ng-model="vm.quantityValue"
+                                    ng-model-options="{ debounce: 750 }" />
                                 <span>Units</span>
                             </div>
                         </div>
@@ -69,7 +71,8 @@
                                     type="text" 
                                     class="form-control"
                                     ng-disabled="!checkboxModel.periods"
-                                    ng-model="vm.periodsValue" />
+                                    ng-model="vm.periodsValue"
+                                    ng-model-options="{ debounce: 750 }" />
                                 <span>periods</span>
                             </div>
                             <!-- <select class="form-control">
@@ -113,19 +116,27 @@
                         <h3>Modeling</h3>
                         <dl class="stats">
                             <dt>Records Selected</dt>
-                            <dd>10,345</dd>
+                            <dd>
+                                <span ng-if="!vm.recordsCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                <span ng-if="vm.recordsCountReturned">{{ vm.recordsCount | number }}</span>
+                            </dd>  
                         </dl>
                         <dl class="stats">
                             <dt>First Purchases</dt>
                             <dt ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'">Returning Purchases</dt>
-                            <dd>679</dd>
-                        </dl>
+                            <dd>
+                                <span ng-if="!vm.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                <span ng-if="vm.purchasesCountReturned">{{ vm.purchasesCount | number }}</span>
+                            </dd>                        </dl>
                     </li>
                     <li class="stats-group">
                         <h3>Scoring</h3>
                         <dl class="stats">
                             <dt>Accounts to be scored</dt>
-                            <dd>6,996</dd>
+                            <dd>
+                                <span ng-if="!vm.scoringCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
+                                <span ng-if="vm.scoringCountReturned">{{ vm.scoringCount | number }}</span>
+                            </dd>
                         </dl>
                     </li>
                 </ul>

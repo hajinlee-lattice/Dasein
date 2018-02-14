@@ -2,7 +2,9 @@ angular.module('lp.ratingsengine.wizard.training', [
     'mainApp.appCommon.directives.chips',
     'mainApp.appCommon.directives.formOnChange'
 ])
-.controller('RatingsEngineAITraining', function ($q, $scope, RatingsEngineStore, RatingsEngineService, SegmentService) {
+.controller('RatingsEngineAITraining', function (
+    $q, $scope, $stateParams,
+    Rating, RatingsEngineStore, RatingsEngineService, SegmentService) {
     var vm = this;
     angular.extend(vm, {
         segments: RatingsEngineStore.getCachedSegments(),
@@ -15,15 +17,47 @@ angular.module('lp.ratingsengine.wizard.training', [
         periodsValue: 2,
         modelingConfigFilters: {},
         trainingSegment: null,
-        trainingProducts: null
+        trainingProducts: null,
+        ratingEngine: Rating,
+        scoringCountReturned: false,
+        recordsCountReturned: false,
+        purchasesCountReturned: false
     });
 
     vm.init = function () {
+
+        vm.engineId = vm.ratingEngine.id;
+        vm.modelId = vm.ratingEngine.activeModel.AI.id;
+
+        vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+        vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
+        vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
+
+    }
+
+    vm.getRecordsCount = function(engineId, modelId, ratingEngine) {
+        RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TRAINING').then(function(count){
+            vm.recordsCount = count;
+            vm.recordsCountReturned = true;
+        });
+    }
+    vm.getPurchasesCount = function(engineId, modelId, ratingEngine) {
+        RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'EVENT').then(function(count){
+            vm.purchasesCount = count;
+            vm.purchasesCountReturned = true;
+        });
+    }
+    vm.getScoringCount = function(engineId, modelId, ratingEngine) {
+        RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TARGET').then(function(count){
+            vm.scoringCount = count;
+            vm.scoringCountReturned = true;
+        });
     }
 
     vm.segmentCallback = function(selectedSegment) {
         vm.trainingSegment = selectedSegment[0];
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
+        vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
     }
 
     vm.productsCallback = function(selectedProducts) {
@@ -32,9 +66,13 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.trainingProducts.push(product.ProductId);
         });
         RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
+        vm.ratingEngine.activeModel.AI.trainingProducts = vm.trainingProducts;
     }
 
     vm.formOnChange = function(){
+        vm.recordsCountReturned = false;
+        vm.purchasesCountReturned = false;
+
         if($scope.checkboxModel) {
             if($scope.checkboxModel.spend) {
                 vm.modelingConfigFilters.SPEND_IN_PERIOD = {
@@ -70,6 +108,11 @@ angular.module('lp.ratingsengine.wizard.training', [
                 RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
             }
         }
+
+        vm.ratingEngine.activeModel.AI.modelingConfigFilters = vm.modelingConfigFilters;
+
+        vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+        vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
 
     };
 

@@ -7,7 +7,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     angular.extend(vm, {
         ratingEngine: Rating,
-        status: 'Preparing Modeling Job'
+        status: 'Preparing Modeling Job',
+        progress: '1%'
     });
 
     vm.init = function() {
@@ -22,8 +23,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.modelingConfigFilters = model.modelingConfigFilters;
         vm.trainingSegment = model.trainingSegment;
         vm.trainingProducts = model.trainingProducts;
-
-        console.log(vm.modelingStrategy);
 
     	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
         	vm.ratingEngineType = 'First Purchase Cross-Sell'
@@ -61,16 +60,28 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         }
 
 
-        $interval(function() { 
+        var checkJobStatus = $interval(function() { 
             JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
-                // console.log(result);
+                
+                console.log(result);
                 if(result.id) {
                     vm.status = result.jobStatus;
+
+                    if(result.stepsCompleted.length > 0){
+                        vm.progress = ((result.stepsCompleted.length / 2) * 7) + '%';
+                    }
+                    if(vm.status === 'Completed'){
+                        $interval.cancel(checkJobStatus);
+                    }
                 }
             });
         }, 10 * 1000);
 
     };
+
+    $scope.$on('$destroy', function(){
+        $interval.cancel(checkJobStatus)
+    });
 
     vm.returnProductNameFromId = function(productId) {
         var cachedProducts = RatingsEngineStore.getCachedProducts(),
