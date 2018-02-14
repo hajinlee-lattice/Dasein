@@ -89,7 +89,8 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
             "");
     protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor(
             "");
-    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays.asList(new ClientHttpRequestInterceptor[]{addMagicAuthHeader});
+    protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
+            .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
     protected GetHttpStatusErrorHandler statusErrorHandler = new GetHttpStatusErrorHandler();
 
     public static class AuthorizationHeaderHttpRequestInterceptor implements ClientHttpRequestInterceptor {
@@ -172,14 +173,15 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     public void createTenantByRestCall(Tenant tenant) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{ addMagicAuthHeader }));
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         magicRestTemplate.postForObject(getPLSRestAPIHostPort() + "/pls/admin/tenants", tenant, Boolean.class);
     }
 
     public void deleteTenantByRestCall(String tenantId) {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{ addMagicAuthHeader }));
-        sendHttpDeleteForObject(magicRestTemplate, getPLSRestAPIHostPort() + "/pls/admin/tenants/" + tenantId, Boolean.class);
+        magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        sendHttpDeleteForObject(magicRestTemplate, getPLSRestAPIHostPort() + "/pls/admin/tenants/" + tenantId,
+                Boolean.class);
     }
 
     public boolean createAdminUserByRestCall(String tenant, String username, String email, String firstName,
@@ -274,12 +276,19 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected void makeSureUserDoesNotExist(String username) {
         assertTrue(globalUserManagementService.deleteUser(username));
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+
+        int retries = 0;
+        User user = globalUserManagementService.getUserByUsername(username);
+        while (user != null && retries++ < 3) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            user = globalUserManagementService.getUserByUsername(username);
         }
-        assertNull(globalUserManagementService.getUserByUsername(username));
+        assertNull(user,
+                "User " + username + " should be deleted from GA, but still get: " + JsonUtils.serialize(user));
     }
 
     protected Session login(String username) {
@@ -292,11 +301,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         return sessionService.attach(ticket);
     }
 
-    protected void grantRight (String right, String tenantId, String username) {
+    protected void grantRight(String right, String tenantId, String username) {
         try {
             globalUserManagementService.grantRight(right, tenantId, username);
         } catch (LedpException e) {
-            //ignore
+            // ignore
         }
     }
 
@@ -312,7 +321,7 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/attach", doc.getResult().getTenants().get(0),
                 UserDocument.class);
@@ -327,33 +336,37 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         creds.setUsername(username);
         creds.setPassword(DigestUtils.sha256Hex(password));
 
-        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds,
-                LoginDocument.class);
+        LoginDocument doc = restTemplate.postForObject(getRestAPIHostPort() + "/login", creds, LoginDocument.class);
 
         addAuthHeader.setAuthValue(doc.getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
 
         return restTemplate.postForObject(getRestAPIHostPort() + "/attach", tenant, UserDocument.class);
     }
 
     protected void useSessionDoc(UserDocument doc) {
         addAuthHeader.setAuthValue(doc.getTicket().getData());
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[]{addAuthHeader}));
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
         restTemplate.setErrorHandler(new GetHttpStatusErrorHandler());
     }
 
-    protected void logoutUserDoc(UserDocument doc) { logoutTicket(doc.getTicket()); }
+    protected void logoutUserDoc(UserDocument doc) {
+        logoutTicket(doc.getTicket());
+    }
 
-    protected void logoutTicket(Ticket ticket) { globalAuthenticationService.discard(ticket); }
+    protected void logoutTicket(Ticket ticket) {
+        globalAuthenticationService.discard(ticket);
+    }
 
     protected static <T> T sendHttpDeleteForObject(RestTemplate restTemplate, String url, Class<T> responseType) {
         ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.DELETE, jsonRequestEntity(""), responseType);
         return response.getBody();
     }
 
-    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload, Class<T> responseType) {
-        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT,
-                jsonRequestEntity(payload), responseType);
+    protected static <T> T sendHttpPutForObject(RestTemplate restTemplate, String url, Object payload,
+            Class<T> responseType) {
+        ResponseEntity<T> response = restTemplate.exchange(url, HttpMethod.PUT, jsonRequestEntity(payload),
+                responseType);
         return response.getBody();
     }
 
