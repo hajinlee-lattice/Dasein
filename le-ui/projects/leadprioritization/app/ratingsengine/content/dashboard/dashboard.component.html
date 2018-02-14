@@ -9,8 +9,11 @@
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
                         <h2>
-                            <div class="contenteditable title" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
-                                <span ng-show="!focus.title">{{ vm.rating.summary.displayName || 'Rating Name' }}</span>
+                            <div class="text-ellipsis">
+                                <span ng-show="!focus.title" title="{{ vm.rating.summary.displayName || 'Rating Name' }}">{{ vm.rating.summary.displayName || 'Rating Name' }}</span>
+                            </div>
+                            <div class="contenteditable" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
+                                
                                 <div class="editor" ng-show="focus.title">
                                     <input autofocus maxlength="50" ng-blur="vm.edited('displayName'); focus = {};" name="displayName" ng-model="vm.editing.displayName" ng-value="vm.rating.summary.displayName" />
                                 </div>
@@ -84,7 +87,7 @@
                 <div class="dashboard-section-container">
                     <div class="dashboard-section-header">
                         <h2>
-                            <span class="title">{{vm.rating.segment.display_name}}</span>
+                            <span class="text-ellipsis" title="{{vm.rating.segment.display_name}}">{{vm.rating.segment.display_name}}</span>
                         </h2>
                     </div>
                     <div class="dashboard-section-content">
