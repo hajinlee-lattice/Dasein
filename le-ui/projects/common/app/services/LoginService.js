@@ -157,8 +157,8 @@ angular.module('mainApp.login.services.LoginService', [
                 ResourceUtility.clearResourceStrings();
 
                 var loginDocument = BrowserStorageUtility.getLoginDocument(),
-                    authenticationRoute = loginDocument.AuthenticationRoute || null,
-                    tenantId = BrowserStorageUtility.getClientSession().Tenant.Identifier;
+                    authenticationRoute = (loginDocument && loginDocument.AuthenticationRoute ? loginDocument.AuthenticationRoute : null),
+                    tenantId = (BrowserStorageUtility.getClientSession() && BrowserStorageUtility.getClientSession().Tenant  && BrowserStorageUtility.getClientSession().Tenant.Identifier ? BrowserStorageUtility.getClientSession().Tenant.Identifier : null);
 
                 setTimeout(function() {
                     if(authenticationRoute === 'SSO') {

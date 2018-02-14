@@ -15,15 +15,17 @@
 .file-import-content {
     .header h2 {
         background: none;
-        padding: 0;
+        padding-left: 0;
     }
-    .ng-pristine .form-control.required,
-    .ng-pristine .form-control:required {
+
+    .form-control.required:not(.ng-dirty),
+    .form-control:required:not(.ng-dirty) {
         border-left-width: 5px;
         border-left-color: #EF6A30;
         -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
         box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     }
+
     form {
         @include flex-container;
         flex-wrap: wrap;
@@ -34,6 +36,15 @@
             padding-right: 50px;
             &:nth-child(even) {
                 padding-right: 0;
+            }
+        }
+        select {
+            background: #fff;
+            height: 30px;
+            font-size: 14px;
+            option[disabled],
+            .disabled {
+                color: #a6a6a6;
             }
         }
     }

@@ -64,7 +64,9 @@ angular.module('lp.import.wizard.thirdpartyids', [])
         var keys = [],
             valid = true;
         mapping.forEach(function(item) {
-            var key = item.mappedField + item.cdlExternalSystemType;
+            var type = item.cdlExternalSystemType,
+                name = (item.mappedField ? item.mappedField.toLowerCase() : ''),
+                key = name + type;
             valid = (keys.indexOf(key) === -1);
             keys.push(key);
         });

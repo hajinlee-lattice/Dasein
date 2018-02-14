@@ -1,6 +1,7 @@
 .import-wizard-progress {
     position: relative;
     color: #aaa;
+    margin-top: 25px;
     
     &:before {
         content: '';
@@ -76,8 +77,7 @@
     }
 
     li.current {
-        font-weight: bold;
-        color: black;
+        color: #ed6a3a;
         
         &:before {
             background-color: #fff;

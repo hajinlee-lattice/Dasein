@@ -15,6 +15,20 @@
 				margin-bottom: 10px;
 				& > li {
 					@incluide flex-item(1 0 auto);
+					padding-right: 80px;
+					@media (max-width: 1000px) {
+						padding-right: 40px;
+					}
+					@media (max-width: 800px) {
+						padding-right: 20px;
+					}
+					@media (max-width: 500px) {
+						padding-right: 5px;
+					}
+					&:last-child {
+						padding-right: 15px;
+
+					}
 					input, select {
 						max-width: 100%;
 					}
@@ -33,6 +47,13 @@
 						transform: translateY(-50%);
 						right: 0;
 					} 
+				}
+			}
+			&.header {
+				& > ul {
+					& > li {
+						padding-right: 0;
+					}
 				}
 			}
 		}

@@ -9,18 +9,20 @@
 				padding-left: 40px;
 			}
 			strong {
-				font-weight: bold;
-				color: dark-gray;
+				//font-weight: bold;
+				//color: dark-gray;
 			}
 		}
 	}
 
 	h3 {
-		font-size: 18px;
+		font-size: 14px;
+		font-weight: normal;
 		background-repeat: no-repeat;
+		text-transform: none;
 		background-position: left;
-		background-size: 18px;
-		padding: 8px 0 6px 28px;
+		background-size: 14px;
+		padding: 8px 0 6px 22px;
 		margin: 40px 0 10px;
 		border-bottom: #ddd solid 1px;
 		&:first-of-type {
@@ -33,7 +35,7 @@
 			background-image: url('/assets/images/ico-user-black.png');
 		}
 		&.analysis {
-			background-image: url('/assets/images/ico-third-party-id-dark.png');
+			background-image: url('/assets/images/ico-analysis-fields-dark.png');
 		}
 	}
 
@@ -47,19 +49,8 @@
 		}
 	}
 	
-	label {
-		font-weight: bold;
-	}
 	p {
 		margin-bottom: 16px;
-	}
-	select {
-		background: #fff;
-	    height: 30px;
-	    font-size: 14px;
-	    option[disabled] {
-	    	color: lightgray;
-	    }
 	}
 
 }

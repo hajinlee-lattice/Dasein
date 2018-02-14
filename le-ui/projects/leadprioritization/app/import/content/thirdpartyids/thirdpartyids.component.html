@@ -19,6 +19,7 @@
                 <ul>
                     <li class="system-name">
                         <input 
+                            class="form-control"
                             type="text" 
                             ng-model="vm.fieldMapping[$index].mappedField" 
                             ng-blur="vm.changeLatticeField(vm.fieldMapping, form)" 
@@ -27,8 +28,10 @@
                     </li>
                     <li class="system-type">
                         <select
+                            class="form-control"
                             ng-model="vm.fieldMapping[$index].cdlExternalSystemType"
                             ng-required="true"
+                            ng-class="{'required': true}"
                             ng-change="vm.changeLatticeField(vm.fieldMapping, form)">
                             <option value="" hidden disabled>--</option>
                             <option ng-repeat="type in field.types" value="{{type}}">
@@ -38,9 +41,11 @@
                     </li>
                     <li class="fields-in-file">
                         <select 
+                            class="form-control"
                             ng-model="vm.fieldMapping[$index].userField" 
                             ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                             ng-required="true"
+                            ng-class="{'required': true}"
                             ng-options="item disable when (vm.unavailableFields.indexOf(item) !== -1) for item in vm.availableFields | filter: vm.hiddenFilter">
                         </select>
                     </li>
@@ -55,7 +60,7 @@
 		class="button gray-button" 
 		type="button"
 		ng-click="vm.addIdentifier($event)">
-            Add An{{vm.fields.length ? 'other' : ''}} Identifier
+            Add An{{vm.fields.length ? 'other' : ''}} ID
     </button>
 
 </div>

@@ -6,71 +6,73 @@
         </p>
     </div>
     <div class="alert">{{ vm.AvailableFields.length }} new Custom Fields have been found.</div>
-    <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="vm.AvailableFields.length">
-        <li class="customfield customfield-header">
-            <ul class="field">
-                <li class="field-name">
-                    Custom Field
-                    <span class="more-info">&#105;
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <p>
-                                    Unmapped fields are shown here and will be treated as Custom Fields unless Ignored.
-                                </p>
+    <form name="form">
+        <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="vm.AvailableFields.length">
+            <li class="customfield customfield-header">
+                <ul class="field">
+                    <li class="field-name">
+                        Custom Field
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Unmapped fields are shown here and will be treated as Custom Fields unless Ignored.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </span>
-                </li>
-                <li class="type">
-                    Type
-                    <span class="more-info">&#105;
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <p>
-                                    Type is important for our databases to function correctly.  If you aren't sure what to choose just leave it as "Text".
-                                </p>
+                        </span>
+                    </li>
+                    <li class="type">
+                        Type
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Type is important for our databases to function correctly.  If you aren't sure what to choose just leave it as "Text".
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </span>
-                </li>
-                <li class="ignore">
-                    <input type="checkbox" name="ignore_all" id="toggleIgnore" ng-model="checked" ng-change="vm.toggleIgnores(checked, fieldMapping)"/> <label for="toggleIgnore">Ignore</label>
-                    <span class="more-info">&#105;
-                        <div class="tooltip_">
-                            <div class="cover">
-                                <p>
-                                    Ignore will supress the field from appearing in the system, useful when you have excess columns in your CSV file.
-                                </p>
+                        </span>
+                    </li>
+                    <li class="ignore">
+                        <input type="checkbox" name="ignore_all" id="toggleIgnore" ng-model="checked" ng-change="vm.toggleIgnores(checked, fieldMapping)"/> <label for="toggleIgnore">Ignore</label>
+                        <span class="more-info">&#105;
+                            <div class="tooltip_">
+                                <div class="cover">
+                                    <p>
+                                        Ignore will supress the field from appearing in the system, useful when you have excess columns in your CSV file.
+                                    </p>
+                                </div>
                             </div>
-                        </div>
-                    </span>
-                </li>
-            </ul>
-        </li>
-        <li ng-repeat="field in vm.mergedFields | filter: vm.filterStandardList" class="customfield">
-            <ul class="field">
-                <li class="field-name">{{field.userField}}</li>
-                <li class="type">
-                    <select
-							class="custom-select"
-							name="columnType_{{ ::field.userField }}"
-							ng-model="fieldMapping[field.userField].fieldType"
-							ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
-							ng-change="vm.changeType(fieldMapping)"
-							value="{{field.fieldType}}">
-						<option value="TEXT" selected>Text</option>
-                        <option value="NUMBER">Number</option>
-						<option value="INTEGER">Integer</option>
-						<option value="BOOLEAN">Boolean</option>
-						<option value="DATE">Date</option>
-					</select>
-                </li>
-                <li class="ignore">
-                    <input type="checkbox" class="ignoreCheckbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"/> 
-                    <label for="{{field.userField}}">Ignore</label>
-                </li>
-            </ul>
-        </li>
-    </ul>
+                        </span>
+                    </li>
+                </ul>
+            </li>
+            <li ng-repeat="field in vm.mergedFields | filter: vm.filterStandardList" class="customfield">
+                <ul class="field">
+                    <li class="field-name">{{field.userField}}</li>
+                    <li class="type">
+                        <select
+    							class="form-control"
+    							name="columnType_{{ ::field.userField }}"
+    							ng-model="fieldMapping[field.userField].fieldType"
+    							ng-init="fieldMapping[field.userField].fieldType = field.fieldType"
+    							ng-change="vm.changeType(fieldMapping)"
+    							value="{{field.fieldType}}">
+    						<option value="TEXT" selected>Text</option>
+                            <option value="NUMBER">Number</option>
+    						<option value="INTEGER">Integer</option>
+    						<option value="BOOLEAN">Boolean</option>
+    						<option value="DATE">Date</option>
+    					</select>
+                    </li>
+                    <li class="ignore">
+                        <input type="checkbox" class="ignoreCheckbox" id="{{field.userField}}" ng-model="fieldMapping[field.userField].ignore" ng-change="vm.changeIgnore(fieldMapping)"/> 
+                        <label for="{{field.userField}}">Ignore</label>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </form>
 
 </div>

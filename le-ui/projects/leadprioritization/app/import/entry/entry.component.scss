@@ -1,6 +1,10 @@
 .setup-import.data-import {
+    .columns.box-outline .section-body.with-padding {
+        margin: 1.5em 3em;
+    }
     .import-additional-info {
         margin: 2em 0;
+        font-size: 15px;
     }
     .button-tabs {
         @include flex-container;
