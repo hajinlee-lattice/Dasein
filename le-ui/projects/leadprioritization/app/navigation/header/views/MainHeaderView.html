@@ -26,14 +26,16 @@
                 </a>
             </li-->
             <li class="jobs-nav-container">
-                <a class="jobs-nav-gear" ui-sref="home.jobs.status" title="Jobs [{{RunningJobs.length + RunningImportJobs.length}} Running]">
-                    <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0}" class="ico-container">
+                <a class="jobs-nav-gear" ui-sref="home.jobs.status" title="Jobs [{{RunningJobs.length + RunningImportJobs.length + RunningSubJubsDataCount}} Running]">
+                    <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || 
+                                                    (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0 ||
+                                                    (RunningSubJubsDataCount =  getRunningSubJobsDataCount())}" class="ico-container">
                         <span class="ico ico-cog ico-black">
                             
                         </span>
                     </span>
-                    <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length || RunningImportJobs.length">
-                        {{ RunningJobs.length + RunningImportJobs.length}}
+                    <span class="jobs-nav-number badge green-badge" ng-if="RunningJobs.length || RunningImportJobs.length || RunningSubJubsDataCount > 0">
+                        {{ RunningJobs.length + RunningImportJobs.length+ SubJobsDataProcessing.length + RunningSubJubsDataCount}}
                     </span>
                 </a>
             </li>

@@ -20,7 +20,7 @@
                 </span>
 
             </div>
-            <div class="le-cell le-col-start-4 le-col-span-1" ng-class="{'partial': getValidation(subjob) == 'Partial Success'}">
+            <div class="le-cell le-col-start-4 le-col-span-1" ng-class="{'partial': getValidation(subjob) == 'Partial Success', 'failed': getValidation(subjob) == 'Failed'}">
                 {{getValidation(subjob)}}
             </div>
             <div class="le-cell le-col-start-5 le-col-span-2">

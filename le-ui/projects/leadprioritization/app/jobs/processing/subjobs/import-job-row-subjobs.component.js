@@ -39,6 +39,13 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.getValidation = function (subjob) {
+                if(subjob.jobStatus === 'Failed'){
+                    return 'Failed';
+                }
+                if(subjob.jobStatus === 'Running'){
+                    return 'In Progress';
+                }
+                
                 var recordFound = $scope.getRecordFound(subjob);
                 var recordUploaded = $scope.getRecordUploaded(subjob);
                 if (recordFound === '-' && recordUploaded === '-') {
@@ -53,7 +60,7 @@ angular.module('lp.jobs.row.subjobs', [])
                 if (recordFound != recordUploaded) {
                     return 'Partial Success';
                 }
-
+                return subjob.jobStatus;
 
 
             }

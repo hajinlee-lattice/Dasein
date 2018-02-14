@@ -22,9 +22,11 @@ angular
 .service('JobsStore', function($q, $filter, JobsService) {
     var JobsStore = this;
     this.importJobsMap = {};
+    this.subjobsRunnigMap = {};
     this.data = {
         jobs: [],
         importJobs:[],
+        subjobsRunning:[],
         loadingJobs: false,
         models: {},
         jobsMap: {},
@@ -36,6 +38,19 @@ angular
             return true;
         }else{
             return false;
+        }
+    }
+
+    function isImportSubJob(job){
+        switch (job.jobType) {
+            case 'cdlDataFeedImportWorkflow': 
+            case 'cdlOperationWorkflow':
+            case 'metadataChange':{
+                return true;
+            };
+            default: {
+                return false;
+            }
         }
     }
 
@@ -128,6 +143,8 @@ angular
         } else {
             if(isImportJob(job)){
                 JobsStore.addImportJob(job);
+            }else if (isImportSubJob(job)){
+                JobsStore.manageSubjobsRunning(job);
             }else{
                 JobsStore.data.jobs.push(job);
             }
@@ -164,6 +181,18 @@ angular
             updateSubJobsImportJob(job);
             updateStepsCompleted(job);
             
+        }
+    }
+
+    this.manageSubjobsRunning = function(job){
+        var applicationidJob = job.applicationId;
+        var inMap = JobsStore.subjobsRunnigMap[applicationidJob];
+        if(job.jobStatus !== 'Completed' && job.jobStatus !== 'Failed' && inMap === undefined){
+            JobsStore.data.subjobsRunning.push(job);
+            JobsStore.subjobsRunnigMap[applicationidJob] = JobsStore.data.subjobsRunning.length - 1;
+        }else if((job.jobStatus === 'Completed' || job.jobStatus === 'Failed')&& inMap !== undefined){
+            JobsStore.data.subjobsRunning.splice(inMap, 1);
+            delete JobsStore.subjobsRunnigMap[inMap];
         }
     }
 

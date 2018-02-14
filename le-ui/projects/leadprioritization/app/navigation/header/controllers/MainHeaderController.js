@@ -25,7 +25,11 @@ angular.module('pd.navigation.header', [
     };
 
     $scope.statusImportFilter = function(item){
-        return item.jobStatus === 'Running';
+        return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
+    }
+
+    $scope.getRunningSubJobsDataCount = function(){
+        return JobsStore.data.subjobsRunning.length;
     }
 
 
