@@ -34,7 +34,7 @@ angular.module('lp.segments.segments', [
 
     vm.init = function() {
 
-        console.log(vm.segments);
+        // console.log(vm.segments);
 
         vm.segmentIds = [];
         SegmentsList.forEach(function(segment) {
@@ -168,7 +168,11 @@ angular.module('lp.segments.segments', [
 
             if (result.success) {
                 var tileState = vm.tileStates[segment.name];
-                tileState.editSegment = !tileState.editSegment;
+                if(tileState){
+                    tileState.editSegment = !tileState.editSegment;
+                }else{
+                    $state.go('home.segments', {}, { reload: true } );
+                }
                 vm.saveInProgress = false;
                 vm.showAddSegmentError = false;
                 vm.inEditing = {};
