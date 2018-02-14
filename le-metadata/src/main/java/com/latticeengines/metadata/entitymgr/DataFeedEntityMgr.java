@@ -6,7 +6,6 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
@@ -27,8 +26,6 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
     DataFeed findDefaultFeedReadOnly();
 
     DataFeedExecution retryLatestExecution(String datafeedName);
-
-    DataFeedProfile startProfile(String datafeedName);
 
     List<DataFeed> getAllDataFeeds();
     List<SimpleDataFeed> getAllSimpleDataFeeds();

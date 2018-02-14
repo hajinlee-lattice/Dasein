@@ -94,14 +94,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("active_execution")
     private DataFeedExecution activeExecution;
 
-    @Column(name = "ACTIVE_PROFILE", nullable = true)
-    @JsonIgnore
-    private Long activeProfileId;
-
-    @Transient
-    @JsonProperty("active_profile")
-    private DataFeedProfile activeProfile;
-
     @Column(name = "EARLIEST_TRANSACTION", nullable = true)
     @JsonProperty("earliest_transaction")
     private Integer earliestTransaction;
@@ -109,7 +101,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @Column(name = "REBUILD_TRANSACTION", nullable = true)
     @JsonProperty("rebuildTransaction")
     private Boolean rebuildTransaction;
-
 
     @JsonIgnore
     @Transient
@@ -219,14 +210,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         this.activeExecutionId = activeExecutionId;
     }
 
-    public Long getActiveProfileId() {
-        return activeProfileId;
-    }
-
-    public void setActiveProfileId(Long activeProfileId) {
-        this.activeProfileId = activeProfileId;
-    }
-
     public List<DataFeedTask> getTasks() {
         return tasks;
     }
@@ -282,14 +265,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setActiveExecution(DataFeedExecution activeExecution) {
         this.activeExecution = activeExecution;
-    }
-
-    public DataFeedProfile getActiveProfile() {
-        return activeProfile;
-    }
-
-    public void setActiveProfile(DataFeedProfile activeProfile) {
-        this.activeProfile = activeProfile;
     }
 
     public Date getLastPublished() {
@@ -353,13 +328,9 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Initialized("initialized", false, false), // import is ready to run
         InitialLoaded("initialLoaded", true, false), // initial import data
                                                      // loaded
-        InitialConsolidated("initialConsolidated", true, true), // initial data
-                                                                // consolidated
         Active("active", true, true), // master table has formed and pushed to
                                       // data store
-        Consolidating("consolidating", true, false), //
         ProcessAnalyzing("processAnalyzing", true, true), //
-        Profiling("profiling", false, true), //
         Deleting("deleting", false, false);
 
         private final String name;

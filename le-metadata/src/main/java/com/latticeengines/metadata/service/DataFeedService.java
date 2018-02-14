@@ -4,7 +4,6 @@ import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedService {
@@ -33,15 +32,10 @@ public interface DataFeedService {
 
     DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName);
 
-    DataFeedProfile startProfile(String customerSpace, String datafeedName);
-
-    DataFeedProfile updateProfileWorkflowId(String customerSpace, String datafeedName, Long workflowId);
-
     void resetImport(String customerSpace, String datafeedName);
 
     void resetImportByEntity(String customerSpace, String datafeedName, String entity);
 
-    DataFeed finishProfile(String customerSpace, String datafeedName, String statusStr);
 
     DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod);
     DataFeed rebuildTransaction(String customerSpace, String datafeedName, Boolean isRebuild);

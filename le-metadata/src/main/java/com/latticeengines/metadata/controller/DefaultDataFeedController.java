@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.metadata.service.DataFeedService;
 
 import io.swagger.annotations.Api;
@@ -113,22 +112,6 @@ public class DefaultDataFeedController {
         return datafeedService.retryLatestExecution(customerSpace, null);
     }
 
-    @RequestMapping(value = "/startprofile", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "start data feed profile")
-    public DataFeedProfile startProfile(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.startProfile(customerSpace, "");
-    }
-
-    @RequestMapping(value = "/status/{initialDataFeedStatus}/finishprofile", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "finish data feed profile")
-    public DataFeed finishProfile(@PathVariable String customerSpace, @PathVariable String initialDataFeedStatus) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.finishProfile(customerSpace, "", initialDataFeedStatus);
-    }
-
     @RequestMapping(value = "/rebuildtransaction/{isRebuild}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")
@@ -143,14 +126,6 @@ public class DefaultDataFeedController {
     public DataFeed updateEarliestTransaction(@PathVariable String customerSpace, @PathVariable  Integer transactionDayPeriod) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.updateEarliestTransaction(customerSpace, "", transactionDayPeriod);
-    }
-
-    @RequestMapping(value = "/profile/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "update data feed profile")
-    public DataFeedProfile updateProfileWorkflowId(@PathVariable String customerSpace, @PathVariable Long workflowId) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.updateProfileWorkflowId(customerSpace, "", workflowId);
     }
 
     @RequestMapping(value = "/resetimport", method = RequestMethod.POST, headers = "Accept=application/json")

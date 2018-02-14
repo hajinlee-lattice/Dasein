@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.metadata.service.DataFeedService;
 
 import io.swagger.annotations.Api;
@@ -78,19 +77,4 @@ public class DataFeedResource {
         return datafeedService.retryLatestExecution(customerSpace, datafeedName);
     }
 
-    @RequestMapping(value = "/{datafeedName}/startprofile", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "start data feed profile")
-    public DataFeedProfile startProfile(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName) {
-        return datafeedService.startProfile(customerSpace, datafeedName);
-    }
-
-    @RequestMapping(value = "/{datafeedName}/profile/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "update data feed profile")
-    public DataFeedProfile updateProfileWorkflowId(@PathVariable String customerSpace,
-            @PathVariable String datafeedName, @PathVariable Long workflowId) {
-        return datafeedService.updateProfileWorkflowId(customerSpace, datafeedName, workflowId);
-    }
 }

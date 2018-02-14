@@ -10,7 +10,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedProfile;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -173,19 +172,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         post("resetImportByEntity", url, null, Void.class);
     }
 
-    public DataFeedProfile startProfile(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startprofile",
-                shortenCustomerSpace(customerSpace));
-        return post("startProfile", url, null, DataFeedProfile.class);
-    }
-
-    public DataFeedExecution finishProfile(String customerSpace, String initialDataFeedStatus) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/status/{initialDataFeedStatus}/finishprofile",
-                shortenCustomerSpace(customerSpace), initialDataFeedStatus);
-        return post("finishProfile", url, null, DataFeedExecution.class);
-    }
-
     public DataFeed updateEarliestTransaction(String customerSpace, Integer transactionDayPeriod) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datafeed/earliesttransaction/{transactionDayPeriod}",
@@ -198,12 +184,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
                 "/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
                 shortenCustomerSpace(customerSpace), isRebuild.toString());
         return post("updateEarliestTransaction", url, null, DataFeed.class);
-    }
-
-    public DataFeedProfile updateProfileWorkflowId(String customerSpace, Long workflowId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/profile/workflow/{workflowId}",
-                shortenCustomerSpace(customerSpace), workflowId);
-        return post("updateProfileWorkflowId", url, null, DataFeedProfile.class);
     }
 
 }
