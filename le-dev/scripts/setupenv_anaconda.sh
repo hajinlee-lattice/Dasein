@@ -6,6 +6,7 @@ if [ "${ANACONDA_HOME}" = "" ]; then
 fi
 
 BOOTSTRAP_MODE=$1
+CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
 
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     ARTIFACT_DIR=$WSHOME/le-dev/artifacts
@@ -33,23 +34,21 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo bash $ARTIFACT_DIR/$ANACONDA_SH -b -p $ANACONDA_HOME
     popd
     sudo chown -R $USER $ANACONDA_HOME
+fi
 
-    CONDA_ARTIFACT_DIR=$WSHOME/le-dev/conda/artifacts
-
-    for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
+for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
     do
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
         if [ -d $ANACONDA_HOME/envs/$envname ]; then
             echo "Removing existing Anaconda environment: $envname"
-            $ANACONDA_HOME/bin/conda remove -y --name $envname --all 
+            $ANACONDA_HOME/bin/conda remove -y --name $envname --all
         fi
         echo "Creating Anaconda environment: $envname"
         $ANACONDA_HOME/bin/conda create -n $envname -y python=$pythonversion pip
         cp $CONDA_ARTIFACT_DIR/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$envname/lib
         ln -s $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11
     done
-fi
 
 source $ANACONDA_HOME/bin/activate lattice
 
