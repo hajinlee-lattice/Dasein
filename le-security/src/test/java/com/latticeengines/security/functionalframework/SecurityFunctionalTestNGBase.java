@@ -274,6 +274,11 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     protected void makeSureUserDoesNotExist(String username) {
         assertTrue(globalUserManagementService.deleteUser(username));
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         assertNull(globalUserManagementService.getUserByUsername(username));
     }
 
