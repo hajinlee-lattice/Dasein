@@ -2,6 +2,15 @@ CREATE PROCEDURE `UpdateCDLTables`()
     BEGIN
         ALTER TABLE PLS_MultiTenant.PLAY
         ADD COLUMN `STATUS` varchar(255) null;
+
+        ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
+            ADD EXCLUDE_ITEMS_WITHOUT_SFID BOOLEAN NULL DEFAULT 0;
+
+        UPDATE `PLS_MultiTenant`.`PLAY_LAUNCH` 
+            SET EXCLUDE_ITEMS_WITHOUT_SFID = 0;
+
+        ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
+            ADD TOP_N_COUNT bigint NULL;
     
         ALTER TABLE PLS_MultiTenant.AI_MODEL
         ADD COLUMN `MODELING_STRATEGY` varchar(255) not null DEFAULT 'CROSS_SELL_REPEAT_PURCHASE';

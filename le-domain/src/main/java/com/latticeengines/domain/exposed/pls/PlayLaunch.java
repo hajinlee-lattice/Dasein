@@ -122,6 +122,14 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @Column(name = "ACCOUNTS_ERRORED")
     private Long accountsErrored;
 
+    @JsonProperty("excludeItemsWithoutSalesforceId")
+    @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
+    private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
+
+    @JsonProperty("topNCount")
+    @Column(name = "TOP_N_COUNT", nullable = true)
+    private Long topNCount;
+
     @JsonProperty("bucketsToLaunch")
     @Column(name = "BUCKETS_TO_LAUNCH")
     @Type(type = "text")
@@ -291,6 +299,22 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setBucketsToLaunch(Set<RatingBucketName> bucketsToLaunch) {
         this.bucketsToLaunch = JsonUtils.serialize(bucketsToLaunch);
+    }
+
+    public Boolean getExcludeItemsWithoutSalesforceId() {
+        return this.excludeItemsWithoutSalesforceId;
+    }
+
+    public void setExcludeItemsWithoutSalesforceId(Boolean excludeItemsWithoutSalesforceId) {
+        this.excludeItemsWithoutSalesforceId = excludeItemsWithoutSalesforceId;
+    }
+
+    public Long getTopNCount() {
+        return topNCount;
+    }
+
+    public void setTopNCount(Long topNCount) {
+        this.topNCount = topNCount;
     }
 
     @Override

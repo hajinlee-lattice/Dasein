@@ -120,10 +120,6 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
     @Column(name = "CREATED_BY", nullable = false)
     private String createdBy;
 
-    @JsonProperty("excludeItemsWithoutSalesforceId")
-    @Column(name = "EXCLUDE_ITEMS_WITHOUT_SFID", nullable = false)
-    private Boolean excludeItemsWithoutSalesforceId = Boolean.FALSE;
-
     @JsonProperty("lastTalkingPointPublishTime")
     @Column(name = "LAST_TALKING_POINT_PUBLISH_TIME")
     @Temporal(TemporalType.TIMESTAMP)
@@ -244,14 +240,6 @@ public class Play implements HasName, HasPid, HasTenantId, HasAuditingFields {
 
     public void setLaunchHistory(LaunchHistory launchHistory) {
         this.launchHistory = launchHistory;
-    }
-
-    public Boolean getExcludeItemsWithoutSalesforceId() {
-        return this.excludeItemsWithoutSalesforceId;
-    }
-
-    public void setExcludeItemsWithoutSalesforceId(boolean value) {
-        this.excludeItemsWithoutSalesforceId = value;
     }
 
     public Date getLastTalkingPointPublishTime() {

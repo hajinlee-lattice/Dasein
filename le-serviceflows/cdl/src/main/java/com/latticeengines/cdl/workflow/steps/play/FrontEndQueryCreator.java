@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
@@ -51,6 +52,7 @@ public class FrontEndQueryCreator {
 
     public void prepareFrontEndQueries(PlayLaunchContext playLaunchContext) {
         Play play = playLaunchContext.getPlay();
+        PlayLaunch launch = playLaunchContext.getPlayLaunch();
         FrontEndQuery accountFrontEndQuery = playLaunchContext.getAccountFrontEndQuery();
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
 
@@ -67,8 +69,8 @@ public class FrontEndQueryCreator {
             throw new NullPointerException(String.format("Rating Engine is not set for the play %s", play.getName()));
         }
 
-        accountFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
-        contactFrontEndQuery.setRestrictNotNullSalesforceId(play.getExcludeItemsWithoutSalesforceId());
+        accountFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
+        contactFrontEndQuery.setRestrictNotNullSalesforceId(launch.getExcludeItemsWithoutSalesforceId());
 
         setSortField(BusinessEntity.Account, Arrays.asList(InterfaceName.AccountId.name()), false,
                 accountFrontEndQuery);

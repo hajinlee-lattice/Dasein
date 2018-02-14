@@ -96,9 +96,6 @@ public class PlayEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Play, Long> i
         if (play.getDescription() != null) {
             existingPlay.setDescription(play.getDescription());
         }
-        if (play.getExcludeItemsWithoutSalesforceId() != null) {
-            existingPlay.setExcludeItemsWithoutSalesforceId(play.getExcludeItemsWithoutSalesforceId());
-        }
         if (play.getPlayStatus() != null) {
             existingPlay.setPlayStatus(play.getPlayStatus());
         }

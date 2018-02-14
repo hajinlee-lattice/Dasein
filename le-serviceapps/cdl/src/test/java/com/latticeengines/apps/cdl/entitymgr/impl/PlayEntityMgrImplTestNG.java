@@ -122,7 +122,6 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         RatingEngine newRatingEngine = new RatingEngine();
         newRatingEngine.setId(ratingEngine2.getId());
         retrievedPlay.setRatingEngine(newRatingEngine);
-        retrievedPlay.setExcludeItemsWithoutSalesforceId(true);
 
         log.info("ratingEngine 1 is " + ratingEngine1.getId());
         log.info("ratingEngine 2 is " + ratingEngine2.getId());
@@ -137,7 +136,6 @@ public class PlayEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(retrievedPlay.getRatingEngine());
         Assert.assertEquals(retrievedPlay.getPlayStatus(), PlayStatus.DELETED);
         Assert.assertEquals(retrievedPlay.getRatingEngine().getId(), ratingEngine2.getId());
-        Assert.assertTrue(retrievedPlay.getExcludeItemsWithoutSalesforceId());
 
         List<Play> playList = playEntityMgr.findAll();
         Assert.assertNotNull(playList);
