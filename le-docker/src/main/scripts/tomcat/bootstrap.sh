@@ -6,7 +6,7 @@ NETWORK=$3
 CLUSTER="${CLUSTER:=tomcat}"
 NETWORK="${NETWORK:=lenet}"
 
-SERVICE="scoringapi"
+SERVICE="metadata"
 
 source ../functions.sh
 # teardown_simple_service ${SERVICE} ${CLUSTER}

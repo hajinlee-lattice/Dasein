@@ -10,10 +10,14 @@ function process_error() {
 }
 function build_docker() {
 	IMAGE=$1
-	sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
-	docker build -t $IMAGE . 2>/tmp/errors.txt
+    NO_CACHE=$2
+    sed -i.bak "s|{{TIMESTAMP}}|$(date +%s)|g" Dockerfile
+    if [ "${NO_CACHE}" == "--no-cache" ]; then
+	    docker build --no-cache -t ${IMAGE} . || true
+	else
+	    docker build -t ${IMAGE} . || true
+	fi
 	mv Dockerfile.bak Dockerfile
-	process_error
 }
 
 function create_network() {
