@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
