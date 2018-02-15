@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.LocalResourceType;
 import org.apache.hadoop.yarn.api.records.LocalResourceVisibility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.CopyEntry;
 import org.springframework.yarn.fs.LocalResourcesFactoryBean.TransferEntry;
@@ -94,7 +94,11 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     }
 
     private Collection<SoftwareLibrary> getSoftwareLibrary(Properties containerProperties) {
-        String[] pkgNames = containerProperties.getProperty(ContainerProperty.SWLIB_PKG.name()).split(",");
+        String pkgStr = containerProperties.getProperty(ContainerProperty.SWLIB_PKG.name());
+        if (pkgStr == null) {
+            return null;
+        }
+        String[] pkgNames = pkgStr.split(",");
         if (pkgNames != null) {
             return Arrays.stream(pkgNames).map(SoftwareLibrary::fromName).collect(Collectors.toList());
         }
