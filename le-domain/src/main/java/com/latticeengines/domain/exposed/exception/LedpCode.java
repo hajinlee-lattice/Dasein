@@ -76,6 +76,8 @@ public enum LedpCode {
     LEDP_15015("Could not set up configuration file correctly for MapReduce."), //
     LEDP_15016("Cannot model with an empty feature list."), //
     LEDP_15017("Cannot provision modeling service because {0}"), //
+    LEDP_15018("Cannot invoke Data Science functionality due to {0}"), //
+    LEDP_15019("Could not register Job due to error: {0}"), //
 
     // DLOrchestration service: 16000-16999
     LEDP_16000("Missing model command parameter(s) {0}."), //

@@ -7,6 +7,8 @@ hdfs dfs -mkdir -p /app/playmaker/evmodel || true
 
 rm -rf /tmp/app
 mkdir -p /tmp/app/dataplatform/scripts/algorithm
+mkdir -p /tmp/app/dataplatform/scripts/ledatascience/modelquality
+mkdir -p /tmp/app/dataplatform/config/datascience
 
 mkdir -p /tmp/app/dataplatform/lib
 mkdir -p /tmp/app/playmaker/evmodel
@@ -15,9 +17,10 @@ cp conf/env/dev/dataplatform.properties /tmp/app/dataplatform/
 cp conf/env/dev/hadoop-metrics2.properties /tmp/app/dataplatform/
 cp target/le-dataplatform*shaded.jar /tmp/app/dataplatform/lib
 cp target/leframework.tar.gz /tmp/app/dataplatform/scripts
+cp target/ledatascience.tar.gz /tmp/app/dataplatform/scripts
 cp target/evpipeline.tar.gz /tmp/app/playmaker/evmodel
 cp target/lepipeline.tar.gz /tmp/app/dataplatform/scripts
-cp src/main/python/launcher.py /tmp/app/dataplatform/scripts 
+cp src/main/python/launcher.py /tmp/app/dataplatform/scripts
 cp src/main/python/pipelinefwk.py /tmp/app/dataplatform/scripts 
 cp src/main/python/rulefwk.py /tmp/app/dataplatform/scripts 
 cp src/main/python/pipeline/pipeline.py /tmp/app/dataplatform/scripts
@@ -26,7 +29,10 @@ cp src/main/python/configurablepipelinetransformsfromfile/pmmlpipeline.json /tmp
 cp src/main/python/datarules/rulepipeline.json /tmp/app/dataplatform/scripts
 cp src/main/python/evpipeline/evpipeline.py /tmp/app/playmaker/evmodel
 cp src/main/python/algorithm/*.py /tmp/app/dataplatform/scripts/algorithm
+cp src/main/python/ledatascience/*.py /tmp/app/dataplatform/scripts/ledatascience
+cp src/main/python/ledatascience/modelquality/*.py /tmp/app/dataplatform/scripts/ledatascience/modelquality
 cp src/main/scripts/pythonlauncher.sh /tmp/app/dataplatform/scripts
+cp src/main/python/ledatascience/modelquality/modelconfigs/*.csv /tmp/app/dataplatform/config/datascience
 
 cp ../le-serviceflows/cdl/src/test/python/apsdataloader.py /tmp/app/dataplatform/scripts
 cp ../le-serviceflows/cdl/src/test/python/apsgenerator.py /tmp/app/dataplatform/scripts

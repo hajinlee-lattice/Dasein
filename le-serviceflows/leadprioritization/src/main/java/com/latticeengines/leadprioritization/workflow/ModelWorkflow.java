@@ -12,6 +12,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.CreateNote;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
+import com.latticeengines.serviceflows.workflow.modeling.InvokeDataScienceAnalysis;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
 import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
@@ -57,6 +58,9 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     @Autowired
     private RemediateDataRules remediateDataRules;
 
+    @Autowired
+    InvokeDataScienceAnalysis invokeDataScienceAnalysis;
+
     @Bean
     public Job modelWorkflowJob() throws Exception {
         return buildWorkflow();
@@ -75,7 +79,8 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .next(createNote)
-                .next(persistDataRules) //
+                .next(persistDataRules)
+                .next(invokeDataScienceAnalysis)//
                 .build();
     }
 }

@@ -208,6 +208,24 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         return modelExecutor;
     }
 
+    protected String getEventFolderName(Table eventTable, Attribute currentEvent) {
+        String baseEventTableName = eventTable.getName().replaceAll("[^A-Za-z0-9_-]", "_");
+
+        /*
+         Preserving an option for history, although it appears that baseEventTableName is the full folder name!
+        String baseCurrentEventName = currentEvent.getDisplayName()
+
+                .replaceAll("[^A-Za-z0-9_-]", "_")
+                .replace("-Event", "");
+
+        return String.format("%s-%s",
+                baseEventTableName,
+                baseCurrentEventName);
+                */
+
+        return baseEventTableName;
+    }
+
     protected String getMetadataTableFolderName(Table eventTable, Attribute currentEvent) {
         return String.format("%s-%s-Metadata", eventTable.getName().replaceAll("[^A-Za-z0-9_-]", "_"),
                 currentEvent.getDisplayName().replaceAll("[^A-Za-z0-9_-]", "_"));

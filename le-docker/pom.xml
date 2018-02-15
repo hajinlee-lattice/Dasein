@@ -22,6 +22,7 @@
         <pls.docker.context>src/main/scripts/tomcat/le-pls</pls.docker.context>
         <workflowapp.docker.context>src/main/scripts/workflowapp</workflowapp.docker.context>
         <pythonapp.docker.context>src/main/scripts/pythonapp</pythonapp.docker.context>
+	<datascienceapp.docker.context>src/main/scripts/datascienceapp</datascienceapp.docker.context>
     </properties>
 
     <parent>
@@ -155,6 +156,16 @@
                                 <copy file="${project.basedir}/../le-serviceflows/cdl/src/test/python/apsgenerator.py" 
                                       tofile="${project.basedir}/${pythonapp.docker.context}/apsgenerator.py" 
                                       overwrite="true"/>
+
+                                <!-- workflow app -->
+                                <copy file="${project.basedir}/../le-workflowapi/target/le-workflowapi-${project.version}-shaded.jar"
+                                      tofile="${project.basedir}/${workflowapp.docker.context}/workflowapp.jar"
+                                      overwrite="true" />
+
+                                <!-- datascience app -->
+                                <copy file="${project.basedir}/../le-dataplatform/target/ledatascience.tar.gz" 
+                                      tofile="${project.basedir}/${datascienceapp.docker.context}/ledatascience.tar.gz"
+                                      overwrite="true" />
                             </tasks>
                         </configuration>
                     </execution>

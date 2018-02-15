@@ -7,3 +7,5 @@ pushd tomcat; bash build.sh; popd
 pushd zookeeper; bash build.sh; popd
 
 pushd kafka; bash build.sh; popd
+
+pushd datascienceapp; bash build.sh; popd

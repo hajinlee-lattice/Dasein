@@ -356,6 +356,33 @@ public class HdfsUtils {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
+
+    public static final List<String> getFilesForDirRecursive(
+            Configuration configuration,
+            String hdfsDir,
+            String regex,
+            boolean returnFirstMatch) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
+            Set<String> filePaths = new HashSet<String>();
+            for (FileStatus status : statuses) {
+                if (status.isDirectory()) {
+                    filePaths.addAll(getFilesForDir(configuration, status.getPath().toString(), regex));
+                    if (returnFirstMatch && filePaths.size() > 0) {
+                        break;
+                    }
+                    filePaths.addAll(
+                            getFilesForDirRecursive(
+                                    configuration,
+                                    status.getPath().toString(),
+                                    regex,
+                                    returnFirstMatch));
+                }
+            }
+            return new ArrayList<>(filePaths);
+        }
+    }
+
     public static final List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter, boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {

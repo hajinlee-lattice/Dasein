@@ -196,6 +196,21 @@
                             <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
                     </execution>
+		                        <execution>
+                        <id>ledatascience</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <finalName>ledatascience</finalName>
+                            <descriptors>
+                                <descriptor>src/assembly/ledatascience.xml</descriptor>
+                            </descriptors>
+                            <tarLongFileMode>posix</tarLongFileMode>
+                        </configuration>
+                    </execution>
                     <execution>
                         <id>lepipeline</id>
                         <phase>package</phase>

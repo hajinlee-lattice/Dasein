@@ -10,6 +10,7 @@ import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
 import com.latticeengines.serviceflows.workflow.modeling.CreateNote;
 import com.latticeengines.serviceflows.workflow.modeling.DownloadAndProcessModelSummaries;
+import com.latticeengines.serviceflows.workflow.modeling.InvokeDataScienceAnalysis;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
 import com.latticeengines.serviceflows.workflow.modeling.SetMatchSelection;
@@ -43,6 +44,9 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
     private CreateNote createNote;
 
     @Autowired
+    private InvokeDataScienceAnalysis invokeDataScienceAnalysis;
+
+    @Autowired
     private ExportData exportData;
 
     @Bean
@@ -59,7 +63,9 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
                 .next(profile) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
-                .next(createNote).build();
+                .next(createNote)
+                .next(invokeDataScienceAnalysis)
+                .build();
     }
 
 }

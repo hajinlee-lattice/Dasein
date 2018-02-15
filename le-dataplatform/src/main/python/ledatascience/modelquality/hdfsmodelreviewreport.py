@@ -1050,6 +1050,8 @@ def trendIdentification(e_col, data, null_data):
 # function that calls all the functions generating flags
 def hdfsModelReviewReport( modelName, modelDirectoryPath, trainingFilePath, configParametersPath):
 
+    logger.info("Attempting to generate model quality report for model: " + modelName)
+    logger.info("Model Directory: " + modelDirectoryPath)
     param = hdfsRevParam( modelName, modelDirectoryPath, trainingFilePath, configParametersPath)
     sampleMatchrate = []
     modelQuality = []

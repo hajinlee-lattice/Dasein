@@ -5,6 +5,7 @@ import sys
 import traceback
 import json
 import uuid
+import time
 from pandas.core.frame import DataFrame
 from urlparse import urlparse
 from hdfsmodelreviewreport import ModelingEnvironment
@@ -131,10 +132,12 @@ class DataScienceLauncher(object):
     def process_one(self):
         hostsString = self.zookeeperServer + ":" + self.zookeeperPort
         zkClient = KazooClient(hosts=hostsString)
-        zkClient.start()
         try:
+            logger.info("Checking for Zookeeper Datascience Request")
+            zkClient.start()
             toProcess = self.find_one_open(zkClient)
             if(toProcess != ""):
+                logger.info("Found a Zookeeper Datascience Request")
                 self.execute_one(zkClient, toProcess)
 
         except:
@@ -142,7 +145,23 @@ class DataScienceLauncher(object):
             lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
             logger.error( ''.join('!! ' + line for line in lines))
             logger.error("Could not process a request")
+
+        finally:
             zkClient.stop()
+
+    def main(self, numRepeats):
+        logger.info("Entering Zookeeper DataScience Request Loop")
+        while(numRepeats != 0):
+            try:
+                numRepeats = numRepeats - 1
+                self.process_one()
+
+            except:
+                exc_type, exc_value, exc_traceback = sys.exc_info()
+                lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+                logger.error( ''.join('!! ' + line for line in lines))
+
+            time.sleep(10)
 
 if __name__ == "__main__":
     """
@@ -165,14 +184,7 @@ if __name__ == "__main__":
     ModelingEnvironment.initialize(sys.argv[4], sys.argv[5], sys.argv[6], str(uuid.uuid4()))
 
     # Will eventually pass this in to determine whether to loop indefinitely
-    numRepeats = 1
-    while(numRepeats != 0):
-        try:
-            numRepeats = numRepeats - 1
-            dsl = DataScienceLauncher(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
-            dsl.process_one()
+    numRepeats = -1
+    dsl = DataScienceLauncher(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+    dsl.main(numRepeats)
 
-        except:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
-            logger.error( ''.join('!! ' + line for line in lines))

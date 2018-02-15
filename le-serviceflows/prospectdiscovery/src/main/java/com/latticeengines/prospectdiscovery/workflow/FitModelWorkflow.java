@@ -15,6 +15,7 @@ import com.latticeengines.serviceflows.workflow.match.MatchWorkflow;
 import com.latticeengines.serviceflows.workflow.modeling.ActivateModel;
 import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
 import com.latticeengines.serviceflows.workflow.modeling.CreateModel;
+import com.latticeengines.serviceflows.workflow.modeling.InvokeDataScienceAnalysis;
 import com.latticeengines.serviceflows.workflow.modeling.Profile;
 import com.latticeengines.serviceflows.workflow.modeling.ReviewModel;
 import com.latticeengines.serviceflows.workflow.modeling.Sample;
@@ -62,6 +63,9 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private CreateModel createModel;
 
     @Autowired
+    private InvokeDataScienceAnalysis invokeDataScienceAnalysis;
+
+    @Autowired
     private ChooseModel chooseModel;
 
     @Autowired
@@ -92,7 +96,8 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(reviewModel) //
                 .next(createModel) //
                 .next(chooseModel) //
-                .next(activateModel) //
+                .next(activateModel)//
+                .next(invokeDataScienceAnalysis)//
                 .next(score) //
                 .next(createAttributeLevelSummaryWorkflow) //
                 .build();
