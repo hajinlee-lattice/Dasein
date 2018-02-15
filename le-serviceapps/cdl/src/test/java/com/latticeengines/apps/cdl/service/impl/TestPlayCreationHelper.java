@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -13,6 +14,8 @@ import javax.inject.Inject;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -68,6 +71,12 @@ public class TestPlayCreationHelper {
 
     @Inject
     private CDLTestDataService cdlTestDataService;
+   
+    @Inject
+    private EntityProxy entityProxy;
+    
+    @Inject
+    private RatingProxy ratingProxy;
 
     private String tenantIdentifier;
 
@@ -96,7 +105,8 @@ public class TestPlayCreationHelper {
 
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
-        playResourceDeploymentTestNG.setup();
+        playResourceDeploymentTestNG.setup(); // This will populate cdl test
+                                              // data, so don't populate again
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
@@ -175,40 +185,10 @@ public class TestPlayCreationHelper {
     }
 
     public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {
-
-        RatingProxy ratingProxy = new RatingProxy(null, null);
-
-        Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
-        f1.setAccessible(true);
-        f1.set(ratingProxy, 1000L);
-
-        f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("multiplier");
-        f1.setAccessible(true);
-        f1.set(ratingProxy, 2D);
-
-        f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("maxAttempts");
-        f1.setAccessible(true);
-        f1.set(ratingProxy, 10);
-
         return ratingProxy;
     }
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
-
-        EntityProxy entityProxy = new EntityProxy(null, null);
-
-        Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
-        f1.setAccessible(true);
-        f1.set(entityProxy, 1000L);
-
-        f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("multiplier");
-        f1.setAccessible(true);
-        f1.set(entityProxy, 2D);
-
-        f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("maxAttempts");
-        f1.setAccessible(true);
-        f1.set(entityProxy, 10);
-
         return entityProxy;
     }
 
