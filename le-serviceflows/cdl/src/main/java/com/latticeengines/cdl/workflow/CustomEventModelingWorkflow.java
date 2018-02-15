@@ -11,6 +11,7 @@ import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelComplet
 import com.latticeengines.modeling.workflow.steps.CreateTableImportReport;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEvent;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -35,8 +36,8 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
-    @Inject
-    private MatchCDLWorkflow matchCDLWorkflow;
+    // @Inject
+    // private MatchCDLWorkflow matchCDLWorkflow;
 
     @Inject
     private DedupEventTable dedupEventTableDataFlow;
@@ -50,8 +51,8 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     @Inject
     private SetConfigurationForScoring setConfigurationForScoring;
 
-   // @Inject
-   // private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
+    @Inject
+    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Inject
     private PivotScoreAndEvent pivotScoreAndEventDataFlow;
@@ -68,12 +69,12 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(createTableImportReport) //
                 .next(modelValidationWorkflow) //
                 .next(matchDataCloudWorkflow) //
-                .next(matchCDLWorkflow) //
+                // .next(matchCDLWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-               // .next(rtsBulkScoreWorkflow) //
+                .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //
