@@ -75,6 +75,7 @@ public class StatsCubeUtils {
             InterfaceName.AccountId.name(), //
             InterfaceName.ContactId.name(), //
             InterfaceName.ProductId.name(), //
+            InterfaceName.InternalId.name(), //
             InterfaceName.CustomerParentAccountID.name(), //
             InterfaceName.CDLCreatedTime.name(), //
             InterfaceName.CDLUpdatedTime.name());
