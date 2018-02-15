@@ -216,12 +216,13 @@ public class PlayResource {
 
         DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
                 ratingEngine, 0L, 1L, BusinessEntity.Account, //
-                play.getExcludeItemsWithoutSalesforceId(), //
+                playLaunch.getExcludeItemsWithoutSalesforceId(), //
                 playLaunch.getBucketsToLaunch().stream() //
                         .map(RatingBucketName::getName) //
                         .collect(Collectors.toList()));
 
-        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())) {
+        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())
+                || (playLaunch.getTopNCount() != null && playLaunch.getTopNCount() <= 0L)) {
             throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
         }
     }
