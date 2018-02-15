@@ -17,9 +17,9 @@ import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.avro.file.DataFileWriter;
+import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.collections4.CollectionUtils;
@@ -148,21 +148,23 @@ public class ScoringMapperTransformUtil {
         while (context.nextKeyValue()) {
             Record record = context.getCurrentKey().datum();
             JsonNode jsonNode = mapper.readTree(record.toString());
-            recordNumber++;
+
             if (type.equals(ScoringInputType.Json.name())) {
                 if (CollectionUtils.isEmpty(modelGuids)) {
+                    recordNumber++;
                     String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                     transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                             leadFileThreshold, modelGuid, uniqueKeyColumn);
                 } else {
-                    modelGuids.forEach(m -> {
+                    for (String m : modelGuids) {
                         try {
+                            recordNumber++;
                             transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
                                     leadFileThreshold, m, uniqueKeyColumn);
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
-                    });
+                    }
                 }
             } else {
                 boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
@@ -171,14 +173,16 @@ public class ScoringMapperTransformUtil {
                     modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 0L));
                 });
                 if (readModelIdFromRecord) {
+                    recordNumber++;
                     String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                     String uuid = UuidUtils.extractUuid(modelGuid);
                     modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
                 } else {
-                    modelGuids.forEach(m -> {
+                    for (String m : modelGuids) {
                         String uuid = UuidUtils.extractUuid(m);
                         modelInfoMap.get(uuid).setRecordCount(modelInfoMap.get(uuid).getRecordCount() + 1L);
-                    });
+                        recordNumber++;
+                    }
                 }
                 if (out == null) {
                     out = new FileOutputStream("input.avro");
