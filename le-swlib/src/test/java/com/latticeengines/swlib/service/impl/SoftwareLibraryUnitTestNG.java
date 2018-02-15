@@ -7,7 +7,6 @@ import static com.latticeengines.domain.exposed.swlib.SoftwareLibrary.Module.dat
 import static com.latticeengines.domain.exposed.swlib.SoftwareLibrary.Module.workflowapi;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.testng.Assert;
@@ -17,17 +16,20 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class SoftwareLibraryUnitTestNG {
 
-    @Test(groups = "unit", enabled = false)
+    @Test(groups = "unit")
     public void testLoadingSequence() {
-        for (SoftwareLibrary lib : SoftwareLibrary.values()) {
-            System.out.println(lib + ":" + lib.getLoadingSequence(dataflowapi));
-            Assert.assertEquals(lib.getLoadingSequence(dataflowapi), Collections.singletonList(lib));
-            if (DataCloud.equals(lib)) {
-                Assert.assertEquals(lib.getLoadingSequence(workflowapi), Collections.singletonList(lib));
-            } else {
-                Assert.assertEquals(lib.getLoadingSequence(workflowapi), Arrays.asList(DataCloud, lib));
-            }
-        }
+        // for (SoftwareLibrary lib : SoftwareLibrary.values()) {
+        // System.out.println(lib + ":" + lib.getLoadingSequence(dataflowapi));
+        // Assert.assertEquals(lib.getLoadingSequence(dataflowapi),
+        // Collections.singletonList(lib));
+        // if (DataCloud.equals(lib)) {
+        // Assert.assertEquals(lib.getLoadingSequence(workflowapi),
+        // Collections.singletonList(lib));
+        // } else {
+        // Assert.assertEquals(lib.getLoadingSequence(workflowapi),
+        // Arrays.asList(DataCloud, lib));
+        // }
+        // }
 
         List<SoftwareLibrary> libs = SoftwareLibrary.getLoadingSequence(workflowapi,
                 Arrays.asList(LeadPrioritization, CDL));
