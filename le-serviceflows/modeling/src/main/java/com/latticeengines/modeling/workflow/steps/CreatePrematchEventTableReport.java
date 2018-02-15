@@ -13,7 +13,8 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseDataFlowReportStep;
 
 @Component("createPrematchEventTableReport")
-public class CreatePrematchEventTableReport extends BaseDataFlowReportStep<CreatePrematchEventTableReportConfiguration> {
+public class CreatePrematchEventTableReport
+        extends BaseDataFlowReportStep<CreatePrematchEventTableReportConfiguration> {
 
     @Override
     protected ReportPurpose getPurpose() {
@@ -21,7 +22,6 @@ public class CreatePrematchEventTableReport extends BaseDataFlowReportStep<Creat
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public CreateReportParameters getDataFlowParameters() {
         CreateReportParameters parameters = new CreateReportParameters();
         parameters.columns.add(new ReportColumn("count", "COUNT"));

@@ -14,6 +14,8 @@ import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
 public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInputTableWithScoreDataFlowConfiguration> {
+
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CombineInputTableWithScoreDataFlow.class);
 
     @Override

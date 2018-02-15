@@ -1,37 +1,27 @@
 package com.latticeengines.modeling.workflow.steps.modeling;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
-import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.JobPublisher;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.DataScienceInvocationInfo;
-import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
-import com.latticeengines.domain.exposed.camille.Path;
-
-import com.latticeengines.camille.exposed.JobPublisher;
-
-import javax.print.DocFlavor;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
+import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 @Component("invokeDataScienceAnalysis")
 public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfiguration> {
@@ -46,13 +36,11 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
     @Value("${hadoop.fs.web.defaultFS}")
     private String hdfsWebFS;
 
-    public DataScienceInvocationInfo findInfo()
-    {
-        if(apiProxy == null)
+    public DataScienceInvocationInfo findInfo() {
+        if (apiProxy == null)
             apiProxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
 
-        ModelSummary summary = apiProxy.getModelSummaryFromModelId(
-                configuration.getSourceModelSummary().getId(),
+        ModelSummary summary = apiProxy.getModelSummaryFromModelId(configuration.getSourceModelSummary().getId(),
                 configuration.getCustomerSpace());
 
         DataScienceInvocationInfo info = new DataScienceInvocationInfo();
@@ -62,28 +50,20 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
         String[] parts = summary.getLookupId().split("|");
 
         Path extractsDir = new Path(configuration.getModelingServiceHdfsBaseDir())
-                .append(configuration.getCustomerSpace().toString())
-                .append("data")
-                .append(summary.getEventTableName())
+                .append(configuration.getCustomerSpace().toString()).append("data").append(summary.getEventTableName())
                 .append("samples");
 
         info.setExtractsDirectory(extractsDir.toString());
 
         Path modelsDir = new Path(configuration.getModelingServiceHdfsBaseDir())
-                .append(configuration.getCustomerSpace().toString())
-                .append("models")
-                .append(parts[1])
-                .append(parts[2])
+                .append(configuration.getCustomerSpace().toString()).append("models").append(parts[1]).append(parts[2])
                 .append(summary.getApplicationId().replace("application_", ""));
 
         info.setModelDirectory(modelsDir.toString());
         return info;
     }
 
-    public DataScienceInvocationInfo findInfo_HDFS(String customer,
-                                              String baseCustomerFolder,
-                                              String eventFolderName)
-    {
+    public DataScienceInvocationInfo findInfo_HDFS(String customer, String baseCustomerFolder, String eventFolderName) {
         String trainingFileName = "allTraining-r-00000\\.avro";
         String modelJsonPattern = ".*_model.csv";
         String modelsRootDirectory = baseCustomerFolder + "/models/" + eventFolderName;
@@ -92,42 +72,28 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
         DataScienceInvocationInfo toReturn = new DataScienceInvocationInfo();
         List<String> avroSamples = null;
         try {
-            avroSamples = HdfsUtils.getFilesForDirRecursive(
-                    yarnConfiguration,
-                    dataRootDirectory,
-                    trainingFileName,
+            avroSamples = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, dataRootDirectory, trainingFileName,
                     true);
-        }
-        catch (Exception exc)
-        {
+        } catch (Exception exc) {
             log.error("Could not look up Training Avro File", exc);
         }
 
-        if((avroSamples == null) || (avroSamples.size() == 0)) {
-            throw new LedpException(LedpCode.LEDP_10011, new Object[]{trainingFileName});
+        if ((avroSamples == null) || (avroSamples.size() == 0)) {
+            throw new LedpException(LedpCode.LEDP_10011, new Object[] { trainingFileName });
         }
 
         toReturn.setExtractsDirectory(
-                avroSamples.get(0)
-                        .replace("/allTraining-r-00000.avro", "")
-                        .replace(hdfsWebFS, ""));
+                avroSamples.get(0).replace("/allTraining-r-00000.avro", "").replace(hdfsWebFS, ""));
 
         List<String> models = null;
-        try
-        {
-            models = HdfsUtils.getFilesForDirRecursive(
-                    yarnConfiguration,
-                    modelsRootDirectory,
-                    modelJsonPattern,
-                    true);
-        }
-        catch (Exception exc)
-        {
+        try {
+            models = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, modelsRootDirectory, modelJsonPattern, true);
+        } catch (Exception exc) {
             log.error("Could not look up Model.csv File", exc);
         }
 
-        if((models == null) || (models.size() == 0)) {
-            throw new LedpException(LedpCode.LEDP_10011, new Object[]{modelJsonPattern});
+        if ((models == null) || (models.size() == 0)) {
+            throw new LedpException(LedpCode.LEDP_10011, new Object[] { modelJsonPattern });
         }
 
         String fullyQualified = models.get(0);
@@ -135,9 +101,7 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
         String fileName = parts[parts.length - 1];
 
         String modelID = fileName.replace("_model.csv", "");
-        String modelsDirectory = fullyQualified
-                .replace("/" + fileName, "")
-                .replace(hdfsWebFS, "");
+        String modelsDirectory = fullyQualified.replace("/" + fileName, "").replace(hdfsWebFS, "");
 
         toReturn.setModelId(modelID);
         toReturn.setModelDirectory(modelsDirectory);
@@ -145,11 +109,10 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
         return toReturn;
     }
 
-
-    @SuppressWarnings("unchecked")
     @Override
     public void execute() {
-        try { log.info("Executing InvokeDataScienceAnalysis.execute");
+        try {
+            log.info("Executing InvokeDataScienceAnalysis.execute");
 
             if (proxy == null) {
                 proxy = new ModelProxy();
@@ -164,42 +127,30 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
                     String customer = configuration.getCustomerSpace().getContractId();
                     String currentEventFolderName = getEventFolderName(eventTable, event);
                     String baseCustomerDirectory = "";
-                    if(configuration.getModelingServiceHdfsBaseDir().endsWith("/")) {
-                        baseCustomerDirectory = String.format(
-                                "%s%s",
-                                configuration.getModelingServiceHdfsBaseDir(),
+                    if (configuration.getModelingServiceHdfsBaseDir().endsWith("/")) {
+                        baseCustomerDirectory = String.format("%s%s", configuration.getModelingServiceHdfsBaseDir(),
                                 configuration.getCustomerSpace().toString());
-                    }
-                    else
-                    {
-                        baseCustomerDirectory = String.format(
-                                "%s/%s",
-                                configuration.getModelingServiceHdfsBaseDir(),
+                    } else {
+                        baseCustomerDirectory = String.format("%s/%s", configuration.getModelingServiceHdfsBaseDir(),
                                 configuration.getCustomerSpace().toString());
                     }
 
-                    // This code should perhaps be moved into the modelExecutor and Builder.
+                    // This code should perhaps be moved into the modelExecutor
+                    // and Builder.
                     DataScienceInvocationInfo info = null;
-                    try
-                    {
-                        info = findInfo_HDFS(
-                                customer,
-                                baseCustomerDirectory,
-                                currentEventFolderName);
-                    }
-                    catch (Exception exc)
-                    {
+                    try {
+                        info = findInfo_HDFS(customer, baseCustomerDirectory, currentEventFolderName);
+                    } catch (Exception exc) {
                         log.info("Could not use default ModelSummary lookup due to error: " + exc.getMessage());
                     }
 
-                    if(info == null)
-                    {
+                    if (info == null) {
                         info = findInfo();
                     }
 
                     info.setModelLookupID(configuration.getSourceModelSummary().getLookupId());
 
-                    if(info.getModelApplicationID() == null)
+                    if (info.getModelApplicationID() == null)
                         info.setModelApplicationID(configuration.getSourceModelSummary().getApplicationId());
 
                     info.setCustomer(configuration.getCustomerSpace().getContractId());
@@ -221,12 +172,8 @@ public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfigurat
                     log.info("Failed to execute individual model registration, continuing: " + e.getMessage());
                 }
             }
-        }
-        catch (Exception exc)
-        {
-            log.info("Failed to invoke Data Science Analyis: " +exc.getMessage());
+        } catch (Exception exc) {
+            log.info("Failed to invoke Data Science Analyis: " + exc.getMessage());
         }
     }
 }
-
-
