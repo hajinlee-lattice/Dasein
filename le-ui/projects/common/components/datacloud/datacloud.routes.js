@@ -9,11 +9,13 @@ angular
     'common.datacloud.targettabs',
     'common.datacloud.query',
     'common.datacloud.explorer.export',
+    'lp.segments.segments',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .run(function($rootScope, $state, DataCloudStore, DataCloudService) {
     $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
         var states = {
+            'home.segments': 'customer',
             'home.segment.explorer': 'customer', 
             'home.segment.explorer.attributes': 'customer',
             'home.segment.explorer.builder': 'customer',
@@ -117,6 +119,47 @@ angular
     var DataCloudResolves = DataCloudResolvesProvider.$get().main;
 
     $stateProvider
+        .state('home.segments', {
+            url: '/segments',
+            params: {
+                pageTitle: 'Segments',
+                pageIcon: 'ico-segments',
+                edit: null
+            },
+            views: {
+                "summary@": {
+                    templateUrl: 'app/navigation/summary/BlankLine.html'
+                },
+                "main@": {
+                    resolve: angular.extend(DataCloudResolves, {
+                        SegmentsList: function($q, SegmentService, SegmentStore) {
+                            var deferred = $q.defer();
+
+                            SegmentService.GetSegments().then(function(result) {
+                                SegmentStore.setSegments(result);
+                                deferred.resolve(result);
+                            });
+
+                            return deferred.promise;
+                        },
+                        Cube: function($q, DataCloudStore) {
+                            var deferred = $q.defer();
+
+                            DataCloudStore.getCube().then(function(result) {
+                                if (result.data) {
+                                    deferred.resolve(result.data);
+                                }
+                            });
+                            
+                            return deferred.promise;
+                        }
+                    }),
+                    controller: 'SegmentationListController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/segments/views/SegmentationListView.html'
+                }
+            }
+        })
         .state('home.datacloud', {
             url: '/datacloud',
             resolve: DataCloudResolves,

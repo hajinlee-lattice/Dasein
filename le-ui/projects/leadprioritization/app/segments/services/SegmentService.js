@@ -14,6 +14,74 @@ angular
         return this.segments;
     }
 
+    this.flattenSegmentRestrictions = function(segment) {
+        restrictions = [];
+        if (segment.account_restriction.restriction.logicalRestriction && segment.contact_restriction.restriction.logicalRestriction) {
+            segment.account_restriction.restriction.logicalRestriction.restrictions.forEach(function(restriction) {
+                SegmentStore.flattenRestriction(restriction, restrictions);
+            });
+            segment.contact_restriction.restriction.logicalRestriction.restrictions.forEach(function(restriction) {
+                SegmentStore.flattenRestriction(restriction, restrictions);
+            });
+        }
+        return restrictions;
+    }
+
+    this.flattenRestriction = function(restriction, array) {
+        if (restriction.bucketRestriction) {
+            array.push(restriction);
+        } else if (restriction.logicalRestriction) {
+            restriction.logicalRestriction.restrictions.forEach(function(restriction) {
+                SegmentStore.flattenRestriction(restriction, array);
+            })
+        }
+    }
+
+    this.getTopNAttributes = function(segment, n){
+        var restrictions = SegmentStore.flattenSegmentRestrictions(segment);
+
+        if (n > restrictions.length) {
+          return restrictions;
+        }
+        var minIndex = 0, 
+            i;
+
+        for (i = n; i < restrictions.length; i++){
+            minIndex = 0;
+            for (var j = 0; j < n; j++){
+                if(restrictions[minIndex].bucketRestriction.bkt.Cnt > restrictions[j].bucketRestriction.bkt.Cnt){
+                    minIndex = j;
+                    restrictions[minIndex] = restrictions[j];
+                }
+            }    
+            if (restrictions[minIndex].bucketRestriction.bkt.Cnt < restrictions[i].bucketRestriction.bkt.Cnt){
+                SegmentStore.swap(restrictions, minIndex, i);
+            }
+        }
+
+        var result = restrictions.splice(0, n); // unsorted list of top n attributes by volume
+        return result;
+    }
+
+    this.sortAttributesByCnt = function(restrictions) {
+        var counts = restrictions.map(function (restriction, idx) {
+            return {index: idx, count: restriction.bucketRestriction.bkt.Cnt };
+        });
+        counts.sort(function (a, b) {
+            return b.count - a.count;
+        });
+        restrictions = counts.map(function (restriction) {
+            return restrictions[restriction.index];
+        });
+        return restrictions;
+    }
+
+    this.swap = function(array, i, j) {
+        var temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+
     this.getSegmentByName = function(segmentName) {
         var deferred = $q.defer(),
             found = false;

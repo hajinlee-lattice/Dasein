@@ -284,37 +284,7 @@ angular
                 }
             }
         })
-        .state('home.segments', {
-            url: '/segments',
-            params: {
-                pageTitle: 'Segments',
-                pageIcon: 'ico-segments',
-                edit: null
-            },
-            views: {
-                "summary@": {
-                    templateUrl: 'app/navigation/summary/BlankLine.html'
-                },
-                "main@": {
-                    resolve: {
-                        SegmentsList: function($q, SegmentService, SegmentStore) {
-                            var deferred = $q.defer();
-
-                            SegmentService.GetSegments().then(function(result) {
-                                SegmentStore.setSegments(result);
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
-                    controller: 'SegmentationListController',
-                    controllerAs: 'vm',
-                    templateUrl: 'app/segments/views/SegmentationListView.html'
-                }
-            }
-        }
-)        .state('home.segment.import', {
+        .state('home.segment.import', {
             url: '/mydata',
             params: {
                 pageIcon: 'ico-attributes',

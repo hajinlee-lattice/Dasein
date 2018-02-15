@@ -61,13 +61,29 @@
                     </div>
                     <div class="tile-metadata" ng-if="!vm.tileStates[segment.name].editSegment">
                         <ul>
-                            <li>Created by <span class="blue-text">{{segment.created_by}}</span></li>
-                            <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
-                            <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li>
+                            <li>Created by <span class="blue-text">{{segment.created_by}}</span> on <span class="blue-text">{{segment.created | date}}</span></li>
+<!--                             <li>Created on <span class="blue-text">{{segment.created | date}}</span></li>
+                            <li>Last updated <span class="blue-text">{{segment.updated | date}}</span></li> -->
+                            <li> 
+                                <p 
+                                    title="{{segment.description}}" 
+                                    ng-if="segment.description">
+                                    Description: 
+                                        <span class="blue-text">{{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}} </span>
+                                </p>
+                                <p 
+                                    ng-if="!segment.description">
+                                    <span class="gray-text">This segment does not have a description.</span> <span
+                                        class="blue-text" 
+                                        data-ng-click="vm.editSegmentClick($event, segment)">
+                                        Add description
+                                    </span>
+                                </p>
+                            </li>
                         </ul>
                     </div>
                     <div class="tile-body wrap-body" ng-if="!vm.tileStates[segment.name].editSegment">
-                        <p 
+<!--                         <p 
                             title="{{segment.description}}" 
                             ng-if="segment.description">
                             {{segment.description | limitTo: 250 }}{{segment.description.length > 250 ? '&hellip;' : ''}}
@@ -79,8 +95,27 @@
                                 data-ng-click="vm.editSegmentClick($event, segment)">
                                 Add description
                             </span>
+                        </p> -->
+
+                        <p ng-repeat="attr in vm.segmentAttributesMap[segment.name] track by $index" class="attributesDisplay">
+                            {{attr}}
                         </p>
                     </div>
+                    <div class="tile-footer segments">
+                        <div class="account-count columns six">
+                            <h4 class="entity-title"> {{'Accounts' | uppercase}} </h4>
+                            <div class="blue-text">
+                                {{segment.accounts || 0}}
+                            </div>
+                        </div>
+                        <div class="contact-count columns six">
+                            <h4 class="entity-title"> {{'Contacts' | uppercase}} </h4>
+                            <div class="blue-text">
+                                {{segment.contacts || 0}}
+                            </div>
+                        </div>                  
+                    </div>
+
 
                     <form
                         class="edit-form"

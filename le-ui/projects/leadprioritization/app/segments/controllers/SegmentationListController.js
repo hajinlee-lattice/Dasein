@@ -2,13 +2,18 @@ angular.module('lp.segments.segments', [
     'mainApp.segments.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
-    SegmentsList, DeleteSegmentModal, SegmentService, QueryStore, RatingsEngineStore) {
+    SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, QueryStore, RatingsEngineStore, QueryTreeService, 
+    DataCloudStore, LookupResponse, LookupStore) {
 
     var vm = this;
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         segments: SegmentsList || [],
+        enrichments: [],
+        enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
+        segmentAttributesMap: {},
+        cube: Cube,
         count: QueryStore.getCounts(),
         filteredItems: [],
         totalLength: SegmentsList.length,
@@ -16,6 +21,9 @@ angular.module('lp.segments.segments', [
         inEditing: {},
         query: '',
         currentPage: 1,
+        lookupMode: (LookupResponse && LookupResponse.attributes !== null),
+        lookupFiltered: LookupResponse.attributes,
+        LookupResponse: LookupStore.response,
         header: {
             sort: {
                 label: 'Sort By',
@@ -34,7 +42,7 @@ angular.module('lp.segments.segments', [
 
     vm.init = function() {
 
-        // console.log(vm.segments);
+        vm.processEnrichments(Enrichments);
 
         vm.segmentIds = [];
         SegmentsList.forEach(function(segment) {
@@ -44,6 +52,7 @@ angular.module('lp.segments.segments', [
                 saveEnabled: false
             };
             vm.segmentIds.push(segment.name);
+            vm.segmentAttributesMap[segment.name] = vm.displayAttributes(segment, 5);
         });
         // RatingsEngineStore.getSegmentsCounts(vm.segmentIds).then(function(response){
         //     console.log(response);
@@ -98,6 +107,37 @@ angular.module('lp.segments.segments', [
             $state.go('home.model.analysis', {segment: segment.name}, { reload: true } );
         };
     };
+
+    vm.processEnrichments = function(enrichments) {
+        if (vm.lookupFiltered !== null) {
+            for (var i=0, _enrichments=[]; i<enrichments.length; i++) {
+                if (vm.lookupFiltered && vm.lookupFiltered[enrichments[i].ColumnId]) {
+                    _enrichments.push(enrichments[i]);
+                }
+            }
+        } else {
+            var _enrichments = enrichments;
+        }
+
+        for (var i=0, enrichment; i<_enrichments.length; i++) {
+            enrichment = _enrichments[i];
+
+            if (!enrichment) {
+                continue;
+            }
+
+            if (enrichment.IsInternal !== true) {
+                enrichment.IsInternal = false;
+            }
+
+            vm.enrichmentsMap[enrichment.ColumnId] = i;
+            vm.enrichments.push(enrichment);
+        }
+
+        DataCloudStore.setEnrichments(vm.enrichments);
+        DataCloudStore.setEnrichmentsMap(vm.enrichmentsMap);
+    }
+
 
     vm.editSegmentClick = function($event, segment){
         $event.stopPropagation();
@@ -159,6 +199,50 @@ angular.module('lp.segments.segments', [
 
         DeleteSegmentModal.show(segment, !!vm.modelId);
 
+    };
+
+    vm.displayAttributes = function(segment, n) {
+        attrs = [];
+        var restrictions = SegmentStore.getTopNAttributes(segment, n);
+        restrictions = SegmentStore.sortAttributesByCnt(restrictions);
+
+        restrictions.forEach(function(restriction) {
+            var bucketEntity = restriction.bucketRestriction.attr.split('.')[0],
+                bucketColumnId = restriction.bucketRestriction.attr.split('.')[1],
+                enrichment = vm.enrichments[vm.enrichmentsMap[bucketColumnId]];
+            if (enrichment) {
+                var cube = vm.cube[bucketEntity].Stats[bucketColumnId];
+                if (cube.Bkts) {
+                    var operatorType = cube.Bkts.Type;
+                    switch (operatorType) {
+                        case 'Enum': 
+                            var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
+                            if (vals.length > 1) {
+                                attrs.push(enrichment.DisplayName + ': ' + vals.length + ' Values Selected');
+                            } else {
+                                attrs.push(enrichment.DisplayName + ': ' + vals);
+                            }
+                            break;
+                        case 'Numerical':
+                            if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
+                                attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0));
+                            } else {
+                                attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1));
+                            }
+                            break;
+                        case 'Boolean': 
+                            attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType));
+                            break;
+                        case 'TimeSeries':
+                            var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
+                            attrs.push(enrichment.DisplayName + ': ' + value); 
+                            break;
+                    }
+                }
+
+            }
+        })
+        return attrs;
     };
 
     function createOrUpdateSegment(segment) {

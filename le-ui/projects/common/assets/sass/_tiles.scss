@@ -158,6 +158,9 @@
         display: block;
         margin-top: 15px;
     }
+    .attributesDisplay {
+        font-size: 12px;
+    }
 }
 .tile-footer {
     position: absolute;
@@ -180,6 +183,22 @@
         display: inline-block;
         margin-left: 4px;
         font-size: 17px;
+    }
+    &.segments {
+        padding: 0px 13px;
+    }
+    .account-count {
+        border-right: 1px solid grey; 
+        text-align: left; 
+        padding: 8px
+    }
+    .contact-count {
+        text-align: left; 
+        padding:8px 0px 8px 13px; 
+        margin-left:0px;
+    }
+    .entity-title {
+        font-size: 11px;
     }
 }
 

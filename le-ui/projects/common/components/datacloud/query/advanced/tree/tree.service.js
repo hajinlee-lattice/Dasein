@@ -57,6 +57,15 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             'GTE_AND_LT'
         ];
 
+        this.numerical_labels = {
+            'EQUAL': '=',
+            'NOT_EQUAL': '!=',
+            'GREATER_THAN': '>',
+            'GREATER_OR_EQUAL': '>=',
+            'LESS_THAN': '<',
+            'LESS_OR_EQUAL': '<='
+        };
+
         this.prevBucketCountAttr = null;
 
         /**
@@ -602,12 +611,11 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         function getBooleanValue(bucketRestriction) {
-            if (bucketRestriction.bkt.Txn.Negate === true) {
-                return 'False';
-            } if (bucketRestriction.bkt.Txn.Negate === false) {
-                return 'True';
+            if (bucketRestriction.bkt.Txn) {
+                return !bucketRestriction.bkt.Txn.Negate;
+            } else {
+                return 'Empty';
             }
-            return 'Empty';
         }
 
         function getDateValue(bucketRestriction){
