@@ -94,7 +94,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
         Long salesVolVal = (Long) arguments.getObject(salesVolField);
         context.numOfTrees += 1;
 
-        if (salesVolVal > multLargeCompThreshold) {
+        if (salesVolVal != null && salesVolVal > multLargeCompThreshold) {
             context.numOfLargeComp += 1;
         }
         if (context.numOfTrees > franchiseThreshold) {
