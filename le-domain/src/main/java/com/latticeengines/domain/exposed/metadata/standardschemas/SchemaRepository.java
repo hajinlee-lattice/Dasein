@@ -1260,6 +1260,10 @@ public class SchemaRepository {
                 attrs.addAll(Arrays.asList(address1, address2));
             }
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
+            if (SchemaInterpretation.SalesforceLead.equals(schema)) {
+                // needed for CSV downloads in LPI
+                attrs.forEach(a -> a.setCategory(Category.LEAD_INFORMATION));
+            }
         }
         return attrs;
     }
