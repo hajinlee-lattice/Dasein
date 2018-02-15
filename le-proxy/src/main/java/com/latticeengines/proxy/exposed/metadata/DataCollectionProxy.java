@@ -46,9 +46,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     }
 
     public void updateDataCloudBuildNumber(String customerSpace, String dataCloudBuildNumber) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
                 shortenCustomerSpace(customerSpace), dataCloudBuildNumber);
-        put("get default dataCollection", url);
+        put("update dataCollection datacloudbuildnumber", url);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace) {
@@ -107,7 +108,8 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
     }
 
-    public List<String> getTableNames(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+    public List<String> getTableNames(String customerSpace, TableRoleInCollection role,
+            DataCollection.Version version) {
         String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames?role={role}";
         List<Object> args = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
@@ -211,9 +213,10 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     private Pair<String, DataCollection.Version> parseCacheKey(String key) {
         if (key.contains(".")) {
-            String[] tokens =  key.split("\\.");
+            String[] tokens = key.split("\\.");
             if (tokens.length != 2) {
-                throw new RuntimeException("Cache key " + key + " has \".\" but cannot be decomposed into exactly 2 tokens.");
+                throw new RuntimeException(
+                        "Cache key " + key + " has \".\" but cannot be decomposed into exactly 2 tokens.");
             }
             DataCollection.Version version = DataCollection.Version.valueOf(tokens[1]);
             return Pair.of(tokens[0], version);

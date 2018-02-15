@@ -63,12 +63,12 @@ public class DataCollectionResource {
                 version);
         return ResponseDocument.successResponse(version1);
     }
-    
-    @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber}")
+
+    @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")
     @ResponseBody
     @ApiOperation(value = "Switch the version of default data collection")
     public ResponseDocument<String> updateDataCloudVersion(@PathVariable String customerSpace,
-            @PathVariable String dataCloudBuildNumber) {
+            @PathVariable("dataCloudBuildNumber") String dataCloudBuildNumber) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         String newDataCloudVersion = dataCollectionService.updateDataCloudBuildNumber(customerSpace, null,
                 dataCloudBuildNumber);
@@ -112,10 +112,10 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the main statistics of the default collection.")
     public StatisticsContainer getMainStats(@PathVariable String customerSpace,
-                                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         StatisticsContainer container = dataCollectionService.getStats(customerSpace, null, version);
-        return container == null ?  null : container.detachHibernate();
+        return container == null ? null : container.detachHibernate();
     }
 
     @GetMapping(value = "/attrrepo")
