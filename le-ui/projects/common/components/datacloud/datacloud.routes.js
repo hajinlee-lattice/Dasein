@@ -131,7 +131,13 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
-                    resolve: angular.extend(DataCloudResolves, {
+                    resolve: {
+                        LookupResponse: function(DataCloudResolves){
+                            return DataCloudResolves.main.LookupResponse;
+                        },
+                        Enrichments: function(DataCloudResolves){
+                            return DataCloudResolves.main.Enrichments;
+                        },
                         SegmentsList: function($q, SegmentService, SegmentStore) {
                             var deferred = $q.defer();
 
@@ -153,7 +159,7 @@ angular
                             
                             return deferred.promise;
                         }
-                    }),
+                    },
                     controller: 'SegmentationListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/segments/views/SegmentationListView.html'
