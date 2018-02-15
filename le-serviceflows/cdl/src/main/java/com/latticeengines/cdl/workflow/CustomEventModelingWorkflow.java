@@ -8,12 +8,12 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWor
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
-import com.latticeengines.modeling.workflow.steps.CreateTableImportReport;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEvent;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
+import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;

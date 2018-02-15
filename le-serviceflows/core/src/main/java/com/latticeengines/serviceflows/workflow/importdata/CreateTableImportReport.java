@@ -1,4 +1,4 @@
-package com.latticeengines.modeling.workflow.steps;
+package com.latticeengines.serviceflows.workflow.importdata;
 
 import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
 import org.slf4j.Logger;
