@@ -62,9 +62,10 @@
                             <input 
                                 type="checkbox"
                                 id="{{product.ProductId}}"
-                                name="product.ProductId"
-                                ng-click="vm.selectProduct($index, product.ProductId)"
-                                ng-model="product.Selected" \>
+                                name="{{product.ProductId}}"
+                                ng-click="vm.selectProduct(product.ProductId, $index)"
+                                ng-model="product.Selected"
+                                 />
                         </td>
                         <td>
                             <label for="{{product.ProductId}}">{{product.ProductName}}</label>

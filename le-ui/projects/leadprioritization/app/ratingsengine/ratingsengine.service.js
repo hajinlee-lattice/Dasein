@@ -82,7 +82,7 @@ angular.module('lp.ratingsengine')
                     }
                 }
             ],
-            "rules": [
+            "editrules": [
                 { 
                     hide: true,
                     hideBack: true,
@@ -488,6 +488,14 @@ angular.module('lp.ratingsengine')
             this.productsSelected[id] = name;
         }
     }
+    this.selectAllProducts = function(allProducts) {
+        allProducts.forEach(function(product){
+            if(product.Selected === false || product.Selected === undefined){
+                RatingsEngineStore.selectProduct (product.ProductId, product.ProductName);
+            }
+            product.Selected = true;
+        });
+    }
     this.getProductsSelected = function () {
         return this.productsSelected;
     }
@@ -601,13 +609,13 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
-        var type = RatingsEngineStore.getType(),
+        var engineType = $stateParams.engineType,
             opts =  {
                 type: "AI_BASED",
                 activeModel: {
                     AI: {
                         workflowType: 'CROSS_SELL',
-                        modelingStrategy: type.engineType
+                        modelingStrategy: engineType
                     }
                 }
             };
@@ -616,19 +624,6 @@ angular.module('lp.ratingsengine')
             $state.go(nextState, { rating_id: rating.id });
         });
     }
-    
-    // this.nextSaveTypeModel = function(nextState){
-    //     var currentRating = RatingsEngineStore.getCurrentRating();
-
-    //     var obj = currentRating.ratingModels[0].AI;
-    //     obj.workflowType = RatingsEngineAIStore.aiModelOptions.workflowType;//'CROSS_SELL';
-    //     var opts = {
-    //         AI: obj
-    //     };
-    //     RatingsEngineService.updateRatingModel(currentRating.id, obj.id, opts).then(function(model) {
-    //         $state.go(nextState, { rating_id: model.id });
-    //     });
-    // }
 
     this.nextSaveAIRatingModel = function(nextState){
         var currentRating = RatingsEngineStore.getCurrentRating(),
@@ -636,8 +631,7 @@ angular.module('lp.ratingsengine')
             targetProducts = RatingsEngineStore.getProductsSelectedIds(),
             predictionType = RatingsEngineStore.getPredictionType(),
             modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
-            type = RatingsEngineStore.getType(),
-            modelingStrategy = type.engineType,
+            modelingStrategy = $stateParams.engineType,
             trainingSegment = RatingsEngineStore.getTrainingSegment(),
             trainingProducts = RatingsEngineStore.getTrainingProducts(),
             obj = {};
@@ -928,9 +922,6 @@ angular.module('lp.ratingsengine')
 
     this.getTrainingCounts = function(ratingId, modelId, ratingEngine, queryType){
         var deferred = $q.defer();
-
-        console.log(ratingEngine);
-
         $http({
             method: 'POST',
             url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId + '/modelingquery/count',

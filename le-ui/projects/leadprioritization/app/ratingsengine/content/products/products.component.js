@@ -2,7 +2,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, RatingsEngineStore, RatingsEngineService, Products) {
+    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products) {
         var vm = this;
         angular.extend(vm, {
             products: Products,
@@ -13,7 +13,7 @@ angular.module('lp.ratingsengine.wizard.products', [
             sortBy: 'ProductName',
             showPagination: true,
             selectedAll: false,
-            type: RatingsEngineStore.getType(),
+            engineType: $stateParams.engineType,
             modelingConfigFilters: {},
             purchasedBeforePeriod: '6'
         });
@@ -26,7 +26,24 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     vm.init = function () {
 
-        // console.log(vm.products);
+        if($stateParams.rating_id) {
+            RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
+
+                var selectedTargetProducts = rating.activeModel.AI.targetProducts;
+                if(selectedTargetProducts.length > 0) {
+                    angular.forEach(selectedTargetProducts, function(value, key) {
+                        vm.selectProduct(value, key);
+
+                        var product = vm.products.filter(function( product ) {
+                          return product.ProductId === value;
+                        });
+                        product[0].Selected = true
+                    });
+                }
+
+            });
+        }
+
 
         RatingsEngineStore.setCachedProducts(vm.products);
 
@@ -35,7 +52,7 @@ angular.module('lp.ratingsengine.wizard.products', [
 
         vm.validateNextStep();
 
-        if (vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
+        if (vm.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
             vm.resellFormOnChange();    
         };
 
@@ -48,17 +65,14 @@ angular.module('lp.ratingsengine.wizard.products', [
     vm.selectAll = function(){
         if (vm.selectedAll) {
             vm.selectedAll = true;
-            angular.forEach(vm.products, function(product, index) {
-                if(!RatingsEngineStore.isProductSelected(product.ProductId)){
-                    vm.selectProduct(index, product.ProductId);
-                }
+            RatingsEngineStore.selectAllProducts(vm.products);
+            vm.products.forEach(function(product){
+                product.Selected = true;
             });
         } else {
             vm.selectedAll = false;
-            angular.forEach(vm.products, function(product, index) {
-                if(RatingsEngineStore.isProductSelected(product.ProductId)){
-                    vm.selectProduct(index, product.ProductId);
-                }
+            vm.products.forEach(function(product){
+                product.Selected = false;
             });
             RatingsEngineStore.clearSelection();
         }
@@ -67,11 +81,13 @@ angular.module('lp.ratingsengine.wizard.products', [
 
         vm.validateNextStep();
     }
-    vm.selectProduct = function (index, productId) {
+    vm.selectProduct = function (productId, index) {
 
-        vm.products[index]['Selected'] = (vm.products[index]['Selected'] == undefined ? true : !vm.products[index]['Selected']);
+        var product = vm.products.filter(function( product ) {
+          return product.ProductId === productId;
+        });
 
-        RatingsEngineStore.selectProduct(productId, vm.products[index].ProductName);
+        RatingsEngineStore.selectProduct(productId, product[0].ProductName);
         
         vm.validateNextStep();
         vm.productsSelected = RatingsEngineStore.getProductsSelected();

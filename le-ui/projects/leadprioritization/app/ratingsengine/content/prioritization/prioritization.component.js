@@ -1,12 +1,17 @@
 angular.module('lp.ratingsengine.wizard.prioritization', [])
-    .controller('RatingsEngineAIPrioritization', function ($scope, RatingsEngineStore, RatingsEngineService, Products) {
+    .controller('RatingsEngineAIPrioritization', function ($scope, $stateParams, RatingsEngineStore, RatingsEngineService, Products) {
         var vm = this;
         // angular.extend(vm, {
 
         // });
 
         vm.init = function () {
-            
+            if($stateParams.rating_id) {
+                RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
+                    vm.predictionType = rating.activeModel.AI.predictionType;
+                    vm.validateNextStep();
+                });
+            }
         }
 
         vm.setPredictionType = function(predictionType){

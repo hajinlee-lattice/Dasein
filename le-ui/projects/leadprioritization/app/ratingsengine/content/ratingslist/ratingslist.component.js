@@ -134,8 +134,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                         if(model.AI.modelSummary) {
                             $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });
                         } else {
-                            RatingsEngineStore.setType('productpurchase', model.AI.modelingStrategy);
-                            $state.go('home.ratingsengine.productpurchase', { rating_id: rating.id });
+                            $state.go('home.ratingsengine.productpurchase', { rating_id: rating.id, engineType: model.AI.modelingStrategy});
                         }
                     });
                 });                

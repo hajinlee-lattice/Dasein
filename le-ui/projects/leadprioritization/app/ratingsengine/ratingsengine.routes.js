@@ -182,6 +182,10 @@ angular
             })
             .state('home.ratingsengine.rulesprospects', {
                 url: '/rules/:rating_id/:wizard_steps',
+                params: {
+                    rating_id: '',
+                    wizard_steps: 'rulesprospects'
+                },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
                         return RatingsEngineStore;
@@ -191,7 +195,9 @@ angular
                     },
                     WizardProgressItems: function ($stateParams, RatingsEngineStore) {
                         var rating_id = $stateParams.rating_id || '',
-                            wizard_steps = 'rulesprospects';
+                            wizard_steps = $stateParams.wizard_steps || 'rulesprospects';
+
+                        console.log(wizard_steps);
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     }
@@ -466,7 +472,8 @@ angular
             .state('home.ratingsengine.productpurchase', {
                 url: '/product/:rating_id/:wizard_steps',
                 params: {
-                    wizard_steps: 'productpurchase'
+                    wizard_steps: 'productpurchase',
+                    engineType: 'CROSS_SELL_FIRST_PURCHASE'
                 },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
@@ -494,13 +501,16 @@ angular
                     },
                     'main@': {
                         resolve: {
-                            WizardHeaderTitle: function (RatingsEngineStore) {
-                                var ratingEngine = RatingsEngineStore.getType(),
+                            WizardHeaderTitle: function ($stateParams, RatingsEngineStore) {
+
+                                // RatingsEngineStore.getType()
+
+                                var engineType = $stateParams.engineType,
                                     title = '';
 
-                                if (ratingEngine.engineType === 'CROSS_SELL_FIRST_PURCHASE') {
+                                if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
                                     title = 'Create Rating Engine: Customers that will purchase a product for the first time';
-                                } else if (ratingEngine.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
+                                } else if (engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
                                     title = 'Create Rating Engine: Customers that will purchase again next quarter';
                                 }
 

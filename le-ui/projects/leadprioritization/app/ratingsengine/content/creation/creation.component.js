@@ -1,9 +1,10 @@
 angular.module('lp.ratingsengine.wizard.creation', [])
 .controller('RatingsEngineCreation', function (
-    $q, $state, $stateParams, $interval,
+    $q, $state, $stateParams, $scope, $interval,
     Rating, RatingsEngineStore, JobsStore
 ) {
-    var vm = this;
+    var vm = this,
+        checkJobStatus;
 
     angular.extend(vm, {
         ratingEngine: Rating,
@@ -59,28 +60,27 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
         }
 
-
-        var checkJobStatus = $interval(function() { 
-            JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
-                
-                console.log(result);
-                if(result.id) {
-                    vm.status = result.jobStatus;
-
-                    if(result.stepsCompleted.length > 0){
-                        vm.progress = ((result.stepsCompleted.length / 2) * 7) + '%';
-                    }
-                    if(vm.status === 'Completed'){
-                        $interval.cancel(checkJobStatus);
-                    }
-                }
-            });
-        }, 10 * 1000);
-
     };
 
+    vm.checkJobStatus = $interval(function() { 
+        JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
+            
+            console.log(result);
+            if(result.id) {
+                vm.status = result.jobStatus;
+
+                if(result.stepsCompleted.length > 0){
+                    vm.progress = ((result.stepsCompleted.length / 2) * 7) + '%';
+                }
+                if(vm.status === 'Completed'){
+                    $interval.cancel(vm.checkJobStatus);
+                }
+            }
+        });
+    }, 10 * 1000);
+
     $scope.$on('$destroy', function(){
-        $interval.cancel(checkJobStatus)
+        $interval.cancel(vm.checkJobStatus)
     });
 
     vm.returnProductNameFromId = function(productId) {
