@@ -6,3 +6,4 @@ kazoo
 zc.zk
 RBTools
 zk-shell
+requests
