@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
-import com.latticeengines.modeling.steps.pmml.CreatePMMLModel;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.modeling.workflow.steps.CreatePMMLModel;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
