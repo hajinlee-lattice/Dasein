@@ -1,6 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
-
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
+package com.latticeengines.domain.exposed.serviceflows.modeling.steps;
 
 public class CreatePMMLModelConfiguration extends ModelStepConfiguration {
 

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow;
+package com.latticeengines.domain.exposed.serviceflows.scoring.dataflow;
 
 import java.util.List;
 

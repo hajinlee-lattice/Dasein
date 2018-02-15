@@ -1,4 +1,4 @@
-package com.latticeengines.modeling.workflow.steps;
+package com.latticeengines.modeling.steps.pmml;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -10,7 +10,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Field;
 import org.apache.commons.io.FileUtils;
@@ -29,9 +28,10 @@ import com.latticeengines.domain.exposed.pmml.PmmlField;
 import com.latticeengines.domain.exposed.scoringapi.DataComposition;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.util.PmmlModelUtils;
-import com.latticeengines.modeling.workflow.steps.CreatePMMLModel;
+import com.latticeengines.modeling.steps.pmml.CreatePMMLModel;
 
 public class CreatePMMLModelUnitTestNG {
 

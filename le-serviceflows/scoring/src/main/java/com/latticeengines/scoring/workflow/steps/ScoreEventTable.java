@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.PrimaryKey;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 
 @Component("scoreEventTable")
 public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {

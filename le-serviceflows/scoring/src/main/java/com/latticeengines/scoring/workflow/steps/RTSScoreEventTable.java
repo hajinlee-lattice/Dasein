@@ -2,7 +2,7 @@ package com.latticeengines.scoring.workflow.steps;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStepConfiguration;
 
 @Component("rtsScoreEventTable")
 public class RTSScoreEventTable extends BaseRTSScoreStep<RTSScoreStepConfiguration> {

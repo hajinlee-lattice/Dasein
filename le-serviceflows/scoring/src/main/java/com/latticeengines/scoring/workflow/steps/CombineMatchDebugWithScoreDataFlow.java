@@ -1,10 +1,10 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.dataflow.CombineMatchDebugWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 

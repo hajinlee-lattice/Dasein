@@ -1,12 +1,12 @@
 package com.latticeengines.modeling.workflow.steps.modeling;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 
 @Component("setMatchSelection")
 public class SetMatchSelection extends BaseModelStep<ModelStepConfiguration> {

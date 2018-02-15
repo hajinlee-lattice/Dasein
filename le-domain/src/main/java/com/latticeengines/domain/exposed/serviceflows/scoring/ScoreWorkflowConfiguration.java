@@ -1,10 +1,8 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
+package com.latticeengines.domain.exposed.serviceflows.scoring;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -16,60 +14,45 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
-import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
-public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
+public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration {
 
-    private RTSBulkScoreWorkflowConfiguration() {
-    }
-
-    @Override
-    public Collection<String> getSwpkgNames() {
-        return ImmutableSet.<String> builder() //
-                .add(SoftwareLibrary.Scoring.getName())//
-                .addAll(super.getSwpkgNames()) //
-                .build();
+    private ScoreWorkflowConfiguration() {
     }
 
     public static class Builder {
 
-        private RTSBulkScoreWorkflowConfiguration configuration = new RTSBulkScoreWorkflowConfiguration();
+        private ScoreWorkflowConfiguration configuration = new ScoreWorkflowConfiguration();
         private MicroserviceStepConfiguration microserviceStepConfiguration = new MicroserviceStepConfiguration();
-
-        private RTSScoreStepConfiguration score = new RTSScoreStepConfiguration();
+        private MatchStepConfiguration match = new MatchStepConfiguration();
+        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
+        private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
-        private MatchStepConfiguration match = new MatchStepConfiguration();
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace, "rtsBulkScoreWorkflow");
+            configuration.setContainerConfiguration("scoreWorkflow", customerSpace, "scoreWorkflow");
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
+            addStandardAttributes.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            return this;
-        }
-
-        public Builder internalResourcePort(String internalResourceHostPort) {
-            match.setInternalResourceHostPort(internalResourceHostPort);
-            score.setInternalResourceHostPort(internalResourceHostPort);
-            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
-            combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
-            export.setInternalResourceHostPort(internalResourceHostPort);
-            configuration.setInternalResourceHostPort(internalResourceHostPort);
+            matchResult.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -80,15 +63,18 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            score.setInternalResourceHostPort(internalResourceHostPort);
-            configuration.setInternalResourceHostPort(internalResourceHostPort);
             match.setInternalResourceHostPort(internalResourceHostPort);
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            score.setInternalResourceHostPort(internalResourceHostPort);
+            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
+            export.setInternalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder inputTableName(String tableName) {
             match.setInputTableName(tableName);
-            score.setInputTableName(tableName);
             // result table name is set during execution
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
@@ -96,6 +82,35 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
 
         public Builder modelId(String modelId) {
             score.setModelId(modelId);
+            return this;
+        }
+
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            matchResult.setExcludeDataCloudAttrs(exclude);
+            return this;
+        }
+
+        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
+            match.setDbUrl(matchClientDocument.getUrl());
+            match.setDbUser(matchClientDocument.getUsername());
+            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
+            match.setMatchClient(matchClientDocument.getMatchClient().name());
+            return this;
+        }
+
+        public Builder matchType(MatchCommandType matchCommandType) {
+            match.setMatchCommandType(matchCommandType);
+            return this;
+        }
+
+        public Builder matchDestTables(String destTables) {
+            match.setDestTables(destTables);
             return this;
         }
 
@@ -110,23 +125,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             return this;
         }
 
-        public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
-            score.setEnableLeadEnrichment(enableLeadEnrichment);
-            return this;
-        }
-
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
-            return this;
-        }
-
-        public Builder matchType(MatchCommandType matchCommandType) {
-            match.setMatchCommandType(matchCommandType);
-            return this;
-        }
-
-        public Builder matchDestTables(String destTables) {
-            match.setDestTables(destTables);
             return this;
         }
 
@@ -135,25 +135,46 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             return this;
         }
 
+        public Builder transformationGroup(TransformationGroup transformationGroup) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
+            return this;
+        }
+
+        public Builder transformDefinitions(List<TransformDefinition> transforms) {
+            addStandardAttributes.setTransforms(transforms);
+            return this;
+        }
+
+        /**
+         * You can provide a full column selection object or the name of a
+         * predefined selection. When both are present, predefined one will be
+         * used.
+         * 
+         * @param customizedColumnSelection
+         * @return
+         */
         public Builder columnSelection(ColumnSelection customizedColumnSelection) {
             match.setCustomizedColumnSelection(customizedColumnSelection);
             return this;
         }
 
+        /**
+         * You can provide a full column selection object or the name of a
+         * predefined selection. When both are present, predefined one will be
+         * used. If selectionVersion is empty, will use current version.
+         * 
+         * @param predefinedColumnSelection
+         * @return
+         */
         public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             match.setPredefinedColumnSelection(predefinedColumnSelection);
             match.setPredefinedSelectionVersion(selectionVersion);
             return this;
         }
 
-        public Builder excludeDataCloudAttrs(boolean exclude) {
-            matchResult.setExcludeDataCloudAttrs(exclude);
-            return this;
-        }
-
-        public Builder skipMatchingStep(boolean skipMatchingStep) {
-            match.setSkipStep(skipMatchingStep);
-            matchResult.setSkipStep(skipMatchingStep);
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            match.setDataCloudVersion(dataCloudVersion);
+            matchResult.setDataCloudVersion(dataCloudVersion);
             return this;
         }
 
@@ -167,17 +188,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             return this;
         }
 
-        public Builder dataCloudVersion(String dataCloudVersion) {
-            match.setDataCloudVersion(dataCloudVersion);
-            matchResult.setDataCloudVersion(dataCloudVersion);
-            return this;
-        }
-
-        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
-            match.setDbUrl(matchClientDocument.getUrl());
-            match.setDbUser(matchClientDocument.getUsername());
-            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
-            match.setMatchClient(matchClientDocument.getMatchClient().name());
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
+            combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;
         }
 
@@ -186,8 +198,9 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
             return this;
         }
 
-        public RTSBulkScoreWorkflowConfiguration build() {
+        public ScoreWorkflowConfiguration build() {
             match.microserviceStepConfiguration(microserviceStepConfiguration);
+            addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -195,38 +208,13 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfigurati
 
             configuration.add(match);
             configuration.add(matchResult);
+            configuration.add(addStandardAttributes);
             configuration.add(score);
             configuration.add(combineInputWithScores);
             configuration.add(combineMatchDebugWithScores);
             configuration.add(export);
 
             return configuration;
-        }
-
-        public Builder enableDebug(boolean enableDebug) {
-            score.setEnableDebug(enableDebug);
-            return this;
-        }
-
-        public Builder setScoreTestFile(boolean scoreTestFile) {
-            score.setScoreTestFile(scoreTestFile);
-            return this;
-        }
-
-        public Builder modelType(String modelType) {
-            score.setModelType(modelType);
-            combineInputWithScores.setModelType(modelType);
-            return this;
-        }
-
-        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
-            return this;
-        }
-
-        public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
-            combineInputWithScores.setBucketMetadata(bucketMetadataList);
-            return this;
         }
 
     }

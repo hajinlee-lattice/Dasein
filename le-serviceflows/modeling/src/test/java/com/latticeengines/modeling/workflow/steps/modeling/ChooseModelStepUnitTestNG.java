@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ChooseModelStepConfiguration;
 import org.springframework.batch.item.ExecutionContext;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
 import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 
 public class ChooseModelStepUnitTestNG {

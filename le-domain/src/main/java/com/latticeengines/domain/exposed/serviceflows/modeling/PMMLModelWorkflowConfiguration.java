@@ -1,22 +1,11 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
+package com.latticeengines.domain.exposed.serviceflows.modeling;
 
-import java.util.Collection;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
-import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 
-public class PMMLModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
-
-    @Override
-    public Collection<String> getSwpkgNames() {
-        return ImmutableSet.<String> builder() //
-                .add(SoftwareLibrary.Modeling.getName())//
-                .addAll(super.getSwpkgNames()) //
-                .build();
-    }
+public class PMMLModelWorkflowConfiguration extends BaseModelingWorkflowConfiguration {
 
     public static class Builder {
         private PMMLModelWorkflowConfiguration configuration = new PMMLModelWorkflowConfiguration();

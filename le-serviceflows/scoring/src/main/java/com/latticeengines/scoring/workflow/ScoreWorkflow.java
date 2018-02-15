@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;

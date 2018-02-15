@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.core.steps;
+package com.latticeengines.domain.exposed.serviceflows.modeling.steps;
 
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.core.steps;
+package com.latticeengines.domain.exposed.serviceflows.modeling.steps;
 
 import java.util.List;
 import java.util.Map;
@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {

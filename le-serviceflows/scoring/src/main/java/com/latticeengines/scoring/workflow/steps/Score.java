@@ -1,7 +1,8 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ScoreStepConfiguration;
 import org.springframework.stereotype.Component;
+
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 
 @Component("score")
 public class Score extends BaseScoreStep<ScoreStepConfiguration> {

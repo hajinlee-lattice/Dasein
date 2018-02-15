@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.PMMLModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.MetadataFileUploadService;
 
@@ -28,8 +28,8 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @Autowired
     private MetadataFileUploadService metadataFileUploadService;
 
-    public ApplicationId submit(String modelName, String modelDisplayName, String moduleName,
-            String pivotFileName, String pmmlFileName, SchemaInterpretation schemaInterpretation) {
+    public ApplicationId submit(String modelName, String modelDisplayName, String moduleName, String pivotFileName,
+            String pmmlFileName, SchemaInterpretation schemaInterpretation) {
         Map<String, Artifact> pmmlArtifacts = getArtifactMap(
                 metadataFileUploadService.getArtifacts(moduleName, ArtifactType.PMML));
         Map<String, Artifact> pivotArtifacts = getArtifactMap(
@@ -47,8 +47,7 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         }
 
         if (pivotFileName != null && pivotArtifact == null) {
-            throw new LedpException(LedpCode.LEDP_28026,
-                    new String[] { pivotFileName, moduleName });
+            throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
         }
 
         Map<String, String> inputProperties = new HashMap<>();

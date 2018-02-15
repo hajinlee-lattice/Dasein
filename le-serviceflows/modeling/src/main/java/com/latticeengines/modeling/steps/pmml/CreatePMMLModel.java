@@ -1,4 +1,4 @@
-package com.latticeengines.modeling.workflow.steps;
+package com.latticeengines.modeling.steps.pmml;
 
 import java.io.BufferedOutputStream;
 import java.io.InputStream;
@@ -47,10 +47,9 @@ import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.FieldSource;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePMMLModelConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.CreatePMMLModelConfiguration;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.util.PmmlModelUtils;
-import com.latticeengines.modeling.steps.pmml.PMMLModelingServiceExecutor;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;

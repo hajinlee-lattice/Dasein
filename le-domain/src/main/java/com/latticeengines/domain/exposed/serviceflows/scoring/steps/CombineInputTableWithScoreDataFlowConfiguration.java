@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.core.steps;
+package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
 import java.util.List;
 import java.util.UUID;
@@ -6,7 +6,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
-public class CombineInputTableWithScoreDataFlowConfiguration extends DataFlowStepConfiguration {
+public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoringDataFlowStepConfiguration {
 
     private List<BucketMetadata> bucketMetadata;
     private String modelType;
