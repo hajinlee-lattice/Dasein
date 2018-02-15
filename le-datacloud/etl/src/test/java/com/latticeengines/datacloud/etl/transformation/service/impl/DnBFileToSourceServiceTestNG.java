@@ -122,8 +122,8 @@ public class DnBFileToSourceServiceTestNG
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");
-        String[] expectedDuns = { "970372808", "970372809", "970372810", "970372811", "970372812", "970372813",
-                "970372814", "970372815", "970372816" };
+        String[] expectedDuns = { "980565675", "980565683", "980565688", "980565691", "980565696", "980565626",
+                "980565634", "980565639", "980565642", null };
         Set<String> set = new HashSet<>(Arrays.asList(expectedDuns));
         int rowNum = 0;
         while (records.hasNext()) {
@@ -135,6 +135,6 @@ public class DnBFileToSourceServiceTestNG
             Assert.assertTrue(set.contains(duns));
             rowNum++;
         }
-        Assert.assertEquals(rowNum, 27);
+        Assert.assertEquals(rowNum, 15);
     }
 }

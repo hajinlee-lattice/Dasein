@@ -39,7 +39,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
             "LE_EMPLOYEE_RANGE" //
     );
 
-    private static final String DATA_CLOUD_VERSION = "2.0.5";
+    private static final String DATA_CLOUD_VERSION = "2.0.6";
 
     @Override
     @Test(groups = "pipeline1", enabled = true)
@@ -69,7 +69,7 @@ public class AccountMasterStatisticsTestNG extends AccountMasterBucketTestNG {
         }
         logger.info(count + " records in total, " + zeroCountAttrs + " has zero not null count");
         // TODO: change to compare with rows in profile result
-        Assert.assertEquals(count, 25973);
+        Assert.assertEquals(count, 28574);
         Assert.assertTrue(zeroCountAttrs > 0, "Should have some attributes with zero count.");
     }
 

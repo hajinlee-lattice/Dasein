@@ -85,7 +85,7 @@ public class SourceProfileDeploymentTestNG extends PipelineTransformationTestNGB
 
     private ObjectMapper om = new ObjectMapper();
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testTransformation() {
         prepareAM();
         prepareMatch();
