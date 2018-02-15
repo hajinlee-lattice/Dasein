@@ -131,14 +131,8 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
-                    resolve: {
-                        LookupResponse: function(DataCloudResolves){
-                            return DataCloudResolves.main.LookupResponse;
-                        },
-                        Enrichments: function(DataCloudResolves){
-                            return DataCloudResolves.main.Enrichments;
-                        },
-                        SegmentsList: function($q, SegmentService, SegmentStore) {
+                    resolve: angular.extend({}, DataCloudResolves, {
+                        SegmentsList: ['$q', 'SegmentService', 'SegmentStore', function($q, SegmentService, SegmentStore) {
                             var deferred = $q.defer();
 
                             SegmentService.GetSegments().then(function(result) {
@@ -146,9 +140,9 @@ angular
                                 deferred.resolve(result);
                             });
 
-                            return deferred.promise;
-                        },
-                        Cube: function($q, DataCloudStore) {
+                            return deferred.promise;                  
+                        }],
+                        Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore) {
                             var deferred = $q.defer();
 
                             DataCloudStore.getCube().then(function(result) {
@@ -156,10 +150,10 @@ angular
                                     deferred.resolve(result.data);
                                 }
                             });
-                            
+                        
                             return deferred.promise;
-                        }
-                    },
+                        }]
+                    }),
                     controller: 'SegmentationListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/segments/views/SegmentationListView.html'
