@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -187,12 +189,16 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
         return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
     }
 
-    public ApplicationContext loadSoftwarePackages(String module, String name, ApplicationContext context,
+    public ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context,
             VersionManager versionManager) {
-        SoftwareLibrary lib = SoftwareLibrary.fromName(name);
-        log.info("Trying to load software libraries for " + lib.getName());
-        List<SoftwareLibrary> deps = lib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module));
-        return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
+        Set<SoftwareLibrary> deps = new LinkedHashSet<>();
+        for (String name : names) {
+            SoftwareLibrary lib = SoftwareLibrary.fromName(name);
+            log.info("Trying to load software libraries for " + lib.getName());
+            deps.addAll(lib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module)));
+        }
+        return loadSoftwarePackagesInSequence(module, new ArrayList<>(deps), context,
+                versionManager.getCurrentVersion());
     }
 
     private ApplicationContext loadSoftwarePackagesInSequence(String module, List<SoftwareLibrary> deps,

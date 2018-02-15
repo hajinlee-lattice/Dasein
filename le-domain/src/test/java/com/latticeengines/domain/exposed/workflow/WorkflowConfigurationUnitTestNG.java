@@ -15,7 +15,7 @@ public class WorkflowConfigurationUnitTestNG {
         String serialized = JsonUtils.serialize(cdlWorkflowConfiguration);
 
         WorkflowConfiguration deserialized = JsonUtils.deserialize(serialized, WorkflowConfiguration.class);
-        Assert.assertEquals(deserialized.getSwpkgName(), new BaseCDLWorkflowConfiguration().getSwpkgName());
+        Assert.assertEquals(deserialized.getSwpkgNames(), new BaseCDLWorkflowConfiguration().getSwpkgNames());
     }
 
 

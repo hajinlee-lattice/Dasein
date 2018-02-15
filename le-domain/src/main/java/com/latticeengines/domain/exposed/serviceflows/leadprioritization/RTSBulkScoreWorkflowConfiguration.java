@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -22,10 +24,19 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RTSScoreStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class RTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private RTSBulkScoreWorkflowConfiguration() {
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Scoring.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {

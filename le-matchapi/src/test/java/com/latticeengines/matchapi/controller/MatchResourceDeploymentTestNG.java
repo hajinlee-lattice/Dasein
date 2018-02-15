@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.util.Utf8;
@@ -21,12 +20,6 @@ import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.yarn.client.YarnClient;
@@ -416,7 +409,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);
         BulkMatchWorkflowConfiguration bulkConf = matchProxy.getBulkConfig(input, podId);
         Assert.assertNotNull(bulkConf);
-        Assert.assertEquals(bulkConf.getSwpkgName(), "datacloud");
+        Assert.assertTrue(bulkConf.getSwpkgNames().contains("datacloud"));
     }
 
     @DataProvider(name = "allDataCloudVersions", parallel = true)

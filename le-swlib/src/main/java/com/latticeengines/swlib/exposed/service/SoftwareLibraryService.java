@@ -1,6 +1,7 @@
 package com.latticeengines.swlib.exposed.service;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 import org.springframework.context.ApplicationContext;
@@ -27,6 +28,6 @@ public interface SoftwareLibraryService {
 
     ApplicationContext loadSoftwarePackages(String module, ApplicationContext context, VersionManager versionManager);
 
-    ApplicationContext loadSoftwarePackages(String module, String name, ApplicationContext context,
+    ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context,
                          VersionManager versionManager);
 }

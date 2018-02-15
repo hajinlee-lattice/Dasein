@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -31,10 +33,19 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.C
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.CreatePrematchEventTableReportConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PivotScoreAndEventConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Modeling.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
+    }
 
     public static class Builder {
         private ImportMatchAndModelWorkflowConfiguration configuration = new ImportMatchAndModelWorkflowConfiguration();

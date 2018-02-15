@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.modeling.Algorithm;
 import com.latticeengines.domain.exposed.modeling.Model;
 import com.latticeengines.domain.exposed.modeling.ModelDefinition;
 import com.latticeengines.domain.exposed.modeling.algorithm.PMMLAlgorithm;
-import com.latticeengines.serviceflows.workflow.core.ModelingServiceExecutor;
+import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 
 public class PMMLModelingServiceExecutor extends ModelingServiceExecutor {
 

@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -14,14 +16,22 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.transform.TransformationGroup;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConfiguration {
 
     private ImportMatchAndScoreWorkflowConfiguration() {
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Scoring.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {
@@ -121,7 +131,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
             scoreWorkflowConfigurationBuilder.matchDebugEnabled(matchDebugEnabled);
             return this;
         }
-        
+
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             scoreWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
             return this;

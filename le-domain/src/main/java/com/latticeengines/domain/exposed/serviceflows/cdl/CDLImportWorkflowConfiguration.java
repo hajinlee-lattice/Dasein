@@ -1,17 +1,16 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportListOfEntitiesConfiguration;
 
 public class CDLImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
-    
+
     private String microServiceHostPort;
-    
+
     public CDLImportWorkflowConfiguration() {
     }
-    
+
     public String getMicroServiceHostPort() {
         return microServiceHostPort;
     }
@@ -25,12 +24,13 @@ public class CDLImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration
         private CDLImportWorkflowConfiguration configuration = new CDLImportWorkflowConfiguration();
 
         private ImportListOfEntitiesConfiguration.Builder builder = new ImportListOfEntitiesConfiguration.Builder();
-        
+
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("cdlCreateStagingTablesWorkflow", customerSpace, "cdlCreateStagingTablesWorkflow");
+            configuration.setContainerConfiguration("cdlCreateStagingTablesWorkflow", customerSpace,
+                    "cdlCreateStagingTablesWorkflow");
             return this;
         }
-        
+
         public Builder microServiceHostPort(String microServiceHostPort) {
             configuration.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -48,12 +48,14 @@ public class CDLImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration
 
         public CDLImportWorkflowConfiguration build() {
             ImportListOfEntitiesConfiguration config = builder.build();
-            
+
             config.setCustomerSpace(configuration.getCustomerSpace());
             config.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
             config.setMicroServiceHostPort(configuration.getMicroServiceHostPort());
-            config.getImportConfigs().values().forEach(x -> x.setMicroServiceHostPort(configuration.getMicroServiceHostPort()));
-            config.getImportConfigs().values().forEach(x -> x.setInternalResourceHostPort(configuration.getInternalResourceHostPort()));
+            config.getImportConfigs().values()
+                    .forEach(x -> x.setMicroServiceHostPort(configuration.getMicroServiceHostPort()));
+            config.getImportConfigs().values()
+                    .forEach(x -> x.setInternalResourceHostPort(configuration.getInternalResourceHostPort()));
             configuration.add(config);
             return configuration;
         }

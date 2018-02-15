@@ -14,12 +14,15 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.TopologicalTraverse;
 
 public enum SoftwareLibrary {
 
     DataCloud("datacloud"), //
+    Modeling("modeling"), //
+    Scoring("scoring"), //
     LeadPrioritization("leadprioritization"), //
     ProspectDiscovery("prospectdiscovery"), //
     CDL("cdl");
@@ -31,11 +34,19 @@ public enum SoftwareLibrary {
     private final List<Dependency> depdencies = new ArrayList<>();
 
     static {
-        for (SoftwareLibrary swlib: SoftwareLibrary.values()) {
+        for (SoftwareLibrary swlib : SoftwareLibrary.values()) {
             nameMap.put(swlib.getName(), swlib);
         }
 
         DataCloud.modules = Collections.singleton(Module.workflowapi);
+
+        Modeling.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
+        Modeling.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
+        Modeling.depdencies.add(new Dependency(Module.workflowapi, Scoring));
+        Modeling.depdencies.add(new Dependency(Module.dataflowapi, Scoring));
+
+        Scoring.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
+        Scoring.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
         LeadPrioritization.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));
         LeadPrioritization.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
@@ -60,7 +71,8 @@ public enum SoftwareLibrary {
         List<Dependency> init = libs.stream().map(l -> new Dependency(module, l)).collect(Collectors.toList());
         List<Dependency> deps = traverse.sort(init, (dep) -> new Dependency(dep.module, dep.lib));
         List<SoftwareLibrary> depLibs = new ArrayList<>();
-        // not use stream, because not sure how it handles ordering, which is important here.
+        // not use stream, because not sure how it handles ordering, which is
+        // important here.
         deps.forEach(d -> depLibs.add(d.lib));
         return depLibs;
     }

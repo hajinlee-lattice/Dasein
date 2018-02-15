@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.workflow;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty("containerMemMB")
     private Integer containerMemoryMB;
 
-    private String swpkgName;
+    private Collection<String> swpkgNames;
 
     @JsonProperty
     private boolean restart;
@@ -36,14 +37,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
 
-    @JsonProperty("swpkgName")
-    public String getSwpkgName() {
-        return swpkgName;
+    @JsonProperty("swpkgNames")
+    public Collection<String> getSwpkgNames() {
+        return swpkgNames;
     }
 
     @JsonProperty("swpkgName")
-    public void setSwpkgName(String swpkgName) {
-        this.swpkgName = swpkgName;
+    public void setSwpkgName(Collection<String> swpkgNames) {
+        this.swpkgNames = swpkgNames;
     }
 
     public void add(BaseStepConfiguration configuration) {

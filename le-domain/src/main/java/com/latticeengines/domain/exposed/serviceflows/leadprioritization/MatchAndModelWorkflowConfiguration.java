@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.C
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {

@@ -10,12 +10,12 @@ import com.latticeengines.prospectdiscovery.workflow.steps.CreateImportSummaryWo
 import com.latticeengines.prospectdiscovery.workflow.steps.CreatePreMatchEventTable;
 import com.latticeengines.prospectdiscovery.workflow.steps.MarkReportOutOfDate;
 import com.latticeengines.prospectdiscovery.workflow.steps.MockCreateAttributeLevelSummaryWorkflow;
+import com.latticeengines.scoring.workflow.steps.Score;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MockMatchWorkflow;
-import com.latticeengines.serviceflows.workflow.modeling.ChooseModel;
-import com.latticeengines.serviceflows.workflow.modeling.MockProfileAndModel;
-import com.latticeengines.serviceflows.workflow.modeling.Sample;
-import com.latticeengines.serviceflows.workflow.scoring.Score;
+import com.latticeengines.modeling.workflow.steps.modeling.ChooseModel;
+import com.latticeengines.modeling.workflow.steps.modeling.MockProfileAndModel;
+import com.latticeengines.modeling.workflow.steps.modeling.Sample;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;

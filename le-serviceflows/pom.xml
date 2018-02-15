@@ -22,6 +22,8 @@
     <modules>
         <module>core</module>
         <module>datacloud</module>
+        <module>modeling</module>
+        <module>scoring</module>
         <module>prospectdiscovery</module>
         <module>leadprioritization</module>
         <module>cdl</module>

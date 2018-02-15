@@ -1,12 +1,14 @@
 package com.latticeengines.yarn.exposed.client;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -62,7 +64,7 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
             String dir = properties.getProperty(ContainerProperty.JOBDIR.name());
             String importConfig = properties.getProperty(getModuleName() + "Config");
             File metadataFile = new File(dir + "/metadata.json");
-            FileUtils.writeStringToFile(metadataFile, importConfig);
+            FileUtils.writeStringToFile(metadataFile, importConfig, "UTF-8");
             properties.put(ContainerProperty.METADATA.name(), metadataFile.getAbsolutePath());
         } catch (Exception e) {
             throw new IllegalStateException(e);
@@ -86,21 +88,21 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
     @Override
     public Collection<TransferEntry> getHdfsEntries(Properties containerProperties) {
         Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries = getHdfsEntries(containerProperties, true);
-        SoftwareLibrary swlib = getSoftwareLibrary(containerProperties);
-        hdfsEntries = appendModuleHdfsEntries(hdfsEntries, swlib);
+        Collection<SoftwareLibrary> swlibs = getSoftwareLibrary(containerProperties);
+        hdfsEntries = appendModuleHdfsEntries(hdfsEntries, swlibs);
         return hdfsEntries;
     }
 
-    private SoftwareLibrary getSoftwareLibrary(Properties containerProperties) {
-        String pkgName = containerProperties.getProperty(ContainerProperty.SWLIB_PKG.name());
-        if (StringUtils.isNotBlank(pkgName)) {
-            return SoftwareLibrary.fromName(pkgName);
+    private Collection<SoftwareLibrary> getSoftwareLibrary(Properties containerProperties) {
+        String[] pkgNames = containerProperties.getProperty(ContainerProperty.SWLIB_PKG.name()).split(",");
+        if (pkgNames != null) {
+            return Arrays.stream(pkgNames).map(SoftwareLibrary::fromName).collect(Collectors.toList());
         }
         return null;
     }
 
     protected Collection<LocalResourcesFactoryBean.TransferEntry> appendModuleHdfsEntries(
-            Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries, SoftwareLibrary swlib) {
+            Collection<LocalResourcesFactoryBean.TransferEntry> hdfsEntries, Collection<SoftwareLibrary> swlibs) {
         String module = getModuleName();
         hdfsEntries.add(new LocalResourcesFactoryBean.TransferEntry(LocalResourceType.FILE, //
                 LocalResourceVisibility.PUBLIC, //
@@ -116,10 +118,12 @@ public abstract class SingleContainerClientCustomization extends DefaultYarnClie
                         versionManager.getCurrentVersion());
             }
             List<SoftwarePackage> requiredPackages;
-            if (swlib != null) {
-                log.info("Filter by dependencies of software library " + swlib.getName());
-                Set<String> deps = swlib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module)).stream() //
-                        .map(SoftwareLibrary::getName).collect(Collectors.toSet());
+            if (CollectionUtils.isNotEmpty(swlibs)) {
+                log.info("Filter by dependencies of software library " + swlibs);
+                Set<String> deps = swlibs.stream()
+                        .flatMap(swlib -> swlib.getLoadingSequence(SoftwareLibrary.Module.valueOf(module)).stream() //
+                                .map(SoftwareLibrary::getName))
+                        .collect(Collectors.toSet());
                 requiredPackages = packages.stream().filter(p -> deps.contains(p.getName()))
                         .collect(Collectors.toList());
             } else {

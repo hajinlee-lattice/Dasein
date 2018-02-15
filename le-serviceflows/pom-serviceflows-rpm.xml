@@ -38,6 +38,16 @@
                                 </source>
                                 <source>
                                     <location>
+                                        modeling/target/le-serviceflows-modeling-${project.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
+                                    <location>
+                                        scoring/target/le-serviceflows-scoring-${project.version}-shaded.jar
+                                    </location>
+                                </source>
+                                <source>
+                                    <location>
                                         cdl/target/le-serviceflows-cdl-${project.version}-shaded.jar
                                     </location>
                                 </source>

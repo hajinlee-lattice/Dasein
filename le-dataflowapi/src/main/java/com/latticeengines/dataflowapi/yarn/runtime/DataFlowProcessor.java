@@ -1,5 +1,6 @@
 package com.latticeengines.dataflowapi.yarn.runtime;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,8 @@ public class DataFlowProcessor extends SingleContainerYarnProcessor<DataFlowConf
         String swlib = dataFlowConfig.getSwlib();
         if (StringUtils.isNotBlank(swlib)) {
             log.info("Enriching application context with sw package " + swlib);
-            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", swlib, appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", Collections.singleton(swlib),
+                    appContext, versionManager);
         } else {
             log.info("Enriching application context with all sw packages available.");
             appContext = softwareLibraryService.loadSoftwarePackages("dataflowapi", appContext, versionManager);

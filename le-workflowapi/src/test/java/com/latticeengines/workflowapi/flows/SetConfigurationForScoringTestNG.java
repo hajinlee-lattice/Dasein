@@ -24,7 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.leadprioritization.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.workflow.core.WorkflowTranslator;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;

@@ -24,16 +24,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
-import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
-import com.latticeengines.domain.exposed.scoringapi.DataComposition;
-import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
-import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ModelStepConfiguration;
-import com.latticeengines.domain.exposed.util.ModelingUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -170,61 +162,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
         System.arraycopy(tokens, 0, newTokens, 0, newTokens.length);
         return "/" + StringUtils.join(newTokens, "/");
-    }
-
-    private String getDataCompositionContents(Table eventTable) {
-        DataComposition dataComposition = new DataComposition();
-        Map.Entry<Map<String, FieldSchema>, List<TransformDefinition>> transforms = eventTable
-                .getRealTimeTransformationMetadata();
-        dataComposition.fields = transforms.getKey();
-        dataComposition.transforms = transforms.getValue();
-        return JsonUtils.serialize(dataComposition);
-    }
-
-    protected ModelingServiceExecutor.Builder createModelingServiceExecutorBuilder(
-            ModelStepConfiguration modelStepConfiguration, Table eventTable) {
-        String metadataContents = JsonUtils.serialize(eventTable.getModelingMetadata());
-        try {
-            PivotValuesLookup pivotValues = ModelingUtils.getPivotValues(yarnConfiguration,
-                    modelStepConfiguration.getPivotArtifactPath());
-            metadataContents = ModelingUtils.addPivotValuesToMetadataContent(eventTable.getModelingMetadata(),
-                    pivotValues);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_00002, e);
-        }
-
-        String dataCompositionContents = getDataCompositionContents(eventTable);
-
-        List<DataRule> dataRules = null;
-        if (executionContext.containsKey(DATA_RULES)) {
-            dataRules = getListObjectFromContext(DATA_RULES, DataRule.class);
-        } else {
-            dataRules = modelStepConfiguration.getDataRules();
-        }
-
-        ModelingServiceExecutor.Builder bldr = new ModelingServiceExecutor.Builder();
-        bldr.sampleSubmissionUrl("/modeling/samples") //
-                .profileSubmissionUrl("/modeling/profiles") //
-                .modelSubmissionUrl("/modeling/models") //
-                .retrieveFeaturesUrl("/modeling/features") //
-                .retrieveJobStatusUrl("/modeling/jobs/%s") //
-                .retrieveModelingJobStatusUrl("/modeling/modelingjobs/%s") //
-                .modelingServiceHostPort(modelStepConfiguration.getMicroServiceHostPort()) //
-                .modelingServiceHdfsBaseDir(modelStepConfiguration.getModelingServiceHdfsBaseDir()) //
-                .customer(modelStepConfiguration.getCustomerSpace().toString()) //
-                .metadataContents(metadataContents) //
-                .dataCompositionContents(dataCompositionContents) //
-                .yarnConfiguration(yarnConfiguration) //
-                .hdfsDirToSample(getHdfsDir(eventTable.getExtracts().get(0).getPath())) //
-                .table(eventTable.getName()) //
-                .modelProxy(modelProxy) //
-                .jobProxy(jobProxy) //
-                .dataRules(dataRules) //
-                .runTimeParams(modelStepConfiguration.getRunTimeParams()) //
-                .setModelSummaryProvenance(modelStepConfiguration.getModelSummaryProvenance()) //
-                .productType(modelStepConfiguration.getProductType());
-
-        return bldr;
     }
 
     @SuppressWarnings("unchecked")
