@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+
 public class PivotScoreAndEventConfiguration extends BaseLPDataFlowStepConfiguration {
 
     private String eventColumn;
@@ -14,5 +16,10 @@ public class PivotScoreAndEventConfiguration extends BaseLPDataFlowStepConfigura
 
     public String getEventColumn() {
         return eventColumn;
+    }
+
+    @Override
+    public String getSwlib() {
+        return SoftwareLibrary.Scoring.getName();
     }
 }

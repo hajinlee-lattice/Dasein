@@ -2,7 +2,7 @@ package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class DedupEventTableConfiguration extends BaseLPDataFlowStepConfiguration {
 
@@ -15,5 +15,10 @@ public class DedupEventTableConfiguration extends BaseLPDataFlowStepConfiguratio
 
     public void setDedupType(DedupType dedupType) {
         this.dedupType = dedupType;
+    }
+
+    @Override
+    public String getSwlib() {
+        return SoftwareLibrary.Modeling.getName();
     }
 }
