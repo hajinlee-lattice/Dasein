@@ -16,7 +16,7 @@ public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
                 .add(SoftwareLibrary.Modeling.getName())//
-                .addAll(super.getSwpkgNames()) //
+                .add(SoftwareLibrary.CDL.getName()) //
                 .build();
     }
 
