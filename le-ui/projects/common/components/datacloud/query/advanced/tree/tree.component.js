@@ -31,7 +31,7 @@ angular
                 range: [],
                 operation: '',
                 unused: false,
-                uniqueId: Date.now(),
+                uniqueId: Math.random() * (8 << 8),
                 editMode: 'Custom',
                 records_updating: false,
                 numerical_operations: QueryTreeService.numerical_operations,

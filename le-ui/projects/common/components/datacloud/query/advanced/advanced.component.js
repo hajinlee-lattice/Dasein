@@ -710,10 +710,5 @@ angular.module('common.datacloud.query.builder', [
         vm.setCurrentSavedTree();
     }
 
-    vm.mouseOut = function() {
-        vm.draggedItem = null;
-        vm.droppedItem = null;
-    }
-
     vm.init();
 });

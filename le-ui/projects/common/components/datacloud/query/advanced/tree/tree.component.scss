@@ -1,4 +1,11 @@
 div.advanced-query-builder {
+    &, & * {
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        transition: none;
+    }
+            
     .query-helper-text-one {
 //         padding-left: 8px;
         margin-bottom: .5em;
@@ -36,7 +43,8 @@ div.advanced-query-builder {
         left: -1.8em;
         width: 1.5em;
         border-bottom: 1px dashed #888;
-
+        display: none;
+        
         &.operation {
             margin-top: 16px;
             left: 0em;
@@ -53,6 +61,10 @@ div.advanced-query-builder {
             span.query-helper-text {
                 display: none;
                 font-size: 13px;
+            }
+
+            div.query-section-type-dotline {
+                display: block;
             }
 
             & > li > query-tree-directive > ul > li {
@@ -126,6 +138,8 @@ div.advanced-query-builder {
             display: flex;
             cursor: default;
             z-index: 1;
+            border-top-left-radius: 2px;
+            border-bottom-left-radius: 2px;
             
             & *:not(a) {
                 cursor: default;
