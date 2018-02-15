@@ -3,6 +3,9 @@ CREATE PROCEDURE `UpdateCDLTables`()
         ALTER TABLE PLS_MultiTenant.PLAY
         ADD COLUMN `STATUS` varchar(255) null;
 
+        ALTER TABLE PLS_MultiTenant.PLAY
+        MODIFY EXCLUDE_ITEMS_WITHOUT_SFID tinyint(1) null;
+
         ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH`
             ADD EXCLUDE_ITEMS_WITHOUT_SFID BOOLEAN NULL DEFAULT 0;
 
