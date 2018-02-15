@@ -71,7 +71,7 @@ class SampleGenerator(State):
         maxScore = buckets[0]["MaximumScore"] if len(buckets) != 0 else 1
 
         if score >= maxScore:
-            return 100
+            return 99
         else:
             order = 1 if top else -1
             for bucket in buckets[::order]:
