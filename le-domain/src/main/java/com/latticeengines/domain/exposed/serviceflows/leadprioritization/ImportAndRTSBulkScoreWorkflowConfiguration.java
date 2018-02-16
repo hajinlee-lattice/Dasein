@@ -28,7 +28,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
-                .add(SoftwareLibrary.Scoring.getName())//
+                .add(SoftwareLibrary.Modeling.getName())//
                 .addAll(super.getSwpkgNames()) //
                 .build();
     }
