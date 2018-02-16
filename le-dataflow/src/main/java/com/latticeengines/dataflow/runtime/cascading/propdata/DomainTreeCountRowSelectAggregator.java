@@ -137,7 +137,8 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
 
     private boolean isNoProfitable(TupleEntry arguments, Long salesVolVal, Integer empTotalVal) {
         String primaryIndustry = arguments.getString(primIndustryField);
-        if ((primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
+        if (primaryIndustry != null
+                && (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
                 || primaryIndustry.equals(NON_PROFIT))
                 || (salesVolVal < NON_PROFIT_TOTAL_SALES && empTotalVal > NON_PROFIT_TOTAL_EMP)) {
             return true;
@@ -155,10 +156,12 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     private Context update(Context context, TupleEntry arguments, String updateReason) {
         context.rootDuns = arguments.getString(rootDunsField);
         context.dunsType = arguments.getString(dunsTypeField);
-        context.maxSalesVolume = (Long) arguments.getObject(salesVolField);
+        if (arguments.getObject(salesVolField) != null)
+            context.maxSalesVolume = (Long) arguments.getObject(salesVolField);
         if (arguments.getString(totalEmpField) != null)
             context.maxEmpTotal = Integer.parseInt(arguments.getString(totalEmpField));
-        context.maxNumOfLoc = (Integer) arguments.getObject(numOfLocField);
+        if (arguments.getObject(numOfLocField) != null)
+            context.maxNumOfLoc = (Integer) arguments.getObject(numOfLocField);
         context.reasonType = updateReason;
         context.isNonProfitable = isNoProfitable(arguments, context.maxSalesVolume, context.maxEmpTotal);
         return context;

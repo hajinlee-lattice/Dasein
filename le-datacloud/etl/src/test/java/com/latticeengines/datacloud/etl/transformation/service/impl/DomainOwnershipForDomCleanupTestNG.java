@@ -68,7 +68,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting" },
                 { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing" },
                 { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy" },
-                { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, "Food Production" },
+                { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null },
                 { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal" },
                 { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media" },
                 { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media" },
@@ -87,9 +87,10 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "unicef.org", "DUNS22", null, null, 104500L, "3700", 2, "Non-profit" },
                 { "goodwill.com", "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media" },
                 { "goodwill.com", "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media" },
+                { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null },
                 // domains present in OwnershipTable with reasons multiple large
                 // company, franchise
-                { "amazon.com", "DUNS37", "DUNS36", null, 304500L, "2200", 1, "Media" },
+                { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media" },
                 { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services" },
                 { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,
                         "Manufacturing - Semiconductors" },
@@ -208,7 +209,7 @@ public class DomainOwnershipForDomCleanupTestNG
     Object[][] expectedDataValues = new Object[][] { //
             { "karlDuns1.com", "DUNS33", "DUNS", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
-            { "sbiDuns2.com", "DUNS10", "GU", 2, "HIGHER_NUM_OF_LOC", "false" }, //
+            { "sbiDuns2.com", "DUNS10", "GU", 3, "HIGHER_NUM_OF_LOC", "false" }, //
             { "amazon.com", null, null, 3, "MULTIPLE_LARGE_COMPANY", "false" }, //
             { "netappDuns2.com", "DUNS17", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
@@ -222,16 +223,16 @@ public class DomainOwnershipForDomCleanupTestNG
             { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production"},
             { "sbiDu.com", "DUNS11", "DUNS10", "DUNS11", 250000242L, "20000", 30, "Consumer Services"},
             { "karlDu.com", "DUNS24", null, "DUNS24", 21100024L, "50000", 3, "Accounting"},
-            { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing"},
+            { "netappGu.com", "DUNS28", "DUNS28", null, 2250000262L, "55000", 20, "Passenger Car Leasing" },
             { "amazonGu.com", "DUNS36", "DUNS36", null, 3250000242L, "11000", 2, "Energy"},
-            { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, "Food Production"},
+            { "mongodbDu.com", "DUNS18", "DUNS17", "DUNS18", 510002421L, "22009", 9, null},
             { "mongodbGu.com", "DUNS17", "DUNS17", "DUNS18", 2250000242L, "67009", 34, "Legal"},
             { "regalGoodWill.com", "DUNS55", "DUNS55", null, 9728329L, "2230", 11, "Media" },
             { "goodWillOrg.com", "DUNS59", "DUNS59", null, 82329840L, "2413", 10, "Media"},
             { "netappDuns1.com", "DUNS31", "DUNS28", null, 30450010L, "10000", 3, "Junior Colleges"},
             { "mongoDbDuns1.com", "DUNS21", "DUNS17", "DUNS18", 30450010L, "10000", 1, "Wholesale"},
             { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government"},
-            { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education"},
+            { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education" },
             { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Non-profit"},
             // domains present in OwnershipTable (rootDuns match) : result =
             // domain not cleaned up
@@ -245,9 +246,10 @@ public class DomainOwnershipForDomCleanupTestNG
             { null, "DUNS22", null, null, 104500L, "3700", 2, "Non-profit" },
             { null, "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media"},
             { null, "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media"},
+            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null },
             // domains present in OwnershipTable with reasons multiple large
             // company, franchise : result = not cleaned up
-            { "amazon.com", "DUNS37", "DUNS36", null, 304500L, "2200", 1, "Media"},
+            { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media" },
             { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services"},
             { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors"},
             { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology"},
@@ -294,37 +296,18 @@ public class DomainOwnershipForDomCleanupTestNG
                 break;
                 /*
             case ACC_MASTER_SEED_CLEANUP:
-                break;
-                */
+                break;*/
         }
     }
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
-        /*
         int rowCount = 0;
-        Map<String, Object[]> orbSecSrcExpValues = new HashMap<>();
-        for (Object[] data : orbSecSrcCleanedupValues) {
-            orbSecSrcExpValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
-        }
-        while (records.hasNext()) {
-            GenericRecord record = records.next();
-            log.info("record : " + record);
-            String primDomain = String.valueOf(record.get(0));
-            String secDomain = String.valueOf(record.get(1));
-            Object[] expectedVal = orbSecSrcExpValues.get(primDomain + secDomain);
-            Assert.assertTrue(isObjEquals(record.get(0), expectedVal[0]));
-            Assert.assertTrue(isObjEquals(record.get(1), expectedVal[1]));
-            rowCount++;
-        }
-        //System.out.println("rowCount : " + rowCount);
-        //Assert.assertEquals(rowCount, 11);*/
-        int rowCount = 0;
+        rowCount = 0;
         List<Integer> attrNameIndex = Arrays.asList(6, 1, 7, 0, 5, 2, 3, 4);
         Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
         for (Object[] data : amSeedCleanedUpValues) {
-            amSeedExpectedValues
-                    .put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
+            amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
         while (records.hasNext()) {
             GenericRecord record = records.next();
@@ -341,6 +324,6 @@ public class DomainOwnershipForDomCleanupTestNG
             }
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 31);
+        Assert.assertEquals(rowCount, 32);
     }
 }
