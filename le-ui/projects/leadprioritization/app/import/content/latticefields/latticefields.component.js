@@ -60,11 +60,17 @@ angular.module('lp.import.wizard.latticefields', [])
             vm.matchingFieldsArr.push(matchingField.name);
         });
         if(vm.savedFields) {
+            vm.fieldMappings.forEach(function(fieldMapping) {
+                vm.availableFields.push(fieldMapping);
+            });
             vm.savedFields.forEach(function(fieldMapping) {
                 if(fieldMapping.mappedField && vm.matchingFieldsArr.indexOf(fieldMapping.userField) != -1) {
                     vm.unavailableFields.push(fieldMapping.userField);
                 }
-                vm.availableFields.push(fieldMapping);
+                var fieldItem = vm.fieldMappings.find(function(item) {
+                    return item.userField === fieldMapping.userField;
+                });
+                fieldItem.mappedField = fieldMapping.mappedField;
             });
         } else {
             vm.fieldMappings.forEach(function(fieldMapping) {
