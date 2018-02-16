@@ -185,6 +185,12 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             return service.getAttributeRules(bkt, bucket, isSameAttribute);
         }
         
+        this.isBucketUsed = function(bucket){
+            var entity = getEntity(bucket);
+            var service = getService(entity);
+            return service.isBucketUsed(bucket);
+        }
+
         //***************** Editing ************************************/
 
 
@@ -404,9 +410,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         function getBooleanValue(bucketRestriction) {
-            if (bucketRestriction.bkt.Vals[0] === 'Yes') {
+            if (bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] === 'Yes') {
                 return 'True';
-            } if (bucketRestriction.bkt.Vals[0] === 'No') {
+            } if (bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] === 'No') {
                 return 'False';
             }
             return 'Empty';
@@ -444,6 +450,10 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
             
             return isSameAttribute && isSameBucket;
+        }
+
+        this.isBucketUsed = function(bucket){
+             return typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
         }
 
         //******************** Editing mode *********************************/
@@ -678,6 +688,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             return r;
         }
 
+        this.isBucketUsed = function(bucket){
+            return typeof bucket.bkt.Id == "number";//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
+       }
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             var txn = bucketRestriction.bkt.Txn;

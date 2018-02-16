@@ -73,10 +73,13 @@ angular
             }
 
             vm.isBucketUsed = function(bucket) {
-                return typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
+                var ret = QueryTreeService.isBucketUsed(bucket);//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
+                // console.log('isBucketUsed', ret);
+                return ret;
             }
 
             vm.checkSelected = function(bucket) {
+                console.log('checkSelected', bucket);
                 if (bucket.Vals && bucket.Vals[0] == vm.range[0] && bucket.Vals[1] == vm.range[1]) {
                     vm.presetOperation = bucket.Lbl;
                 }
