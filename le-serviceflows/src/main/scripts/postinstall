@@ -21,7 +21,7 @@ fi
 
 echo $VERSION
 
-for sf in 'prospectdiscovery' 'leadprioritization' 'cdl' 'datacloud'
+for sf in 'prospectdiscovery' 'leadprioritization' 'cdl' 'datacloud' 'modeling' 'scoring'
 do
     module=$(echo ${sf} | cut -d \| -f 1)
     library=$(echo ${sf} | cut -d \| -f 2)
