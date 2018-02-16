@@ -15,6 +15,12 @@ public class CloneProduct extends BaseCloneEntityStep<ProcessProductStepConfigur
     @Override
     protected List<TableRoleInCollection> tablesToClone() {
         return Collections.singletonList(BusinessEntity.Product.getServingStore());
+
+    }
+
+    @Override
+    protected List<TableRoleInCollection> tablesToLink() {
+        return Collections.emptyList();
     }
 
 }

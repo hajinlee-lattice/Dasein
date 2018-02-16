@@ -16,7 +16,14 @@ public class CloneTransaction extends BaseCloneEntityStep<ProcessTransactionStep
     protected List<TableRoleInCollection> tablesToClone() {
         return Arrays.asList( //
                 BusinessEntity.Transaction.getBatchStore(), //
-                BusinessEntity.PeriodTransaction.getBatchStore(), //
+                BusinessEntity.PeriodTransaction.getBatchStore() //
+        );
+
+    }
+
+    @Override
+    protected List<TableRoleInCollection> tablesToLink() {
+        return Arrays.asList( //
                 BusinessEntity.Transaction.getServingStore(), //
                 BusinessEntity.PeriodTransaction.getServingStore() //
         );

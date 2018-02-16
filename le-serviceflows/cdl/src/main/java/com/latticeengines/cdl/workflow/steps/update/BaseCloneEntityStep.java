@@ -26,8 +26,13 @@ public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfigu
         for (TableRoleInCollection role : tablesToClone()) {
             cloneTableService.cloneToInactiveTable(role);
         }
+        for (TableRoleInCollection role : tablesToLink()) {
+            cloneTableService.linkInactiveTable(role);
+        }
     }
 
     protected abstract List<TableRoleInCollection> tablesToClone();
+
+    protected abstract List<TableRoleInCollection> tablesToLink();
 
 }

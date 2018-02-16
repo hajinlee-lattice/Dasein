@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -14,6 +15,12 @@ public class CloneContact extends BaseCloneEntityStep<ProcessContactStepConfigur
 
     @Override
     protected List<TableRoleInCollection> tablesToClone() {
+        return Collections.emptyList();
+
+    }
+
+    @Override
+    protected List<TableRoleInCollection> tablesToLink() {
         return Arrays.asList( //
                 BusinessEntity.Contact.getServingStore(), //
                 TableRoleInCollection.ContactProfile //
