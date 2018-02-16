@@ -87,16 +87,20 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
     private Map.Entry<ScoringConfiguration, String> buildScoringConfig() {
         ScoringConfiguration scoringConfig = new ScoringConfiguration();
         scoringConfig.setCustomer(configuration.getCustomerSpace().toString());
-        String modelId = getModelId();
-        scoringConfig.setModelGuids(Arrays.asList(modelId));
+        String[] modelIds = getModelId().split("\\|");
+        log.info("Get model ids: " + StringUtils.join(modelIds, ", "));
+        scoringConfig.setModelGuids(Arrays.asList(modelIds));
         scoringConfig.setSourceDataDir(getSourceDir());
         scoringConfig.setUniqueKeyColumn(getUniqueKeyColumn());
         scoringConfig.setUseScorederivation(configuration.getUseScorederivation());
         scoringConfig.setModelIdFromRecord(configuration.readModelIdFromRecord());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //
                 configuration.getCustomerSpace());
-        String tableName = String.format("ScoreResult_%s_%d", modelId.replaceAll("-", "_"), System.currentTimeMillis());
+        String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"), System.currentTimeMillis());
         scoringConfig.setTargetResultDir(targetPath.toString() + "/" + tableName);
+        if (getScoringInputType() != null) {
+            scoringConfig.setScoreInputType(getScoringInputType());
+        }
         return new AbstractMap.SimpleEntry<ScoringConfiguration, String>(scoringConfig, tableName);
     }
 
@@ -121,6 +125,10 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         if (StringUtils.isNotEmpty(configuration.getUniqueKeyColumn()))
             uniqueKeyColumn = configuration.getUniqueKeyColumn();
         return uniqueKeyColumn;
+    }
+
+    protected ScoringConfiguration.ScoringInputType getScoringInputType() {
+        return null;
     }
 
 }

@@ -2,6 +2,7 @@ package com.latticeengines.scoring.workflow.steps;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -16,34 +17,41 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepCon
 @Component("scoreEventTable")
 public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
 
-    public ScoreEventTable() {
-    }
-
     @Override
     public void onConfigurationInitialized() {
         configuration.setRegisterScoredTable(true);
         Table table = getObjectFromContext(EVENT_TABLE, Table.class);
         putStringValueInContext(SCORING_SOURCE_DIR,
                 StringUtils.substringBeforeLast(table.getExtracts().get(0).getPath(), "*.avro"));
+        if (StringUtils.isBlank(getStringValueFromContext(SCORING_UNIQUEKEY_COLUMN))) {
+            Attribute id = resolveIdAttr(table);
+            putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, id.getName());
+        }
+    }
 
+    private Attribute resolveIdAttr(Table eventTable) {
         Attribute id = null;
-        PrimaryKey primaryKey = table.getPrimaryKey();
+        PrimaryKey primaryKey = eventTable.getPrimaryKey();
         if (primaryKey == null) {
-            List<Attribute> idAttrs = table.getAttributes(LogicalDataType.Id);
+            List<Attribute> idAttrs = eventTable.getAttributes(LogicalDataType.Id);
             if (CollectionUtils.isEmpty(idAttrs)) {
-                idAttrs = table.getAttributes(LogicalDataType.InternalId);
+                idAttrs = eventTable.getAttributes(LogicalDataType.InternalId);
             }
             if (CollectionUtils.isNotEmpty(idAttrs)) {
                 id = idAttrs.get(0);
             }
         } else {
-            id = table.getAttribute(primaryKey.getAttributes().get(0));
+            id = eventTable.getAttribute(primaryKey.getAttributes().get(0));
         }
         if (id == null) {
             throw new RuntimeException(String.format("Could not locate unique key to use to score table %s: %s",
-                    table.getName(), JsonUtils.pprint(table)));
+                    eventTable.getName(), JsonUtils.pprint(eventTable)));
         }
+        return id;
+    }
 
-        putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, id.getName());
+    @Override
+    protected ScoringConfiguration.ScoringInputType getScoringInputType() {
+        return ScoringConfiguration.ScoringInputType.Avro;
     }
 }
