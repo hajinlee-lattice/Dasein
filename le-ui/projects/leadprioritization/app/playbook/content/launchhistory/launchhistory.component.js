@@ -21,7 +21,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
 
     vm.init = function() {
 
-        if(vm.launchesCount > 10){
+        if(vm.launchesCount > vm.pagesize){
             vm.showPagination = true;
         } else {
             vm.showPagination = false;
@@ -118,7 +118,7 @@ angular.module('lp.playbook.dashboard.launchhistory', [])
             vm.launches = result;
         });
         PlaybookWizardStore.getPlayLaunchCount(countParams).then(function(result){
-            if(result > 10){
+            if(result > vm.pagesize){
                 vm.showPagination = true;
             } else {
                 vm.showPagination = false;

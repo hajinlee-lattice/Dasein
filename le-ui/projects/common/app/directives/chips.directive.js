@@ -11,7 +11,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             id: '@', 
             displayname: '@' ,
             model: '@',
-            queryScope: '@'
+            queryscope: '@'
         },
         link: function (scope, element, attrs, ctrl) {
             scope.showClass = ''
@@ -25,10 +25,10 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.id = scope.itemId || scope.itemName || scope.name || scope.ProductId;
             scope.displayName = scope.displayname;
             scope.queryItems = scope.datasource;
-            scope.queryscope = scope.queryScope;
+            scope.queryScope = scope.queryscope;
 
             scope.filterFunction = function(item) {
-                return item[scope.queryscope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
+                return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
             };
 
             scope.getDisplayName = function(item){

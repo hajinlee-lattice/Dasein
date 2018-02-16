@@ -38,17 +38,18 @@ angular
 		vm.reports.forEach(function(report) {
 			var payload = JSON.parse(report['json']['Payload']);
 			if (report['purpose'] == 'PROCESS_ANALYZE_RECORDS_SUMMARY') {
-				vm.entities.forEach(function(entity) {
-					vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'];
-					vm.summaries[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary;
-				});
+				if (payload.EntitiesSummary) {
+					vm.entities.forEach(function(entity) {
+						vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'];
+						vm.summaries[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary;
+					});
+				}
 				if (payload['SystemActions']) {
 					vm.systemActionTimestamp = report.created;
 					vm.systemActions = payload['SystemActions'];
 				}
 			}
 		});
-
 
 	}
 

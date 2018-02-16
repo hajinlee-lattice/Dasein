@@ -74,7 +74,7 @@ angular
 			}
 
 			vm.parsePayload = function(action, key) {
-				return JSON.parse(action.reports[0]['json']['Payload'])[key];
+				return JSON.parse(action.reports[0]['json']['Payload'])[key] || JSON.parse(action.reports[0]['json']['Payload'])[key + '_Deleted'];
 			}
 
             vm.showUpdateTile = function() {
