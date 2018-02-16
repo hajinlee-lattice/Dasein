@@ -48,6 +48,17 @@ angular.module('common.datacloud.query.service',[
         this.initRestrictions();
     }
 
+    function getEntity(entity){
+        switch(entity){
+            case 'account':
+            case 'purchasehistory':{
+                return 'account';
+            }
+            case 'contact': {
+                return 'contact';
+            }
+        }
+    }
     this.initRestrictions = function() {
         var template = {
             restriction: {
@@ -59,19 +70,20 @@ angular.module('common.datacloud.query.service',[
         };
 
         this.entities.forEach(function(entity) {
-            QueryStore[entity + 'Restriction'] = angular.copy(template);
+            
+            QueryStore[getEntity(entity) + 'Restriction'] = angular.copy(template);
         });
     }
 
     this.resetRestrictions = function(segment) {
         this.entities.forEach(function(entity) {
-            var restriction = QueryStore[entity + 'Restriction'].restriction.logicalRestriction;
+            var restriction = QueryStore[getEntity(entity) + 'Restriction'].restriction.logicalRestriction;
 
             restriction.operator = "AND";
 
-            if (segment && segment[entity + '_restriction']) {
-                restriction.restrictions = segment[entity + '_restriction'].restriction.logicalRestriction.restrictions;
-                restriction.operator = segment[entity + '_restriction'].restriction.logicalRestriction.operator;
+            if (segment && segment[getEntity(entity) + '_restriction']) {
+                restriction.restrictions = segment[getEntity(entity) + '_restriction'].restriction.logicalRestriction.restrictions;
+                restriction.operator = segment[getEntity(entity) + '_restriction'].restriction.logicalRestriction.operator;
             } else {
                 restriction.restrictions.length = 0;
             }
@@ -457,6 +469,7 @@ angular.module('common.datacloud.query.service',[
             queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
             QueryService.GetCountByQuery(resourceType, queryWithRestriction).then(function(data) {
+                console.log('Resource Type', resourceType);
                 deferred.resolve(data[resourceType == 'account' ? 'Account' : 'Contact']);
             });
 
@@ -490,6 +503,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.isValidResourceType = function(resourceType) {
+        console.log('isValidResourceType', resourceType);
         return this.validResourceTypes.indexOf(resourceType) > -1;
     };
 

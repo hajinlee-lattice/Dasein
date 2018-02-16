@@ -328,14 +328,15 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             };
 
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
+            if(this.treeMode === 'purchasehistory'){
+                this.treeMode = 'account';
+            }
+
             segment[this.treeMode + '_restriction'] = {
                 "restriction": {
                     "bucketRestriction": angular.copy(bucketRestriction)
                 }
             };
-            if(this.treeMode === 'purchasehistory'){
-                this.treeMode = 'account';
-            }
             QueryService.GetCountByQuery(
                 this.treeMode + 's', 
                 segment, 
