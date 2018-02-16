@@ -34,9 +34,9 @@ if __name__ == '__main__':
 #     loader.writeDataFrameToAvro(apState)
     logger.info(apState.shape)
     assert  apState.shape == (833038, 203)
-    newApSatate = loader.readDataFrameFromAvro("./output")
-    print newApSatate.shape
-    assert(apState.shape == newApSatate.shape)
+#     newApSatate = loader.readDataFrameFromAvro("./output")
+#     print newApSatate.shape
+#     assert(apState.shape == newApSatate.shape)
     loader.parallelUploadFromLocal()
 #     loader.uploadFromLocal()
     

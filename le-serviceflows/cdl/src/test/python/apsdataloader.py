@@ -34,18 +34,13 @@ class FileWriterProcess (multiprocessing.Process):
             avro.writer(fp, self.schema, records)
         logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
 
-class UploadFromLocalProcess(multiprocessing.Process):
-    def __init__(self, outputFile, outputPath, webHdfsHostPort):
-        super(UploadFromLocalProcess, self).__init__()
-        self.outputFile = outputFile
-        self.outputPath = outputPath
-        self.webHdfsHostPort = webHdfsHostPort
-    def run(self):
-        logger.info("Uploading file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
-        filePath, fileName = os.path.split(self.outputFile)
-        hdfs = WebHDFS(self.webHdfsHostPort.hostname, self.webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
-        hdfs.copyFromLocal(self.outputFile, self.outputPath + "/" + fileName)
-        logger.info("Uploaded file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
+def uploadFromLocalFunc(param):
+        outputFile, outputPath, webHdfsHostPort, userId = param
+        logger.info("Uploading file from local=%s to remote=%s" % (outputFile, outputPath))
+        filePath, fileName = os.path.split(outputFile)
+        hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, userId)
+        hdfs.copyFromLocal(outputFile, outputPath + "/" + fileName)
+        logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, outputPath))
         
               
 class ApsDataLoader(object):
@@ -100,11 +95,17 @@ class ApsDataLoader(object):
     def parallelUploadFromLocal(self, localDir='./output'):
         logger.info("Start to uploadFromLocal data.")
         outputFiles = glob.glob("%s/*.avro" % localDir)
-        processes = []
-        for outputFile in outputFiles:
-            processes.append(UploadFromLocalProcess(outputFile, self.outputPath, self.webHdfsHostPort))
-        self.parallelExecute(processes)
+        userId = pwd.getpwuid(os.getuid())[0]
+        params = [[outputFile, self.outputPath, self.webHdfsHostPort, userId] for outputFile in outputFiles]
+        self.parallelExecutePool(uploadFromLocalFunc, params, 2)
         logger.info("Finished uploadFromLocal data.")
+        
+    def parallelExecutePool(self, func, params, poolSize):
+        pool = multiprocessing.Pool(processes=poolSize, maxtasksperchild=1);
+        pool.map(func, params)
+        pool.close()
+        pool.join()
+        
 
     def readDataFrameFromAvro(self, localDir='./input'):
         logger.info("Start to read Dataframe from avro file.")
