@@ -24,7 +24,7 @@ public abstract class BaseCloneEntityStep<T extends BaseProcessEntityStepConfigu
         cloneTableService.setActiveVersion(active);
         cloneTableService.setCustomerSpace(customerSpace);
         for (TableRoleInCollection role : tablesToClone()) {
-            cloneTableService.linkInactiveTable(role);
+            cloneTableService.cloneToInactiveTable(role);
         }
     }
 
