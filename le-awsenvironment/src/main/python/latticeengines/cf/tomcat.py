@@ -145,7 +145,7 @@ def provision(environment, app, stackname, tgrp, profile, instance_type, tag="la
     profile_vars = get_profile_vars(profile)
     extra_params = parse_profile(profile, profile_vars)
 
-    max_mem = int(TYPE_DEF[instance_type]['mem_gb'] * 1024.0 - 512)
+    max_mem = int(TYPE_DEF[instance_type]['mem_gb'] * 1024.0 - 1024)
     print "set %s to %s" % (PARAM_MEM.name(), max_mem)
     extra_params.append(PARAM_MEM.config(str(max_mem)))
 
