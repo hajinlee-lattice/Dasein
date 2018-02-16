@@ -57,7 +57,7 @@
 
             <h3>Job Status</h3>
             <dl class="step-progression">
-                <dt ng-class="{ 'started': vm.startTimestamp }">Job Started</dt>
+                <dt ng-class="{ 'started': !vm.jobStarted }">Job Started</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
