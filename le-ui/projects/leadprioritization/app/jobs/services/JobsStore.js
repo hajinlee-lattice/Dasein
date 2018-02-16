@@ -187,12 +187,23 @@ angular
     this.manageSubjobsRunning = function(job){
         var applicationidJob = job.applicationId;
         var inMap = JobsStore.subjobsRunnigMap[applicationidJob];
-        if(job.jobStatus !== 'Completed' && job.jobStatus !== 'Failed' && inMap === undefined){
-            JobsStore.data.subjobsRunning.push(job);
-            JobsStore.subjobsRunnigMap[applicationidJob] = JobsStore.data.subjobsRunning.length - 1;
-        }else if((job.jobStatus === 'Completed' || job.jobStatus === 'Failed')&& inMap !== undefined){
-            JobsStore.data.subjobsRunning.splice(inMap, 1);
-            delete JobsStore.subjobsRunnigMap[inMap];
+        switch(job.jobStatus){
+            case 'Completed' :
+            case 'Failed' : {
+                if(inMap !== undefined){
+                    JobsStore.data.subjobsRunning.splice(inMap, 1);
+                    delete JobsStore.subjobsRunnigMap[inMap];
+                }
+                break;
+            }
+            
+            default: {
+                if(inMap === undefined){
+                    JobsStore.data.subjobsRunning.push(job);
+                    JobsStore.subjobsRunnigMap[applicationidJob] = JobsStore.data.subjobsRunning.length - 1;
+                }
+                break;
+            }
         }
     }
 

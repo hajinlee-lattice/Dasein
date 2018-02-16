@@ -78,8 +78,8 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
-            $scope.isOneActionCompleted = function () {
-                var subJobs = $scope.job.subJobs;
+            $scope.isOneActionCompleted = function (job) {
+                var subJobs = job.subJobs;
                 var oneCompleted = false;
                 if (subJobs) {
                     subJobs.forEach(function (job) {
@@ -88,6 +88,9 @@ angular.module('lp.jobs.import.row', [])
                             return oneCompleted;
                         }
                     });
+                }
+                if(job.jobStatus === 'Ready' && oneCompleted === false){
+                    job.jobStatus = 'Waiting';
                 }
                 return oneCompleted;
             }
@@ -123,30 +126,76 @@ angular.module('lp.jobs.import.row', [])
                 return !allCompleted;
             }
 
-            $scope.disableRunButton = function () {
-                var oneCompleted = $scope.isOneActionCompleted();
+            $scope.showScheduleTime = function(job){
+                if(!$scope.disableRunButton(job) && $scope.showRunButton(job)){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+
+            $scope.disableRunButton = function (job) {
+                var oneCompleted = $scope.isOneActionCompleted(job);
                 var canRun = $scope.vm.canLastJobRun();
                 var disable = false;
                 if ($scope.disableButton || !canRun || !oneCompleted) {
                     disable = true;
                 }
                 return disable;
-                // disableButton || !vm.canLastJobRun() || !isOneActionCompleted()
             }
 
             $scope.showRunButton = function (job) {
-                if (job.jobStatus === 'Ready') {
-                    return true;
-                } else {
-                    return false;
+                switch(job.jobStatus){
+                    case 'Failed':
+                    case 'Completed':
+                    case 'Pending':
+                    case 'Running':{
+                        return false;
+                    }
+                    default: {
+                        return true;
+                    }
                 }
             }
 
             $scope.showReport = function (job) {
+                if($scope.showRunButton(job)){
+                    return false;
+                }else{
+                    switch(job.jobStatus){
+                        case 'Completed':{
+                            return true;
+                        }
 
-                if (job.jobStatus === 'Completed' || job.jobStatus === 'Failed') {
+                        default: {
+                            return false;
+                        }
+                    }
+                }
+
+            }
+
+            $scope.showChevron = function(job){
+                switch(job.jobStatus){
+                    case 'Waiting': 
+                    case 'Pending':
+                    case 'Ready':{
+                        return false;
+                    }
+                    default: {
+                        if($scope.expanded === true){
+                            return true;
+                        }else{
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            $scope.isJonInState = function(job, status){
+                if(job.jobStatus === status){
                     return true;
-                } else {
+                }else{
                     return false;
                 }
             }

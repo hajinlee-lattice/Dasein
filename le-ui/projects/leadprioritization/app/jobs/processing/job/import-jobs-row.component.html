@@ -1,6 +1,6 @@
 <div class="le-cell le-col-start-1 le-col-span-2">
 
-    <span ng-if="!isJobReady(job)">
+    <span ng-if="!isJonInState(job, 'Waiting') && !isJonInState(job, 'Ready')">
         {{job.startTimestamp | date : 'MM/dd/yyyy h:mma'}}
     </span>
 </div>
@@ -32,16 +32,16 @@
     </span>
 </div>
 <div class="le-cell le-col-start-7 le-col-span-2">
-    <span ng-if="!vm.isJobRunning(job) && vm.showRunButton(job) && vm.canLastJobRun()" class="contact">
+    <span ng-if="showScheduleTime(job)" class="contact">
         Schedule at {{job.startTimestamp ? (job.startTimestamp | date : 'MM/dd/yyyy h:mma') : ''}}
     </span>
 </div>
 <div class="le-cell le-col-start-9 le-col-span-3">
-    <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="disableRunButton()">
+    <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="disableRunButton(job)">
         Run Now
     </button>
 
-    <a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="!showRunButton(job) && !isJobRunning(job) && !isJobFailed(job)">
+    <a ui-sref="home.jobs.summary({jobId: job.id})" ng-if="showReport(job)">
         Report
     </a>
     <span>
@@ -70,5 +70,5 @@
         </span>
     </div>
 </div>
-<chevron class="le-row" chevronconfig="chevronConfig" stepscompleted="job.steps" jobstatus="job.jobStatus" ng-if="expanded && job.jobStatus != 'Pending' && job.jobStatus != 'Ready'"></chevron>
+<chevron class="le-row" chevronconfig="chevronConfig" stepscompleted="job.steps" jobstatus="job.jobStatus" ng-if="showChevron(job)"></chevron>
 <import-job-row-sub-jobs ng-if="expanded" subjobs="job.subJobs"></import-job-row-sub-jobs>
