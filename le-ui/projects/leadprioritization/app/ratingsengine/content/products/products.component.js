@@ -29,7 +29,13 @@ angular.module('lp.ratingsengine.wizard.products', [
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
 
+                console.log(rating);
+
                 var selectedTargetProducts = rating.activeModel.AI.targetProducts;
+
+                vm.productsSelected = selectedTargetProducts;
+                vm.getProductsSelectedCount();
+
                 if(selectedTargetProducts.length > 0) {
                     angular.forEach(selectedTargetProducts, function(value, key) {
                         vm.selectProduct(value, key);

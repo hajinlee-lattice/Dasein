@@ -609,6 +609,8 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
+
+        console.log($stateParams);
         var engineType = $stateParams.engineType,
             opts =  {
                 type: "AI_BASED",
@@ -626,6 +628,9 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveAIRatingModel = function(nextState){
+
+        console.log($stateParams);
+
         var currentRating = RatingsEngineStore.getCurrentRating(),
             ratingId = $stateParams.rating_id,
             targetProducts = RatingsEngineStore.getProductsSelectedIds(),
@@ -651,6 +656,8 @@ angular.module('lp.ratingsengine')
             };
 
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
+
+                console.log(model);
 
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);

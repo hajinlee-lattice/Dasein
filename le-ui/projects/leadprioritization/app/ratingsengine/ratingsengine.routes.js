@@ -503,14 +503,12 @@ angular
                         resolve: {
                             WizardHeaderTitle: function ($stateParams, RatingsEngineStore) {
 
-                                // RatingsEngineStore.getType()
-
                                 var engineType = $stateParams.engineType,
                                     title = '';
 
                                 if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
                                     title = 'Create Rating Engine: Customers that will purchase a product for the first time';
-                                } else if (engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
+                                } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
                                     title = 'Create Rating Engine: Customers that will purchase again next quarter';
                                 }
 
