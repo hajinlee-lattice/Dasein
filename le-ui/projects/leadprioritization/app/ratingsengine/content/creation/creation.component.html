@@ -56,6 +56,54 @@
             </dl>
 
             <h3>Job Status</h3>
+            <dl class="step-progression">
+                <dt ng-class="{ 'started': vm.startTimestamp }">Job Started</dt>
+                <dd>
+                    <i 
+                        class="fa fa-spinner fa-pulse fw"
+                        ng-if="!vm.jobStarted"></i>
+                    <span ng-if="vm.startTimestamp">
+                        <i 
+                        class="fa fa-check"></i>
+                        {{vm.startTimestamp | date:"MM/dd/yyyy 'at' h:mma"}}
+                    </span>
+                </dd>
+                <dt ng-class="{ 'started': vm.completedSteps.load_data }">Processing File</dt>
+                <dd>
+                    <i 
+                        class="fa fa-spinner fa-pulse fw"
+                        ng-if="vm.loadingData"></i>
+                    <span ng-if="vm.completedSteps.load_data">
+                        <i 
+                        class="fa fa-check"></i>
+                        {{vm.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
+                    </span>
+                </dd>
+                <dt ng-class="{ 'started': vm.completedSteps.create_global_target_market }">Matching to Data Cloud</dt>
+                <dd>
+                    <i 
+                        class="fa fa-spinner fa-pulse fw"
+                        ng-if="vm.matchingToDataCloud"></i>
+                    <span ng-if="vm.completedSteps.create_global_target_market">
+                        <i 
+                        class="fa fa-check"></i>
+                        {{vm.completedSteps.create_global_target_market | date:"MM/dd/yyyy 'at' h:mma"}}
+                    </span>
+                </dd>
+                <dt ng-class="{ 'started': vm.completedSteps.score_training_set }">Scoring Training Set</dt>
+                <dd>
+                    <i 
+                        class="fa fa-spinner fa-pulse fw"
+                        ng-if="vm.scoringTrainingSet"></i>
+                    <span ng-if="vm.completedSteps.score_training_set">
+                        <i 
+                        class="fa fa-check"></i>
+                        {{vm.completedSteps.score_training_set | date:"MM/dd/yyyy 'at' h:mma"}}
+                    </span>
+                </dd>
+            </dl>
+
+
             <div class="meter bar" ng-if="vm.status !== 'Completed'">
                 <span class="indeterminate" ng-style="{ 'width': vm.progress }"></span>
             </div>

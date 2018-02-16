@@ -35,4 +35,19 @@
             margin-left: 160px;
         }
     }
+    .step-progression {
+        margin-bottom: 10px;
+        dt {
+            width: auto;
+            float: left;
+            color: #ddd;
+            &.started {
+                color: #333;
+            }
+        }
+        dd {
+            float: right;
+            margin-left: 0;
+        }
+    }
 }

@@ -69,9 +69,20 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             if(result.id) {
                 vm.status = result.jobStatus;
 
+                vm.jobStarted = true;
+                vm.startTimestamp = result.startTimestamp;
+            
+                vm.completedSteps = result.completedTimes;
+
+                vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
+                vm.matchingToDataCloud = vm.completedSteps.load_data && !vm.completedSteps.create_global_target_market;
+                vm.scoringTrainingSet = vm.completedSteps.create_global_target_market && !vm.completedSteps.score_training_set;
+
+                // Green status bar
                 if(result.stepsCompleted.length > 0){
                     vm.progress = ((result.stepsCompleted.length / 2) * 7) + '%';
                 }
+                // Cancel $interval when completed
                 if(vm.status === 'Completed'){
                     $interval.cancel(vm.checkJobStatus);
                 }
