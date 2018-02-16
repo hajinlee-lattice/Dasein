@@ -135,4 +135,9 @@ public class GlobalAuthFunctionalTestBed extends AbstractGlobalAuthTestBed imple
     public void loginAD() {
         throw new UnsupportedOperationException("loginAD is not applicable to functional tests.");
     }
+
+    @Override
+    public Tenant getTenantBasedOnId(String tenantId) {
+        return tenantService.findByTenantId(tenantId);
+    }
 }

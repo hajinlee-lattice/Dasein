@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.security.exposed.AccessLevel;
+import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.proxy.admin.AdminInternalProxy;
 import com.latticeengines.testframework.exposed.proxy.admin.AdminTenantProxy;
 import com.latticeengines.testframework.exposed.service.GlobalAuthTestBed;
@@ -75,6 +76,9 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Autowired
     private AdminInternalProxy adminInternalProxy;
+
+    @Autowired
+    private TenantService tenantService;
 
     public GlobalAuthDeploymentTestBed(String plsApiHostPort, String adminApiHostPort, String environment) {
         super();
@@ -443,6 +447,11 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
     public void attachProtectedProxy(ProtectedRestApiProxy proxy) {
         proxy.attachInterceptor(authHeaderInterceptor);
         log.info("Attached pls auth interceptor to " + proxy.getClass().getSimpleName());
+    }
+
+    @Override
+    public Tenant getTenantBasedOnId(String tenantId) {
+        return tenantService.findByTenantId(tenantId);
     }
 
 }

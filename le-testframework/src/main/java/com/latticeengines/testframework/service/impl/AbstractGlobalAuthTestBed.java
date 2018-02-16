@@ -276,7 +276,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
         tenant.setName(fullTenantId);
 
         createTenant(tenant);
-        testTenants.add(tenant);
+        Tenant retrievedTenant = getTenantBasedOnId(tenantId);
+        testTenants.add(retrievedTenant);
 
         log.info("Adding test tenant " + tenantId);
         return tenant;
@@ -290,6 +291,8 @@ public abstract class AbstractGlobalAuthTestBed implements GlobalAuthTestBed {
     public abstract void createTenant(Tenant tenant);
 
     public abstract void deleteTenant(Tenant tenant);
+
+    public abstract Tenant getTenantBasedOnId(String tenantId);
 
     private void cleanupHdfs() {
         Configuration yarnConfiguration;
