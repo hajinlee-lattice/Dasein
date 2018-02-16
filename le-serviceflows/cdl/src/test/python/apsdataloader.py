@@ -35,15 +35,16 @@ class FileWriterProcess (multiprocessing.Process):
         logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
 
 class UploadFromLocalProcess(multiprocessing.Process):
-    def __init__(self, outputFile, outputPath, hdfs):
+    def __init__(self, outputFile, outputPath, webHdfsHostPort):
         super(UploadFromLocalProcess, self).__init__()
         self.outputFile = outputFile
         self.outputPath = outputPath
-        self.hdfs = hdfs
+        self.webHdfsHostPort = webHdfsHostPort
     def run(self):
         logger.info("Uploading file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
         filePath, fileName = os.path.split(self.outputFile)
-        self.hdfs.copyFromLocal(self.outputFile, self.outputPath + "/" + fileName)
+        hdfs = WebHDFS(self.webHdfsHostPort.hostname, self.webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+        hdfs.copyFromLocal(self.outputFile, self.outputPath + "/" + fileName)
         logger.info("Uploaded file from local=%s to remote=%s" % (self.outputFile, self.outputPath))
         
               
@@ -63,9 +64,9 @@ class ApsDataLoader(object):
         self.inputPaths = flowJson['inputPaths'] if 'inputPaths' in flowJson else None
         self.outputPath = flowJson['outputPath'] if 'outputPath' in flowJson else None
         
-        webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
-        logger.info("Web hdfs host=" + str(webHdfsHostPort.hostname) + " port=" + str(webHdfsHostPort.port))
-        self.hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
+        self.webHdfsHostPort = urlparse(os.environ['SHDP_HD_FSWEB'])
+        logger.info("Web hdfs host=" + str(self.webHdfsHostPort.hostname) + " port=" + str(self.webHdfsHostPort.port))
+        self.hdfs = WebHDFS(self.webHdfsHostPort.hostname, self.webHdfsHostPort.port, pwd.getpwuid(os.getuid())[0])
         
     def downloadToLocal(self, localDir='./input'):
         logger.info("Start to downloadToLocal data.")
@@ -101,7 +102,7 @@ class ApsDataLoader(object):
         outputFiles = glob.glob("%s/*.avro" % localDir)
         processes = []
         for outputFile in outputFiles:
-            processes.append(UploadFromLocalProcess(outputFile, self.outputPath, self.hdfs))
+            processes.append(UploadFromLocalProcess(outputFile, self.outputPath, self.webHdfsHostPort))
         self.parallelExecute(processes)
         logger.info("Finished uploadFromLocal data.")
 

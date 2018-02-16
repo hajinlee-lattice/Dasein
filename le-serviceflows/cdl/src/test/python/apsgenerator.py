@@ -149,6 +149,6 @@ if __name__ == '__main__':
     apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
     loader.parallelWriteDataFrameToAvro(apState)
     logger.info(apState.shape)
-    loader.uploadFromLocal()
-#     loader.parallelUploadFromLocal()
+#     loader.uploadFromLocal()
+    loader.parallelUploadFromLocal()
     
