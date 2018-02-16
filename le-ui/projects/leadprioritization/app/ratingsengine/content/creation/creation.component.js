@@ -65,7 +65,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     vm.checkJobStatus = $interval(function() { 
         JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
             
-            console.log(result);
             if(result.id) {
                 vm.status = result.jobStatus;
 
