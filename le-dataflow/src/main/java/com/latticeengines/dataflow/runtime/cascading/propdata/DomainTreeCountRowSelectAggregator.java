@@ -137,6 +137,10 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
 
     private boolean isNoProfitable(TupleEntry arguments, Long salesVolVal, Integer empTotalVal) {
         String primaryIndustry = arguments.getString(primIndustryField);
+        if (salesVolVal == null)
+            salesVolVal = 0L;
+        if (empTotalVal == null)
+            empTotalVal = 0;
         if (primaryIndustry != null
                 && (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
                 || primaryIndustry.equals(NON_PROFIT))
