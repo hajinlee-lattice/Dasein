@@ -54,11 +54,6 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
         destroyTestTenant();
     }
 
-    @BeforeMethod(groups = { "functional", "deployment" })
-    public void beforeMethod() {
-        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
-    }
-
     @Test(groups = { "functional", "deployment" }, dataProvider = "authTableProvider")
     public void registerUser(AccessLevel level, Boolean[] expectForEachTargetLevel) {//
         switchToAccessLevel(level);
@@ -106,6 +101,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void validateNewUser() {
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testConflictingUserInTenant();
         testConflictingUserOutsideTenant();
     }
@@ -148,6 +144,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
 
     @Test(groups = { "functional", "deployment" })
     public void changePassword() {
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         testChangePassword(AccessLevel.THIRD_PARTY_USER);
         testChangePassword(AccessLevel.EXTERNAL_USER);
         testChangePassword(AccessLevel.EXTERNAL_ADMIN);
@@ -160,6 +157,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void deleteUserWithShortEmail() {
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         String shortEmail = "a@b.c";
         makeSureUserDoesNotExist(shortEmail);
         createUser(shortEmail, shortEmail, "Short", "Email");
@@ -175,6 +173,7 @@ public class UserResourceTestNG extends UserResourceTestNGBase {
     @SuppressWarnings("rawtypes")
     @Test(groups = { "functional", "deployment" })
     public void stringifiedUserName_updateAccessLevel_acessLevelSuccessfullyUpdated() {
+        switchToAccessLevel(AccessLevel.SUPER_ADMIN);
         User user = createTestUser(AccessLevel.EXTERNAL_USER);
         UserUpdateData data = new UserUpdateData();
         data.setAccessLevel(user.getAccessLevel());
