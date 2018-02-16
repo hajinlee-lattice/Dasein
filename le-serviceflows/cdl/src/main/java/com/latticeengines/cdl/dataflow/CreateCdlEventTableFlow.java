@@ -2,8 +2,10 @@ package com.latticeengines.cdl.dataflow;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
 
 @Component("createCdlEventTableFlow")
@@ -35,7 +38,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         result = result.leftJoin(accountGroupFields, accountTable, accountGroupFields);
 
         result = result.retain(new FieldList(retainFields));
-        log.info("Cdl event table's columns=", retainFields);
+        log.info("Cdl event table's columns=" + StringUtils.join(retainFields, ","));
         return result;
     }
 
@@ -44,15 +47,24 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(apsTable.getFieldNames());
         retainFields.addAll(accountTable.getFieldNames());
-        if (inputTable.getFieldNames().contains(InterfaceName.Train.name()))
-            retainFields.add(InterfaceName.Train.name());
         if (inputTable.getFieldNames().contains(parameters.eventColumn))
             retainFields.add(parameters.eventColumn);
-        if (inputTable.getFieldNames().contains(InterfaceName.__Revenue.name()))
-            retainFields.add(InterfaceName.__Revenue.name());
+        potentialFieldsToRetain().forEach(attr -> {
+            if (inputTable.getFieldNames().contains(attr))
+                retainFields.add(attr);
+        });
         retainFields.removeAll(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.CDLCreatedTime.name(),
                 InterfaceName.CDLUpdatedTime.name()));
         return retainFields;
+    }
+
+    private Collection<String> potentialFieldsToRetain() {
+        return Arrays.asList( //
+                InterfaceName.Train.name(), //
+                InterfaceName.__Revenue.name(), //
+                ScoreResultField.ModelId.displayName, //
+                InterfaceName.__Composite_Key__.name() //
+        );
     }
 
 }

@@ -12,7 +12,8 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoring
     private String modelType;
 
     private boolean liftChart;
-    private boolean cdlModel;
+    private boolean cdlModel; //M19: to be merged into cdlMultiModel mode in future release ~ M20
+    private boolean cdlMultiModel;
     private boolean expectedValue;
 
     public CombineInputTableWithScoreDataFlowConfiguration() {
@@ -27,6 +28,15 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoring
 
     public void setCdlModel(boolean cdlModel) {
         this.cdlModel = cdlModel;
+    }
+
+    @JsonProperty
+    public boolean isCdlMultiModel() {
+        return cdlMultiModel;
+    }
+
+    public void setCdlMultiModel(boolean cdlMultiModel) {
+        this.cdlMultiModel = cdlMultiModel;
     }
 
     public List<BucketMetadata> getBucketMetadata() {

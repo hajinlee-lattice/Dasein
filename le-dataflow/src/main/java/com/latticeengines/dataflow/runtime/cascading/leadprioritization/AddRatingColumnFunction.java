@@ -1,8 +1,11 @@
 package com.latticeengines.dataflow.runtime.cascading.leadprioritization;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,66 +27,103 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     private static final Logger log = LoggerFactory.getLogger(AddRatingColumnFunction.class);
 
     private String scoreFieldName;
-    private List<BucketMetadata> bucketMetadata = new ArrayList<>();
+    private String modelIdFieldName;
     private Integer scoreMultiplier;
     private Double avgScore;
+
+    // fields for multi model
+    private boolean multiModelMode = false;
+    private List<BucketMetadata> bucketMetadata;
+    private Map<String, List<BucketMetadata>> bucketMetadataMap;
+    private Map<String, String> scoreFieldMap;
 
     public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
             Integer scoreMultiplier, Double avgScore) {
         super(new Fields(ratingFieldName));
         this.scoreFieldName = scoreFieldName;
-        this.bucketMetadata = bucketMetadata;
+        this.bucketMetadata = sortBucketMetadata(bucketMetadata);
         this.scoreMultiplier = scoreMultiplier;
         this.avgScore = avgScore;
+    }
+
+    public AddRatingColumnFunction(Map<String, String> scoreFieldMap, String modelIdFieldName, String ratingFieldName,
+            Map<String, List<BucketMetadata>> bucketMetadataMap, Integer scoreMultiplier, Double avgScore) {
+        super(new Fields(ratingFieldName));
+        this.multiModelMode = true;
+        this.scoreFieldMap = scoreFieldMap;
+        this.modelIdFieldName = modelIdFieldName;
+        this.scoreMultiplier = scoreMultiplier;
+        this.avgScore = avgScore;
+        this.bucketMetadataMap = new HashMap<>();
+        bucketMetadataMap.forEach((modelId, bucketMetadata) -> //
+                this.bucketMetadataMap.put(modelId, sortBucketMetadata(bucketMetadata)));
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        Object scoreObj = arguments.getObject(scoreFieldName);
+        String scoreField = scoreFieldName;
+        if (multiModelMode) {
+            String modelId = arguments.getString(modelIdFieldName);
+            scoreField = scoreFieldMap.get(modelId);
+        }
+        Object scoreObj = arguments.getObject(scoreField);
         double score = Double.parseDouble(scoreObj.toString());
-        Double newAvgScore = avgScore;
-        if (scoreMultiplier != null) {
-            score *= scoreMultiplier;
+        if (multiModelMode) {
+            //to be filled
+        } else {
+            Double newAvgScore = avgScore;
+            if (scoreMultiplier != null) {
+                score *= scoreMultiplier;
+                if (newAvgScore != null) {
+                    newAvgScore *= scoreMultiplier;
+                }
+            }
             if (newAvgScore != null) {
-                newAvgScore *= scoreMultiplier;
+                score /= newAvgScore;
             }
         }
-        if (newAvgScore != null) {
-            score /= newAvgScore;
+        Object ratingObj;
+        if (multiModelMode) {
+            String modelId = arguments.getString(modelIdFieldName);
+            ratingObj = bucketScore(bucketMetadataMap.get(modelId), score);
+        } else {
+            ratingObj = bucketScore(bucketMetadata, score);
         }
-        Object ratingObj = bucketScore(bucketMetadata, score);
-        functionCall.getOutputCollector().add(new Tuple(ratingObj.toString()));
-        return;
+        functionCall.getOutputCollector().add(new Tuple(ratingObj));
     }
 
-    protected String bucketScore(List<BucketMetadata> bucketMetadataList, double score) {
-        BucketName bucketName = null;
-
-        if (bucketMetadataList != null && !bucketMetadataList.isEmpty()) {
-            bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadataList, score).getBucket();
+    private String bucketScore(List<BucketMetadata> bucketMetadata, double score) {
+        BucketName bucketName;
+        if (CollectionUtils.isNotEmpty(bucketMetadata)) {
+            bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadata, score).getBucket();
         } else {
             // use default bucketing criteria
             if (log.isDebugEnabled()) {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");
             }
-            if (score < BucketName.D.getDefaultLowerBound()) {
-                log.warn(String.format("%f is less than minimum bound, setting to %s", score, BucketName.D.name()));
+            if (score < BucketName.C.getDefaultLowerBound()) {
+                if (score < BucketName.D.getDefaultLowerBound()) {
+                    log.warn(String.format("%f is less than minimum bound, setting to %s", score, BucketName.D.name()));
+                }
                 bucketName = BucketName.D;
-            } else if (score >= BucketName.D.getDefaultLowerBound() && score <= BucketName.D.getDefaultUpperBound()) {
-                bucketName = BucketName.D;
-            } else if (score >= BucketName.C.getDefaultLowerBound() && score <= BucketName.C.getDefaultUpperBound()) {
+            } else if (score < BucketName.B.getDefaultLowerBound()) {
                 bucketName = BucketName.C;
-            } else if (score >= BucketName.B.getDefaultLowerBound() && score <= BucketName.B.getDefaultUpperBound()) {
+            } else if (score < BucketName.A.getDefaultLowerBound()) {
                 bucketName = BucketName.B;
-            } else if (score >= BucketName.A.getDefaultLowerBound() && score <= BucketName.A.getDefaultUpperBound()) {
-                bucketName = BucketName.A;
             } else {
-                log.warn(String.format("%f is more than maximum bound, setting to %s", score, BucketName.A.name()));
+                if (score > BucketName.A.getDefaultUpperBound()) {
+                    log.warn(String.format("%f is more than maximum bound, setting to %s", score, BucketName.A.name()));
+                }
                 bucketName = BucketName.A;
             }
         }
         return bucketName == null ? null : bucketName.toValue();
+    }
+
+    private List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        return bucketMetadata.stream().sorted((o1, o2) -> //
+                Integer.compare(o1.getLeftBoundScore(), o2.getRightBoundScore())).collect(Collectors.toList());
     }
 
 }

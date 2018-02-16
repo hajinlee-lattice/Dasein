@@ -1,12 +1,15 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -18,11 +21,22 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessR
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private ProcessAnalyzeWorkflowConfiguration() {
 
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        ImmutableSet.Builder<String> builder = ImmutableSet.<String>builder() //
+                .add(SoftwareLibrary.Modeling.getName());
+        if (CollectionUtils.isNotEmpty(super.getSwpkgNames())) {
+            builder.addAll(super.getSwpkgNames());
+        }
+        return builder.build();
     }
 
     public static class Builder {
@@ -107,6 +121,16 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder currentDataCloudBuildNumber(String currentDataCloudBuildNumber) {
             processStepConfiguration.setDataCloudBuildNumber(currentDataCloudBuildNumber);
+            return this;
+        }
+
+        public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
+            generateRatingWorfklowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            return this;
+        }
+
+        public Builder matchYarnQueue(String matchYarnQueue) {
+            generateRatingWorfklowConfigurationBuilder.matchYarnQueue(matchYarnQueue);
             return this;
         }
 

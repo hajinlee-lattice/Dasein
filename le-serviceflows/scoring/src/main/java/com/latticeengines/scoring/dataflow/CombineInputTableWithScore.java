@@ -2,6 +2,7 @@ package com.latticeengines.scoring.dataflow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.leadprioritization.AddRatingColumnFunction;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
@@ -31,11 +33,23 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
         Node scoreWithRating = scoreTable;
         boolean noRatingColumnInScoreTable = scoreWithRating
-                .getSourceAttribute(ScoreResultField.Rating.displayName) == null ? true : false;
-        boolean notPMMLModel = parameters.getModelType() == null ? true
-                : parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
+                .getSourceAttribute(ScoreResultField.Rating.displayName) == null;
+        boolean notPMMLModel = parameters.getModelType() == null
+                || parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
 
-        if (noRatingColumnInScoreTable && notPMMLModel) {
+        if (inputTable.getFieldNames().contains(InterfaceName.ModelId.name())) {
+            log.info("Enter multi-model mode");
+            Map<String, List<BucketMetadata>> bucketMetadataMap = parameters.getBucketMetadataMap();
+            String modelIdField = parameters.getModelIdField();
+            Map<String, String> scoreFieldMap = parameters.getScoreFieldMap();
+            scoreWithRating = scoreTable.apply(
+                    new AddRatingColumnFunction(scoreFieldMap, modelIdField,
+                            ScoreResultField.Rating.displayName, bucketMetadataMap, parameters.getScoreMultiplier(),
+                            parameters.getAvgScore()),
+                    new FieldList(parameters.getScoreFieldName()),
+                    new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
+        } else if (noRatingColumnInScoreTable && notPMMLModel) {
+            log.info("Enter single-model mode");
             scoreWithRating = scoreTable.apply(
                     new AddRatingColumnFunction(parameters.getScoreFieldName(), ScoreResultField.Rating.displayName,
                             parameters.getBucketMetadata(), parameters.getScoreMultiplier(), parameters.getAvgScore()),

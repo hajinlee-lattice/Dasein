@@ -1,8 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -11,24 +9,14 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
-    @NotEmptyString
-    @NotNull
     private String dbUrl;
 
-    @NotEmptyString
-    @NotNull
     private String dbUser;
 
-    @NotEmptyString
-    @NotNull
     private String dbPasswordEncrypted;
 
-    @NotEmptyString
-    @NotNull
     private String destTables;
 
-    @NotEmptyString
-    @NotNull
     private String matchClient;
 
     @JsonProperty("match_hdfs_pod")
@@ -41,13 +29,10 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     private boolean excludePublicDomain = false;
     private boolean publicDomainAsNormalDomain = false;
 
-    @NotNull
     private MatchCommandType matchCommandType;
 
     private MatchJoinType matchJoinType = MatchJoinType.OUTER_JOIN;
 
-    @NotEmptyString
-    @NotNull
     private String inputTableName;
 
     private Predefined predefinedColumnSelection;

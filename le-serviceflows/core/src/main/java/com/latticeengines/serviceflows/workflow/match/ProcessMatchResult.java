@@ -1,20 +1,22 @@
 package com.latticeengines.serviceflows.workflow.match;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -25,7 +27,7 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     private static final String EVENT = "DataCloudMatchEvent";
@@ -49,11 +51,6 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
     }
 
     @Override
-    public void execute() {
-        super.execute();
-    }
-
-    @Override
     public void onExecutionCompleted() {
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
@@ -66,45 +63,45 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
         MatchCommand matchCommand = getObjectFromContext(MATCH_COMMAND, MatchCommand.class);
         Table matchResultTable = MetadataConverter.getTable(yarnConfiguration, matchCommand.getResultLocation(), null,
                 null);
-        String resultTableName = AvroUtils.getAvroFriendlyString(LDC_MATCH + "_" + matchCommand.getRootOperationUid());
+        String resultTableName = NamingUtils.uuid(LDC_MATCH, UUID.fromString(matchCommand.getRootOperationUid()));
         matchResultTable.setName(resultTableName);
-        metadataProxy.createTable(configuration.getCustomerSpace().toString(), resultTableName, matchResultTable);
-        try {
-            // wait 3 seconds for metadata to create the table
-            Thread.sleep(3000L);
-        } catch (InterruptedException e) {
-            // ignore
-        }
+        String customerSpace = configuration.getCustomerSpace().toString();
+        metadataProxy.createTable(customerSpace, resultTableName, matchResultTable);
         return matchResultTable;
     }
 
     private List<String> sourceCols(Table preMatchTable) {
-        List<String> cols = new ArrayList<>();
-        String idCol = getIdColumn(preMatchTable);
-        cols.add(idCol);
-        for (Attribute attr : preMatchTable.getAttributes()) {
-            if (!idCol.equalsIgnoreCase(attr.getName())) {
-                cols.add(attr.getName());
-            }
-        }
+        List<String> cols = Arrays.asList(preMatchTable.getAttributeNames());
+//        String idCol = getIdColumn(preMatchTable);
+//        cols.add(idCol);
+//        for (Attribute attr : preMatchTable.getAttributes()) {
+//            if (!idCol.equalsIgnoreCase(attr.getName())) {
+//                cols.add(attr.getName());
+//            }
+//        }
         log.info("Found source columns: " + StringUtils.join(cols, ", "));
         return cols;
     }
 
     private String getIdColumn(Table table) {
-        List<Attribute> idColumns = table.getAttributes(LogicalDataType.InternalId);
-        if (idColumns.isEmpty()) {
-            if (table.getAttribute("Id") == null) {
-                throw new RuntimeException("No Id columns found in prematch table");
-            } else {
-                log.warn("No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
-                idColumns.add(table.getAttribute("Id"));
+        String idAttr = getStringValueFromContext(MATCH_INPUT_ID_COLUMN);
+        if (StringUtils.isBlank(idAttr)) {
+            List<Attribute> idColumns = table.getAttributes(LogicalDataType.InternalId);
+            if (idColumns.isEmpty()) {
+                if (table.getAttribute("Id") == null) {
+                    throw new RuntimeException("No Id columns found in prematch table");
+                } else {
+                    log.warn("No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
+                    idColumns.add(table.getAttribute("Id"));
+                }
             }
+            if (idColumns.size() != 1) {
+                log.warn(String.format("Multiple id columns in prematch table.  Choosing %s", idColumns.get(0).getName()));
+            }
+            return idColumns.get(0).getName();
+        } else {
+            return idAttr;
         }
-        if (idColumns.size() != 1) {
-            log.warn(String.format("Multiple id columns in prematch table.  Choosing %s", idColumns.get(0).getName()));
-        }
-        return idColumns.get(0).getName();
     }
 
 }

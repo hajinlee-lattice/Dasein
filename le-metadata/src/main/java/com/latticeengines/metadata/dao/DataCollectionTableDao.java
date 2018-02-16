@@ -1,10 +1,13 @@
 package com.latticeengines.metadata.dao;
 
+import java.util.List;
+
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 
 public interface DataCollectionTableDao extends BaseDao<DataCollectionTable> {
 
-    DataCollectionTable findByNames(String collectionName, String tableName);
+    List<DataCollectionTable> findAllByName(String collectionName, String tableName, DataCollection.Version version);
 
 }

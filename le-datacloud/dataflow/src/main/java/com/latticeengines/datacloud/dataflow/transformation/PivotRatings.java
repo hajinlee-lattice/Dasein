@@ -29,6 +29,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
         PivotRatingsConfig config = getTransformerConfig(parameters);
         Map<String, String> idAttrsMap = config.getIdAttrsMap();
         Node rawRatings = addSource(parameters.getBaseTables().get(0));
+        rawRatings = rawRatings.discard(InterfaceName.__Composite_Key__.name());
         Node pivoted = pivotRuleBased(rawRatings, idAttrsMap);
         return renameIds(pivoted, idAttrsMap);
     }

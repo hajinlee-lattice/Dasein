@@ -42,8 +42,8 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
         return swpkgNames;
     }
 
-    @JsonProperty("swpkgName")
-    public void setSwpkgName(Collection<String> swpkgNames) {
+    @JsonProperty("swpkgNames")
+    public void setSwpkgNames(Collection<String> swpkgNames) {
         this.swpkgNames = swpkgNames;
     }
 

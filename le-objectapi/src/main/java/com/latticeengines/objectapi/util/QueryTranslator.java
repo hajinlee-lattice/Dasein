@@ -52,7 +52,6 @@ import com.latticeengines.query.exposed.translator.TransactionRestrictionTransla
 public class QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
 
-    public static final int MAX_ROWS = 250;
     private static final int MAX_CARDINALITY = 20000;
     private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
@@ -107,12 +106,6 @@ public class QueryTranslator {
 
         if (frontEndQuery.getPageFilter() != null) {
             pageFilter = frontEndQuery.getPageFilter();
-
-            if (pageFilter.getNumRows() > MAX_ROWS) {
-                log.warn(String.format("Refusing to accept a query requesting more than %s rows."
-                                       + " Currently specified page filter: %s", MAX_ROWS, pageFilter));
-                pageFilter.setNumRows(MAX_ROWS);
-            }
         }
 
         queryBuilder.page(pageFilter);

@@ -76,11 +76,12 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
     public void skipStep() {
         log.info("Skip matching step and register event table now.");
         Table table = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
-        if (table == null)
+        if (table == null && StringUtils.isNotBlank(configuration.getInputTableName())) {
             table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getInputTableName());
-        putObjectInContext(EVENT_TABLE, table);
-        putObjectInContext(MATCH_RESULT_TABLE, table);
+            putObjectInContext(EVENT_TABLE, table);
+            putObjectInContext(MATCH_RESULT_TABLE, table);
+        }
         log.info("Skip embedded bulk match workflow.");
         skipEmbeddedWorkflow(BulkMatchWorkflowConfiguration.class);
     }
@@ -96,7 +97,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
     private MatchInput prepareMatchInput(Table preMatchEventTable) {
         MatchInput matchInput = new MatchInput();
-        matchInput.setYarnQueue(getConfiguration().getMatchQueue());
+        matchInput.setYarnQueue(configuration.getMatchQueue());
 
         if (getConfiguration().getCustomizedColumnSelection() == null
                 && getConfiguration().getPredefinedColumnSelection() == null) {
@@ -121,11 +122,8 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
                 matchInput.setPredefinedSelection(predefined);
             }
 
-            String version = getConfiguration().getPredefinedSelectionVersion();
-            if (StringUtils.isEmpty(version)) {
-                version = "1.0";
-                getConfiguration().setPredefinedSelectionVersion(version);
-            }
+            String version = "1.0";
+            getConfiguration().setPredefinedSelectionVersion(version);
 
             putStringValueInContext(MATCH_PREDEFINED_SELECTION, predefined.getName());
             putStringValueInContext(MATCH_PREDEFINED_SELECTION_VERSION, version);

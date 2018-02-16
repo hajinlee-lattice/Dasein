@@ -136,14 +136,16 @@ public class ScoringMapperPredictUtil {
             DataFileWriter dataFileWriter = null;
             Schema schema = null;
             boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.Id.name())
-                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
+                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                    || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
             boolean cdl = false;
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
                 Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue);
                 schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
-                cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
+                cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                        || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
             } else {
                 userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
@@ -177,7 +179,7 @@ public class ScoringMapperPredictUtil {
             Map<String, List<Double>> revenues, boolean hasRevenue, Schema schema, String key, ScoreOutput result,
             int i, JsonNode model, ScoreNormalizer normalizer) {
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        if (cdl) {
+        if (uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())) {
             builder.set(uniqueKeyColumn, Long.valueOf(result.getLeadID()));
         } else {
             builder.set(uniqueKeyColumn, String.valueOf(result.getLeadID()));
@@ -239,7 +241,8 @@ public class ScoringMapperPredictUtil {
             DataFileWriter dataFileWriter = null;
             Schema schema = null;
             boolean hasUniqueKey = uniqueKeyColumn.equals(InterfaceName.Id.name())
-                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name());
+                    || uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
+                    || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);

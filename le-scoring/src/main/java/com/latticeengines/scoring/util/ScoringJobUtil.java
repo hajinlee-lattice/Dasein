@@ -143,7 +143,8 @@ public class ScoringJobUtil {
         attributes.add(percentile);
         attributes.add(rawScore);
 
-        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)) {
+        if (InterfaceName.AnalyticPurchaseState_ID.name().equals(uniqueKeyColumn)
+                || InterfaceName.__Composite_Key__.name().equals(uniqueKeyColumn)) {
             Attribute probility = createAttribute(ScoreResultField.Probability);
             attributes.add(probility);
             Attribute normalized = createAttribute(ScoreResultField.NormalizedScore);

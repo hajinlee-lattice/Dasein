@@ -101,7 +101,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         if (getScoringInputType() != null) {
             scoringConfig.setScoreInputType(getScoringInputType());
         }
-        return new AbstractMap.SimpleEntry<ScoringConfiguration, String>(scoringConfig, tableName);
+        return new AbstractMap.SimpleEntry<>(scoringConfig, tableName);
     }
 
     private String getModelId() {

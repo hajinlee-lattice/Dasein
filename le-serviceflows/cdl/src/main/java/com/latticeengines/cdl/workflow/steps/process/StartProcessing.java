@@ -78,6 +78,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
+    // for Spring
     public StartProcessing() {
     }
 
@@ -114,7 +115,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         createReportJson();
         updateActions();
         setRebuildEntities();
-        cleanupInactiveVersion();
+        setupInactiveVersion();
         exportDataToRedshift.upsertToInactiveVersion();
     }
 
@@ -173,12 +174,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
     }
 
-    private void cleanupInactiveVersion() {
+    private void setupInactiveVersion() {
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactiveVersion);
             if (StringUtils.isNotBlank(tableName)) {
-                log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);
-                metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, activeVersion);
+                if (tableName.equalsIgnoreCase(activeTableName)) {
+                    log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
+                    dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
+                } else {
+                    log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);
+                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                }
             }
         }
         log.info("Removing stats in " + inactiveVersion);

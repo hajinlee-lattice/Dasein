@@ -1,13 +1,20 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
@@ -28,7 +35,11 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private void setupDataFlow() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
                 getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType());
-        setupCdlParameters(params);
+        if (configuration.isCdlModel()) {
+            setupCdlParameters(params);
+        } else if (configuration.isCdlMultiModel()) {
+            setCdlMultiModelParams(params);
+        }
         configuration.setDataFlowParams(params);
     }
 
@@ -46,6 +57,49 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         if (configuration.isLiftChart())
             params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
         params.setIdColumn(InterfaceName.AnalyticPurchaseState_ID.toString());
+    }
+
+    private void setCdlMultiModelParams(CombineInputTableWithScoreParameters params) {
+        if (!configuration.isCdlMultiModel())
+            return;
+
+        List<RatingModelContainer> containers = getModelContainers();
+        if (CollectionUtils.isEmpty(containers)) {
+            throw new IllegalStateException("There is no AI models in context.");
+        }
+        Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
+        Map<String, String> scoreFieldMap = new HashMap<>();
+        Map<String, Integer> scoreMultiplierMap = new HashMap<>();
+
+        containers.forEach(container -> {
+            CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
+            String modelGuid = ((AIModel) container.getModel()).getModelSummary().getId();
+            bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
+            scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());
+            scoreMultiplierMap.put(modelGuid, singleModelParams.getScoreMultiplier());
+        });
+
+        params.setBucketMetadataMap(bucketMetadataMap);
+        params.setScoreFieldMap(scoreFieldMap);
+        params.setScoreMultiplierMap(scoreMultiplierMap);
+
+        if (configuration.isLiftChart())
+            params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
+
+        params.setIdColumn(InterfaceName.__Composite_Key__.toString());
+    }
+
+    private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
+        CombineInputTableWithScoreParameters params =
+                new CombineInputTableWithScoreParameters(getScoreResultTableName(), getInputTableName());
+        return params;
+    }
+
+    private List<RatingModelContainer> getModelContainers() {
+        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        return allContainers.stream() //
+                .filter(container -> RatingEngineType.AI_BASED.equals(container.getEngineSummary().getType())) //
+                .collect(Collectors.toList());
     }
 
     private void configureExport() {

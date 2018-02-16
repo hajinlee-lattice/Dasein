@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,6 +31,7 @@ import org.testng.annotations.Listeners;
 
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -54,7 +53,6 @@ import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
@@ -93,7 +91,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Value("${camille.zk.pod.id}")
     private String podId;
 
-    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironment() {
         testBed.bootstrapForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
@@ -243,7 +241,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected ModelSummary waitToDownloadModelSummaryWithUuid(ModelSummaryProxy modelSummaryProxy, String uuid)
             throws InterruptedException {
-        log.info(String.format("Getting the model whose id contains %s", uuid));
         ModelSummary found = null;
         while (true) {
             log.info(String.format("Getting the model whose id contains %s", uuid));

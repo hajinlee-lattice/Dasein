@@ -62,7 +62,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected void checkActiveServingStore(AbstractStep<? extends BaseStepConfiguration> step) {
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
-        String customerSpace = step.getObjectFromContext(CUSTOMER_SPACE, String.class);
+        String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
         hasActiveServingStore = true;
         for (TableRoleInCollection servingStore: Arrays.asList( //
                 BusinessEntity.Transaction.getServingStore(), //

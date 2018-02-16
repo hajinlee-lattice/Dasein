@@ -46,6 +46,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String PREMATCH_EVENT_TABLE = "PREMATCH_EVENT_TABLE";
     protected static final String PREMATCH_UPSTREAM_EVENT_TABLE = "PREMATCH_UPSTREAM_EVENT_TABLE";
     protected static final String FILTER_EVENT_TABLE = "FILTER_EVENT_TABLE";
+    protected static final String PREMATCH_EVENT_TABLE_NAME = "PREMATCH_EVENT_TABLE_NAME";
     protected static final String EVENT_TABLE_EVENT_COLUMN = "EVENT_TABLE_EVENT_COLUMN";
     protected static final String FILTER_EVENT_TARGET_TABLE_NAME = "FILTER_EVENT_TARGET_TABLE_NAME";
     protected static final String MATCH_FETCH_ONLY = "MATCH_FETCH_ONLY";
@@ -55,6 +56,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MATCH_COMMAND_ID = "MATCH_COMMAND_ID";
     protected static final String MATCH_COMMAND = "MATCH_COMMAND";
     protected static final String MATCH_TABLE = "MATCH_TABLE";
+    protected static final String MATCH_INPUT_ID_COLUMN = "MATCH_INPUT_ID_COLUMN";
     protected static final String MATCH_RESULT_TABLE = "MATCH_RESULT_TABLE";
     protected static final String MATCH_PREDEFINED_SELECTION = "MATCH_PREDEFINED_SELECTION";
     protected static final String MATCH_PREDEFINED_SELECTION_VERSION = "MATCH_PREDEFINED_SELECTION_VERSION";
@@ -63,6 +65,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODEL_APP_IDS = "MODEL_APP_IDS";
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
     protected static final String SCORING_AVG_SCORE = "SCORING_AVG_SCORE";
+    protected static final String SCORING_AVG_SCORES = "SCORING_AVG_SCORES";
     protected static final String SCORING_RESULT_TABLE_NAME = "SCORING_RESULT_TABLE_NAME";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
     protected static final String SCORING_MODEL_TYPE = "SCORING_MODEL_TYPE";

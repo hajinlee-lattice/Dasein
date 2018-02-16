@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -33,7 +34,6 @@ import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
@@ -98,12 +98,16 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
         List<String> existingTableNames = dataCollectionEntityMgr.getTableNamesOfRole(collectionName, role, version);
         for (String existingTableName : existingTableNames) {
-            log.info("There are already table(s) of role " + role + " in data collection " + collectionName
-                    + ". Remove it from collection and delete it.");
+            log.info("There are already table(s) of role " + role + " in data collection " + collectionName);
             if (!existingTableName.equals(tableName)) {
-                log.info("Remove it from collection and delete it.");
-                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
-                tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
+                int numLinks = dataCollectionEntityMgr.getTablesFromCollection(collectionName, existingTableName).size();
+                removeTable(customerSpace, collectionName, existingTableName, role, version);
+                if (numLinks == 1) {
+                    new Thread(() -> {
+                        log.info(existingTableName + " is an orphan table, delete it completely.");
+                        tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
+                    }).start();
+                }
             }
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
@@ -132,7 +136,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (String existingTableName : existingTableNames) {
             if (existingTableName.equals(tableName)) {
                 log.info("Removing " + tableName + " as " + role + " in " + version + " from collection.");
-                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
+                dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName, version);
             }
         }
     }
@@ -148,7 +152,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (String existingTableName : existingTableNames) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName
                     + ". Remove it from collection and delete it.");
-            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName);
+            dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName, null);
             tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
         }
     }

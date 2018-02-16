@@ -97,11 +97,11 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/rf_model.tar.gz");
     }
 
-    private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary) {
+    private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary) throws InterruptedException {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setSegment(segment);
-        ratingEngine.setDisplayName("CDL End2End EV Engine");
+        ratingEngine.setDisplayName("CDL End2End AI Engine");
         ratingEngine.setType(RatingEngineType.AI_BASED);
 
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
@@ -111,6 +111,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         AIModel model = createAIModel((AIModel) newEngine.getActiveModel(), modelSummary);
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
+        Thread.sleep(300);
         return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
     }
 

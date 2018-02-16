@@ -25,6 +25,7 @@ public enum InterfaceName {
     Probability, //
     AnalyticPurchaseState_ID, //
     Train, //
+    AverageScore, //
 
     LastModifiedDate, //
     CreatedDate, //

@@ -1,8 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -28,8 +32,19 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepCo
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        ImmutableSet.Builder<String> builder = ImmutableSet.<String>builder() //
+                .add(SoftwareLibrary.Modeling.getName());
+        if (CollectionUtils.isNotEmpty(super.getSwpkgNames())) {
+            builder.addAll(super.getSwpkgNames());
+        }
+        return builder.build();
+    }
 
     public static class Builder {
         private RatingEngineImportMatchAndModelWorkflowConfiguration configuration = new RatingEngineImportMatchAndModelWorkflowConfiguration();
@@ -83,7 +98,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder matchInputTableName(String tableName) {
             match.setInputTableName(tableName);
-            cdlEventTable.setOutputTableName(tableName);
+            cdlEventTable.setTargetTableName(tableName);
             return this;
         }
 

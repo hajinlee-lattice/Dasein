@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -44,6 +45,7 @@ import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
+import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
 public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
@@ -193,6 +195,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private ProcessAnalyzeWorkflowConfiguration generateConfiguration(String customerSpace,
             ProcessAnalyzeRequest request, Pair<List<Long>, List<Long>> actionAndJobIds, Status status,
             String currentDataCloudBuildNumber) {
+        DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
+        String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -202,6 +206,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .importAndDeleteJobIds(actionAndJobIds.getRight()) //
                 .actionIds(actionAndJobIds.getLeft()) //
                 .rebuildEntities(request.getRebuildEntities()) //
+                .dataCloudVersion(dataCloudVersion) //
+                .matchYarnQueue(scoringQueue) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //

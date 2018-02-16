@@ -59,7 +59,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
         statsTablePrefix = entity.name() + "Stats";
 
-        masterTableName = getObjectFromContext(RAW_RATING_TABLE_NAME, String.class);
+        masterTableName = getStringValueFromContext(RAW_RATING_TABLE_NAME);
         Table rawTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
         if (rawTable == null) {
             throw new IllegalStateException("Cannot find raw rating table " + masterTableName);

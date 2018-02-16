@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollectionTable;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -32,7 +34,6 @@ import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.SegmentEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("dataCollectionEntityMgr")
 public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollection> implements DataCollectionEntityMgr {
@@ -93,7 +94,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         DataCollection dataCollection = getDataCollection(name);
 
         List<Table> tablesInCollection = getTablesOfRole(name, null, null);
-        tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName()));
+        tablesInCollection.forEach(t -> removeTableFromCollection(name, t.getName(), null));
 
         dataCollectionDao.delete(dataCollection);
     }
@@ -126,13 +127,9 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
             DataCollection collection = getDataCollection(collectionName);
-            DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
-            if (dataCollectionTable == null) {
-                dataCollectionTable = new DataCollectionTable();
-                dataCollectionTable.setTenant(MultiTenantContext.getTenant());
-            } else {
-                dataCollectionTableDao.delete(dataCollectionTable);
-            }
+            removeTableFromCollection(collectionName, tableName, version);
+            DataCollectionTable dataCollectionTable = new DataCollectionTable();
+            dataCollectionTable.setTenant(MultiTenantContext.getTenant());
             dataCollectionTable.setDataCollection(collection);
             dataCollectionTable.setTable(table);
             dataCollectionTable.setRole(role);
@@ -143,10 +140,10 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
-    public void removeTableFromCollection(String collectionName, String tableName) {
-        DataCollectionTable dataCollectionTable = dataCollectionTableDao.findByNames(collectionName, tableName);
-        if (dataCollectionTable != null) {
-            dataCollectionTableDao.delete(dataCollectionTable);
+    public void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version) {
+        List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByName(collectionName, tableName, version);
+        if (CollectionUtils.isNotEmpty(dataCollectionTables)) {
+            dataCollectionTables.forEach(dataCollectionTableDao::delete);
         }
     }
 
@@ -239,7 +236,12 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
-    public DataCollectionTable getTableFromCollection(String collectionName, String tableName) {
-        return dataCollectionTableDao.findByNames(collectionName, tableName);
+    public List<DataCollectionTable> getTablesFromCollection(String collectionName, String tableName) {
+        List<DataCollectionTable> list = dataCollectionTableDao.findAllByName(collectionName, tableName, null);
+        if (CollectionUtils.isEmpty(list)) {
+            return Collections.emptyList();
+        } else {
+            return list;
+        }
     }
 }

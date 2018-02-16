@@ -3,13 +3,17 @@ package com.latticeengines.cdl.workflow.steps;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import com.latticeengines.common.exposed.util.NamingUtils;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -29,10 +33,10 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private static Logger log = LoggerFactory.getLogger(CreateCdlEventTableStep.class);
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Value("${dataplatform.queue.scheme}")
@@ -41,7 +45,11 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Override
     public void onConfigurationInitialized() {
         CreateCdlEventTableConfiguration configuration = getConfiguration();
-        configuration.setTargetTableName(configuration.getOutputTableName());
+        if (StringUtils.isBlank(configuration.getTargetTableName())) {
+            String targetTableName = NamingUtils.timestamp("CdlEventTable");
+            configuration.setTargetTableName(targetTableName);
+            log.info("Read target table name from context: " + targetTableName);
+        }
         configuration.setApplyTableProperties(true);
         configuration.setDataFlowParams(createDataFlowParameters());
     }
@@ -95,8 +103,16 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     private Table getAndSetInputTable() {
         Table inputTable = getObjectFromContext(FILTER_EVENT_TABLE, Table.class);
         if (inputTable == null) {
+            String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+            if (StringUtils.isNotBlank(inputTableName)) {
+                inputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
+            }
+        }
+        if (inputTable == null) {
             throw new RuntimeException("There's no input table found!");
         }
+        long count = AvroUtils.count(yarnConfiguration, inputTable.getExtracts().get(0).getPath());
+        log.info(count + " records in input table " + inputTable.getName() + ":" + inputTable.getExtracts().get(0).getPath());
         List<Attribute> attributes = inputTable.getAttributes();
         for (Attribute attribute : attributes) {
             attribute.setApprovedUsage(ApprovedUsage.NONE);

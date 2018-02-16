@@ -418,7 +418,7 @@ public abstract class BaseRestApiProxy {
                 headers.setContentType(MediaType.APPLICATION_JSON);
             }
         }
-        if (kryoContent || kryoResponse) {
+        if ((kryoContent || kryoResponse) && !headers.isEmpty()) {
             log.info("Headers: " + headers.toSingleValueMap());
         }
         HttpEntity<P> entity;

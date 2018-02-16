@@ -9,6 +9,7 @@ import com.latticeengines.cdl.workflow.listeners.ProcessAnalyzeListener;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.process.FinishProcessing;
+import com.latticeengines.cdl.workflow.steps.process.GenerateProcessingReport;
 import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -23,6 +24,9 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
 
     @Inject
     private FinishProcessing finishProcessing;
+
+    @Inject
+    private GenerateProcessingReport generateProcessingReport;
 
     @Inject
     private ProcessAnalyzeListener processAnalyzeListener;
@@ -66,6 +70,7 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
                 .next(redshiftPublishWorkflow) //
                 .next(awsApsGeneratorStep) //
                 .next(processRatingWorkflow) //
+                .next(generateProcessingReport) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //
                 .choreographer(choreographer) //

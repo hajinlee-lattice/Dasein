@@ -82,7 +82,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder inputTableName(String tableName) {
             match.setInputTableName(tableName);
-            cdlEventTable.setOutputTableName(tableName);
+            cdlEventTable.setTargetTableName(tableName);
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }

@@ -14,11 +14,15 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class GenerateRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkflowConfiguration> {
 
     @Inject
+    private GenerateAIRatingWorkflow generateAIRatingWorkflow;
+
+    @Inject
     private IngestRuleBasedRating ingestRatingFromRedshift;
 
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
+                .next(generateAIRatingWorkflow) //
                 .next(ingestRatingFromRedshift) //
                 .build();
     }

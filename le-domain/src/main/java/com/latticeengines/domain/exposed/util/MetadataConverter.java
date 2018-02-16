@@ -93,7 +93,11 @@ public class MetadataConverter {
             }
             extract.setName("extract");
             if (!skipCount) {
-                extract.setProcessedRecords(AvroUtils.count(configuration, match));
+                if (isDirectory) {
+                    extract.setProcessedRecords(AvroUtils.count(configuration, avroPath));
+                } else {
+                    extract.setProcessedRecords(AvroUtils.count(configuration, match));
+                }
             }
             extracts.add(extract);
             if (isDirectory) {

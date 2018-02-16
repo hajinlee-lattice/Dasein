@@ -29,9 +29,9 @@ public interface DataCollectionEntityMgr extends BaseEntityMgr<DataCollection> {
     void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
             DataCollection.Version version);
 
-    void removeTableFromCollection(String collectionName, String tableName);
+    void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version);
 
     void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer);
 
-    DataCollectionTable getTableFromCollection(String collectionName, String tableName);
+    List<DataCollectionTable> getTablesFromCollection(String collectionName, String tableName);
 }

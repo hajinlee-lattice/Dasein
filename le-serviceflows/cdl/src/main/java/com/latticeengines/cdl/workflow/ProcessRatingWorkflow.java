@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
+import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
@@ -18,6 +19,9 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
 
     @Inject
     private PrepareForRating prepareForRating;
+
+    @Inject
+    private CloneInactiveServingStores cloneInactiveServingStores;
 
     @Inject
     private GenerateRatingWorkflow generateRatingWorkflow;
@@ -35,6 +39,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
                 .next(prepareForRating) //
+                .next(cloneInactiveServingStores) //
                 .next(generateRatingWorkflow) //
                 .next(profileRatingWrapper) //
                 .next(combineStatistics) //
