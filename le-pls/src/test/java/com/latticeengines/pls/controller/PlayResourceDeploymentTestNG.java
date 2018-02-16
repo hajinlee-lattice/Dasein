@@ -72,6 +72,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     private boolean shouldSkipAutoTenantCreation = false;
 
+    private boolean shouldSkipCdlTestDataPopulation = false;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         if (shouldSkipAutoTenantCreation) {
@@ -81,7 +83,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             tenant = testBed.getMainTestTenant();
         }
         switchToSuperAdmin();
-        cdlTestDataService.populateData(tenant.getId());
+
+        if (!shouldSkipCdlTestDataPopulation) {
+            cdlTestDataService.populateData(tenant.getId());
+        }
 
         MetadataSegment retrievedSegment = createSegment();
 
@@ -133,13 +138,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     public void getCrud() {
         logInterceptor();
 
-        List<Play> playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
-        int existingPlays = playList == null ? 0 : playList.size();
-        Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
-                Play.class);
-        name = createdPlay1.getName();
-        play = createdPlay1;
-        assertPlay(createdPlay1);
+        int existingPlays = createPlayOnly();
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
         List<TalkingPointDTO> createTPResponse = restTemplate.postForObject( //
@@ -152,8 +151,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
                 Play.class);
         Assert.assertNotNull(createdPlay2);
 
-        playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
+        List<Play> playList = (List) restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
         Assert.assertNotNull(playList);
+
         Assert.assertEquals(playList.size(), existingPlays + 2);
 
         playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play?ratingEngineId=" + ratingEngine1.getId(),
@@ -168,6 +168,17 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         String jsonValue = JsonUtils.serialize(retrievedPlay);
         Assert.assertNotNull(jsonValue);
         this.play = retrievedPlay;
+    }
+
+    public int createPlayOnly() {
+        List<?> playList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/play/", List.class);
+        int existingPlaysCount = playList == null ? 0 : playList.size();
+        Play createdPlay1 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/play", createDefaultPlay(),
+                Play.class);
+        name = createdPlay1.getName();
+        play = createdPlay1;
+        assertPlay(createdPlay1);
+        return existingPlaysCount;
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
@@ -402,6 +413,10 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     public void setShouldSkipAutoTenantCreation(boolean shouldSkipAutoTenantCreation) {
         this.shouldSkipAutoTenantCreation = shouldSkipAutoTenantCreation;
+    }
+
+    public void setShouldSkipCdlTestDataPopulation(boolean shouldSkipCdlTestDataPopulation) {
+        this.shouldSkipCdlTestDataPopulation = shouldSkipCdlTestDataPopulation;
     }
 
     public RatingEngine getRatingEngine() {

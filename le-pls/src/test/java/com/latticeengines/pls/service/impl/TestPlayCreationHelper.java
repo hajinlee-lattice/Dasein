@@ -89,18 +89,14 @@ public class TestPlayCreationHelper {
         cdlTestDataService.populateData(tenantIdentifier);
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
         MultiTenantContext.setTenant(tenant);
+        log.info("Tenant = " + tenant.getId());
     }
 
-    public void setupTenantAndCreatePlay() throws Exception {
-        tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
-        setupSecurityContext(tenant);
-        tenantIdentifier = tenant.getId();
-        tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
-        MultiTenantContext.setTenant(tenant);
-
+    public void setupPlayTestEnv() throws Exception {
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
+        playResourceDeploymentTestNG.setShouldSkipCdlTestDataPopulation(true);
         playResourceDeploymentTestNG.setMainTestTenant(tenant);
-        playResourceDeploymentTestNG.setup(); // This will populate cdl test data, so don't populate again
+        playResourceDeploymentTestNG.setup();
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
@@ -110,17 +106,29 @@ public class TestPlayCreationHelper {
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         log.info("Tenant = " + tenant.getId());
         ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+    }
 
-        log.info("Tenant = " + tenant.getId());
+    public void createPlay() {
         playResourceDeploymentTestNG.getCrud();
-        log.info("Tenant = " + tenant.getId());
-        playResourceDeploymentTestNG.createPlayLaunch();
-
         play = playResourceDeploymentTestNG.getPlay();
-        playLaunch = playResourceDeploymentTestNG.getPlayLaunch();
-
         Assert.assertNotNull(play);
+    }
+
+    public void createPlayLaunch() {
+        playResourceDeploymentTestNG.createPlayLaunch();
+        playLaunch = playResourceDeploymentTestNG.getPlayLaunch();
         Assert.assertNotNull(playLaunch);
+    }
+
+    public void setupTenantAndCreatePlay() throws Exception {
+        setupTenant();
+        setupPlayTestEnv();
+        createPlay();
+        createPlayLaunch();
+    }
+
+    public void createPlayOnly() {
+        playResourceDeploymentTestNG.createPlayOnly();
     }
 
     private Restriction createAccountRestriction() {

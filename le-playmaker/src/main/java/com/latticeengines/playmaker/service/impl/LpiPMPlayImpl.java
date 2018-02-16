@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMPlay;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("lpiPMPlay")
 public class LpiPMPlayImpl implements LpiPMPlay {
@@ -33,48 +34,61 @@ public class LpiPMPlayImpl implements LpiPMPlay {
 
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
+        // following API has sub-second performance even for large number of
+        // plays (50+). This API returns only those plays for with there is
+        // at least one play launch. Implementing pagination in this API may not
+        // be worth the effort as it is fast enough. Therefore handling
+        // pagination in application layer itself
+        PlayLaunchDashboard dashboard = playProxy.getPlayLaunchDashboard(
+                MultiTenantContext.getCustomerSpace().toString(), null, null, 0L, 0L, 1L, null, null, null);
+        List<Play> plays = dashboard.getUniquePlaysWithLaunches();
 
-        List<Play> plays = playProxy.getPlays(MultiTenantContext.getCustomerSpace().toString(), null, null);
+        return handlePagination(start, offset, maximum, plays);
+    }
 
+    private List<Map<String, Object>> handlePagination(long start, int offset, int maximum, List<Play> plays) {
         List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
         int skipped = 0;
         int rowNum = offset + 1;
 
         for (Play play : plays) {
-            // TODO - implement this pagination in play dao impl and expose it
-            // via play resource
             if (secondsFromEpoch(play) >= start) {
                 if (skipped < offset) {
                     skipped++;
                     continue;
                 }
-
                 if (result.size() >= maximum) {
                     break;
                 }
-
-                Map<String, Object> playMap = new HashMap<>();
-                playMap.put(PlaymakerConstants.ID, play.getPid());
-                playMap.put(PlaymakerConstants.ID + PlaymakerConstants.V2, play.getName());
-                playMap.put(PlaymakerConstants.ExternalId, play.getName());
-                playMap.put(PlaymakerConstants.DisplayName, play.getDisplayName());
-                playMap.put(PlaymakerConstants.Description, play.getDescription());
-                playMap.put(PlaymakerConstants.AverageProbability, dummyAvgProbability());
-                playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
-                playMap.put(PlaymakerConstants.PlayGroups, dummyPlayGroups());
-                playMap.put(PlaymakerConstants.TargetProducts, dummyTargetProducts());
-                playMap.put(PlaymakerConstants.Workflow, dummyWorkfowType());
-                playMap.put(PlaymakerConstants.RowNum, rowNum++);
-                result.add(playMap);
+                generatePlayObjForSync(result, rowNum++, play);
             }
         }
         return result;
     }
 
+    private Map<String, Object> generatePlayObjForSync(List<Map<String, Object>> result, int rowNum, Play play) {
+        Map<String, Object> playMap = new HashMap<>();
+        playMap.put(PlaymakerConstants.ID, play.getPid());
+        playMap.put(PlaymakerConstants.ID + PlaymakerConstants.V2, play.getName());
+        playMap.put(PlaymakerConstants.ExternalId, play.getName());
+        playMap.put(PlaymakerConstants.DisplayName, play.getDisplayName());
+        playMap.put(PlaymakerConstants.Description, play.getDescription());
+        playMap.put(PlaymakerConstants.AverageProbability, null);
+        playMap.put(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY, secondsFromEpoch(play));
+        playMap.put(PlaymakerConstants.PlayGroups, null);
+        playMap.put(PlaymakerConstants.TargetProducts, dummyTargetProducts());
+        playMap.put(PlaymakerConstants.Workflow, dummyWorkfowType());
+        playMap.put(PlaymakerConstants.RowNum, rowNum);
+        result.add(playMap);
+        return playMap;
+    }
+
+    // TODO - remove following when we have workflow type defined for plays
     private String dummyWorkfowType() {
         return PlaymakerConstants.DefaultWorkflowType;
     }
 
+    // TODO - remove following when we have products associated with plays
     private List<Map<String, String>> dummyTargetProducts() {
         List<Map<String, String>> products = new ArrayList<>();
         Map<String, String> prod1 = new HashMap<>();
@@ -86,14 +100,6 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         prod2.put(PlaymakerConstants.ExternalName, "NETSUITE-SRSL");
         products.add(prod2);
         return products;
-    }
-
-    private String dummyPlayGroups() {
-        return null;// "[PG2]";
-    }
-
-    private String dummyAvgProbability() {
-        return null;// "0.5";
     }
 
     private long secondsFromEpoch(Play play) {
