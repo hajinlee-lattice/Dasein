@@ -89,7 +89,6 @@ public class LocalCache<K, V> implements Cache {
         return (T) value;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void put(Object key, Object value) {
         // cache.put((K) key, (V) value);
@@ -153,8 +152,8 @@ public class LocalCache<K, V> implements Cache {
                 }
             }
         });
-        log.info(String.format("Local cache %s received %s %s signal for %s, resolved to %d keys.", getName(),
-                opStr, mode, keyPattern, keysToReturn.size()));
+        log.info(String.format("Local cache %s received %s %s signal for %s, resolved to %d keys.", getName(), opStr,
+                mode, keyPattern, keysToReturn.size()));
         return keysToReturn;
     }
 

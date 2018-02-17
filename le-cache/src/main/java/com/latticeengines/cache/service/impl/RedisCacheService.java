@@ -45,7 +45,7 @@ public class RedisCacheService extends CacheServiceBase {
             @Override
             public Void doWithRetry(RetryContext context) {
                 redisTemplate.execute(new SessionCallback<Long>() {
-                    @SuppressWarnings("unchecked")
+                    @SuppressWarnings({ "unchecked", "rawtypes" })
                     @Override
                     public Long execute(RedisOperations operations) throws DataAccessException {
                         List<Object> rawkeys = redisTemplate.executePipelined(new RedisCallback<Object>() {
