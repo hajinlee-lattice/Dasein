@@ -8,19 +8,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.saml.IdentityProvider;
 import com.latticeengines.domain.exposed.saml.IdpMetadataValidationResponse;
+import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.saml.entitymgr.IdentityProviderEntityMgr;
 import com.latticeengines.saml.service.IdentityProviderService;
 import com.latticeengines.saml.util.SAMLUtils;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.security.exposed.TicketAuthenticationToken;
 
 @Component("IdentityProviderService")
 public class IdentityProviderServiceImpl implements IdentityProviderService {
@@ -78,7 +81,14 @@ public class IdentityProviderServiceImpl implements IdentityProviderService {
     private Tenant getTenant() {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
-            throw new RuntimeException("No tenant supplied in context");
+            TicketAuthenticationToken auth = (TicketAuthenticationToken) SecurityContextHolder.getContext()
+                    .getAuthentication();
+            Session session = auth.getSession();
+            tenant = session.getTenant();
+
+            if (tenant == null) {
+                throw new RuntimeException("No tenant supplied in context");
+            }
         }
         return tenant;
     }
