@@ -2,6 +2,9 @@ package com.latticeengines.domain.exposed.metadata.datafeed;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -324,19 +327,38 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public enum Status {
-        Initing("initing", false, false), // no template yet
-        Initialized("initialized", false, false), // import is ready to run
-        InitialLoaded("initialLoaded", true, false), // initial import data
-                                                     // loaded
-        Active("active", true, true), // master table has formed and pushed to
-                                      // data store
-        ProcessAnalyzing("processAnalyzing", true, true), //
-        Deleting("deleting", false, false);
+        Initing("initing"), //
+        Initialized("initialized") {
+            @Override
+            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+                return Collections.singleton(DataFeedExecutionJobType.Import);
+            }
+        }, // import is ready to run
+        InitialLoaded("initialLoaded") {
+            @Override
+            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.Import, //
+                        DataFeedExecutionJobType.PA);
+            }
+        }, // initial import data loaded
+        Active("active") {
+            @Override
+            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.Import, //
+                        DataFeedExecutionJobType.CDLOperation, //
+                        DataFeedExecutionJobType.PA);
+            }
+
+        }, // master table has formed and pushed to data store
+        ProcessAnalyzing("processAnalyzing"), //
+        Deleting("deleting");
 
         private final String name;
-        private boolean allowConsolidation;
-        private boolean allowProfile;
         private static Map<String, Status> nameMap;
+
+        public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+            return Collections.emptySet();
+        }
 
         static {
             nameMap = new HashMap<>();
@@ -345,10 +367,8 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
             }
         }
 
-        Status(String name, boolean allowConsolidation, boolean allowProfile) {
+        Status(String name) {
             this.name = name;
-            this.allowConsolidation = allowConsolidation;
-            this.allowProfile = allowProfile;
         }
 
         @JsonValue
@@ -358,22 +378,6 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
         public String toString() {
             return this.name;
-        }
-
-        public boolean isAllowConsolidation() {
-            return allowConsolidation;
-        }
-
-        public void setAllowConsolidation(boolean allowConsolidation) {
-            this.allowConsolidation = allowConsolidation;
-        }
-
-        public boolean isAllowProfile() {
-            return allowProfile;
-        }
-
-        public void setAllowProfile(boolean allowProfile) {
-            this.allowProfile = allowProfile;
         }
 
         public static Status fromName(String name) {

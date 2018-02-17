@@ -30,17 +30,25 @@ public class DataFeedController {
         this.processAnalyzeWorkflowSubmitter = processAnalyzeWorkflowSubmitter;
     }
 
-
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Invoke profile workflow. Returns the job id.")
     public ResponseDocument<String> processAnalyze(@PathVariable String customerSpace, //
-                                                   @RequestBody(required = false) ProcessAnalyzeRequest request) {
+            @RequestBody(required = false) ProcessAnalyzeRequest request) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
         ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request);
+        return ResponseDocument.successResponse(appId.toString());
+    }
+
+    @RequestMapping(value = "/processanalyze/restart", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Restart a previous failed processanalyze execution")
+    public ResponseDocument<String> restart(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace);
         return ResponseDocument.successResponse(appId.toString());
     }
 

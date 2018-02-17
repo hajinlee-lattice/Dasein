@@ -14,4 +14,6 @@ public interface DataFeedExecutionEntityMgr extends BaseEntityMgr<DataFeedExecut
 
     List<DataFeedExecution> findByDataFeed(DataFeed datafeed);
 
+    void updateImports(DataFeedExecution execution);
+
 }

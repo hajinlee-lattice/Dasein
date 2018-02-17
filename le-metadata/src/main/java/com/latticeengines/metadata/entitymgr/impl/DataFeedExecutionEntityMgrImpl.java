@@ -42,6 +42,15 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void updateImports(DataFeedExecution execution) {
+        super.update(execution);
+        for (DataFeedImport datafeedImport : execution.getImports()) {
+            datafeedImportEntityMgr.create(datafeedImport);
+        }
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findByExecutionId(Long executionId) {
         if (executionId == null) {

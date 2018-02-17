@@ -16,10 +16,12 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
@@ -32,7 +34,6 @@ import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("datafeedEntityMgr")
 public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {
@@ -120,6 +121,22 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
+    public void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+        DataFeed datafeed = findByNameInflated(datafeedName);
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setDataFeed(datafeed);
+        execution.setStatus(DataFeedExecution.Status.Started);
+        log.info(String.format("starting execution %s", execution));
+        datafeedExecutionEntityMgr.create(execution);
+        datafeed.setActiveExecutionId(execution.getPid());
+        datafeed.setActiveExecution(execution);
+        datafeed.setStatus(Status.ProcessAnalyzing);
+        log.info(String.format("starting execution: updating data feed to %s", datafeed));
+        update(datafeed);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
     public DataFeedExecution startExecution(String datafeedName) {
         DataFeed datafeed = findByNameInflated(datafeedName);
         if (datafeed == null) {
@@ -128,23 +145,20 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         }
 
         List<DataFeedImport> imports = new ArrayList<>();
-        List<DataFeedTask> tasks = new ArrayList<>(datafeed.getTasks());
+        List<DataFeedTask> tasks = datafeed.getTasks();
         tasks.forEach(task -> {
             imports.addAll(createImports(task));
             datafeedTaskEntityMgr.clearTableQueuePerTask(task);
         });
-        log.info("imports for consolidates are: " + imports);
+        log.info("imports for processanalyze are: " + imports);
 
         Collections.sort(imports, (a, b) -> Long.compare(a.getDataTable().getPid(), b.getDataTable().getPid()));
-        DataFeedExecution execution = new DataFeedExecution();
-        execution.setDataFeed(datafeed);
+        DataFeedExecution execution = datafeed.getActiveExecution();
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
-        log.info(String.format("starting execution %s", execution));
-        datafeedExecutionEntityMgr.create(execution);
+        log.info(String.format("starting processanalyze execution %s", execution));
+        datafeedExecutionEntityMgr.updateImports(execution);
 
-        datafeed.setActiveExecutionId(execution.getPid());
-        datafeed.setActiveExecution(execution);
         datafeed.setStatus(Status.ProcessAnalyzing);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
@@ -203,7 +217,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setStatus(datafeedStatus);
-        if (DataFeedExecution.Status.ProcessAnalyzed == status && Status.Active == datafeedStatus) {
+        if (DataFeedExecution.Status.Completed == status && Status.Active == datafeedStatus) {
             datafeed.setLastPublished(new Date());
         }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));

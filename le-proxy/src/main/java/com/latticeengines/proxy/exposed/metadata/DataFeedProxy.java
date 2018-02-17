@@ -7,9 +7,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
@@ -27,7 +29,8 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public DataFeed getDefaultDataFeed(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/default", shortenCustomerSpace(customerSpace));
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/default",
+                shortenCustomerSpace(customerSpace));
         return get("get default data feed", url, DataFeed.class);
     }
 
@@ -47,6 +50,17 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startexecution",
                 shortenCustomerSpace(customerSpace));
         return post("startExecution", url, null, DataFeedExecution.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/lockexecution",
+                shortenCustomerSpace(customerSpace));
+        ResponseDocument<Boolean> responseDoc = post("lockExecution", url, jobType.name(), ResponseDocument.class);
+        if (responseDoc == null) {
+            return Boolean.FALSE;
+        }
+        return responseDoc.isSuccess();
     }
 
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {
@@ -173,15 +187,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public DataFeed updateEarliestTransaction(String customerSpace, Integer transactionDayPeriod) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/earliesttransaction/{transactionDayPeriod}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/earliesttransaction/{transactionDayPeriod}",
                 shortenCustomerSpace(customerSpace), transactionDayPeriod.toString());
         return post("updateEarliestTransaction", url, null, DataFeed.class);
     }
 
     public DataFeed rebuildTransaction(String customerSpace, Boolean isRebuild) {
-        String url = constructUrl(
-                "/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
                 shortenCustomerSpace(customerSpace), isRebuild.toString());
         return post("updateEarliestTransaction", url, null, DataFeed.class);
     }

@@ -7,9 +7,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.metadata.service.DataFeedService;
 
 import io.swagger.annotations.Api;
@@ -51,12 +53,11 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedDrainingStatus(customerSpace, drainingStatus);
     }
 
-    @RequestMapping(value = "/maintenance/{maintenanceMode}", method = RequestMethod.PUT, headers =
-            "Accept=application/json")
+    @RequestMapping(value = "/maintenance/{maintenanceMode}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedMaintenanceMode(@PathVariable String customerSpace,
-                                              @PathVariable boolean maintenanceMode) {
+            @PathVariable boolean maintenanceMode) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
     }
@@ -67,6 +68,14 @@ public class DefaultDataFeedController {
     public DataFeedExecution startExecution(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.startExecution(customerSpace, "");
+    }
+
+    @RequestMapping(value = "/jobtype/{jobType}/lockexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "lock data feed execution")
+    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
+            @PathVariable DataFeedExecutionJobType jobType) {
+        return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));
     }
 
     @RequestMapping(value = "/status/{status}", method = RequestMethod.PUT, headers = "Accept=application/json")
@@ -123,7 +132,8 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/earliesttransaction/{transactionDayPeriod}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")
-    public DataFeed updateEarliestTransaction(@PathVariable String customerSpace, @PathVariable  Integer transactionDayPeriod) {
+    public DataFeed updateEarliestTransaction(@PathVariable String customerSpace,
+            @PathVariable Integer transactionDayPeriod) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.updateEarliestTransaction(customerSpace, "", transactionDayPeriod);
     }

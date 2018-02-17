@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
@@ -101,34 +102,13 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
-        DataFeedExecution execution = datafeed.getActiveExecution();
-        if (datafeedStatus == Status.Initing) {
-            throw new RuntimeException("We can't launch a process and analyze workflow now as there is no data yet.");
-        }
-        if (execution != null && DataFeedExecution.Status.Started.equals(execution.getStatus())) {
-            if (execution.getWorkflowId() == null) {
-                throw new RuntimeException(
-                        "We can't launch a process and analyze workflow now as there is one still running.");
-            }
-            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
-            JobStatus status = job.getJobStatus();
-            if (!status.isTerminated()) {
-                throw new RuntimeException(
-                        "We can't launch a process and analyze workflow now as there is one still running.");
-            } else if (JobStatus.FAILED.equals(status)) {
-                log.info(String.format(
-                        "Execution %s of data feed %s already terminated in an unknown state. Fail this execution so that we can start a new one.",
-                        execution, datafeed));
-                dataFeedProxy.failExecution(customerSpace,
-                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
-            }
-        } else if (execution != null && DataFeedExecution.Status.Failed.equals(execution.getStatus())) {
-            log.info("current execution failed, we will start a new one");
+        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
+            throw new RuntimeException("We can't restart processanalyze workflow right now");
         }
 
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
-        execution = dataFeedProxy.startExecution(customerSpace);
+        DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace);
         log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
         updateActions(customerSpace, actionAndJobIds.getLeft());
@@ -229,6 +209,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         redshiftTableConfig.setS3Bucket(s3Bucket);
         exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
         return exportConfig;
+    }
+
+    public ApplicationId retryLatestFailed(String customerSpace) {
+        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
+            throw new RuntimeException("We can't restart processanalyze workflow right now");
+        }
+
+        DataFeedExecution execution = dataFeedProxy.retryLatestExecution(customerSpace);
+        log.info(String.format("restarted execution with status: %s", execution.getStatus()));
+        return workflowJobService.restart(execution.getWorkflowId());
     }
 
 }

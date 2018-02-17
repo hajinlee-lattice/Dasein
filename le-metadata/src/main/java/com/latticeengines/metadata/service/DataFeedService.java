@@ -2,6 +2,7 @@ package com.latticeengines.metadata.service;
 
 import java.util.List;
 
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
@@ -36,10 +37,13 @@ public interface DataFeedService {
 
     void resetImportByEntity(String customerSpace, String datafeedName, String entity);
 
-
     DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod);
+
     DataFeed rebuildTransaction(String customerSpace, String datafeedName, Boolean isRebuild);
 
     List<DataFeed> getAllDataFeeds();
+
     List<SimpleDataFeed> getAllSimpleDataFeeds();
+
+    boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 }

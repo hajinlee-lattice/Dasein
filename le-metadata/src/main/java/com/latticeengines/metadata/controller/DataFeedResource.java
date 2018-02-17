@@ -7,8 +7,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.metadata.service.DataFeedService;
 
 import io.swagger.annotations.Api;
@@ -28,6 +30,15 @@ public class DataFeedResource {
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName) {
         return datafeedService.startExecution(customerSpace, datafeedName);
+    }
+
+    @RequestMapping(value = "/{datafeedName}/jobtype/{jobType}/lockexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "lock data feed execution")
+    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
+            @PathVariable String datafeedName, //
+            @PathVariable DataFeedExecutionJobType jobType) {
+        return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, datafeedName, jobType));
     }
 
     @RequestMapping(value = "/{datafeedName}", method = RequestMethod.GET, headers = "Accept=application/json")

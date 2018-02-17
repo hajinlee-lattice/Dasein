@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -63,7 +63,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
                     customerSpace, Status.Active.getName()));
             DataFeedExecution execution = dataFeedProxy.finishExecution(customerSpace, initialDataFeedStatus);
             log.info(String.format("trying to finish running execution %s", execution));
-            if (execution.getStatus() != DataFeedExecution.Status.ProcessAnalyzed) {
+            if (execution.getStatus() != DataFeedExecution.Status.Completed) {
                 throw new RuntimeException("Can't finish execution");
             }
             cleanupInactiveVersion();

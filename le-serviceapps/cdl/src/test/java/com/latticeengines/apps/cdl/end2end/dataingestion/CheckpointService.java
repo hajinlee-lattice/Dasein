@@ -130,7 +130,7 @@ public class CheckpointService {
 
     private String checkpointDir;
 
-    private Map<TableRoleInCollection, String> savedRedshiftTables =  new HashMap<>();
+    private Map<TableRoleInCollection, String> savedRedshiftTables = new HashMap<>();
 
     void setMainTestTenant(Tenant mainTestTenant) {
         this.mainTestTenant = mainTestTenant;
@@ -201,7 +201,7 @@ public class CheckpointService {
                     completed.add(future);
                 } catch (TimeoutException e) {
                     // ignore
-                } catch (InterruptedException|ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException("Failed to clone redshift table.", e);
                 }
             });
@@ -406,7 +406,7 @@ public class CheckpointService {
     private Long createExecution(long feedPid, long workflowPid) {
         String sql = "INSERT INTO `DATAFEED_EXECUTION` ";
         sql += "(`FK_FEED_ID`, `WORKFLOW_ID`, `STATUS`) VALUES ";
-        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.ProcessAnalyzed.name());
+        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.Completed.name());
         jdbcTemplate.execute(sql);
 
         sql = "SELECT `PID` FROM `DATAFEED_EXECUTION` WHERE `FK_FEED_ID` = " + feedPid;
@@ -560,7 +560,8 @@ public class CheckpointService {
         }
     }
 
-    private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role, String checkpointVersion) {
+    private String checkpointRedshiftTableName(String checkpoint, TableRoleInCollection role,
+            String checkpointVersion) {
         return String.format("cdlend2end_%s_%s_%s", checkpoint, role.name(), checkpointVersion);
     }
 

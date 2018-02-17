@@ -1,42 +1,76 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Collection;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.metadata.service.DataFeedTaskService;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("datafeedService")
 public class DataFeedServiceImpl implements DataFeedService {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedServiceImpl.class);
 
-    @Autowired
+    @Inject
     private DataFeedEntityMgr datafeedEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCollectionService dataCollectionService;
 
-    @Autowired
+    @Inject
     private DataFeedTaskService datafeedTaskService;
+
+    @Inject
+    private WorkflowProxy workflowProxy;
+
+    @Override
+    public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().allowedJobTypes();
+        if (!allowedJobType.contains(jobType)) {
+            DataFeedExecution execution = datafeed.getActiveExecution();
+            if (execution == null || execution.getWorkflowId() == null
+                    || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+                return false;
+            }
+            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
+            if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
+                return false;
+            }
+            failExecution(customerSpace, datafeedName,
+                    job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
+        }
+        prepareExecution(customerSpace, datafeedName, jobType);
+        return true;
+    }
+
+    private void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+        datafeedEntityMgr.prepareExecution(customerSpace, datafeedName, jobType);
+    }
 
     @Override
     public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
@@ -51,7 +85,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public DataFeedExecution finishExecution(String customerSpace, String datafeedName, String initialDataFeedStatus) {
 
-        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.ProcessAnalyzed,
+        return datafeedEntityMgr.updateExecutionWithTerminalStatus(datafeedName, DataFeedExecution.Status.Completed,
                 getSuccessfulDataFeedStatus(initialDataFeedStatus));
     }
 

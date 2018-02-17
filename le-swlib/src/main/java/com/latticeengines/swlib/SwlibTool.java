@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.PosixParser;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -19,7 +19,7 @@ public class SwlibTool {
     public static void main(String[] args) {
         ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("swlib-commandline-context.xml");
 
-        CommandLineParser parser = new PosixParser();
+        CommandLineParser parser = new DefaultParser();
         Options options = new Options();
         options.addOption("o", "operation", true, " -<operation> (install or uninstall)"). //
                 addOption("n", "name", true, " -<name> (package name - cdl, leadprioritization or datacloud)"). //
@@ -81,7 +81,7 @@ public class SwlibTool {
             throw new RuntimeException("Cannot find software library for name " + swPackage.getName());
         }
         Set<SoftwareLibrary.Module> modules = swLib.getModules();
-        for (SoftwareLibrary.Module module: modules) {
+        for (SoftwareLibrary.Module module : modules) {
             swPackage.setModule(module.name());
             if (fsDefaultFS != null) {
                 swlibService.installPackage(fsDefaultFS, swPackage, fileToInstall);

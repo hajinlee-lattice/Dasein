@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -22,12 +23,12 @@ import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 
@@ -127,6 +128,8 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void startExecution() {
+        datafeedEntityMgr.prepareExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+                DataFeedExecutionJobType.PA);
         assertNotNull(datafeedEntityMgr.startExecution(DATA_FEED_NAME).getImports());
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
@@ -142,8 +145,8 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
     @Test(groups = "functional", dependsOnMethods = "startExecution")
     public void finishExecution() {
         DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
-                DataFeedExecution.Status.ProcessAnalyzed, Status.Active);
-        assertEquals(exec1.getStatus(), DataFeedExecution.Status.ProcessAnalyzed);
+                DataFeedExecution.Status.Completed, Status.Active);
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Completed);
 
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());

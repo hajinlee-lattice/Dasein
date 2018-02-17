@@ -41,7 +41,7 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "`FK_FEED_EXEC_ID`", nullable = false)
+    @JoinColumn(name = "`FK_FEED_EXEC_ID`", nullable = true)
     private DataFeedExecution execution;
 
     @Column(name = "SOURCE", nullable = false)
