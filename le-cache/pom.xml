@@ -64,18 +64,18 @@
         <dependency>
             <groupId>io.lettuce</groupId>
             <artifactId>lettuce-core</artifactId>
-            <version>5.1.0.BUILD-SNAPSHOT</version>
+            <version>5.0.2.RELEASE</version>
         </dependency>
     </dependencies>
 
     <repositories>
-        <repository>
+        <!-- repository>
             <id>sonatype-nexus-snapshots</id>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>
+        </repository-->
 
         <repository>
             <id>spring-libs-snapshot</id>
