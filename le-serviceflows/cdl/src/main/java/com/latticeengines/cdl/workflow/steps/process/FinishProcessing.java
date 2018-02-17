@@ -79,6 +79,8 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void swapMissingTableRoles() {
+        cloneTableService.setCustomerSpace(customerSpace);
+        cloneTableService.setActiveVersion(active);
         Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
         if (resetEntities == null) {
             resetEntities = Collections.emptySet();
