@@ -47,7 +47,7 @@ public class DomainOwnershipForDomCleanupTestNG
         finish(progress);
         confirmResultFile(progress);
         confirmIntermediateSource(domOwnTable, targetVersion);
-        //confirmIntermediateSource(amSeedCleanup, targetVersion);
+        // confirmIntermediateSource(amSeedCleanup, targetVersion);
         cleanupProgressTables();
     }
 
@@ -89,13 +89,15 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "goodwill.com", "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media" },
                 { "sbiDuns2.com", "DUNS01", null, "DUNS01", 21100024L, "50000", null, null },
                 // domains present in OwnershipTable with reasons multiple large
-                // company, franchise
+                // company, franchise, other
                 { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media" },
                 { "sbiDuns1.com", "DUNS13", "DUNS10", "DUNS11", 50000242L, "7000", 2, "Consumer Services" },
                 { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1,
                         "Manufacturing - Semiconductors" },
                 { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology" },
                 { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production" },
+                { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal" },
+                { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal" },
                 // domain only entries
                 { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors" },
                 { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes" },
@@ -165,25 +167,24 @@ public class DomainOwnershipForDomCleanupTestNG
             step2.setTargetSource(source.getSourceName());
 
             /*
-            // -----------------
-            TransformationStepConfig step3 = new TransformationStepConfig();
-            List<Integer> cleanupOrbSecSrcStep = new ArrayList<Integer>();
-            List<String> cleanupOrbSecSrc = new ArrayList<String>();
-            cleanupOrbSecSrcStep.add(0);
-            cleanupOrbSecSrc.add(baseSource2.getSourceName());
-            cleanupOrbSecSrc.add(baseSource1.getSourceName());
-            step3.setInputSteps(cleanupOrbSecSrcStep);
-            step3.setBaseSources(cleanupOrbSecSrc);
-            step3.setTransformer(CleanupOrbSecSrcFlow.TRANSFORMER_NAME);
-            step3.setConfiguration(confParamStr1);
-            step3.setTargetSource(source.getSourceName());
-            */
+             // ----------------- TransformationStepConfig step3 = new
+             TransformationStepConfig(); List<Integer> cleanupOrbSecSrcStep =
+             new ArrayList<Integer>(); List<String> cleanupOrbSecSrc = new
+             ArrayList<String>(); cleanupOrbSecSrcStep.add(0);
+             cleanupOrbSecSrc.add(baseSource2.getSourceName());
+             cleanupOrbSecSrc.add(baseSource1.getSourceName());
+             step3.setInputSteps(cleanupOrbSecSrcStep);
+             step3.setBaseSources(cleanupOrbSecSrc);
+             step3.setTransformer(CleanupOrbSecSrcFlow.TRANSFORMER_NAME);
+             step3.setConfiguration(confParamStr1);
+             step3.setTargetSource(source.getSourceName());
+             */
 
             // -----------
             List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
             steps.add(step1);
             steps.add(step2);
-            //steps.add(step3);
+            // steps.add(step3);
 
             configuration.setSteps(steps);
             return configuration;
@@ -214,7 +215,8 @@ public class DomainOwnershipForDomCleanupTestNG
             { "netappDuns2.com", "DUNS17", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
             { "unicef.org", "DUNS39", "GU", 2, "HIGHER_NUM_OF_LOC", "true" }, //
-            { "goodwill.com", "DUNS54", "DUNS", 3, "HIGHER_EMP_TOTAL", "true" }
+            { "goodwill.com", "DUNS54", "DUNS", 3, "HIGHER_EMP_TOTAL", "true" }, //
+            { "tesla.com", null, null, 2, "OTHER", "false" }
     };
 
     Object[][] amSeedCleanedUpValues = new Object[][] { //
@@ -254,6 +256,8 @@ public class DomainOwnershipForDomCleanupTestNG
             { "sbiDuns1.com", "DUNS20", "DUNS17", "DUNS18", 200002421L, "11000", 1, "Manufacturing - Semiconductors"},
             { "sbiDuns1.com", "DUNS66", "DUNS28", null, 99991910L, "10801", 2, "Biotechnology"},
             { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production"},
+            { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal" },
+            { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal" },
             // domain only entries : not cleaned up
             { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors"},
             { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes"},
@@ -292,18 +296,18 @@ public class DomainOwnershipForDomCleanupTestNG
                     Assert.assertTrue(isObjEquals(record.get(5), expected[5]));
                     rowCount++;
                 }
-                Assert.assertEquals(rowCount, 8);
+                Assert.assertEquals(rowCount, 9);
                 break;
                 /*
             case ACC_MASTER_SEED_CLEANUP:
-                break;*/
+                break;
+                */
         }
     }
 
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        rowCount = 0;
         List<Integer> attrNameIndex = Arrays.asList(6, 1, 7, 0, 5, 2, 3, 4);
         Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
         for (Object[] data : amSeedCleanedUpValues) {
@@ -324,6 +328,6 @@ public class DomainOwnershipForDomCleanupTestNG
             }
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 32);
+        Assert.assertEquals(rowCount, 34);
     }
 }

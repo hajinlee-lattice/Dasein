@@ -29,6 +29,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
     private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
     private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
+    private final static String SINGLE_TREE = "SINGLE_TREE";
     private final static String OTHER = "OTHER";
     public final static String GOVERNMENT = "Government";
     public final static String EDUCATION = "Education";
@@ -109,7 +110,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
         }
         Integer numOfLocVal = (Integer) arguments.getObject(numOfLocField);
         if (context.rootDuns == null) {
-            return update(context, arguments, OTHER);
+            return update(context, arguments, SINGLE_TREE);
         }
         int res = 0;
         if (!context.isNonProfitable && !isNoProfitable(arguments, salesVolVal, empTotal)) {
@@ -131,8 +132,9 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
             return update(context, arguments, HIGHER_NUM_OF_LOC);
         } else if (res < 0) {
             return update(context, HIGHER_NUM_OF_LOC);
+        } else {
+            return cleanup(context, OTHER);
         }
-        return context;
     }
 
     private boolean isNoProfitable(TupleEntry arguments, Long salesVolVal, Integer empTotalVal) {
@@ -151,7 +153,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     }
 
     private Context update(Context context, String updateReason) {
-        if (context.reasonType.equals(OTHER)) {
+        if (context.reasonType.equals(SINGLE_TREE)) {
             context.reasonType = updateReason;
         }
         return context;
