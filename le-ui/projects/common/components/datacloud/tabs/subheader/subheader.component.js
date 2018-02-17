@@ -1,7 +1,7 @@
 angular.module('common.datacloud.tabs.subheader', [])
 .controller('SubHeaderTabsController', function(
     $state, $stateParams, $timeout, FeatureFlagService, DataCloudStore, QueryStore, 
-    SegmentService, SegmentStore, HealthService, QueryTreeService
+    SegmentService, SegmentStore, HealthService, QueryTreeService, StateHistory
 ) {
     var vm = this,
         flags = FeatureFlagService.Flags();
@@ -88,6 +88,13 @@ angular.module('common.datacloud.tabs.subheader', [])
         $timeout(function() {
             $state.go(state, $stateParams);
         },1);
+    }
+
+    vm.clickPickerBack = function() {
+        var state = StateHistory.lastFrom();
+        var params = StateHistory.lastFromParams();
+
+        $state.go(state.name, params);
     }
 
     vm.clickSegmentButton = function(parms) {

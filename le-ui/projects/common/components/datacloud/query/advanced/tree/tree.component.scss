@@ -490,6 +490,24 @@ div.advanced-query-builder {
                 margin-left: 3px;
                 margin-right: 0.3em;
                 float: left;
+
+                &:hover {
+                    border-style: solid;
+                    border-color: #457EBA;
+                    background: #fff;
+                    -webkit-transition: none;
+                    -moz-transition: none;
+                    -ms-transition: none;
+                    transition: none;
+                
+                    .fa:before {
+                        color: #457EBA;
+                        -webkit-transition: none;
+                        -moz-transition: none;
+                        -ms-transition: none;
+                        transition: none;
+                    }
+                }
             }
 
             .query-section-label-expand.fa {
@@ -518,7 +536,7 @@ div.advanced-query-builder {
             
             .query-section-controls i.fa {
                 display: inline-block;
-                padding: 0.5em 0.6em;
+                padding: 7px 8px;
                 cursor: pointer;
                 font-size: 13px;
             }
@@ -550,7 +568,7 @@ div.advanced-query-builder {
 
         &> div > div.item-operator-or {
             display: block;
-        }
+        } 
     }
     
     .query-section-item-box:first-child {
@@ -588,16 +606,35 @@ div.advanced-query-builder {
         transition: none;
     }
 
-    .dragging { }
+    .dragging {
+        pointer-events: none;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        perspective: 5px;
+        -webkit-transition: none;
+        -moz-transition: none;
+        -ms-transition: none;
+        -o-transition: none;
+        transition: none;
+        -webkit-transform-origin: bottom left;
+        -moz-transform-origin: bottom left;
+        -ms-transform-origin: bottom left;
+        -o-transform-origin: bottom left;
+        transform-origin: bottom left;
+        opacity: .666;
+        z-index: 999;
+    }
 
     .dashed {
         background: white;
         border: 1px dashed #999;
-        height: 51px;
+        height: 52px;
         display: block;
+        opacity: .5;
         
         .query-section-item-label {
-            opacity: .5;
+            border: none;
         }
     } 
 }

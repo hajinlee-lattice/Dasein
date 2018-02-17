@@ -345,7 +345,7 @@ class Server {
         });
 
         // print stack trace for dev environment
-        if (NODE_ENV != 'production') {
+        if (NODE_ENV != 'production' && NODE_ENV != 'qa') {
             this.app.use((err, req, res, next) => {
                 res.status(err.status || 500);
                 res.render('server/error', {

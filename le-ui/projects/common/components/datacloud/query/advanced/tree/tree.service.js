@@ -44,8 +44,8 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         this.enum_operations = {
             'EQUAL': 'is',
             'NOT_EQUAL': 'is not',
-            'IN_COLLECTION': 'all of',
-            'NOT_IN_COLLECTION': 'none of'
+            'IN_COLLECTION': 'is',
+            'NOT_IN_COLLECTION': 'is not'
         };
 
         this.no_inputs = [
@@ -403,10 +403,27 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             var cmp = bucketRestriction.bkt.Cmp;
 
             switch (type) {
-                case 'Boolean': return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
-                case 'Numerical': return cmpMap[cmp];
-                case 'Enum': return cmp == "EQUAL" || cmp == "IN_COLLECTION" ? 'is' : 'is not';
-                default: return 'has a value of';
+                case 'Boolean': 
+                    return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
+
+                case 'Numerical': 
+                    return cmpMap[cmp];
+
+                case 'Enum':
+                    var ret = '';
+
+                    switch (cmp) {
+                        case 'EQUAL': ret = 'is'; break;
+                        case 'IN_COLLECTION': ret = 'is'; break;
+                        case 'NOT_EQUAL': ret = 'is not'; break;
+                        case 'NOT_IN_COLLECTION': ret = 'is not'; break;
+                        case 'IS_EMPTY': ret = 'is empty'; break;
+                    }
+
+                    return ret;
+
+                default: 
+                    return 'has a value of';
             }
         }
 
@@ -454,7 +471,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
         }
 
         this.isBucketUsed = function(bucket){
-             return typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
+             return typeof bucket.bkt.Id == "number";
         }
 
         //******************** Editing mode *********************************/
@@ -476,6 +493,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             return bucketRestriction.bkt.Vals[0];
         }
         this.getEnumCmpModel = function (bucketRestriction) {
+            
             return bucketRestriction.bkt.Cmp;
         }
 

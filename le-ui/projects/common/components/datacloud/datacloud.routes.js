@@ -266,9 +266,7 @@ angular
             url: '/attr/:category/:subcategory',
             params: {
                 section: 'lookup',
-                LoadingText: 'Looking up Company Profile data',
-                category: {value: null, squash: true},
-                subcategory: {value: null, squash: true}
+                LoadingText: 'Looking up Company Profile data'
             },
             views: {
                 "main@": {
@@ -284,9 +282,7 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
                 LoadingText: 'Loading DataCloud Attributes',
-                section: 'edit',
-                category: {value: null, squash: true},
-                subcategory: {value: null, squash: true}
+                section: 'edit'
             },
             resolve: {
                 LookupResponse: function() {
@@ -420,9 +416,7 @@ angular
             params: {
                 pageIcon: 'ico-analysis',
                 pageTitle: 'Analysis',
-                section: 'segment.analysis',
-                category: {value: null, squash: true},
-                subcategory: {value: null, squash: true}
+                section: 'segment.analysis'
             },
             views: {
                 "main@": {
@@ -710,9 +704,7 @@ angular
                 segment: 'segment.name',
                 pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
-                section: 'segment.analysis',
-                category: { value: null, squash: true },
-                subcategory: { value: null, squash: true }
+                section: 'segment.analysis'
             },
             resolve: {
                 LookupResponse: [ function() {

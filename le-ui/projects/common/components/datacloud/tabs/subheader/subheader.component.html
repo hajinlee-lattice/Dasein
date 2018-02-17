@@ -16,7 +16,7 @@
         <li>Contacts</li>
     </ul>
     <ul class="subheader-tabs-links" ng-if="vm.checkState('picker')">
-        <li ng-click="vm.clickBuilder()" ng-class="{'active':vm.checkState('builder')}">Back</li>
+        <li ng-click="vm.clickPickerBack()" ng-class="{'active':vm.checkState('builder')}">Back</li>
         <li ng-if="vm.getPickerItem()">|</li>
         <li>{{ vm.getPickerItem().item.DisplayName }}</li>
     </ul>

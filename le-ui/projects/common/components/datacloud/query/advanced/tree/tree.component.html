@@ -115,6 +115,7 @@
             <button class="button blue-button set-button" 
                     ng-click="vm.setBucket($event)">SET</button>
             <button class="button gray-button unset-button"
+                    ng-if="vm.root.mode == 'rules'"
                     ng-click="vm.setBucket($event, true)">UNSET</button>
         </span>
     </div>

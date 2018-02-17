@@ -43,6 +43,16 @@ angular
                     QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, vm.booleanValue);
                 }
                 vm.changeEnumCmpValue = function () {
+                    if (vm.enumCmpModel == 'is empty') {
+                        vm.enumCmpModel = 'IS_EMPTY';
+                        vm.vals.length = 0;
+                    } else if (vm.enumCmpModel == 'is') {
+                        vm.enumCmpModel = vm.vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
+                    } else if (vm.enumCmpModel == 'is not') {
+                        vm.enumCmpModel = vm.vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
+                    }
+
+                    console.log(vm.enumCmpModel, vm.vals);
                     QueryTreeService.changeEnumCmpValue(vm.tree.bucketRestriction, vm.enumCmpModel);
                 }
 

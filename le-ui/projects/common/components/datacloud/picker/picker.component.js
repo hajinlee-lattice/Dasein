@@ -1,6 +1,7 @@
 angular.module('common.datacloud.valuepicker', [])
 .controller('ValuePickerController', function (
-    $state, $stateParams, $timeout, DataCloudStore, QueryStore, QueryTreeService, PickerBuckets, SegmentStore
+    $state, $stateParams, $timeout, DataCloudStore, QueryStore, 
+    QueryTreeService, PickerBuckets, SegmentStore
 ) {
     var vm = this;
 
@@ -83,20 +84,16 @@ angular.module('common.datacloud.valuepicker', [])
             vals.splice(vals.indexOf(bucket.Vals[0]), 1);
         }
 
-        if (bkt.Cmp == 'EQUAL' || bkt.Cmp == 'IN_COLLECTION') {
-            bkt.Cmp = vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
-        } else {
+        if (vals.length == 0) {
+            bkt.Cmp = 'IS_EMPTY';
+        } else if (bkt.Cmp == 'NOT_EQUAL' || bkt.Cmp == 'NOT_IN_COLLECTION') {
             bkt.Cmp = vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
+        } else {
+            bkt.Cmp = vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
         }
 
         if (vm.controller) {
             vm.updateCounts(vals);
-
-            if (vals.length == 0) {
-                vm.controller.unused = true;
-            } else {
-                vm.controller.unused = false;
-            }
         }
         
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);

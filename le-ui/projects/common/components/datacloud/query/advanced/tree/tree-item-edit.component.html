@@ -12,7 +12,10 @@
 </span>
 
 <span ng-if="vm.showItem('Enum')" class="query-section-item-operation">
-    <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()" ng-options="k as v for (k, v) in vm.enum_operations">
+    <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
+        <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL">is</option>
+        <option ng-selected="vm.enumCmpModel == 'NOT_EQUAL' || vm.enumCmpModel == 'NOT_IN_COLLECTION'" ng-value="NOT_EQUAL">is not</option>
+        <option ng-selected="vm.enumCmpModel == 'IS_EMPTY'" ng-value="IS_EMPTY">is empty</option>
     </select>
 
     <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add or Remove Values</a>

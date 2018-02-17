@@ -38,8 +38,6 @@ angular
                 var entity = enrichment.Entity;
                 var fieldname = enrichment.ColumnId;
 
-                console.log(entity, fieldname, bucket, enrichment);
-
                 $state.go('home.segment.explorer.enumpicker', { entity: entity, fieldname: fieldname });
             }
 

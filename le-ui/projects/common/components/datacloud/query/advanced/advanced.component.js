@@ -642,7 +642,7 @@ angular.module('common.datacloud.query.builder', [
         $state.go(state);
     }
 
-    vm.mouseUp = function(event) {
+    vm.mouseUp = function(event) { 
         var dragged = vm.draggedItem,
             dropped = vm.droppedItem;
 

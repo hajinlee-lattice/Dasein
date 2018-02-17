@@ -235,25 +235,20 @@ angular
                         vm.root.draggedClone.append(event.currentTarget.cloneNode(true));
 
                         vm.root.draggedContainer.append(vm.root.draggedClone);
-                        vm.root.draggedClone.addClass('query-section');
+                        vm.root.draggedClone.addClass('query-section').addClass('dragging');
                     }
 
                     vm.rect = vm.root.draggedContainer[0].getBoundingClientRect();
 
                     var x = event.clientX - vm.rect.left + 10;
                     var y = event.clientY - vm.rect.top - 51;
-                    var t = 'translate(' + x + 'px,' + y + 'px) scale(.75,.75)';
+                    var t = 'translate(' + x + 'px,' + y + 'px) scale(0.8, 0.8)';
 
                     vm.root.draggedClone.css({
-                        'pointer-events': 'none',
-                        'position': 'absolute',
-                        'top': 0 + 'px',
-                        'left': 0 + 'px',
-                        'transition': 'none',
-                        'transform-origin': 'bottom left',
+                        '-webkit-transform': t,
+                        '-moz-transform': t,
+                        '-ms-transform': t,
                         'transform': t,
-                        'opacity': .666,
-                        'z-index': 999
                     });
                 }
             }

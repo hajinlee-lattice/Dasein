@@ -84,7 +84,7 @@
             <h5><label>Attribute range</label><label>Records</label></h5>
             
             <ul class="attribute-stats">
-                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | limitTo: 5"
+                <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | orderBy: ['-Cnt', 'Lbl'] | limitTo: 5"
                     class="attribute attribute-stat delay top"
                     ng-class="{
                                 'select-range': vm.section == 'segment.analysis', 
@@ -130,8 +130,8 @@
             </ul>
             <div    class="attributes-more noselect" 
                     ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)" 
-                    ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum'">
-                More
+                    ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Enum' && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length > 5">
+                See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
             </div>
         </div>
     </span>
