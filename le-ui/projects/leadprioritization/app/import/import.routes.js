@@ -93,8 +93,6 @@ angular
                     var entityType = ImportWizardStore.getEntityType(),
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
 
-                    console.log(wizard_steps);
-
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'account');
                 }
             },
@@ -251,8 +249,6 @@ angular
                     var entityType = ImportWizardStore.getEntityType(),
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
 
-                    console.log(wizard_steps);
-
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'contact');
                 }
             },
@@ -314,7 +310,7 @@ angular
                     return ImportWizardStore.getUnmappedFields();
                 },
                 mergedFieldDocument: function($q, ImportWizardStore) {
-                    return ImportWizardStore.mergeFieldDocument({append: false, save: false});
+                    return ImportWizardStore.mergeFieldDocument({segment: true, save: false});
                 },
                 Type: function(){
                     return "Contacts";
@@ -489,8 +485,6 @@ angular
                 WizardProgressItems: function($stateParams, ImportWizardStore) {
                     var entityType = ImportWizardStore.getEntityType(),
                         wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
-
-                        console.log(wizard_steps);
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product');
                 }

@@ -7,17 +7,29 @@ angular.module('lp.import.wizard.customfields', [])
         AvailableFields: [],
         ignoredFields: FieldDocument.ignoredFields || [],
         fieldMappings: FieldDocument.fieldMappings,
-        mergedFields: mergedFieldDocument,
+        mergedFields: mergedFieldDocument.main || mergedFieldDocument,
         fieldMappingIgnore: {}
     });
 
     vm.init = function() {
         vm.size = vm.AvailableFields.length;
-        vm.mergedFields.forEach(function(item){
-            if(item.mappedField == null) {
-        	    vm.AvailableFields.push(item);
-            }
-        });
+        if(vm.mergedFields) {
+            vm.mergedFields.forEach(function(item) {
+                var appended = null;
+                if(item.mappedField == null) {
+                    if(mergedFieldDocument.appended) {
+                        appended = mergedFieldDocument.appended.find(function(dup) {
+                            return (item.userField === dup.userField);
+                        });
+                    }
+                    if(appended) {
+                        vm.AvailableFields.push(appended);
+                    } else {
+                        vm.AvailableFields.push(item);
+                    }
+                }
+            });
+        }
     };
 
     vm.toggleIgnores = function(checked, fieldMapping) {

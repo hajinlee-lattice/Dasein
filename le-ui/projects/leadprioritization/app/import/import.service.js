@@ -221,10 +221,12 @@ angular.module('lp.import')
             var deferred = $q.defer(),
                 append = [],
                 tmpFieldMappings = angular.copy(ImportWizardStore.fieldDocument.fieldMappings),
+                segmentedTmpFieldMappings = {main: [], appended: []},
                 opts = opts || {};
 
             opts.append = (opts.append === false ? false : true);
             opts.save = (opts.save === false ? false : true);
+            opts.segment = opts.segment || false;
 
             for(var i in this.saveObjects) {
                 var name = i,
@@ -289,6 +291,11 @@ angular.module('lp.import')
                 }
             }
 
+            if(opts.segment) {
+                segmentedTmpFieldMappings['main'] = tmpFieldMappings;
+                segmentedTmpFieldMappings['appended'] = append;
+            }
+
             if(opts.append) {
                 tmpFieldMappings = tmpFieldMappings.concat(append); // append
             }
@@ -297,7 +304,11 @@ angular.module('lp.import')
                 ImportWizardStore.fieldDocument.fieldMappings = tmpFieldMappings;
             }
 
-            deferred.resolve(tmpFieldMappings);
+            if(opts.segment) {
+                deferred.resolve(segmentedTmpFieldMappings);
+            } else {
+                deferred.resolve(tmpFieldMappings);
+            }
             return deferred.promise;
     }
 
