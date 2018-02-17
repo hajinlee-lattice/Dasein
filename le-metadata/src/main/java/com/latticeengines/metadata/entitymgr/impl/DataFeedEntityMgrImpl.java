@@ -130,7 +130,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         datafeedExecutionEntityMgr.create(execution);
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setActiveExecution(execution);
-        datafeed.setStatus(Status.ProcessAnalyzing);
+        datafeed.setStatus(jobType.getRunningStatus());
         log.info(String.format("starting execution: updating data feed to %s", datafeed));
         update(datafeed);
     }
@@ -186,21 +186,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             }
         });
         return imports;
-    }
-
-    @Override
-    @Transactional(propagation = Propagation.REQUIRED)
-    public DataFeedExecution retryLatestExecution(String datafeedName) {
-        DataFeed datafeed = findByNameInflated(datafeedName);
-        DataFeedExecution execution = datafeed.getActiveExecution();
-        execution.setStatus(DataFeedExecution.Status.Started);
-        log.info(String.format("restarting execution %s", execution));
-        datafeedExecutionEntityMgr.update(execution);
-
-        datafeed.setStatus(Status.ProcessAnalyzing);
-        log.info(String.format("restarting execution: updating data feed to %s", datafeed));
-        update(datafeed);
-        return execution;
     }
 
     @Override

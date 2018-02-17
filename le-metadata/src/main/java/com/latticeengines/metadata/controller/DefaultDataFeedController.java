@@ -113,14 +113,6 @@ public class DefaultDataFeedController {
         return datafeedService.updateExecutionWorkflowId(customerSpace, "", workflowId);
     }
 
-    @RequestMapping(value = "/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "restart data feed execution")
-    public DataFeedExecution restartExecution(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.retryLatestExecution(customerSpace, null);
-    }
-
     @RequestMapping(value = "/rebuildtransaction/{isRebuild}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")

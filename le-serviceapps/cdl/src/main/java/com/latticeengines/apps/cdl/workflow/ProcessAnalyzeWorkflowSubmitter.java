@@ -212,11 +212,15 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     public ApplicationId retryLatestFailed(String customerSpace) {
+        DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        if (execution == null) {
+            throw new RuntimeException("There is no previously failed processanalyze workflow to restart");
+        }
         if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
             throw new RuntimeException("We can't restart processanalyze workflow right now");
         }
 
-        DataFeedExecution execution = dataFeedProxy.retryLatestExecution(customerSpace);
         log.info(String.format("restarted execution with status: %s", execution.getStatus()));
         return workflowJobService.restart(execution.getWorkflowId());
     }

@@ -162,17 +162,22 @@ public class DataFeedEntityMgrImplTestNG extends DataCollectionFunctionalTestNGB
                 DataFeedExecution.Status.Failed, Status.InitialLoaded);
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Failed);
 
-        datafeedEntityMgr.retryLatestExecution(DATA_FEED_NAME);
+        datafeedEntityMgr.prepareExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+                DataFeedExecutionJobType.PA);
 
         DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
-        assertEquals(df.getExecutions().size(), 1);
+        assertEquals(df.getExecutions().size(), 2);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         DataFeedExecution exec = df.getExecutions().get(0);
-        assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
+        assertEquals(exec.getStatus(), DataFeedExecution.Status.Failed);
         assertEquals(exec.getImports().size(), exec1.getImports().size());
         assertEquals(exec.getImports().get(0).getDataTable().getAttributes().size(), 1);
+
+        exec = df.getExecutions().get(1);
+        assertEquals(exec.getPid(), df.getActiveExecution().getPid());
+        assertEquals(exec.getStatus(), DataFeedExecution.Status.Started);
     }
 
 }

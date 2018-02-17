@@ -2,9 +2,9 @@ package com.latticeengines.metadata.service;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedService {
@@ -30,8 +30,6 @@ public interface DataFeedService {
     DataFeedExecution failExecution(String customerSpace, String datafeedName, String initialDataFeedStatus);
 
     DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId);
-
-    DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName);
 
     void resetImport(String customerSpace, String datafeedName);
 

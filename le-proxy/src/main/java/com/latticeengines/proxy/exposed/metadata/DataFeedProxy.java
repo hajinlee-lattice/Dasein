@@ -101,12 +101,6 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         put("updateDataFeedStatus", url);
     }
 
-    public DataFeedExecution retryLatestExecution(String customerSpace) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/restartexecution",
-                shortenCustomerSpace(customerSpace));
-        return post("restartExecution", url, null, DataFeedExecution.class);
-    }
-
     public Boolean dataFeedTaskExist(String customerSpace, String dataFeedType, String entity) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{dataFeedType}/{entity}/exist",
                 shortenCustomerSpace(customerSpace), dataFeedType, entity);

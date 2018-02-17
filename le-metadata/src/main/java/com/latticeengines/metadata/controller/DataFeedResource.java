@@ -80,12 +80,4 @@ public class DataFeedResource {
         return datafeedService.updateExecutionWorkflowId(customerSpace, datafeedName, workflowId);
     }
 
-    @RequestMapping(value = "/{datafeedName}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "restart data feed execution")
-    public DataFeedExecution restartExecution(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName) {
-        return datafeedService.retryLatestExecution(customerSpace, datafeedName);
-    }
-
 }

@@ -50,7 +50,7 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Override
     public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().allowedJobTypes();
+        Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
         if (!allowedJobType.contains(jobType)) {
             DataFeedExecution execution = datafeed.getActiveExecution();
             if (execution == null || execution.getWorkflowId() == null
@@ -208,15 +208,6 @@ public class DataFeedServiceImpl implements DataFeedService {
                     String.format("Can't finish this execution due to datafeed status is %s", initialDataFeedStatus));
         }
 
-    }
-
-    @Override
-    public DataFeedExecution retryLatestExecution(String customerSpace, String datafeedName) {
-        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        if (datafeed == null) {
-            return null;
-        }
-        return datafeedEntityMgr.retryLatestExecution(datafeed.getName());
     }
 
     @Override

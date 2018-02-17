@@ -26,8 +26,6 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
 
     DataFeed findDefaultFeedReadOnly();
 
-    DataFeedExecution retryLatestExecution(String datafeedName);
-
     List<DataFeed> getAllDataFeeds();
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();

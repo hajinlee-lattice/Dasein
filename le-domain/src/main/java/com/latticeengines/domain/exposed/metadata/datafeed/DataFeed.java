@@ -330,20 +330,20 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Initing("initing"), //
         Initialized("initialized") {
             @Override
-            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+            public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
                 return Collections.singleton(DataFeedExecutionJobType.Import);
             }
         }, // import is ready to run
         InitialLoaded("initialLoaded") {
             @Override
-            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+            public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
                 return Arrays.asList(DataFeedExecutionJobType.Import, //
                         DataFeedExecutionJobType.PA);
             }
         }, // initial import data loaded
         Active("active") {
             @Override
-            public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+            public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
                 return Arrays.asList(DataFeedExecutionJobType.Import, //
                         DataFeedExecutionJobType.CDLOperation, //
                         DataFeedExecutionJobType.PA);
@@ -356,7 +356,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         private final String name;
         private static Map<String, Status> nameMap;
 
-        public Collection<DataFeedExecutionJobType> allowedJobTypes() {
+        public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
             return Collections.emptySet();
         }
 
