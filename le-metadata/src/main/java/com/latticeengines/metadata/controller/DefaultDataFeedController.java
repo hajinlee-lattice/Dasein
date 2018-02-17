@@ -75,6 +75,7 @@ public class DefaultDataFeedController {
     @ApiOperation(value = "lock data feed execution")
     public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));
     }
 
