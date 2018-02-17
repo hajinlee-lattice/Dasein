@@ -7,6 +7,7 @@ import org.springframework.data.redis.connection.lettuce.LettuceClientConfigurat
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionProvider;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionProvider.TargetAware;
+
 import io.lettuce.core.AbstractRedisClient;
 import io.lettuce.core.ReadFrom;
 import io.lettuce.core.RedisClient;
@@ -94,6 +95,7 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
             throw new UnsupportedOperationException("Connection type " + connectionType + " not supported!");
         }
 
+        @SuppressWarnings("rawtypes")
         private StatefulRedisConnection masterSlaveConnection(List<RedisURI> endpoints, ReadFrom readFrom) {
 
             StatefulRedisMasterSlaveConnection<?, ?> connection = MasterSlave.connect(client, codec, endpoints);
