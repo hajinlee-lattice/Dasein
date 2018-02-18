@@ -26,9 +26,8 @@ public class PeriodStrategy implements Serializable {
     }
 
     public PeriodStrategy(Template template) {
-        PeriodStrategy periodStrategy = new PeriodStrategy();
-        periodStrategy.setTemplate(template);
-        periodStrategy.setName(template.name());
+        this.setTemplate(template);
+        this.setName(template.name());
     }
 
     @JsonProperty("template")
