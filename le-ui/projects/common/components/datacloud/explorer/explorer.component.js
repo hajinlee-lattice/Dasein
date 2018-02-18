@@ -1047,7 +1047,7 @@ angular.module('common.datacloud.explorer', [
 
         if (enrichment.IsPremium) {
             vm.premiumSelectedTotal = vm.filter(selectedTotal, 'IsPremium', true).length;
-            if(vm.premiumSelectedTotal > vm.premiumSelectLimit) {
+            if(vm.premiumSelectedTotal > vm.premiumSelectLimit && enrichment.IsSelected) {
                 vm.premiumSelectedTotal = vm.premiumSelectLimit;
                 enrichment.IsSelected = false;
                 enrichment.IsDirty = false;
@@ -1058,7 +1058,7 @@ angular.module('common.datacloud.explorer', [
 
         vm.generalSelectedTotal = selectedTotal.length;
 
-        if (vm.generalSelectedTotal > vm.generalSelectLimit) {
+        if (vm.generalSelectedTotal > vm.generalSelectLimit && enrichment.IsSelected) {
             vm.generalSelectedTotal = vm.generalSelectLimit;
             enrichment.IsSelected = false;
             enrichment.IsDirty = false;
