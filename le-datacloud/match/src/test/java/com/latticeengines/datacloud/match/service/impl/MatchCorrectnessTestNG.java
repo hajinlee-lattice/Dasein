@@ -101,10 +101,6 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
             { null, "Edison47", "Port Orchard", "WA", "98367", "US", "3608746772", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
             // { null, "SS&C Advent", "San Francisco", "CA", "950142083", "US", "4089961010", "edison47.com",  "Edison", "Washington", "USA", "1-10", "0-1M" },
     };
-    
-    
-    private static final Object[][] TEST_DATA = ArrayUtils.addAll(TEST_DATA_1, TEST_DATA_2, TEST_DATA_3, TEST_DATA_4,
-            TEST_DATA_5, TEST_DATA_6, TEST_DATA_7);
 
     private static final int EXPECTED_DOMAIN_IDX = 7;
     private static final int EXPECTED_NAME_IDX = 8;

@@ -2,11 +2,10 @@ package com.latticeengines.common.exposed.period;
 
 import java.time.LocalDate;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
-import com.google.common.annotations.VisibleForTesting;
-
-public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
+public abstract class StartTimeBasedPeriodBuilder extends BasePeriodBuilder implements PeriodBuilder {
 
     private static final long serialVersionUID = -5148098981943162677L;
 
@@ -33,8 +32,8 @@ public abstract class StartTimeBasedPeriodBuilder implements PeriodBuilder {
         return toPeriodId(LocalDate.parse(date));
     }
 
-    @Override
-    public int currentPeriod() {
+    // Not sure when this should be used
+    private int currentPeriod() {
         if (OVERWRITING_NOW != null) {
             return toPeriodId(OVERWRITING_NOW);
         } else {

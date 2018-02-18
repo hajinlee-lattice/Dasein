@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -14,6 +15,11 @@ public class PeriodStrategy implements Serializable {
 
     private static final long serialVersionUID = 4453849238385668063L;
     public static PeriodStrategy CalendarWeek, CalendarMonth, CalendarQuarter, CalendarYear;
+    public static final ImmutableList<PeriodStrategy> NATURAL_PERIODS = ImmutableList.of( //
+            new PeriodStrategy(Template.Week), //
+            new PeriodStrategy(Template.Month), //
+            new PeriodStrategy(Template.Quarter), //
+            new PeriodStrategy(Template.Year));
 
     static {
         CalendarWeek = new PeriodStrategy(Template.Week);

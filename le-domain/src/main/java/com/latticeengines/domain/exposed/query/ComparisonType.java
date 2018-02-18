@@ -25,10 +25,7 @@ public enum ComparisonType {
     PRIOR, //
     PRIOR_ONLY, //
     FOLLOWING,  //
-    WITHIN, //
-
-    @Deprecated
-    IN_RANGE;
+    WITHIN; //
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

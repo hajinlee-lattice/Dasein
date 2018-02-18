@@ -12,10 +12,12 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -69,14 +71,14 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
 
         Map<String, Restriction> ruleA = new HashMap<>();
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("B", "G").build());
+                new BucketRestriction(BusinessEntity.Account, "CompanyName", Bucket.rangeBkt("B", "G")));
         ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Contact, "Title").in("A", "N").build());
+                new BucketRestriction(BusinessEntity.Contact, "Title", Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
 
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                Restriction.builder().let(BusinessEntity.Account, "CompanyName").in("H", "N").build());
+                new BucketRestriction(BusinessEntity.Account, "CompanyName", Bucket.rangeBkt("H", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
 
         model.setRatingRule(rule);

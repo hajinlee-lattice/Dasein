@@ -21,7 +21,7 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
+import com.latticeengines.common.exposed.period.NaturalMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
@@ -315,7 +315,7 @@ public class TimeSeriesUtils {
 
     private static PeriodBuilder getPeriodBuilder(PeriodStrategy strategy, String minDateStr) {
         // TODO: getting period builder by strategy and factory
-        PeriodBuilder periodBuilder = new CalendarMonthPeriodBuilder();
+        PeriodBuilder periodBuilder = new NaturalMonthPeriodBuilder();
         return periodBuilder;
     }
 

@@ -7,8 +7,6 @@ public class FrontEndQueryConstants {
 
     public static final String LOOKUPS = "lookups";
 
-    public static final String RESTRICT_HAS_TRANSACTION = "restrict_has_transaction";
-
     public static final String PERIOD_NAME = "period_name";
 
     public static final String PERIOD_COUNT = "period_count";

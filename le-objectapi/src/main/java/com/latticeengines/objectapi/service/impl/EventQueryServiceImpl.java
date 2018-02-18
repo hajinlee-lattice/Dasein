@@ -1,8 +1,10 @@
 package com.latticeengines.objectapi.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -11,17 +13,16 @@ import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.objectapi.util.ModelingQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.objectapi.util.QueryTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
 
     private final QueryEvaluatorService queryEvaluatorService;
 
-    @Autowired
+    @Inject
     public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
         this.queryEvaluatorService = queryEvaluatorService;
     }
@@ -60,7 +61,7 @@ public class EventQueryServiceImpl implements EventQueryService {
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
                           DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
+        ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
         return queryEvaluatorService.getCount(attrRepo, query);
     }
@@ -68,7 +69,7 @@ public class EventQueryServiceImpl implements EventQueryService {
     private DataPage getData(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
                              DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
+        ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
         Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
         return queryEvaluatorService.getData(attrRepo, query);
     }

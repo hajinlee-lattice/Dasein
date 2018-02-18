@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import com.latticeengines.query.evaluator.lookup.LookupResolver;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.ComparableExpression;
 import com.querydsl.core.types.dsl.StringExpression;
+import com.querydsl.sql.SQLQuery;
 
 public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestriction>
         implements RestrictionResolver<ConcreteRestriction> {
@@ -63,7 +65,7 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 restriction.setRelation(ComparisonType.NOT_EQUAL);
                 rhs = new ValueLookup(0);
                 isBitEncodedNullQuery = true;
-            } else if (rhs instanceof  CollectionLookup) {
+            } else if (rhs instanceof CollectionLookup) {
                 CollectionLookup collectionLookup = (CollectionLookup) rhs;
                 AttributeStats stats = findAttributeStats(attrLookup);
                 Buckets bkts = stats.getBuckets();
@@ -129,8 +131,14 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             switch (restriction.getRelation()) {
             case EQUAL:
                 if (rhs instanceof SubQueryAttrLookup) {
-                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                    booleanExpression = lhsPath.eq(subselect);
+                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                        booleanExpression = lhsPaths.get(0)
+                                .eq((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
+                    } else {
+                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                        booleanExpression = lhsPath.eq(subselect);
+                    }
                 } else {
                     if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
                         booleanExpression = ((StringExpression) lhsPath).equalsIgnoreCase(rhsPaths.get(0));
@@ -141,8 +149,14 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 break;
             case NOT_EQUAL:
                 if (rhs instanceof SubQueryAttrLookup) {
-                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                    booleanExpression = lhsPath.ne(subselect);
+                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                        booleanExpression = lhsPaths.get(0)
+                                .ne((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
+                    } else {
+                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                        booleanExpression = lhsPath.ne(subselect);
+                    }
                 } else {
                     if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
                         booleanExpression = ((StringExpression) lhsPath).notEqualsIgnoreCase(rhsPaths.get(0));
@@ -163,24 +177,22 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             case LESS_THAN:
                 booleanExpression = lhsPath.lt(rhsPaths.get(0));
                 break;
-            case IN_RANGE:
-                if (rhsPaths.size() > 1) {
-                    booleanExpression = lhsPath.between(rhsPaths.get(0), rhsPaths.get(1));
-                } else {
-                    booleanExpression = lhsPath.eq(rhsPaths.get(0));
-                }
-                break;
-
             case NOT_IN_COLLECTION:
                 if (rhs instanceof SubQueryAttrLookup) {
-                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                    booleanExpression = lhsPaths.get(0).notIn(subselect);
+                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                        booleanExpression = lhsPaths.get(0)
+                                .notIn((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
+                    } else {
+                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                        booleanExpression = lhsPaths.get(0).notIn(subselect);
+                    }
                 } else {
                     if (rhsPaths.size() > 1) {
                         if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
                             rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                            booleanExpression = ((StringExpression) lhsPath).toLowerCase().notIn(
-                                    rhsPaths.toArray(new ComparableExpression[0]));
+                            booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                    .notIn(rhsPaths.toArray(new ComparableExpression[0]));
 
                         } else {
                             booleanExpression = lhsPath.notIn(rhsPaths.toArray(new ComparableExpression[0]));
@@ -196,8 +208,14 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                 break;
             case IN_COLLECTION:
                 if (rhs instanceof SubQueryAttrLookup) {
-                    ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
-                    booleanExpression = lhsPaths.get(0).in(subselect);
+                    SubQueryAttrLookup subQueryAttrLookup = (SubQueryAttrLookup) rhs;
+                    if (StringUtils.isBlank(subQueryAttrLookup.getAttribute())) {
+                        booleanExpression = lhsPaths.get(0)
+                                .in((SQLQuery<?>) subQueryAttrLookup.getSubQuery().getSubQueryExpression());
+                    } else {
+                        ComparableExpression<String> subselect = rhsResolver.resolveForSubselect(rhs);
+                        booleanExpression = lhsPaths.get(0).in(subselect);
+                    }
                 } else {
                     // when there's only 1 element in the collection, querydsl
                     // generates something
@@ -206,8 +224,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
                     if (rhsPaths.size() > 1) {
                         if (applyEqualIgnoreCase(isBitEncoded, lhs, lhsPath)) {
                             rhsPaths = rhsResolver.resolveForLowercaseCompare(rhs);
-                            booleanExpression = ((StringExpression) lhsPath).toLowerCase().in(
-                                    rhsPaths.toArray(new ComparableExpression[0]));
+                            booleanExpression = ((StringExpression) lhsPath).toLowerCase()
+                                    .in(rhsPaths.toArray(new ComparableExpression[0]));
 
                         } else {
                             booleanExpression = lhsPath.in(rhsPaths.toArray(new ComparableExpression[0]));
@@ -246,7 +264,8 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
             }
 
             if (isBitEncoded && !isBitEncodedNullQuery && isNegativeBitEncodedLookup(restriction)) {
-                // for bit encoded, make sure not equal or not in collection won't return null
+                // for bit encoded, make sure not equal or not in collection
+                // won't return null
                 Restriction notNull = Restriction.builder().let(lhs).isNotNull().build();
                 BooleanExpression notNullExpn = resolve((ConcreteRestriction) notNull);
                 booleanExpression = booleanExpression.and(notNullExpn);
@@ -313,17 +332,17 @@ public class ConcreteResolver extends BaseRestrictionResolver<ConcreteRestrictio
 
     private boolean isNegativeBitEncodedLookup(ConcreteRestriction restriction) {
         boolean negativeOperator = !Boolean.TRUE.equals(restriction.getNegate()) && ( //
-                Arrays.asList( //
-                        ComparisonType.NOT_EQUAL, //
-                        ComparisonType.NOT_CONTAINS, //
-                        ComparisonType.NOT_IN_COLLECTION //
-                ).contains(restriction.getRelation()));
+        Arrays.asList( //
+                ComparisonType.NOT_EQUAL, //
+                ComparisonType.NOT_CONTAINS, //
+                ComparisonType.NOT_IN_COLLECTION //
+        ).contains(restriction.getRelation()));
         boolean positiveOperator = Boolean.TRUE.equals(restriction.getNegate()) && ( //
-                Arrays.asList( //
-                        ComparisonType.EQUAL, //
-                        ComparisonType.CONTAINS, //
-                        ComparisonType.IN_COLLECTION //
-                ).contains(restriction.getRelation()));
+        Arrays.asList( //
+                ComparisonType.EQUAL, //
+                ComparisonType.CONTAINS, //
+                ComparisonType.IN_COLLECTION //
+        ).contains(restriction.getRelation()));
         return negativeOperator || positiveOperator;
     }
 

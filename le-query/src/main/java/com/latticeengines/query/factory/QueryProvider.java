@@ -1,6 +1,7 @@
 package com.latticeengines.query.factory;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -18,7 +19,7 @@ public abstract class QueryProvider implements ApplicationContextAware {
     private static final long MAX_CACHE_SIZE = 10000;
     private Cache<String, SQLQueryFactory> factoryCache;
 
-    protected JdbcTemplate jdbcTemplate;
+    protected DataSource dataSource;
     protected ApplicationContext applicationContext;
 
     @PostConstruct

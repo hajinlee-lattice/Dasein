@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,12 +19,7 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public List<PeriodStrategy> getPeriodStrategies() {
-        return Arrays.asList( //
-                PeriodStrategy.CalendarWeek, //
-                PeriodStrategy.CalendarMonth, //
-                PeriodStrategy.CalendarQuarter, //
-                PeriodStrategy.CalendarYear //
-        );
+        return PeriodStrategy.NATURAL_PERIODS;
     }
 
 }

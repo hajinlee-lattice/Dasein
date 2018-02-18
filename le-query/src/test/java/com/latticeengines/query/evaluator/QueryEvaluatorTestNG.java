@@ -142,24 +142,11 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("not lower(%s.%s) = lower(?)", ACCOUNT, ATTR_ACCOUNT_NAME));
 
-        // range look up
-        Restriction range1 = Restriction.builder() //
-                .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("a", "z") //
-                .build();
-        Restriction range2 = Restriction.builder() //
-                .let(BusinessEntity.Account, "AlexaViewsPerUser").in(1.0, 3.5) //
-                .build();
-        restriction = Restriction.builder().and(range1, range2).build();
-        query = Query.builder().where(restriction).build();
-        sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("%s.%s between ? and ?", ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, String.format("%s.AlexaViewsPerUser between ? and ?", ACCOUNT));
-
         // half range look up
-        range1 = Restriction.builder() //
+        Restriction range1 = Restriction.builder() //
                 .let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("a") //
                 .build();
-        range2 = Restriction.builder() //
+        Restriction range2 = Restriction.builder() //
                 .let(BusinessEntity.Account, "AlexaViewsPerUser").lt(3.5) //
                 .build();
         restriction = Restriction.builder().and(range1, range2).build();
@@ -458,8 +445,14 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCaseLookup() {
         TreeMap<String, Restriction> cases = new TreeMap<>();
-        Restriction A = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).in("c", "d").build();
-        Restriction B = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).in("a", "b").build();
+        Restriction A = Restriction.builder().and(
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("c").build(),
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).lte("d").build()
+        ).build();
+        Restriction B = Restriction.builder().and(
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).gt("a").build(),
+                Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_CITY).lt("b").build()
+        ).build();
         Restriction C = Restriction.builder().let(BusinessEntity.Account, BUCKETED_NOMINAL_ATTR).eq("No").build();
 
         cases.put("B", B);
@@ -472,8 +465,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .select(caseLookup) //
                 .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
+        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT, ATTR_ACCOUNT_CITY));
         sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");
@@ -505,8 +498,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
                 .groupBy(new AttributeLookup(null, "Score")) //
                 .build();
         sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_NAME));
-        sqlContains(sqlQuery, String.format("when %s.%s between ? and ? then ?", ACCOUNT, ATTR_ACCOUNT_CITY));
+        sqlContains(sqlQuery, String.format("when (%s.%s >= ? and %s.%s <= ?)", ACCOUNT, ATTR_ACCOUNT_NAME, ACCOUNT, ATTR_ACCOUNT_NAME));
+        sqlContains(sqlQuery, String.format("when (%s.%s > ? and %s.%s < ?)", ACCOUNT, ATTR_ACCOUNT_CITY, ACCOUNT, ATTR_ACCOUNT_CITY));
         sqlContains(sqlQuery, String.format("when (%s.%s>>?)&? = ? then ?", ACCOUNT, BUCKETED_PHYSICAL_ATTR));
         sqlContains(sqlQuery, "else ? end");
         sqlContains(sqlQuery, "as Score");

@@ -33,7 +33,7 @@ public class RestrictionOptimizerUnitTestNG {
         Assert.assertEquals(JsonUtils.serialize(flatten), JsonUtils.serialize(expected));
     }
 
-    @DataProvider(name = "optimizeTestData", parallel = true)
+    @DataProvider(name = "optimizeTestData")
     public Object[][] provideOptimizeTestData() {
         Restriction r1 = and(A1, and(A2), and(A3, A4));
         Restriction e1 = and(A1, A2, A3, A4);
@@ -60,7 +60,7 @@ public class RestrictionOptimizerUnitTestNG {
         Assert.assertNull(RestrictionOptimizer.optimize(restriction));
     }
 
-    @DataProvider(name = "nullTestData", parallel = true)
+    @DataProvider(name = "nullTestData")
     public Object[][] provideNullTestData() {
         return new Object[][] { //
                 { null }, //

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.latticeengines.domain.exposed.query.TimeFilter.Period;
-
 public class RestrictionBuilder {
 
     private Restriction restriction;
@@ -178,6 +176,17 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder inSubquery(SubQuery subQuery) {
+        if (subQuery == null) {
+            throw new IllegalArgumentException("subquery cannot be null");
+        }
+        operator = ComparisonType.IN_COLLECTION;
+        negate = false;
+        rhsLookup = new SubQueryAttrLookup(subQuery);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder inCollection(Collection<Object> collection) {
         if (collection == null) {
             throw new IllegalArgumentException("collection cannot be null");
@@ -234,12 +243,13 @@ public class RestrictionBuilder {
         return this;
     }
 
+    @Deprecated
     public RestrictionBuilder in(Object min, Object max) {
         if (min == null && max == null) {
             throw new RuntimeException("min and max cannot both be null.");
         }
         if (min != null && max != null) {
-            operator = ComparisonType.IN_RANGE;
+            operator = ComparisonType.GTE_AND_LT;
             rhsLookup = new RangeLookup(min, max);
         } else if (min != null) {
             operator = ComparisonType.GREATER_OR_EQUAL;

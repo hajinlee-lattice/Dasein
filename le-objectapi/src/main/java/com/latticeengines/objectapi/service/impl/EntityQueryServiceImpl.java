@@ -9,7 +9,10 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -34,12 +37,14 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
 import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.objectapi.util.QueryTranslator;
+import com.latticeengines.objectapi.util.RatingQueryTranslator;
+import com.latticeengines.objectapi.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
@@ -48,49 +53,130 @@ import reactor.core.publisher.Flux;
 @Service("entityQueryService")
 public class EntityQueryServiceImpl implements EntityQueryService {
 
+    private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImpl.class);
+
     private final QueryEvaluatorService queryEvaluatorService;
 
-    @Autowired
-    public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
+    private final TransactionService transactionService;
+
+    @Inject
+    public EntityQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
         this.queryEvaluatorService = queryEvaluatorService;
+        this.transactionService = transactionService;
     }
 
     @Override
     public long getCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
-        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo);
+        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
+        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         return queryEvaluatorService.getCount(attrRepo, query);
     }
 
     @Override
     public DataPage getData(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
-        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
-        if (query.getLookups() == null || query.getLookups().isEmpty()) {
-            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
-        }
-        query = preProcess(frontEndQuery.getMainEntity(), query);
-        DataPage data = queryEvaluatorService.getData(attrRepo, query);
-        return postProcess(frontEndQuery.getMainEntity(), data);
+        Flux<Map<String, Object>> flux = getDataFlux(frontEndQuery, version);
+        List<Map<String, Object>> data = flux.toStream().collect(Collectors.toList());
+        return new DataPage(data);
     }
 
     @Override
     public Flux<Map<String, Object>> getDataFlux(FrontEndQuery frontEndQuery, DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        QueryTranslator queryTranslator = new QueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
-        Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), true));
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo);
+        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
+        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
         query = preProcess(frontEndQuery.getMainEntity(), query);
         return queryEvaluatorService.getDataFlux(attrRepo, query) //
                 .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
+    }
+
+    @Override
+    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
+        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+                .getData();
+        RatingModel model = frontEndQuery.getRatingModels().get(0);
+        Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
+        TreeMap<String, Long> counts = new TreeMap<>();
+        data.forEach(map -> {
+            String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
+            if (!counts.containsKey(key)) {
+                counts.put(key, 0L);
+            }
+            counts.put(key, counts.get(key) + (Long) map.get("count"));
+        });
+        return counts;
+    }
+
+    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
+            DataCollection.Version version) {
+        List<RatingModel> models = frontEndQuery.getRatingModels();
+        if (models != null && models.size() == 1) {
+            Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
+                    : frontEndQuery.getAccountRestriction().getRestriction();
+            Restriction contactRestriction = frontEndQuery.getContactRestriction() == null ? null
+                    : frontEndQuery.getContactRestriction().getRestriction();
+            if (contactRestriction != null) {
+                // merge account and contact restrictions
+                accountRestriction = accountRestriction == null ? contactRestriction
+                        : Restriction.builder().and(accountRestriction, contactRestriction).build();
+                frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
+                frontEndQuery.setContactRestriction(null);
+            }
+            RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                    queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator);
+            query.setPageFilter(null);
+            query.setSort(null);
+            RatingModel model = frontEndQuery.getRatingModels().get(0);
+            if (model instanceof RuleBasedModel) {
+                RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
+                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
+                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null, timeTranslator);
+                AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
+                query.setLookups(Arrays.asList(idLookup, ruleLookup));
+                GroupBy groupBy = new GroupBy();
+                groupBy.setLookups(Collections.singletonList(idLookup));
+                query.setGroupBy(groupBy);
+
+                SubQuery subQuery = new SubQuery(query, "q");
+                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, QueryEvaluator.SCORE);
+                return Query.builder() //
+                        .select(subQueryAttrLookup, AggregateLookup.count().as("Count")) //
+                        .from(subQuery) //
+                        .groupBy(subQueryAttrLookup) //
+                        .build();
+            } else {
+                throw new UnsupportedOperationException(
+                        "Can not count rating model of type " + model.getClass().getSimpleName());
+            }
+        } else {
+            throw new RuntimeException("Must specify one and only one rating model.");
+        }
+    }
+
+    private TimeFilterTranslator getTimeFilterTranslator(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        if (transactionService.hasTransactionBucket(frontEndQuery)) {
+            return transactionService.getTimeFilterTranslator(version);
+        } else {
+            return null;
+        }
     }
 
     private Query preProcess(BusinessEntity entity, Query query) {
@@ -160,72 +246,6 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         }
     }
 
-    @Override
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
-        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query).getData();
-        RatingModel model = frontEndQuery.getRatingModels().get(0);
-        Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
-        TreeMap<String, Long> counts = new TreeMap<>();
-        data.forEach(map -> {
-            String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
-            if (!counts.containsKey(key)) {
-                counts.put(key, 0L);
-            }
-            counts.put(key, counts.get(key) + (Long) map.get("count"));
-        });
-        return counts;
-    }
-
-    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        List<RatingModel> models = frontEndQuery.getRatingModels();
-        if (models != null && models.size() == 1) {
-            Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
-                    : frontEndQuery.getAccountRestriction().getRestriction();
-            Restriction contactRestriction = frontEndQuery.getContactRestriction() == null ? null
-                    : frontEndQuery.getContactRestriction().getRestriction();
-            if (contactRestriction != null) {
-                // merge account and contact restrictions
-                accountRestriction = accountRestriction == null ? contactRestriction
-                        : Restriction.builder().and(accountRestriction, contactRestriction).build();
-                frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
-                frontEndQuery.setContactRestriction(null);
-            }
-            QueryTranslator queryTranslator = new QueryTranslator(
-                    queryEvaluatorService.getQueryFactory(),
-                    queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
-            Query query = queryTranslator.translate(frontEndQuery, getDecorator(frontEndQuery.getMainEntity(), false));
-            query.setPageFilter(null);
-            query.setSort(null);
-            RatingModel model = frontEndQuery.getRatingModels().get(0);
-            if (model instanceof RuleBasedModel) {
-                RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                                                                        ruleBasedModel.getRatingRule(),
-                                                                        QueryEvaluator.SCORE, true, null, false);
-                AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
-                query.setLookups(Arrays.asList(idLookup, ruleLookup));
-                GroupBy groupBy = new GroupBy();
-                groupBy.setLookups(Collections.singletonList(idLookup));
-                query.setGroupBy(groupBy);
-
-                SubQuery subQuery = new SubQuery(query, "q");
-                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, QueryEvaluator.SCORE);
-                return Query.builder() //
-                        .select(subQueryAttrLookup, AggregateLookup.count().as("Count")) //
-                        .from(subQuery) //
-                        .groupBy(subQueryAttrLookup) //
-                        .build();
-            } else {
-                throw new UnsupportedOperationException(
-                        "Can not count rating model of type " + model.getClass().getSimpleName());
-            }
-        } else {
-            throw new RuntimeException("Must specify one and only one rating model.");
-        }
-    }
-
     private QueryDecorator getDecorator(BusinessEntity entity, boolean addSelects) {
         switch (entity) {
         case Account:
@@ -235,7 +255,8 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         case Product:
             return addSelects ? ProductQueryDecorator.WITH_SELECTS : ProductQueryDecorator.WITHOUT_SELECTS;
         default:
-            throw new UnsupportedOperationException("Cannot find a decorator for entity " + entity);
+            log.warn("Cannot find a decorator for entity " + entity);
+            return null;
         }
     }
 

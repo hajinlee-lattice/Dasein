@@ -1,5 +1,8 @@
 package com.latticeengines.query.exposed.translator;
 
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
+import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,18 +10,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.querydsl.core.types.EntityPath;
-import com.querydsl.core.types.Expression;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.Expressions;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.PathBuilder;
-import com.querydsl.core.types.dsl.StringPath;
-import com.querydsl.sql.SQLExpressions;
-import com.querydsl.sql.SQLQuery;
-import com.querydsl.sql.SQLQueryFactory;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -31,10 +22,24 @@ import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.query.exposed.factory.QueryFactory;
+import com.querydsl.core.types.EntityPath;
+import com.querydsl.core.types.Expression;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.dsl.NumberPath;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.sql.SQLExpressions;
+import com.querydsl.sql.SQLQuery;
+import com.querydsl.sql.SQLQueryFactory;
 
-import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
-import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 
+// segment builder uses DateRangeTranslator
+// modeling/scoring uses EventQueryTranslator
+// this one is deprecated.
+@Deprecated
 public class TransactionRestrictionTranslator extends TranslatorCommon {
 
     private NumberPath periodRangeMaxPid = Expressions.numberPath(BigDecimal.class, periodRange, MAX_PID);

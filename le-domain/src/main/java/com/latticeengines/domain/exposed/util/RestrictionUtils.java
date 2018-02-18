@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.util;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL;
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -15,10 +16,14 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.RangeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
+
+    public static final AttributeLookup TRANSACTION_LOOKUP =
+            new AttributeLookup(BusinessEntity.PurchaseHistory, "Has_Purchased");
 
     public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction) {
         Bucket bkt = bucketRestriction.getBkt();
@@ -30,7 +35,8 @@ public class RestrictionUtils {
         if (BusinessEntity.TRANSACTION_ENTITIES.contains(attr.getEntity())) {
             Bucket.Transaction transaction = bkt.getTransaction();
             if (transaction == null) {
-                throw new IllegalArgumentException("A " + attr.getEntity() + " bucket must have transaction (Txn) field.");
+                throw new IllegalArgumentException(
+                        "A " + attr.getEntity() + " bucket must have transaction (Txn) field.");
             } else {
                 return convertTxnBucket(transaction);
             }
@@ -44,6 +50,20 @@ public class RestrictionUtils {
                     "Bucket without comparator is obsolete. You might need to update your query to latest schema.");
         } else {
             return RestrictionUtils.convertValueComparisons(attr, comparisonType, values);
+        }
+    }
+
+    public static Restriction convertConcreteRestriction(ConcreteRestriction concreteRestriction) {
+        if (Arrays.asList(ComparisonType.GTE_AND_LTE, ComparisonType.GT_AND_LTE, ComparisonType.GTE_AND_LT,
+                ComparisonType.GT_AND_LT).contains(concreteRestriction.getRelation())) {
+            RangeLookup rangeLookup = (RangeLookup) concreteRestriction.getRhs();
+            return convertBinaryValueComparison( //
+                    concreteRestriction.getLhs(),
+                    concreteRestriction.getRelation(),
+                    rangeLookup.getMin(),
+                    rangeLookup.getMax());
+        } else {
+            return concreteRestriction;
         }
     }
 
@@ -77,7 +97,8 @@ public class RestrictionUtils {
         return transactionRestriction;
     }
 
-    private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType, List<Object> values) {
+    private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType,
+            List<Object> values) {
         Restriction restriction = null;
         switch (comparisonType) {
         case IS_NULL:
@@ -150,45 +171,43 @@ public class RestrictionUtils {
         return restriction;
     }
 
-    private static Restriction convertBinaryValueComparison(Lookup attr, ComparisonType comparisonType, Object min, Object max) {
-        Restriction restriction = null;
+    private static Restriction convertBinaryValueComparison(Lookup attr, ComparisonType comparisonType, Object min,
+            Object max) {
+        Restriction restriction;
         switch (comparisonType) {
-            case GTE_AND_LTE:
-                restriction = Restriction.builder()
-                        .and( //
-                                Restriction.builder().let(attr).gte(min).build(),
-                                Restriction.builder().let(attr).lte(max).build())
-                        .build();
-                break;
-            case GT_AND_LTE:
-                restriction = Restriction.builder()
-                        .and( //
-                                Restriction.builder().let(attr).gt(min).build(),
-                                Restriction.builder().let(attr).lte(max).build())
-                        .build();
-                break;
-            case GTE_AND_LT:
-                restriction = Restriction.builder()
-                        .and( //
-                                Restriction.builder().let(attr).gte(min).build(),
-                                Restriction.builder().let(attr).lt(max).build())
-                        .build();
-                break;
-            case GT_AND_LT:
-                restriction = Restriction.builder()
-                        .and( //
-                                Restriction.builder().let(attr).gt(min).build(),
-                                Restriction.builder().let(attr).lt(max).build())
-                        .build();
-                break;
-            default:
-                restriction = Restriction.builder().let(attr).in(min, max).build();
-                break;
+        case GTE_AND_LTE:
+            restriction = Restriction.builder()
+                    .and( //
+                            Restriction.builder().let(attr).gte(min).build(),
+                            Restriction.builder().let(attr).lte(max).build())
+                    .build();
+            break;
+        case GT_AND_LTE:
+            restriction = Restriction.builder()
+                    .and( //
+                            Restriction.builder().let(attr).gt(min).build(),
+                            Restriction.builder().let(attr).lte(max).build())
+                    .build();
+            break;
+        case GTE_AND_LT:
+            restriction = Restriction.builder()
+                    .and( //
+                            Restriction.builder().let(attr).gte(min).build(),
+                            Restriction.builder().let(attr).lt(max).build())
+                    .build();
+            break;
+        case GT_AND_LT:
+            restriction = Restriction.builder()
+                    .and( //
+                            Restriction.builder().let(attr).gt(min).build(),
+                            Restriction.builder().let(attr).lt(max).build())
+                    .build();
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown operator " + comparisonType);
         }
         return restriction;
     }
-
-
 
     private static void validateSingleValue(List<Object> values) {
         if (values == null || values.size() != 1) {

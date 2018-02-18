@@ -82,6 +82,7 @@ public class TimeFilter {
 
     public static class Period {
 
+        public static final Period Date = new Period("Date");
         public static final Period Day = new Period("Day");
         public static final Period Week = new Period("Week");
         public static final Period Month = new Period("Month");

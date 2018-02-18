@@ -22,7 +22,7 @@
         <property name="maxPoolSize" value="8"/>
         <property name="minPoolSize" value="1"/>
         <property name="checkoutTimeout" value="30000"/>
-        <property name="unreturnedConnectionTimeout" value="30"/>
+        <property name="unreturnedConnectionTimeout" value="60"/>
         <property name="debugUnreturnedConnectionStackTraces" value="true"/>
         <property name="maxIdleTime" value="30"/>
     </bean>

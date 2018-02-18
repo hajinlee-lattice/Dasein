@@ -3,6 +3,8 @@ package com.latticeengines.query.evaluator.lookup;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
@@ -35,9 +37,7 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
         }
         String alias = subQuery.getAlias();
         StringPath subQueryPath = QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
-        ComparableExpression<String> s = Expressions
-                .asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
-        return s;
+        return Expressions.asComparable(SQLExpressions.select(subQueryPath).from(sqlSubQuery.as(alias)));
     }
 
     @SuppressWarnings("unchecked")
@@ -49,7 +49,11 @@ public class SubQueryAttrResolver extends BaseLookupResolver<SubQueryAttrLookup>
 
     @Override
     public Expression<?> resolveForSelect(SubQueryAttrLookup lookup, boolean asAlias) {
-        return QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
+        if (StringUtils.isBlank(lookup.getAttribute())) {
+            return Expressions.TRUE;
+        } else {
+            return QueryUtils.getAttributePath(lookup.getSubQuery(), lookup.getAttribute());
+        }
     }
 
 }

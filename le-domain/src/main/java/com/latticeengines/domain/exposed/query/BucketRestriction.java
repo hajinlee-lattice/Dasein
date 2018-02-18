@@ -32,7 +32,13 @@ public class BucketRestriction extends Restriction {
     private Bucket bkt;
 
     @JsonProperty("deleted")
-    private boolean deleted;
+    private Boolean deleted;
+
+    public BucketRestriction(BusinessEntity entity, String attrName, Bucket bkt) {
+        this.attr = new AttributeLookup(entity, attrName);
+        this.bkt = bkt;
+        this.deleted = false;
+    }
 
     public BucketRestriction(AttributeLookup attr, Bucket bkt) {
         this.attr = attr;
@@ -70,11 +76,11 @@ public class BucketRestriction extends Restriction {
         this.attr = AttributeLookup.fromString(attr);
     }
 
-    public boolean isDeleted() {
+    public Boolean getDeleted() {
         return deleted;
     }
 
-    public void setDeleted(boolean deleted) {
+    public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
     }
 

@@ -1,9 +1,9 @@
 package com.latticeengines.query.factory;
 
 import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
@@ -17,8 +17,8 @@ public class RedshiftQueryProvider extends QueryProvider {
 
     @PostConstruct
     private void init() {
-        jdbcTemplate = BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, JdbcTemplate.class,
-                "redshiftSegmentJdbcTemplate");
+        dataSource = BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
+                "redshiftSegmentDataSource");
     }
 
     @Override
@@ -31,6 +31,6 @@ public class RedshiftQueryProvider extends QueryProvider {
     protected SQLQueryFactory getSQLQueryFactory() {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new SQLQueryFactory(configuration, jdbcTemplate.getDataSource());
+        return new SQLQueryFactory(configuration, dataSource);
     }
 }

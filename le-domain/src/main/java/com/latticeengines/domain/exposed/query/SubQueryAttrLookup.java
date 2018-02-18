@@ -19,6 +19,10 @@ public class SubQueryAttrLookup extends Lookup {
 
     private SubQueryAttrLookup() {}
 
+    public SubQueryAttrLookup(SubQuery subQuery) {
+        this.subQuery = subQuery;
+    }
+
     public SubQueryAttrLookup(SubQuery subQuery, String attribute) {
         this.subQuery = subQuery;
         this.attribute = attribute;

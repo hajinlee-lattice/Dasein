@@ -31,8 +31,7 @@ public class QueryEvaluatorService {
     private static final int MAX_RETRIES = 2;
 
     @Autowired
-    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this
-                                                     // proxy
+    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
 
     @Autowired
     private QueryEvaluator queryEvaluator;

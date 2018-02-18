@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.period.CalendarMonthPeriodBuilder;
+import com.latticeengines.common.exposed.period.NaturalMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
@@ -46,7 +46,7 @@ public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements
     private PeriodBuilder getPeriodBuilder(String minDateStr) {
         // TODO: getting period builder by strategy and factory
         if (periodBuilder == null) {
-            periodBuilder = new CalendarMonthPeriodBuilder();
+            periodBuilder = new NaturalMonthPeriodBuilder();
         }
         return periodBuilder;
     }
