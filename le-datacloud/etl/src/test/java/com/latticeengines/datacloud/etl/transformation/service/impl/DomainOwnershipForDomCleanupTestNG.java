@@ -98,6 +98,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production" },
                 { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal" },
                 { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal" },
+                { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal" },
                 // domain only entries
                 { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors" },
                 { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes" },
@@ -216,7 +217,7 @@ public class DomainOwnershipForDomCleanupTestNG
             { "sbiDuns1.com", null, null, 4, "FRANCHISE", "false" }, //
             { "unicef.org", "DUNS39", "GU", 2, "HIGHER_NUM_OF_LOC", "true" }, //
             { "goodwill.com", "DUNS54", "DUNS", 3, "HIGHER_EMP_TOTAL", "true" }, //
-            { "tesla.com", null, null, 2, "OTHER", "false" }
+            { "tesla.com", null, null, 3, "OTHER", "false" }
     };
 
     Object[][] amSeedCleanedUpValues = new Object[][] { //
@@ -258,6 +259,7 @@ public class DomainOwnershipForDomCleanupTestNG
             { "sbiDuns1.com", "DUNS29", null, "DUNS24", 1700320L, "220", 1, "Food Production"},
             { "tesla.com", "DUNS111", "DUNS111", "DUNS110", 3131213L, "1123", 3, "Legal" },
             { "tesla.com", "DUNS121", "DUNS121", "DUNS120", 3131213L, "1123", 3, "Legal" },
+            { "tesla.com", "DUNS122", "DUNS122", null, 3131213L, "1123", 3, "Legal" },
             // domain only entries : not cleaned up
             { "amazon.com", null, "DUNS17", "DUNS18", 100002421L, null, 1, "Manufacturing - Semiconductors"},
             { "netappDu.com", null, "DUNS28", null, null, null, null, "X-ray Apparatus and Tubes"},
@@ -328,6 +330,6 @@ public class DomainOwnershipForDomCleanupTestNG
             }
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 34);
+        Assert.assertEquals(rowCount, 35);
     }
 }

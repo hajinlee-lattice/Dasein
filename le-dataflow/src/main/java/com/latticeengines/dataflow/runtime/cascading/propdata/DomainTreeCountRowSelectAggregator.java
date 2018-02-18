@@ -109,7 +109,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
             empTotal = Integer.parseInt(arguments.getString(totalEmpField));
         }
         Integer numOfLocVal = (Integer) arguments.getObject(numOfLocField);
-        if (context.rootDuns == null) {
+        if (context.numOfTrees == 1) {
             return update(context, arguments, SINGLE_TREE);
         }
         int res = 0;
