@@ -591,6 +591,36 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
+                    },
+                    GetSelectedProducts: function ($q, $stateParams, $timeout, Products, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if($stateParams.rating_id) {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
+                                var selectedTargetProducts = rating.activeModel.AI.targetProducts;
+
+                                angular.forEach(selectedTargetProducts, function(value, key) {
+                                    
+                                    var product = Products.filter(function( product ) {
+                                      return product.ProductId === value;
+                                    });
+                                    product[0].Selected = true;
+
+                                    var productId = product[0].ProductId,
+                                        productName = product[0].ProductName;
+
+                                    if(!RatingsEngineStore.productsSelected[productId]){
+                                        RatingsEngineStore.selectProduct(productId, productName);
+                                    };
+                                });
+                            });
+                            $timeout(function(){
+                                deferred.resolve(RatingsEngineStore.getProductsSelected());
+                            }, 750);
+                        } else {
+                            deferred.resolve({});
+                        }
+                        return deferred.promise;
                     }
                 },
                 views: {

@@ -2,14 +2,14 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products) {
+    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products, GetSelectedProducts) {
         var vm = this;
         angular.extend(vm, {
             products: Products,
             currentPage: 1,
             pageSize: 10,
             productsCount: 0,
-            productsSelected: {},
+            productsSelected: GetSelectedProducts,
             sortBy: 'ProductName',
             showPagination: true,
             selectedAll: false,
@@ -26,28 +26,7 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     vm.init = function () {
 
-        if($stateParams.rating_id) {
-            RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
-
-                var selectedTargetProducts = rating.activeModel.AI.targetProducts;
-
-                vm.productsSelected = selectedTargetProducts;
-                vm.getProductsSelectedCount();
-
-                if(selectedTargetProducts.length > 0) {
-                    angular.forEach(selectedTargetProducts, function(value, key) {
-                        vm.selectProduct(value, key);
-
-                        var product = vm.products.filter(function( product ) {
-                          return product.ProductId === value;
-                        });
-                        product[0].Selected = true
-                    });
-                }
-
-            });
-        }
-
+        console.log(vm.productsSelected);
 
         RatingsEngineStore.setCachedProducts(vm.products);
 
@@ -103,10 +82,6 @@ angular.module('lp.ratingsengine.wizard.products', [
         }
     }
 
-    vm.getProductsSelectedCount = function () {
-        return RatingsEngineStore.getProductsSelectedCount();
-    }
-
     vm.validateNextStep = function () {
         if (RatingsEngineStore.getProductsSelectedCount() > 0) {
             vm.setValidation('products', true);
@@ -129,5 +104,10 @@ angular.module('lp.ratingsengine.wizard.products', [
         RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
     };
 
+    vm.getProductsSelectedCount = function () {        
+        return RatingsEngineStore.getProductsSelectedCount();
+    }
+
     vm.init();
+
 });

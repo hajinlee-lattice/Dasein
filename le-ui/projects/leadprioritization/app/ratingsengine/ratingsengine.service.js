@@ -610,7 +610,6 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveRatingEngineAI = function(nextState){
 
-        console.log($stateParams);
         var engineType = $stateParams.engineType,
             opts =  {
                 type: "AI_BASED",

@@ -36,6 +36,14 @@
             background: #fff;
             border: #ddd solid 1px;
             border-radius: 4px;
+            span {
+                font-size: 35px;
+                line-height: 1;
+                margin-bottom: 8px;
+                color: #3f7bbd;
+                display: block;
+                font-weight: bold;
+            }
             svg {
                 display: block;
                 width: 60px;
@@ -57,6 +65,9 @@
                 color: #fff;
                 svg {
                     fill: #b6cde6;
+                }
+                span {
+                    color: #b6cde6;
                 }
                 &:hover {
                     border-color: #457EBA;
