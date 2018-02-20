@@ -26,7 +26,7 @@ public class PlsLoginProxy extends BaseRestApiProxy {
         Credentials creds = new Credentials();
         creds.setUsername(username);
         creds.setPassword(password);
-        LoginDocument doc = postWithoutLogBody("login pls", url, creds, LoginDocument.class);
+        LoginDocument doc = post("login pls", url, creds, LoginDocument.class);
         if (doc == null) {
             throw new RuntimeException("Failed to login GA for the user " + username); // don't put pw in this log
         }

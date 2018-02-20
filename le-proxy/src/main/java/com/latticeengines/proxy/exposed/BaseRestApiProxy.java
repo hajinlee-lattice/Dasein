@@ -118,7 +118,7 @@ public abstract class BaseRestApiProxy {
         restTemplate.setInterceptors(interceptors);
     }
 
-    protected void cleanupAuthHeader() {
+    void cleanupAuthHeader() {
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>(restTemplate.getInterceptors());
         interceptors.removeIf(i -> i instanceof AuthorizationHeaderHttpRequestInterceptor);
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
@@ -137,12 +137,8 @@ public abstract class BaseRestApiProxy {
         return post(method, url, body, returnValueClazz, false, true);
     }
 
-    protected <T, B> T postWithoutLogBody(final String method, final String url, final B body, final Class<T> returnValueClazz) {
-        return post(method, url, body, returnValueClazz, false, false);
-    }
-
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
-        return post(method, url, body, returnValueClazz, true, false);
+        return post(method, url, body, returnValueClazz, false, false);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
@@ -259,16 +255,8 @@ public abstract class BaseRestApiProxy {
         put(method, url, null, false);
     }
 
-    protected <B> void putWithoutLogBody(final String method, final String url, final B body) {
-        put(method, url, body, false);
-    }
-
     protected <B> void put(final String method, final String url, final B body) {
-        put(method, url, body, true);
-    }
-
-    protected <B> void putKryo(final String method, final String url, final B body) {
-        put(method, url, body, null, false, true);
+        put(method, url, body, false);
     }
 
     protected <B> void put(final String method, final String url, final B body, boolean logBody) {

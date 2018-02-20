@@ -83,7 +83,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void createTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        postWithoutLogBody("createTable", url, table, null);
+        post("createTable", url, table, null);
     }
 
     public Boolean resetTables(String customerSpace) {
@@ -93,7 +93,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        putWithoutLogBody("updateTable", url, table);
+        put("updateTable", url, table);
     }
 
     public Table cloneTable(String customerSpace, String tableName) {
