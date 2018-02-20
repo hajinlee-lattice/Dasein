@@ -8,6 +8,8 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
@@ -36,6 +38,7 @@ import org.springframework.web.client.RestTemplate;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -81,6 +84,9 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
 
     @Autowired
     private GlobalTenantManagementService globalTenantManagementService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Autowired
     private SessionService sessionService;
@@ -222,12 +228,14 @@ public class SecurityFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         tenant.setId("testAdminTenant");
         tenant.setName("AdminTenant");
         globalTenantManagementService.registerTenant(tenant);
+        tenantEntityMgr.create(tenant);
     }
 
     protected void deleteAdminTenant() {
         Tenant tenant = new Tenant();
         tenant.setId("testAdminTenant");
         tenant.setName("AdminTenant");
+        tenantEntityMgr.delete(tenant);
         globalTenantManagementService.discardTenant(tenant);
     }
 

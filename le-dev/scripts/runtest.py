@@ -10,13 +10,6 @@ def chdirToProjectDir(project):
     os.chdir(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))) + '/' + project)
     print("Change to directory: ", os.getcwd())
 
-
-def pomOpts(command, project):
-    if command == "jetty:run" and project == "proxy":
-        return [ "-f", "web-pom.xml" ]
-    else:
-        return []
-
 def propDirsOpts():
     if 'LE_ENVIRONMENT' not in os.environ or os.environ['LE_ENVIRONMENT'] == '':
         le_env = "dev"
@@ -82,6 +75,6 @@ if __name__ == "__main__":
     my_env["MAVEN_OPTS"] = "-Xmx1g"
     if args.command == "jetty:run":
         my_env["MAVEN_OPTS"] += " -Xdebug -Xnoagent -Djava.compiler=NONE -Xrunjdwp:transport=dt_socket,address=4002,server=y,suspend=n"
-    commands = ['mvn'] + pomOpts(args.command, args.project) + propDirsOpts() + commonOpts() + testOpts(args)
+    commands = ['mvn'] + propDirsOpts() + commonOpts() + testOpts(args)
     print('Executing [with common opts added]: ', ' '.join(commands))
     subprocess.call(commands, env=my_env)

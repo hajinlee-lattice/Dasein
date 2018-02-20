@@ -9,13 +9,17 @@
 
     <properties>
         <component-name>proxy</component-name>
+        <jetty.dir>test</jetty.dir>
+        <jetty.use.test.cp>true</jetty.use.test.cp>
+        <jetty.port>8084</jetty.port>
+        <jetty.ssl.port>9084</jetty.ssl.port>
     </properties>
 
     <parent>
         <groupId>com.latticeengines</groupId>
-        <artifactId>le-parent</artifactId>
+        <artifactId>le-web-parent</artifactId>
         <version>4.4.0-SNAPSHOT</version>
-        <relativePath>../le-parent</relativePath>
+        <relativePath>../le-parent/web-pom.xml</relativePath>
     </parent>
 
     <dependencies>
@@ -66,6 +70,12 @@
             <artifactId>le-security</artifactId>
             <version>${project.version}</version>
             <classifier>intf</classifier>
+        </dependency>
+        <dependency>
+            <groupId>com.latticeengines</groupId>
+            <artifactId>le-security</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
