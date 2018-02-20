@@ -1,9 +1,10 @@
-package com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps;
+package com.latticeengines.domain.exposed.serviceflows.core.steps;
 
 import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.BaseLPDataFlowStepConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class AddStandardAttributesConfiguration extends BaseLPDataFlowStepConfiguration {

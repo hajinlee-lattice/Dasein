@@ -2,14 +2,18 @@ package com.latticeengines.metadata.service.impl;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.camille.exposed.locks.LockManager;
+import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
@@ -47,25 +51,37 @@ public class DataFeedServiceImpl implements DataFeedService {
     @Inject
     private WorkflowProxy workflowProxy;
 
+    private static final String LockType = "DataFeedExecutionLock";
+
     @Override
     public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
-        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
-        if (!allowedJobType.contains(jobType)) {
-            DataFeedExecution execution = datafeed.getActiveExecution();
-            if (execution == null || execution.getWorkflowId() == null
-                    || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
-                return false;
+        String lockName = new Path("/").append(LockType).append("/").append(customerSpace).toString();
+        try {
+            LockManager.registerCrossDivisionLock(lockName);
+            LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
+            DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+            Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
+            if (!allowedJobType.contains(jobType)) {
+                DataFeedExecution execution = datafeed.getActiveExecution();
+                if (execution == null || execution.getWorkflowId() == null
+                        || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+                    return false;
+                }
+                Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
+                if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
+                    return false;
+                }
+                failExecution(customerSpace, datafeedName,
+                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
-            Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
-            if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
-                return false;
-            }
-            failExecution(customerSpace, datafeedName,
-                    job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
+            prepareExecution(customerSpace, datafeedName, jobType);
+            return true;
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            return false;
+        } finally {
+            LockManager.releaseWriteLock(lockName);
         }
-        prepareExecution(customerSpace, datafeedName, jobType);
-        return true;
     }
 
     private void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {

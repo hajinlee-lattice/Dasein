@@ -52,12 +52,12 @@ public class LockManager {
         deregisterLock(lockName, "");
     }
 
-    private static void deregisterLock(String lockName, String dvision) {
+    private static void deregisterLock(String lockName, String division) {
         if (locks.containsKey(lockName)) {
             log.info("Deregistering the lock " + lockName);
             locks.remove(lockName);
         }
-        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), dvision, lockName);
+        Path lockPath = PathBuilder.buildLockPath(CamilleEnvironment.getPodId(), division, lockName);
         try {
             if (CamilleEnvironment.getCamille().exists(lockPath)) {
                 CamilleEnvironment.getCamille().delete(lockPath);
