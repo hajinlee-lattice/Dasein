@@ -28,7 +28,7 @@ public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextS
             return null;
         }
 
-        if (tenant == null && tenant.getPid() == null) {
+        if (tenant != null && tenant.getPid() == null) {
             throw new IllegalStateException(
                     "Should not have a " + authSource + " with null PID in SecurityContextHolder: " + JsonUtils.serialize(auth));
         }
