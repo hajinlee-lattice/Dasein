@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -211,6 +212,7 @@ public class WorkflowJobServiceImplUnitTestNG {
     private void mockTenantEntityManager() {
         Tenant tenant = new Tenant();
         tenant.setId("tenant");
+        tenant.setPid(1L);
         when(tenantEntityMgr.findByTenantId(anyString())).thenReturn(tenant);
     }
 

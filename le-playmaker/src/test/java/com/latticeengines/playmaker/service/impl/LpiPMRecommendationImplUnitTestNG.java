@@ -64,7 +64,9 @@ public class LpiPMRecommendationImplUnitTestNG {
 
         mockRecommendationEntityMgr(TOTAL_REC_COUNT);
         mockInternalResourceRestApiProxy();
-        MultiTenantContext.setTenant(new Tenant("a.a.Production"));
+        Tenant tenant = new Tenant("a.a.Production");
+        tenant.setPid(1L);
+        MultiTenantContext.setTenant(tenant);
 
         lpiPMRecommendationImpl = new LpiPMRecommendationImpl();
 
