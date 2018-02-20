@@ -53,6 +53,7 @@
             <groupId>com.latticeengines</groupId>
             <artifactId>le-proxy</artifactId>
             <version>${project.version}</version>
+            <classifier>intf</classifier>
         </dependency>
         <dependency>
             <groupId>com.latticeengines</groupId>
