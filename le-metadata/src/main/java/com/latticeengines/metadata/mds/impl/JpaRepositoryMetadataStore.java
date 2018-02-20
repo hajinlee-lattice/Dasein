@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.mds.impl;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.List;
 
@@ -30,7 +31,7 @@ public abstract class JpaRepositoryMetadataStore<T extends MetadataEntity> {
     private static Scheduler scheduler = Schedulers.newParallel("metadata-store");
     private String idField = null;
 
-    public Flux<ColumnMetadata> getMetadata(String... namespace) {
+    public Flux<ColumnMetadata> getMetadata(Serializable... namespace) {
         Class<T> clz = getEntityClz();
         MetadataStoreRepository<T> repository = getRepository();
         long count = repository.countByNameSpace(clz, namespace);
@@ -64,6 +65,11 @@ public abstract class JpaRepositoryMetadataStore<T extends MetadataEntity> {
             idField = "uuid";
         }
         return idField;
+    }
+
+    // default impl assumes all namespace keys are string
+    public Serializable[] parseNameSpace(String... namespace) {
+        return namespace;
     }
 
 }

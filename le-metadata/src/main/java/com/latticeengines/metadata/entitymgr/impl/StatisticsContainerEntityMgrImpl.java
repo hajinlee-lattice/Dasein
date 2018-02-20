@@ -42,12 +42,12 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findStatisticsByName(String statisticsName) {
         return statisticsContainerDao.findByField("name", statisticsName);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public StatisticsContainer createOrUpdateStatistics(StatisticsContainer container) {
         StatisticsContainer existing = findStatisticsByName(container.getName());
@@ -62,7 +62,7 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public StatisticsContainer createStatistics(StatisticsContainer container) {
         container.setTenant(MultiTenantContext.getTenant());
@@ -74,14 +74,14 @@ public class StatisticsContainerEntityMgrImpl extends BaseEntityMgrImpl<Statisti
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInSegment(String segmentName, DataCollection.Version version) {
         StatisticsContainer container =  statisticsContainerDao.findInSegment(segmentName, version);
         return copyStatisticsToStatsCubes(container);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public StatisticsContainer findInMasterSegment(String collectionName, DataCollection.Version version) {
         collectionName = StringUtils.isBlank(collectionName)
                 ? dataCollectionEntityMgr.getOrCreateDefaultCollection().getName() : collectionName;

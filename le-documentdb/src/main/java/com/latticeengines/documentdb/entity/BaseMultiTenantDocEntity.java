@@ -9,11 +9,9 @@ import com.latticeengines.documentdb.annotation.TenantIdColumn;
 @MappedSuperclass
 public abstract class BaseMultiTenantDocEntity extends BaseDocumentEntity {
 
-    static final String COLUMN_TENANT_ID = "TenantId";
-
     @TenantIdColumn
     @JsonProperty("TenantId")
-    @Column(name = COLUMN_TENANT_ID, nullable = false)
+    @Column(name = "TenantId", nullable = false)
     private String tenantId;
 
     public String getTenantId() {
@@ -22,6 +20,10 @@ public abstract class BaseMultiTenantDocEntity extends BaseDocumentEntity {
 
     public void setTenantId(String tenantId) {
         this.tenantId = tenantId;
+    }
+
+    protected String getTenantIdField() {
+        return "tenantId";
     }
 
 }

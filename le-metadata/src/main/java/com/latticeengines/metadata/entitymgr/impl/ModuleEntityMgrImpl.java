@@ -22,7 +22,7 @@ public class ModuleEntityMgrImpl extends BaseEntityMgrImpl<Module> implements Mo
         return moduleDao;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public Module findByName(String name) {
         return moduleDao.findByField("NAME", name);

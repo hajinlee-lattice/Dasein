@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -25,7 +26,8 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
 
     public Flux<ColumnMetadata> getMetadata(String metadataStoreName, String... namespace) {
         MetadataStore metadataStore = getMetadataStore(metadataStoreName);
-        return metadataStore.getMetadata(namespace);
+        Serializable[] keys = metadataStore.parseNameSpace(namespace);
+        return metadataStore.getMetadata(keys);
     }
 
     private MetadataStore getMetadataStore(String metadataStoreName) {

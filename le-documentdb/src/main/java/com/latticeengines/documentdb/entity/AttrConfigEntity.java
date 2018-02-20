@@ -35,7 +35,7 @@ public class AttrConfigEntity extends BaseColumnMetadataDocEntity implements Met
 
     @Override
     public List<String> getnamespaceKeys() {
-        return Arrays.asList(COLUMN_TENANT_ID, "Entity");
+        return Arrays.asList(getTenantIdField(), "entity");
     }
 
 }

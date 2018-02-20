@@ -65,7 +65,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(DataFeedTask datafeedTask) {
         Table templateTable = datafeedTask.getImportTemplate();
         tableTypeHolder.setTableType(TableType.IMPORTTABLE);
@@ -83,7 +83,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public Table peekFirstDataTable(DataFeedTask datafeedTask) {
         Table table = datafeedTaskTableDao.peekFirstDataTable(datafeedTask);
         TableEntityMgr.inflateTable(table);
@@ -91,7 +91,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Table pollFirstDataTable(DataFeedTask datafeedTask) {
         Table table = datafeedTaskTableDao.pollFirstDataTable(datafeedTask);
         TableEntityMgr.inflateTable(table);
@@ -99,7 +99,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public int getDataTableSize(DataFeedTask datafeedTask) {
         if (datafeedTask == null) {
             return 0;
@@ -108,7 +108,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DataFeedTaskTable> getDataTables(DataFeedTask datafeedTask) {
         if (datafeedTask == null) {
             return Collections.emptyList();
@@ -117,7 +117,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addTableToQueue(DataFeedTask datafeedTask, Table table) {
         if (table.getPid() == null) {
             table.setTableType(TableType.DATATABLE);
@@ -134,19 +134,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void clearTableQueue() {
         datafeedTaskTableDao.deleteAll();
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void clearTableQueuePerTask(DataFeedTask dataFeedTask) {
         datafeedTaskTableDao.deleteDataFeedTaskTables(dataFeedTask);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void registerExtract(DataFeedTask datafeedTask, String tableName, Extract extract) {
         Table templateTable = getTemplate(tableName);
         registerExtractTable(templateTable, extract, datafeedTask);
@@ -154,7 +154,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts) {
         Table templateTable = getTemplate(tableName);
         for (int i = 0; i < extracts.size(); i++) {
@@ -192,7 +192,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeedTask findByKey(DataFeedTask task) {
         DataFeedTask datafeedTask = datafeedTaskDao.findByKey(task);
         TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
@@ -201,7 +201,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId) {
         DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(source, dataFeedType, entity, dataFeedId);
         if (dataFeedTask != null) {
@@ -212,7 +212,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(Long pid) {
         DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", pid);
         if (dataFeedTask != null) {
@@ -223,7 +223,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String uniqueId) {
         DataFeedTask dataFeedTask = datafeedTaskDao.findByField("UNIQUE_ID", uniqueId);
         if (dataFeedTask != null) {
@@ -234,7 +234,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, Long dataFeedId) {
         List<DataFeedTask> dataFeedTasks = datafeedTaskDao.getDataFeedTaskWithSameEntity(entity, dataFeedId);
         if (dataFeedTasks != null) {
@@ -247,7 +247,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
         DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", taskId);
         if (dataFeedTask != null) {
@@ -256,7 +256,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateDataFeedTask(DataFeedTask dataFeedTask) {
         DataFeedTask task = datafeedTaskDao.findByKey(dataFeedTask);
         TableEntityMgr.inflateTable(task.getImportTemplate());
@@ -320,19 +320,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void update(DataFeedTask datafeedTask, Date startTime) {
         datafeedTaskDao.update(datafeedTask, startTime);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void update(DataFeedTask datafeedTask, Status status, Date lastImported) {
         datafeedTaskDao.update(datafeedTask, status, lastImported);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public List<Extract> getExtractsPendingInQueue(DataFeedTask task) {
         List<DataFeedTaskTable> datafeedTaskTables = getDataTables(task);
         List<Extract> extracts = new ArrayList<>();

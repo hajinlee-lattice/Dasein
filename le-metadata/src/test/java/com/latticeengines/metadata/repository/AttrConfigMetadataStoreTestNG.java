@@ -58,7 +58,7 @@ public class AttrConfigMetadataStoreTestNG extends MetadataFunctionalTestNGBase 
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttrConfigEntity> readAttrConfig() {
         return attrConfigMetadataStore //
-                .findByNamespace(AttrConfigEntity.class, null, tenantId, BusinessEntity.Account.name());
+                .findByNamespace(AttrConfigEntity.class, null, tenantId, BusinessEntity.Account);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

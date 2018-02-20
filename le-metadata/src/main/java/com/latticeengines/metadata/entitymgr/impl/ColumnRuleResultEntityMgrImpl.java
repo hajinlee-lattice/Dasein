@@ -25,7 +25,7 @@ public class ColumnRuleResultEntityMgrImpl extends BaseEntityMgrImpl<ColumnRuleR
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public List<ColumnRuleResult> findByModelId(String modelId) {
         return columnRuleResultDao.findByModelId(modelId);
     }

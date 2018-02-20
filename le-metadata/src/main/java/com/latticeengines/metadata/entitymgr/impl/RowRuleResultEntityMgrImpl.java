@@ -25,7 +25,7 @@ public class RowRuleResultEntityMgrImpl extends BaseEntityMgrImpl<RowRuleResult>
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = false)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = false)
     public List<RowRuleResult> findByModelId(String modelId) {
         return rowRuleResultDao.findByModelId(modelId);
     }

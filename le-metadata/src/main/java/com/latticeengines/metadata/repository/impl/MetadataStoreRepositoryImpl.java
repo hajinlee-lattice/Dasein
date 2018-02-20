@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.repository.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +37,7 @@ public class MetadataStoreRepositoryImpl<T extends MetadataEntity> extends BaseJ
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<T> findByNamespace(Class<T> clz, Pageable pageable, String... namespace) {
+    public List<T> findByNamespace(Class<T> clz, Pageable pageable, Serializable... namespace) {
         Specification<T> spec = namespaceSpec(clz, namespace);
         if (pageable == null) {
             return super.findAll(spec);
@@ -46,29 +47,29 @@ public class MetadataStoreRepositoryImpl<T extends MetadataEntity> extends BaseJ
     }
 
     @Override
-    public long countByNameSpace(Class<T> clz, String... namespace) {
+    public long countByNameSpace(Class<T> clz, Serializable... namespace) {
         Specification<T> spec = namespaceSpec(clz, namespace);
         return super.count(spec);
     }
 
-    private Specification<T> namespaceSpec(Class<T> clz, String... namespace) {
+    private Specification<T> namespaceSpec(Class<T> clz, Serializable... namespace) {
         List<String> keys = getNamespaceKeys(clz);
         if (keys.size() != namespace.length) {
             throw new RuntimeException(String.format("Expecting %d namespace coordinates, but only %d are provided.", //
                     namespace.length, keys.size()));
         }
-        Map<String, String> nsParams = new HashMap<>();
+        Map<String, Serializable> nsParams = new HashMap<>();
         for (int i = 0; i < keys.size(); i++) {
             String key = keys.get(i);
-            String value = namespace[i];
+            Serializable value = namespace[i];
             nsParams.put(key, value);
         }
 
         return (Specification<T>) (root, criteriaQuery, builder) -> {
             List<Predicate> predicates = new ArrayList<>();
-            for (Map.Entry<String, String> entry: nsParams.entrySet()) {
+            for (Map.Entry<String, Serializable> entry: nsParams.entrySet()) {
                 String key = entry.getKey();
-                String value = entry.getValue();
+                Serializable value = entry.getValue();
                 Predicate predicate;
                 if (value == null) {
                     predicate = builder.isNull(root.get(key));

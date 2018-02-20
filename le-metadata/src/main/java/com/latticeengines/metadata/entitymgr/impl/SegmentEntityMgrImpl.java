@@ -41,19 +41,19 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         return segmentDao;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findByName(String name) {
         return segmentDao.findByField("name", name);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAll() {
         return super.findAll().stream().collect(Collectors.toList());
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void delete(MetadataSegment segment) {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
@@ -63,7 +63,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         segmentDao.delete(segment);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void createOrUpdate(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
@@ -96,7 +96,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<MetadataSegment> findAllInCollection(String collectionName) {
         return super.findAll().stream() //
@@ -104,13 +104,13 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
                 .collect(Collectors.toList());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public MetadataSegment findMasterSegment(String collectionName) {
         return segmentDao.findMasterSegment(collectionName);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void upsertStats(String segmentName, StatisticsContainer statisticsContainer) {
         MetadataSegment segment = findByName(segmentName);

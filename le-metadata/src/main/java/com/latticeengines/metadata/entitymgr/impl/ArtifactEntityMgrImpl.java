@@ -31,7 +31,7 @@ public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implement
         return artifactDao;
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void create(Artifact artifact) {
         Module module = moduleDao.findByField("NAME", artifact.getModule().getName());
@@ -47,12 +47,12 @@ public class ArtifactEntityMgrImpl extends BaseEntityMgrImpl<Artifact> implement
         artifactDao.create(artifact);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Artifact> findAll() {
         return super.findAll();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Artifact findByPath(String path) {
         return artifactDao.findByField("PATH", path);
     }

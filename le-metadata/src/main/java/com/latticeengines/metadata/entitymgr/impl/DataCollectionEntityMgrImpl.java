@@ -82,7 +82,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return dataFeed;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDataCollection(String name) {
         return dataCollectionDao.findByField("name", name);
@@ -99,7 +99,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         dataCollectionDao.delete(dataCollection);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<Table> getTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
@@ -110,7 +110,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 .collect(Collectors.toList());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<String> getTableNamesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
@@ -121,7 +121,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role, DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
@@ -138,7 +138,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version) {
         List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByName(collectionName, tableName, version);
@@ -147,7 +147,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void upsertStatsForMasterSegment(String collectionName, StatisticsContainer statisticsContainer) {
         DataCollection dataCollection = getDataCollection(collectionName);
@@ -163,7 +163,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         segmentEntityMgr.upsertStats(masterSeg.getName(), statisticsContainer);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public DataCollection getOrCreateDefaultCollection() {
         List<DataCollection> collections = dataCollectionDao.findAll();
@@ -178,7 +178,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     }
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection getDefaultCollectionReadOnly() {
         List<DataCollection> collections = dataCollectionDao.findAll();
@@ -193,13 +193,13 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     }
 
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection.Version getActiveVersion() {
         return getDefaultCollectionReadOnly().getVersion();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection.Version getInactiveVersion() {
         DataCollection.Version activeVersion = getActiveVersion();
@@ -234,7 +234,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return getDataCollection(dataCollection.getName());
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public List<DataCollectionTable> getTablesFromCollection(String collectionName, String tableName) {
         List<DataCollectionTable> list = dataCollectionTableDao.findAllByName(collectionName, tableName, null);

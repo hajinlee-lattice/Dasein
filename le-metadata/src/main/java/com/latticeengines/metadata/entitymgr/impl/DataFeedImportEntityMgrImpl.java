@@ -28,7 +28,7 @@ public class DataFeedImportEntityMgrImpl extends BaseEntityMgrImpl<DataFeedImpor
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(DataFeedImport dataFeedImport) {
         if (dataFeedImport.getDataTable() != null && dataFeedImport.getDataTable().getPid() == null) {
             dataFeedImport.getDataTable().setTableType(TableType.DATATABLE);

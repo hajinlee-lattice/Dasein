@@ -83,7 +83,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     private RedshiftService redshiftService;
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Table entity) {
         setTenantId(entity);
         tableDao.create(entity);
@@ -120,13 +120,13 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addExtract(Table table, Extract extract) {
         table.addExtract(extract);
         extractDao.create(extract);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void deleteByName(String name) {
         final Table entity = findByName(name);
@@ -138,7 +138,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void deleteTableAndCleanupByName(String name) {
         final Table entity = findByName(name);
@@ -170,14 +170,14 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Table> findAll() {
         List<Table> tables = tableDao.findAll();
         return tables;
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name) {
         Table table = tableDao.findByName(name);
         TableEntityMgr.inflateTable(table);
@@ -185,7 +185,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Table clone(String name) {
         Table existing = findByName(name);
         if (existing == null) {
@@ -261,7 +261,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Table copy(String name, final CustomerSpace targetCustomerSpace) {
         Table existing = findByName(name);
         if (existing == null) {
@@ -298,7 +298,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Table rename(String oldName, String newName) {
         Table existing = findByName(oldName);
         if (existing == null) {

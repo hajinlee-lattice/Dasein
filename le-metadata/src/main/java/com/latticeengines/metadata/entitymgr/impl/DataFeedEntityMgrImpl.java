@@ -61,7 +61,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(DataFeed datafeed) {
         DataCollection dataCollection;
         if (datafeed.getDataCollection() == null || StringUtils.isBlank(datafeed.getDataCollection().getName())) {
@@ -86,14 +86,14 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
         datafeedName = StringUtils.isBlank(datafeedName) ? findDefaultFeed().getName() : datafeedName;
         return findByField("name", datafeedName);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByNameInflated(String datafeedName) {
         DataFeed datafeed = findByName(datafeedName);
         if (datafeed == null) {
@@ -112,7 +112,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByNameInflatedWithAllExecutions(String datafeedName) {
         DataFeed datafeed = findByNameInflated(datafeedName);
         datafeed.setExecutions(datafeedExecutionEntityMgr.findByDataFeed(datafeed));
@@ -120,7 +120,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         DataFeed datafeed = findByNameInflated(datafeedName);
         DataFeedExecution execution = new DataFeedExecution();
@@ -136,7 +136,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeedExecution startExecution(String datafeedName) {
         DataFeed datafeed = findByNameInflated(datafeedName);
         if (datafeed == null) {
@@ -189,7 +189,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
             Status datafeedStatus) {
         DataFeed datafeed = findByNameInflated(datafeedName);
@@ -211,7 +211,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findDefaultFeed() {
         DataCollection collection = dataCollectionEntityMgr.getDefaultCollectionReadOnly();
         if (collection == null) {
@@ -221,7 +221,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findDefaultFeedReadOnly() {
         DataCollection collection = null;
         try {
@@ -238,7 +238,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DataFeed> getAllDataFeeds() {
         List<DataFeed> dataFeeds = datafeedDao.findAll();
         for (DataFeed datafeed : dataFeeds) {
@@ -256,7 +256,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         return datafeedDao.findAllSimpleDataFeeds();
     }

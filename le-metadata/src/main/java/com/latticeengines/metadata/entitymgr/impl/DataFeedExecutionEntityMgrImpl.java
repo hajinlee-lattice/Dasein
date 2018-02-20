@@ -33,7 +33,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(DataFeedExecution execution) {
         super.create(execution);
         for (DataFeedImport datafeedImport : execution.getImports()) {
@@ -42,7 +42,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateImports(DataFeedExecution execution) {
         super.update(execution);
         for (DataFeedImport datafeedImport : execution.getImports()) {
@@ -51,7 +51,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findByExecutionId(Long executionId) {
         if (executionId == null) {
             return null;
@@ -62,7 +62,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findConsolidatingExecution(DataFeed datafeed) {
         DataFeedExecution execution = datafeedExecutionDao.findConsolidatingExecution(datafeed);
         inflateDataFeedImport(execution);
@@ -70,7 +70,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public List<DataFeedExecution> findByDataFeed(DataFeed datafeed) {
         List<DataFeedExecution> executions = datafeedExecutionDao.findByDataFeed(datafeed);
         for (DataFeedExecution execution : executions) {
