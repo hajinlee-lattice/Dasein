@@ -8,7 +8,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 @NoRepositoryBean
 public interface BaseJpaRepository<T, ID> extends JpaRepository<T, ID>, JpaSpecificationExecutor<T> {
-	
-	public EntityManager getEntityManager();
-	
+
+	EntityManager getEntityManager();
+
 }

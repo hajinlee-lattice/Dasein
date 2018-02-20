@@ -51,7 +51,7 @@ public class WindowFunctionResolver extends BaseLookupResolver<WindowFunctionLoo
         if (lookup.getTarget() instanceof AttributeLookup) {
             AttributeLookup innerLookup = (AttributeLookup) target;
             ColumnMetadata cm = getColumnMetadata(innerLookup);
-            targetExpression = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getName());
+            targetExpression = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getAttrName());
         } else if (target instanceof SubQueryAttrLookup) {
             SubQueryAttrLookup innerLookup = (SubQueryAttrLookup) target;
             targetExpression = QueryUtils.getAttributeNumberPath(innerLookup.getSubQuery(), innerLookup.getAttribute());

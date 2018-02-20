@@ -322,7 +322,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             } else if (BusinessEntity.PurchaseHistory.getServingStore().equals(role)) {
                 Map<String, String> productMap = getProductMap(customerSpace);
                 cms.forEach(cm -> {
-                    String prodId = TransactionMetrics.getProductIdFromAttr(cm.getName());
+                    String prodId = TransactionMetrics.getProductIdFromAttr(cm.getAttrName());
                     String prodName = productMap.getOrDefault(prodId, "Other");
                     cm.setSubcategory(prodName);
                 });

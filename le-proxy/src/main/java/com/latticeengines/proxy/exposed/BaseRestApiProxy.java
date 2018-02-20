@@ -440,6 +440,12 @@ public abstract class BaseRestApiProxy {
      * Data transmission starts when the flux is first time subscribed.
      * Retry should handle retry in callers, because it may be an infinite stream
      */
+    protected <T> Flux<T> getFlux(String channel, String url, Class<T> clz) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
+        Flux<T> flux = request.retrieve().bodyToFlux(clz);
+        return appendLogInterceptors(flux, channel, url);
+    }
+
     protected <K, V, P> Flux<Map<K, V>> postMapFlux(String channel, String url, P payload) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Flux<Map<K, V>> flux = request.retrieve().bodyToFlux(new ParameterizedTypeReference<Map<K, V>>() {});

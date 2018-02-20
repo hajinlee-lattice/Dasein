@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -22,28 +23,26 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ColumnMetadata implements HasAttributeCustomizations {
+public class ColumnMetadata implements HasAttributeCustomizations, Serializable {
+    private static final long serialVersionUID = -8532367815438372761L;
+
     public static final String SUBCATEGORY_OTHER = "Other";
 
-    @JsonProperty("ColumnId")
-    private String columnId;
-    @JsonProperty("ColumnName")
-    private String columnName;
-    @JsonProperty("Description")
+    @JsonProperty(ColumnMetadataKey.AttrName)
+    private String attrName;
+    @JsonProperty(ColumnMetadataKey.Description)
     private String description;
     @JsonProperty("DataType")
     private String dataType;
     @JsonProperty("JavaClass")
     private String javaClass;
-    @JsonProperty("DisplayName")
+    @JsonProperty(ColumnMetadataKey.DisplayName)
     private String displayName;
     private Category category;
-    @JsonProperty("Subcategory")
+    @JsonProperty(ColumnMetadataKey.Subcategory)
     private String subcategory;
     @JsonProperty("DiscretizationStrategy")
     private String discretizationStrategy;
-    @JsonProperty("MatchDestination")
-    private String matchDestination;
     @JsonProperty("Entity")
     private BusinessEntity entity;
     @JsonProperty("ImportanceOrdering")
@@ -71,33 +70,40 @@ public class ColumnMetadata implements HasAttributeCustomizations {
 
     @JsonProperty("IsPremium")
     private Boolean isPremium;
-    @JsonProperty("CanModel")
-    private Boolean canModel;
-    @JsonProperty("CanEnrich")
-    private Boolean canEnrich;
     @JsonProperty("CanInternalEnrich")
     private Boolean canInternalEnrich;
-    @JsonProperty("CanInsights")
-    private Boolean canInsights;
-    @JsonProperty("CanBIS")
-    private Boolean canBis;
     @JsonProperty("DataLicense")
     private String dataLicense;
 
+    //TODO: Attribute Customization should be migrated to new metadata framework
+    @Deprecated
     @JsonProperty("AttributeFlagsMap")
     private Map<AttributeUseCase, JsonNode> attributeFlagsMap;
 
+    @Deprecated
+    @JsonProperty("MatchDestination")
+    private String matchDestination;
+
+    @Deprecated
+    @JsonProperty("ColumnName")
+    private String columnName;
+
+    @Deprecated // should use AttrName
     public String getColumnId() {
-        return columnId;
+        return getAttrName();
     }
 
+    @Deprecated
     public void setColumnId(String columnId) {
-        this.columnId = columnId;
+        setAttrName(columnId);
     }
 
-    @JsonIgnore
-    public String getName() {
-        return getColumnId();
+    public String getAttrName() {
+        return attrName;
+    }
+
+    public void setAttrName(String attrName) {
+        this.attrName = attrName;
     }
 
     @Deprecated
@@ -182,10 +188,12 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.discretizationStrategy = discretizationStrategy;
     }
 
+    @Deprecated
     public String getMatchDestination() {
         return matchDestination;
     }
 
+    @Deprecated
     public void setMatchDestination(String matchDestination) {
         this.matchDestination = matchDestination;
     }
@@ -208,44 +216,12 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.isPremium = isPremium;
     }
 
-    public Boolean isCanModel() {
-        return canModel;
-    }
-
-    public void setCanModel(Boolean canModel) {
-        this.canModel = canModel;
-    }
-
-    public Boolean isCanEnrich() {
-        return canEnrich;
-    }
-
-    public void setCanEnrich(Boolean canEnrich) {
-        this.canEnrich = canEnrich;
-    }
-
     public Boolean isCanInternalEnrich() {
         return canInternalEnrich;
     }
 
     public void setCanInternalEnrich(Boolean canInternalEnrich) {
         this.canInternalEnrich = canInternalEnrich;
-    }
-
-    public Boolean isCanInsights() {
-        return canInsights;
-    }
-
-    public void setCanInsights(Boolean canInsights) {
-        this.canInsights = canInsights;
-    }
-
-    public Boolean isCanBis() {
-        return canBis;
-    }
-
-    public void setCanBis(Boolean canBis) {
-        this.canBis = canBis;
     }
 
     public String getDataLicense() {
@@ -318,7 +294,7 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         List<String> tokens = new ArrayList<>();
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
         if (approvedUsages.isEmpty()) {
-            return tokens;
+            return null;
         }
         for (ApprovedUsage approvedUsage : approvedUsages) {
             tokens.add(approvedUsage.getName());
@@ -341,7 +317,7 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         return "[" + StringUtils.join(tokens, ",") + "]";
     }
 
-    @JsonProperty("Category")
+    @JsonProperty(ColumnMetadataKey.Category)
     public String getCategoryAsString() {
         if (category != null) {
             return category.getName();
@@ -362,7 +338,7 @@ public class ColumnMetadata implements HasAttributeCustomizations {
         this.groups = groups;
     }
 
-    @JsonProperty("Category")
+    @JsonProperty(ColumnMetadataKey.Category)
     public void setCategoryByString(String categoryName) {
         setCategory(Category.fromName(categoryName));
     }
@@ -389,7 +365,7 @@ public class ColumnMetadata implements HasAttributeCustomizations {
     public List<Tag> getTagList() {
         List<Tag> tags = new ArrayList<>();
         if (StringUtils.isEmpty(this.tags)) {
-            return tags;
+            return null;
         }
         for (String tagName : Arrays.asList(this.tags.split(","))) {
             if (Tag.availableNames().contains(tagName)) {

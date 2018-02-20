@@ -20,30 +20,6 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn200.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn201.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn202.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn203.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn203.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn203.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn204.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn204.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn204.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn205.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn205.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn205.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv
-
-rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn207.csv || true
-gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn207.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn207.csv
-
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv
 

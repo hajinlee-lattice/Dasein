@@ -229,7 +229,9 @@ public class Bucket implements Serializable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-    public static class Transaction {
+    public static class Transaction implements Serializable {
+
+        private static final long serialVersionUID = -5862461839904574785L;
 
         @JsonProperty("PrdId")
         private String productId;

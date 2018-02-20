@@ -1,23 +1,34 @@
 package com.latticeengines.testframework.security.impl;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.http.message.BasicNameValuePair;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeClass;
@@ -32,6 +43,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.documentdb.annotation.TenantIdColumn;
+import com.latticeengines.documentdb.entity.MetadataEntity;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -49,7 +62,10 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.testframework.exposed.rest.LedpResponseErrorHandler;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
-@TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
+
+@DirtiesContext
 @ContextConfiguration(locations = { "classpath:test-testframework-cleanup-context.xml" })
 public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
@@ -70,9 +86,13 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     @Autowired
     private RedshiftService redshiftService;
 
+    @Resource(name = "docJdbcTemplate")
+    private JdbcTemplate docJdbcTemplate;
+
     @Value("${admin.test.deployment.api:http://localhost:8085}")
     private String adminApiHostPort;
 
+    private Map<String, String> multiTenantDocStores;
     private Camille camille;
     private String podId;
     private RestTemplate magicRestTemplate = HttpClientUtils.newRestTemplate();
@@ -89,6 +109,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                 Constants.INTERNAL_SERVICE_HEADERVALUE);
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
         magicRestTemplate.setErrorHandler(errorHandler);
+        multiTenantDocStores = findAllMultiTenantDocStores();
     }
 
     @Test(groups = "cleanup")
@@ -102,13 +123,15 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
                 cleanupTenantInGA(tenant);
                 cleanupTenantInZK(CustomerSpace.parse(tenant.getId()).getContractId());
                 cleanupTenantInDL(CustomerSpace.parse(tenant.getId()).getContractId());
+                cleanupTenantInDocumentStores(tenant);
                 deleteKey(tenant);
             }
         }
 
+        cleanupRedshift();
+        cleanupTenantsInDocumentStores();
         cleanupTenantsInHdfs();
         cleanupZK();
-        cleanupRedshift();
 
         log.info("Finished cleaning up test tenants.");
     }
@@ -119,6 +142,22 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         } catch (Exception e) {
             log.error(String.format("Failed to cleanup key for customer %s", tenant.getId()), e);
         }
+    }
+
+    private void cleanupTenantInDocumentStores(Tenant tenant) {
+        if (!TestFrameworkUtils.isTestTenant(tenant)) {
+            return;
+        }
+
+        log.info("Clean up tenant in document stores: " + tenant.getId());
+        String tenantId = CustomerSpace.parse(tenant.getId()).getTenantId();
+        multiTenantDocStores.forEach((tbl, col) -> cleanupTenantInDocumentStore(tenantId, tbl, col));
+    }
+
+    private boolean cleanupTenantInDocumentStore(String tenantId, String table, String tenantIdCol) {
+        log.info("Cleaning up test tenant " + tenantId + " in document store " + table + ":" + tenantIdCol);
+        docJdbcTemplate.execute("DELETE FROM `" + table + "` WHERE `" + tenantIdCol + "` = " + tenantId);
+        return true;
     }
 
     private void cleanupTenantInGA(Tenant tenant) {
@@ -136,7 +175,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private void cleanupZK() throws Exception {
         try {
-            List<AbstractMap.SimpleEntry<Document, Path>> entries = camille.getChildren(PathBuilder.buildContractsPath(podId));
+            List<AbstractMap.SimpleEntry<Document, Path>> entries = camille
+                    .getChildren(PathBuilder.buildContractsPath(podId));
             if (entries != null) {
                 for (AbstractMap.SimpleEntry<Document, Path> entry : entries) {
                     Path path = entry.getValue();
@@ -215,6 +255,27 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         }
     }
 
+    private void cleanupTenantsInDocumentStores() {
+        multiTenantDocStores.forEach(this::cleanupTenantsInDocumentStore);
+    }
+
+    private void cleanupTenantsInDocumentStore(String table, String col) {
+        log.info("Cleaning up all test tenants in document store " + table + ":" + col);
+        List<String> docs = docJdbcTemplate.queryForList(
+                "SElECT `" + col + "` FROM  `" + table + "` WHERE `" + col + "` LIKE 'LETest%'", String.class);
+        Flux.fromIterable(docs)
+                .parallel()
+                .runOn(Schedulers.newParallel("ga-cleanup")) //
+                .filter(tid -> TestFrameworkUtils.isTestTenant(tid)
+                        && (System.currentTimeMillis() - TestFrameworkUtils.getTestTimestamp(tid)) > cleanupThreshold)
+                .map(tid -> cleanupTenantInDocumentStore(tid, table, col)) //
+                .sequential()
+                .retry(2) //
+                .onErrorReturn(false) //
+                .log(log.getName()) //
+                .blockLast();
+    }
+
     private void cleanupTenantInDL(String tenantName) {
         if (!TestFrameworkUtils.isTestTenant(tenantName)) {
             return;
@@ -227,8 +288,8 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             magicRestTemplate.delete(permStoreUrl);
             log.info("Cleanup VDB permstore for tenant " + tenantName);
         } catch (Exception e) {
-            log.error("Failed to clean up permstore for vdb " + tenantName + " : " + errorHandler.getStatusCode()
-                    + ", " + errorHandler.getResponseString());
+            log.error("Failed to clean up permstore for vdb " + tenantName + " : " + errorHandler.getStatusCode() + ", "
+                    + errorHandler.getResponseString());
         }
 
         try {
@@ -251,7 +312,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             List<String> tables = redshiftService.getTables(TestFrameworkUtils.TENANTID_PREFIX);
             if (tables != null && !tables.isEmpty()) {
                 log.info(String.format("Found %d test tenant tables in redshift.", tables.size()));
-                for (String table: tables) {
+                for (String table : tables) {
                     String tenant = RedshiftUtils.extractTenantFromTableName(table);
                     if (TestFrameworkUtils.isTestTenant(tenant)) {
                         long testTime = TestFrameworkUtils.getTestTimestamp(tenant);
@@ -288,6 +349,85 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
         headers.add(new BasicNameValuePair("Authorization", token));
         return headers;
+    }
+
+    private Map<String, String> findAllMultiTenantDocStores() {
+        Reflections reflections = new Reflections("com.latticeengines.documentdb.entity");
+
+        List<Class<? extends MetadataEntity>> allClasses = reflections.getSubTypesOf(MetadataEntity.class)
+                .stream().filter(clz -> !Modifier.toString(clz.getModifiers()).contains("abstract"))
+                .collect(Collectors.toList());
+
+        Map<String, String> tables = new HashMap<>();
+        allClasses.forEach(clz -> {
+            log.info("Found a multi-tenant entity class " + clz);
+            Field tenantIdField = findTenantIdField(clz);
+            if (tenantIdField != null) {
+                String tenantIdColumn = findTenantIdColumn(tenantIdField);
+                log.info("Found tenantId column name for " + clz + " : " + tenantIdColumn);
+                String tableName = findTableName(clz);
+                log.info("Found table name for " + clz + " : " + tableName);
+                if (StringUtils.isNotBlank(tableName) && StringUtils.isNotBlank(tenantIdColumn)) {
+                    tables.put(tableName, tenantIdColumn);
+                } else {
+                    log.warn("Either table name or tenant id column is null: tableName=" + tableName + " tenantIdCol="
+                            + tenantIdColumn);
+                }
+            }
+        });
+        return tables;
+    }
+
+    private Field findTenantIdField(Class<? extends MetadataEntity> clz) {
+        Class<?> c = clz;
+        while (c != null) {
+            for (Field field : c.getDeclaredFields()) {
+                if (field.isAnnotationPresent(TenantIdColumn.class)) {
+                    return field;
+                }
+            }
+            c = c.getSuperclass();
+        }
+        return null;
+    }
+
+    private String findTenantIdColumn(Field field) {
+        Annotation[] annotations = field.getAnnotations();
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> type = annotation.annotationType();
+            if (type.getName().equals("javax.persistence.Column")) {
+                for (Method method : type.getDeclaredMethods()) {
+                    if ("name".equals(method.getName())) {
+                        try {
+                            return (String) method.invoke(annotation, (Object[]) null);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private String findTableName(Class<? extends MetadataEntity> clz) {
+        Annotation[] annotations = clz.getAnnotations();
+        for (Annotation annotation : annotations) {
+            Class<? extends Annotation> type = annotation.annotationType();
+            if (type.getName().equals("javax.persistence.Table")) {
+                for (Method method : type.getDeclaredMethods()) {
+                    if ("name".equals(method.getName())) {
+                        try {
+                            Object value = method.invoke(annotation, (Object[]) null);
+                            return (value != null) ? (String) value : null;
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.datacloud.statistics;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Buckets {
+public class Buckets implements Serializable {
+
+    private static final long serialVersionUID = 4549483788578240418L;
 
     @JsonProperty("Type")
     private BucketType type;

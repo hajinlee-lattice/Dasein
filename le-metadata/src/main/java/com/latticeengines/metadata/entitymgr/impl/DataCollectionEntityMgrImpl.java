@@ -88,7 +88,7 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         return dataCollectionDao.findByField("name", name);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void removeDataCollection(String name) {
         DataCollection dataCollection = getDataCollection(name);

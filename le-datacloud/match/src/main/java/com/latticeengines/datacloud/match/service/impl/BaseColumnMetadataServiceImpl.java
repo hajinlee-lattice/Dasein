@@ -137,20 +137,6 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         return fieldAssembler.endRecord();
     }
 
-    private void validateColumnMetadatas(String dataCloudVersion,
-            List<ColumnMetadata> columnMetadatas) {
-        for (ColumnMetadata columnMetadata : columnMetadatas) {
-            if (Boolean.TRUE.equals(columnMetadata.isCanBis())
-                    && (!Boolean.TRUE.equals(columnMetadata.isCanInsights()) || !Boolean.TRUE.equals(columnMetadata.isCanModel()))) {
-                throw new LedpException(LedpCode.LEDP_25026,
-                        new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
-            } else if (Boolean.TRUE.equals(columnMetadata.isCanInsights()) && !Boolean.TRUE.equals(columnMetadata.isCanModel())) {
-                throw new LedpException(LedpCode.LEDP_25026,
-                        new String[] { columnMetadata.getDisplayName(), dataCloudVersion });
-            }
-        }
-    }
-
     private Schema.Type getAvroTypeDataType(ColumnMetadata columnMetadata) {
         String javaClass = columnMetadata.getJavaClass();
         if (StringUtils.isNotEmpty(javaClass)) {

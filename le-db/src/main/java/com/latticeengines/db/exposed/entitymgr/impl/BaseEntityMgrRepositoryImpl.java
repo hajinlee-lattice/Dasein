@@ -2,9 +2,6 @@ package com.latticeengines.db.exposed.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -28,7 +25,6 @@ public abstract class BaseEntityMgrRepositoryImpl<T extends HasPid, ID> extends 
     }
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRED)
 	public void delete(T entity) {
 		if (entity != null && !containInSession(entity)) {
 			entity = findByKey(entity);

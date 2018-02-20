@@ -35,3 +35,12 @@ source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 . $WSHOME/le-dev/scripts/setupdb_scoringdb.sh
 . $WSHOME/le-dev/scripts/setupdb_oauth2.sh
 . $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
+. $WSHOME/le-dev/scripts/setupdb_documentdb.sh
+
+# Expand aliases
+echo "Expanding aliases."
+shopt -s expand_aliases
+echo "Sourcing aliases file"
+source $WSHOME/le-dev/aliases
+runtest metadata -g registertable -t RegisterLocalTestBucketedAccountTableTestNG
+

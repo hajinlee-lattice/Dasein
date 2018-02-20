@@ -75,7 +75,7 @@ public class AggregateResolver extends BaseLookupResolver<AggregateLookup> imple
         if (lookup.getLookup() instanceof AttributeLookup) {
             AttributeLookup innerLookup = (AttributeLookup) lookup.getLookup();
             ColumnMetadata cm = getColumnMetadata(innerLookup);
-            numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getName());
+            numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getEntity(), cm.getAttrName());
         } else if (lookup.getLookup() instanceof SubQueryAttrLookup) {
             SubQueryAttrLookup innerLookup = (SubQueryAttrLookup) lookup.getLookup();
             numberPath = QueryUtils.getAttributeNumberPath(innerLookup.getSubQuery(), innerLookup.getAttribute());

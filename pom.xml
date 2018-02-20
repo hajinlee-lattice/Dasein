@@ -35,6 +35,7 @@
         <module>le-parent</module>
         <module>le-datadb</module>
         <module>le-db</module>
+        <module>le-documentdb</module>
         <module>le-query</module>
         <module>le-swlib</module>
         <module>le-hadoop</module>

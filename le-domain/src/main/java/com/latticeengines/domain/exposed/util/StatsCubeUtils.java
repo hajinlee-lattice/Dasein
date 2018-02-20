@@ -325,7 +325,7 @@ public class StatsCubeUtils {
     }
 
     private static boolean isSystemAttribute(ColumnMetadata cm) {
-        return SYSTEM_ATTRS.contains(cm.getName());
+        return SYSTEM_ATTRS.contains(cm.getAttrName());
     }
 
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {
@@ -395,9 +395,9 @@ public class StatsCubeUtils {
         Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
         ratingEngineSummaries.forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
         cms.forEach(cm -> {
-            String attrName = cm.getName();
+            String attrName = cm.getAttrName();
             if (summaryMap.containsKey(attrName)) {
-                String engineIdAttr = cm.getName();
+                String engineIdAttr = cm.getAttrName();
                 RatingEngineSummary summary = summaryMap.get(engineIdAttr);
                 if (StringUtils.isNotBlank(summary.getDisplayName())) {
                     cm.setDisplayName(summary.getDisplayName());

@@ -1,0 +1,65 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>le-documentdb</artifactId>
+	<name>le-${component-name}</name>
+	<description>LE Document DB</description>
+
+	<parent>
+		<groupId>com.latticeengines</groupId>
+		<artifactId>le-parent</artifactId>
+		<version>4.4.0-SNAPSHOT</version>
+		<relativePath>../le-parent</relativePath>
+	</parent>
+
+	<properties>
+		<component-name>documentdb</component-name>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.3.2</version>
+				<executions>
+					<execution>
+						<id>document</id>
+						<phase>package</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>com.latticeengines.db.exposed.schemagen.SchemaGenerator</mainClass>
+							<arguments>
+								<argument>DocumentDB</argument>
+								<argument>false</argument>
+								<argument>com.latticeengines.documentdb.entity</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.latticeengines</groupId>
+			<artifactId>le-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.latticeengines</groupId>
+			<artifactId>le-db</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.vladmihalcea</groupId>
+			<artifactId>hibernate-types-52</artifactId>
+			<version>${hibnerate.types52.version}</version>
+		</dependency>
+	</dependencies>
+
+</project>

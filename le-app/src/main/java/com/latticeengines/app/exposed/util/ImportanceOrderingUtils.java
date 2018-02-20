@@ -23,8 +23,8 @@ public class ImportanceOrderingUtils {
 
     public static void addImportanceOrdering(List<ColumnMetadata> cms) {
         for (ColumnMetadata cm : cms) {
-            if (Category.FIRMOGRAPHICS.equals(cm.getCategory()) && FIRMOGRAPHIC_ORDERING.containsKey(cm.getName())) {
-                cm.setImportanceOrdering(FIRMOGRAPHIC_ORDERING.get(cm.getName()));
+            if (Category.FIRMOGRAPHICS.equals(cm.getCategory()) && FIRMOGRAPHIC_ORDERING.containsKey(cm.getAttrName())) {
+                cm.setImportanceOrdering(FIRMOGRAPHIC_ORDERING.get(cm.getAttrName()));
             }
         }
     }

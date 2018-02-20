@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.EmailUtils;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -24,9 +23,13 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
+import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.CDLProxy;
+import com.latticeengines.proxy.exposed.lp.LPProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -50,10 +53,10 @@ public class PLSComponentManager {
     private TenantConfigService tenantConfigService;
 
     @Inject
-    private BatonService batonService;
+    private CDLProxy cdlProxy;
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private LPProxy lpProxy;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -127,13 +130,26 @@ public class PLSComponentManager {
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
 
-        if (products.contains(LatticeProduct.CG)) {
-            try {
-                LOGGER.info("Bootstrapping data feed for a new CG tenant.");
-                dataFeedProxy.getDataFeed(space.toString());
-            } catch (Exception e) {
-                LOGGER.warn("Error when bootstrapping data feed for a new CG tenant " + tenant.getId(), e);
+        try {
+            if (products.contains(LatticeProduct.LPA3)) {
+                LOGGER.info("Bootstrapping " + camilleTenantId + " in LP.");
+                BootstrapRequest bootstrapRequest = new LPBootstrapRequest();
+                bootstrapRequest.setTenantId(PLSTenantId);
+                lpProxy.bootstrap(bootstrapRequest);
             }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to bootstrapping " + camilleTenantId + " in LP.");
+        }
+
+        try {
+            if (products.contains(LatticeProduct.CG)) {
+                LOGGER.info("Bootstrapping " + camilleTenantId + " in CDL.");
+                BootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
+                bootstrapRequest.setTenantId(PLSTenantId);
+                cdlProxy.bootstrap(bootstrapRequest);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to bootstrapping " + camilleTenantId + " in CDL.");
         }
 
     }
@@ -167,6 +183,23 @@ public class PLSComponentManager {
         Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant != null) {
             discardTenant(tenant);
+        }
+        try {
+            LOGGER.info("Cleaning up " + tenantId + " from LP.");
+            BootstrapRequest bootstrapRequest = new LPBootstrapRequest();
+            bootstrapRequest.setTenantId(tenantId);
+            lpProxy.bootstrap(bootstrapRequest);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to cleaning up " + tenantId + " from LP.");
+        }
+
+        try {
+            LOGGER.info("Cleaning up " + tenantId + " from CDL.");
+            BootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
+            bootstrapRequest.setTenantId(tenantId);
+            cdlProxy.bootstrap(bootstrapRequest);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to cleaning up " + tenantId + " from CDL.");
         }
     }
 

@@ -56,7 +56,7 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
         if (stats != null) {
             Integer numBits = cm.getNumBits();
             if (numBits == null) {
-                return QueryUtils.getAttributePath(entity, cm.getName());
+                return QueryUtils.getAttributePath(entity, cm.getAttrName());
             } else {
                 String physicalColumnName = cm.getPhysicalName();
                 Integer offset = cm.getBitOffset();
@@ -70,7 +70,7 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
                             .stringTemplate("({0}>>{1})&{2}", QueryUtils.getAttributePath(entity, physicalColumnName), //
                                     offset, //
                                     bitMask)
-                            .as(Expressions.stringPath(cm.getName()));
+                            .as(Expressions.stringPath(cm.getAttrName()));
                 } else {
                     return Expressions.stringTemplate("({0}>>{1})&{2}",
                             QueryUtils.getAttributePath(entity, physicalColumnName), //
@@ -80,9 +80,9 @@ public class AttributeResolver<T extends AttributeLookup> extends BaseLookupReso
             }
         } else {
             if (alias) {
-                return QueryUtils.getAttributePath(entity, cm.getName()).as(Expressions.stringPath(cm.getName()));
+                return QueryUtils.getAttributePath(entity, cm.getAttrName()).as(Expressions.stringPath(cm.getAttrName()));
             } else {
-                return QueryUtils.getAttributePath(entity, cm.getName());
+                return QueryUtils.getAttributePath(entity, cm.getAttrName());
             }
         }
     }

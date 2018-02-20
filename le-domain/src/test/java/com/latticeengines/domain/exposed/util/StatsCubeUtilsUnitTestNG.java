@@ -228,7 +228,7 @@ public class StatsCubeUtilsUnitTestNG {
         cmMap.forEach((name, cms) -> {
             BusinessEntity entity = BusinessEntity.valueOf(name);
             cms.forEach(cm -> {
-                AttributeLookup attributeLookup = new AttributeLookup(entity, cm.getName());
+                AttributeLookup attributeLookup = new AttributeLookup(entity, cm.getAttrName());
                 consolidatedCmMap.put(attributeLookup, cm);
             });
         });

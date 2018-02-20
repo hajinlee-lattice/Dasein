@@ -6,7 +6,6 @@ import javax.sql.DataSource;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -16,7 +15,7 @@ import com.querydsl.sql.SQLQueryFactory;
 
 public abstract class QueryProvider implements ApplicationContextAware {
 
-    private static final long MAX_CACHE_SIZE = 10000;
+    private static final int MAX_CACHE_SIZE = 10000;
     private Cache<String, SQLQueryFactory> factoryCache;
 
     protected DataSource dataSource;
@@ -24,7 +23,7 @@ public abstract class QueryProvider implements ApplicationContextAware {
 
     @PostConstruct
     private void init() {
-        factoryCache = Caffeine.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
+        factoryCache = Caffeine.newBuilder().initialCapacity(MAX_CACHE_SIZE).build();
     }
 
     public abstract boolean providesQueryAgainst(AttributeRepository repository);

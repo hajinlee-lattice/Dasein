@@ -362,13 +362,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         List<ApprovedUsage> approvedUsages = getApprovedUsageList();
 
         ColumnMetadata metadata = new ColumnMetadata();
-        metadata.setColumnId(getAmColumnId());
-        metadata.setColumnName(getAmColumnId());
+        metadata.setAttrName(getAmColumnId());
         metadata.setDescription(getDescription());
         metadata.setJavaClass(getJavaClass());
-        // remove this type conversion once codescience has started using
-        // JavaType instead of SQLServer data types
-        metadata.setDataType(JavaToSQLServerDataTypeConverter.convert(getJavaClass()));
         metadata.setDisplayName(getDisplayName());
         metadata.setCategory(getCategory());
         metadata.setSubcategory(getSubcategory());
@@ -378,31 +374,17 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setTagList(Collections.singletonList(Tag.EXTERNAL));
         metadata.setDiscretizationStrategy(getDiscretizationStrategy());
         metadata.setIsPremium(isPremium());
-        metadata.setMatchDestination(getMatchDestination());
         metadata.setDecodeStrategy(getDecodeStrategy());
         metadata.setDataLicense(getDataLicense());
+        metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
 
-        if (approvedUsages != null) {
-            if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
-                    || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
-                metadata.setCanModel(true);
-                if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
-                        || approvedUsages.contains(ApprovedUsage.MODEL_MODELINSIGHTS)) {
-                    metadata.setCanInsights(true);
-                    if (approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)) {
-                        metadata.setCanBis(true);
-                    }
-                }
-            }
-        }
-
-        String groups = getGroups();
-        if (groups != null && groups.contains(ColumnSelection.Predefined.Enrichment.name())
-                && !groups.contains(ColumnSelection.Predefined.LeadEnrichment.name())) {
-            metadata.setCanEnrich(true);
-        }
-        metadata.setCanInternalEnrich(isInternalEnrichment());
+        // deprecated properties
+        metadata.setMatchDestination(getMatchDestination());
+        metadata.setColumnName(getAmColumnId());
+        // remove this type conversion once codescience has started using
+        // JavaType instead of SQLServer data types
+        metadata.setDataType(JavaToSQLServerDataTypeConverter.convert(getJavaClass()));
 
         return metadata;
     }

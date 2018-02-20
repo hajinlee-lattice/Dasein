@@ -24,6 +24,7 @@ import org.hibernate.tool.schema.TargetType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.db.exposed.schemagen.postprocess.MySQLPostProcessor;
 import com.latticeengines.db.exposed.schemagen.postprocess.PostProcessor;
 import com.latticeengines.db.exposed.schemagen.postprocess.SQLServerPostProcessor;
 import com.latticeengines.db.naming.LEImplicitNamingStrategy;
@@ -213,7 +214,7 @@ public class SchemaGenerator {
         SchemaGenerator mysqlGenerator = new SchemaGenerator(dbName, DBDialect.MYSQL, null, packages);
         File mysqlExportFile = mysqlGenerator.generateToScript();
 
-        SchemaGenerator mysql5Generator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, null, packages);
+        SchemaGenerator mysql5Generator = new SchemaGenerator(dbName, DBDialect.MYSQL5INNODB, new MySQLPostProcessor(), packages);
         File mysql5ExportFile = mysql5Generator.generateToScript();
 
         SchemaGenerator sqlServerGenerator = new SchemaGenerator(dbName, DBDialect.SQLSERVER,

@@ -18,10 +18,11 @@
     <modules>
         <module>le-domain</module>
         <module>le-db</module>
+        <module>le-datadb</module>
+        <module>le-documentdb</module>
         <module>le-dataplatform</module>
         <module>le-scoring</module>
         <module>le-quartzclient</module>
         <module>le-metadata</module>
-        <module>le-datadb</module>
     </modules>
 </project>
