@@ -47,8 +47,6 @@ import reactor.core.publisher.Mono;
 public abstract class BaseRestApiProxy {
 
     private static final Logger log = LoggerFactory.getLogger(BaseRestApiProxy.class);
-    private static final String MONO = "mono";
-    private static final String FLUX = "flux";
 
     private RestTemplate restTemplate;
     private WebClient webClient;
@@ -92,6 +90,81 @@ public abstract class BaseRestApiProxy {
         if (StringUtils.isNotBlank(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"))) {
             this.initialWaitMsec = Long.valueOf(PropertyUtils.getProperty("proxy.retry.initialwaitmsec"));
         }
+    }
+
+
+
+    private RetryTemplate getRetryTemplate() {
+        RetryTemplate retry = new RetryTemplate();
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+        retryPolicy.setMaxAttempts(maxAttempts);
+        retry.setRetryPolicy(retryPolicy);
+        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+        backOffPolicy.setInitialInterval(initialWaitMsec);
+        backOffPolicy.setMultiplier(multiplier);
+        retry.setBackOffPolicy(backOffPolicy);
+        retry.setThrowLastExceptionOnExhausted(true);
+        return retry;
+    }
+
+    protected String constructUrl() {
+        return constructUrl(null);
+    }
+
+    protected String constructUrl(Object path, Object... variables) {
+        if (hostport == null || hostport.equals("")) {
+            throw new NullPointerException("hostport must be set");
+        }
+
+        String end = rootpath;
+        if (path != null) {
+            String expandedPath = new UriTemplate(path.toString()).expand(variables).toString();
+            end = combine(rootpath, expandedPath);
+        }
+        return combine(hostport, end);
+    }
+
+    private String combine(Object... parts) {
+        List<String> toCombine = new ArrayList<>();
+        for (int i = 0; i < parts.length; ++i) {
+            String part = parts[i].toString();
+            if (i != 0) {
+                if (part.startsWith("/")) {
+                    part = part.substring(1);
+                }
+            }
+
+            if (i != parts.length - 1) {
+                if (part.endsWith("/")) {
+                    part = part.substring(0, part.length() - 2);
+                }
+            }
+            toCombine.add(part);
+        }
+        return StringUtils.join(toCombine, "/");
+    }
+
+    public String getRootpath() {
+        return rootpath;
+    }
+
+    public String getHostport() {
+        return hostport;
+    }
+
+    public void setHostport(String hostport) {
+        this.hostport = hostport;
+    }
+
+    protected void setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+        log.info("set " + getClass().getSimpleName() + " maxattemps to " + this.maxAttempts);
+    }
+
+    void enforceSSLNameVerification() {
+        restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
+        restTemplate.setErrorHandler(new GetResponseErrorHandler());
+        cleanupAuthHeader();
     }
 
     void setMagicAuthHeader() {
@@ -168,7 +241,7 @@ public abstract class BaseRestApiProxy {
         RetryTemplate retry = getRetryTemplate();
         return retry.execute(context -> {
             try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1, body, true);
+                logInvocation(method, url, verb, context.getRetryCount() + 1, body, false);
                 return exchange(url, verb, body, returnValueClazz, false, true).getBody();
             } catch (Exception e) {
                 logError(e, method);
@@ -490,79 +563,6 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-    private RetryTemplate getRetryTemplate() {
-        RetryTemplate retry = new RetryTemplate();
-        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(maxAttempts);
-        retry.setRetryPolicy(retryPolicy);
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(initialWaitMsec);
-        backOffPolicy.setMultiplier(multiplier);
-        retry.setBackOffPolicy(backOffPolicy);
-        retry.setThrowLastExceptionOnExhausted(true);
-        return retry;
-    }
-
-    protected String constructUrl() {
-        return constructUrl(null);
-    }
-
-    protected String constructUrl(Object path, Object... variables) {
-        if (hostport == null || hostport.equals("")) {
-            throw new NullPointerException("hostport must be set");
-        }
-
-        String end = rootpath;
-        if (path != null) {
-            String expandedPath = new UriTemplate(path.toString()).expand(variables).toString();
-            end = combine(rootpath, expandedPath);
-        }
-        return combine(hostport, end);
-    }
-
-    private String combine(Object... parts) {
-        List<String> toCombine = new ArrayList<>();
-        for (int i = 0; i < parts.length; ++i) {
-            String part = parts[i].toString();
-            if (i != 0) {
-                if (part.startsWith("/")) {
-                    part = part.substring(1);
-                }
-            }
-
-            if (i != parts.length - 1) {
-                if (part.endsWith("/")) {
-                    part = part.substring(0, part.length() - 2);
-                }
-            }
-            toCombine.add(part);
-        }
-        return StringUtils.join(toCombine, "/");
-    }
-
-    public String getRootpath() {
-        return rootpath;
-    }
-
-    public String getHostport() {
-        return hostport;
-    }
-
-    public void setHostport(String hostport) {
-        this.hostport = hostport;
-    }
-
-    protected void setMaxAttempts(int maxAttempts) {
-        this.maxAttempts = maxAttempts;
-        log.info("set " + getClass().getSimpleName() + " maxattemps to " + this.maxAttempts);
-    }
-
-    void enforceSSLNameVerification() {
-        restTemplate = HttpClientUtils.newSSLEnforcedRestTemplate();
-        restTemplate.setErrorHandler(new GetResponseErrorHandler());
-        cleanupAuthHeader();
-    }
-
     private void logInvocation(String method, String url, HttpMethod verb, Integer attempt) {
         logInvocation(method, url, verb, attempt, null, false);
     }
@@ -577,28 +577,5 @@ public abstract class BaseRestApiProxy {
             msg += String.format(".  (Attempt=%d)", attempt);
         }
         log.info(msg);
-    }
-
-    private <K, V> BaseSubscriber<Map<K, V>> getMapSubscriber(String mode, String channel, String url) {
-        return new BaseSubscriber<Map<K, V>>() {
-
-            AtomicBoolean requested = new AtomicBoolean(false);
-
-            @Override
-            protected void hookOnSubscribe(Subscription subscription) {
-                log.info(String.format("Start reading %s %s from %s", channel, mode, url));
-                request(1);
-            }
-
-            @Override
-            protected void hookOnComplete() {
-                log.info(String.format("Complete reading %s %s from %s", channel, mode, url));
-            }
-
-            @Override
-            protected void hookOnNext(Map<K, V> value) {
-                request(1);
-            }
-        };
     }
 }
