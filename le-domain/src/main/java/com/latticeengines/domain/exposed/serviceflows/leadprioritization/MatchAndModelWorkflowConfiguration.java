@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -30,9 +32,18 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInput
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfiguration {
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Modeling.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
+    }
 
     public static class Builder {
         private MatchAndModelWorkflowConfiguration configuration = new MatchAndModelWorkflowConfiguration();
