@@ -49,7 +49,7 @@
         <maven.rpm.version>2.1.5</maven.rpm.version> <!-- upgrade ? -->
 
         <!-- release trains -->
-        <reactor.release.train>Bismuth-SR5</reactor.release.train>
+        <reactor.release.train>Bismuth-SR6</reactor.release.train>
 
         <!-- dependencies with rigid version interlock, hard to upgrade -->
         <hadoop.version>2.7.1.2.3.6.0-3796</hadoop.version>
@@ -117,7 +117,7 @@
         <lettuce.version>5.0.1.RELEASE</lettuce.version>
         <caffeine.version>2.6.1</caffeine.version>
         <zip4j.version>1.3.2</zip4j.version>
-        <netty.all.version>4.1.17.Final</netty.all.version>
+        <netty.all.version>4.1.21.Final</netty.all.version>
         <netty.version>3.10.6.Final</netty.version>
         <reactor.version>3.1.3.RELEASE</reactor.version>
         <zt.exec.version>1.10</zt.exec.version>
