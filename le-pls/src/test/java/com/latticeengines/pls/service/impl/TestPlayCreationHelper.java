@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.latticeengines.proxy.objectapi.EntityProxyImpl;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -211,7 +212,7 @@ public class TestPlayCreationHelper {
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        EntityProxy entityProxy = new EntityProxy(null, null);
+        EntityProxy entityProxy = new EntityProxyImpl(null, null);
 
         Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
