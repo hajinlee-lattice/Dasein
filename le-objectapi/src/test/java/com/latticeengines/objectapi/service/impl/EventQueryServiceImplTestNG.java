@@ -11,6 +11,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -31,7 +32,6 @@ import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestN
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
 
@@ -46,7 +46,9 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         mockDataCollectionProxy();
-        MultiTenantContext.setTenant(new Tenant("LocalTest"));
+        Tenant tenant = new Tenant("LocalTest");
+        tenant.setPid(1L);
+        MultiTenantContext.setTenant(tenant);
     }
 
     @Test(groups = "functional")

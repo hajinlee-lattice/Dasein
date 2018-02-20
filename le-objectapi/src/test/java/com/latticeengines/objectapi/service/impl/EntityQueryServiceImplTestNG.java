@@ -70,11 +70,15 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     @Inject
     private QueryEvaluatorService queryEvaluatorService;
 
+    private Tenant tenant;
+
     @BeforeClass(groups = "functional")
     public void setup() {
         mockDataCollectionProxy();
         mockPeriodProxy();
-        MultiTenantContext.setTenant(new Tenant("LocalTest"));
+        tenant = new Tenant("LocalTest");
+        tenant.setPid(1L);
+        MultiTenantContext.setTenant(tenant);
         String maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
         log.info("Max txn date is " + maxTransactionDate);
         ExpressionTemplateUtils.setCurrentDate(String.format("'%s'", maxTransactionDate));
@@ -116,7 +120,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
     @Test(groups = "functional", dataProvider = "timefilterProvider")
     public void testAccountWithTxn(TimeFilter timeFilter, long expectedTotal) {
-        MultiTenantContext.setTenant(new Tenant("LocalTest"));
+        MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
 
         // Ever Purchased
@@ -178,6 +182,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testAccountContactWithTxn() {
+        MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         // Check add up
         AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
@@ -205,6 +210,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testAccountContactWithDeletedTxn() {
+        MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
