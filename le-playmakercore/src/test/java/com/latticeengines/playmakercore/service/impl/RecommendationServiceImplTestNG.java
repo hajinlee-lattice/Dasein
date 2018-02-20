@@ -38,7 +38,7 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
     private String LAUNCH_ID = "launch__" + CURRENT_TIME_MILLIS;
     private String ACCOUNT_ID = "account__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_DESCRIPTION = "Recommendation done on " + CURRENT_TIME_MILLIS;
-    private long TENANT_PID = 1L;
+    private long TENANT_PID = -1L;
     private String CUSTOMER_SPACE = "LocalTest.LocalTest.Production";
 
     private Tenant tenant;
@@ -58,7 +58,7 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
                 SynchronizationDestinationEnum.SFDC.name());
 
         tenant = new Tenant(CUSTOMER_SPACE);
-
+        tenant.setPid(TENANT_PID);
         MultiTenantContext.setTenant(tenant);
     }
 
@@ -91,8 +91,6 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByLaunchId" })
     public void testGetRecommendationByPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
@@ -117,8 +115,6 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByPlayId" })
     public void testGetRecommendationAsMapByPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
@@ -142,8 +138,6 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
     public void testGetRecommendationWithoutPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         int recommendationCount = recommendationService.findRecommendationCount(new Date(0L), //

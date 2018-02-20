@@ -15,13 +15,13 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-playmakercore-context.xml" })
@@ -40,7 +40,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     private String LAUNCH_ID = "launch__" + CURRENT_TIME_MILLIS;
     private String ACCOUNT_ID = "account__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_DESCRIPTION = "Recommendation done on " + CURRENT_TIME_MILLIS;
-    private long TENANT_PID = 1L;
+    private long TENANT_PID = -1L;
     private String CUSTOMER_SPACE = "LocalTest.LocalTest.Production";
     private String DUMMY_EMAIL = "FirstName5763@com";
     private String DUMMY_ZIP = "48098-2815";
@@ -76,7 +76,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         recommendation.setSynchronizationDestination(SynchronizationDestinationEnum.SFDC.toString());
 
         tenant = new Tenant(CUSTOMER_SPACE);
-
+        tenant.setPid(TENANT_PID);
         MultiTenantContext.setTenant(tenant);
     }
 
@@ -93,7 +93,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
     public void testGetRecommendationById() {
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
         Recommendation result = recommendationEntityMgr.findByRecommendationId(recommendation.getRecommendationId());
         Assert.assertEquals(result.getAccountId(), recommendation.getAccountId());
@@ -102,8 +101,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
     public void testGetRecommendationByLaunchId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         List<Recommendation> recommendations = recommendationEntityMgr.findByLaunchId(LAUNCH_ID);
@@ -124,8 +121,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByLaunchId" })
     public void testGetRecommendationByPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
@@ -150,8 +145,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByPlayId" })
     public void testGetRecommendationAsMapByPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
@@ -209,8 +202,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
     public void testGetRecommendationWithoutPlayId() {
-
-        tenant = new Tenant(CUSTOMER_SPACE);
         MultiTenantContext.setTenant(tenant);
 
         int recommendationCount = recommendationEntityMgr.findRecommendationCount(new Date(0L), //
