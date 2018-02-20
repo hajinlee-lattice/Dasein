@@ -2,8 +2,10 @@ package com.latticeengines.scoring.exposed.service.impl;
 
 import java.util.Properties;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataplatform.Job;
@@ -26,6 +28,9 @@ public class ScoringServiceImpl implements ScoringService {
 
     @Autowired
     private JobEntityMgr jobEntityMgr;
+
+    @Value("${dataplatform.trustore.jks}")
+    private String trustStoreJks;
 
     @Override
     public ApplicationId submitScoreWorkflow(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
@@ -54,6 +59,10 @@ public class ScoringServiceImpl implements ScoringService {
         containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
         containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
+
+        if (StringUtils.isNotBlank(trustStoreJks)) {
+            containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
+        }
 
         job.setAppMasterPropertiesObject(appMasterProperties);
         job.setContainerPropertiesObject(containerProperties);
