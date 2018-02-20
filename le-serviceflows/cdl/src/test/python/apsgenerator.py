@@ -147,8 +147,9 @@ if __name__ == '__main__':
  
     apState = createAps(df)
     apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
+    shutil.rmtree("./input", ignore_errors=True)
     loader.parallelWriteDataFrameToAvro(apState)
     logger.info(apState.shape)
     #loader.uploadFromLocal()
-    loader.parallelUploadFromLocal()
+#     loader.parallelUploadFromLocal()
     

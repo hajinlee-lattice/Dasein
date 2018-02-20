@@ -16,32 +16,32 @@ logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='ApsDataLoader')
 
-class FileWriterProcess (multiprocessing.Process):
-    def __init__(self, df, schema, localDir, file):
-        super(FileWriterProcess, self).__init__()
-        self.df = df
-        self.schema = schema
-        self.localDir = localDir
-        self.file = file
-    def run(self):
-        logger.info("Start writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
-        print self.df.shape
-        with open(self.file, "wb") as fp:
+def fileWriterFunc(param):
+        df, schema, localDir, file, webHdfsHostPort, outputPath, userId = param
+        logger.info("Start writing Dataframe to avro file %s in directory=%s" % (file, localDir))
+        logger.info(file + ":" + str(df.shape))
+        with open(file, "wb") as fp:
             records = []
-            for record in self.df.itertuples(index=False, name=None):
-               datum = {self.schema['fields'][i]['name']:(record[i] if pd.notnull(record[i]) else None) for i in range(len(self.schema['fields']))}
+            for record in df.itertuples(index=False, name=None):
+               datum = {schema['fields'][i]['name']:(record[i] if pd.notnull(record[i]) else None) for i in range(len(schema['fields']))}
                records.append(datum)
-            avro.writer(fp, self.schema, records)
-        logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (self.file, self.localDir))
+            logger.info("Before writing to file:" + file)
+            avro.writer(fp, schema, records)
+            
+        uploadFromLocalFunc2(file, outputPath, webHdfsHostPort, userId)
+        os.remove(file)
+        logger.info("Finished writing Dataframe to avro file %s in directory=%s" % (file, localDir))
 
-def uploadFromLocalFunc(param):
-        outputFile, outputPath, webHdfsHostPort, userId = param
+def uploadFromLocalFunc2(outputFile, outputPath, webHdfsHostPort, userId):
         logger.info("Uploading file from local=%s to remote=%s" % (outputFile, outputPath))
         filePath, fileName = os.path.split(outputFile)
         hdfs = WebHDFS(webHdfsHostPort.hostname, webHdfsHostPort.port, userId)
         hdfs.copyFromLocal(outputFile, outputPath + "/" + fileName)
         logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, outputPath))
-        
+
+def uploadFromLocalFunc(param):
+        outputFile, outputPath, webHdfsHostPort, userId = param
+        uploadFromLocalFunc2(file, outputPath, webHdfsHostPort, userId)
               
 class ApsDataLoader(object):
     def __init__(self):
@@ -88,7 +88,12 @@ class ApsDataLoader(object):
         for outputFile in outputFiles:
             logger.info("Uploading file from local=%s to remote=%s" % (outputFile, self.outputPath))
             filePath, fileName = os.path.split(outputFile)
-            self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
+            #self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
+            try:
+                self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
+            except Exception:
+                self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
+
             logger.info("Uploaded file from local=%s to remote=%s" % (outputFile, self.outputPath))
         logger.info("Finished uploadFromLocal data.")
 
@@ -97,7 +102,7 @@ class ApsDataLoader(object):
         outputFiles = glob.glob("%s/*.avro" % localDir)
         userId = pwd.getpwuid(os.getuid())[0]
         params = [[outputFile, self.outputPath, self.webHdfsHostPort, userId] for outputFile in outputFiles]
-        self.parallelExecutePool(uploadFromLocalFunc, params, 2)
+        self.parallelExecutePool(uploadFromLocalFunc, params, 1)
         logger.info("Finished uploadFromLocal data.")
         
     def parallelExecutePool(self, func, params, poolSize):
@@ -106,7 +111,6 @@ class ApsDataLoader(object):
         pool.close()
         pool.join()
         
-
     def readDataFrameFromAvro(self, localDir='./input'):
         logger.info("Start to read Dataframe from avro file.")
         inputFiles = glob.glob("%s/*.avro" % localDir)
@@ -118,6 +122,7 @@ class ApsDataLoader(object):
                 df = pd.DataFrame.from_records(records)
                 dfs.append(df)
         logger.info("Finished reading Dataframe from avro file.")
+        shutil.rmtree(localDir, ignore_errors=True)
         return pd.concat(dfs)
         
     def writeDataFrameToAvro(self, dataFrame, localDir='./output'):
@@ -132,25 +137,26 @@ class ApsDataLoader(object):
             avro.writer(fp, schema, records)
         logger.info("Finished writing Dataframe to avro file in directory=%s" % localDir)
 
-    def parallelWriteDataFrameToAvro(self, dataFrame, localDir='./output', parallel=8):
+    def parallelWriteDataFrameToAvro(self, dataFrame, localDir='./output', parallel=16):
         logger.info("Start to write Dataframe to avro file.")
+        logger.info("Frame shape:" + str(dataFrame.shape))
         schemaStr = self._getSchema(dataFrame)
         schema = json.loads(schemaStr)
         dfs = np.array_split(dataFrame, parallel)
+
         index = 0;
-        processes = []
+        params = []
+        userId = pwd.getpwuid(os.getuid())[0]
         for df in dfs:
-            processes.append(FileWriterProcess(df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index)))
+            params.append([df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index), self.webHdfsHostPort, self.outputPath, userId])
             index += 1
-        self.parallelExecute(processes)
+        self.parallelExecutePool(fileWriterFunc, params, 8)
+
+        files = [localDir + '/' + file for file in os.listdir(localDir)]
+        for file in files:
+            logger.info(file + " size: " + str(os.path.getsize(file)))
         logger.info("Finished writing Dataframe to avro file.")
         
-    def parallelExecute(self, processes):
-        for process in processes:
-            process.start()
-        for process in processes:
-            process.join()
-            
     def _getSchema(self, dataFrame):
         schema = """{
         "name": "APS",
@@ -184,7 +190,7 @@ if __name__ == '__main__':
     loader.downloadToLocal()
     df = loader.readDataFrameFromAvro()
     loader.parallelWriteDataFrameToAvro(df)
-    print df.shape
+    logger.info(df.shape)
     assert df.shape == (873967, 24)
     csvdf = pd.read_csv("./AnalyticTransaction.csv")
     assert(df.shape == csvdf.shape)
