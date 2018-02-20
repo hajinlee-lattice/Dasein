@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
@@ -140,6 +141,15 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         }
         List<Double> sorted = new ArrayList<>(distinctValues);
         Collections.sort(sorted);
+        if (sorted.size() > 2) {
+            sorted.remove(0);
+            sorted.remove(sorted.size() - 1);
+        }
+        Random r = new Random();
+        int size = sorted.size();
+        for (int i = 0; i < size - (buckets - 1); i++) {
+            sorted.remove(r.nextInt(sorted.size()));
+        }
         List<Number> boundaries = new ArrayList<>();
         for (Double dVal : sorted) {
             boundaries.add(numberTransform(dVal, cls));
