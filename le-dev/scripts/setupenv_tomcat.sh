@@ -6,7 +6,7 @@ ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.4
+    TOMCAT_VERSION=9.0.5
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
@@ -54,18 +54,19 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
             make && make install
             popd
         fi
-
-        sudo mkdir -p /etc/ledp/tls
-        sudo chown -R $USER /etc/ledp/tls
-        rm -rf /etc/ledp/tls/*
-        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt /etc/ledp/tls/server.crt
-        aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key /etc/ledp/tls/server.key
-        aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
-        aws s3 cp s3://latticeengines-dev-chef/tls/cacerts /etc/ledp/tls/cacerts
-        chmod 600 /etc/ledp/tls/server.crt
-        chmod 600 /etc/ledp/tls/server.key
-        chmod 600 /etc/ledp/tls/ledp_keystore.jks
     fi
+
+    sudo mkdir -p /etc/ledp/tls
+    sudo chown -R $USER /etc/ledp/tls
+    rm -rf /etc/ledp/tls/*
+    aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.crt /etc/ledp/tls/server.crt
+    aws s3 cp s3://latticeengines-dev-chef/tls/star.lattice.local/star.lattice.local.key /etc/ledp/tls/server.key
+    aws s3 cp s3://latticeengines-dev-chef/tls/ledp_keystore.jks /etc/ledp/tls/ledp_keystore.jks
+    aws s3 cp s3://latticeengines-dev-chef/tls/cacerts /etc/ledp/tls/cacerts
+    chmod 600 /etc/ledp/tls/server.crt
+    chmod 600 /etc/ledp/tls/server.key
+    chmod 600 /etc/ledp/tls/ledp_keystore.jks
+    chmod 600 /etc/ledp/tls/cacerts
 fi
 
 for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-users.xml'; do

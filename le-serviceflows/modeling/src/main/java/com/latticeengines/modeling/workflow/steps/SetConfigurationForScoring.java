@@ -22,9 +22,6 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
 
     private static final Logger log = LoggerFactory.getLogger(SetConfigurationForScoring.class);
 
-    @Autowired
-    protected ColumnMetadataProxy columnMetadataProxy;
-
     @Override
     public void execute() {
         log.info("Setting the configuration for scoring.");

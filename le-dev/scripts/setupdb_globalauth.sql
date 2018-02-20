@@ -22,6 +22,13 @@ INSERT INTO GlobalTenant (
   NOW(),
   0,
   0
+), (
+'LocalTest2.LocalTest2.Production',
+'LocalTest2',
+NOW(),
+NOW(),
+0,
+0
 );
 
 INSERT INTO GlobalUser (
@@ -119,5 +126,4 @@ INSERT INTO GlobalUserTenantRight (
   0
 FROM GlobalUser u, GlobalTenant t
 WHERE u.Email IN ('bnguyen@lattice-engines.com', 'pls-super-admin-tester@test.lattice-engines.com')
-AND t.Deployment_ID = 'LocalTest.LocalTest.Production'
-LIMIT 2;
+AND t.Deployment_ID IN ('LocalTest.LocalTest.Production', 'LocalTest2.LocalTest2.Production');

@@ -84,8 +84,8 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
     }
 
     @Override
-    public List<ColumnMetadata> findAll(String dataCloudVersion) {
-        return toColumnMetadata(getMetadataColumnService().scan(dataCloudVersion));
+    public List<ColumnMetadata> findAll(String dataCloudVersion, Integer page, Integer size) {
+        return toColumnMetadata(getMetadataColumnService().scan(dataCloudVersion, page, size));
     }
 
     @Override

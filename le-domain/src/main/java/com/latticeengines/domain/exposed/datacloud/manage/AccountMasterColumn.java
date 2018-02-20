@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -380,6 +381,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setMatchDestination(getMatchDestination());
         metadata.setDecodeStrategy(getDecodeStrategy());
         metadata.setDataLicense(getDataLicense());
+        metadata.setGroups(getPredefinedGroups());
 
         if (approvedUsages != null) {
             if (approvedUsages.contains(ApprovedUsage.MODEL) || approvedUsages.contains(ApprovedUsage.MODEL_ALLINSIGHTS)
@@ -454,4 +456,16 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         }
 
     }
+
+    @JsonIgnore
+    private List<ColumnSelection.Predefined> getPredefinedGroups() {
+        if (StringUtils.isNotBlank(getGroups())) {
+            return Arrays.stream(getGroups().split(",")) //
+                    .map(ColumnSelection.Predefined::fromName) //
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
+    }
+
 }

@@ -228,7 +228,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
 
     @Override
     protected void enrichTableSchema(Table table) {
-        String dataCloudVersion = columnMetadataProxy.latestVersion("").getVersion();
+        String dataCloudVersion = configuration.getDataCloudVersion();
         List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, dataCloudVersion);
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
         amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));

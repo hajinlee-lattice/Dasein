@@ -126,6 +126,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
             generateRatingWorfklowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            processAccountStepConfiguration.setDataCloudVersion(dataCloudVersion.getVersion());
             return this;
         }
 

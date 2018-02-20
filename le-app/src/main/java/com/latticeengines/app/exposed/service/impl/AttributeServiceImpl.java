@@ -24,6 +24,7 @@ import com.latticeengines.app.exposed.entitymanager.SelectedAttrEntityMgr;
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.common.exposed.util.DatabaseUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -34,7 +35,6 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMa
 import com.latticeengines.domain.exposed.pls.SelectedAttribute;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("selectedAttrService")
 public class AttributeServiceImpl implements AttributeService {
@@ -64,7 +64,7 @@ public class AttributeServiceImpl implements AttributeService {
 
     @PostConstruct
     private void postConstruct() {
-        columnMetadataProxy.scheduleDelayedInitOfEnrichmentColCache();
+        columnMetadataProxy.scheduleLoadColumnMetadataCache();
     }
 
     @Override

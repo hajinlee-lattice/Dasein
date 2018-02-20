@@ -35,6 +35,9 @@ import com.latticeengines.metadata.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
 @Component("dataCollectionService")
 public class DataCollectionServiceImpl implements DataCollectionService {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionServiceImpl.class);
@@ -49,6 +52,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
     @Autowired
     private StatisticsContainerEntityMgr statisticsContainerEntityMgr;
+
+    @Resource(name = "localCacheService")
+    private CacheService localCacheService;
 
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
@@ -70,6 +76,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
                 CacheName.getCdlCacheGroup());
+        localCacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
+                CacheName.getCdlLocalCacheGroup());
         return newVersion;
     }
 

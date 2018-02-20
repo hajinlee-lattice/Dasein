@@ -1,0 +1,69 @@
+/LocalTest2
+  /Tenants
+    /LocalTest2
+      /Spaces
+        /Production
+          /Services
+            /Modeling
+              /FeaturesThreshold
+                string_value = '-1'
+              /lock
+              /state.json
+                desiredVersion = 1
+                errorMessage = None
+                installedVersion = 1
+                state = u'OK'
+            /DataCloud
+              /BypassDnBCache
+                string_value = 'false'
+              /lock
+              /state.json
+                desiredVersion = 1
+                errorMessage = None
+                installedVersion = 1
+                state = u'OK'
+            /PLS
+              /EnrichAttributesMaxNumber
+                string_value = '10'
+              /ExternalAdminEmails
+                string_value = '[]'
+              /LatticeAdminEmails
+                string_value = '["ysong@lattice-engines.com"]'
+              /SuperAdminEmails
+                string_value = '["bnguyen@lattice-engines.com","bross@lattice-engines.com"]'
+              /ThirdPartyUserEmails
+                string_value = '[]'
+              /lock
+              /state.json
+                desiredVersion = 1
+                errorMessage = None
+                installedVersion = 1
+                state = u'OK'
+          /SpaceConfiguration
+            /DL_Address
+              string_value = 'http://bodcdevvint187.dev.lattice.local:8081'
+            /Products
+              string_value = '["Lead Prioritization 3.0"]'
+            /Topology
+              string_value = 'SFDC'
+          /feature-flags.json
+            AllowPivotFile = False
+            EnableInternalEnrichmentAttributes = False
+            EnableDataEncryption = True
+            LatticeInsights = True
+            EnableLpiPlaymaker = True
+          /properties.json
+            description = u'A LP solution for LocalTest'
+            displayName = u'LocalTest2 Tenant'
+            sandboxSfdcOrgId = None
+            sfdcOrgId = None
+      /default-space
+        string_value = 'Production'
+      /properties.json
+        created = 1475376396768
+        description = u'A LP tenant under the contract LocalTest'
+        displayName = u'LocalTest2 Tenant'
+        lastModified = 1475376397768
+  /properties.json
+    description = None
+    displayName = None

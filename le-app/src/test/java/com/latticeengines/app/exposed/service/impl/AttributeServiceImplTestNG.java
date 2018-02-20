@@ -17,6 +17,7 @@ import com.latticeengines.app.exposed.entitymanager.CategoryCustomizationPropert
 import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.testframework.AppTestNGBase;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -27,7 +28,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.CategoryNameUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class AttributeServiceImplTestNG extends AppTestNGBase {
 
@@ -92,8 +92,8 @@ public class AttributeServiceImplTestNG extends AppTestNGBase {
 
         ColumnMetadataProxy proxy = Mockito.mock(ColumnMetadataProxy.class);
         Mockito.when(proxy.latestVersion(null)).thenReturn(new DataCloudVersion());
-        Mockito.when(proxy.columnSelection(ColumnSelection.Predefined.Enrichment, null))
-                .thenReturn(Arrays.<ColumnMetadata> asList(new ColumnMetadata[] { cm1, cm2, cm3 }));
+        Mockito.when(proxy.columnSelection(ColumnSelection.Predefined.Enrichment))
+                .thenReturn(Arrays.asList(cm1, cm2, cm3));
 
         ReflectionTestUtils.setField(attributeService, "columnMetadataProxy", proxy);
     }

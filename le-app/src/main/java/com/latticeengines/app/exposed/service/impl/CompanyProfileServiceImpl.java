@@ -52,7 +52,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @PostConstruct
     private void postConstruct() {
-        columnMetadataProxy.scheduleDelayedInitOfEnrichmentColCache();
+        columnMetadataProxy.scheduleLoadColumnMetadataCache();
     }
 
     @Override
@@ -118,8 +118,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 }
             }
 
-            List<ColumnMetadata> enrichmentColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment,
-                    dataCloudVersion);
+            List<ColumnMetadata> enrichmentColumns = columnMetadataProxy.columnSelection(Predefined.Enrichment);
 
             List<ColumnMetadata> requiredEnrichmentMetadataList = new ArrayList<>();
 

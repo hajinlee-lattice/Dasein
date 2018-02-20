@@ -3,6 +3,7 @@ package com.latticeengines.security.exposed.util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContextStrategy;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -14,14 +15,25 @@ public class GlobalAuthMultiTenantContextStrategy implements MultiTenantContextS
     @Override
     public Tenant getTenant() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        Tenant tenant;
+        String authSource;
         if (auth instanceof TicketAuthenticationToken) {
             TicketAuthenticationToken token = (TicketAuthenticationToken) auth;
-            return token.getSession().getTenant();
+            tenant = token.getSession().getTenant();
+            authSource = "TicketAuthenticationToken";
         } else if (auth instanceof TenantToken) {
-            return ((TenantToken) auth).getTenant();
+            tenant = ((TenantToken) auth).getTenant();
+            authSource = "TenantToken";
         } else {
             return null;
         }
+
+        if (tenant.getPid() == null) {
+            throw new IllegalStateException(
+                    "Should not have a " + authSource + " with null PID in SecurityContextHolder: " + JsonUtils.serialize(auth));
+        }
+
+        return tenant;
     }
 
     @Override

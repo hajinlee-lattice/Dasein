@@ -16,6 +16,11 @@ public enum CacheName {
     TimeTranslatorCache(Constants.TimeTranslatorCacheName), //
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
+
+    DataCloudCMCache(Constants.DataCloudCMCacheName), //
+    DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
+    DataCloudVersionCache(Constants.DataCloudVersionCacheName), //
+
     SessionCache(Constants.SessionCacheName);//
 
     private String name;
@@ -28,6 +33,14 @@ public enum CacheName {
         return this.name;
     }
 
+    public static CacheName[] getDataCloudCacheGroup() {
+        return new CacheName[] { DataCloudVersionCache };
+    }
+
+    public static CacheName[] getDataCloudLocalCacheGroup() {
+        return new CacheName[] { DataCloudCMCache, DataCloudStatsCache };
+    }
+
     public static CacheName[] getCdlCacheGroup() {
         return new CacheName[] { //
                 DataLakeStatsCubesCache, //
@@ -37,15 +50,16 @@ public enum CacheName {
                 EntityDataCache, //
                 EntityRatingCountCache, //
                 RatingCoverageCache, //
-                RatingSummariesCache ,//
-                TimeTranslatorCache
+                RatingSummariesCache //
         };
     }
 
+    public static CacheName[] getCdlLocalCacheGroup() {
+        return new CacheName[] { TimeTranslatorCache };
+    }
+
     public static CacheName[] getRatingEnginesCacheGroup() {
-        return new CacheName[] { //
-                RatingSummariesCache
-        };
+        return new CacheName[] { RatingSummariesCache };
     }
 
     public static class Constants {
@@ -64,5 +78,8 @@ public enum CacheName {
         public static final String SessionCacheName = "SessionCache";
         public static final String AttrRepoCacheName = "AttrRepoCache";
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
+        public static final String DataCloudCMCacheName = "DataCloudCMCache";
+        public static final String DataCloudStatsCacheName = "DataCloudStatsCacheName";
+        public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
     }
 }

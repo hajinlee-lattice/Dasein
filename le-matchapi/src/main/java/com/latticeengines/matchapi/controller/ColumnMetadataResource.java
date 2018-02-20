@@ -2,8 +2,11 @@ package com.latticeengines.matchapi.controller;
 
 import java.util.List;
 
+import javax.annotation.Resource;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,9 +14,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
+import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
+import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -36,6 +44,12 @@ public class ColumnMetadataResource {
 
     @Autowired
     private DataCloudVersionService dataCloudVersionService;
+
+    @Resource(name = "accountMasterColumnMetadataService")
+    private ColumnMetadataService columnMetadataService;
+
+    @Resource(name = "localCacheService")
+    private CacheService localCacheService;
 
     @GetMapping(value = "/predefined/{selectName}")
     @ResponseBody
@@ -69,14 +83,22 @@ public class ColumnMetadataResource {
         return dataCloudVersionService.latestApprovedForMajorVersion(compatibleToVersion);
     }
 
-    @GetMapping(value = "/")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
     public List<ColumnMetadata> getAllColumns(
-            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
-        ColumnMetadataService columnMetadataService = beanDispatcher
-                .getColumnMetadataService(dataCloudVersion);
-        return columnMetadataService.findAll(dataCloudVersion);
+            @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size) {
+        return columnMetadataService.findAll(dataCloudVersion, page, size);
+    }
+
+    @GetMapping(value = "/count")
+    @ResponseBody
+    @ApiOperation(value = "Get number of columns belong to a data cloud version")
+    public Long getCount(@RequestParam(value = "datacloudversion", required = false) String dataCloudVersion) {
+        MetadataColumnService<?> service = beanDispatcher.getMetadataColumnService(dataCloudVersion);
+        return service.count(dataCloudVersion);
     }
 
     @ApiIgnore
@@ -99,6 +121,17 @@ public class ColumnMetadataResource {
         }
         ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
         return columnMetadataService.getTopNTree(dataCloudVersion);
+    }
+
+    @ApiIgnore
+    @DeleteMapping(value = "/refreshcache")
+    @ApiOperation(value = "Refresh metadata caches.")
+    public void refreshCache() {
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
+                CacheName.getDataCloudCacheGroup());
+        localCacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
+                CacheName.getDataCloudLocalCacheGroup());
     }
 
 }

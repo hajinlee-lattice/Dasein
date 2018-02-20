@@ -129,9 +129,7 @@ public class AttributePageProcessor {
     }
 
     public List<LeadEnrichmentAttribute> getPage() {
-        String currentDataCloudVersion = columnMetadataProxy.latestVersion(null).getVersion();
-        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment, //
-                currentDataCloudVersion);
+        List<ColumnMetadata> allColumns = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment);
         List<SelectedAttribute> selectedAttributes = skipTenantLevelCustomization ? new ArrayList<>()
                 : selectedAttrEntityMgr.findAll();
         List<LeadEnrichmentAttribute> attributes = superimpose(allColumns, selectedAttributes,

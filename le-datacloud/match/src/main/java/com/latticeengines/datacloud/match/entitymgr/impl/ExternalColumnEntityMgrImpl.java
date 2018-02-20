@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -12,13 +13,31 @@ import org.springframework.transaction.annotation.Transactional;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.datacloud.match.dao.ExternalColumnDao;
 import com.latticeengines.datacloud.match.entitymgr.MetadataColumnEntityMgr;
+import com.latticeengines.datacloud.match.repository.ExternalColumnRepository;
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
 
 @Component("externalColumnEntityMgr")
-public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<ExternalColumn> {
+public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<ExternalColumn, Long>
+        implements MetadataColumnEntityMgr<ExternalColumn> {
 
-    @Resource(name="externalColumnDao")
+    @Resource(name = "externalColumnDao")
     private ExternalColumnDao externalColumnDao;
+
+    @Inject
+    private ExternalColumnRepository repository;
+
+    @Override
+    public BaseDao<ExternalColumn> getDao() {
+        return externalColumnDao;
+    }
+
+    @Override
+    public BaseJpaRepository<ExternalColumn, Long> getRepository() {
+        return repository;
+    }
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
@@ -28,18 +47,11 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
     }
 
     @Override
-    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
-    @VisibleForTesting
-    public void deleteByColumnIdAndDataCloudVersion(String columnId, String dataCloudVersion) {
-        // no-op
-    }
-
-    @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ExternalColumn> findByTag(String tag, String dataCloudVersion) {
         List<ExternalColumn> columns = externalColumnDao.findByTag(tag);
         List<ExternalColumn> toReturn = new ArrayList<>();
-        for (ExternalColumn column: columns) {
+        for (ExternalColumn column : columns) {
             if (column.getTagList().contains(tag)) {
                 toReturn.add(column);
             }
@@ -60,10 +72,13 @@ public class ExternalColumnEntityMgrImpl implements MetadataColumnEntityMgr<Exte
     }
 
     @Override
-    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRED)
-    public void updateMetadataColumns(String dataCloudVersion, List<ExternalColumn> metadataColumns) {
-        // no-op
-        return;
+    public List<ExternalColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
+        throw new UnsupportedOperationException("find by page is not supported for 1.0.0");
+    }
+
+    @Override
+    public Long count(String dataCloudVersion) {
+        return repository.count();
     }
 
 }

@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,8 +36,25 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<E> scan(String dataCloudVersion) {
-        return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+    public Long count(String dataCloudVersion) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = getLatestVersion();
+        }
+        return getMetadataColumnEntityMgr().count(dataCloudVersion);
+    }
+
+    @Override
+    public List<E> scan(String dataCloudVersion, Integer page, Integer size) {
+        if (StringUtils.isBlank(dataCloudVersion)) {
+            dataCloudVersion = getLatestVersion();
+        }
+        if (page == null && size == null) {
+            return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+        } else if (size == null) {
+            throw new IllegalArgumentException("Must specify size when asking for a particular page");
+        } else {
+            return getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, size);
+        }
     }
 
     @Override

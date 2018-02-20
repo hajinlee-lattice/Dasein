@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.controller;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +28,9 @@ import io.swagger.annotations.ApiOperation;
 public class DataCollectionController {
 
     private final DataCollectionManagerService collectionMgrSvc;
+
+    @Resource(name = "localCacheService")
+    private CacheService localCacheService;
 
     @Inject
     public DataCollectionController(DataCollectionManagerService collectionMgrSvc) {
@@ -59,6 +63,8 @@ public class DataCollectionController {
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
                 CacheName.getCdlCacheGroup());
+        localCacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
+                CacheName.getCdlLocalCacheGroup());
         return ResponseDocument.successResponse("Success");
     }
 

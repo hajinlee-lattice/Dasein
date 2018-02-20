@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
@@ -21,8 +23,13 @@ import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 @Component("enrichmentService")
 public class EnrichmentServiceImpl implements EnrichmentService {
 
-    @Autowired
+    @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @PostConstruct
+    private void postConstruct() {
+        columnMetadataProxy.scheduleLoadColumnMetadataCache();
+    }
 
     @Override
     public void updateEnrichmentMatchFields(String id, List<MarketoMatchField> marketoMatchFields) {
@@ -41,7 +48,7 @@ public class EnrichmentServiceImpl implements EnrichmentService {
     @Override
     public TopNTree getTopNTree(boolean excludeInternalEnrichment) {
         TopNTree topNTree = columnMetadataProxy.getTopNTree();
-        List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment, "");
+        List<ColumnMetadata> cms = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Enrichment);
         if (excludeInternalEnrichment) {
             Set<String> internalAttrs = cms.stream().filter(cm -> Boolean.TRUE.equals(cm.isCanInternalEnrich()))
                     .map(ColumnMetadata::getColumnId).collect(Collectors.toSet());

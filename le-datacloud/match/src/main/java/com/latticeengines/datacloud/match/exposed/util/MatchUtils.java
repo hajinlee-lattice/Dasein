@@ -53,7 +53,7 @@ public class MatchUtils {
     }
 
     public static boolean isValidForAccountMasterBasedMatch(String version) {
-        return !StringUtils.isEmpty(version)
+        return StringUtils.isNotEmpty(version)
                 && version.trim().startsWith(DEFAULT_VERSION_FOR_ACCOUNT_MASTER_BASED_MATCHING);
     }
 

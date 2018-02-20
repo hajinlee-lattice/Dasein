@@ -5,14 +5,11 @@ import javax.inject.Inject;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.security.exposed.TenantToken;
 
 @Aspect
 public class SetTenantAspect {
@@ -76,13 +73,6 @@ public class SetTenantAspect {
             throw new RuntimeException(String.format("No tenant found with id %s", customerSpace.toString()));
         }
         MultiTenantContext.setTenant(tenant);
-        setSecurityContext(tenant);
-    }
-
-    public void setSecurityContext(Tenant tenant) {
-        SecurityContext securityCtx = SecurityContextHolder.createEmptyContext();
-        securityCtx.setAuthentication(new TenantToken(tenant));
-        SecurityContextHolder.setContext(securityCtx);
     }
 
 }

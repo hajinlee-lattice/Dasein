@@ -3,14 +3,17 @@ package com.latticeengines.security.exposed.service.impl;
 import java.util.Collections;
 import java.util.Random;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTenantEntityMgr;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -35,17 +38,20 @@ public class SessionServiceImpl implements SessionService {
     private static final String AUTH_ROUTE_SSO = "SSO";
     private static final String AUTH_ROUTE_GA = "GA";
 
-    @Autowired
+    @Inject
     private GlobalSessionManagementService globalSessionManagementService;
 
-    @Autowired
+    @Inject
     private GlobalAuthenticationService globalAuthenticationService;
 
-    @Autowired
+    @Inject
     private SamlGlobalAuthenticationService samlGlobalAuthenticationService;
 
-    @Autowired
+    @Inject
     private GlobalAuthTenantEntityMgr gaTenantEntityMgr;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public Ticket authenticate(Credentials credentials) {
@@ -75,7 +81,7 @@ public class SessionServiceImpl implements SessionService {
 
         Session session = attach(ticket);
         session.setAuthenticationRoute(AUTH_ROUTE_SSO);
-        return session;
+        return setTenantPid(session);
     }
 
     @Override
@@ -107,7 +113,7 @@ public class SessionServiceImpl implements SessionService {
         if (session != null) {
             session.setAuthenticationRoute(AUTH_ROUTE_GA);
         }
-        return session;
+        return setTenantPid(session);
     }
 
     @Override
@@ -160,6 +166,20 @@ public class SessionServiceImpl implements SessionService {
             }
         }
 
+        return setTenantPid(session);
+    }
+
+    private Session setTenantPid(Session session) {
+        if (session != null) {
+            Tenant tenant = session.getTenant();
+            if (tenant != null && tenant.getPid() == null) {
+                Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
+                if (tenantWithPid == null) {
+                    throw new IllegalStateException("Cannot find pid for in tenant :" + JsonUtils.serialize(tenant));
+                }
+                session.setTenant(tenantWithPid);
+            }
+        }
         return session;
     }
 

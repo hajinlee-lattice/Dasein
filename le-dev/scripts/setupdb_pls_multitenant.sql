@@ -16,6 +16,11 @@ UI_VERSION
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
 '3.0'
 ), (
+'LocalTest2.LocalTest2.Production',
+'LocalTest2',
+UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),
+'3.0'
+), (
 'PropDataService.PropDataService.Production',
 'PropDataService',
 UNIX_TIMESTAMP(DATE_ADD(NOW(), INTERVAL -1 YEAR )),

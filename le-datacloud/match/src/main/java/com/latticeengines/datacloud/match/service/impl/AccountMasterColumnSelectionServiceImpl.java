@@ -174,7 +174,7 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         Map<String, BitCodeBook.DecodeStrategy> decodeStrategyMap = new HashMap<>();
         Map<String, Map<String, Object>> valueDictRevMap = new HashMap<>();
         Map<String, Integer> bitUnitMap = new HashMap<>();
-        for (AccountMasterColumn column : accountMasterColumnService.scan(dataCloudVersion)) {
+        for (AccountMasterColumn column : accountMasterColumnService.scan(dataCloudVersion, null, null)) {
             String decodeStrategyStr = column.getDecodeStrategy();
             if (StringUtils.isEmpty(decodeStrategyStr)) {
                 continue;
