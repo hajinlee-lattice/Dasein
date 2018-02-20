@@ -38,6 +38,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflow
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -117,6 +119,23 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         setRebuildEntities();
         setupInactiveVersion();
         exportDataToRedshift.upsertToInactiveVersion();
+        // clearPhaseForRetry();
+    }
+
+    @SuppressWarnings("unused")
+    private void clearPhaseForRetry() {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
+                ProcessAnalyzeWorkflowConfiguration.class);
+        if (stepConfigMap.isEmpty()) {
+            log.info("stepConfigMap is Empty!!!");
+        }
+        stepConfigMap.entrySet().stream().filter(e -> e.getValue() instanceof BaseWrapperStepConfiguration)//
+                .forEach(e -> {
+                    log.info("enabling step:" + e.getKey());
+                    e.getValue().setSkipStep(false);
+                    ((BaseWrapperStepConfiguration) e.getValue()).setPhase(Phase.PRE_PROCESSING);
+                    putObjectInContext(e.getKey(), e.getValue());
+                });
     }
 
     private void setRebuildEntities() {
@@ -178,7 +197,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactiveVersion);
             if (StringUtils.isNotBlank(tableName)) {
-                String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, activeVersion);
+                String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role,
+                        activeVersion);
                 if (tableName.equalsIgnoreCase(activeTableName)) {
                     log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
                     dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
