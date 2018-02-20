@@ -67,7 +67,7 @@ angular
                     ];
 
                 if (vm.section == 'segment.analysis') {
-                    var order = ['SegmentChecked','-ImportanceOrdering'];
+                    var order = ['SegmentChecked','!ImportanceOrdering','-ImportanceOrdering'];
 
                     if (category && YesCategories.indexOf(category) >= 0) {
                         order.push(function(attribute) {
@@ -79,7 +79,7 @@ angular
                 } else {
                     var order = !vm.showHighlighting()
                         ? ['-ImportanceOrdering']
-                        : ['-HighlightHighlighted','-ImportanceOrdering'];
+                        : ['-HighlightHighlighted','!ImportanceOrdering','-ImportanceOrdering'];
 
                     if (vm.lookupMode ) {
                         order.push(function(attribute) {
