@@ -37,7 +37,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
-        Map<String, Product> productMap = config.getProductMap();
+        Map<String, List<Product>> productMap = config.getProductMap();
         String idField = config.getIdField();
         String accountField = config.getAccountField();
         String productField = config.getProductField();
@@ -48,7 +48,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
         String transactionType = config.getTransactionType();
         List<String> inputPeriods = config.getPeriods();
         List<String> inputMetrics = config.getMetrics();
-        Map<String, Object> defaultValues = new HashMap<String, Object>();
+        Map<String, Object> defaultValues = new HashMap<>();
 
         Node transactions = addSource(parameters.getBaseTables().get(0));
         Node accounts = addSource(parameters.getBaseTables().get(1));
@@ -56,20 +56,17 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
 
         transactions = transactions.filter(typeField + ".equals(\"" + transactionType + "\")", new FieldList(typeField));
 
-        List<String> productIds = new ArrayList<String>();
-        for (String productId : productMap.keySet()) {
-            productIds.add(productId);
-        }
+        List<String> productIds = new ArrayList<>(productMap.keySet());
 
         List<FieldMetadata> fms = new ArrayList<>();
         List<String> fields = new ArrayList<>();
         fms.add(new FieldMetadata(accountField, String.class));
         fields.add(accountField);
 
-        List<String> periods = new ArrayList<String>();
-        List<String> metrics = new ArrayList<String>();
-        Long long0 = new Long(0);
-        Double double0 = new Double(0);
+        List<String> periods = new ArrayList<>();
+        List<String> metrics = new ArrayList<>();
+        Long long0 = 0L;
+        Double double0 = 0.0;
         for (int i = 0; i < inputPeriods.size(); i++) {
             NamedPeriod namedPeriod = NamedPeriod.fromName(inputPeriods.get(i));
             TransactionMetrics transactionMetrics = TransactionMetrics.fromName(inputMetrics.get(i));
@@ -127,7 +124,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
         transactionHistory = transactionHistory.retain(new FieldList(fields));
 
         List<String> fieldNames = transactionHistory.getFieldNames();
-        List<Object> defaultValueList = new ArrayList<Object>();
+        List<Object> defaultValueList = new ArrayList<>();
         for (String fieldName : fieldNames) {
              defaultValueList.add(defaultValues.get(fieldName));
         }

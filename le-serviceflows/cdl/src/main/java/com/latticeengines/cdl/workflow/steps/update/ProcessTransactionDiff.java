@@ -50,7 +50,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
     static final String BEAN_NAME = "processTransactionDiff";
 
-    private Map<String, Product> productMap;
+    private Map<String, List<Product>> productMap;
     private int dailyRawStep, productAgrStep, addPeriodStep;
     private int dailyAgrStep, periodsStep, periodDataStep, periodAgrStep;
 
@@ -192,7 +192,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         return step;
     }
 
-    private TransformationStepConfig rollupProduct(Map<String, Product> productMap) {
+    private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         step.setInputSteps(Collections.singletonList(dailyRawStep));
@@ -369,7 +369,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
     private TransformationStepConfig updatePeriodStore() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(periodsStep);
         inputSteps.add(periodAgrStep);
         step.setInputSteps(inputSteps);

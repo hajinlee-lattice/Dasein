@@ -1,14 +1,6 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -41,7 +33,7 @@ public class TimeSeriesUtils {
 
         avroDir = getPath(avroDir) + "/*.avro";
         log.info("Collect " + periodField + " periods from " + avroDir);
-        Set<Integer> periodSet = new HashSet<Integer>();
+        Set<Integer> periodSet = new HashSet<>();
         try {
             Iterator<GenericRecord> iter = AvroUtils.iterator(yarnConfiguration, avroDir);
             while (iter.hasNext()) {
@@ -229,7 +221,7 @@ public class TimeSeriesUtils {
            pendingWrites.add(executor.submit(callable));
        }
 
-       return new HashMap<Integer, List<GenericRecord>>();
+       return new HashMap<>();
     }
 
     private static void syncWrites(List<Future<Boolean>> pendingWrites) {
@@ -259,25 +251,57 @@ public class TimeSeriesUtils {
         }
     }
 
-    public static Map<String, Product> loadProductMap(Configuration yarnConfiguration, Table productTable) {
-        Map<String, Product> productMap = new HashMap<>();
+    public static Map<String, List<Product>> loadProductMap(Configuration yarnConfiguration, Table productTable) {
+        Map<String, List<Product>> productMap = new HashMap<>();
         for (Extract extract : productTable.getExtracts()) {
             List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath());
             for (GenericRecord record : recordList) {
                 Product product = new Product();
                 product.setProductId(record.get(InterfaceName.ProductId.name()).toString());
+
                 try {
-                    product.setBundleId(record.get(InterfaceName.BundleId.name()).toString());
+                    product.setProductBundle(record.get(InterfaceName.ProductBundle.name()).toString());
                 } catch (Exception e) {
-                    product.setBundleId(null);
+                    product.setProductBundle(null);
                 }
-                product.setProductName(record.get(InterfaceName.ProductName.name()).toString());
-                //todo: uncomment after release tag
-//                product.setDescription(record.get("Description").toString());
-//                product.setProductLine(record.get("ProductLine").toString());
-//                product.setProductFamily(record.get("ProductFamily").toString());
-//                product.setProductCategory(record.get("ProductCategory").toString());
-                productMap.put(product.getProductId(), product);
+
+                try {
+                    product.setProductName(record.get(InterfaceName.ProductName.name()).toString());
+                } catch (Exception e) {
+                    product.setProductName(null);
+                }
+
+                try {
+                    product.setDescription(record.get("Description").toString());
+                } catch (Exception e) {
+                    product.setDescription(null);
+                }
+
+                try {
+                    product.setProductLine(record.get("ProductLine").toString());
+                } catch (Exception e) {
+                    product.setProductLine(null);
+                }
+
+                try {
+                    product.setProductFamily(record.get("ProductFamily").toString());
+                } catch (Exception e) {
+                    product.setProductFamily(null);
+                }
+
+                try {
+                    product.setProductCategory(record.get("ProductCategory").toString());
+                } catch (Exception e) {
+                    product.setProductCategory(null);
+                }
+
+                if (productMap.get(product.getProductId()) != null) {
+                    productMap.get(product.getProductId()).add(product);
+                } else {
+                    List<Product> products = new ArrayList<>();
+                    products.add(product);
+                    productMap.put(product.getProductId(), products);
+                }
             }
         }
         return productMap;

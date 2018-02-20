@@ -53,7 +53,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     static final String BEAN_NAME = "profilePurchaseHistory";
 
     private int aggregateStep, profileStep, bucketStep;
-    private Map<String, Product> productMap;
+    private Map<String, List<Product>> productMap;
     private String dailyTableName;
     private String accountTableName;
 
@@ -166,7 +166,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     private TransformationStepConfig aggregate(CustomerSpace customerSpace, String transactionTableName, //
-                                               String accountTableName, Map<String, Product> productMap) {
+                                               String accountTableName, Map<String, List<Product>> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
 
@@ -285,10 +285,20 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
                 }
                 String productName = null;
-                Product product = productMap.get(productId);
-                if (product != null) {
-                    productName = product.getProductName();
+                List<Product> products = productMap.get(productId);
+                if (products != null) {
+                    for (Product product : products) {
+                        productName = product.getProductName();
+                        if (productName != null) {
+                            break;
+                        }
+                    }
                 }
+
+                if (productName == null) {
+                    productName = productId;
+                }
+
                 if (StringUtils.isBlank(productName)) {
                     throw new IllegalArgumentException("Cannot find product name for product id " + productId
                             + " in product map " + JsonUtils.serialize(productMap));

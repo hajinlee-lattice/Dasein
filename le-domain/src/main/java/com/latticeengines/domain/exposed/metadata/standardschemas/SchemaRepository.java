@@ -666,39 +666,38 @@ public class SchemaRepository {
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
                 .build());
-        //todo: uncomment after release tag
-//        table.addAttribute(attr(InterfaceName.BundleId.name()) //
-//                .allowedDisplayNames(Sets.newHashSet("PRODUCT_BUNDLE", "PRODUCT BUNDLE")) //
-//                .type(Schema.Type.STRING) //
-//                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-//                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-//                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-//                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-//                .build());
-//        table.addAttribute(attr("ProductLine") //
-//                .allowedDisplayNames(Sets.newHashSet("PRODUCT_LINE", "PRODUCT LINE")) //
-//                .type(Schema.Type.STRING) //
-//                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-//                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-//                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-//                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-//                .build());
-//        table.addAttribute(attr("ProductFamily") //
-//                .allowedDisplayNames(Sets.newHashSet("PRODUCT_FAMILY", "PRODUCT FAMILY")) //
-//                .type(Schema.Type.STRING) //
-//                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-//                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-//                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-//                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-//                .build());
-//        table.addAttribute(attr("ProductCategory") //
-//                .allowedDisplayNames(Sets.newHashSet("PRODUCT_CATEGORY", "PRODUCT CATEGORY")) //
-//                .type(Schema.Type.STRING) //
-//                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
-//                .fundamentalType(ModelingMetadata.FT_ALPHA) //
-//                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
-//                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
-//                .build());
+        table.addAttribute(attr(InterfaceName.ProductBundle.name()) //
+                .allowedDisplayNames(Sets.newHashSet("PRODUCT_BUNDLE", "PRODUCT BUNDLE")) //
+                .type(Schema.Type.STRING) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build());
+        table.addAttribute(attr("ProductLine") //
+                .allowedDisplayNames(Sets.newHashSet("PRODUCT_LINE", "PRODUCT LINE")) //
+                .type(Schema.Type.STRING) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build());
+        table.addAttribute(attr("ProductFamily") //
+                .allowedDisplayNames(Sets.newHashSet("PRODUCT_FAMILY", "PRODUCT FAMILY")) //
+                .type(Schema.Type.STRING) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build());
+        table.addAttribute(attr("ProductCategory") //
+                .allowedDisplayNames(Sets.newHashSet("PRODUCT_CATEGORY", "PRODUCT CATEGORY")) //
+                .type(Schema.Type.STRING) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .statisticalType(ModelingMetadata.NOMINAL_STAT_TYPE) //
+                .build());
         return table;
     }
 
@@ -1119,7 +1118,7 @@ public class SchemaRepository {
         lmk.setDisplayName(columnName);
         lmk.setName(columnName);
         lmk.setLastModifiedTimestamp(DateTime.now().getMillis());
-        lmk.setAttributes(Arrays.asList(columnName));
+        lmk.setAttributes(Collections.singletonList(columnName));
         return lmk;
     }
 

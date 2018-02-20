@@ -106,7 +106,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(false, false, false));
+        step.setConfiguration(getConsolidateDataConfig(false, false, false, null));
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);

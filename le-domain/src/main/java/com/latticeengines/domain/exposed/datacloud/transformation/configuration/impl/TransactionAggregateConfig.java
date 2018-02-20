@@ -10,7 +10,7 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 public class TransactionAggregateConfig extends TransformerConfig {
 
     @JsonProperty("ProductMap")
-    private Map<String, Product> productMap;
+    private Map<String, List<Product>> productMap;
 
     @JsonProperty("TransactionType")
     private String transactionType;
@@ -42,11 +42,11 @@ public class TransactionAggregateConfig extends TransformerConfig {
     @JsonProperty("Metrics")
     private List<String> metrics;
 
-    public Map<String, Product> getProductMap() {
+    public Map<String, List<Product>> getProductMap() {
         return productMap;
     }
 
-    public void setProductMap(Map<String, Product> productMap) {
+    public void setProductMap(Map<String, List<Product>> productMap) {
         this.productMap = productMap;
     }
 

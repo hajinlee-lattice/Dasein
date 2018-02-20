@@ -13,7 +13,8 @@ public enum InterfaceName {
     CategoryId, //
     SubcategoryId, //
     ProductId, //
-    BundleId, //
+    ProductType, //
+    ProductBundle, //
     TransactionId, //
     PeriodId, //
     PeriodName, //

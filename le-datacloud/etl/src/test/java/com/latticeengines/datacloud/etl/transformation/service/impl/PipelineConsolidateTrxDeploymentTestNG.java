@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
@@ -78,16 +79,16 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     List<Class<?>> clz = Arrays.asList((Class<?>) String.class, String.class, String.class, String.class, String.class,
             Double.class, Long.class, String.class, Long.class, String.class);
 
-    List<String> accountFieldNames = Arrays.asList("AccountId");
-    List<Class<?>> accountClz = Arrays.asList((Class<?>) String.class);
+    List<String> accountFieldNames = Collections.singletonList("AccountId");
+    List<Class<?>> accountClz = Collections.singletonList((Class<?>) String.class);
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
-    List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
+    List<TransformationStepConfig> steps = new ArrayList<>();
 
     private Table rawTable;
     private Table dailyTable;
     private Table periodTable;
-    private HashMap<String, Product> productMap = new HashMap<String, Product>();
+    private HashMap<String, List<Product>> productMap = new HashMap<>();
 
     private int inputMergeStep;
     private int dailyStep;
@@ -317,14 +318,13 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSrcIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
         config.setMasterIdField(TableRoleInCollection.AggregatedTransaction.getPrimaryKey().name());
         config.setCreateTimestampColumn(true);
-        config.setColumnsFromRight(new HashSet<String>(Arrays.asList("CREATION_DATE")));
+        config.setColumnsFromRight(new HashSet<>(Collections.singletonList("CREATION_DATE")));
         config.setCompositeKeys(
                 Arrays.asList("AccountId", "ContactId", "ProductId", "TransactionType", "TransactionTime"));
         return JsonUtils.serialize(config);
     }
 
     private TransformationStepConfig addTrxDate() {
-
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setTransformer(DataCloudConstants.PERIOD_DATE_CONVERTOR);
         step2.setInputSteps(Collections.singletonList(inputMergeStep));
@@ -351,7 +351,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(dayPeriodStep);
         inputSteps.add(dailyStep);
         step2.setInputSteps(inputSteps);
@@ -393,15 +393,16 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private TransformationStepConfig rollupProduct() {
-        TransformationStepConfig step2 = new TransformationStepConfig();
-        step2.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
-        step2.setInputSteps(Collections.singletonList(dailyRawStep));
+        TransformationStepConfig stepConfig = new TransformationStepConfig();
+        stepConfig.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
+        stepConfig.setInputSteps(Collections.singletonList(dailyRawStep));
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
+        config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
 
-        step2.setConfiguration(JsonUtils.serialize(config));
-        return step2;
+        stepConfig.setConfiguration(JsonUtils.serialize(config));
+        return stepConfig;
     }
 
     private TransformationStepConfig rollupProductRawTable() {
@@ -418,6 +419,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
+        config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
 
         step2.setConfiguration(JsonUtils.serialize(config));
@@ -459,7 +461,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private TransformationStepConfig updateDailyStore() {
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(dayPeriodStep);
         inputSteps.add(dailyAgrStep);
         step2.setInputSteps(inputSteps);
@@ -521,10 +523,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         targetTable.setExpandBucketedAttrs(false);
         step2.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList("TotalAmount"));
-        config.setSumOutputFields(Arrays.asList("TotalAmount"));
-        config.setSumLongFields(Arrays.asList("TotalQuantity"));
-        config.setSumLongOutputFields(Arrays.asList("TotalQuantity"));
+        config.setSumFields(Collections.singletonList("TotalAmount"));
+        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
+        config.setSumLongFields(Collections.singletonList("TotalQuantity"));
+        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.PeriodId.name()));
@@ -556,7 +558,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private TransformationStepConfig updatePeriodStore() {
         TransformationStepConfig step2 = new TransformationStepConfig();
         step2.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(periodsStep);
         inputSteps.add(periodAgrStep);
         step2.setInputSteps(inputSteps);
@@ -581,10 +583,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step2.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList("Amount"));
-        config.setSumOutputFields(Arrays.asList("TotalAmount"));
-        config.setSumLongFields(Arrays.asList("Quantity"));
-        config.setSumLongOutputFields(Arrays.asList("TotalQuantity"));
+        config.setSumFields(Collections.singletonList("Amount"));
+        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
+        config.setSumLongFields(Collections.singletonList("Quantity"));
+        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name(),
@@ -685,21 +687,21 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             recordMap.put((accountId + "-" + productId), record);
             rowCount++;
         }
-        Assert.assertEquals(rowCount, new Integer(4));
+        Assert.assertEquals(rowCount, new Integer(9));
 
-        GenericRecord record = recordMap.get("1-1");
+        GenericRecord record = recordMap.get("1-b1");
         Assert.assertEquals(record.get("TotalAmount"), 20D);
         Assert.assertEquals(record.get("TotalQuantity"), 2L);
 
-        record = recordMap.get("2-1");
+        record = recordMap.get("2-b2");
         Assert.assertEquals(record.get("TotalAmount"), 20D);
         Assert.assertEquals(record.get("TotalQuantity"), 2L);
 
-        record = recordMap.get("2-2");
+        record = recordMap.get("2-b1");
         Assert.assertEquals(record.get("TotalAmount"), 20D);
         Assert.assertEquals(record.get("TotalQuantity"), 2L);
 
-        record = recordMap.get("3-1");
+        record = recordMap.get("3-b1");
         Assert.assertEquals(record.get("TotalAmount"), 20D);
         Assert.assertEquals(record.get("TotalQuantity"), 2L);
     }
@@ -775,20 +777,29 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private void initProductTable() {
-        productMap.put("1", createProduct("1", "product1", null));
-        productMap.put("2", createProduct("2", "product2", null));
-        productMap.put("3", createProduct("3", "product3", null));
-        productMap.put("4", createProduct("4", "sku1", "product1"));
-        productMap.put("5", createProduct("5", "sku2", "product1"));
-        productMap.put("6", createProduct("6", "sku3", "product2"));
-        productMap.put("7", createProduct("7", "sku4", "product3"));
+        Product product11 = createProduct("1", "sku1", "b1", null, null, null);
+        Product product12 = createProduct("1", "sku1", "b2", null, null, null);
+        Product product13 = createProduct("1", "sku1", null, "pl1", "pf1", "pc1");
+        Product product3 = createProduct("3", "sku3", "b1", "pl1", "pf1", "pc1");
+        Product product4 = createProduct("4", "sku4", null, null, null, null);
+        Product product5 = createProduct("5", "sku5", "b3", "pl1", "pf1", "pc1");
+
+        List<Product> products1 = Arrays.asList(product11, product12, product13);
+        productMap.put("1", products1);
+        productMap.put("3", Collections.singletonList(product3));
+        productMap.put("4", Collections.singletonList(product4));
+        productMap.put("5", Collections.singletonList(product5));
     }
 
-    private Product createProduct(String id, String name, String bundle) {
+    private Product createProduct(String id, String name, String bundle, String productLine, String productFamily,
+                                  String productCategory) {
         Product product = new Product();
         product.setProductId(id);
         product.setProductName(name);
-        product.setBundleId(bundle);
+        product.setProductBundle(bundle);
+        product.setProductLine(productLine);
+        product.setProductFamily(productFamily);
+        product.setProductCategory(productCategory);
         return product;
     }
 
@@ -803,7 +814,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         Table table = SchemaRepository.instance().getSchema(schema);
 
         String hdfsPath = PathBuilder
-                .buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString() + "/" + schema;;
+                .buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString() + "/" + schema;
         try {
             log.info("Initialize period store " + hdfsPath);
             if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {

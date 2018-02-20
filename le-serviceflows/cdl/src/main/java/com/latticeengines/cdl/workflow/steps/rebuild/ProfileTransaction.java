@@ -63,7 +63,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private DataCollection.Version active;
     private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep;
     private Table rawTable, dailyTable, periodTable;
-    private Map<String, Product> productMap;
+    private Map<String, List<Product>> productMap;
 
     private String sortedDailyTablePrefix;
     private String sortedPeriodTablePrefix;
@@ -224,7 +224,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
     }
 
-    private TransformationStepConfig rollupProduct(Map<String, Product> productMap) {
+    private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PRODUCT_MAPPER);
         String tableSourceName = "CustomerUniverse";
@@ -262,6 +262,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(Collections.singletonList("Amount"));
+        // todo: add this to daily configuration to derive TransactionCount attribute
+//        config.setCountField(Collections.singletonList("Amount"));
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("Quantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
@@ -290,7 +292,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private TransformationStepConfig updateDailyStore() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(dayPeriodStep);
         inputSteps.add(dailyAgrStep);
         step.setInputSteps(inputSteps);
@@ -318,6 +320,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
+
+        // todo: add this to period configuration to derive TransactionCount attributes
+//        config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(
                 InterfaceName.AccountId.name(), //
@@ -342,7 +347,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private TransformationStepConfig updatePeriodStore() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
-        List<Integer> inputSteps = new ArrayList<Integer>();
+        List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(periodsStep);
         inputSteps.add(periodAgrStep);
         step.setInputSteps(inputSteps);
