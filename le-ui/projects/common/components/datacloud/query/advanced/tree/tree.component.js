@@ -263,7 +263,7 @@ angular
             }
 
             vm.addOperator = function(tree) {
-                var operator = tree.logicalRestriction.operator == 'AND' ? 'AND' : 'OR';
+                var operator = tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND';
 
                 this.root.saveState();
 
