@@ -46,7 +46,9 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private static final String STATS_CUBE = "StatsCube";
     private static final String TOPN_TREE = "TopNTree";
-    private static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
+
+    // has to be public because used in cache key
+    public static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
 
     private LocalCacheManager<String, List<ColumnMetadata>> columnMetadataCache = null;
     private LocalCacheManager<String, DataCloudVersion> latestDataCloudVersionCache;
@@ -110,12 +112,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataCloudVersionCacheName, key = "T(java.lang.String).format(\"" + KEY_PREFIX + "|%s|latest\", #compatibleVersion)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.DataCloudVersionCacheName, key = "T(java.lang.String).format(\"%s|%s|latest\", T(com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy).KEY_PREFIX, #compatibleVersion)", sync = true)
     public DataCloudVersion latestVersion(String compatibleVersion) {
         return requestLatestVersion(compatibleVersion);
     }
 
-    private List<ColumnMetadata> getAllColumns() {
+    public List<ColumnMetadata> getAllColumns() {
         return getAllColumns("");
     }
 
