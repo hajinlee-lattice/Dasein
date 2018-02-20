@@ -23,7 +23,7 @@ def bytes_to_int(bytes):
     return int(bytes[0])
 
 def int_to_bytes(value):
-    return value
+    return str(value)
 
 class DataScienceLauncher(object):
 
