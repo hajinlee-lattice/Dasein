@@ -142,7 +142,7 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
         }
     }
 
-    @DataProvider(name = "TestData", parallel = true)
+    @DataProvider(name = "TestData")
     private Object[][] testData() {
         Object[][] data = ArrayUtils.addAll(TEST_DATA_1, TEST_DATA_2);
         data = ArrayUtils.addAll(data, TEST_DATA_3);
