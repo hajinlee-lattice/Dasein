@@ -142,10 +142,10 @@ public class ScoringMapperPredictUtil {
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
-                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, true);
-                schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
                 cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
                         || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
+                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, true, cdl);
+                schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
             } else {
                 userDatumWriter = new SpecificDatumWriter<ScoreOutput>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
@@ -249,7 +249,7 @@ public class ScoringMapperPredictUtil {
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
-                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue);
+                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue, false);
                 schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
             } else {
                 userDatumWriter = new SpecificDatumWriter<ScoreOutput>();

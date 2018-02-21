@@ -22,7 +22,6 @@ import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.mapred.AvroKey;
 import org.apache.commons.codec.binary.Base64InputStream;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -145,12 +144,14 @@ public class ScoringMapperTransformUtil {
         DataFileWriter<GenericRecord> writer = null;
         DataFileWriter<GenericRecord> creator = null;
         String type = config.get(ScoringProperty.SCORE_INPUT_TYPE.name(), ScoringInputType.Json.name());
+        boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
+                true);
         while (context.nextKeyValue()) {
             Record record = context.getCurrentKey().datum();
             JsonNode jsonNode = mapper.readTree(record.toString());
 
             if (type.equals(ScoringInputType.Json.name())) {
-                if (CollectionUtils.isEmpty(modelGuids)) {
+                if (readModelIdFromRecord) {
                     recordNumber++;
                     String modelGuid = jsonNode.get(ScoringDaemonService.MODEL_GUID).asText();
                     transformAndWriteRecord(jsonNode, dataType, modelInfoMap, recordFileBufferMap, models,
@@ -167,8 +168,7 @@ public class ScoringMapperTransformUtil {
                     }
                 }
             } else {
-                boolean readModelIdFromRecord = config.getBoolean(ScoringProperty.READ_MODEL_ID_FROM_RECORD.name(),
-                        true);
+                
                 modelGuids.forEach(m -> {
                     modelInfoMap.putIfAbsent(UuidUtils.extractUuid(m), new ModelAndRecordInfo.ModelInfo(m, 0L));
                 });

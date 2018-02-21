@@ -54,7 +54,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
@@ -176,7 +175,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             configuration.setVersion(targetVersion);
             configuration.setKeepTemp(true);
 
-
             String earliestDate = DateTimeUtils.toDateOnlyFromMillis("1502755200000");
             createConsolidateSteps(steps, tableName1, tableName2, Boolean.TRUE, earliestDate);
             createProfileSteps(steps, Boolean.TRUE, earliestDate);
@@ -192,7 +190,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         }
     }
 
-    private void createConsolidateSteps(List<TransformationStepConfig> steps, String inputTable1, String inputTable2, Boolean rebuild, String earliestDate) {
+    private void createConsolidateSteps(List<TransformationStepConfig> steps, String inputTable1, String inputTable2,
+            Boolean rebuild, String earliestDate) {
         int startStep = steps.size();
 
         log.info("Consolidate start step " + startStep);
@@ -210,8 +209,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
 
             TransformationStepConfig inputMerge = mergeInputs(inputTable1, inputTable2);
             TransformationStepConfig daily = addTrxDate();
-            TransformationStepConfig dayPeriods  = collectDays(dailyStep);
-            TransformationStepConfig dailyPartition  = partitionDaily();
+            TransformationStepConfig dayPeriods = collectDays(dailyStep);
+            TransformationStepConfig dailyPartition = partitionDaily();
 
             steps.add(inputMerge);
             steps.add(daily);
@@ -219,16 +218,16 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             steps.add(dailyPartition);
             if (!rebuild) {
                 TransformationStepConfig dailyRaw = collectDailyData(earliestDate);
-                TransformationStepConfig productAgr  = rollupProduct();
+                TransformationStepConfig productAgr = rollupProduct();
                 TransformationStepConfig perioded = addPeriod();
-                TransformationStepConfig dailyAgr  = aggregateDaily();
-                TransformationStepConfig cleanDaily  = cleanupDailyHistory();
-                TransformationStepConfig updateDaily  = updateDailyStore();
-                TransformationStepConfig periods  = collectPeriods();
+                TransformationStepConfig dailyAgr = aggregateDaily();
+                TransformationStepConfig cleanDaily = cleanupDailyHistory();
+                TransformationStepConfig updateDaily = updateDailyStore();
+                TransformationStepConfig periods = collectPeriods();
                 TransformationStepConfig periodData = collectPeriodData(earliestDate);
-                TransformationStepConfig periodAgr  = aggregatePeriods(periodDataStep);
-                TransformationStepConfig cleanPeriod  = cleanupPeriodHistory();
-                TransformationStepConfig updatePeriod  = updatePeriodStore();
+                TransformationStepConfig periodAgr = aggregatePeriods(periodDataStep);
+                TransformationStepConfig cleanPeriod = cleanupPeriodHistory();
+                TransformationStepConfig updatePeriod = updatePeriodStore();
 
                 steps.add(dailyRaw);
                 steps.add(productAgr);
@@ -260,14 +259,14 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
                 dayPeriodStep = startIdx + 3;
                 periodAgrStep = startIdx + 5;
                 periodsStep = startIdx + 6;
-                TransformationStepConfig productAgr  = rollupProductRawTable();
+                TransformationStepConfig productAgr = rollupProductRawTable();
                 TransformationStepConfig perioded = addPeriod();
-                TransformationStepConfig dailyAgr  = aggregateDaily();
+                TransformationStepConfig dailyAgr = aggregateDaily();
                 TransformationStepConfig dayPeriods = collectDays(dailyAgrStep);
-                TransformationStepConfig updateDaily  = updateDailyStore();
-                TransformationStepConfig periodAgr  = aggregatePeriods(dailyAgrStep);
-                TransformationStepConfig periods  = collectPeriods();
-                TransformationStepConfig updatePeriod  = updatePeriodStore();
+                TransformationStepConfig updateDaily = updateDailyStore();
+                TransformationStepConfig periodAgr = aggregatePeriods(dailyAgrStep);
+                TransformationStepConfig periods = collectPeriods();
+                TransformationStepConfig updatePeriod = updatePeriodStore();
                 steps.add(productAgr);
                 steps.add(perioded);
                 steps.add(dailyAgr);
@@ -283,9 +282,10 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             TransformationStepConfig sortDaily = sort(customerSpace, dailyTable, SORTED_TABLE_PREFIX);
             TransformationStepConfig sortPeriod = sort(customerSpace, periodTable, SORTED_PERIOD_TABLE_PREFIX);
             /*
-            TransformationStepConfig aggregate = aggregate(customerSpace, MASTER_TABLE_PREFIX, dailyTable.getName(), //
-                    accountTable.getName(), productMap);
-            */
+             * TransformationStepConfig aggregate = aggregate(customerSpace,
+             * MASTER_TABLE_PREFIX, dailyTable.getName(), //
+             * accountTable.getName(), productMap);
+             */
             steps.add(sortDaily);
             steps.add(sortPeriod);
             // steps.add(aggregate);
@@ -335,7 +335,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
-
 
     private TransformationStepConfig collectDays(int inputStep) {
         TransformationStepConfig step2 = new TransformationStepConfig();
@@ -528,8 +527,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
-                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
-                InterfaceName.PeriodId.name()));
+                InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(), InterfaceName.PeriodId.name()));
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
@@ -589,8 +587,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
-                InterfaceName.TransactionDate.name(),
-                InterfaceName.PeriodId.name(),
+                InterfaceName.TransactionDate.name(), InterfaceName.PeriodId.name(),
                 InterfaceName.TransactionDayPeriod.name()));
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
@@ -636,10 +633,11 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     // private void verifyHistoryTable() {
-    //     String historyTableFullName = TableSource.getFullTableName(historyTableName1, targetVersion);
-    //     verifyRegisteredTable(historyTableFullName, productMap.size() * 3 + 1);
-    //      verifyRecordsInHistoryTable(historyTableFullName);
-    //  }
+    // String historyTableFullName =
+    // TableSource.getFullTableName(historyTableName1, targetVersion);
+    // verifyRegisteredTable(historyTableFullName, productMap.size() * 3 + 1);
+    // verifyRecordsInHistoryTable(historyTableFullName);
+    // }
 
     private void verifyRawRecords(Table table) {
         log.info("Start to verify records one by one.");
@@ -709,7 +707,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private void verifyRegisteredTable(Table table, int attrs) {
         Assert.assertNotNull(table);
         // List<Attribute> attributes = table.getAttributes();
-        // Assert.assertEquals(new Integer(attributes.size()), new Integer(attrs));
+        // Assert.assertEquals(new Integer(attributes.size()), new
+        // Integer(attrs));
     }
 
     @Override
@@ -792,7 +791,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     }
 
     private Product createProduct(String id, String name, String bundle, String productLine, String productFamily,
-                                  String productCategory) {
+            String productCategory) {
         Product product = new Product();
         product.setProductId(id);
         product.setProductName(name);
@@ -813,8 +812,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private Table buildPeriodStore(SchemaInterpretation schema) {
         Table table = SchemaRepository.instance().getSchema(schema);
 
-        String hdfsPath = PathBuilder
-                .buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString() + "/" + schema;
+        String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString()
+                + "/" + schema;
         try {
             log.info("Initialize period store " + hdfsPath);
             if (HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
@@ -843,7 +842,6 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         String tableDir = table.getExtracts().get(0).getPath();
         return AvroUtils.getDataFromGlob(yarnConfiguration, tableDir + "/*.avro");
     }
-
 
     private void uploadAndRegisterAccountTable() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();

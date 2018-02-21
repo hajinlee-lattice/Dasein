@@ -110,7 +110,7 @@ public class ScoringJobUtil {
         return jsonObj;
     }
 
-    public static Table createGenericOutputSchema(String uniqueKeyColumn, boolean hasRevenue) {
+    public static Table createGenericOutputSchema(String uniqueKeyColumn, boolean hasRevenue, boolean isCdl) {
         Table scoreResultTable = new Table();
         String tableName = "ScoreResult";
         scoreResultTable.setName(tableName);
@@ -150,13 +150,15 @@ public class ScoringJobUtil {
             Attribute normalized = createAttribute(ScoreResultField.NormalizedScore);
             attributes.add(normalized);
         }
-        Attribute predictedRevenue = createAttribute(ScoreResultField.PredictedRevenue);
-        attributes.add(predictedRevenue);
-        Attribute expectedRevenue = createAttribute(ScoreResultField.ExpectedRevenue);
-        attributes.add(expectedRevenue);
-        if (!hasRevenue) {
-            predictedRevenue.setNullable(Boolean.TRUE);
-            expectedRevenue.setNullable(Boolean.TRUE);
+        if (isCdl) {
+            Attribute predictedRevenue = createAttribute(ScoreResultField.PredictedRevenue);
+            attributes.add(predictedRevenue);
+            Attribute expectedRevenue = createAttribute(ScoreResultField.ExpectedRevenue);
+            attributes.add(expectedRevenue);
+            if (!hasRevenue) {
+                predictedRevenue.setNullable(Boolean.TRUE);
+                expectedRevenue.setNullable(Boolean.TRUE);
+            }
         }
 
         scoreResultTable.setAttributes(attributes);
@@ -174,7 +176,7 @@ public class ScoringJobUtil {
 
     public static void writeScoreResultToAvroRecord(DataFileWriter<GenericRecord> dataFileWriter,
             List<ScoreOutput> resultList, File outputFile, String uniqueKeyColumn) throws IOException {
-        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, false);
+        Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, false, false);
         Schema schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
 
         dataFileWriter.create(schema, outputFile);

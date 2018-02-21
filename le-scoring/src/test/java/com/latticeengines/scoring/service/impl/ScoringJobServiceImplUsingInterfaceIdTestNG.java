@@ -73,7 +73,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         scorePath = customerBaseDir + "/" + tenant + "/scoring/" + UUID.randomUUID() + "/scores";
         InputStream is = ClassLoader
                 .getSystemResourceAsStream("com/latticeengines/scoring/models/sampleModel/Hootsuite-lead-20160907-1516_2016-09-07_17-13_scored.txt");
-        List<String> lines = IOUtils.readLines(is);
+        List<String> lines = IOUtils.readLines(is, "UTF-8");
         for (String line : lines) {
             String[] arr = line.split(",");
             scores.put(arr[0], Double.valueOf(arr[1]));
@@ -88,6 +88,7 @@ public class ScoringJobServiceImplUsingInterfaceIdTestNG extends ScoringFunction
         scoringConfig.setTargetResultDir(scorePath);
         scoringConfig.setModelGuids(Arrays.<String> asList(new String[] { "ms__" + uuid + "-PLS_model" }));
         scoringConfig.setUniqueKeyColumn(InterfaceName.Id.name());
+        scoringConfig.setModelIdFromRecord(false);
         ApplicationId appId = scoringJobService.score(scoringConfig);
         waitForStatus(appId, FinalApplicationStatus.SUCCEEDED);
 
