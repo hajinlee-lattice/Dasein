@@ -8,8 +8,24 @@ import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
 public class RestrictionOptimizer {
+
+    public static void optimize(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery.getAccountRestriction() != null) {
+            Restriction restriction = frontEndQuery.getAccountRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getAccountRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+            }
+        }
+        if (frontEndQuery.getContactRestriction() != null) {
+            Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
+            if (restriction != null) {
+                frontEndQuery.getContactRestriction().setRestriction(RestrictionOptimizer.optimize(restriction));
+            }
+        }
+    }
 
     public static Restriction optimize(Restriction restriction) {
         if (restriction == null) {

@@ -1,11 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.common.exposed.util.NamingUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -72,7 +72,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         }
         int changedCount = 0;
         List<Attribute> attributes = accountTable.getAttributes();
-        List<String> internal = Arrays.asList(ModelingMetadata.INTERNAL_TAG);
+        List<String> internal = Collections.singletonList(ModelingMetadata.INTERNAL_TAG);
         for (Attribute attribute : attributes) {
             if (CollectionUtils.isEmpty(attribute.getTags()) || attribute.getTags().get(0).equals("")) {
                 attribute.setTags(internal);

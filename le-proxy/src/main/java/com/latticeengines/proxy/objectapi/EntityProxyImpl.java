@@ -82,7 +82,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
 
     @Override
     public Long getCount(String customerSpace, FrontEndQuery frontEndQuery) {
-        optimizeRestrictions(frontEndQuery);
+        RestrictionOptimizer.optimize(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
         return Long.valueOf(_entityProxy.getCountFromCache(customerSpace, frontEndQuery));
