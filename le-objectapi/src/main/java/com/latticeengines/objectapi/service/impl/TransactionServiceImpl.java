@@ -130,7 +130,7 @@ public class TransactionServiceImpl implements TransactionService {
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof BucketRestriction) {
                     BucketRestriction bucket = (BucketRestriction) object;
-                    if (!Boolean.TRUE.equals(bucket.getDeleted()) && isTransactionBucket(bucket)) {
+                    if (!Boolean.TRUE.equals(bucket.getIgnored()) && isTransactionBucket(bucket)) {
                         hasTxn.set(true);
                     }
                 }

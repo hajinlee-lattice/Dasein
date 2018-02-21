@@ -22,6 +22,7 @@ import org.springframework.util.StringUtils;
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -38,7 +39,6 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("cdlJobService")
 public class CDLJobServiceImpl implements CDLJobService {
@@ -115,7 +115,7 @@ public class CDLJobServiceImpl implements CDLJobService {
                 allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
                         LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
             } catch (Exception e) {
-                log.error("get 'allow auto schedule' value failed.", e);
+                log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
             }
             if(dataFeed != null && runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
                 int invokeHour = internalResourceRestApiProxy.getInvokeTime(CustomerSpace.parse(tenant.getId()));

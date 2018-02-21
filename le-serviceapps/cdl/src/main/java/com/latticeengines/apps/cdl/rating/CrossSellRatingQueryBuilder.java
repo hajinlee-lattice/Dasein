@@ -57,7 +57,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
             if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
                 Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
                 if (transaction.getNegate() && transaction.getTimeFilter().getRelation() != ComparisonType.EVER) {
-                    ((BucketRestriction) node).setDeleted(true);
+                    ((BucketRestriction) node).setIgnored(true);
                 }
             }
         });

@@ -31,19 +31,20 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("bkt")
     private Bucket bkt;
 
-    @JsonProperty("deleted")
-    private Boolean deleted;
+    @JsonProperty("ignored")
+    private Boolean ignored;
+
+    @JsonProperty("selected")
+    private Boolean selected;
 
     public BucketRestriction(BusinessEntity entity, String attrName, Bucket bkt) {
         this.attr = new AttributeLookup(entity, attrName);
         this.bkt = bkt;
-        this.deleted = false;
     }
 
     public BucketRestriction(AttributeLookup attr, Bucket bkt) {
         this.attr = attr;
         this.bkt = bkt;
-        this.deleted = false;
     }
 
     public BucketRestriction() {
@@ -65,6 +66,22 @@ public class BucketRestriction extends Restriction {
         this.bkt = bkt;
     }
 
+    public Boolean getIgnored() {
+        return ignored;
+    }
+
+    public void setIgnored(Boolean ignored) {
+        this.ignored = ignored;
+    }
+
+    public Boolean getSelected() {
+        return selected;
+    }
+
+    public void setSelected(Boolean selected) {
+        this.selected = selected;
+    }
+
     // to simplify UI json. other restrictions does not need this.
     @JsonProperty("attr")
     private String getAttrAsString() {
@@ -74,14 +91,6 @@ public class BucketRestriction extends Restriction {
     @JsonProperty("attr")
     private void setAttrViaString(String attr) {
         this.attr = AttributeLookup.fromString(attr);
-    }
-
-    public Boolean getDeleted() {
-        return deleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
-        this.deleted = deleted;
     }
 
     @Override

@@ -215,7 +215,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
         BucketRestriction txnRestriction = (BucketRestriction) getTxnRestriction(txn);
-        txnRestriction.setDeleted(true);
+        txnRestriction.setIgnored(true);
 
         Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
         Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();

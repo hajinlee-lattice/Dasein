@@ -1,16 +1,10 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
@@ -18,13 +12,26 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 public class RestrictionOptimizer {
 
     public static Restriction optimize(Restriction restriction) {
-        if (restriction == null || restriction instanceof BucketRestriction
-                || restriction instanceof ConcreteRestriction || restriction instanceof TransactionRestriction) {
+        if (restriction == null) {
+            return null;
+        } else if (restriction instanceof ConcreteRestriction || restriction instanceof TransactionRestriction) {
             return restriction;
+        } else if (restriction instanceof BucketRestriction) {
+            return optimizeBucketRestriction((BucketRestriction) restriction);
         } else if (restriction instanceof LogicalRestriction) {
             return optimizeLogicalRestriction((LogicalRestriction) restriction);
         } else {
-            throw new RuntimeException("Can only optimize logical, bucket, concrete and transaction restrictions");
+            throw new RuntimeException("Cannot optimize restriction of type " + restriction.getClass());
+        }
+    }
+
+    private static BucketRestriction optimizeBucketRestriction(BucketRestriction bucket) {
+        bucket.setSelected(null);
+        if (Boolean.TRUE.equals(bucket.getIgnored())) {
+            return null;
+        } else {
+            bucket.setIgnored(null);
+            return bucket;
         }
     }
 
@@ -37,7 +44,7 @@ public class RestrictionOptimizer {
         logicalRestriction.getRestrictions().forEach(restriction -> {
             if (restriction != null) {
                 Restriction flatRestriction;
-                if (restriction instanceof LogicalRestriction) {
+                if (restriction instanceof LogicalRestriction || restriction instanceof BucketRestriction) {
                     flatRestriction = optimize(restriction);
                 } else {
                     flatRestriction = restriction;

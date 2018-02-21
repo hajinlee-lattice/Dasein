@@ -4,7 +4,11 @@ import static com.latticeengines.query.exposed.translator.TranslatorUtils.genera
 
 import java.util.Collections;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -26,6 +30,8 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
 
 abstract class QueryTranslator {
+
+    private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
 
     QueryFactory queryFactory;
     AttributeRepository repository;
@@ -138,8 +144,9 @@ abstract class QueryTranslator {
                     BucketRestriction bucket = (BucketRestriction) object;
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
 
-                    if (Boolean.TRUE.equals(bucket.getDeleted())) {
+                    if (Boolean.TRUE.equals(bucket.getIgnored())) {
                         parent.getRestrictions().remove(bucket);
+                        log.warn("Ignored buckets should be filtered out by optimizer: " + JsonUtils.serialize(bucket));
                     } else {
                         Restriction converted = RestrictionUtils.convertBucketRestriction(bucket);
                         parent.getRestrictions().remove(bucket);
@@ -155,8 +162,10 @@ abstract class QueryTranslator {
             translated = restriction;
         } else if (restriction instanceof BucketRestriction) {
             BucketRestriction bucket = (BucketRestriction) restriction;
-            if (!Boolean.TRUE.equals(bucket.getDeleted())) {
+            if (!Boolean.TRUE.equals(bucket.getIgnored())) {
                 translated = RestrictionUtils.convertBucketRestriction(bucket);
+            } else {
+                log.warn("Ignored buckets should be filtered out by optimizer: " + JsonUtils.serialize(bucket));
             }
         } else if (restriction instanceof ConcreteRestriction) {
             translated = RestrictionUtils.convertConcreteRestriction((ConcreteRestriction) restriction);

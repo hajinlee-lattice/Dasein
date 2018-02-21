@@ -30,7 +30,11 @@ public class RestrictionOptimizerUnitTestNG {
     @Test(groups = "unit", dataProvider = "optimizeTestData")
     public void testOptimize(Restriction restriction, Restriction expected) {
         Restriction flatten = RestrictionOptimizer.optimize(restriction);
-        Assert.assertEquals(JsonUtils.serialize(flatten), JsonUtils.serialize(expected));
+        if (expected == null) {
+            Assert.assertNull(flatten);
+        } else {
+            Assert.assertEquals(JsonUtils.serialize(flatten), JsonUtils.serialize(expected));
+        }
     }
 
     @DataProvider(name = "optimizeTestData")
@@ -47,11 +51,31 @@ public class RestrictionOptimizerUnitTestNG {
         Restriction r4 = and(C1, or(A2), and(C3, or(C4, A5)));
         Restriction e4 = and(C1, A2, C3, or(C4, A5));
 
+        Restriction r5 = and(C5);
+        Restriction e5 = null;
+
+        Restriction r6 = and(C4, C5);
+        Restriction e6 = C4;
+
+        Restriction r7 = or(C4, C5);
+        Restriction e7 = C4;
+
+        Restriction r8 = or(C1, and(C5, or(C4, A5)));
+        Restriction e8 = or(C1, C4, A5);
+
+        Restriction r9 = and(C5, or(C4, A5));
+        Restriction e9 = or(C4, A5);
+
         return new Object[][] { //
                 { r1, e1 }, //
                 { r2, e2 }, //
                 { r3, e3 }, //
                 { r4, e4 }, //
+                { r5, e5 }, //
+                { r6, e6 }, //
+                { r7, e7 }, //
+                { r8, e8 }, //
+                { r9, e9 }, //
         };
     }
 
@@ -73,7 +97,11 @@ public class RestrictionOptimizerUnitTestNG {
     private static BucketRestriction bucket(BusinessEntity entity, int idx) {
         Bucket bucket = Bucket.valueBkt(String.valueOf(idx));
         AttributeLookup attrLookup = new AttributeLookup(entity, entity.name().substring(0, 1));
-        return new BucketRestriction(attrLookup, bucket);
+        BucketRestriction bucketRestriction = new BucketRestriction(attrLookup, bucket);
+        if (BusinessEntity.Contact.equals(entity) && idx == 5) {
+            bucketRestriction.setIgnored(true);
+        }
+        return bucketRestriction;
     }
 
     private static Restriction and(Restriction... restrictions) {

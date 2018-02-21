@@ -255,8 +255,8 @@ public class QueryTranslatorUnitTestNG {
                 new AttributeLookup(BusinessEntity.Account, "PD_DC_FEATURETERMCREATEAFREEWEB_E93595C308"),
                 Bucket.rangeBkt(1, 10));
 
-        b.setDeleted(true);
-        e.setDeleted(true);
+        b.setIgnored(true);
+        e.setIgnored(true);
 
         Restriction and = Restriction.builder().and(a, b).build();
         Restriction or = Restriction.builder().or(c, d).build();
