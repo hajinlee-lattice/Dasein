@@ -589,7 +589,7 @@ angular.module('lp.playbook')
         var deferred = $q.defer();
         $http({
             method: 'GET',
-            url: this.host + '/ratingengines' + (active ? '?status=ACTIVE' : ''),
+            url: this.host + '/ratingengines?type=RULE_BASED' + (active ? '&status=ACTIVE' : ''),
             headers: {
                 'Accept': 'application/json'
             }
