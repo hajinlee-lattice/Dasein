@@ -27,12 +27,13 @@ public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated 
     }
 
     @Test(groups = { "functional" })
-    public void create_calledWithParameters_assertQuotaIsCreated() {
+    public void create_calledWithParameters_assertQuotaIsCreated() throws Exception {
         setupSecurityContext(mainTestTenant);
         assertNull(this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID));
 
         this.quotaEntityMgr.create(QUOTA);
 
+        Thread.sleep(500); // wait for replication lag
         Quota quota = this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID);
         assertNotNull(quota);
         assertEquals(quota.getId(), TEST_QUOTA_ID);
@@ -48,24 +49,25 @@ public class QuotaEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated 
     }
     
     @Test(groups = {"functional" }, dependsOnMethods = { "createdQuotaInOneTenant_findQuotaInAnotherTenant_quotaCannotBeFound" })
-    public void update_calledWithParameters_assertQuotaIsUpdated() {
+    public void update_calledWithParameters_assertQuotaIsUpdated() throws Exception {
         setupSecurityContext(mainTestTenant);
 
         QUOTA.setPid(null);
         QUOTA.setBalance(BALANCE_1);
         this.quotaEntityMgr.updateQuotaByQuotaId(QUOTA, TEST_QUOTA_ID);
-        
+        Thread.sleep(500); // wait for replication lag
         Quota quota = this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID);
         assertNotNull(quota);
         assertEquals(quota.getBalance(), BALANCE_1);
     }
     
     @Test(groups = { "functional" }, dependsOnMethods = { "update_calledWithParameters_assertQuotaIsUpdated" })
-    public void delete_calledWithParameters_assertQuotaIsDeleted() {
+    public void delete_calledWithParameters_assertQuotaIsDeleted() throws Exception {
         Quota quota = this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID);
         assertNotNull(quota);
 
         this.quotaEntityMgr.deleteQuotaByQuotaId(TEST_QUOTA_ID);
+        Thread.sleep(500); // wait for replication lag
         assertNull(this.quotaEntityMgr.findQuotaByQuotaId(TEST_QUOTA_ID));
     }
 
