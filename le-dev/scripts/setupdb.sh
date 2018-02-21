@@ -20,7 +20,7 @@ UNAME=`uname`
 
 # delete existing ddl files
 printf "%s\n" "Removing ddl_*.sql files from WSHOME: ${WSHOME}"
-rm $WSHOME/ddl_*.sql
+rm ${WSHOME}/ddl_*.sql
 
 # Compile
 mvn -T6 -f $WSHOME/db-pom.xml -DskipTests clean install
