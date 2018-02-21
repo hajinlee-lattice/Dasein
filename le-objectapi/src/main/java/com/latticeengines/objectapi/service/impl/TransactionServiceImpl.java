@@ -66,7 +66,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public TimeFilterTranslator getTimeFilterTranslator(DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        initializetimeTranslatorCache();
+        initializeTimeTranslatorCache();
         return timeTranslatorCache.getWatcherCache() //
                 .get(String.format("%s|%s", customerSpace.getTenantId(), version.name()));
     }
@@ -147,7 +147,7 @@ public class TransactionServiceImpl implements TransactionService {
         return periodProxy.getPeriodStrategies(customerSpace.toString());
     }
 
-    private synchronized void initializetimeTranslatorCache() {
+    private synchronized void initializeTimeTranslatorCache() {
         if (timeTranslatorCache == null) {
             timeTranslatorCache = new LocalCacheManager<>( //
                     CacheName.TimeTranslatorCache, //
