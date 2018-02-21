@@ -156,7 +156,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
 
     private boolean cleanupTenantInDocumentStore(String tenantId, String table, String tenantIdCol) {
         log.info("Cleaning up test tenant " + tenantId + " in document store " + table + ":" + tenantIdCol);
-        docJdbcTemplate.execute("DELETE FROM `" + table + "` WHERE `" + tenantIdCol + "` = " + tenantId);
+        docJdbcTemplate.execute("DELETE FROM `" + table + "` WHERE `" + tenantIdCol + "` = '" + tenantId + "'");
         return true;
     }
 
