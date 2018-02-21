@@ -233,16 +233,30 @@ def bootstrap(environment, stackname, apps, profile, instances, tag, logdriver):
     print "Retrieve HAProxy IP from consul: %s" % ip
 
     threads = []
-    for app in apps.split(","):
-        alloc = ALLOCATION[app]
-        num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
-        num_tasks = instances if instances < num_tasks else num_tasks
-        thread = CreateServiceThread(environment, stackname, app, num_tasks, ip, profile, tag, logdriver)
-        thread.start()
-        threads.append(thread)
+    app_list = apps.split(",")
+    count = 0
+    while count < len(app_list):
+        batch_size = 0
+        while batch_size < 4 and count < len(app_list):
+            app = app_list[count]
+            alloc = ALLOCATION[app]
+            num_tasks = alloc['capacity'] if 'capacity' in alloc else 1
+            num_tasks = instances if instances < num_tasks else num_tasks
+            thread = CreateServiceThread(environment, stackname, app, num_tasks, ip, profile, tag, logdriver)
+            thread.start()
+            threads.append(thread)
 
-    for thread in threads:
-        thread.join(120)
+            count += 1
+            batch_size += 1
+        for thread in threads:
+            thread.join(120)
+        time.sleep(20)
+        threads = []
+
+    if len(threads) > 0:
+        for thread in threads:
+            thread.join(120)
+        time.sleep(20)
 
     print "HAProxy IP from consul: %s" % ip
 
@@ -361,7 +375,7 @@ def teardown(stackname, apps=None, completely=False):
     count = 0
     while count < len(app_list):
         batch_size = 0
-        while batch_size < 6 and count < len(app_list):
+        while batch_size < 4 and count < len(app_list):
             app = app_list[count]
             thread = DeleteServiceThread(stackname, app)
             thread.start()
