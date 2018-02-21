@@ -142,7 +142,7 @@ public class ScoringMapperPredictUtil {
             if (hasUniqueKey) {
                 userDatumWriter = new GenericDatumWriter<GenericRecord>();
                 dataFileWriter = new DataFileWriter(userDatumWriter);
-                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, hasRevenue);
+                Table scoreResultTable = ScoringJobUtil.createGenericOutputSchema(uniqueKeyColumn, true);
                 schema = TableUtils.createSchema(scoreResultTable.getName(), scoreResultTable);
                 cdl = uniqueKeyColumn.equals(InterfaceName.AnalyticPurchaseState_ID.name())
                         || uniqueKeyColumn.equals(InterfaceName.__Composite_Key__.name());
@@ -191,6 +191,8 @@ public class ScoringMapperPredictUtil {
             if (!hasRevenue) {
                 builder.set(ScoreResultField.NormalizedScore.name(),
                         createNormalizedScore(result.getRawScore(), normalizer));
+                builder.set(ScoreResultField.PredictedRevenue.name(), null);
+                builder.set(ScoreResultField.ExpectedRevenue.name(), null);
             } else {
                 double predictedRevenue = 0D;
                 if (revenues.get(key).size() > i) {
@@ -221,6 +223,7 @@ public class ScoringMapperPredictUtil {
         log.info("outputDir: " + outputPath);
 
         String uniqueKeyColumn = config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name());
+
         for (String uuid : uuidSet) {
             log.info("uuid is " + uuid);
             // key: leadID, value: list of raw scores for that lead
@@ -329,13 +332,8 @@ public class ScoringMapperPredictUtil {
                 recordId = new String(Hex.decodeHex(recordId.toCharArray()), "UTF-8");
             }
             Double rawScore = Double.parseDouble(splitLine[1]);
-            if (scores.containsKey(recordId)) {
-                scores.get(recordId).add(rawScore);
-            } else {
-                List<Double> scoreListWithRecordId = new ArrayList<Double>();
-                scoreListWithRecordId.add(rawScore);
-                scores.put(recordId, scoreListWithRecordId);
-            }
+            scores.putIfAbsent(recordId, new ArrayList<Double>());
+            scores.get(recordId).add(rawScore);
             if (splitLine.length == 3) {
                 generateRevenue(revenues, splitLine, recordId);
             }
@@ -346,13 +344,8 @@ public class ScoringMapperPredictUtil {
 
     private static void generateRevenue(Map<String, List<Double>> revenues, String[] splitLine, String recordId) {
         Double revenue = Double.parseDouble(splitLine[2]);
-        if (revenues.containsKey(recordId)) {
-            revenues.get(recordId).add(revenue);
-        } else {
-            List<Double> revenueListWithRecordId = new ArrayList<Double>();
-            revenueListWithRecordId.add(revenue);
-            revenues.put(recordId, revenueListWithRecordId);
-        }
+        revenues.putIfAbsent(recordId, new ArrayList<Double>());
+        revenues.get(recordId).add(revenue);
     }
 
     private static ScoreOutput getResult(String modelGuid, String leadId, JsonNode model, double score) {

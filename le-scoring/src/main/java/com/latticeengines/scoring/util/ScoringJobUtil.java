@@ -150,11 +150,13 @@ public class ScoringJobUtil {
             Attribute normalized = createAttribute(ScoreResultField.NormalizedScore);
             attributes.add(normalized);
         }
-        if (hasRevenue) {
-            Attribute predictedRevenue = createAttribute(ScoreResultField.PredictedRevenue);
-            attributes.add(predictedRevenue);
-            Attribute expectedRevenue = createAttribute(ScoreResultField.ExpectedRevenue);
-            attributes.add(expectedRevenue);
+        Attribute predictedRevenue = createAttribute(ScoreResultField.PredictedRevenue);
+        attributes.add(predictedRevenue);
+        Attribute expectedRevenue = createAttribute(ScoreResultField.ExpectedRevenue);
+        attributes.add(expectedRevenue);
+        if (!hasRevenue) {
+            predictedRevenue.setNullable(Boolean.TRUE);
+            expectedRevenue.setNullable(Boolean.TRUE);
         }
 
         scoreResultTable.setAttributes(attributes);
