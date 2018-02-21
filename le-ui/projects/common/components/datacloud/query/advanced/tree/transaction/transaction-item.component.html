@@ -1,17 +1,19 @@
-<!-- In time frame (Txn)-->
-<span class="query-section-item-value">
-    <span>in timeframe</span>
-    <!-- <strong>{{vm.getOperationValue('Date')}}</strong> -->
-</span>
+<div class="transaction-info-container">
+    <!-- In time frame (Txn)-->
+    <span class="query-section-item-value">
+        <span>in timeframe</span>
+        <strong>{{vm.getCmp('Time')}} {{vm.getValues('Time')}}</strong>
+    </span>
 
-<!-- Unit Purchased (Qty)-->
-<span class="query-section-item-value">
-    <span>units purchased</span>
-    <!-- <strong>{{vm.getOperationValue('Date')}}</strong> -->
-</span>
+    <!-- Unit Purchased (Qty)-->
+    <span class="query-section-item-value">
+        <span>units purchased</span>
+        <strong>{{vm.getCmp('Qty')}} {{vm.getValues('Qty')}}</strong>
+    </span>
 
-<!-- Amount Spent (Amt)-->
-<span class="query-section-item-value">
-    <span>amount spent</span>
-    <!-- <strong>{{vm.getOperationValue('Date')}}</strong> -->
-</span>
+    <!-- Amount Spent (Amt)-->
+    <span class="query-section-item-value">
+        <span>amount spent</span>
+        <strong>{{vm.getCmp('Amt')}} {{vm.getValues('Amt')}}</strong>
+    </span>
+</div>

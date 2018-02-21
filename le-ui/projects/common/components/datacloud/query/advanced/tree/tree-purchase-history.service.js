@@ -239,6 +239,37 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 }
             }
         }
+
+        this.getValues = function(bucketRestriction, type, subType){
+            if(type === 'TimeSeries' && bucketRestriction.bkt.Txn){
+                var txn = bucketRestriction.bkt.Txn;
+                switch(subType){
+                    case 'Time': {
+                        var tsTime = txn.Time;
+                        if(tsTime && tsTime.Vals){
+                            return tsTime.Vals;
+                        }
+                    }
+                    case 'Qty': {
+                        var qty = txn.Qty;
+                        if(qty && qty.Vals){
+                            return qty.Vals;
+                        }
+                    }
+                    case 'Amt': {
+                        var amt = txn.Amt;
+                        if(amt && amt.Vals){
+                            return amt.Vals;
+                        }
+                    }
+                    default: {
+                        return [];
+                    }
+                }
+            }else{
+                return [];
+            }
+        }
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             var txn = bucketRestriction.bkt.Txn;
@@ -282,7 +313,6 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         case 'Qty': {
                             var qty = txn.Qty;
                             if (qty && value !== undefined) {
-                                console.log('Changing value', value);
                                 qty.Vals[position] = value;
                             }
                             break;
@@ -319,7 +349,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         this.changeCmp = function (bucketRestriction, type, value, subType) {
             if (type === 'TimeSeries') {
                 var txn = bucketRestriction.bkt.Txn;
-                console.log('Change Cmp', value, subType);
+                // console.log('Change Cmp', value, subType);
                 if (txn) {
                     switch (subType) {
                         case 'Time': {
