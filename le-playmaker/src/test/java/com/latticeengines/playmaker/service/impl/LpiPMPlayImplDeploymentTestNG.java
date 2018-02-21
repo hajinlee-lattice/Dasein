@@ -15,8 +15,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -37,8 +35,6 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @Autowired
     private PlayProxy playProxy;
 
-    private Tenant tenant;
-
     private long accountCount;
 
     List<String> accountFields = Arrays.asList( //
@@ -57,10 +53,6 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenant();
-
-        tenant = testPlayCreationHelper.getTenant();
-
-        MultiTenantContext.setTenant(tenant);
 
         lpiPMPlayImpl = new LpiPMPlayImpl();
         lpiPMPlayImpl.setPlayProxy(playProxy);

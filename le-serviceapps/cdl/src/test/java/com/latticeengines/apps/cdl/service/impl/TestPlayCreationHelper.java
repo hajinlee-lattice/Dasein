@@ -1,9 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
@@ -11,13 +9,8 @@ import java.util.TreeMap;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.Cache;
-import org.springframework.cache.CacheManager;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -40,12 +33,10 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -71,10 +62,10 @@ public class TestPlayCreationHelper {
 
     @Inject
     private CDLTestDataService cdlTestDataService;
-   
+
     @Inject
     private EntityProxy entityProxy;
-    
+
     @Inject
     private RatingProxy ratingProxy;
 
@@ -92,7 +83,6 @@ public class TestPlayCreationHelper {
 
     public void setupTenant() {
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
-        setupSecurityContext(tenant);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
 
@@ -253,8 +243,8 @@ public class TestPlayCreationHelper {
     }
 
     private void populateBucketInfo(TreeMap<String, Map<String, Restriction>> bucketToRuleMap,
-                                    boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
-                                    BusinessEntity entity, String attrName, Object min, Object max) {
+            boolean createConcreteRestriction, RatingBucketName bucketName, String key, ComparisonType comparisonType,
+            BusinessEntity entity, String attrName, Object min, Object max) {
         Map<String, Restriction> bucketInfo = bucketToRuleMap.get(bucketName.name());
         if (bucketInfo == null) {
             bucketInfo = new HashMap<>();
@@ -274,18 +264,5 @@ public class TestPlayCreationHelper {
         }
 
         bucketInfo.put(key, info);
-    }
-
-    private void setupSecurityContext(Tenant t) {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(tenant.getId()).thenReturn(t.getId());
-        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
     }
 }

@@ -18,11 +18,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
 import com.latticeengines.pls.service.impl.TestPlayCreationHelper;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
@@ -40,8 +38,6 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
 
     @Autowired
     private EntityQueryGenerator entityQueryGenerator;
-
-    private Tenant tenant;
 
     private long accountCount;
 
@@ -62,10 +58,6 @@ public class LpiPMAccountExtensionImplDeploymentTestNG extends AbstractTestNGSpr
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenant();
         EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
-
-        tenant = testPlayCreationHelper.getTenant();
-
-        MultiTenantContext.setTenant(tenant);
 
         lpiPMAccountExtensionImpl = new LpiPMAccountExtensionImpl();
         lpiPMAccountExtensionImpl.setEntityProxy(entityProxy);

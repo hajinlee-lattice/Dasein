@@ -7,14 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.latticeengines.proxy.objectapi.EntityProxyImpl;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -36,14 +32,13 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
-import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.security.exposed.TicketAuthenticationToken;
+import com.latticeengines.proxy.objectapi.EntityProxyImpl;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -85,7 +80,6 @@ public class TestPlayCreationHelper {
 
     public void setupTenant() {
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
-        setupSecurityContext(tenant);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
         tenant = tenantEntityMgr.findByTenantId(tenantIdentifier);
@@ -312,18 +306,5 @@ public class TestPlayCreationHelper {
         }
 
         bucketInfo.put(key, info);
-    }
-
-    private void setupSecurityContext(Tenant t) {
-        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
-        TicketAuthenticationToken token = Mockito.mock(TicketAuthenticationToken.class);
-        Session session = Mockito.mock(Session.class);
-        Tenant tenant = Mockito.mock(Tenant.class);
-        Mockito.when(session.getTenant()).thenReturn(tenant);
-        Mockito.when(tenant.getId()).thenReturn(t.getId());
-        Mockito.when(tenant.getPid()).thenReturn(t.getPid());
-        Mockito.when(token.getSession()).thenReturn(session);
-        Mockito.when(securityContext.getAuthentication()).thenReturn(token);
-        SecurityContextHolder.setContext(securityContext);
     }
 }
