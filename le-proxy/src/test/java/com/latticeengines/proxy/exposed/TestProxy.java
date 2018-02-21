@@ -17,9 +17,6 @@ public class TestProxy extends BaseRestApiProxy implements TestInterface {
     public void testUrlExpansion() {
         String url = constructUrl("value?customer={customer}", "test");
         Assert.assertEquals(url, getHostport() + "/foo/baz/value?customer=test");
-
-        String home = System.getenv("HOME");
-        Assert.assertTrue(url.startsWith("http://" + home));
     }
 
     @Override
