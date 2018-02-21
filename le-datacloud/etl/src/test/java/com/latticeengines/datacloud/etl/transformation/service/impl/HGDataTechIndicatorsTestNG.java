@@ -29,6 +29,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TechIndicatorsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class HGDataTechIndicatorsTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
@@ -38,15 +39,15 @@ public class HGDataTechIndicatorsTestNG
     private final String SEGMENT_INDICATORS = "SegmentTechIndicators";
     private final String SUPPLIER_INDICATORS = "SupplierTechIndicators";
 
-    private final String TECH_SEG1 = "TechIndicator_1010Data";
-    private final String TECH_SEG2 = "TechIndicator_CommVault";
-    private final String TECH_SEG3 = "TechIndicator_AutonomyConnectedBackup";
-    private final String TECH_SEG4 = "TechIndicator_11";
+    private final String TECH_SEG1 = "TechIndicator_1010Data";  // single search key
+    private final String TECH_SEG2 = "TechIndicator_CommVault"; // multi search key
+    private final String TECH_SEG3 = "TechIndicator_AutonomyConnectedBackup";   // deprecated
+    private final String TECH_SEG4 = "TechIndicator_11"; // single search key
 
-    private final String TECH_SUPP1 = "TechIndicator_247Customer";
-    private final String TECH_SUPP2 = "TechIndicator_3M";
-    private final String TECH_SUPP3 = "TechIndicator_24_7";
-    private final String TECH_SUPP4 = "TechIndicator_ABB";
+    private final String TECH_SUPP1 = "TechIndicator_247Customer";  // single search key
+    private final String TECH_SUPP2 = "TechIndicator_3M";   // single search key
+    private final String TECH_SUPP3 = "TechIndicator_24_7"; // Deprecated
+    private final String TECH_SUPP4 = "TechIndicator_ABB"; // Deprecated
 
     private int HAS_SEG1_POS = -1;
     private int HAS_SEG2_POS = -1;
@@ -157,17 +158,37 @@ public class HGDataTechIndicatorsTestNG
         uploadBaseSourceData(hgClean.getSourceName(), baseSourceVersion, columns, hgCleanData);
     }
 
-    private Object[][] hgTechIndData = new Object[][] { //
-            { "google.com", "AAAAAAAAAAAAAAAAAAAAAAAAAAAACA",
-                    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg" }, //
-    };
+    private Object[][] preparePreviousHGTechIndData() {
+        Object[][] data = new Object[1][3];
+        data[0][0] = "google.com";
+        List<SourceColumn> srcCols = sourceColumnEntityMgr.getSourceColumns(source.getSourceName());
+        List<Integer> supplierTrueBits = new ArrayList<>();
+        List<Integer> segmentTrueBits = new ArrayList<>();
+        for (SourceColumn srcCol : srcCols) {
+            if (srcCol.getColumnName().equals(TECH_SEG3)) {
+                JsonNode args = JsonUtils.deserialize(srcCol.getArguments(), JsonNode.class);
+                segmentTrueBits.add(args.get("DecodeStrategy").get("BitPosition").asInt());
+            }
+            if (srcCol.getColumnName().equals(TECH_SUPP3)) {
+                JsonNode args = JsonUtils.deserialize(srcCol.getArguments(), JsonNode.class);
+                supplierTrueBits.add(args.get("DecodeStrategy").get("BitPosition").asInt());
+            }
+        }
+        try {
+            data[0][1] = BitCodecUtils.encode(supplierTrueBits.stream().mapToInt(i -> i).toArray());
+            data[0][2] = BitCodecUtils.encode(segmentTrueBits.stream().mapToInt(i -> i).toArray());
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to encode", e);
+        }
+        return data;
+    }
 
     private void prepareHGTechInd() {
         List<Pair<String, Class<?>>> columns = new ArrayList<>();
         columns.add(Pair.of("Domain", String.class));
         columns.add(Pair.of("SupplierTechIndicators", String.class));
         columns.add(Pair.of("SegmentTechIndicators", String.class));
-        uploadBaseSourceData(hgTechInd.getSourceName(), baseSourceVersion, columns, hgTechIndData);
+        uploadBaseSourceData(hgTechInd.getSourceName(), baseSourceVersion, columns, preparePreviousHGTechIndData());
     }
 
     @Override
