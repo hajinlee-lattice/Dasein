@@ -375,9 +375,7 @@ public class CheckpointService {
         Long executionId = createExecution(feedPid, workflowId);
         updateActiveExecution(feedPid, executionId);
 
-        Long workflowId2 = createFakeWorkflow(tenantPid);
-        Long profileId = creatProfile(feedPid, executionId, workflowId2);
-        updateActiveProfile(feedPid, profileId);
+        createFakeWorkflow(tenantPid);
     }
 
     private Long getTenantPid() {
@@ -415,18 +413,6 @@ public class CheckpointService {
         return pid;
     }
 
-    private Long creatProfile(long feedPid, long execId, long workflowPid) {
-        String sql = "INSERT INTO `DATAFEED_PROFILE` ";
-        sql += "(`FEED_EXEC_ID`, `WORKFLOW_ID`, `FK_FEED_ID`) VALUES ";
-        sql += String.format("(%d, %d, %d)", execId, workflowPid, feedPid);
-        jdbcTemplate.execute(sql);
-
-        sql = "SELECT `PID` FROM `DATAFEED_PROFILE` WHERE `FK_FEED_ID` = " + feedPid;
-        long pid = jdbcTemplate.queryForObject(sql, Long.class);
-        logger.info("Created a fake profile " + pid);
-        return pid;
-    }
-
     private Long getDataFeedPid(long tenantPid) {
         String sql = "SELECT `PID` FROM `DATAFEED` WHERE ";
         sql += String.format("`FK_TENANT_ID` = %d", tenantPid);
@@ -439,14 +425,6 @@ public class CheckpointService {
         sql += String.format("WHERE `PID` = %d", feedPid);
         jdbcTemplate.execute(sql);
         logger.info("Set execution " + executionId + " as active execution of data feed " + feedPid);
-    }
-
-    private void updateActiveProfile(Long feedPid, Long profileId) {
-        String sql = "UPDATE `DATAFEED` ";
-        sql += String.format("SET `ACTIVE_PROFILE` = %d ", profileId);
-        sql += String.format("WHERE `PID` = %d", feedPid);
-        jdbcTemplate.execute(sql);
-        logger.info("Set profile " + profileId + " as active profile of data feed " + feedPid);
     }
 
     void saveCheckPoint(String checkpoint) throws IOException {

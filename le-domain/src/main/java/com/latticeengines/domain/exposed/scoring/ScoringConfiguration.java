@@ -17,7 +17,7 @@ public class ScoringConfiguration {
 
     private String targetResultDir;
 
-    private Boolean useScorederivation;
+    private boolean useScorederivation;
 
     private List<String> modelGuids = new ArrayList<>();
 
@@ -98,7 +98,7 @@ public class ScoringConfiguration {
     }
 
     @JsonProperty("use_score_derivation")
-    public Boolean getUseScorederivation() {
+    public boolean getUseScorederivation() {
         return useScorederivation;
     }
 

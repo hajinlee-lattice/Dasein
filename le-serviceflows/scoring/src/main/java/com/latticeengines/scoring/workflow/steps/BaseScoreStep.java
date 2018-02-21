@@ -96,7 +96,8 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
         scoringConfig.setModelIdFromRecord(configuration.readModelIdFromRecord());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(), //
                 configuration.getCustomerSpace());
-        String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"), System.currentTimeMillis());
+        String tableName = String.format("ScoreResult_%s_%d", modelIds[0].replaceAll("-", "_"),
+                System.currentTimeMillis());
         scoringConfig.setTargetResultDir(targetPath.toString() + "/" + tableName);
         if (getScoringInputType() != null) {
             scoringConfig.setScoreInputType(getScoringInputType());

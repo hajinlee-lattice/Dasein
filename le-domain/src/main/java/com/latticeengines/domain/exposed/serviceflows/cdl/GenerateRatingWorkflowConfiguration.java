@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 
-
 public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private GenerateRatingWorkflowConfiguration() {
@@ -33,8 +32,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
-                    "processAnalyzeWorkflow");
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace, "processAnalyzeWorkflow");
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
