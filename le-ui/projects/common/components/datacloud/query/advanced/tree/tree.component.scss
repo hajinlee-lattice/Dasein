@@ -4,15 +4,16 @@
     @media only screen and (max-width: 1000px) {
         min-height: 80px;
     }
+    /**This is used when there are two buttons in the query builder edit item*/
 
     .edit-controllers{
         display: flex;
-        justify-content: space-around;
+        justify-content: flex-end;//space-around; When two buttons are in the qb editing mode
         height: 100%;
         align-items: center;
-        @media only screen and (max-width: 1000px) {
-            flex-direction: column;
-        }
+        // @media only screen and (max-width: 1000px) {
+        //     flex-direction: column;
+        // }
         .set,
         .unset {
             margin-top: -17px;

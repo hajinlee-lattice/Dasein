@@ -10,11 +10,7 @@ div.transaction-container {
     margin-left: 87px;
     margin-top: -22px;
     margin-bottom: 0px;
-    // min-width: 580px;
-    // border: 1px solid yellow;
     .transaction-row {
-        // min-height: $row-height;
-        // border: 1px solid green;
         display: flex;
         justify-content: flex-start;
 
@@ -27,7 +23,6 @@ div.transaction-container {
            select{
                min-width: 120px;
            }
-        //    border: 1px solid red;
        }
     }
 }
