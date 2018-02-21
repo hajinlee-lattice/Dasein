@@ -191,6 +191,8 @@ angular.module('lp.models.ratings', [
         vm.containerBox = vm.slidersContainer.getBoundingClientRect();
         vm.bucket = bucket;
         vm.index = index;
+
+        vm.bucket.isMoving = true;
         vm.canAddBucket = false;
         vm.showRemoveBucketText = false;
         vm.startingPosition = ev.clientX;
@@ -251,6 +253,8 @@ angular.module('lp.models.ratings', [
     function eleMouseUp(ev, index){
         ev.preventDefault();
         ev.stopPropagation();
+
+        vm.bucket.isMoving = false;
 
         if(vm.startingPosition != ev.clientX) {
             vm.bucket.right_bound_score = this.right;
