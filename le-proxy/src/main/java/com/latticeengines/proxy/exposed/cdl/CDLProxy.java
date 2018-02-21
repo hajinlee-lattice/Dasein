@@ -30,6 +30,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
 
     protected CDLProxy() {
         super("cdl");
+        setMaxAttempts(1);
     }
 
     @SuppressWarnings("unchecked")
