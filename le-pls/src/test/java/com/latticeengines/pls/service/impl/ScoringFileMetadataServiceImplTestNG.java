@@ -1,9 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -34,6 +34,7 @@ import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -59,7 +60,6 @@ import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
@@ -266,6 +266,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
 
         Tenant t = new Tenant();
         t.setId("t1");
+        t.setPid(-1L);
         MultiTenantContext.setTenant(t);
         Table table = scoringFileMetadataService.saveFieldMappingDocument("csvfilename", summary.getId(),
                 fieldMappingDocument);
@@ -285,6 +286,7 @@ public class ScoringFileMetadataServiceImplTestNG extends PlsFunctionalTestNGBas
 
         Tenant t = new Tenant();
         t.setId("tena");
+        t.setPid(-1L);
         MultiTenantContext.setTenant(t);
         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
         attr.setDisplayName("A");
