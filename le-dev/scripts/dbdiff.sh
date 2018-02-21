@@ -29,6 +29,6 @@ mysqldiff \
     --difftype=sql \
     ${DB}:${DB} > ${ENV}_diff.sql
 
-python ${WSHOME}/le-dev/scripts/combine_sql.py -b ${DB} -d ${ENV}_diff.sql -g ${WSHOME}/le-db/ddl_pls_multitenant_mysql5innodb.sql -o ${ENV}_upgrade.sql
+python ${WSHOME}/le-dev/scripts/combine_sql.py -b ${DB} -d ${ENV}_diff.sql -g ${WSHOME}/ddl_pls_multitenant_mysql5innodb.sql -o ${ENV}_upgrade.sql
 
 echo "upgrade script is generated at ${PWD}/${ENV}_upgrade.sql and ${PWD}/${ENV}_upgrade.sql.2"
