@@ -135,10 +135,13 @@ angular.module('lp.ratingsengine')
                 { 
                     label: 'Creation', 
                     state: 'segment.products.prioritization.training.creation', 
-                    nextLabel: 'Next',
+                    hideBack: true,
+                    secondaryLinkLabel: 'Go to Rating Engine List',
+                    secondaryLink: 'home.ratingsengine',
+                    lastRoute: true,
+                    nextLabel: 'Create another Rating Engine',
                     nextFn: function(nextState) {
-                        $state.go('home.ratingsengine.list.ratings');
-                        // RatingsEngineStore.nextSaveRatingEngine(nextState);
+                        $state.go('home.ratingsengine.ratingsenginetype');
                     } 
                 }
             ]

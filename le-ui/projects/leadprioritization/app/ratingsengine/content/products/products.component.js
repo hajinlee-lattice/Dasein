@@ -26,8 +26,6 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     vm.init = function () {
 
-        console.log(vm.productsSelected);
-
         RatingsEngineStore.setCachedProducts(vm.products);
 
         vm.filteredProducts = vm.products.slice(0, 10);

@@ -16,6 +16,7 @@ angular.module('pd.navigation.header', [
     $scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService,
     LoginService, NavUtility, JobsStore
 ) {
+
     $scope.ResourceUtility = ResourceUtility;
     $scope.jobs = JobsStore.data.jobs;
     $scope.importJobs = JobsStore.data.importJobs;
@@ -35,12 +36,17 @@ angular.module('pd.navigation.header', [
 
     FeatureFlagService.GetAllFlags().then(function(result) {
         var flags = FeatureFlagService.Flags();
+
+        if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
+            $scope.IsRatingEngine = true;
+        };
+
         $scope.showUserManagement = FeatureFlagService.FlagIsEnabled(flags.USER_MGMT_PAGE);
         $scope.showJobsPage = FeatureFlagService.FlagIsEnabled(flags.JOBS_PAGE);
     });
 
     var ClientSession = BrowserStorageUtility.getClientSession();
-    
+
     if (ClientSession != null) {
         var LoginDocument = BrowserStorageUtility.getLoginDocument();
         var Tenants = LoginDocument ? LoginDocument.Tenants : {};
@@ -69,7 +75,7 @@ angular.module('pd.navigation.header', [
             setPageTitle(toState.params);
         }
 
-        if (isModelDetailState(fromState.name) && ! isModelDetailState(toState.name)) {
+        if (isModelDetailState(fromState.name) && !isModelDetailState(toState.name)) {
             $scope.isModelDetailsPage = false;
         }
         
@@ -87,6 +93,7 @@ angular.module('pd.navigation.header', [
 
     function isModelDetailState(stateName) {
         var stateNameArr = stateName.split('.');
+
         if (stateNameArr[0] == 'home' && stateNameArr[1] == 'model') {
             return true;
         }

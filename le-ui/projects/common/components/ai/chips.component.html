@@ -12,6 +12,7 @@
             </div>
         </div>
     </div>
+
     <div 
         class="text-container dropdown" 
         ng-class="(showQueryList) ?'show-dropdown' : ''">
@@ -22,6 +23,7 @@
             ng-keyup="queryKeyPressed($event)" 
             ng-model="query" 
             ng-blur="blurText()"
+            ng-show="!isSelectionDone()"
             >
         <div 
             class="dropdown-content" 

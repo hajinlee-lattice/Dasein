@@ -26,6 +26,7 @@ angular.module('mainApp.appCommon.directives.chips', [])
             scope.displayName = scope.displayname;
             scope.queryItems = scope.datasource;
             scope.queryScope = scope.queryscope;
+            scope.isSelectionDone = false;
 
             scope.filterFunction = function(item) {
                 return item[scope.queryScope].toLowerCase().includes( scope.query.toLowerCase() ) ? true : false;
@@ -38,10 +39,12 @@ angular.module('mainApp.appCommon.directives.chips', [])
             }
 
             scope.isSelectionDone = function(){
-                if(Object.keys(scope.chips).length > 0){
-                    return true;
-                } else {
-                    return false;
+                if(scope.singleSelection){
+                    if(Object.keys(scope.chips).length > 0){
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
             }
 

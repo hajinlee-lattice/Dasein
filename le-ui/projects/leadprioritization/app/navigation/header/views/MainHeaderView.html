@@ -4,7 +4,11 @@
         <!-- <span class="ico ico-model ico-light-gray"></span> -->
         <ul class="secondary-nav-grid">
             <li ng-if="isModelDetailsPage && modelDisplayName" class="model-name-container" title="{{modelDisplayName}}">
-                <a ui-sref="home.models" ng-if="isModelDetailsPage" class="model-name">{{ modelDisplayName }}</a>
+
+                <a ui-sref="home.models" ng-if="isModelDetailsPage && !IsRatingEngine" class="model-name">{{ modelDisplayName }}</a>
+
+                <a ui-sref="home.ratingsengine" ng-if="isModelDetailsPage && IsRatingEngine" class="model-name">{{ modelDisplayName }}</a>
+
             </li>
             <li ng-if="headerBack" class="header-back-name-container" title="{{headerBack.displayName}}">
                 <a ui-sref="{{headerBack.sref}}" class="header-back-name">{{ headerBack.displayName }}</a>

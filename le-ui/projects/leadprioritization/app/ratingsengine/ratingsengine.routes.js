@@ -533,6 +533,7 @@ angular
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
                                     backState: 'home.ratingsengine',
+                                    secondaryLink: true,
                                     nextState: 'home.ratingsengine.dashboard'
                                 };
                             }

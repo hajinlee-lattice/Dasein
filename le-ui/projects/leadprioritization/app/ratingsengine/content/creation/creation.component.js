@@ -14,7 +14,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     vm.init = function() {
 
-    	// console.log(vm.ratingEngine);
+        vm.setValidation('creation', true);
 
     	var model = vm.ratingEngine.activeModel.AI;
 
@@ -99,6 +99,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         return product.ProductName;
     };
+
+    vm.setValidation = function (type, validated) {
+        RatingsEngineStore.setValidation(type, validated);
+    }
 
     vm.init();
 

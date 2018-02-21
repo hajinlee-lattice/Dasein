@@ -23,6 +23,10 @@ angular.module('common.wizard.controls', [])
         // console.log($state);
         vm.setButtons();
 
+        if(WizardControlsOptions.secondaryLink){
+            vm.secondaryLink = true;
+        };
+
         vm.items.forEach(function(item) {
             var key = vm.rootState + item.state;
             vm.itemMap[key] = item;
@@ -49,6 +53,10 @@ angular.module('common.wizard.controls', [])
             }
         }
 
+    }
+
+    vm.clickSecondary = function() {
+        $state.go(vm.item.secondaryLink);
     }
 
     vm.go = function(state, isPrev, params) {

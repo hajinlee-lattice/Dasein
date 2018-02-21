@@ -5,11 +5,16 @@
             type="button" 
             class="button white-button block-button"
             ng-click="vm.click(true)">
-          Back
+          {{vm.item.prevLabel || 'Back'}}
         </button>
     </div>
-    
     <div class="pull-right">
+        <button
+            ng-if="vm.secondaryLink && vm.item.lastRoute"
+            class="button white-button"
+            ng-click="vm.clickSecondary()">
+            {{vm.item.secondaryLinkLabel}}
+        </button>
         <button 
             ng-if="!vm.item.hideNext"
             type="button" 
