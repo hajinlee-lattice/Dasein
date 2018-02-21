@@ -15,6 +15,7 @@
         <!-- build:css app.css -->
         <link rel="stylesheet" type="text/css" href="../common/assets/css/font-awesome.min.css" />
         <link rel="stylesheet" type="text/css" href="assets/styles/production.css" />
+        <link rel="stylesheet" type="text/css" href="../common/assets/css/pickaday.css" />
         <!-- endbuild -->
 
     </head>
@@ -45,6 +46,7 @@
         <script src="/assets/vendor.min.js"></script>
         <script src="/assets/js/angulartics/angulartics.min.js"></script>
         <script src="/assets/js/angulartics/angulartics-mixpanel.js"></script>
+        <script src="/lib/bower/pikaday.js"></script>
 
         <!-- build:template:dist
         <script src="/assets/lattice.min.js"></script>
@@ -110,12 +112,15 @@
         <script src="/components/datacloud/query/results/targettabs.component.js"></script>
         <script src="/components/datacloud/query/builder/querybuilder.component.js"></script>
         <script src="/components/datacloud/query/advanced/advanced.component.js"></script>
-        <script src="/components/datacloud/query/advanced/tree/tree-item.component.js"></script>
-        <script src="/components/datacloud/query/advanced/tree/tree-item-edit.component.js"></script>
+        <script src="/components/datacloud/query/advanced/tree/item/tree-item.component.js"></script>
+        <script src="/components/datacloud/query/advanced/tree/edit/tree-item-edit.component.js"></script>
+        <script src="/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.js"></script>
+        <script src="/components/datacloud/query/advanced/tree/transaction/transaction-item.component.js"></script>
         <script src="/components/datacloud/query/advanced/tree/tree.component.js"></script>
         <script src="/components/datacloud/lookup/lookup.component.js"></script>
         <script src="/components/datacloud/lookup/lookup.service.js"></script>
 
+        <script src="/components/datacloud/query/advanced/tree/tree-purchase-history.service.js"></script>
         <script src="/components/datacloud/query/advanced/tree/tree.service.js"></script>
         <script src="/components/datacloud/query/advanced/input/input.component.js"></script>
         <script src="/components/datacloud/query/filter/queryfilter.component.js"></script>

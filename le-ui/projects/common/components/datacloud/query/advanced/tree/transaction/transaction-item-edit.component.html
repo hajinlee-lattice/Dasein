@@ -1,0 +1,72 @@
+<!-- In time frame (Txn)-->
+<div class="transaction-container">
+    <div class="query-section-item-operation transaction-row">
+        <div class="transaction-element-title">in timeframe</div>
+        <div class="transaction-element">
+            <select ng-model="vm.timeCmp" ng-change="vm.changeTimeCmp()">
+                <option ng-repeat="(key, value) in vm.cmpsList" value="{{value.name}}">{{value.displayName}}</option>
+            </select>
+        </div>
+
+        <!--  -->
+        <div class="transaction-element">
+            <input type="number" ng-if="vm.showQtyTimeframeFrom()" min="1">
+            <span ng-if="vm.showQtyTimeframeFrom() && vm.showQtyTimeframeTo()"> - </span>
+            <input type="number" ng-if="vm.showQtyTimeframeTo()" min="1">
+            <select ng-if="vm.showTimeframePeriod()" ng-model="vm.timeframePeriod" ng-change="vm.changeTimeFramePeriod()">
+                <option ng-repeat="(key, value) in vm.periodList" value="{{value.name}}">{{value.displayName}}</option>
+            </select>
+        </div>
+
+        <!--  -->
+        <div class="query-section-item-operation">
+            <input type="text" id="{{vm.getFromId()}}" ng-if="vm.showTimeFrom()">
+            <span ng-if="vm.showFrom() && vm.showTo()"> - </span>
+            <input type="text" id="{{vm.getToId()}}" ng-if="vm.showTimeTo()">
+        </div>
+    </div>
+
+    <!-- Units purchased  (Qty)-->
+    <div class="query-section-item-operation transaction-row">
+        <div class="transaction-element-title">units purchased</div>
+        <div class="transaction-element">
+            <select ng-model="vm.unitPurchasedCmp" ng-change="vm.changeCmp(vm.unitPurchasedCmp, 'Qty')">
+                <option ng-repeat="row in vm.unitPurchasedCmpChoises | orderBy: 'displayName'" value="{{row.name}}">{{row.displayName}}</option>
+            </select>
+        </div>
+        <div class="transaction-element">
+            <input type="number" 
+                    min="1" 
+                    ng-model="vm.values.qty1.val"
+                    ng-if="vm.showUnitFrom()"
+                    ng-change="vm.changeVal('qty1')">
+            <span ng-if="vm.showUnitFrom() && vm.showUnitTo()"> - </span>
+            <input type="number" min="1" 
+                    ng-if="vm.showUnitTo()" 
+                    ng-model="vm.values.qty2.val"
+                    ng-change="vm.changeVal('qty2')">
+        </div>
+    </div>
+
+    <!-- Amount Spent (Amt)-->
+    <div class="query-section-item-operation transaction-row">
+        <div class="transaction-element-title">amount spent</div>
+        <div class="transaction-element">
+            <select ng-model="vm.amtCmp" ng-change="vm.changeCmp(vm.amtCmp, 'Amt')">
+                <option ng-repeat="(key, value) in vm.amountSpentCmpChoises" value="{{value.name}}">{{value.displayName}}</option>
+            </select>
+        </div>
+        <div class="transaction-element">
+            <span ng-if="vm.showAmtFrom()"> $</span>
+            <input type="text" 
+                    ng-if="vm.showAmtFrom()"
+                    ng-model="vm.values.amt1.val"
+                    ng-change="vm.changeVal('amt1')">
+            <span ng-if="vm.showAmtFrom() && vm.showAmtTo()"> - $</span>
+            <input type="text"
+                    ng-if="vm.showAmtTo()"
+                    ng-model="vm.values.amt2.val"
+                    ng-change="vm.changeVal('amt2')">
+        </div>
+    </div>
+</div>

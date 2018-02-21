@@ -1,3 +1,25 @@
+.editing-container{
+    min-width: 560px;
+    min-height: 25px;
+    @media only screen and (max-width: 1000px) {
+        min-height: 80px;
+    }
+
+    .edit-controllers{
+        display: flex;
+        justify-content: space-around;
+        height: 100%;
+        align-items: center;
+        @media only screen and (max-width: 1000px) {
+            flex-direction: column;
+        }
+        .set,
+        .unset {
+            margin-top: -17px;
+            min-width: 70px;
+        }
+    }
+}
 div.advanced-query-builder {
     &, & * {
         -webkit-transition: none;
@@ -7,7 +29,6 @@ div.advanced-query-builder {
     }
             
     .query-helper-text-one {
-//         padding-left: 8px;
         margin-bottom: .5em;
         margin-left: 0.15em;
     }

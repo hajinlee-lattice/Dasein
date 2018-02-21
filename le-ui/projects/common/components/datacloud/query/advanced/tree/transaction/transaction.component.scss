@@ -1,0 +1,33 @@
+$columns-gap: 8px;
+$header-height: 50px;
+$row-height: 25px;
+$max-span: 12;
+$cell-padding:8px;
+$font-size:12px;
+
+div.transaction-container {
+
+    margin-left: 87px;
+    margin-top: -22px;
+    margin-bottom: 0px;
+    // min-width: 580px;
+    // border: 1px solid yellow;
+    .transaction-row {
+        // min-height: $row-height;
+        // border: 1px solid green;
+        display: flex;
+        justify-content: flex-start;
+
+        .transaction-element-title{
+            min-width: 100px;
+            font-weight: bold;
+        }
+       .transaction-element{
+           padding: 3px 0 3px 0;
+           select{
+               min-width: 120px;
+           }
+        //    border: 1px solid red;
+       }
+    }
+}

@@ -1,8 +1,10 @@
 angular
 .module('common.datacloud.query.builder.tree', [
-    'common.datacloud.query.builder.tree.service', 
+    'common.datacloud.query.builder.tree.service',
     'common.datacloud.query.builder.tree.info',
-    'common.datacloud.query.builder.tree.edit'
+    'common.datacloud.query.builder.tree.edit',
+    'common.datacloud.query.builder.tree.edit.transaction',
+    'common.datacloud.query.builder.tree.edit.transaction.edit'
 ])
 .directive('queryTreeDirective',function() {
     return {
@@ -65,9 +67,10 @@ angular
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
                             }
                         }
-
+                        // var tmp = vm.enrichmentsMap;
+                        // console.log(tmp);
                         vm.label = vm.tree.bucketRestriction.bkt.Lbl;
-                        vm.range = vm.tree.bucketRestriction.bkt.Vals;
+                        vm.range = QueryTreeService.getBktVals(vm.tree.bucketRestriction, vm.type)//vm.tree.bucketRestriction.bkt.Vals;
                     }
                 });
             }

@@ -1,4 +1,6 @@
-angular.module('common.datacloud.query.builder.tree.service', [])
+angular.module('common.datacloud.query.builder.tree.service', [
+    'common.datacloud.query.builder.tree.purchasehistory.service'
+])
     .service('QueryTreeService', function (
         $q, $http, QueryTreeAccountEntityService, QueryTreePurchaseHistoryService, QueryService
     ) {
@@ -184,8 +186,20 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             var service = getService(entity);
             return service.getAttributeRules(bkt, bucket, isSameAttribute);
         }
-        
-        this.isBucketUsed = function(bucket){
+
+        this.getValue = function(bucketRestriction, type, position, subType){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            return service.getValue(bucketRestriction, type, position, subType);
+        }
+
+        this.getBktVals = function (bucketRestriction, type) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            return service.getBktVals(bucketRestriction, type);
+        }
+
+        this.isBucketUsed = function (bucket) {
             var entity = getEntity(bucket);
             var service = getService(entity);
             return service.isBucketUsed(bucket);
@@ -262,9 +276,9 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
-        this.changeBktValsSize = function(bucketRestriction, value) {
+        this.changeBktValsSize = function (bucketRestriction, value) {
             if (QueryTreeService.two_inputs.indexOf(value) < 0 && bucketRestriction.bkt.Vals.length == 2) {
-                bucketRestriction.bkt.Vals.splice(1,1);
+                bucketRestriction.bkt.Vals.splice(1, 1);
             }
         }
 
@@ -278,6 +292,35 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
+        this.changeBktValue = function (bucketRestriction, type, value, position, subType) {
+            if (subType === undefined) {
+                this.changeBktValue(bucketRestriction, value, position);
+            } else {
+                var entity = getEntity(bucketRestriction);
+                var service = getService(entity);
+                service.changeBktValue(bucketRestriction, type, value, position, subType);
+            }
+        }
+
+        this.changeCmp = function (bucketRestriction, type, value, subType) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeCmp(bucketRestriction, type, value, subType);
+            } else {
+                console.warn(' changeNumericalCmpValue() Service not implemented');
+            }
+        }
+
+        this.changeTimeframePeriod = function (bucketRestriction, type, value) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeTimeframePeriod(bucketRestriction, type, value);
+            } else {
+                console.warn(' changeNumericalCmpValue() Service not implemented');
+            }
+        }
 
         this.getBktValue = function (bucketRestriction, position) {
             var entity = getEntity(bucketRestriction);
@@ -299,28 +342,28 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             }
         }
 
-        this.setPickerObject = function(attribute) {
+        this.setPickerObject = function (attribute) {
             this.picker_object = attribute;
         }
 
-        this.getPickerObject = function(attribute) {
+        this.getPickerObject = function (attribute) {
             return this.picker_object;
         }
 
-        this.getPickerCubeData = function(entity, fieldname) {
+        this.getPickerCubeData = function (entity, fieldname) {
             var deferred = $q.defer();
 
             $http({
                 method: 'GET',
                 url: '/pls/datacollection/statistics/attrs/' + entity + '/' + fieldname
-            }).then(function(result) {
+            }).then(function (result) {
                 deferred.resolve(result);
             });
 
             return deferred.promise;
         }
 
-        this.updateBucketCount = function(bucketRestriction) {
+        this.updateBucketCount = function (bucketRestriction) {
             var deferred = $q.defer();
 
             var segment = {
@@ -328,7 +371,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             };
 
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
-            if(this.treeMode === 'purchasehistory'){
+            if (this.treeMode === 'purchasehistory') {
                 this.treeMode = 'account';
             }
 
@@ -338,17 +381,50 @@ angular.module('common.datacloud.query.builder.tree.service', [])
                 }
             };
             QueryService.GetCountByQuery(
-                this.treeMode + 's', 
-                segment, 
+                this.treeMode + 's',
+                segment,
                 bucketRestriction.attr == this.prevBucketCountAttr
-            ).then(function(result) {
+            ).then(function (result) {
                 deferred.resolve(result);
             });
-            
+
             this.prevBucketCountAttr = bucketRestriction.attr;
 
             return deferred.promise;
         }
+
+
+        this.getCmp = function (bucketRestriction, type) {
+            console.log(bucketRestriction);
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getCmp(bucketRestriction, type);
+            } else {
+                console.warn(' getCmp() Service not implemented');
+            }
+        }
+
+        this.getCmp = function (bucketRestriction, type, subType) {
+            if (subType === undefined) {
+                return this.getCmp(bucketRestriction, type);
+            } else {
+                var entity = getEntity(bucketRestriction);
+                var service = getService(entity);
+                if (service) {
+                    return service.getCmp(bucketRestriction, type, subType);
+                } else {
+                    console.warn(' getCmp() Service not implemented');
+                }
+            }
+        }
+
+        this.getPeriodValue = function (bucketRestriction, type, subType) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            return service.getPeriodValue(bucketRestriction, type, subType);
+        }
+
     })
     .service('QueryTreeAccountEntityService', function () {
 
@@ -403,10 +479,10 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             var cmp = bucketRestriction.bkt.Cmp;
 
             switch (type) {
-                case 'Boolean': 
+                case 'Boolean':
                     return cmpMap[bucketRestriction.bkt.Vals[0] || ''];
 
-                case 'Numerical': 
+                case 'Numerical':
                     return cmpMap[cmp];
 
                 case 'Enum':
@@ -422,7 +498,7 @@ angular.module('common.datacloud.query.builder.tree.service', [])
 
                     return ret;
 
-                default: 
+                default:
                     return 'has a value of';
             }
         }
@@ -466,13 +542,19 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
                 isSameBucket = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp;
             }
-            
+
             return isSameAttribute && isSameBucket;
         }
 
-        this.isBucketUsed = function(bucket){
-             return typeof bucket.bkt.Id == "number";
+        this.isBucketUsed = function (bucket) {
+            return typeof bucket.bkt.Id == "number";
         }
+
+        this.getBktVals = function (bucketRestriction, type) {
+            return bucketRestriction.bkt.Vals;
+        }
+
+        this.getValue = function(bucketRestriction, type, position, subType){}
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
@@ -489,11 +571,17 @@ angular.module('common.datacloud.query.builder.tree.service', [])
             bucketRestriction.bkt.Vals[position] = value;
         }
 
+        this.changeBktValue = function (bucketRestriction, type, value, position, subType) { }
+
+        this.changeTimeframePeriod = function (bucketRestriction, type, value) {
+
+        }
+
         this.getBooleanModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Vals[0];
         }
         this.getEnumCmpModel = function (bucketRestriction) {
-            
+
             return bucketRestriction.bkt.Cmp;
         }
 
@@ -507,278 +595,487 @@ angular.module('common.datacloud.query.builder.tree.service', [])
 
         this.getCubeBktList = function (cube) {
             return cube.Bkts.List;
+        }
+
+        this.getCmp = function (bucketRestriction, type, subType) {
+            return '';
+        }
+
+        this.getPeriodValue = function (bucketRestriction, type, subtype) {
+            return '';
+        }
+
+        this.changeCmp = function (bucketRestriction, type, value, subType) {
+
         }
 
 
         //*******************************************************************/
 
-    })
-    .service('QueryTreePurchaseHistoryService', function () {
-
-        /**
-         * type is 'TimeSeries'
-         * How to identify 'Boolean':
-         * bkt: {
-         *      Txn:{
-         *          Negate: false/true
-         *          Time: {
-         *              Cmp: "EVER"
-         *              Period: "Day"
-         *              Vals: []
-         *          }
-         *      }
-         * }
-         * 
-         * ///////
-         * bkt: {
-         *      Txn:{
-         *          Qty: {
-         *              Cmp: "LESS_THAN"
-         *              Vals:[1]
-         *          }
-         *          Time:{
-         *              Cmp: ""
-         *              Period: "EVER"
-         *              Vals: []
-         *          }
-         *      }
-         * }
-         * ////
-         * bkt: {
-         *      Txn:{
-         *          Amt: {
-         *              Cmp: ""
-         *              Vals:[2]
-         *          }
-         *          Time:{
-         *              Cmp: ""
-         *              Period: "EVER"
-         *              Vals: []
-         *          }
-         *      }
-         * }
-         * How to identify 'Numerical'
-         * 
-         * How to identify 'Enum'
-         * 
-         * @param {*} bucketRestriction 
-         * @param {*} type 
-         * @param {*} typeToShow 
-         */
-        this.showType = function (bucketRestriction, type, typeToShow) {
-            // console.log(bucketRestriction, ' - TO SHOW: ', typeToShow, ' - TYPE: ', type);
-            if ('TimeSeries' === type) {
-
-                switch (typeToShow) {
-                    case 'Boolean': {
-                        var txn = bucketRestriction.bkt.Txn;
-                        if (txn.Negate != undefined) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-
-                    };
-                    case 'Date':{
-                        var time = bucketRestriction.bkt.Txn.Time;
-                        if (time != undefined) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-
-                    case 'Numerical': {
-                        return false;
-                    };
-
-                    case 'Enum': {
-                        return false;
-                    };
-                    default: return false;
-                }
-            }
-        }
-
-        this.showTo = function (bucketRestriction, two_inputs) {
-            if (two_inputs.indexOf(bucketRestriction.bkt.Cmp) >= 0) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        /**
-         * Return the operation label for and Account or Contacts Entity
-         * @param {*} cmpMap 
-         * @param {*} type 
-         * @param {*} bucketRestriction 
-         */
-        this.getOperationLabel = function (cmpMap, type, bucketRestriction) {
-            if (!bucketRestriction.bkt) {
-                return;
-            }
-
-            switch (type) {
-                case 'TimeSeries': {
-                    var txn = bucketRestriction.bkt.Txn;
-                    var cmp = '';
-                    if (txn.Negate !== undefined) {
-                        cmp = 'is';
-                    }
-                    else if (txn.Amt) {
-                        cmp = txn.Amt.Cmp;
-                    } else {
-                        cmp = txn.Time.Cmp;
-                    }
-                    // console.log('CMP', cmp);
-                    var ret = cmpMap[cmp];
-                    // console.log('RET', ret);
-                    return ret;
-                };
-                default: return 'has a value of';
-            }
-        }
-
-        function getBooleanValue(bucketRestriction) {
-            if (bucketRestriction.bkt.Txn) {
-                return !bucketRestriction.bkt.Txn.Negate;
-            } else {
-                return 'Empty';
-            }
-        }
-
-        function getDateValue(bucketRestriction){
-            var time = bucketRestriction.bkt.Txn.Time;
-            if(time !== undefined){
-                return 'Ever';
-                // return time.Period; This is the value that can be edited in the future
-            }else{
-                return 'Ever';
-            }
-        }
-
-        function getNumericalValue(bucketRestriction, position) {
-            return bucketRestriction.bkt.Vals[position];
-        }
-
-        function getEnumValues(bucketRestriction) {
-            return bucketRestriction.bkt.Vals;
-        }
-
-        this.getOperationValue = function (bucketRestriction, operatorType, position) {
-            // console.log('Operation Value', operatorType, position);
-            switch (operatorType) {
-                case 'Boolean': {
-                    return getBooleanValue(bucketRestriction);
-                };
-                case 'Date': {
-                    return getDateValue(bucketRestriction);
-                };
-                case 'Numerical': {
-                    return getNumericalValue(bucketRestriction, position);
-                };
-                case 'Enum': {
-                    return getEnumValues(bucketRestriction);
-                };
-                default: return 'Unknown';
-            }
-        }
-
-        this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
-            // console.log('PurchaseHistory');
-            var isSameBucket = true;
-            if (bucket && bucket.Txn) {
-                var qty1 = bucket.Txn.Qty;
-                var amt1 = bucket.Txn.Amt;
-                var qty2 = bkt.Txn.Qty;
-                var amt2 = bkt.Txn.Amt;
-
-                if (!qty1 && !amt1 && !qty2 && !qty2) {
-                    var txn1 = bucket.Txn;
-                    var txn2 = bkt.Txn;
-                    var neg1 = txn1.Negate;
-                    var neg2 = txn1.Negate;
-                    var lbl1 = bucket.Lbl;
-                    var lbl2 = bkt.Lbl;
-                    isSameBucket = neg1 == neg2 && lbl1 == lbl2;
-                }
-            } 
-            var r = isSameAttribute && isSameBucket;
-            return r;
-        }
-
-        this.isBucketUsed = function(bucket){
-            return typeof bucket.bkt.Id == "number";//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
-       }
-        //******************** Editing mode *********************************/
-        this.changeBooleanValue = function (bucketRestriction, booleanValue) {
-            var txn = bucketRestriction.bkt.Txn;
-            if (txn != undefined) {
-                if ('Yes' === booleanValue) {
-                    txn.Negate = false;
-                    bucketRestriction.bkt.Lbl = 'Yes';
-                } else if ('No' === booleanValue) {
-                    txn.Negate = true;
-                    bucketRestriction.bkt.Lbl = 'No';
-                } else {
-                    txn.Negate = null;
-                    bucketRestriction.bkt.Lbl = 'Undefined';
-                }
-
-            }
-        }
-        this.changeEnumCmpValue = function (bucketRestriction, value) {
-            bucketRestriction.bkt.Cmp = value;
-        }
-        this.changeNumericalCmpValue = function (bucketRestriction, value) {
-            bucketRestriction.bkt.Cmp = value;
-        }
-
-        this.changeBktValue = function (bucketRestriction, value, position) {
-            bucketRestriction.bkt.Vals[position] = value;
-        }
-
-        this.getBooleanModel = function (bucketRestriction) {
-            var txn = bucketRestriction.bkt.Txn;
-            if (txn.Negate != undefined) {
-                if (txn.Negate === true) {
-                    return 'No';
-                } if (txn.Negate === false) {
-                    return 'Yes';
-                }
-                return '';
-
-            } else {
-                console.warn('Buket restirction with Boolean Value not set');
-                return '?';
-            }
-        }
-
-        this.getEnumCmpModel = function (bucketRestriction) {
-            return bucketRestriction.bkt.Cmp;
-        }
-
-        this.getNumericalCmpModel = function (bucketRestriction) {
-            return bucketRestriction.bkt.Cmp;
-        }
-
-        this.getBktValue = function (bucketRestriction, position) {
-            var txn = bucketRestriction.bkt.Txn;
-            if (txn.Negate !== undefined) {
-                return (txn.Negate === true) ? 'No' : 'Yes';
-            }
-            if (txn.Qty) {
-                return txn.Qry.Vals[position];
-            }
-            if (txn.Amt) {
-                return txn.Amt.Vals[position];
-            }
-            return '';
-        }
-
-        this.getCubeBktList = function (cube) {
-            return cube.Bkts.List;
-        }
-
-
     });
+    // .service('QueryTreePurchaseHistoryService', function () {
+
+    //     /**
+    //      * type is 'TimeSeries'
+    //      * How to identify 'Boolean':
+    //      * bkt: {
+    //      *      Txn:{
+    //      *          Negate: false/true
+    //      *          Time: {
+    //      *              Cmp: "EVER"
+    //      *              Period: "Day"
+    //      *              Vals: []
+    //      *          }
+    //      *      }
+    //      * }
+    //      * 
+    //      * ///////
+    //      * bkt: {
+    //      *      Txn:{
+    //      *          Qty: {
+    //      *              Cmp: "LESS_THAN"
+    //      *              Vals:[1]
+    //      *          }
+    //      *          Time:{
+    //      *              Cmp: ""
+    //      *              Period: "EVER"
+    //      *              Vals: []
+    //      *          }
+    //      *      }
+    //      * }
+    //      * ////
+    //      * bkt: {
+    //      *      Txn:{
+    //      *          Amt: {
+    //      *              Cmp: ""
+    //      *              Vals:[2]
+    //      *          }
+    //      *          Time:{
+    //      *              Cmp: ""
+    //      *              Period: "EVER"
+    //      *              Vals: []
+    //      *          }
+    //      *      }
+    //      * }
+    //      * How to identify 'Numerical'
+    //      * 
+    //      * How to identify 'Enum'
+    //      * 
+    //      * @param {*} bucketRestriction 
+    //      * @param {*} type 
+    //      * @param {*} typeToShow 
+    //      */
+    //     this.showType = function (bucketRestriction, type, typeToShow) {
+    //         // console.log(bucketRestriction, ' - TO SHOW: ', typeToShow, ' - TYPE: ', type);
+    //         if ('TimeSeries' === type) {
+
+    //             switch (typeToShow) {
+    //                 case 'Boolean': {
+    //                     var txn = bucketRestriction.bkt.Txn;
+    //                     if (txn.Negate != undefined) {
+    //                         return true;
+    //                     } else {
+    //                         return false;
+    //                     }
+
+    //                 };
+    //                 case 'Date':
+    //                 case 'Numerical':
+    //                 case 'Enum': {
+    //                     return false;
+    //                 }
+    //                 case 'Transaction': {
+    //                     return true;
+    //                 }
+    //                 default: return false;
+    //             }
+    //         }
+    //     }
+
+    //     this.showTo = function (bucketRestriction, two_inputs) {
+    //         if (two_inputs.indexOf(bucketRestriction.bkt.Cmp) >= 0) {
+    //             return true;
+    //         } else {
+    //             return false;
+    //         }
+    //     }
+    //     /**
+    //      * Return the operation label for and Account or Contacts Entity
+    //      * @param {*} cmpMap 
+    //      * @param {*} type 
+    //      * @param {*} bucketRestriction 
+    //      */
+    //     this.getOperationLabel = function (cmpMap, type, bucketRestriction) {
+    //         if (!bucketRestriction.bkt) {
+    //             return;
+    //         }
+
+    //         switch (type) {
+    //             case 'TimeSeries': {
+    //                 var txn = bucketRestriction.bkt.Txn;
+    //                 var cmp = '';
+    //                 if (txn.Negate !== undefined) {
+    //                     cmp = 'is';
+    //                 }
+    //                 else if (txn.Amt) {
+    //                     cmp = txn.Amt.Cmp;
+    //                 } else {
+    //                     cmp = txn.Time.Cmp;
+    //                 }
+    //                 // console.log('CMP', cmp);
+    //                 var ret = cmpMap[cmp];
+    //                 // console.log('RET', ret);
+    //                 return ret;
+    //             };
+    //             default: return 'has a value of';
+    //         }
+    //     }
+
+    //     function getBooleanValue(bucketRestriction) {
+    //         if (bucketRestriction.bkt.Txn) {
+    //             return !bucketRestriction.bkt.Txn.Negate;
+    //         } else {
+    //             return 'Empty';
+    //         }
+    //     }
+
+    //     function getDateValue(bucketRestriction) {
+    //         var time = bucketRestriction.bkt.Txn.Time;
+    //         if (time !== undefined) {
+    //             return 'Ever';
+    //             // return time.Period; This is the value that can be edited in the future
+    //         } else {
+    //             return 'Ever';
+    //         }
+    //     }
+
+    //     function getNumericalValue(bucketRestriction, position) {
+    //         return bucketRestriction.bkt.Vals[position];
+    //     }
+
+    //     function getEnumValues(bucketRestriction) {
+    //         return bucketRestriction.bkt.Vals;
+    //     }
+
+    //     this.getOperationValue = function (bucketRestriction, operatorType, position) {
+    //         // console.log('Operation Value', operatorType, position);
+    //         switch (operatorType) {
+    //             case 'Boolean': {
+    //                 return getBooleanValue(bucketRestriction);
+    //             };
+    //             case 'Date': {
+    //                 return getDateValue(bucketRestriction);
+    //             };
+    //             case 'Numerical': {
+    //                 return getNumericalValue(bucketRestriction, position);
+    //             };
+    //             case 'Enum': {
+    //                 return getEnumValues(bucketRestriction);
+    //             };
+    //             default: return 'Unknown';
+    //         }
+    //     }
+
+    //     this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
+    //         // console.log('PurchaseHistory');
+    //         var isSameBucket = true;
+    //         if (bucket && bucket.Txn) {
+    //             var qty1 = bucket.Txn.Qty;
+    //             var amt1 = bucket.Txn.Amt;
+    //             var qty2 = bkt.Txn.Qty;
+    //             var amt2 = bkt.Txn.Amt;
+
+    //             if (!qty1 && !amt1 && !qty2 && !qty2) {
+    //                 var txn1 = bucket.Txn;
+    //                 var txn2 = bkt.Txn;
+    //                 var neg1 = txn1.Negate;
+    //                 var neg2 = txn1.Negate;
+    //                 var lbl1 = bucket.Lbl;
+    //                 var lbl2 = bkt.Lbl;
+    //                 isSameBucket = neg1 == neg2 && lbl1 == lbl2;
+    //             }
+    //         }
+    //         var r = isSameAttribute && isSameBucket;
+    //         return r;
+    //     }
+
+    //     this.isBucketUsed = function (bucket) {
+    //         return typeof bucket.bkt.Id == "number";//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
+    //     }
+
+    //     /**
+    //      * type: TimeSeries
+    //      * @param {*} bucketRestriction 
+    //      * @param {*} type 
+    //      */
+    //     this.getBktVals = function (bucketRestriction, type) {
+    //         if (bucketRestriction.bkt.Txn) {
+    //             var txn = bucketRestriction.bkt.Txn;
+    //             switch (type) {
+    //                 case 'TimeSeries': {
+    //                     var val = getBooleanValue(bucketRestriction);
+    //                     var vals = [val];
+    //                     return vals;
+    //                 }
+    //                 default: {
+    //                     return [];
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     this.getValue = function(bucketRestriction, type, position, subType){
+    //         if(type === 'TimeSeries' && bucketRestriction.bkt.Txn){
+    //             var txn = bucketRestriction.bkt.Txn;
+    //             switch(subType){
+    //                 case 'Time': {
+    //                     var tsTime = txn.Time;
+    //                     if(tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1){
+    //                         return tsTime.Vals[position];
+    //                     }
+    //                 }
+    //                 case 'Qty': {
+    //                     var qty = txn.Qty;
+    //                     if(qty && qty.Vals && position <= qty.Vals.length - 1){
+    //                         return qty.Vals[position];
+    //                     }
+    //                 }
+    //                 case 'Amt': {
+    //                     var amt = txn.Amt;
+    //                     if(amt && amt.Vals && position <= amt.Vals.length - 1){
+    //                         return amt.Vals[position];
+    //                     }
+    //                 }
+
+    //                 default: {
+    //                     return 0;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     //******************** Editing mode *********************************/
+    //     this.changeBooleanValue = function (bucketRestriction, booleanValue) {
+    //         var txn = bucketRestriction.bkt.Txn;
+    //         if (txn != undefined) {
+    //             if ('Yes' === booleanValue) {
+    //                 txn.Negate = false;
+    //                 bucketRestriction.bkt.Lbl = 'Yes';
+    //             } else if ('No' === booleanValue) {
+    //                 txn.Negate = true;
+    //                 bucketRestriction.bkt.Lbl = 'No';
+    //             } else {
+    //                 txn.Negate = null;
+    //                 bucketRestriction.bkt.Lbl = 'Undefined';
+    //             }
+
+    //         }
+    //     }
+    //     this.changeEnumCmpValue = function (bucketRestriction, value) {
+    //         bucketRestriction.bkt.Cmp = value;
+    //     }
+    //     this.changeNumericalCmpValue = function (bucketRestriction, value) {
+    //         bucketRestriction.bkt.Cmp = value;
+    //     }
+
+    //     this.changeBktValue = function (bucketRestriction, value, position) {
+    //         bucketRestriction.bkt.Vals[position] = value;
+    //     }
+
+    //     this.changeBktValue = function (bucketRestriction, type, value, position, subType) {
+    //         if (type === 'TimeSeries') {
+    //             var txn = bucketRestriction.bkt.Txn;
+    //             if (txn) {
+    //                 switch (subType) {
+    //                     case 'Time': {
+    //                         var tsTime = txn.Time;
+    //                         if (tsTime && value !== undefined) {
+    //                             tsTime.Vals[position] = value;
+    //                         }
+    //                         break;
+    //                     }
+    //                     case 'Qty': {
+    //                         var qty = txn.Qty;
+    //                         if (qty && value !== undefined) {
+    //                             console.log('Changing value', value);
+    //                             qty.Vals[position] = value;
+    //                         }
+    //                         break;
+    //                     }
+    //                     case 'Amt': {
+    //                         var amt = txn.Amt;
+    //                         if (amt && value !== undefined) {
+    //                             amt.Vals[position] = value;
+    //                         }
+    //                         break;
+    //                     }
+    //                 }
+
+    //             }
+    //         }
+    //     }
+
+    //     this.changeTimeframePeriod = function (bucketRestriction, type, value) {
+    //         switch (type) {
+    //             case 'TimeSeries': {
+    //                 var txn = bucketRestriction.bkt.Txn;
+    //                 if (txn) {
+    //                     var tsTime = txn.Time;
+    //                     if (tsTime) {
+    //                         tsTime.Period = value;
+    //                     }
+    //                 }
+    //             };
+
+    //             // default: return '';
+    //         }
+    //     }
+
+    //     this.changeCmp = function (bucketRestriction, type, value, subType) {
+    //         if (type === 'TimeSeries') {
+    //             var txn = bucketRestriction.bkt.Txn;
+    //             console.log('Change Cmp', value, subType);
+    //             if (txn) {
+    //                 switch (subType) {
+    //                     case 'Time': {
+    //                         var tsTime = txn.Time;
+    //                         if (tsTime) {
+    //                             tsTime.Cmp = value;
+    //                         } else {
+    //                             txn[subType] = {
+    //                                 Cmp: value,
+    //                                 Period: "Month",
+    //                                 Vals: []
+    //                             };
+    //                         }
+    //                         break;
+    //                     }
+    //                     case 'Qty': {
+    //                         var qty = txn.Qty;
+    //                         if (qty) {
+    //                             qty.Cmp = value;
+    //                         } else {
+    //                             txn[subType] = {
+    //                                 Cmp: value,
+    //                                 Vals: []
+    //                             };
+    //                         }
+    //                         break;
+    //                     }
+    //                     case 'Amt': {
+    //                         var amt = txn.Amt;
+    //                         if (amt) {
+    //                             amt.Cmp = value;
+    //                         } else {
+    //                             txn[subType] = {
+    //                                 Cmp: value,
+    //                                 Vals: []
+    //                             };
+    //                         }
+    //                         break;
+    //                     }
+    //                 }
+
+    //             }
+    //         }
+    //     }
+
+    //     this.getBooleanModel = function (bucketRestriction) {
+    //         var txn = bucketRestriction.bkt.Txn;
+    //         if (txn.Negate != undefined) {
+    //             if (txn.Negate === true) {
+    //                 return 'No';
+    //             } if (txn.Negate === false) {
+    //                 return 'Yes';
+    //             }
+    //             return '';
+
+    //         } else {
+    //             console.warn('Buket restirction with Boolean Value not set');
+    //             return '?';
+    //         }
+    //     }
+
+    //     this.getEnumCmpModel = function (bucketRestriction) {
+    //         return bucketRestriction.bkt.Cmp;
+    //     }
+
+    //     this.getNumericalCmpModel = function (bucketRestriction) {
+    //         return bucketRestriction.bkt.Cmp;
+    //     }
+
+    //     this.getBktValue = function (bucketRestriction, position) {
+    //         var txn = bucketRestriction.bkt.Txn;
+    //         if (txn.Negate !== undefined) {
+    //             return (txn.Negate === true) ? 'No' : 'Yes';
+    //         }
+    //         if (txn.Qty) {
+    //             return txn.Qry.Vals[position];
+    //         }
+    //         if (txn.Amt) {
+    //             return txn.Amt.Vals[position];
+    //         }
+    //         return '';
+    //     }
+
+    //     this.getCubeBktList = function (cube) {
+    //         return cube.Bkts.List;
+    //     }
+
+    //     function getTransacionCmp(bucketRestriction) {
+    //         if (bucketRestriction && bucketRestriction.bkt && bucketRestriction.bkt.Txn && bucketRestriction.bkt.Txn.Time) {
+    //             return bucketRestriction.bkt.Txn.Time.Cmp;
+    //         } else {
+    //             console.warn('Transaction attribute does not contain Cmp')
+    //             return '';
+    //         }
+    //     }
+
+    //     this.getCmp = function (bucketRestriction, type) {
+    //         // console.log('TYPE', type);
+    //         switch (type) {
+    //             case 'TimeSeries': {
+    //                 return getTransacionCmp(bucketRestriction);
+    //             };
+
+    //             default: return '';
+    //         }
+    //     }
+
+    //     this.getCmp = function (bucketRestriction, type, subType) {
+    //         switch (type) {
+    //             case 'TimeSeries': {
+    //                 if (bucketRestriction.bkt.Txn !== undefined) {
+    //                     var txn = bucketRestriction.bkt.Txn;
+    //                     if (subType === 'Time' && txn !== undefined) {
+    //                         return txn.Time.Cmp;
+    //                     }
+    //                     if (subType === 'Qty' && txn.Qty !== undefined) {
+    //                         return txn.Qty.Cmp;
+    //                     }
+    //                     if (subType === 'Amt' && txn.Amt !== undefined) {
+    //                         return txn.Amt.Cmp;
+    //                     }
+    //                     return '';
+    //                 } else {
+    //                     console.warn('TimeSeries does not have Txn object');
+    //                 }
+    //             };
+    //             default: return '';
+    //         }
+    //     }
+
+    //     this.getPeriodValue = function (bucketRestriction, type, subType) {
+    //         if (type === 'TimeSeries' && subType !== undefined) {
+    //             var txn = bucketRestriction.bkt.Txn;
+    //             switch (subType) {
+    //                 case 'Time': {
+    //                     return txn.Time.Period;
+    //                 }
+    //                 default:
+    //                     return '';
+    //             }
+    //         } else {
+    //             return '';
+    //         }
+    //     }
+    // });
