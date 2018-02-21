@@ -21,9 +21,11 @@
                 <dd>{{ vm.prioritizeBy }}</dd>
 
                 <dt 
-                    ng-if="vm.modelingConfigFilters !== {} && vm.trainingSegment !== null && vm.trainingProducts.length !== 0">Rating Engine Settings:</dt>
+                    ng-if="vm.modelingConfigFilters !== {} || vm.trainingSegment !== null || vm.trainingProducts.length !== 0"
+                    class="creation-settings">Rating Engine Settings:</dt>
                 <dd
-                    ng-if="vm.modelingConfigFilters !== {} && vm.trainingSegment !== null && vm.trainingProducts.length !== 0">
+                    ng-if="vm.modelingConfigFilters !== {} || vm.trainingSegment !== null || vm.trainingProducts.length !== 0"
+                    class="creation-settings">
                     <ul>
                         <li 
                             ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">
