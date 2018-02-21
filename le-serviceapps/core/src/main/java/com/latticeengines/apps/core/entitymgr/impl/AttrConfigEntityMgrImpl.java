@@ -1,6 +1,10 @@
 package com.latticeengines.apps.core.entitymgr.impl;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -19,8 +23,10 @@ import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.documentdb.entitymgr.impl.BaseDocumentEntityMgrImpl;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 
 @Component("attrConfigEntityMgr")
 public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfigEntity> implements AttrConfigEntityMgr {
@@ -37,17 +43,27 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
-        repository.removeByTenantIdAndEntity(tenantId, entity);
+    public List<AttrConfigEntity> save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
+        List<AttrConfigEntity> existing = repository.findByTenantIdAndEntity(tenantId, entity);
+        Map<String, AttrConfigEntity> existingMap = new HashMap<>();
+        existing.forEach(config -> existingMap.put(config.getMetadata().getAttrName(), config));
+        List<AttrConfigEntity> toCreateOrUpdate = new ArrayList<>();
         List<ColumnMetadata> cms = attrConfigs.stream().map(this::toColumnMetadata).collect(Collectors.toList());
         for (ColumnMetadata cm: cms) {
-            AttrConfigEntity attrConfigEntity = new AttrConfigEntity();
-            attrConfigEntity.setTenantId(tenantId);
-            attrConfigEntity.setEntity(entity);
-            attrConfigEntity.setUuid(UUID.randomUUID().toString());
+            String attrName = cm.getAttrName();
+            AttrConfigEntity attrConfigEntity;
+            if (existingMap.containsKey(attrName)) {
+                attrConfigEntity = existingMap.get(attrName);
+            } else {
+                attrConfigEntity = new AttrConfigEntity();
+                attrConfigEntity.setUuid(UUID.randomUUID().toString());
+                attrConfigEntity.setTenantId(tenantId);
+                attrConfigEntity.setEntity(entity);
+            }
             attrConfigEntity.setMetadata(cm);
-            repository.save(attrConfigEntity);
+            toCreateOrUpdate.add(attrConfigEntity);
         }
+        return repository.saveAll(toCreateOrUpdate);
     }
 
 
@@ -76,9 +92,8 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
 
     private AttrConfig toAttrConfig(ColumnMetadata cm) {
         AttrConfig attrConfig = new AttrConfig();
-
-        attrConfig.setAttrName(cm.getColumnId());
-
+        attrConfig.setAttrName(cm.getAttrName());
+        putProperty(attrConfig, ColumnMetadataKey.DisplayName, cm.getDisplayName());
         return attrConfig;
     }
 
@@ -87,10 +102,27 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
             throw new IllegalArgumentException("Must specify attribute name");
         }
         ColumnMetadata cm = new ColumnMetadata();
-
-        cm.setColumnId(attrConfig.getAttrName());
-
+        cm.setAttrName(attrConfig.getAttrName());
+        cm.setDisplayName(getProperty(attrConfig, ColumnMetadataKey.DisplayName, String.class));
         return cm;
+    }
+
+    // only persist custom value in this table
+    private static <T> T getProperty(AttrConfig attrConfig, String key, Class<T> valueClz) {
+        AttrConfigProp prop = attrConfig.getProperty(key);
+        if (prop !=null && prop.getCustomValue() != null) {
+            return valueClz.cast(prop.getCustomValue());
+        }
+        return null;
+    }
+
+    // only persist custom value in this table
+    private static void putProperty(AttrConfig attrConfig, String key, Serializable value) {
+        if (value != null) {
+            AttrConfigProp prop = new AttrConfigProp();
+            prop.setCustomValue(value);
+            attrConfig.putProperty(key, prop);
+        }
     }
 
 }

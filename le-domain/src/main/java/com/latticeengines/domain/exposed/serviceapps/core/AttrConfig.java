@@ -2,7 +2,10 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.collections4.MapUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -49,5 +52,19 @@ public class AttrConfig implements Serializable {
     // Keys must be chosen from the constants in ColumnMetadataKey
     public void setAttrProps(Map<String, AttrConfigProp> attrProps) {
         this.attrProps = attrProps;
+    }
+
+    public void putProperty(String key, AttrConfigProp attrProp) {
+        if (attrProps == null) {
+            attrProps = new HashMap<>();
+        }
+        attrProps.put(key, attrProp);
+    }
+
+    public AttrConfigProp getProperty(String key) {
+        if (MapUtils.isNotEmpty(attrProps) && attrProps.containsKey(key)) {
+            return attrProps.get(key);
+        }
+        return null;
     }
 }
