@@ -48,7 +48,7 @@ public class AccountMasterBucketTestNG extends PipelineTransformationTestNGBase 
 
     private Long expectedCount;
 
-    private static final String DATA_CLOUD_VERSION = "2.0.5";
+    private static final String DATA_CLOUD_VERSION = "2.0.6";
 
     @Test(groups = "functional")
     public void testTransformation() throws Exception {
