@@ -1,6 +1,7 @@
 package com.latticeengines.auth.exposed.entitymanager.impl;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -77,6 +78,12 @@ public class GlobalAuthUserEntityMgrImpl extends BaseEntityMgrImpl<GlobalAuthUse
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public GlobalAuthUser findByEmail(String email) {
         return gaUserDao.findByField("Email", email);
+    }
+    
+    @Override
+    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public HashMap<Long, String> findUserInfoByTenantId(Long tenantId) {
+        return gaUserDao.findUserInfoByTenantId(tenantId);
     }
 
 }

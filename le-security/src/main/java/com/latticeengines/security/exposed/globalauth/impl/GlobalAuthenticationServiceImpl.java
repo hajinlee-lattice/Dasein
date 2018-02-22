@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthAuthenticationEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthTicketEntityMgr;
 import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserEntityMgr;
-import com.latticeengines.auth.exposed.entitymanager.GlobalAuthUserTenantConfigEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
@@ -45,9 +44,6 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     @Autowired
     protected GlobalAuthUserEntityMgr gaUserEntityMgr;
-
-    @Autowired
-    protected GlobalAuthUserTenantConfigEntityMgr gaUserTenantConfigEntityMgr;
 
     @Autowired
     protected GlobalAuthTicketEntityMgr gaTicketEntityMgr;
@@ -125,22 +121,8 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
                 }
             }
             
-            // Collect all Tenants where SSO is Enabled and User is forced SSO Login only.
-            List<GlobalAuthUserConfigSummary> userConfigSummaryList = gaUserTenantConfigEntityMgr
-                    .findUserConfigSummaryByUserId(user.getPid());
-            Map<String, GlobalAuthUserConfigSummary> ssoForcedTenantMap = new HashMap<>();
-            userConfigSummaryList.forEach(userConfigSummary -> {
-                if (userConfigSummary.getSsoEnabled() && userConfigSummary.getForceSsoLogin()) {
-                    ssoForcedTenantMap.put(userConfigSummary.getTenantDeploymentId(), userConfigSummary);
-                }
-            });
-
             List<Tenant> tenants = new ArrayList<Tenant>();
             for (Entry<String, GlobalAuthTenant> tenantData : distinctTenants.entrySet()) {
-                // Exclude SSO forced tenants from Display List
-                if (ssoForcedTenantMap.containsKey(tenantData.getKey())) {
-                    continue;
-                }
                 Tenant tenant = new Tenant();
                 tenant.setId(tenantData.getKey());
                 tenant.setName(tenantData.getValue().getName());

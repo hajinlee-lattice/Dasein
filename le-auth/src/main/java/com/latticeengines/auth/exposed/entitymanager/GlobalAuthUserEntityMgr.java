@@ -1,5 +1,6 @@
 package com.latticeengines.auth.exposed.entitymanager;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
@@ -16,5 +17,7 @@ public interface GlobalAuthUserEntityMgr extends BaseEntityMgr<GlobalAuthUser> {
     List<GlobalAuthUser> findByEmailJoinUserTenantRight(String email);
 
     GlobalAuthUser findByEmail(String email);
+
+    HashMap<Long, String> findUserInfoByTenantId(Long tenantId);
 
 }

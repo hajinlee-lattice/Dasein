@@ -142,7 +142,7 @@ public class GlobalUserManagementServiceImplTestNG extends SecurityFunctionalTes
             for (AbstractMap.SimpleEntry<User, List<String>> userRight : userRightsList) {
                 User user = userRight.getKey();
                 if (user.getUsername().contains(prefix)) {
-                    assertEquals(user.getEmail(), user.getUsername() + "@xyz.com");
+                    assertTrue(user.getEmail().endsWith("@xyz.com"));
                     assertEquals(user.getFirstName(), firstName);
                     assertEquals(user.getLastName(), lastName);
 

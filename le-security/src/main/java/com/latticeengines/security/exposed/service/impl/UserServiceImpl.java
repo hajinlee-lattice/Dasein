@@ -2,6 +2,7 @@ package com.latticeengines.security.exposed.service.impl;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Ticket;
 import com.latticeengines.domain.exposed.security.User;
@@ -28,9 +30,11 @@ import com.latticeengines.security.exposed.globalauth.GlobalAuthenticationServic
 import com.latticeengines.security.exposed.globalauth.GlobalUserManagementService;
 import com.latticeengines.security.exposed.service.UserFilter;
 import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.util.IntegrationUserUtils;
 
 @Component("userService")
 public class UserServiceImpl implements UserService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
@@ -120,6 +124,33 @@ public class UserServiceImpl implements UserService {
         }
 
         return userByEmail != null;
+    }
+
+
+    @Override
+    public boolean upsertSamlIntegrationUser(LoginValidationResponse samlLoginResp, String tenantDeploymentId) {
+        GlobalAuthUser globalAuthUser = globalUserManagementService.findByEmailNoJoin(samlLoginResp.getUserId());
+        User userInfoFromSaml = IntegrationUserUtils.buildUserFrom(samlLoginResp);
+        if (globalAuthUser == null) {
+            LOGGER.info("Creating new User: %s for Tenant: %s", samlLoginResp.getUserId(), tenantDeploymentId);
+            globalUserManagementService.registerExternalIntegrationUser(userInfoFromSaml);
+        }
+        List<String> gaUserRights = globalUserManagementService.getRights(userInfoFromSaml.getEmail(), tenantDeploymentId);
+        
+        AccessLevel grantAccessLevel = null;
+        if (StringUtils.isBlank(userInfoFromSaml.getAccessLevel())) {
+            // If the SAML role doesn't match with any of the allowed roles, then grant External User role
+            assignAccessLevel(AccessLevel.EXTERNAL_USER, tenantDeploymentId, userInfoFromSaml.getEmail());
+        } else {
+            // If there is any change in user configurations between login attempts, update the access level
+            AccessLevel existingAccessLevel = AccessLevel.findAccessLevel(gaUserRights);
+            AccessLevel samlResponseAccessLevel = AccessLevel.findAccessLevel(Arrays.asList((String)userInfoFromSaml.getAccessLevel()));
+            
+            if (samlResponseAccessLevel != existingAccessLevel) {
+                assignAccessLevel(samlResponseAccessLevel, tenantDeploymentId, userInfoFromSaml.getEmail());
+            }
+        }
+        return true;
     }
 
     @Override
@@ -348,4 +379,5 @@ public class UserServiceImpl implements UserService {
         LOGGER.info(String.format("%s sets user %s to %s", userName, emails, level));
         return globalUserManagementService.addUserAccessLevel(emails, level);
     }
+
 }

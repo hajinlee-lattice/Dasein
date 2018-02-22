@@ -300,6 +300,7 @@ public enum LedpCode {
     LEDP_19001("Unauthorized."), //
     LEDP_19002("Access denied."), //
     LEDP_19003("Resource not found."), //
+    LEDP_19004("External User is not allowed with Lattice Email ID."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //

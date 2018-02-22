@@ -38,10 +38,8 @@ public class SamlGlobalAuthenticationServiceImpl extends GlobalAuthenticationSer
     }
 
     protected Ticket validateUserAndCreateTicket(GlobalAuthUser user, GlobalAuthTenant gaTenant) throws Exception {
-        GlobalAuthUserConfigSummary userConfig = gaUserTenantConfigEntityMgr
-                .findUserConfigSummaryByUserIdTenantId(user.getPid(), gaTenant.getPid());
-
-        validateUserForTicketCreation(user, userConfig);
+        
+        validateUserForTicketCreation(user, null);
 
         Ticket ticket = constructTicket(user);
 
@@ -56,9 +54,6 @@ public class SamlGlobalAuthenticationServiceImpl extends GlobalAuthenticationSer
     protected void validateUserForTicketCreation(GlobalAuthUser user, GlobalAuthUserConfigSummary userConfig)
             throws Exception {
         super.validateUserForTicketCreation(user);
-        if (userConfig == null || Boolean.FALSE.equals(userConfig.getSsoEnabled())) {
-            throw new Exception("SSO login not enabled for user at tenant: " + user.getEmail());
-        }
     }
 
     @Override

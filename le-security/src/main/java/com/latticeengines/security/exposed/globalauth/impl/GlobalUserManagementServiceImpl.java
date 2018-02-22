@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,6 +44,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private static final Logger log = LoggerFactory.getLogger(GlobalUserManagementServiceImpl.class);
 
+    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
+    
     @Value("${monitor.emailsettings.from}")
     private String EMAIL_FROM;
 
@@ -89,6 +92,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
+    @Override
+    public synchronized Boolean registerExternalIntegrationUser(User user) {
+        try {
+            log.info(String.format("Registering external integration user %s against Global Auth.", user.getEmail()));
+            createGlobalAuthUser(user, true);
+            return true;
+        } catch (LedpException le) {
+            throw le;
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_18004, e, new String[] { "External: " + user.getEmail() });
+        }
+    }
+
     private Boolean globalAuthRegisterUser(User user, Credentials creds) throws Exception {
         GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
                 .findByUsername(creds.getUsername());
@@ -111,14 +127,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             throw new Exception("The specified email already exists.");
         }
 
-        userData = new GlobalAuthUser();
-        userData.setEmail(user.getEmail());
-        userData.setFirstName(user.getFirstName());
-        userData.setLastName(user.getLastName());
-        userData.setTitle(user.getTitle());
-        userData.setPhoneNumber(user.getPhoneNumber());
-        userData.setIsActive(true);
-        gaUserEntityMgr.create(userData);
+        userData = createGlobalAuthUser(user, false);
 
         latticeAuthenticationData = new GlobalAuthAuthentication();
         latticeAuthenticationData.setUsername(creds.getUsername());
@@ -129,6 +138,22 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         latticeAuthenticationData.setLastModificationDate(now);
         gaAuthenticationEntityMgr.create(latticeAuthenticationData);
         return true;
+    }
+
+    protected GlobalAuthUser createGlobalAuthUser(User user, boolean externalIntegUser) {
+        if (externalIntegUser && StringUtils.isNotBlank(user.getEmail()) && user.getEmail().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
+            throw new LedpException(LedpCode.LEDP_19004);
+        }
+        GlobalAuthUser userData;
+        userData = new GlobalAuthUser();
+        userData.setEmail(user.getEmail());
+        userData.setFirstName(user.getFirstName());
+        userData.setLastName(user.getLastName());
+        userData.setTitle(user.getTitle());
+        userData.setPhoneNumber(user.getPhoneNumber());
+        userData.setIsActive(true);
+        gaUserEntityMgr.create(userData);
+        return userData;
     }
 
     @Override
@@ -145,11 +170,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     public Boolean globalAuthGrantRight(String right, String tenant, String username)
             throws Exception {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
-        if (latticeAuthenticationData == null) {
-            throw new Exception("Unable to find the user requested.");
-        }
+        
+        GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
 
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
         if (tenantData == null) {
@@ -158,18 +180,40 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
         GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
                 .findByUserIdAndTenantIdAndOperationName(
-                        latticeAuthenticationData.getGlobalAuthUser().getPid(),
+                        globalAuthUser.getPid(),
                         tenantData.getPid(), right);
         if (rightData != null) {
             return true;
         }
 
         rightData = new GlobalAuthUserTenantRight();
-        rightData.setGlobalAuthUser(latticeAuthenticationData.getGlobalAuthUser());
+        rightData.setGlobalAuthUser(globalAuthUser);
         rightData.setGlobalAuthTenant(tenantData);
         rightData.setOperationName(right);
         gaUserTenantRightEntityMgr.create(rightData);
         return true;
+    }
+
+    protected GlobalAuthUser findGlobalAuthUserByUsername(String username) throws Exception {
+        return findGlobalAuthUserByUsername(username, false);
+    }
+    
+    protected GlobalAuthUser findGlobalAuthUserByUsername(String username, boolean assertUserExistence) throws Exception {
+        GlobalAuthUser globalAuthUser = findByEmailNoJoin(username);
+        if (globalAuthUser != null) {
+            return globalAuthUser;
+        }
+        // This is the corner case for admin User. Other than that, for all other users username and email are same.
+        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
+                .findByUsernameJoinUser(username);
+        if (latticeAuthenticationData != null) {
+            globalAuthUser = latticeAuthenticationData.getGlobalAuthUser();
+            return globalAuthUser;
+        } 
+        if (assertUserExistence) {
+            throw new Exception("Unable to find the user requested.");
+        }
+        return null;
     }
 
     @Override
@@ -186,20 +230,19 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         }
     }
 
-    private List<String> globalAuthGetRights(String tenantId, String username) {
+    private List<String> globalAuthGetRights(String tenantId, String username) throws Exception {
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenantId);
         if (tenantData == null) {
             return new ArrayList<>();
         }
 
-        GlobalAuthAuthentication authenticationData = gaAuthenticationEntityMgr
-                .findByUsernameJoinUser(username);
-        if (authenticationData == null) {
+        GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username);
+        if (globalAuthUser == null) {
             return new ArrayList<>();
         }
 
         List<GlobalAuthUserTenantRight> rightsData = gaUserTenantRightEntityMgr
-                .findByUserIdAndTenantId(authenticationData.getGlobalAuthUser().getPid(),
+                .findByUserIdAndTenantId(globalAuthUser.getPid(),
                         tenantData.getPid());
         if (rightsData != null) {
 
@@ -229,12 +272,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private Boolean globalAuthRevokeRight(String right, String tenant, String username)
             throws Exception {
-        GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
-                .findByUsername(username);
-        if (latticeAuthenticationData == null) {
-            throw new Exception("Unable to find the user requested.");
-        }
-
+        GlobalAuthUser globalAuthUser = findGlobalAuthUserByUsername(username, true);
+        
         GlobalAuthTenant tenantData = gaTenantEntityMgr.findByTenantId(tenant);
         if (tenantData == null) {
             throw new Exception("Unable to find the tenant requested.");
@@ -242,7 +281,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
         GlobalAuthUserTenantRight rightData = gaUserTenantRightEntityMgr
                 .findByUserIdAndTenantIdAndOperationName(
-                        latticeAuthenticationData.getGlobalAuthUser().getPid(),
+                        globalAuthUser.getPid(),
                         tenantData.getPid(), right);
         if (rightData == null) {
             return true;
@@ -277,6 +316,8 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private Boolean globalAuthForgotLatticeCredentials(String username, EmailSettings emailsettings)
             throws Exception {
+        // For forgot password we should check for User Existence in "GlobalAuthentication" instead of "GlobalUser"
+        // Because, for SAML auto provisioned users, we should not allow them to change / create password in GlobalAuth system.
         GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr
                 .findByUsername(username);
         if (latticeAuthenticationData == null) {
@@ -403,9 +444,13 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
         if (userData == null) {
             throw new Exception("Unable to find the user requested.");
         }
-        GlobalAuthAuthentication authData = userData.getAuthentications().get(0);
-
-        user.setUsername(authData.getUsername());
+        GlobalAuthAuthentication authData = null;
+        if(userData.getAuthentications() != null && userData.getAuthentications().size() > 0) {
+            authData = userData.getAuthentications().get(0);
+        }
+        if (authData != null) {
+            user.setUsername(authData.getUsername());    
+        }
         if (userData.getEmail() != null) {
             user.setEmail(userData.getEmail());
         }
@@ -445,11 +490,9 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
 
     private User globalAuthFindUserByUsername(String username) throws Exception {
         User user = new User();
-        GlobalAuthUser userData = gaAuthenticationEntityMgr.findByUsernameJoinUser(username)
-                .getGlobalAuthUser();
-        if (userData == null) {
-            throw new Exception("Unable to find the user requested.");
-        }
+        
+        GlobalAuthUser userData = findGlobalAuthUserByUsername(username, true);
+        
         user.setUsername(username);
         if (userData.getEmail() != null) {
             user.setEmail(userData.getEmail());
@@ -490,15 +533,11 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
     }
 
     private Boolean globalAuthDeleteUser(String username) throws Exception {
-        GlobalAuthAuthentication authenticationData = gaAuthenticationEntityMgr
-                .findByUsernameJoinUser(username);
-        if (authenticationData == null) {
-            return true;
-        }
-        GlobalAuthUser userData = authenticationData.getGlobalAuthUser();
+        GlobalAuthUser userData = findGlobalAuthUserByUsername(username);
         if (userData == null) {
             return true;
         }
+        
         try {
             gaUserEntityMgr.delete(userData);
         } catch (Exception e) {
@@ -551,7 +590,7 @@ public class GlobalUserManagementServiceImpl extends GlobalAuthenticationService
             return userRightsList;
         }
 
-        HashMap<Long, String> userIdToUsername = gaAuthenticationEntityMgr.findUserInfoByTenantId(tenantData.getPid());
+        HashMap<Long, String> userIdToUsername = gaUserEntityMgr.findUserInfoByTenantId(tenantData.getPid());
 
         HashMap<Long, AbstractMap.SimpleEntry<User, HashSet<String>>> userRights = new HashMap<>();
         for(GlobalAuthUserTenantRight userRightData : userRightDatas) {

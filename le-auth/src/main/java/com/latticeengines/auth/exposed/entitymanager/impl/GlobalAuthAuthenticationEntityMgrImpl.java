@@ -46,12 +46,6 @@ public class GlobalAuthAuthenticationEntityMgrImpl extends
     }
 
     @Override
-    @Transactional(value = "globalAuth", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public HashMap<Long, String> findUserInfoByTenantId(Long tenantId) {
-        return gaAuthenticationDao.findUserInfoByTenantId(tenantId);
-    }
-
-    @Override
     @Transactional(value = "globalAuth", propagation = Propagation.REQUIRED)
     public void create(GlobalAuthAuthentication gaAuthentication) {
     	    getDao().create(gaAuthentication);

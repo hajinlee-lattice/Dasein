@@ -1,5 +1,6 @@
 package com.latticeengines.auth.exposed.dao;
 
+import java.util.HashMap;
 import java.util.List;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -12,5 +13,7 @@ public interface GlobalAuthUserDao extends BaseDao<GlobalAuthUser> {
     GlobalAuthUser findByEmailJoinAuthentication(String email);
 
     List<GlobalAuthUser> findByEmailJoinUserTenantRight(String email);
+
+    HashMap<Long, String> findUserInfoByTenantId(Long tenantId);
 
 }

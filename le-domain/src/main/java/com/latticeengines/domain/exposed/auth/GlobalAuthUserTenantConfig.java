@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasPid;
                 + "WHERE guc.globalAuthUser.pid = :userId GROUP BY guc.globalAuthTenant.pid"),
         @NamedQuery(name = GlobalAuthUserTenantConfig.NQ_FIND_CONFIG_BY_USER_ID_TENANT_ID, query = GlobalAuthUserTenantConfig.SELECT_USER_CONFIG_SUMMARY
                 + "WHERE guc.globalAuthUser.pid = :userId AND guc.globalAuthTenant.pid = :tenantId GROUP BY guc.globalAuthTenant.pid") })
+@Deprecated 
 public class GlobalAuthUserTenantConfig extends BaseGlobalAuthObject implements HasPid {
 
     static final String SELECT_USER_CONFIG_SUMMARY = "SELECT new com.latticeengines.domain.exposed.auth.GlobalAuthUserConfigSummary ( "

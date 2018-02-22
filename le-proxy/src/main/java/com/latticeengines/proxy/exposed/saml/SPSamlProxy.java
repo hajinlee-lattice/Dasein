@@ -19,7 +19,7 @@ public class SPSamlProxy extends BaseRestApiProxy {
                 tenantId, samlSSOResponse, relayState);
 
         if (url.contains("+")) {
-            // adding this workaround as in qa env + sigh is not getting
+            // adding this workaround as in qa env + sign is not getting
             // replaced due to changes in new spring library. Without + sign
             // getting replaced, SAMLResponse generate invalid XML and saml
             // library fails exception

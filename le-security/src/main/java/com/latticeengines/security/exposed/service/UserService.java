@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
 import com.latticeengines.domain.exposed.pls.RegistrationResult;
 import com.latticeengines.domain.exposed.pls.UserUpdateData;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.security.UserRegistrationWithTenant;
@@ -15,6 +16,8 @@ public interface UserService {
     boolean addAdminUser(UserRegistrationWithTenant userRegistrationWithTenant);
 
     boolean createUser(UserRegistration userRegistration);
+
+    boolean upsertSamlIntegrationUser(LoginValidationResponse samlLoginResp, String tenantDeploymentId);
 
     RegistrationResult registerUserToTenant(UserRegistrationWithTenant userRegistrationWithTenant);
 
@@ -49,4 +52,5 @@ public interface UserService {
     boolean deleteUserByEmail(String email);
 
     String addUserAccessLevel(String userName,String emails, AccessLevel level);
+
 }

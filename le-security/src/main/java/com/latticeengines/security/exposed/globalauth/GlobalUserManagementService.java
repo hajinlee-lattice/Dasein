@@ -12,7 +12,9 @@ import com.latticeengines.security.exposed.AccessLevel;
 public interface GlobalUserManagementService {
 
     Boolean registerUser(User user, Credentials creds);
-    
+
+    Boolean registerExternalIntegrationUser(User user);
+
     Boolean grantRight(String right, String tenant, String username);
 
     Boolean revokeRight(String right, String tenant, String username);
@@ -42,4 +44,5 @@ public interface GlobalUserManagementService {
     boolean deleteUserByEmail(String email);
 
     String addUserAccessLevel(String emails, AccessLevel level);
+
 }

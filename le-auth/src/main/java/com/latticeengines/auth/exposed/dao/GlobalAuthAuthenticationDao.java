@@ -9,6 +9,4 @@ public interface GlobalAuthAuthenticationDao extends BaseDao<GlobalAuthAuthentic
 
     GlobalAuthAuthentication findByUsernameJoinUser(String username);
 
-    HashMap<Long, String> findUserInfoByTenantId(Long tenantId);
-
 }

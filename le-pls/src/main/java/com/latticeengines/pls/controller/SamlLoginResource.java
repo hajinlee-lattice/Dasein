@@ -1,7 +1,9 @@
 package com.latticeengines.pls.controller;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
@@ -38,6 +40,8 @@ import com.latticeengines.proxy.exposed.saml.SPSamlProxy;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.RightsUtilities;
 import com.latticeengines.security.exposed.service.SessionService;
+import com.latticeengines.security.exposed.service.UserService;
+import com.latticeengines.security.exposed.util.SamlIntegrationRole;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -51,6 +55,9 @@ public class SamlLoginResource {
 
     @Autowired
     private SessionService sessionService;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private SPSamlProxy samlProxy;
@@ -88,7 +95,7 @@ public class SamlLoginResource {
                 // local env. For prod this is not allowed.
                 baseLoginURL = "https://localhost:3000";
                 samlLoginResp = new LoginValidationResponse();
-                samlLoginResp.setUserId("bnguyen@lattice-engines.com");
+                samlLoginResp.setUserId("bnguyen@test-domain.com");
                 samlLoginResp.setValidated(true);
             } else {
                 samlLoginResp = samlProxy.validateSSOLogin(tenantDeploymentId, samlResponse, relayState);
@@ -97,24 +104,27 @@ public class SamlLoginResource {
             if (!samlLoginResp.isValidated()) {
                 throw new LedpException(LedpCode.LEDP_18170);
             }
+            
+            // Check whether User already exists in the system and other attributes are up to date too.
+            if (StringUtils.isBlank(samlLoginResp.getFirstName())) {
+                //TODO: Anoop. Delete this code after Saml response is parsed with correct values
+                log.warn("Need to remove these hard coded values.");
+                samlLoginResp.setFirstName("Test FirstName");
+                samlLoginResp.setLastName("Test LastName");
+                List<String> externalRoles = new ArrayList<>();
+                externalRoles.add(SamlIntegrationRole.LATTICE_USER.name());
+                samlLoginResp.setUserRoles(externalRoles);
+            }
+            userService.upsertSamlIntegrationUser(samlLoginResp, tenantDeploymentId);
+            
             String userName = samlLoginResp.getUserId();
-
-            Session session = sessionService.attchSamlUserToTenant(userName, tenantDeploymentId);
+            Session session = sessionService.attachSamlUserToTenant(userName, tenantDeploymentId);
 
             uDoc.setSuccess(true);
             uDoc.setAuthenticationRoute(session.getAuthenticationRoute());
             uDoc.setTicket(session.getTicket());
 
-            UserResult result = uDoc.new UserResult();
-            UserResult.User user = result.new User();
-            user.setDisplayName(session.getDisplayName());
-            user.setEmailAddress(session.getEmailAddress());
-            user.setIdentifier(session.getIdentifier());
-            user.setLocale(session.getLocale());
-            user.setTitle(session.getTitle());
-            user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
-            user.setAccessLevel(session.getAccessLevel());
-            result.setUser(user);
+            UserResult result = getUserResult(uDoc, session);
 
             uDoc.setResult(result);
 
@@ -132,6 +142,20 @@ public class SamlLoginResource {
         }
 
         return redirectView;
+    }
+
+    protected UserResult getUserResult(UserDocument uDoc, Session session) {
+        UserResult result = uDoc.new UserResult();
+        UserResult.User user = result.new User();
+        user.setDisplayName(session.getDisplayName());
+        user.setEmailAddress(session.getEmailAddress());
+        user.setIdentifier(session.getIdentifier());
+        user.setLocale(session.getLocale());
+        user.setTitle(session.getTitle());
+        user.setAvailableRights(RightsUtilities.translateRights(session.getRights()));
+        user.setAccessLevel(session.getAccessLevel());
+        result.setUser(user);
+        return result;
     }
 
     @RequestMapping(value = "/logout/"

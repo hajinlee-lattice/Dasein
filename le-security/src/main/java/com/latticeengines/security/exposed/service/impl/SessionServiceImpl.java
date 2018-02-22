@@ -64,7 +64,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public Session attchSamlUserToTenant(String userName, String tenantDeploymentId) {
+    public Session attachSamlUserToTenant(String userName, String tenantDeploymentId) {
         Ticket ticket = samlGlobalAuthenticationService.externallyAuthenticated(userName, tenantDeploymentId);
         ticket.setAuthenticationRoute(AUTH_ROUTE_SSO);
         GlobalAuthTenant gaTenant = gaTenantEntityMgr.findByTenantId(tenantDeploymentId);
