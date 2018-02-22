@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.prospectdiscovery;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.eai.SourceType;
@@ -18,10 +20,19 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.Ru
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunScoreTableDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
 
     private FitModelWorkflowConfiguration() {
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Modeling.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {
