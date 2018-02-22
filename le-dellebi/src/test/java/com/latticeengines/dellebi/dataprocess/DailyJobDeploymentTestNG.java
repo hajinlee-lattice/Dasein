@@ -107,7 +107,7 @@ public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
 
     }
 
-    @Test(groups = "deployment", dataProvider = "startDateFileDataProvider", enabled = true)
+    @Test(groups = "deployment", dataProvider = "startDateFileDataProvider", enabled = false)
     public void testStartDate(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail";
@@ -151,7 +151,7 @@ public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
         }
     }
 
-    @Test(groups = "deployment", dataProvider = "filteredTypeFileDataProvider", enabled = true)
+    @Test(groups = "deployment", dataProvider = "filteredTypeFileDataProvider", enabled = false)
     public void testFilteredTypeFile(String file, String sourceType, Boolean isSetStartDate) throws Exception {
         String fileName = getFileNameFromPath(file);
         String typesStr = "quote,order_detail,Order_Summary,SKU_Global,SKU_Manufacturer,"
@@ -181,7 +181,7 @@ public class DailyJobDeploymentTestNG extends DellEbiTestNGBase {
     public static Object[][] getValidateNameData() {
         return new Object[][] {
 
-                { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
+                //{ "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "LOCAL", false },
                 { "./src/test/resources/tgt_quote_trans_global_1_2015.zip", "SMB", false },
                 { "./src/test/resources/tgt_all_account_cust_1_20160404_034341.zip", "SMB", false },
                 { "./src/test/resources/fiscal_day_calendar_1_20151125_200027.zip", "SMB", false },
