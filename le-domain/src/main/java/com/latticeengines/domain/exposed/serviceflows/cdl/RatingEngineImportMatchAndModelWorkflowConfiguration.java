@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections4.CollectionUtils;
-
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -38,12 +36,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
     @Override
     public Collection<String> getSwpkgNames() {
-        ImmutableSet.Builder<String> builder = ImmutableSet.<String>builder() //
-                .add(SoftwareLibrary.Modeling.getName());
-        if (CollectionUtils.isNotEmpty(super.getSwpkgNames())) {
-            builder.addAll(super.getSwpkgNames());
-        }
-        return builder.build();
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Modeling.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {

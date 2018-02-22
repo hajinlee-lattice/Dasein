@@ -1,11 +1,11 @@
 package com.latticeengines.leadprioritization.workflow;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.ScoreWorkflow;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
@@ -15,24 +15,20 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("importMatchAndScoreWorkflow")
+@Lazy
 public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAndScoreWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private ImportData importData;
 
-    @Autowired
+    @Inject
     private CreateTableImportReport createTableImportReport;
 
-    @Autowired
+    @Inject
     private ScoreWorkflow scoreWorkflow;
 
-    @Autowired
+    @Inject
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
-
-    @Bean
-    public Job importMatchAndScoreWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
@@ -15,6 +16,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("processRatingWorkflow")
+@Lazy
 public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject

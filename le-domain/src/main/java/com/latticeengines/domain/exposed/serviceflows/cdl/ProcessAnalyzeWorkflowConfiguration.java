@@ -1,11 +1,13 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
@@ -19,11 +21,20 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessR
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private ProcessAnalyzeWorkflowConfiguration() {
 
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Scoring.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {

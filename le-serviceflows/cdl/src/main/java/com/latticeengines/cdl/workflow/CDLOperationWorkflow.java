@@ -1,8 +1,8 @@
 package com.latticeengines.cdl.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.MaintenanceOperationListener;
@@ -15,36 +15,27 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("cdlOperationWorkflow")
+@Lazy
 public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private DeleteFileUploadStep deleteFileUploadStep;
 
-    @Autowired
+    @Inject
     private StartMaintenanceStep startMaintenanceStep;
 
-    @Autowired
+    @Inject
     private OperationExecuteStep operationExecuteStep;
 
-    @Autowired
+    @Inject
     private CleanupByUploadWrapper cleanupByUploadWrapper;
 
-    @Autowired
+    @Inject
     private MaintenanceOperationListener maintenanceOperationListener;
-
-    @Bean
-    public Job cdlDataFeedImportWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {
-        return new WorkflowBuilder()
-                .next(deleteFileUploadStep)
-                .next(startMaintenanceStep)
-                .next(cleanupByUploadWrapper)
-                .next(operationExecuteStep)
-                .listener(maintenanceOperationListener)
-                .build();
+        return new WorkflowBuilder().next(deleteFileUploadStep).next(startMaintenanceStep).next(cleanupByUploadWrapper)
+                .next(operationExecuteStep).listener(maintenanceOperationListener).build();
     }
 }

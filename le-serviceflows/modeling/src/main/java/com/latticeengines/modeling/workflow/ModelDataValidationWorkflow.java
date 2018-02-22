@@ -1,8 +1,8 @@
 package com.latticeengines.modeling.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -13,20 +13,16 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component
+@Lazy
 public class ModelDataValidationWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private CreatePrematchEventTableReport createPrematchEventTableReport;
 
-    @Autowired
+    @Inject
     private ValidatePrematchEventTable validatePrematchEventTable;
 
-    @Bean
-    public Job modelDataValidationWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
-    @Override
+    @Inject
     public Workflow defineWorkflow() {
         return new WorkflowBuilder().next(createPrematchEventTableReport) //
                 .next(validatePrematchEventTable) //

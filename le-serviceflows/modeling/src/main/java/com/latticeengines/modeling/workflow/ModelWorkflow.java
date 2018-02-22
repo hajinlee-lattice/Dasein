@@ -1,8 +1,8 @@
 package com.latticeengines.modeling.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
@@ -23,48 +23,44 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("modelWorkflow")
+@Lazy
 public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private Sample sample;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
-    @Autowired
+    @Inject
     private SetMatchSelection setMatchSelection;
 
-    @Autowired
+    @Inject
     private WriteMetadataFiles writeMetadataFiles;
 
-    @Autowired
+    @Inject
     private Profile profile;
 
-    @Autowired
+    @Inject
     private ReviewModel reviewModel;
 
-    @Autowired
+    @Inject
     private CreateModel createModel;
 
-    @Autowired
+    @Inject
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
-    @Autowired
+    @Inject
     private CreateNote createNote;
 
-    @Autowired
+    @Inject
     private PersistDataRules persistDataRules;
 
-    @Autowired
+    @Inject
     private RemediateDataRules remediateDataRules;
 
-    @Autowired
+    @Inject
     InvokeDataScienceAnalysis invokeDataScienceAnalysis;
-
-    @Bean
-    public Job modelWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

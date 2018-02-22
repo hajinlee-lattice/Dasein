@@ -8,10 +8,9 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 
-	@Override
+    @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
-                .add(SoftwareLibrary.Modeling.getName())//
                 .add(SoftwareLibrary.CDL.getName()) //
                 .build();
     }

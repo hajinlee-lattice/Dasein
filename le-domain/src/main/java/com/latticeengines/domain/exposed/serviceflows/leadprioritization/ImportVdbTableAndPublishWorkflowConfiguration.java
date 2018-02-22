@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.leadprioritization;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 
 public class ImportVdbTableAndPublishWorkflowConfiguration extends BaseLPWorkflowConfiguration {

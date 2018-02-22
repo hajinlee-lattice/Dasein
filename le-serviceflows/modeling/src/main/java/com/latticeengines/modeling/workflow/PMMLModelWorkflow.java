@@ -1,8 +1,8 @@
 package com.latticeengines.modeling.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
@@ -14,21 +14,17 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("pmmlModelWorkflow")
+@Lazy
 public class PMMLModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private CreatePMMLModel createPMMLModel;
 
-    @Autowired
+    @Inject
     private DownloadAndProcessModelSummaries downloadAndProcessModelSummaries;
 
-    @Autowired
+    @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
-
-    @Bean
-    public Job pmmlModelWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

@@ -1,50 +1,46 @@
 package com.latticeengines.scoring.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterScoringCompletionListener;
-import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
-import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.scoring.workflow.steps.CombineMatchDebugWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
+import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("scoreWorkflow")
+@Lazy
 public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
-    @Autowired
+    @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
 
-    @Autowired
+    @Inject
     private ScoreEventTable score;
 
-    @Autowired
+    @Inject
     private CombineMatchDebugWithScoreDataFlow combineMatchDebugWithScore;
 
-    @Autowired
+    @Inject
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
-    @Autowired
+    @Inject
     private ExportWorkflow exportWorkflow;
 
-    @Autowired
+    @Inject
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
-
-    @Bean
-    public Job scoreWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

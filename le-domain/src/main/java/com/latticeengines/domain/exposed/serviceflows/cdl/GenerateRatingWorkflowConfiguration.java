@@ -1,5 +1,8 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
+
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -12,11 +15,20 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfig
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     private GenerateRatingWorkflowConfiguration() {
 
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Scoring.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {

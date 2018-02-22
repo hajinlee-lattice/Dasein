@@ -1,8 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CdlPivotScoreAndEventFlow;
@@ -18,6 +17,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("ratingEngineImportMatchAndModelWorkflow")
+@Lazy
 public class RatingEngineImportMatchAndModelWorkflow
         extends AbstractWorkflow<RatingEngineImportMatchAndModelWorkflowConfiguration> {
 
@@ -47,11 +47,6 @@ public class RatingEngineImportMatchAndModelWorkflow
 
     @Autowired
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
-
-    @Bean
-    public Job ratingEngineImportMatchAndModelWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

@@ -1,15 +1,15 @@
 package com.latticeengines.scoring.workflow;
 
-import org.springframework.batch.core.Job;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.scoring.workflow.steps.CombineMatchDebugWithScoreDataFlow;
-import com.latticeengines.scoring.workflow.steps.RTSScoreEventTable;
-import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
+import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.CombineMatchDebugWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.RTSScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -17,30 +17,26 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("rtsBulkScoreWorkflow")
+@Lazy
 public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
-    @Autowired
+    @Inject
     private RTSScoreEventTable score;
 
-    @Autowired
+    @Inject
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
-    @Autowired
+    @Inject
     private CombineMatchDebugWithScoreDataFlow combineMatchDebugWithScore;
 
-    @Autowired
+    @Inject
     private ExportWorkflow exportWorkflow;
 
-    @Autowired
+    @Inject
     private SendEmailAfterRTSBulkScoringCompletionListener sendEmailAfterRTSBulkScoringCompletionListener;
-
-    @Bean
-    public Job rtsBulkScoreWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {

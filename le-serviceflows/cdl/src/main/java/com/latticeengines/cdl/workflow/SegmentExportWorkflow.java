@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.SegmentExportListener;
@@ -12,6 +13,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("segmentExportWorkflow")
+@Lazy
 public class SegmentExportWorkflow extends AbstractWorkflow<SegmentExportWorkflowConfiguration> {
 
     @Autowired

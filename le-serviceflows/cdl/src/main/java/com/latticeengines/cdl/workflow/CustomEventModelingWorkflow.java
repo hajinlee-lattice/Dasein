@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
@@ -22,6 +23,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("customEventModelingWorkflow")
+@Lazy
 public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventModelingWorkflowConfiguration> {
 
     @Inject

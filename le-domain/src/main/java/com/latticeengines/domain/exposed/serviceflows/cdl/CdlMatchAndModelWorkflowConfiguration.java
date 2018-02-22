@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
@@ -20,9 +22,18 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CdlMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Modeling.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
+    }
 
     public static class Builder {
         private CdlMatchAndModelWorkflowConfiguration configuration = new CdlMatchAndModelWorkflowConfiguration();

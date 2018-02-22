@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.PlayLaunchInitStep;
@@ -10,9 +12,10 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("playLaunchWorkflow")
+@Lazy
 public class PlayLaunchWorkflow extends AbstractWorkflow<PlayLaunchWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private PlayLaunchInitStep playLaunchInitStep;
 
     @Override

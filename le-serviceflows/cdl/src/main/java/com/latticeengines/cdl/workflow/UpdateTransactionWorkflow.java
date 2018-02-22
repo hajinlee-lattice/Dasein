@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
@@ -13,6 +14,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("updateTransactionWorkflow")
+@Lazy
 public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
@@ -27,8 +29,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWo
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
-                .next(cloneTransaction)
-                .next(clonePurchaseHistory) //
+                .next(cloneTransaction).next(clonePurchaseHistory) //
                 .next(processTransactionDiffWrapper) //
                 .build();
     }

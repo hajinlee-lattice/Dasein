@@ -1,8 +1,9 @@
 package com.latticeengines.leadprioritization.workflow;
 
-import org.springframework.batch.core.Job;
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
@@ -21,42 +22,38 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("modelAndEmailWorkflow")
+@Lazy
 public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private DedupEventTable dedupEventTableDataFlow;
 
-    @Autowired
+    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
-    @Autowired
+    @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
 
-    @Autowired
+    @Inject
     private ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
 
-    @Autowired
+    @Inject
     private ModelWorkflow modelWorkflow;
 
     @Autowired
     private SetConfigurationForScoring setConfigurationForScoring;
 
-    @Autowired
+    @Inject
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
-    @Autowired
+    @Inject
     private PivotScoreAndEvent pivotScoreAndEventDataFlow;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
-    @Autowired
+    @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
-
-    @Bean
-    public Job modelAndEmailWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
 
     @Override
     public Workflow defineWorkflow() {
