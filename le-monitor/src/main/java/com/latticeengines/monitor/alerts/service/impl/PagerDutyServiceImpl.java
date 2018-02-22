@@ -41,21 +41,21 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     private static final String TOKEN = "VjqbZdWQbwq2Fy7gniny";
     private static final String MODULE_NAME = "PLS, Modeling Platform, Scoring";
 
-    protected String serviceApiKey;
+    private String serviceApiKey;
     private static ObjectMapper om = new ObjectMapper();
-    private static RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
+    private RestTemplate restTemplate;
 
     @Value("${monitor.alert.service.enabled:false}")
     private boolean alertServiceEnabled;
 
     public PagerDutyServiceImpl() {
         this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
-
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         List<BasicNameValuePair> headers = this.getHeaders();
         for (BasicNameValuePair header : headers) {
             interceptors.add(new HeaderRequestInterceptor(header.getName(), header.getValue()));
         }
+        restTemplate = HttpClientUtils.newRestTemplate();
         restTemplate.setInterceptors(interceptors);
     }
 
