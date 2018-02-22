@@ -52,6 +52,6 @@ public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
 
     @Override
     protected ScoringConfiguration.ScoringInputType getScoringInputType() {
-        return ScoringConfiguration.ScoringInputType.Avro;
+        return ScoringConfiguration.ScoringInputType.Json;
     }
 }
