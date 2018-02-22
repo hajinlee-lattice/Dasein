@@ -56,7 +56,7 @@ public class PagerDutyServiceImpl implements PagerDutyService {
         for (BasicNameValuePair header : headers) {
             interceptors.add(new HeaderRequestInterceptor(header.getName(), header.getValue()));
         }
-        this.restTemplate.setInterceptors(interceptors);
+        restTemplate.setInterceptors(interceptors);
     }
 
     @Override
