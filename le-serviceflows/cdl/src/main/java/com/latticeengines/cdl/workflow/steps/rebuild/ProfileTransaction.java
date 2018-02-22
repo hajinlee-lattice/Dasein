@@ -238,6 +238,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
+        config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
 
         step.setConfiguration(JsonUtils.serialize(config));

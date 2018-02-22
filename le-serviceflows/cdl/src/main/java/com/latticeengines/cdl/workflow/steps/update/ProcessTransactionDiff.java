@@ -198,6 +198,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setInputSteps(Collections.singletonList(dailyRawStep));
         ProductMapperConfig config = new ProductMapperConfig();
         config.setProductField(InterfaceName.ProductId.name());
+        config.setProductTypeField(InterfaceName.ProductType.name());
         config.setProductMap(productMap);
 
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
