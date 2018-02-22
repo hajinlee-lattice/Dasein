@@ -214,7 +214,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
-    private boolean shouldUpdate() {
+    protected boolean shouldUpdate() {
         if (reset) {
             log.info("Going to reset " + mainEntity() + ", skipping update.");
             return false;

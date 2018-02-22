@@ -136,9 +136,15 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+
         boolean skip = isCommonSkip(step, seq);
-        if (skip && isProfilePurchaseHistory(seq)) {
-            return !shouldCalculatePurchaseHistory();
+        if (isProfilePurchaseHistory(seq)) {
+            if (skip) {
+                skip = !shouldCalculatePurchaseHistory();
+            } else {
+                log.info("Skip rebuild purchase history due to Missing account.");
+                skip = !hasAccounts;
+            }
         }
         return skip;
     }
@@ -176,11 +182,26 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
-        if (!should && hasRawStore && hasProducts) {
-            if (productChoreographer.update || productChoreographer.rebuild) {
-                log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
-                return true;
+        if (!should) {
+            if (hasRawStore && hasProducts) {
+                if (productChoreographer.update || productChoreographer.rebuild) {
+                    log.info("Need to rebuild " + mainEntity() + " due to Product changes.");
+                    should = true;
+                }
             }
+        } else if (!hasProducts) {
+            log.info("Skip rebuild " + mainEntity() + " due to missing product table.");
+            should = false;
+        }
+        return should;
+    }
+
+    @Override
+    protected boolean shouldUpdate() {
+        boolean should = super.shouldUpdate();
+        if (should && !hasProducts) {
+            log.info("Skip update " + mainEntity() + " due to missing product table.");
+            should = false;
         }
         return should;
     }
