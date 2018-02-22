@@ -194,17 +194,9 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
     var makeDanteAccountsObj = function(obj) {
         var accounts = [];
         obj.forEach(function(value, key){
-            // console.log(value);
-            // console.log(key);
-            // value.value = (typeof value.value === 'string' ? JSON.parse(value.value) : value.value);
-            // var tmpObj = {
-            //     name: value.value.DisplayName,
-            //     id: value.value.BaseExternalID
-            // };
-            // accounts.push(tmpObj);
             var tmpObj = {
                 name: value.LDC_Name,
-                id: value.SalesforceAccountID
+                id: value.SalesforceAccountID != null ? value.SalesforceAccountID : value.AccountId
             };
             accounts.push(tmpObj);
         });
