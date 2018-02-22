@@ -38,7 +38,14 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.*;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -132,7 +139,8 @@ public class WorkflowServiceImpl implements WorkflowService {
                 parmsBuilder.addString(CUSTOMER_SPACE, workflowConfiguration.getCustomerSpace().toString());
             }
             if (workflowConfiguration.getInternalResourceHostPort() != null) {
-                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT, workflowConfiguration.getInternalResourceHostPort());
+                parmsBuilder.addString(INTERNAL_RESOURCE_HOST_PORT,
+                        workflowConfiguration.getInternalResourceHostPort());
             }
             if (workflowConfiguration.getUserId() != null) {
                 parmsBuilder.addString(USER_ID, workflowConfiguration.getUserId());
@@ -240,7 +248,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public void stop(WorkflowExecutionId workflowId) {
         try {
             WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
-            if(job != null) {
+            if (job != null) {
                 jobOperator.stop(workflowId.getId());
             } else {
                 throw new LedpException(LedpCode.LEDP_28000, new String[] { String.valueOf(workflowId.getId()) });
@@ -364,7 +372,8 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
-    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) throws Exception {
+    public WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval)
+            throws Exception {
         WorkflowStatus status = null;
         long start = System.currentTimeMillis();
         int retryOnException = 16;
@@ -377,7 +386,7 @@ public class WorkflowServiceImpl implements WorkflowService {
         Long workflowPid = workflowJob.getPid();
 
         // break label for inner loop
-        done: do {
+        do {
             try {
                 status = getStatus(workflowId);
                 WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
