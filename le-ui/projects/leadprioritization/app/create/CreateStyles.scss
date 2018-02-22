@@ -1,5 +1,10 @@
 section.container.setup-import {
     font-size: 1.2em;
+    tooltip._top {
+        tip {
+            width: 600px;
+        }
+    }
     tooltip._bottom {
         position: absolute;
         margin-top: -2px;

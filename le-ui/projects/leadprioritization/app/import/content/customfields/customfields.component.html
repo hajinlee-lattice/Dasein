@@ -5,9 +5,9 @@
             You can add custom fields by adding columns in your CSV file with whatever data you wish to provide. All unmapped fields (non-ID and non-Lattice fields) are considered Custom Fields unless you choose to ignore them. You can always add more Custom Fields later.
         </p>
     </div>
-    <div class="alert">{{ vm.AvailableFields.length }} new Custom Fields have been found.</div>
+    <div class="alert">{{filtered.length}} new Custom Fields have been found.</div>
     <form name="form">
-        <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="vm.AvailableFields.length">
+        <ul class="customfields" ng-init="fieldMapping = fieldMapping || {}" ng-show="filtered.length">
             <li class="customfield customfield-header">
                 <ul class="field">
                     <li class="field-name">
@@ -48,7 +48,7 @@
                     </li>
                 </ul>
             </li>
-            <li ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList" class="customfield">
+            <li ng-repeat="field in vm.AvailableFields | filter: vm.filterStandardList as filtered" class="customfield">
                 <ul class="field">
                     <li class="field-name">{{field.userField}}</li>
                     <li class="type">

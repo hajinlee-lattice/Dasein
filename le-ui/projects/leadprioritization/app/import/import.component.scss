@@ -18,6 +18,8 @@
         padding-left: 0;
     }
 
+    .form-control.ng-invalid-required.required,
+    .form-control.ng-invalid-required:required,
     .form-control.required:not(.ng-dirty),
     .form-control:required:not(.ng-dirty) {
         border-left-width: 5px;

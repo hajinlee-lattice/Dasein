@@ -217,7 +217,7 @@ angular
                     return ImportWizardStore.getFieldDocument();
                 },
                 mergedFieldDocument: function($q, ImportWizardStore) {
-                    return ImportWizardStore.mergeFieldDocument({append: false, save: false});
+                    return ImportWizardStore.mergeFieldDocument({segment: true, save: false});
                 }
             },
             views: {

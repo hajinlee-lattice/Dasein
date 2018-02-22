@@ -1,5 +1,4 @@
 .lattice-fields {
-	
 	&.file-import-content {
 		.header {
 			h2 {
@@ -28,9 +27,7 @@
 		&:first-of-type {
 			margin-top: 20px;
 		}
-		&.Account-matching {
-			background-image: url('/assets/images/ico-third-party-id-dark.png');
-		}
+		background-image: url('/assets/images/ico-third-party-id-dark.png');
 		&.Contacts-matching {
 			background-image: url('/assets/images/ico-user-black.png');
 		}
@@ -38,17 +35,18 @@
 			background-image: url('/assets/images/ico-analysis-fields-dark.png');
 		}
 	}
-
-	li {
-		display: inline-block;
-		width: 48%;
-		margin-right: 2%;
-		margin-bottom: 14px;
-		&:nth-child(even){
-			margin-right: 0;
+	ul {
+		width: 100%;
+		li {
+			display: inline-block;
+			width: 48%;
+			margin-right: 2%;
+			margin-bottom: 14px;
+			&:nth-child(even){
+				margin-right: 0;
+			}
 		}
 	}
-	
 	p {
 		margin-bottom: 16px;
 	}
