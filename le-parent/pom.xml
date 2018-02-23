@@ -1280,16 +1280,6 @@
                 <artifactId>quartz-jobs</artifactId>
                 <version>${quartz.version}</version>
             </dependency>
-            <dependency> <!-- used by hadoop libs -->
-                <groupId>io.netty</groupId>
-                <artifactId>netty</artifactId>
-                <version>${netty.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-all</artifactId>
-                <version>${netty.all.version}</version>
-            </dependency>
             <dependency>
                 <groupId>com.joestelmach</groupId>
                 <artifactId>natty</artifactId>
@@ -1324,6 +1314,24 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+
+            <!-- Netty -->
+            <dependency> <!-- used by hadoop libs -->
+                <groupId>io.netty</groupId>
+                <artifactId>netty</artifactId>
+                <version>${netty.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-all</artifactId>
+                <version>${netty.all.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-codec-http</artifactId>
+                <version>${netty.all.version}</version>
+            </dependency>
+
 
             <!-- Apache Commons -->
             <dependency>
@@ -1450,17 +1458,6 @@
             <dependency>
                 <groupId>com.amazonaws</groupId>
                 <artifactId>aws-java-sdk-s3</artifactId>
-                <version>${aws.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>com.amazonaws</groupId>
-                <artifactId>aws-java-sdk-osgi</artifactId>
                 <version>${aws.version}</version>
                 <exclusions>
                     <exclusion>
