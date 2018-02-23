@@ -157,7 +157,10 @@ public class DataLakeServiceImpl implements DataLakeService {
         // Only return attributes for account now
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, BusinessEntity.Account);
-        return cms.stream().filter(cm -> cm.getGroups() != null && cm.getGroups().contains(predefined)) //
+        return cms.stream().filter(cm -> cm.getGroups() != null && cm.getGroups().contains(predefined)
+        // Hack to limit attributes for talking points temporarily PLS-7065
+                && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
+                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
                 .collect(Collectors.toList());
     }
 
@@ -221,7 +224,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setRestrictNotNullSalesforceId(true);
         frontEndQuery.addLookups(BusinessEntity.Account, attributes.toArray(new String[attributes.size()]));
 
         log.info(String.format("Calling entityProxy with request payload: %s", JsonUtils.serialize(frontEndQuery)));
@@ -258,7 +260,7 @@ public class DataLakeServiceImpl implements DataLakeService {
                     .forEach(row -> productMap.put( //
                             (String) row.get(InterfaceName.ProductId.name()), //
                             (String) row.get(InterfaceName.ProductName.name()) //
-                    ));
+            ));
             return productMap;
         } else {
             return Collections.emptyMap();
@@ -288,7 +290,8 @@ public class DataLakeServiceImpl implements DataLakeService {
             TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
             if (topNTree.hasCategory(Category.PRODUCT_SPEND)) {
                 Map<String, String> productMap = getProductMap(customerSpace);
-                timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size() + " products.";
+                timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size()
+                        + " products.";
                 timer.setTimerMessage(timerMsg);
                 StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
             }
@@ -312,7 +315,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (role == null) {
             return Collections.emptyList();
         }
-        String batchTableName= dataCollectionProxy.getTableName(customerSpace, role);
+        String batchTableName = dataCollectionProxy.getTableName(customerSpace, role);
         if (StringUtils.isBlank(batchTableName)) {
             return Collections.emptyList();
         } else {
@@ -330,7 +333,6 @@ public class DataLakeServiceImpl implements DataLakeService {
             return cms;
         }
     }
-
 
     private List<RatingEngineSummary> getRatingSummaries(String customerSpace) {
         List<RatingEngineSummary> engineSummaries = new ArrayList<>();
