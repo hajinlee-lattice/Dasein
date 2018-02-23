@@ -37,7 +37,7 @@ public class QuotaEntityMgrImpl extends BaseEntityMgrImpl<Quota> implements
         if (this.quotaDao.findQuotaByQuotaId(quota.getId()) != null) {
             throw new RuntimeException(String.format(
                     "Quota for tenant: %s already exists", MultiTenantContext
-                            .getTenant().getName()));
+                            .getTenant().getId()));
         }
         this.setTenantAndTenantIdOnQuota(quota);
         this.quotaDao.create(quota);

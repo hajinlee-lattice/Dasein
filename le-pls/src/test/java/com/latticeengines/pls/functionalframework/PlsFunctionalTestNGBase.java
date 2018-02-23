@@ -263,7 +263,7 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
         List<Quota> quotas = this.quotaEntityMgr.getAllQuotas();
         for (Quota quota : quotas) {
             if (quota.getId().startsWith("TEST")) {
-                this.quotaEntityMgr.deleteQuotaByQuotaId(quota.getId());
+                this.quotaEntityMgr.delete(quota);
             }
         }
     }
