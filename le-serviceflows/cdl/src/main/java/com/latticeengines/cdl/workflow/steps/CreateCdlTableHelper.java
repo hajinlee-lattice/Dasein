@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
@@ -23,6 +21,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -110,7 +109,7 @@ public class CreateCdlTableHelper {
             }
             writeRecords(schema, filePath, records);
             total += rows.size();
-            rowNumber += pageSize;
+            rowNumber += Math.min(rows.size(), pageSize);
         }
         log.info(type + " total filter rows=" + total);
         Table table = MetaDataTableUtils.createTable(yarnConfiguration, tableName, filePath);
