@@ -21,6 +21,8 @@ import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import reactor.core.publisher.ParallelFlux;
+
 public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> implements MetadataColumnService<E> {
 
     private static final Logger log = LoggerFactory.getLogger(BaseMetadataColumnServiceImpl.class);
@@ -44,16 +46,16 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     }
 
     @Override
-    public List<E> scan(String dataCloudVersion, Integer page, Integer size) {
+    public ParallelFlux<E> scan(String dataCloudVersion, Integer page, Integer size) {
         if (StringUtils.isBlank(dataCloudVersion)) {
             dataCloudVersion = getLatestVersion();
         }
         if (page == null && size == null) {
             return getMetadataColumnEntityMgr().findAll(dataCloudVersion);
-        } else if (size == null) {
-            throw new IllegalArgumentException("Must specify size when asking for a particular page");
+        } else if (size == null || page == null) {
+            throw new IllegalArgumentException("Must specify page and size when asking for a particular page");
         } else {
-            return getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, size);
+            return getMetadataColumnEntityMgr().findByPage(dataCloudVersion, page, size).parallel();
         }
     }
 
@@ -154,7 +156,7 @@ public abstract class BaseMetadataColumnServiceImpl<E extends MetadataColumn> im
     private void refreshCacheForVersion(String dataCloudVersion) {
        new Thread(() -> {
             log.info("Start loading black and white column caches for version " + dataCloudVersion);
-            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion);
+            List<E> columns = getMetadataColumnEntityMgr().findAll(dataCloudVersion).sequential().collectList().block();
             log.info("Read " + columns.size() + " columns from DB for version " + dataCloudVersion);
             ConcurrentMap<String, E> whiteColumnCache = new ConcurrentHashMap<>();
             for (E column : columns) {

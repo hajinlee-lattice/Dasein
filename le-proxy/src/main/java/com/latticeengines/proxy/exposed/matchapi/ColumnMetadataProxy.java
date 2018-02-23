@@ -120,7 +120,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return getAllColumns("");
     }
 
-    private synchronized List<ColumnMetadata> getAllColumns(String dataCloudVersion) {
+    public List<ColumnMetadata> getAllColumns(String dataCloudVersion) {
         if (StringUtils.isEmpty(dataCloudVersion)) {
             dataCloudVersion = "";
         }
@@ -129,7 +129,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     }
 
     private List<ColumnMetadata> requestAllColumns(String dataCloudVersion) {
-        String msg = "Load mdatadata of data cloud version " + dataCloudVersion;
+        String msg = "Load metadata of data cloud version " + dataCloudVersion;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             long count = getColumnCount(dataCloudVersion);
             int pageSize = 5000;
@@ -153,14 +153,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         if (StringUtils.isNotBlank(dataCloudVersion)) {
             url += "&datacloudversion=" + dataCloudVersion;
         }
-        @SuppressWarnings("unchecked")
-        List<ColumnMetadata> metadataList = getKryo("get metadata page", url, List.class);
-        if (CollectionUtils.isEmpty(metadataList)) {
-            return Flux.empty();
-        } else {
-            log.info("Retrieved " + metadataList.size() + " column metadata from matchapi.");
-            return Flux.fromIterable(metadataList);
-        }
+        return getFlux("get metadata page", url, ColumnMetadata.class);
     }
 
     private Long getColumnCount(String dataCloudVersion) {
@@ -207,26 +200,34 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         return get("latest version", url, DataCloudVersion.class);
     }
 
-    private synchronized void initializeColumnMetadataCache() {
+    private void initializeColumnMetadataCache() {
         if (columnMetadataCache == null) {
-            columnMetadataCache = new LocalCacheManager<>( //
-                    CacheName.DataCloudCMCache, //
-                    str -> {
-                        String key = str.replace(KEY_PREFIX + "|", "");
-                        return requestAllColumns(key);
-                    }, //
-                    10); //
-            log.info("Initialized local cache DataCloudCMCache.");
+            synchronized (this) {
+                if (columnMetadataCache == null) {
+                    columnMetadataCache = new LocalCacheManager<>( //
+                            CacheName.DataCloudCMCache, //
+                            str -> {
+                                String key = str.replace(KEY_PREFIX + "|", "");
+                                return requestAllColumns(key);
+                            }, //
+                            10); //
+                    log.info("Initialized local cache DataCloudCMCache.");
+                }
+            }
         }
     }
 
-    private synchronized void initializeAMStatsCache() {
+    private void initializeAMStatsCache() {
         if (amStatsCache == null) {
-            amStatsCache = new LocalCacheManager<>(CacheName.DataCloudStatsCache, str -> {
-                String key = str.replace(KEY_PREFIX + "|", "");
-                return getStatsObjectViaREST(key);
-            }, 10);
-            log.info("Initialized local cache DataCloudStatsCache.");
+            synchronized (this) {
+                if (amStatsCache == null) {
+                    amStatsCache = new LocalCacheManager<>(CacheName.DataCloudStatsCache, str -> {
+                        String key = str.replace(KEY_PREFIX + "|", "");
+                        return getStatsObjectViaREST(key);
+                    }, 10);
+                    log.info("Initialized local cache DataCloudStatsCache.");
+                }
+            }
         }
     }
 

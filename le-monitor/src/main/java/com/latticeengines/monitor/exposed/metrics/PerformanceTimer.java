@@ -12,6 +12,10 @@ public class PerformanceTimer implements Closeable {
     private Date start;
     private String timerMessage;
 
+    public PerformanceTimer() {
+        this.start = new Date();
+    }
+
     public PerformanceTimer(String timerMessage) {
         this.start = new Date();
         this.timerMessage = timerMessage;

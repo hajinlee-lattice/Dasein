@@ -7,20 +7,6 @@
       http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
 
     <import resource="classpath:datacloud-match-persistence-datasource-context.xml" />
-
-	<!--  
-    <bean id="sessionFactoryPropDataMatch" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
-        <property name="dataSource" ref="propDataMatchDataSource" />
-        <property name="packagesToScan" value="com.latticeengines.domain.exposed.datacloud" />
-        <property name="hibernateProperties">
-            <props>
-                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
-                <prop key="hibernate.show_sql">false</prop>
-                <prop key="hibernate.globally_quoted_identifiers">true</prop>
-            </props>
-        </property>
-    </bean>
-	-->
 	
 	<!-- Hibernate session factory -->
     <bean id="sessionFactoryPropDataMatch" class="org.springframework.orm.jpa.vendor.HibernateJpaSessionFactoryBean">

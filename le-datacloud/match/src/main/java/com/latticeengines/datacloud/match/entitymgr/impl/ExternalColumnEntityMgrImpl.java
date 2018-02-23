@@ -6,6 +6,8 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,11 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.manage.ExternalColumn;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Schedulers;
 
 @Component("externalColumnEntityMgr")
 public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<ExternalColumn, Long>
@@ -61,8 +68,9 @@ public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ext
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<ExternalColumn> findAll(String dataCloudVersion) {
-        return externalColumnDao.findAll();
+    public ParallelFlux<ExternalColumn> findAll(String dataCloudVersion) {
+        return Mono.fromCallable(() -> repository.findAll()).flatMapMany(Flux::fromIterable)
+                .parallel().runOn(Schedulers.newParallel("ext-col"));
     }
 
     @Override
@@ -72,8 +80,11 @@ public class ExternalColumnEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ext
     }
 
     @Override
-    public List<ExternalColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
-        throw new UnsupportedOperationException("find by page is not supported for 1.0.0");
+    public Flux<ExternalColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
+        return Mono.fromCallable(() -> {
+            PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("amColumnId"));
+            return repository.findAll(pageRequest);
+        }).flatMapMany(Flux::fromIterable);
     }
 
     @Override

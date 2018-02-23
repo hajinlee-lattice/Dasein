@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import static com.latticeengines.domain.exposed.camille.watchers.CamilleWatcher.AMRelease;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,11 +19,11 @@ import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+
+import reactor.core.publisher.ParallelFlux;
 
 public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         implements ColumnMetadataService {
@@ -66,25 +65,28 @@ public abstract class BaseColumnMetadataServiceImpl<E extends MetadataColumn>
         return toColumnMetadata(columns);
     }
 
+    private ParallelFlux<ColumnMetadata> toColumnMetadata(ParallelFlux<E> columns) {
+        return columns.map(this::toColumnMetadata);
+    }
+
     private List<ColumnMetadata> toColumnMetadata(List<E> columns) {
-        List<ColumnMetadata> columnMetadataList = new ArrayList<>();
-        for (MetadataColumn column : columns) {
-            try {
-                ColumnMetadata columnMetadata = column.toColumnMetadata();
-                columnMetadataList.add(columnMetadata);
-            } catch (Exception e) {
-                if (column == null) {
-                    throw new IllegalArgumentException("Found a null column in column list");
-                }
-                throw new RuntimeException("Failed to extract metadata from MetadataColumn ["
-                        + column.getColumnId() + "]", e);
+        return columns.stream().map(this::toColumnMetadata).collect(Collectors.toList());
+    }
+
+    private ColumnMetadata toColumnMetadata(E column) {
+        try {
+            return column.toColumnMetadata();
+        } catch (Exception e) {
+            if (column == null) {
+                throw new IllegalArgumentException("Found a null column in column list");
             }
+            throw new RuntimeException("Failed to extract metadata from MetadataColumn ["
+                    + column.getColumnId() + "]", e);
         }
-        return columnMetadataList;
     }
 
     @Override
-    public List<ColumnMetadata> findAll(String dataCloudVersion, Integer page, Integer size) {
+    public ParallelFlux<ColumnMetadata> findAll(String dataCloudVersion, Integer page, Integer size) {
         return toColumnMetadata(getMetadataColumnService().scan(dataCloudVersion, page, size));
     }
 

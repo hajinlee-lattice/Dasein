@@ -19,11 +19,21 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @Component("accountMasterColumnEntityMgr")
 public class AccountMasterColumnEntityMgrImpl
         extends BaseEntityMgrRepositoryImpl<AccountMasterColumn, Long>
         implements MetadataColumnEntityMgr<AccountMasterColumn> {
+
+    private static final int PAGE_SIZE = 10000;
+    private static final Scheduler scheduler = Schedulers.newParallel("am-metadata");
 
     @Resource(name = "accountMasterColumnDao")
     private AccountMasterColumnDao accountMasterColumnDao;
@@ -55,15 +65,26 @@ public class AccountMasterColumnEntityMgrImpl
     }
 
     @Override
-    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<AccountMasterColumn> findAll(String dataCloudVersion) {
-        return accountMasterColumnDao.findAllByField("dataCloudVersion", dataCloudVersion);
+    public ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion) {
+        long count = repository.countByDataCloudVersion(dataCloudVersion);
+        int pages = (int) Math.ceil(1.0 * count / PAGE_SIZE);
+        return Flux.range(0, pages).parallel().runOn(scheduler) //
+                .map(k -> {
+                    try (PerformanceTimer timer = new PerformanceTimer()) {
+                        PageRequest pageRequest = PageRequest.of(k, PAGE_SIZE, Sort.by("amColumnId"));
+                        List<AccountMasterColumn> attrs = repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+                        timer.setTimerMessage("Fetched a page of " + attrs.size() + " AM attrs.");
+                        return attrs;
+                    }
+                }).flatMap(Flux::fromIterable);
     }
 
     @Override
-    public List<AccountMasterColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
-        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("amColumnId"));
-        return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+    public Flux<AccountMasterColumn> findByPage(String dataCloudVersion, int page, int pageSize) {
+        return Mono.fromCallable(() -> {
+            PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by("amColumnId"));
+            return repository.findByDataCloudVersion(dataCloudVersion, pageRequest);
+        }).flatMapMany(Flux::fromIterable);
     }
 
     @Override

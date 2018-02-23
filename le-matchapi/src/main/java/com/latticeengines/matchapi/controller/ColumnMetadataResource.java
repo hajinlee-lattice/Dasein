@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.ParallelFlux;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "columnmetadata", description = "REST resource for column metadata")
@@ -86,7 +87,7 @@ public class ColumnMetadataResource {
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get all columns belong to a data cloud version")
-    public List<ColumnMetadata> getAllColumns(
+    public ParallelFlux<ColumnMetadata> getAllColumns(
             @RequestParam(value = "datacloudversion", required = false) String dataCloudVersion,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "size", required = false) Integer size) {

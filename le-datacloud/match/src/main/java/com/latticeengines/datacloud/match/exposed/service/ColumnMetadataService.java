@@ -10,6 +10,8 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
+import reactor.core.publisher.ParallelFlux;
+
 public interface ColumnMetadataService extends HasDataCloudVersion {
 
     List<ColumnMetadata> fromPredefinedSelection(Predefined selectionName, String dataCloudVersion);
@@ -21,7 +23,7 @@ public interface ColumnMetadataService extends HasDataCloudVersion {
     Schema getAvroSchemaFromColumnMetadatas(List<ColumnMetadata> columnMetadatas, String recordName,
             String dataCloudVersion);
 
-    List<ColumnMetadata> findAll(String dataCloudVersion, Integer page, Integer size);
+    ParallelFlux<ColumnMetadata> findAll(String dataCloudVersion, Integer page, Integer size);
 
     StatsCube getStatsCube(String dataCloudVersion);
 
