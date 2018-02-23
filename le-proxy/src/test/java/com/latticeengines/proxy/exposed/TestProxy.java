@@ -1,27 +1,32 @@
 package com.latticeengines.proxy.exposed;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 
 @Component("testProxy")
-public class TestProxy extends BaseRestApiProxy implements TestInterface {
+public class TestProxy extends BaseRestApiProxy {
 
     public TestProxy() {
         super(PropertyUtils.getProperty("proxy.test.rest.endpoint.hostport"), "foo/{bar}", "baz");
     }
 
-    @Override
     public void testUrlExpansion() {
         String url = constructUrl("value?customer={customer}", "test");
         Assert.assertEquals(url, getHostport() + "/foo/baz/value?customer=test");
     }
 
-    @Override
-    public void testRetry() {
-        post("testRetry", "http://thiswillfail", null, Void.class);
+    public String testRetry() {
+        return get("testRetry", constructUrl("/retry"), String.class);
+    }
+
+    public String testDirectlyFail() {
+        return get("testDirectlyFail", constructUrl("/runtime"), String.class);
+    }
+
+    public String testRetryAndFail() {
+        return get("testRetryAndFail", constructUrl("/timeout"), String.class);
     }
     
     

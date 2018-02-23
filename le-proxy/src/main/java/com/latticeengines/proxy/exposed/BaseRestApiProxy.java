@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -69,6 +70,7 @@ public abstract class BaseRestApiProxy {
     // Used to call external API because there is no standardized error handler
     protected BaseRestApiProxy() {
         this.restTemplate = HttpClientUtils.newRestTemplate();
+        this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.webClient = HttpClientUtils.newWebClient();
         this.retryExceptions = DEFAULT_RETRY_EXCEPTIONS;
         initialConfig();
@@ -114,13 +116,30 @@ public abstract class BaseRestApiProxy {
         return retry;
     }
 
-    private Throwable shouldRetryFor(Throwable e) {
+    private Class<? extends Throwable> shouldRetryFor(Throwable e) {
+        Class<? extends Throwable> reason = null;
+        Throwable cause = findRetryCause(e);
+        if (cause != null) {
+            reason = cause.getClass();
+        } else {
+            String stackTrace = ExceptionUtils.getStackTrace(e);
+            for (Class<? extends Throwable> c : retryExceptions) {
+                if (stackTrace.contains(c.getCanonicalName())) {
+                    reason = c;
+                    break;
+                }
+            }
+        }
+        return reason;
+    }
+
+    private Throwable findRetryCause(Throwable e) {
         Throwable reason = null;
         if (e != null) {
-            if (retryExceptions.contains(e.getClass())) {
+            if (retryExceptions.contains(e)) {
                 reason = e;
             } else {
-                reason = shouldRetryFor(e.getCause());
+                reason = findRetryCause(e.getCause());
             }
         }
         return reason;
@@ -242,9 +261,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
                 return exchange(url, verb, body, returnValueClazz, useKryo, useKryo).getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -278,9 +297,9 @@ public abstract class BaseRestApiProxy {
                         returnValueClazz);
                 return response.getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -302,9 +321,9 @@ public abstract class BaseRestApiProxy {
                 RestTemplate newRestTemplate = HttpClientUtils.newFormURLEncodedRestTemplate();
                 return newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -324,9 +343,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
                 return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -367,9 +386,9 @@ public abstract class BaseRestApiProxy {
                     return response.getBody();
                 }
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -389,9 +408,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, HttpMethod.PATCH, context.getRetryCount() + 1);
                 return restTemplate.patchForObject(url, entity, returnValueClazz);
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -411,9 +430,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, verb, context.getRetryCount() + 1);
                 return exchange(url, verb, null, returnValueClazz, false, false).getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -434,9 +453,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, verb, context.getRetryCount() + 1);
                 return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -456,9 +475,9 @@ public abstract class BaseRestApiProxy {
                 logInvocation(method, url, verb, context.getRetryCount() + 1);
                 return exchange(url, verb, null, returnValueClazz, false, true).getBody();
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -478,9 +497,9 @@ public abstract class BaseRestApiProxy {
                 restTemplate.delete(url);
                 return null;
             } catch (Exception e) {
-                Throwable reason = shouldRetryFor(e);
+                Class<? extends Throwable> reason = shouldRetryFor(e);
                 if (reason != null) {
-                    logWarn(reason, method);
+                    logWarn(reason, e.getMessage(), method);
                 } else {
                     context.setExhaustedOnly();
                 }
@@ -592,9 +611,9 @@ public abstract class BaseRestApiProxy {
     }
 
 
-    private void logWarn(Throwable e, String method) {
-        log.warn(String.format("%s: Remote call failure, will retry: %s:%s", method, e.getClass().getCanonicalName(),
-                e.getMessage()));
+    private void logWarn(Class<? extends Throwable> reason, String message, String method) {
+        log.warn(String.format("%s: Remote call failure, will retry: %s:%s", method, reason.getCanonicalName(),
+                message));
     }
 
     private void logError(String method, String url, HttpMethod verb, Integer attempt) {
