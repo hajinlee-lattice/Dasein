@@ -12,11 +12,11 @@ import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.DataProvider;
@@ -30,6 +30,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
@@ -93,7 +94,7 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupTwoTenants(scrTenantIsEncrypted, dstTenantIsEncrypted);
         cleanup();
         setupHdfs();
-        setupSecurityContext(tenant1);
+        MultiTenantContext.setTenant(tenant1);
         log.info("Wait for 900 seconds to download model summary");
         waitToDownloadModel(ORIGINAL_MODELID);
         setupTables();
@@ -148,14 +149,15 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
             deploymentTestBed.deleteTenant(tenant);
             deploymentTestBed.createTenant(tenant);
         }
+        tenant = deploymentTestBed.getTenantBasedOnId(tenant.getId());
         return tenant;
     }
 
     private void setupTables() throws IOException {
-        Table trainingTable = JsonUtils.deserialize(
-                IOUtils.toString(ClassLoader.getSystemResourceAsStream(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json")),
-                Table.class);
+        Table trainingTable = JsonUtils.deserialize(IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream(
+                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/TrainingTable.json"),
+                "UTF-8"), Table.class);
         Extract extract = trainingTable.getExtracts().get(0);
         extract.setPath(
                 PathBuilder.buildDataFilePath(CamilleEnvironment.getPodId(), CustomerSpace.parse(tenant1.getId()))
@@ -164,10 +166,10 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         trainingTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
         metadataProxy.createTable(tenant1.getId(), trainingTable.getName(), trainingTable);
 
-        Table eventTable = JsonUtils.deserialize(
-                IOUtils.toString(ClassLoader.getSystemResourceAsStream(
-                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json")),
-                Table.class);
+        Table eventTable = JsonUtils.deserialize(IOUtils.toString(
+                ClassLoader.getSystemResourceAsStream(
+                        "com/latticeengines/pls/service/impl/modelcopyserviceimpl/pythonscriptmodel/tables/EventTable.json"),
+                "UTF-8"), Table.class);
         extract = eventTable.getExtracts().get(0);
         extract.setPath(customerBase + tenant1.getId() + "/data/AccountModel/Samples/allTraining-r-00000.avro");
         eventTable.setExtracts(Arrays.<Extract> asList(new Extract[] { extract }));
@@ -264,8 +266,8 @@ public class ModelCopyResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         SourceFile newSourceFile = sourceFileEntityMgr.getByTableName(newTrainingTableName);
         assertNotNull(newSourceFile);
         assertEquals(newSourceFile.getDisplayName(), outputFileName);
-        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()),
-                FileUtils.readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile())));
+        assertEquals(HdfsUtils.getHdfsFileContents(yarnConfiguration, newSourceFile.getPath()), FileUtils
+                .readFileToString(new File(ClassLoader.getSystemResource(sourceFileLocalPath).getFile()), "UTF-8"));
     }
 
     @DataProvider(name = "dataProvider")
