@@ -45,7 +45,7 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
         ImportAndRTSBulkScoreWorkflowConfiguration workflowConfig = importAndRTSBulkScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data", false, false);
 
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
     }

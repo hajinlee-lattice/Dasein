@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -59,6 +60,13 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
     private String modelDisplayName;
     private int modelCount = 1;
 
+    @Override
+    @BeforeClass(groups = { "deployment", "workflow" })
+    public void setup() throws Exception {
+        super.setup();
+        workflowService.registerJob("pmmlModelWorkflow", applicationContext);
+    }
+
     @Test(groups = "workflow", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
         MultiTenantContext.setTenant(mainTestTenant);
@@ -76,9 +84,7 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         }
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
 
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
-
         waitForCompletion(workflowId);
 
         List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();

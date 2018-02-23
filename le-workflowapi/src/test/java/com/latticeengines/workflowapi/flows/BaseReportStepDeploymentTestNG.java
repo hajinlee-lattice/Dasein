@@ -33,7 +33,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
     @Test(groups = "workflow")
     public void testRegisterReport() throws Exception {
         TestReportWorkflowConfiguration workflowConfig = generateConfiguration();
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);

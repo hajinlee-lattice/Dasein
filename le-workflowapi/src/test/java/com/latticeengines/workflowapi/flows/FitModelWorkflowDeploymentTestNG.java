@@ -26,7 +26,7 @@ public class FitModelWorkflowDeploymentTestNG extends FitModelWorkflowTestNGBase
     public void testWorkflow() throws Exception {
         FitModelWorkflowConfiguration workflowConfig = generateFitModelWorkflowConfiguration();
 
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         // Line below is example of how to restart a workflow from the last

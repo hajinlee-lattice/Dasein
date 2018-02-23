@@ -80,7 +80,7 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
         ImportMatchAndScoreWorkflowConfiguration workflowConfig = importMatchAndScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing Data", transformationGroup);
 
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);

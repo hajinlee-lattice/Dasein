@@ -176,7 +176,7 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
 
-        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);
