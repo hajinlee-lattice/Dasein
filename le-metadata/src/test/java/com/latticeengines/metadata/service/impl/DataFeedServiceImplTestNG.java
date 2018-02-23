@@ -119,17 +119,13 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
         datafeedService.updateDataFeed(customerSpace, DATA_FEED_NAME, Status.Active.getName());
         ExecutorService executor = Executors.newFixedThreadPool(1);
         Tenant t = MultiTenantContext.getTenant();
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(50L);
-                    MultiTenantContext.setTenant(t);
-                    assertFalse(
-                            datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
-                } catch (InterruptedException e) {
-                    throw new RuntimeException(e);
-                }
+        executor.execute(() -> {
+            try {
+                Thread.sleep(50L);
+                MultiTenantContext.setTenant(t);
+                assertFalse(datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
             }
         });
         log.info("started locking execution");
