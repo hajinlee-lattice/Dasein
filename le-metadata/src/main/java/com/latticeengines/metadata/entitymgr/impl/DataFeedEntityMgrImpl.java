@@ -126,12 +126,12 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         DataFeedExecution execution = new DataFeedExecution();
         execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Started);
-        log.info(String.format("starting execution %s", execution));
+        log.info(String.format("preparing execution %s", execution));
         datafeedExecutionEntityMgr.create(execution);
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setActiveExecution(execution);
         datafeed.setStatus(jobType.getRunningStatus());
-        log.info(String.format("starting execution: updating data feed to %s", datafeed));
+        log.info(String.format("preparing execution: updating data feed to %s", datafeed));
         update(datafeed);
     }
 
