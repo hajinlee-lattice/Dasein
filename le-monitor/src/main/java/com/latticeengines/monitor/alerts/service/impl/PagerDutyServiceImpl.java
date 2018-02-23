@@ -8,6 +8,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
@@ -41,14 +43,15 @@ public class PagerDutyServiceImpl implements PagerDutyService {
     private static final String TOKEN = "VjqbZdWQbwq2Fy7gniny";
     private static final String MODULE_NAME = "PLS, Modeling Platform, Scoring";
 
-    private String serviceApiKey;
     private static ObjectMapper om = new ObjectMapper();
+    private String serviceApiKey;
     private RestTemplate restTemplate;
 
     @Value("${monitor.alert.service.enabled:false}")
     private boolean alertServiceEnabled;
 
-    public PagerDutyServiceImpl() {
+    @PostConstruct
+    public void postConstruct() {
         this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         List<BasicNameValuePair> headers = this.getHeaders();
