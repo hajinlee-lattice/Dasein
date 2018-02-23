@@ -342,7 +342,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
             this.groups = new HashMap<>();
             groups.forEach((k, v) -> {
                 if (k != null && v != null) {
-                    groups.put(k, v);
+                    this.groups.put(k, v);
                 }
             });
             if (MapUtils.isEmpty(groups)) {
@@ -350,6 +350,26 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
             }
         } else {
             this.groups = null;
+        }
+    }
+
+    public void enableGroup(ColumnSelection.Predefined group) {
+        if (groups == null) {
+            groups = new HashMap<>();
+        }
+        groups.put(group, true);
+    }
+
+    public void disableGroup(ColumnSelection.Predefined group) {
+        if (groups == null) {
+            groups = new HashMap<>();
+        }
+        groups.put(group, false);
+    }
+
+    public void unsetGroup(ColumnSelection.Predefined group) {
+        if (MapUtils.isNotEmpty(groups) && groups.containsKey(group)) {
+            groups.remove(group);
         }
     }
 
