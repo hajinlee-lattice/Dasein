@@ -1,12 +1,17 @@
 package com.latticeengines.metadata.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -24,12 +29,15 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.functionalframework.MetadataFunctionalTestNGBase;
 import com.latticeengines.metadata.service.DataFeedService;
 
 public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
+
+    private static final Logger log = LoggerFactory.getLogger(DataFeedServiceImplTestNG.class);
 
     @Autowired
     private DataFeedService datafeedService;
@@ -106,19 +114,35 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
-    public void startExecution() {
-        datafeedService.updateDataFeed(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME, Status.Active.getName());
-        assertTrue(datafeedService.lockExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
-                DataFeedExecutionJobType.PA));
-        assertNotNull(
-                datafeedService.startExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME).getImports());
-        DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
+    public void startExecution() throws Exception {
+        String customerSpace = MultiTenantContext.getTenant().getId();
+        datafeedService.updateDataFeed(customerSpace, DATA_FEED_NAME, Status.Active.getName());
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Tenant t = MultiTenantContext.getTenant();
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(50L);
+                    MultiTenantContext.setTenant(t);
+                    assertFalse(
+                            datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+        log.info("started locking execution");
+        assertTrue(datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
+        log.info("already locked execution");
+        assertNotNull(datafeedService.startExecution(customerSpace, DATA_FEED_NAME).getImports());
+        DataFeed df = datafeedService.findDataFeedByName(customerSpace, DATA_FEED_NAME);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         DataFeedExecution exec1 = df.getActiveExecution();
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
         assertEquals(exec1.getImports().size(), df.getTasks().size());
-
+        executor.shutdown();
     }
 
     @Test(groups = "functional", dependsOnMethods = "startExecution")

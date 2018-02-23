@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -108,16 +109,23 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
-        DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace);
-        log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
-        Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
-        updateActions(customerSpace, actionAndJobIds.getLeft());
+        try {
+            DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace);
+            log.info(String.format("started execution of %s with status: %s", datafeed.getName(),
+                    execution.getStatus()));
+            Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
+            updateActions(customerSpace, actionAndJobIds.getLeft());
 
-        String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
-        ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
+            String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
+            ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
+                    actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
 
-        return workflowJobService.submit(configuration);
+            return workflowJobService.submit(configuration);
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
+            throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace));
+        }
     }
 
     @VisibleForTesting
@@ -221,8 +229,15 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException("We can't restart processanalyze workflow right now");
         }
 
-        log.info(String.format("restarted execution with status: %s", execution.getStatus()));
-        return workflowJobService.restart(execution.getWorkflowId());
+        try {
+            log.info(String.format("restarted execution with status: %s", execution.getStatus()));
+            return workflowJobService.restart(execution.getWorkflowId());
+
+        } catch (Exception e) {
+            log.error(ExceptionUtils.getStackTrace(e));
+            dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());
+            throw new RuntimeException(String.format("Failed to retry %s's P&A workflow", customerSpace));
+        }
     }
 
 }
