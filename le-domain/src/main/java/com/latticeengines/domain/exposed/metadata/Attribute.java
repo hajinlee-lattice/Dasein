@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -354,6 +354,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
         if (StringUtils.isNotBlank(groups)) {
             return Arrays.stream(groups.split(",")) //
                     .map(ColumnSelection.Predefined::fromName) //
+                    .filter(Objects::nonNull) //
                     .collect(Collectors.toList());
         } else {
             return null;
@@ -373,23 +374,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     }
 
     @JsonIgnore
-    public Map<ColumnSelection.Predefined, Boolean> getGroupsAsMap() {
+    private Map<ColumnSelection.Predefined, Boolean> getGroupsAsMap() {
         if (StringUtils.isNotBlank(groups)) {
             Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
             getGroupsAsList().forEach(g -> map.put(g, true));
             return map;
         } else {
             return null;
-        }
-    }
-
-    public void addToGroups(ColumnSelection.Predefined groupToAdd) {
-        List<ColumnSelection.Predefined> groupList = getGroupsAsList();
-        if (CollectionUtils.isEmpty(groupList)) {
-            setGroupsViaList(Collections.singletonList(groupToAdd));
-        } else if (!groupList.contains(ColumnSelection.Predefined.TalkingPoint)) {
-            groupList.add(ColumnSelection.Predefined.TalkingPoint);
-            setGroupsViaList(groupList);
         }
     }
 

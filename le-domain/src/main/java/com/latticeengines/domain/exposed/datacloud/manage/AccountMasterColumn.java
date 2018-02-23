@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -446,6 +447,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
             Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
             Arrays.stream(getGroups().split(",")) //
                     .map(ColumnSelection.Predefined::fromName)
+                    .filter(Objects::nonNull) //
                     .forEach(g -> map.put(g, true));
             return map;
         } else {
