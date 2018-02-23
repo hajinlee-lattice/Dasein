@@ -11,11 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
 
@@ -47,6 +47,8 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         CustomerSpace customerSpace = CustomerSpace.parse(WORKFLOW_TENANT);
         configuration.setContainerConfiguration(runCompletedStepAgainWorkflow.name(), customerSpace,
                 runCompletedStepAgainWorkflow.name());
+
+        workflowService.registerJob(configuration.getWorkflowName(), applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(configuration);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 1000L).getStatus();
         List<String> stepNames = workflowService.getStepNames(workflowId);
@@ -61,6 +63,7 @@ public class RunStepAgainWhenCompleteTestNG extends WorkflowTestNGBase {
         workflowJob2.setTenant(MultiTenantContext.getTenant());
         workflowJob2.setApplicationId(appid);
         workflowJobEntityMgr.create(workflowJob2);
+
         WorkflowExecutionId restartedWorkflowId = workflowService.restart(workflowId, workflowJob2);
         status = workflowService.waitForCompletion(restartedWorkflowId, MAX_MILLIS_TO_WAIT, 1000).getStatus();
         List<String> restartedStepNames = workflowService.getStepNames(restartedWorkflowId);

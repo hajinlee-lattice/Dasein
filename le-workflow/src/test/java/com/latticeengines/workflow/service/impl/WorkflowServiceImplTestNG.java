@@ -7,21 +7,33 @@ import static org.testng.Assert.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.workflow.*;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -29,7 +41,6 @@ import com.latticeengines.workflow.functionalframework.AnotherSuccessfulStep;
 import com.latticeengines.workflow.functionalframework.FailableStep;
 import com.latticeengines.workflow.functionalframework.FailableWorkflow;
 import com.latticeengines.workflow.functionalframework.FailingListener;
-import com.latticeengines.workflow.functionalframework.RunCompletedStepAgainWorkflow;
 import com.latticeengines.workflow.functionalframework.SleepableStep;
 import com.latticeengines.workflow.functionalframework.SleepableWorkflow;
 import com.latticeengines.workflow.functionalframework.SuccessfulListener;
@@ -48,9 +59,6 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
 
     @Autowired
     private FailableWorkflow failableWorkflow;
-
-    @Autowired
-    private RunCompletedStepAgainWorkflow runCompletedStepAgainWorkflow;
 
     @Autowired
     private SleepableStep sleepableStep;
@@ -90,6 +98,9 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
         executorService = Executors.newSingleThreadScheduledExecutor();
+        workflowService.registerJob(failableWorkflow.name(), applicationContext);
+        workflowService.registerJob(sleepableWorkflow.name(), applicationContext);
+        workflowService.registerJob(workflowWithFailingListener.name(), applicationContext);
     }
 
     @AfterClass(groups = "functional")
@@ -129,7 +140,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         this.workflowId = workflowId.getId();
-        ScheduledFuture future = checkWorkflowJobUpdate(workflowId);
+        ScheduledFuture<?> future = checkWorkflowJobUpdate(workflowId);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         future.cancel(true);
@@ -141,7 +152,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         workflowConfig.setWorkflowName(failableWorkflow.name());
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         this.workflowId = workflowId.getId();
-        ScheduledFuture future = checkWorkflowJobUpdate(workflowId);
+        ScheduledFuture<?> future = checkWorkflowJobUpdate(workflowId);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
         List<Job> jobs = workflowService.getJobs(Collections.singletonList(workflowId), failableWorkflow.name());
@@ -213,13 +224,6 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testGetNames() {
-        List<String> workflowNames = workflowService.getNames();
-        assertTrue(workflowNames.contains(failableWorkflow.name()));
-        assertTrue(workflowNames.contains(runCompletedStepAgainWorkflow.name()));
-    }
-
-    @Test(groups = "functional")
     public void testWorkflowWithFailingListener() throws Exception {
         int successfulListenerCalls = SuccessfulListener.calls;
         int failureListenerCalls = FailingListener.calls;
@@ -254,7 +258,7 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         assertEquals(status, BatchStatus.STOPPED);
     }
 
-    private ScheduledFuture checkWorkflowJobUpdate(WorkflowExecutionId workflowId) {
+    private ScheduledFuture<?> checkWorkflowJobUpdate(WorkflowExecutionId workflowId) {
         Long workflowPid = workflowJobEntityMgr.findByWorkflowId(workflowId.getId()).getPid();
         WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
         assertNotNull(jobUpdate);
@@ -264,8 +268,9 @@ public class WorkflowServiceImplTestNG extends WorkflowTestNGBase {
         AtomicLong lastUpdateTime = new AtomicLong(jobUpdate.getLastUpdateTime());
         return executorService.scheduleAtFixedRate(() -> {
             Long updateTime = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid).getLastUpdateTime();
-            log.info(String.format("workflowPid = %s, updateTime = %s, lastUpdateTime = %s", workflowPid, updateTime, lastUpdateTime));
+            log.info(String.format("workflowPid = %s, updateTime = %s, lastUpdateTime = %s", workflowPid, updateTime,
+                    lastUpdateTime));
             assertTrue(updateTime >= lastUpdateTime.getAndSet(updateTime));
-        } , 2L, 2L, TimeUnit.SECONDS);
+        }, 2L, 2L, TimeUnit.SECONDS);
     }
 }

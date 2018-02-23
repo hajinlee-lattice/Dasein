@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfiguration;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.ScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
     static final String RESOURCE_BASE = "com/latticeengines/workflowapi/flows/leadprioritization";
@@ -49,7 +49,7 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
 
     private void setupTables() throws IOException {
         InputStream ins = getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + "/tables/Account.json");
-        accountTable = JsonUtils.deserialize(IOUtils.toString(ins), Table.class);
+        accountTable = JsonUtils.deserialize(IOUtils.toString(ins, "UTF-8"), Table.class);
         accountTable.setName("ScoreWorkflowDeploymentTest_Account");
         metadataProxy.createTable(MultiTenantContext.getCustomerSpace().toString(), accountTable.getName(),
                 accountTable);
@@ -66,10 +66,12 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
                 "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
                         + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid);
         String summaryHdfsPath = "/user/s-analytics/customers/" + mainTestCustomerSpace.toString()
-                + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid + "/enhancements/modelsummary.json";
+                + "/models/RunMatchWithLEUniverse_152637_DerivedColumnsCache_with_std_attrib/" + uuid
+                + "/enhancements/modelsummary.json";
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration, summaryHdfsPath));
 
-        InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(RESOURCE_BASE + "/models/AccountModel/random_uuid/enhancements/modelsummary.json");
+        InputStream is = Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(RESOURCE_BASE + "/models/AccountModel/random_uuid/enhancements/modelsummary.json");
         String summary = IOUtils.toString(is, Charset.forName("UTF-8"));
         summary = summary.replace("{% uuid %}", uuid);
         HdfsUtils.writeToFile(yarnConfiguration, summaryHdfsPath, summary);
@@ -88,9 +90,11 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
-        ScoreWorkflowConfiguration configuration = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
+        ScoreWorkflowConfiguration workflowConfig = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
                 new Table(), tableToScore, TransformationGroup.STANDARD);
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);
     }

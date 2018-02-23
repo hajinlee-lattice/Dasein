@@ -10,12 +10,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -88,9 +88,10 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
         builder.customer(mainTestCustomerSpace);
         builder.microServiceHostPort(microserviceHostPort);
         builder.internalResourceHostPort(internalResourceHostPort);
-        RedshiftPublishWorkflowConfiguration config = builder.build();
+        RedshiftPublishWorkflowConfiguration workflowConfig = builder.build();
 
-        WorkflowExecutionId workflowId = workflowService.start(config);
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
         verify(targetTableName, 122);
         verifyReport(workflowId, ReportPurpose.PUBLISH_DATA_SUMMARY, 122);
@@ -133,7 +134,8 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
     }
 
     private void verifyReport(WorkflowExecutionId workflowId, ReportPurpose purpose, int count) {
-        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(), true);
+        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(),
+                true);
         Report publishDataReport = job.getReports().stream()
                 .filter(r -> r.getPurpose().equals(ReportPurpose.PUBLISH_DATA_SUMMARY)).findFirst().orElse(null);
         assertNotNull(publishDataReport);

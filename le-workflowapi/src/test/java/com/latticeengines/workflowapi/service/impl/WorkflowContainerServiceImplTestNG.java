@@ -16,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.RemoteLedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -26,13 +27,13 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 
 public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(WorkflowContainerServiceImplTestNG.class);
 
     @Autowired

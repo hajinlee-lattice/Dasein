@@ -33,7 +33,8 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchWorkflowDeploymentTestNG.class);
 
-    private WorkflowExecutionId workflowId = null;
+    @SuppressWarnings("unused")
+    private WorkflowExecutionId workflowId;
 
     @Autowired
     private TestPlayDao testPlayDao;
@@ -75,6 +76,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         // deleteTestSegment();
     }
 
+    @SuppressWarnings("unused")
     private PlayLaunchWorkflowConfiguration generatePlayLaunchWorkflowConfiguration() throws Exception {
         Map<String, String> inputProperties = new HashMap<>();
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "playLaunchWorkflow");
@@ -86,6 +88,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
                 .build();
     }
 
+    @SuppressWarnings("unused")
     private PlayLaunch createTestPlayLaunch(Play play) {
         PlayLaunch playLaunch = new PlayLaunch();
         MetadataSegment segment = new MetadataSegment();
@@ -109,6 +112,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         return playLaunch;
     }
 
+    @SuppressWarnings("unused")
     private Play createTestPlay() {
         Play play = new Play();
         play.setDisplayName("WorkFlowTestPlay");
@@ -129,6 +133,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         return play;
     }
 
+    @SuppressWarnings("unused")
     private MetadataSegment createTestSegment() {
         MetadataSegment segment = new MetadataSegment();
         segment.setName("PlayLaunchWorkflowTestSegment");
@@ -145,6 +150,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         return retrieved;
     }
 
+    @SuppressWarnings("unused")
     private void deleteTestPlay() {
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
@@ -156,6 +162,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         });
     }
 
+    @SuppressWarnings("unused")
     private void deleteTestPlayLaunch() {
         PlatformTransactionManager ptm = applicationContext.getBean("transactionManager",
                 PlatformTransactionManager.class);
@@ -167,6 +174,7 @@ public class PlayLaunchWorkflowDeploymentTestNG extends WorkflowApiDeploymentTes
         });
     }
 
+    @SuppressWarnings("unused")
     private void deleteTestSegment() {
         restTemplate
                 .delete(String.format(getPLSRestAPIHostPort() + "/pls/datacollection/segments/%s", segment.getName()));

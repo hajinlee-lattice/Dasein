@@ -42,9 +42,11 @@ public class ImportAndRTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflow
     }
 
     private void score(String modelId, String tableToScore) throws Exception {
-        ImportAndRTSBulkScoreWorkflowConfiguration configuration = importAndRTSBulkScoreWorkflowSubmitter
+        ImportAndRTSBulkScoreWorkflowConfiguration workflowConfig = importAndRTSBulkScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing RTS Bulk Score Data", false, false);
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
     }
 }

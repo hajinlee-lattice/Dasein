@@ -93,11 +93,6 @@ public class WorkflowServiceImpl implements WorkflowService {
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Override
-    public List<String> getNames() {
-        return new ArrayList<>(jobRegistry.getJobNames());
-    }
-
-    @Override
     public void registerJob(String name, ApplicationContext context) {
         Job job;
         try {

@@ -18,6 +18,8 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -31,8 +33,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.workflow.ImportMatchAndScoreWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymentTestNGBase {
 
@@ -70,16 +70,18 @@ public class ImportMatchAndScoreWorkflowDeploymentTestNG extends ScoreWorkflowDe
 
     private void setupTables() throws IOException {
         InputStream ins = getClass().getClassLoader().getResourceAsStream(RESOURCE_BASE + "/tables/Account.json");
-        accountTable = JsonUtils.deserialize(IOUtils.toString(ins), Table.class);
+        accountTable = JsonUtils.deserialize(IOUtils.toString(ins, "UTF-8"), Table.class);
         accountTable.setName("ScoreWorkflowDeploymentTest_Account");
         metadataProxy.createTable(MultiTenantContext.getCustomerSpace().toString(), accountTable.getName(),
                 accountTable);
     }
 
     private void score(String modelId, String tableToScore, TransformationGroup transformationGroup) throws Exception {
-        ImportMatchAndScoreWorkflowConfiguration configuration = importMatchAndScoreWorkflowSubmitter
+        ImportMatchAndScoreWorkflowConfiguration workflowConfig = importMatchAndScoreWorkflowSubmitter
                 .generateConfiguration(modelId, sourceFile, "Testing Data", transformationGroup);
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);
     }

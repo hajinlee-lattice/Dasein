@@ -18,6 +18,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
@@ -38,8 +40,6 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
 public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiDeploymentTestNGBase {
@@ -106,9 +106,11 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
     }
 
     protected void model(ModelingParameters parameters) throws Exception {
-        ImportMatchAndModelWorkflowConfiguration configuration = importMatchAndModelWorkflowSubmitter
+        ImportMatchAndModelWorkflowConfiguration workflowConfig = importMatchAndModelWorkflowSubmitter
                 .generateConfiguration(parameters);
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);
     }

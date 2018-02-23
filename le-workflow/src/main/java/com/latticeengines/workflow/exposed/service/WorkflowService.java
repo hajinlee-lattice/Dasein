@@ -16,8 +16,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 
 public interface WorkflowService {
 
-    List<String> getNames();
-
     WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration);
 
     WorkflowExecutionId restart(WorkflowExecutionId workflowId, WorkflowJob workflowJob);
@@ -37,7 +35,8 @@ public interface WorkflowService {
 
     WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime) throws Exception;
 
-    WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) throws Exception;
+    WorkflowStatus waitForCompletion(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval)
+            throws Exception;
 
     Job getJob(WorkflowExecutionId workflowId);
 

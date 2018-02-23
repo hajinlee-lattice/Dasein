@@ -25,6 +25,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -47,7 +48,6 @@ import com.latticeengines.pls.service.ModelNoteService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWorkflowDeploymentTestNGBase {
 
@@ -172,11 +172,12 @@ public class MatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndModelWo
         noteParams.setUserName("penglong.liu@lattice-engines.com");
         noteParams.setContent("this is a test case");
         modelNoteService.create(modelSummary.getId(), noteParams);
-        MatchAndModelWorkflowConfiguration configuration = matchAndModelWorkflowSubmitter.generateConfiguration(
+        MatchAndModelWorkflowConfiguration workflowConfig = matchAndModelWorkflowSubmitter.generateConfiguration(
                 clone.getName(), parameters, TransformationGroup.STANDARD, userRefinedAttributes, modelSummary);
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
 
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);
     }

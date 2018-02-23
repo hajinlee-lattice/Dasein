@@ -9,11 +9,11 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
@@ -32,12 +32,14 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
 
     @Test(groups = "workflow")
     public void testRegisterReport() throws Exception {
-        TestReportWorkflowConfiguration configuration = generateConfiguration();
-        WorkflowExecutionId workflowId = workflowService.start(configuration);
+        TestReportWorkflowConfiguration workflowConfig = generateConfiguration();
+        workflowService.registerJob(workflowConfig.getName(), applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
-        
-        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(), true);
+
+        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(),
+                true);
         assertEquals(job.getReports().size(), 1);
         Report report = job.getReports().get(0);
         assertTrue(report.getName().startsWith("Test"));

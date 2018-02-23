@@ -73,6 +73,7 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
+        workflowService.registerJob(dynamicWorkflow.name(), applicationContext);
     }
 
     @AfterClass(groups = "functional")
@@ -96,6 +97,7 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
         choreographer.examinedSteps = new ArrayList<>();
         choreographer.setSkipStrategy(skipStrategy);
         workflowConfig.setWorkflowName(dynamicWorkflow.name());
+
         workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 1000).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
@@ -104,8 +106,7 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
 
     @DataProvider(name = "dynamicWorkflowTestConfig")
     private Object[][] dynamicWorkflowTestConfig() {
-        return new Object[][] {
-                { DynamicWorkflowChoreographer.NO_SKIP, Collections.emptyList()}, //
+        return new Object[][] { { DynamicWorkflowChoreographer.NO_SKIP, Collections.emptyList() }, //
                 { DynamicWorkflowChoreographer.SKIP_ALL_C, Arrays.asList(4, 6, 7) }, //
                 { DynamicWorkflowChoreographer.SKIP_ROOT_A, Collections.singletonList(0) }, //
                 { DynamicWorkflowChoreographer.SKIP_C_IN_WORKFLOW_B, Arrays.asList(4, 7) }, //
@@ -121,7 +122,7 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
         List<List<Object>> shouldSkip = new ArrayList<>();
         List<List<Object>> shouldNotSkip = new ArrayList<>();
 
-        for (List<Object> objs: choreographer.examinedSteps) {
+        for (List<Object> objs : choreographer.examinedSteps) {
             int stepSeq = (int) objs.get(0);
             String stepName = (String) objs.get(1);
             boolean skipped = (boolean) objs.get(2);
@@ -136,26 +137,26 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
             }
 
             switch (stepSeq) {
-                case 0:
-                case 2:
-                    Assert.assertEquals(stepName, stepA.getStepName());
-                    break;
-                case 1:
-                case 3:
-                    Assert.assertEquals(stepName, stepB.getStepName());
-                    break;
-                case 4:
-                case 6:
-                case 7:
-                    Assert.assertEquals(stepName, stepC.getStepName());
-                    break;
-                case 5:
-                case 8:
-                case 9:
-                    Assert.assertEquals(stepName, stepD.getStepName());
-                    break;
-                default:
-                    Assert.fail("There should not be a " + stepSeq + "-th step");
+            case 0:
+            case 2:
+                Assert.assertEquals(stepName, stepA.getStepName());
+                break;
+            case 1:
+            case 3:
+                Assert.assertEquals(stepName, stepB.getStepName());
+                break;
+            case 4:
+            case 6:
+            case 7:
+                Assert.assertEquals(stepName, stepC.getStepName());
+                break;
+            case 5:
+            case 8:
+            case 9:
+                Assert.assertEquals(stepName, stepD.getStepName());
+                break;
+            default:
+                Assert.fail("There should not be a " + stepSeq + "-th step");
             }
             idx++;
         }

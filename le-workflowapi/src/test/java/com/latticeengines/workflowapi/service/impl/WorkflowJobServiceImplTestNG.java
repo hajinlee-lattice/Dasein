@@ -1,37 +1,55 @@
 package com.latticeengines.workflowapi.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.api.records.YarnApplicationState;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.batch.core.*;
-import org.springframework.batch.core.repository.dao.*;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameter;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.StepExecution;
+import org.springframework.batch.core.repository.dao.JobExecutionDao;
+import org.springframework.batch.core.repository.dao.JobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapJobExecutionDao;
+import org.springframework.batch.core.repository.dao.MapJobInstanceDao;
+import org.springframework.batch.core.repository.dao.MapStepExecutionDao;
+import org.springframework.batch.core.repository.dao.StepExecutionDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.Test;
-import org.mockito.Mockito;
 
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.workflow.*;
-import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
-import com.latticeengines.workflowapi.service.WorkflowJobService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
-
-import javax.annotation.PostConstruct;
+import com.latticeengines.workflowapi.service.WorkflowJobService;
 
 public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImplTestNG.class);
@@ -153,7 +171,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         testWorkflowIds1.add(workflowIds.get(10000L));
         testWorkflowIds1.add(workflowIds.get(20000L));
         testWorkflowIds1.add(workflowIds.getOrDefault(90000L, 90000L));
-        List<JobStatus> statuses = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1);
+        List<JobStatus> statuses = workflowJobService.getJobStatus(WFAPITEST_CUSTOMERSPACE.toString(),
+                testWorkflowIds1);
         Assert.assertEquals(statuses.size(), 2);
         Assert.assertEquals(statuses.get(0), JobStatus.RUNNING);
         Assert.assertEquals(statuses.get(1), JobStatus.FAILED);
@@ -182,9 +201,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertEquals(status, JobStatus.FAILED);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus",
-            expectedExceptions = { RuntimeException.class },
-            expectedExceptionsMessageRegExp = "No tenant found with id .*")
+    @Test(groups = "functional", dependsOnMethods = "testGetJobStatus", expectedExceptions = {
+            RuntimeException.class }, expectedExceptionsMessageRegExp = "No tenant found with id .*")
     public void testGetJobs() {
         mockWorkflowService();
         setupLEJobExecutionRetriever();
@@ -217,7 +235,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         Assert.assertTrue(applicationIds.contains("application_30001"));
 
         List<Long> workflowExecutionIds = new ArrayList<>(workflowIds.values());
-        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds, null, true, null, null);
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), workflowExecutionIds, null, true, null,
+                null);
         Assert.assertEquals(jobs.size(), 5);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10000");
         Assert.assertEquals(jobs.get(0).getSteps().size(), 2);
@@ -291,18 +310,21 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
         List<String> testTypes = new ArrayList<>();
         testTypes.add("application_10001");
-        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, false, false, 0L);
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, false, false,
+                0L);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         Assert.assertNull(jobs.get(0).getSteps());
 
-        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, true, false, 0L);
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, testTypes, true, false,
+                0L);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         Assert.assertNotNull(jobs.get(0).getSteps());
 
         Long parentJobId = workflowIds.get(10000L);
-        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, null, true, true, parentJobId);
+        jobs = workflowJobService.getJobs(WFAPITEST_CUSTOMERSPACE.toString(), testWorkflowIds1, null, true, true,
+                parentJobId);
         Assert.assertEquals(jobs.size(), 2);
         Assert.assertEquals(jobs.get(0).getApplicationId(), "application_10001");
         Assert.assertNotNull(jobs.get(0).getSteps());
@@ -410,7 +432,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob1.setApplicationId(applicationId);
         workflowJob1.setInputContext(inputContext);
         workflowJob1.setTenant(tenant);
-        workflowJob1.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name(), YarnApplicationState.RUNNING).name());
+        workflowJob1.setStatus(
+                JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name(), YarnApplicationState.RUNNING).name());
         workflowJob1.setWorkflowId(jobExecution1.getJobId());
         workflowJob1.setType(jobInstance1.getJobName());
         workflowJob1.setParentJobId(null);
@@ -574,7 +597,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         workflowJob31.setApplicationId(applicationId);
         workflowJob31.setInputContext(inputContext);
         workflowJob31.setTenant(tenant3);
-        workflowJob31.setStatus(JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name(), YarnApplicationState.RUNNING).name());
+        workflowJob31.setStatus(
+                JobStatus.fromString(FinalApplicationStatus.UNDEFINED.name(), YarnApplicationState.RUNNING).name());
         workflowJob31.setWorkflowId(jobExecution31.getJobId());
         workflowJob31.setType(jobInstance31.getJobName());
         workflowJobEntityMgr.create(workflowJob31);
@@ -609,52 +633,43 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
     @SuppressWarnings("unchecked")
     private void mockWorkflowService() {
         WorkflowService workflowService = Mockito.mock(WorkflowService.class);
-        Mockito.when(workflowService.getJobs(Mockito.anyList())).thenAnswer(
-                invocation -> {
-                    List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
-                    List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId)
-                            .collect(Collectors.toList());
-                    List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
-                    return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-                }
-        );
-        Mockito.when(workflowService.getJobs(Mockito.anyList(), Mockito.anyString())).thenAnswer(
-                invocation -> {
-                    List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
-                    String type = (String) invocation.getArguments()[1];
-                    List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId)
-                            .collect(Collectors.toList());
-                    List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
-                    workflowJobs.removeIf(workflowJob -> !workflowJob.getType().equals(type));
-                    return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-                }
-        );
-        Mockito.when(workflowService.getStepNames(Mockito.any(WorkflowExecutionId.class))).thenAnswer(
-                invocation -> {
-                    Long workflowId = ((WorkflowExecutionId) invocation.getArguments()[0]).getId();
-                    Job job = workflowJobToJobMapper.apply(workflowJobEntityMgr.findByWorkflowId(workflowId));
-                    if (job != null) {
-                        List<JobStep> jobSteps = job.getSteps();
-                        return jobSteps.stream().map(JobStep::getName).collect(Collectors.toList());
-                    } else {
-                        return null;
-                    }
-                }
-        );
+        Mockito.when(workflowService.getJobs(Mockito.anyList())).thenAnswer(invocation -> {
+            List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
+            List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId).collect(Collectors.toList());
+            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
+            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
+        });
+        Mockito.when(workflowService.getJobs(Mockito.anyList(), Mockito.anyString())).thenAnswer(invocation -> {
+            List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
+            String type = (String) invocation.getArguments()[1];
+            List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId).collect(Collectors.toList());
+            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
+            workflowJobs.removeIf(workflowJob -> !workflowJob.getType().equals(type));
+            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
+        });
+        Mockito.when(workflowService.getStepNames(Mockito.any(WorkflowExecutionId.class))).thenAnswer(invocation -> {
+            Long workflowId = ((WorkflowExecutionId) invocation.getArguments()[0]).getId();
+            Job job = workflowJobToJobMapper.apply(workflowJobEntityMgr.findByWorkflowId(workflowId));
+            if (job != null) {
+                List<JobStep> jobSteps = job.getSteps();
+                return jobSteps.stream().map(JobStep::getName).collect(Collectors.toList());
+            } else {
+                return null;
+            }
+        });
         ((WorkflowJobServiceImpl) workflowJobService).setWorkflowService(workflowService);
     }
 
+    @SuppressWarnings("unused")
     private void mockWorkflowContainerService() {
         WorkflowContainerService workflowContainerService = Mockito.mock(WorkflowContainerService.class);
-        Mockito.when(workflowContainerService.getJobsByTenant(Mockito.anyLong())).thenAnswer(
-                invocation -> {
-                    Long tenantPid = (Long) invocation.getArguments()[0];
-                    Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-                    MultiTenantContext.setTenant(tenant);
-                    List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
-                    return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-                }
-        );
+        Mockito.when(workflowContainerService.getJobsByTenant(Mockito.anyLong())).thenAnswer(invocation -> {
+            Long tenantPid = (Long) invocation.getArguments()[0];
+            Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
+            MultiTenantContext.setTenant(tenant);
+            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
+            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
+        });
         ((WorkflowJobServiceImpl) workflowJobService).setWorkflowContainerService(workflowContainerService);
     }
 }

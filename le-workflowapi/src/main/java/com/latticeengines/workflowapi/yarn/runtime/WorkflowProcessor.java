@@ -1,7 +1,5 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
-import com.latticeengines.domain.exposed.workflow.*;
-
 import java.util.Collection;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -15,6 +13,12 @@ import com.latticeengines.common.exposed.version.VersionManager;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
@@ -68,8 +72,8 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                     appContext, versionManager);
         } else {
             log.info("Enriching application context with sw package " + swpkgNames);
-            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(), swpkgNames,
-                    appContext, versionManager);
+            appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
+                    swpkgNames, appContext, versionManager);
         }
         workflowService.registerJob(workflowConfig.getWorkflowName(), appContext);
 
@@ -88,8 +92,9 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
             WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);
             workflowJob.setStatus(JobStatus.fromString(workflowStatus.getStatus().name()).name());
-            log.info(String.format("Completed workflow - workflowId:%s batchStatus:%s yarnStatus:%s appId:%s " +
-                            "startTime:%s endTime:%s",
+            log.info(String.format(
+                    "Completed workflow - workflowId:%s batchStatus:%s yarnStatus:%s appId:%s "
+                            + "startTime:%s endTime:%s",
                     String.valueOf(workflowId.getId()), workflowStatus.getStatus(), workflowStatus.toYarnStatus(),
                     appId.toString(), workflowStatus.getStartTime(), workflowStatus.getEndTime()));
         } catch (Exception e) {
