@@ -2,7 +2,6 @@ package com.latticeengines.datacloud.etl.publication.service.impl;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -17,6 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication;
 import com.latticeengines.domain.exposed.datacloud.manage.Publication.MaterialType;
 import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
+import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublishToSqlConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.SqlDestination;
 
@@ -104,6 +104,7 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
         configuration.setDefaultTableName("DefaultTable");
         configuration.setPublicationStrategy(PublicationConfiguration.PublicationStrategy.VERSIONED);
         publication.setDestinationConfiguration(configuration);
+        publication.setSchedularEnabled(false);
 
         return publicationEntityMgr.addPublication(publication);
     }
