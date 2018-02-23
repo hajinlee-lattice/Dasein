@@ -17,7 +17,6 @@ public class AdminLoginProxy extends BaseRestApiProxy {
 
     public AdminLoginProxy() {
         super(PropertyUtils.getProperty("common.test.admin.url"), "admin");
-        setMaxAttempts(3);
     }
 
     protected String login(String username, String password) {

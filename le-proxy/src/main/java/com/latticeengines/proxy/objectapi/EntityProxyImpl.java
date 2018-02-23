@@ -50,7 +50,6 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
     @Inject
     public EntityProxyImpl(CacheManager cacheManager, EntityProxyImpl entityProxy) {
         super("objectapi/customerspaces");
-        setMaxAttempts(2);
         this._entityProxy = entityProxy;
         this.cacheManager = cacheManager;
         countCache = new LocalCacheManager<>(CacheName.EntityCountCache, o -> {
@@ -140,7 +139,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         } else {
             url = constructUrl("/{customerSpace}/entity/data", tenantId);
         }
-        return postWithRetries("getData", url, frontEndQuery, DataPage.class);
+        return post("getData", url, frontEndQuery, DataPage.class);
     }
 
     private FrontEndQuery getRatingCountQuery(FrontEndQuery frontEndQuery) {
@@ -183,7 +182,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         } else {
             url = constructUrl("/{customerSpace}/entity/count", tenantId);
         }
-        return postWithRetries("getCount", url, frontEndQuery, Long.class);
+        return post("getCount", url, frontEndQuery, Long.class);
     }
 
     private DataPage getDataFromObjectApi(String serializedKey) {
@@ -191,7 +190,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/data", tenantId);
-        return postWithRetries("getData", url, frontEndQuery, DataPage.class);
+        return post("getData", url, frontEndQuery, DataPage.class);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -200,7 +199,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        return postWithRetries("getRatingCount", url, frontEndQuery, Map.class);
+        return post("getRatingCount", url, frontEndQuery, Map.class);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {

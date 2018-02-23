@@ -1,6 +1,5 @@
 package com.latticeengines.testframework.exposed.proxy.pls;
 
-import com.latticeengines.testframework.exposed.proxy.admin.AdminLoginProxy;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +9,7 @@ import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.pls.LoginDocument;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
+import com.latticeengines.testframework.exposed.proxy.admin.AdminLoginProxy;
 
 @Component("globalAuthLoginProxy")
 public class PlsLoginProxy extends BaseRestApiProxy {
@@ -18,7 +18,6 @@ public class PlsLoginProxy extends BaseRestApiProxy {
 
     public PlsLoginProxy() {
         super(PropertyUtils.getProperty("common.test.pls.url"), "pls");
-        setMaxAttempts(3);
     }
 
     protected String login(String username, String password) {

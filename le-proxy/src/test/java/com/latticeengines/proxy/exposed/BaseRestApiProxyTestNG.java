@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
+
     @Autowired
     private TestProxy testProxy;
 

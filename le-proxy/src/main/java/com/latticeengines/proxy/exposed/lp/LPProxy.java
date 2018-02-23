@@ -14,7 +14,6 @@ public class LPProxy extends MicroserviceRestApiProxy {
 
     protected LPProxy() {
         super("lp");
-        setMaxAttempts(1);
     }
 
     public void bootstrap(BootstrapRequest bootstrapRequest) {

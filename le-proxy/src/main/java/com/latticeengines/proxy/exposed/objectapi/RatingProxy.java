@@ -45,7 +45,6 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
     @Inject
     public RatingProxy(CacheManager cacheManager, RatingProxy ratingProxy) {
         super("objectapi/customerspaces");
-        setMaxAttempts(2);
         this.cacheManager = cacheManager;
         this._ratingProxy = ratingProxy;
         coverageCache = new LocalCacheManager<>(CacheName.RatingCoverageCache, str -> {
@@ -105,7 +104,7 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         } else {
             url = constructUrl("/{customerSpace}/rating/count", tenantId);
         }
-        return postWithRetries("getCount", url, frontEndQuery, Long.class);
+        return post("getCount", url, frontEndQuery, Long.class);
     }
 
     public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
@@ -115,7 +114,7 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         } else {
             url = constructUrl("/{customerSpace}/rating/data", tenantId);
         }
-        return postWithRetries("getData", url, frontEndQuery, DataPage.class);
+        return post("getData", url, frontEndQuery, DataPage.class);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -124,7 +123,7 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
         String url = constructUrl("/{customerSpace}/rating/coverage", tenantId);
-        return postWithRetries("getRatingCoverage", url, frontEndQuery, Map.class);
+        return post("getRatingCoverage", url, frontEndQuery, Map.class);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {
