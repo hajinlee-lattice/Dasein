@@ -111,8 +111,12 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         if (inputTable == null) {
             throw new RuntimeException("There's no input table found!");
         }
-        long count = AvroUtils.count(yarnConfiguration, inputTable.getExtracts().get(0).getPath());
-        log.info(count + " records in input table " + inputTable.getName() + ":" + inputTable.getExtracts().get(0).getPath());
+        String path = inputTable.getExtracts().get(0).getPath();
+        if (!path.endsWith(".avro")) {
+            path = path + "/" + "*.avro";
+        }
+        long count = AvroUtils.count(yarnConfiguration, path);
+        log.info(count + " records in input table " + inputTable.getName() + ":" + path);
         List<Attribute> attributes = inputTable.getAttributes();
         for (Attribute attribute : attributes) {
             attribute.setApprovedUsage(ApprovedUsage.NONE);
