@@ -54,7 +54,11 @@ public class WatcherCache<K, V> {
             initialize();
         }
         if (cache.getIfPresent(key) == null) {
-            loadKey(key);
+            synchronized (this) {
+                if (cache.getIfPresent(key) == null) {
+                    loadKey(key);
+                }
+            }
         }
         return cache.getIfPresent(key);
     }
