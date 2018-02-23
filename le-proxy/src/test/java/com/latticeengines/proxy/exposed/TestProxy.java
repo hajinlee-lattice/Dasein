@@ -1,5 +1,9 @@
 package com.latticeengines.proxy.exposed;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.springframework.http.HttpMethod;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 
@@ -21,12 +25,18 @@ public class TestProxy extends BaseRestApiProxy {
         return get("testRetry", constructUrl("/retry"), String.class);
     }
 
-    public String testDirectlyFail() {
-        return get("testDirectlyFail", constructUrl("/runtime"), String.class);
+    public String getWithCounter(String endpoint, AtomicInteger counter) {
+        String url = constructUrl("/" + endpoint);
+        return getWithCounter("get " + endpoint,  url, String.class, counter);
     }
 
-    public String testRetryAndFail() {
-        return get("testRetryAndFail", constructUrl("/timeout"), String.class);
+    private  <T> T getWithCounter(final String method, final String url, final Class<T> returnValueClazz, final AtomicInteger counter) {
+        final HttpMethod verb = HttpMethod.GET;
+        RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
+        return retry.execute(context -> {
+            counter.incrementAndGet();
+            return exchange(url, verb, null, returnValueClazz, false, false).getBody();
+        });
     }
     
     

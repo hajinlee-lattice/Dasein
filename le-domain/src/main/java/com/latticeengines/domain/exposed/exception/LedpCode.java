@@ -10,6 +10,7 @@ public enum LedpCode {
     LEDP_00004("Could not delete hdfs dir {0}."), //
     LEDP_00005("API call rate limit reached, discarding new request: {0}"), //
     LEDP_00006("Failed because the system is busy.  Please try again later"), //
+    LEDP_00007("Generic rest call error."), //
     // Validation service: 10000-10999
     LEDP_10000("Metadata schema is null."), //
     LEDP_10001("Metadata schema is not retrievable from hdfs."), //

@@ -1,8 +1,11 @@
 package com.latticeengines.proxy.exposed;
 
+import static org.testng.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.net.ssl.KeyManager;
@@ -13,8 +16,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.web.client.ResourceAccessException;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.mchange.v2.resourcepool.TimeoutException;
@@ -25,13 +30,24 @@ import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
 
-import static org.testng.Assert.assertTrue;
-
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private TestProxy testProxy;
+
+    private Undertow server;
+
+    @BeforeClass(groups = "functional")
+    public void setup() throws Exception {
+        server = getHttpServer();
+        server.start();
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() {
+        server.stop();
+    }
 
     @Test(groups = "functional")
     public void testUrlExpansion() {
@@ -39,31 +55,29 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional")
-    public void testRetry() throws Exception {
-        Undertow server = getHttpServer();
-        server.start();
+    public void testSuccessRetry() {
+        Assert.assertEquals(testProxy.testRetry(), "Hello World");
+    }
+
+    @Test(groups = "functional", dataProvider = "endpointProvider")
+    public void testRetryAndFail(String endPoint, int expectedAttempts) {
+        boolean thrown = false;
+        AtomicInteger counter = new AtomicInteger();
         try {
-            Assert.assertEquals(testProxy.testRetry(), "Hello World");
-
-            boolean thrown = false;
-            try {
-                testProxy.testDirectlyFail();
-            } catch (Exception e) {
-                thrown = true;
-            }
-            assertTrue(thrown);
-
-            thrown = false;
-            try {
-                testProxy.testRetryAndFail();
-            } catch (Exception e) {
-                thrown = true;
-            }
-            assertTrue(thrown);
-
-        } finally {
-            server.stop();
+            testProxy.getWithCounter(endPoint, counter);
+        } catch (Exception e) {
+            thrown = true;
         }
+        assertTrue(thrown);
+        Assert.assertEquals(counter.get(), expectedAttempts);
+    }
+
+    @DataProvider(name = "endpointProvider")
+    public Object[][] provideEndpoints() {
+        return new Object[][]{ //
+                { "runtime", 1 }, //
+                { "timeout", 5 }, //
+        };
     }
 
     private Undertow getHttpServer() throws Exception {

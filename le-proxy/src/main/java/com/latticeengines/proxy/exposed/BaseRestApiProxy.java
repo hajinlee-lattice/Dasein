@@ -10,7 +10,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -21,8 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.retry.RetryCallback;
-import org.springframework.retry.backoff.ExponentialBackOffPolicy;
-import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -34,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
+import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -55,11 +53,14 @@ public abstract class BaseRestApiProxy {
             io.netty.handler.timeout.TimeoutException.class //
     );
 
+    private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset by peer");
+
     private RestTemplate restTemplate;
     private WebClient webClient;
     private String hostport;
     private String rootpath;
     private Set<Class<? extends Throwable>> retryExceptions;
+    private Set<String> retryMessages;
 
     private long initialWaitMsec = 500;
     private double multiplier = 2;
@@ -73,6 +74,7 @@ public abstract class BaseRestApiProxy {
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.webClient = HttpClientUtils.newWebClient();
         this.retryExceptions = DEFAULT_RETRY_EXCEPTIONS;
+        this.retryMessages = DEFAULT_RETRY_MESSAGES;
         initialConfig();
     }
 
@@ -87,6 +89,7 @@ public abstract class BaseRestApiProxy {
         this.restTemplate.setErrorHandler(new GetResponseErrorHandler());
         this.webClient = HttpClientUtils.newWebClient();
         this.retryExceptions = DEFAULT_RETRY_EXCEPTIONS;
+        this.retryMessages = DEFAULT_RETRY_MESSAGES;
         setMagicAuthHeader();
         initialConfig();
     }
@@ -103,46 +106,17 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-    private RetryTemplate getRetryTemplate() {
-        RetryTemplate retry = new RetryTemplate();
-        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
-        retryPolicy.setMaxAttempts(maxAttempts);
-        retry.setRetryPolicy(retryPolicy);
-        ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
-        backOffPolicy.setInitialInterval(initialWaitMsec);
-        backOffPolicy.setMultiplier(multiplier);
-        retry.setBackOffPolicy(backOffPolicy);
-        retry.setThrowLastExceptionOnExhausted(true);
-        return retry;
-    }
-
-    private Class<? extends Throwable> shouldRetryFor(Throwable e) {
-        Class<? extends Throwable> reason = null;
-        Throwable cause = findRetryCause(e);
-        if (cause != null) {
-            reason = cause.getClass();
-        } else {
-            String stackTrace = ExceptionUtils.getStackTrace(e);
-            for (Class<? extends Throwable> c : retryExceptions) {
-                if (stackTrace.contains(c.getCanonicalName())) {
-                    reason = c;
-                    break;
-                }
-            }
+    <B> RetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url, final boolean logBody, final B body) {
+        ProxyRetryTemplate retryTemplate = new ProxyRetryTemplate(maxAttempts, initialWaitMsec, multiplier);
+        retryTemplate.setRetryExceptions(retryExceptions);
+        retryTemplate.setRetryMessages(retryMessages);
+        retryTemplate.setMethod(method);
+        retryTemplate.setVerb(verb);
+        retryTemplate.setUrl(url);
+        if (logBody) {
+            retryTemplate.setBodyToLog(body);
         }
-        return reason;
-    }
-
-    private Throwable findRetryCause(Throwable e) {
-        Throwable reason = null;
-        if (e != null) {
-            if (retryExceptions.contains(e)) {
-                reason = e;
-            } else {
-                reason = findRetryCause(e.getCause());
-            }
-        }
-        return reason;
+        return retryTemplate;
     }
 
     protected String constructUrl() {
@@ -255,105 +229,53 @@ public abstract class BaseRestApiProxy {
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,
             final boolean logBody, final boolean useKryo) {
         HttpMethod verb = HttpMethod.POST;
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
-                return exchange(url, verb, body, returnValueClazz, useKryo, useKryo).getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, verb, context.getRetryCount() + 1, body, logBody);
-                }
-                throw e;
-            }
+            logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
+            return exchange(url, verb, body, returnValueClazz, useKryo, useKryo).getBody();
         });
     }
 
     protected <T> T postMultiPart(final String method, final String url, final MultiValueMap<String, Object> parts,
             final Class<T> returnValueClazz) {
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
-                RestTemplate newRestTemplate = HttpClientUtils.newRestTemplate();
-                List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
-                for (ClientHttpRequestInterceptor interceptor : restTemplate.getInterceptors()) {
-                    if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor
-                            || interceptor instanceof MagicAuthenticationHeaderHttpRequestInterceptor) {
-                        interceptors.add(interceptor);
-                    }
+            logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(parts, headers);
+            RestTemplate newRestTemplate = HttpClientUtils.newRestTemplate();
+            List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
+            for (ClientHttpRequestInterceptor interceptor : restTemplate.getInterceptors()) {
+                if (interceptor instanceof AuthorizationHeaderHttpRequestInterceptor
+                        || interceptor instanceof MagicAuthenticationHeaderHttpRequestInterceptor) {
+                    interceptors.add(interceptor);
                 }
-                newRestTemplate.setInterceptors(interceptors);
-                ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
-                        returnValueClazz);
-                return response.getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                }
-                throw e;
             }
+            newRestTemplate.setInterceptors(interceptors);
+            ResponseEntity<T> response = newRestTemplate.exchange(url, HttpMethod.POST, requestEntity,
+                    returnValueClazz);
+            return response.getBody();
         });
     }
 
     protected <T> T postForUrlEncoded(final String method, final String url, final Class<T> returnValueClazz) {
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                String baseUrl = url.substring(0, url.indexOf("?"));
-                String params = url.substring(url.indexOf("?") + 1);
-                RestTemplate newRestTemplate = HttpClientUtils.newFormURLEncodedRestTemplate();
-                return newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
+            String baseUrl = url.substring(0, url.indexOf("?"));
+            String params = url.substring(url.indexOf("?") + 1);
+            RestTemplate newRestTemplate = HttpClientUtils.newFormURLEncodedRestTemplate();
+            return newRestTemplate.postForObject(baseUrl, params, returnValueClazz);
         });
     }
 
     protected <T> T postForEntity(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.POST, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, HttpMethod.POST, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, HttpMethod.POST, context.getRetryCount() + 1);
+            return restTemplate.postForEntity(url, entity, returnValueClazz).getBody();
         });
     }
 
@@ -375,143 +297,64 @@ public abstract class BaseRestApiProxy {
 
     protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody, boolean kryo) {
         HttpMethod verb = HttpMethod.PUT;
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
-                ResponseEntity<T> response = exchange(url, verb, body, returnClz, kryo, false);
-                if (returnClz == null || response == null) {
-                    return null;
-                } else {
-                    return response.getBody();
-                }
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, verb, context.getRetryCount() + 1, body, logBody);
-                }
-                throw e;
+            logInvocation(method, url, verb, context.getRetryCount() + 1, body, logBody);
+            ResponseEntity<T> response = exchange(url, verb, body, returnClz, kryo, false);
+            if (returnClz == null || response == null) {
+                return null;
+            } else {
+                return response.getBody();
             }
         });
     }
 
     protected <T> T patch(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.PATCH, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, HttpMethod.PATCH, context.getRetryCount() + 1);
-                return restTemplate.patchForObject(url, entity, returnValueClazz);
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, HttpMethod.PATCH, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
-        });
-    }
-
-    protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
-        final HttpMethod verb = HttpMethod.GET;
-        RetryTemplate retry = getRetryTemplate();
-        return retry.execute(context -> {
-            try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1);
-                return exchange(url, verb, null, returnValueClazz, false, false).getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, verb, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, HttpMethod.PATCH, context.getRetryCount() + 1);
+            return restTemplate.patchForObject(url, entity, returnValueClazz);
         });
     }
 
     protected <T> T get(final String method, final String url, final HttpEntity<?> entity,
             final Class<T> returnValueClazz) {
         final HttpMethod verb = HttpMethod.GET;
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1);
-                return restTemplate.exchange(url, HttpMethod.GET, entity, returnValueClazz).getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, verb, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, verb, context.getRetryCount() + 1);
+            return restTemplate.exchange(url, verb, entity, returnValueClazz).getBody();
         });
     }
 
+    protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
+        return get(method, url, returnValueClazz, false);
+    }
+
     protected <T> T getKryo(final String method, final String url, final Class<T> returnValueClazz) {
+        return get(method, url, returnValueClazz, true);
+    }
+
+    private  <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo) {
         final HttpMethod verb = HttpMethod.GET;
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
-            try {
-                logInvocation(method, url, verb, context.getRetryCount() + 1);
-                return exchange(url, verb, null, returnValueClazz, false, true).getBody();
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logError(method, url, verb, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, verb, context.getRetryCount() + 1);
+            return exchange(url, verb, null, returnValueClazz, false, useKryo).getBody();
         });
     }
 
     protected void delete(final String method, final String url) {
-        RetryTemplate retry = getRetryTemplate();
+        RetryTemplate retry = getRetryTemplate(method, HttpMethod.DELETE, url, false, null);
         retry.execute((RetryCallback<Void, RuntimeException>) context -> {
-            try {
-                logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
-                restTemplate.delete(url);
-                return null;
-            } catch (Exception e) {
-                Class<? extends Throwable> reason = shouldRetryFor(e);
-                if (reason != null) {
-                    logWarn(reason, e.getMessage(), method);
-                } else {
-                    context.setExhaustedOnly();
-                }
-                if (context.isExhaustedOnly()) {
-                    logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
-                }
-                throw e;
-            }
+            logInvocation(method, url, HttpMethod.DELETE, context.getRetryCount() + 1);
+            restTemplate.delete(url);
+            return null;
         });
     }
 
-    private <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
+    <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
                                               boolean kryoContent, boolean kryoResponse) {
         HttpHeaders headers = new HttpHeaders();
 
@@ -610,27 +453,6 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-
-    private void logWarn(Class<? extends Throwable> reason, String message, String method) {
-        log.warn(String.format("%s: Remote call failure, will retry: %s:%s", method, reason.getCanonicalName(),
-                message));
-    }
-
-    private void logError(String method, String url, HttpMethod verb, Integer attempt) {
-        logError(method, url, verb, attempt, null, false);
-    }
-
-    private <P> void logError(String method, String url, HttpMethod verb, Integer attempt, P payload,
-                                   boolean logPlayload) {
-        String msg = String.format("Failed to invoke %s by %s url %s", method, verb, url);
-        if (logPlayload) {
-            msg += String.format(" with body %s", payload == null ? "null" : payload.toString());
-        }
-        if (attempt != null) {
-            msg += String.format(".  (Attempt=%d)", attempt);
-        }
-        log.info(msg);
-    }
     private void logInvocation(String method, String url, HttpMethod verb, Integer attempt) {
         logInvocation(method, url, verb, attempt, null, false);
     }

@@ -35,12 +35,7 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
         IOUtils.copy(response.getBody(), baos);
         String body = new String(baos.toByteArray());
         if (!interpretAndThrowException(response.getStatusCode(), response.getHeaders(), body)) {
-            log.error("Could not interpret exception response: " + body);
-            HttpHeaders httpHeaders = response.getHeaders();
-            if (httpHeaders != null) {
-                log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
-            }
-            throw new RuntimeException(body);
+            throw new RemoteLedpException(body, response.getStatusCode(), LedpCode.LEDP_00007);
         }
     }
 
@@ -60,13 +55,6 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
 
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
             String message = node.get("errorMsg").asText();
-
-            // TODO: temporary workaround. After finding out the root cause of
-            // json truncation, we should remove this.
-            if (message.contains("Could not read JSON: Unexpected end-of-input") || (stackTraceString != null
-                    && stackTraceString.contains("Could not read JSON: Unexpected end-of-input"))) {
-                throw new RuntimeException("Seems JSON IO was truncated: " + body);
-            }
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
             return false;
