@@ -132,7 +132,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         String msg = "Load mdatadata of data cloud version " + dataCloudVersion;
         try (PerformanceTimer timer = new PerformanceTimer(msg)) {
             long count = getColumnCount(dataCloudVersion);
-            int pageSize = 2000;
+            int pageSize = 5000;
             int numPages = (int) Math.ceil(1.0 * count / pageSize);
             Flux<ColumnMetadata> flux = Flux.range(0, numPages) //
                     .parallel().runOn(parallelFluxThreadPool()) //

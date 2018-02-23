@@ -521,10 +521,6 @@ public abstract class BaseRestApiProxy {
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
         return flux //
-                .doOnSubscribe(subscription -> //
-                        log.info(String.format("Start reading %s flux from %s", channel, url)))
-                .doOnComplete(() ->
-                        log.info(String.format("Finish reading %s flux from %s", channel, url)))
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s flux from %s", channel, url)))
                 .doOnError(throwable ->
@@ -534,8 +530,6 @@ public abstract class BaseRestApiProxy {
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
         //TODO: need to enhance error handling
         return mono //
-                .doOnSubscribe(subscription -> //
-                        log.info(String.format("Start reading %s mono from %s", channel, url)))
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s mono from %s", channel, url)))
                 .doOnError(throwable ->

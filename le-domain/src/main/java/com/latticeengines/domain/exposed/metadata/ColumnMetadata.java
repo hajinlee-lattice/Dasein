@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.metadata;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -337,7 +338,19 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     }
 
     public void setGroups(Map<ColumnSelection.Predefined, Boolean> groups) {
-        this.groups = groups;
+        if (MapUtils.isNotEmpty(groups)) {
+            this.groups = new HashMap<>();
+            groups.forEach((k, v) -> {
+                if (k != null && v != null) {
+                    groups.put(k, v);
+                }
+            });
+            if (MapUtils.isEmpty(groups)) {
+                this.groups = null;
+            }
+        } else {
+            this.groups = null;
+        }
     }
 
     public boolean isEnabledFor(ColumnSelection.Predefined group) {
