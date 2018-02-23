@@ -65,7 +65,7 @@ public enum CacheName {
     public static class Constants {
         public static final String PLSCacheName = "PLSCache";
         public static final String DataLakeTopNTreeCache = "DataLakeTopNTreeCache";
-        public static final String DataLakeCMCacheName = "DataLakeCMCache";
+        public static final String DataLakeCMCacheName = "DataLakeCMCacheM19";
         public static final String DataLakeStatsCubesCache = "DataLakeStatsCubesCache";
         public static final String EntityCountCacheName = "EntityCountCache";
         public static final String EntityDataCacheName = "EntityDataCache";
@@ -78,7 +78,7 @@ public enum CacheName {
         public static final String SessionCacheName = "SessionCache";
         public static final String AttrRepoCacheName = "AttrRepoCache";
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
-        public static final String DataCloudCMCacheName = "DataCloudCMCache";
+        public static final String DataCloudCMCacheName = "DataCloudCMCacheM19";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCacheName";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
     }

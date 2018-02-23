@@ -139,6 +139,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.RatingSummariesCacheName));
 
+        RedisCacheConfiguration dataCloudVersionCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(ttl)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.DataCloudVersionCacheName));
+
         Map<String, RedisCacheConfiguration> cacheConfigs = new HashMap<>();
         cacheConfigs.put(CacheName.Constants.SessionCacheName, sessionCacheConfig);
         cacheConfigs.put(CacheName.Constants.DataLakeCMCacheName, dataLakeCMCacheConfig);
@@ -150,6 +157,8 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.EntityRatingCountCacheName, entityRatingCountCacheConfig);
         cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
         cacheConfigs.put(CacheName.Constants.RatingSummariesCacheName, ratingSummariesCacheConfig);
+
+        cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
 
         RedisCacheManager cacheManager = RedisCacheManager
                 .builder(RedisCacheWriter.lockingRedisCacheWriter(lettuceConnectionFactory()))//
