@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -57,7 +59,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String decodeStrategy;
 
     @JsonProperty("Groups")
-    private List<ColumnSelection.Predefined> groups;
+    private Map<ColumnSelection.Predefined, Boolean> groups;
 
     @JsonProperty("BitOffset")
     private Integer bitOffset;
@@ -330,12 +332,29 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.approvedUsage = null;
     }
 
-    public List<ColumnSelection.Predefined> getGroups() {
+    public Map<ColumnSelection.Predefined, Boolean> getGroups() {
         return groups;
     }
 
-    public void setGroups(List<ColumnSelection.Predefined> groups) {
+    public void setGroups(Map<ColumnSelection.Predefined, Boolean> groups) {
         this.groups = groups;
+    }
+
+    public boolean isEnabledFor(ColumnSelection.Predefined group) {
+        return MapUtils.isNotEmpty(groups) && groups.getOrDefault(group, false);
+    }
+
+    // for backward compatible to list-format groups
+    @Deprecated
+    public List<ColumnSelection.Predefined> getEnabledGroups() {
+        if (MapUtils.isNotEmpty(groups)) {
+            return groups.entrySet().stream() //
+                    .filter(e -> Boolean.TRUE.equals(e.getValue())) //
+                    .map(Map.Entry::getKey) //
+                    .collect(Collectors.toList());
+        } else {
+            return null;
+        }
     }
 
     @JsonProperty(ColumnMetadataKey.Category)

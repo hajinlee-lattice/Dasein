@@ -104,8 +104,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                 List<ColumnMetadata> allColumns = getAllColumns(dataCloudVersion);
                 return Flux.fromIterable(allColumns) //
                         .parallel().runOn(parallelFluxThreadPool()) //
-                        .filter(cm -> CollectionUtils.isNotEmpty(cm.getGroups())) //
-                        .filter(cm -> cm.getGroups().contains(selectName)) //
+                        .filter(cm -> cm.isEnabledFor(selectName)) //
                         .sequential().collectList() //
                         .blockOptional(Duration.of(2, ChronoUnit.MINUTES)).orElse(null);
             }

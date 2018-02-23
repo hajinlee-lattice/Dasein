@@ -4,8 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -440,11 +441,13 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     }
 
     @JsonIgnore
-    private List<ColumnSelection.Predefined> getPredefinedGroups() {
+    private Map<ColumnSelection.Predefined, Boolean> getPredefinedGroups() {
         if (StringUtils.isNotBlank(getGroups())) {
-            return Arrays.stream(getGroups().split(",")) //
-                    .map(ColumnSelection.Predefined::fromName) //
-                    .collect(Collectors.toList());
+            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
+            Arrays.stream(getGroups().split(",")) //
+                    .map(ColumnSelection.Predefined::fromName)
+                    .forEach(g -> map.put(g, true));
+            return map;
         } else {
             return null;
         }

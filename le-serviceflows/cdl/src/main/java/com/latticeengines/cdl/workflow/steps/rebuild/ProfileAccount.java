@@ -248,7 +248,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setDescription(latticeIdCm.getDescription());
                 attr.setFundamentalType(FundamentalType.NUMERIC);
                 attr.setCategory(latticeIdCm.getCategory());
-                attr.setGroupsViaList(latticeIdCm.getGroups());
+                attr.setGroupsViaList(latticeIdCm.getEnabledGroups());
                 dcCount.incrementAndGet();
             } else if (amColMap.containsKey(attr0.getName())) {
                 ColumnMetadata cm = amColMap.get(attr.getName());
@@ -257,7 +257,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
                 attr.setFundamentalType(cm.getFundamentalType());
                 attr.setCategory(cm.getCategory());
-                attr.setGroupsViaList(cm.getGroups());
+                attr.setGroupsViaList(new ArrayList<>(cm.getGroups().keySet()));
                 dcCount.incrementAndGet();
             } else if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);

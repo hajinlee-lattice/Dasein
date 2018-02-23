@@ -157,7 +157,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         // Only return attributes for account now
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
         List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, BusinessEntity.Account);
-        return cms.stream().filter(cm -> cm.getGroups() != null && cm.getGroups().contains(predefined)
+        return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
         // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
                         || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //

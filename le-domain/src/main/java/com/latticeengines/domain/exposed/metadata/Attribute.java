@@ -27,6 +27,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -368,6 +369,17 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                     .map(ColumnSelection.Predefined::getName) //
                     .collect(Collectors.toList());
             this.groups = StringUtils.join(groupNames, ",");
+        }
+    }
+
+    @JsonIgnore
+    public Map<ColumnSelection.Predefined, Boolean> getGroupsAsMap() {
+        if (StringUtils.isNotBlank(groups)) {
+            Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
+            getGroupsAsList().forEach(g -> map.put(g, true));
+            return map;
+        } else {
+            return null;
         }
     }
 
@@ -1119,8 +1131,8 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
             metadata.removeApprovedUsageList();
         }
 
-        if (getGroupsAsList() != null && !getGroupsAsList().isEmpty()) {
-            metadata.setGroups(getGroupsAsList());
+        if (MapUtils.isNotEmpty(getGroupsAsMap())) {
+            metadata.setGroups(getGroupsAsMap());
         }
 
         metadata.setStatisticalType(StatisticalType.fromName(getStatisticalType()));
