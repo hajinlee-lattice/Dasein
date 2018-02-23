@@ -5,8 +5,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.dao.KeyValueDao;
@@ -40,7 +38,6 @@ public class KeyValueEntityMgrImpl extends BaseEntityMgrRepositoryImpl<KeyValue,
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<KeyValue> findByTenantId(long tenantId) {
         return keyValueRepository.findByTenantId(tenantId);
     }

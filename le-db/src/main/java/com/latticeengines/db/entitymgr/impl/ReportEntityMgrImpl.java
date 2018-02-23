@@ -52,7 +52,8 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
         return reportRepository;
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Report findByName(String name) {
         Report report = reportRepository.findByName(name);
 
@@ -77,14 +78,14 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
         getDao().create(report);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Report report) {
         internalCreate(report);
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void createOrUpdate(Report report) {
         Report existing = findByName(report.getName());
         if (existing != null) {
@@ -100,7 +101,7 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Report> findAll() {
         List<Report> reports = super.findAll();
         for (Report report : reports) {
@@ -110,7 +111,7 @@ public class ReportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Report, Lon
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<Report> getAll() {
         return findAll();
     }

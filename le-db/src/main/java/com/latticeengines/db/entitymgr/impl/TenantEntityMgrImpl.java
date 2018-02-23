@@ -40,25 +40,25 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantPid(Long tenantPid) {
         return tenantRepository.findById(tenantPid).orElse(null);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantId(String tenantId) {
         return tenantRepository.findByTenantId(tenantId);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Tenant findByTenantName(String tenantName) {
         return tenantRepository.findByName(tenantName);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(Tenant tenant) {
         if (tenant.getRegisteredTime() == null) {
             tenant.setRegisteredTime(new Date().getTime());
@@ -67,14 +67,14 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void delete(Tenant tenant) {
         Tenant tenant1 = findByTenantId(tenant.getId());
         super.delete(tenant1);
     }
 
     @Override
-    @Transactional(value = "transactionManager", propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void update(Tenant tenant) {
         super.update(tenant);
     }
