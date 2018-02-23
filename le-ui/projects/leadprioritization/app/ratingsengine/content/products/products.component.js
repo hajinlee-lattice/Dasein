@@ -2,14 +2,14 @@ angular.module('lp.ratingsengine.wizard.products', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineProducts', function (
-    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products, GetSelectedProducts) {
+    $scope, $stateParams, $timeout, RatingsEngineStore, RatingsEngineService, Products) {
         var vm = this;
         angular.extend(vm, {
             products: Products,
             currentPage: 1,
             pageSize: 10,
             productsCount: 0,
-            productsSelected: GetSelectedProducts,
+            productsSelected: {},
             sortBy: 'ProductName',
             showPagination: true,
             selectedAll: false,
@@ -22,11 +22,12 @@ angular.module('lp.ratingsengine.wizard.products', [
         if(vm.search || oldValue) {
             vm.currentPage = 1;
         }
+
     });
 
     vm.init = function () {
 
-        RatingsEngineStore.setCachedProducts(vm.products);
+        vm.getSelectedProducts();
 
         vm.filteredProducts = vm.products.slice(0, 10);
         vm.productsCount = vm.products.length;
@@ -39,7 +40,36 @@ angular.module('lp.ratingsengine.wizard.products', [
 
     }
 
-    vm.getTotalProductsCount = function () {
+    vm.getSelectedProducts = function() {
+        if($stateParams.rating_id) {
+            RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
+
+                if(rating.activeModel.AI.targetProducts.length > 0){
+                    var selectedTargetProducts = rating.activeModel.AI.targetProducts;
+                    angular.forEach(selectedTargetProducts, function(value, key) {
+                        
+                        var product = Products.filter(function( product ) {
+                          return product.ProductId === value;
+                        });
+                        product[0].Selected = true;
+
+                        var productId = product[0].ProductId,
+                            productName = product[0].ProductName;
+                        if(!RatingsEngineStore.productsSelected[productId]){
+                            RatingsEngineStore.selectProduct(productId, productName);
+                        };
+                    });
+                    vm.productsSelected = RatingsEngineStore.getProductsSelected();
+                    vm.validateNextStep();
+                } else {
+                    RatingsEngineStore.clearSelection();
+                    vm.productsSelected = {};
+                }
+            });
+        }
+    }
+
+    vm.getTotalProductsCount = function() {
         return vm.productsCount;
     }
 
@@ -70,10 +100,10 @@ angular.module('lp.ratingsengine.wizard.products', [
 
         RatingsEngineStore.selectProduct(productId, product[0].ProductName);
         
-        vm.validateNextStep();
         vm.productsSelected = RatingsEngineStore.getProductsSelected();
+        vm.validateNextStep();
         
-        if (RatingsEngineStore.getProductsSelectedCount() === vm.products.length) {
+        if (Object.keys(vm.productsSelected).length === vm.products.length) {
             vm.selectedAll = true;
         } else {
             vm.selectedAll = false;
@@ -81,7 +111,7 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.validateNextStep = function () {
-        if (RatingsEngineStore.getProductsSelectedCount() > 0) {
+        if (Object.keys(vm.productsSelected).length > 0) {
             vm.setValidation('products', true);
         } else {
             vm.setValidation('products', false);
@@ -102,8 +132,8 @@ angular.module('lp.ratingsengine.wizard.products', [
         RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
     };
 
-    vm.getProductsSelectedCount = function () {        
-        return RatingsEngineStore.getProductsSelectedCount();
+    vm.getSelectedCount = function () {
+        return Object.keys(vm.productsSelected).length;
     }
 
     vm.init();

@@ -3,12 +3,12 @@ angular.module('lp.ratingsengine.wizard.training', [
     'mainApp.appCommon.directives.formOnChange'
 ])
 .controller('RatingsEngineAITraining', function (
-    $q, $scope, $stateParams,
-    Rating, RatingsEngineStore, RatingsEngineService, SegmentService) {
+    $q, $scope, $stateParams, $timeout,
+    Rating, RatingsEngineStore, RatingsEngineService, SegmentService, Segments, Products) {
     var vm = this;
     angular.extend(vm, {
-        segments: RatingsEngineStore.getCachedSegments(),
-        products: RatingsEngineStore.getCachedProducts(),
+        segments: Segments,
+        products: Products,
         spendCriteria: "GREATER_OR_EQUAL",
         spendValue: 1500,
         quantityCriteria: "GREATER_OR_EQUAL",
@@ -58,6 +58,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.trainingSegment = selectedSegment[0];
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
         vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
+
+        vm.autcompleteChange();
     }
 
     vm.productsCallback = function(selectedProducts) {
@@ -67,7 +69,14 @@ angular.module('lp.ratingsengine.wizard.training', [
         });
         RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
         vm.ratingEngine.activeModel.AI.trainingProducts = vm.trainingProducts;
+
+        vm.autcompleteChange();        
     }
+
+    vm.autcompleteChange = function(){
+        vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+        vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
+    };
 
     vm.formOnChange = function(){
         vm.recordsCountReturned = false;
@@ -107,12 +116,12 @@ angular.module('lp.ratingsengine.wizard.training', [
             if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
                 RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
             }
+
+            vm.ratingEngine.activeModel.AI.modelingConfigFilters = vm.modelingConfigFilters;
+
+            vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
+            vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
         }
-
-        vm.ratingEngine.activeModel.AI.modelingConfigFilters = vm.modelingConfigFilters;
-
-        vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
-        vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
 
     };
 

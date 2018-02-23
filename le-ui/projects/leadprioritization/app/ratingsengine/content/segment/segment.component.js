@@ -37,8 +37,6 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     	vm.filteredSegments = vm.segments.slice(0, 10);
         vm.segmentsKeyMap = makeSegmentsKeyMap(vm.segments);
         
-        RatingsEngineStore.setCachedSegments(vm.segments);
-
         if(vm.segments.length === 0){
             vm.hasSegments = false;
             vm.isValid = false;

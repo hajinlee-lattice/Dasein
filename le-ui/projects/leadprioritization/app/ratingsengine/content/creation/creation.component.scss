@@ -17,29 +17,45 @@
             padding-bottom: 2px;
             margin-bottom: 12px;
         }
-        dl {
+        .summary-data {
             &:after {
                 clear: both;
                 content: "";
                 display: table;
             }
+            dl {
+                width: 50%;
+                float: left;
+                padding-right: 6px;
+            }
+        }
+        dl:after {
+            clear: both;
+            content: "";
+            display: table;
         }
         dt, dd {
             font-size: 14px;
             font-weight: normal;
         }
         dt {
-            width: 160px;
+            width: 140px;
+            font-weight: bold;
         }
         dd {
-            margin-left: 160px;
+            margin-left: 140px;
+        }
+        .summary-data dl:last-of-type { 
+            dt {
+                width: 100%;
+            }
+            dd {
+                margin-left: 0;
+            }
         }
     }
-    .creation-settings {
-        margin-top: 10px;
-    }
     .step-progression {
-        margin-bottom: 10px;
+        margin: 10px 0;
         dt {
             width: auto;
             float: left;

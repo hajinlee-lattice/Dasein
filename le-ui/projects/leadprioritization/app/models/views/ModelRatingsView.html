@@ -138,7 +138,7 @@
             <h3>Currently published configuration</h3>
 
             <refresher condition="vm.updateContent">
-            <ul class="bucket-tiles published buckets-{{vm.workingBuckets.length}}">
+            <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">
                 <li ng-repeat="bucket in ::vm.currentConfiguration">
                     <div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
                     <dl>

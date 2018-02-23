@@ -1,13 +1,14 @@
 angular.module('lp.ratingsengine.wizard.creation', [])
 .controller('RatingsEngineCreation', function (
     $q, $state, $stateParams, $scope, $interval,
-    Rating, RatingsEngineStore, JobsStore
+    Rating, RatingsEngineStore, JobsStore, Products
 ) {
     var vm = this,
         checkJobStatus;
 
     angular.extend(vm, {
         ratingEngine: Rating,
+        products: Products,
         status: 'Preparing Modeling Job',
         progress: '1%'
     });
@@ -17,6 +18,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.setValidation('creation', true);
 
     	var model = vm.ratingEngine.activeModel.AI;
+
+        console.log(model);
 
     	vm.targetProducts = model.targetProducts;
         vm.modelingStrategy = model.modelingStrategy;
@@ -94,15 +97,15 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     });
 
     vm.returnProductNameFromId = function(productId) {
-        var cachedProducts = RatingsEngineStore.getCachedProducts(),
-            product = cachedProducts.find(function(obj) { return obj.ProductId === productId.toString() });
+        var products = vm.products,
+            product = products.find(function(obj) { return obj.ProductId === productId.toString() });
 
         return product.ProductName;
     };
 
     vm.setValidation = function (type, validated) {
         RatingsEngineStore.setValidation(type, validated);
-    }
+    };
 
     vm.init();
 

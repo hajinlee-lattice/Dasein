@@ -130,6 +130,9 @@ angular.module('lp.ratingsengine.ratingslist', [
         if(tileState.editRating !== true){
             if (rating.type === 'AI_BASED') {
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
+
+                    RatingsEngineStore.setRating(engine);
+
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
                         if(model.AI.modelSummary) {
                             $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });

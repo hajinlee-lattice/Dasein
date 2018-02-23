@@ -11,13 +11,6 @@ angular.module('lp.ratingsengine')
         bucketCountMap: {}
     };
 
-    this.type = null;
-    this.cachedSegments = [];
-    this.cachedProducts = [];
-    this.modelingConfigFilters = null;
-    this.trainingSegment = null;
-    this.trainingProducts = null;
-
     this.init = function() {
         this.settings = {};
 
@@ -47,6 +40,10 @@ angular.module('lp.ratingsengine')
         this.savedSegment = "";
         this.productsSelected = {};
         this.predictionType = 'PROPENSITY';
+        this.type = null;
+        this.modelingConfigFilters = null;
+        this.trainingSegment = null;
+        this.trainingProducts = null;
 
         this.wizardProgressItems = {
             "rulesprospects": [
@@ -183,20 +180,6 @@ angular.module('lp.ratingsengine')
 
     this.getSegment = function() {
         return this.savedSegment;
-    }
-
-    this.setCachedSegments = function(segments) {
-        this.cachedSegments = segments;
-    }
-    this.getCachedSegments = function() {
-        return this.cachedSegments;
-    }
-
-    this.setCachedProducts = function(products) {
-        this.cachedProducts = products;
-    }
-    this.getCachedProducts = function() {
-        return this.cachedProducts;
     }
 
     var getRatingsEngineRule = function(RatingsEngineModels) {
@@ -448,22 +431,6 @@ angular.module('lp.ratingsengine')
     this.setCoverage = function(bucketCountMap) {
         this.current.bucketCountMap = bucketCountMap;
     }
-
-    // this.getRatingsCounts = function(Ratings, noSalesForceId) {
-    //     var deferred = $q.defer(),
-    //         ratings_ids = [],
-    //         noSalesForceId = noSalesForceId || false;
-    //     if(Ratings && typeof Ratings === 'object') {
-    //         Ratings.forEach(function(value, key) {
-    //             ratings_ids.push(value.id);
-    //         });
-    //         RatingsEngineService.getRatingsCounts(ratings_ids, noSalesForceId).then(function(data) {
-    //             deferred.resolve(data);
-    //         });
-    //     }
-    //     return deferred.promise;
-    // }
-
     this.setType = function(type, engineType) {
         this.type = {
             wizardType: type,
@@ -631,17 +598,17 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveAIRatingModel = function(nextState){
 
-        var currentRating = RatingsEngineStore.getCurrentRating(),
-            ratingId = $stateParams.rating_id,
-            targetProducts = RatingsEngineStore.getProductsSelectedIds(),
-            predictionType = RatingsEngineStore.getPredictionType(),
-            modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
-            modelingStrategy = $stateParams.engineType,
-            trainingSegment = RatingsEngineStore.getTrainingSegment(),
-            trainingProducts = RatingsEngineStore.getTrainingProducts(),
-            obj = {};
-
+        var ratingId = $stateParams.rating_id;
         RatingsEngineStore.getRating(ratingId).then(function(rating){
+
+            var model = rating.activeModel.AI,
+                targetProducts = (model.targetProducts === []) ? [] : RatingsEngineStore.getProductsSelectedIds(),
+                predictionType = RatingsEngineStore.getPredictionType(),
+                modelingConfigFilters = (model.modelingConfigFilters === null) ? RatingsEngineStore.getModelingConfigFilters() : null,
+                modelingStrategy = $stateParams.engineType,
+                trainingSegment = RatingsEngineStore.getTrainingSegment(),
+                trainingProducts = RatingsEngineStore.getTrainingProducts(),
+                obj = {};
 
             obj = {
                 AI: {
@@ -655,7 +622,11 @@ angular.module('lp.ratingsengine')
                 }
             };
 
+            // console.log("GET RATING & MODEL CREATE OBJECT", obj.AI);
+
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
+
+                // console.log("MODEL", model.AI);
 
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);
