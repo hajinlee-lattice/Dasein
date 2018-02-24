@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -42,10 +43,10 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     public void execute() {
         customerSpace = configuration.getCustomerSpace().toString();
         String rawRatingTableName = NamingUtils.timestamp("RawRating");
-        putObjectInContext(RAW_RATING_TABLE_NAME, rawRatingTableName);
+        putObjectInContext(RULE_RAW_RATING_TABLE_NAME, rawRatingTableName);
         readActiveRatingModels();
-        putObjectInContext(TABLE_GOING_TO_REDSHIFT, null);
-        putObjectInContext(APPEND_TO_REDSHIFT_TABLE, null);
+        removeObjectFromContext(TABLE_GOING_TO_REDSHIFT);
+        removeObjectFromContext(APPEND_TO_REDSHIFT_TABLE);
     }
 
     private void readActiveRatingModels() {
@@ -66,39 +67,47 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private RatingModelContainer getValidRatingModel(RatingEngineSummary summary) {
+        RatingModelContainer container = null;
         String engineId = summary.getId();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
         RatingModel ratingModel = engine.getActiveModel();
         if (ratingModel != null) {
+            boolean isValid = false;
             if (RatingEngineType.AI_BASED.equals(summary.getType())) {
-                boolean isValid = isValidAIModel((AIModel) ratingModel);
+                AIModel aiModel = (AIModel) ratingModel;
+                isValid = isValidAIModel(aiModel);
                 if (!isValid) {
-                    log.warn("AI rating model " + ratingModel.getId() + " is not ready for scoring.");
-                    return null;
+                    log.warn("AI rating model " + aiModel.getId() + " is not ready for scoring.");
+                } else if (StringUtils.isBlank(aiModel.getModelGuid())) {
+                    ModelSummary modelSummary = aiModel.getModelSummary();
+                    aiModel.setModelGuid(modelSummary.getId());
+                    aiModel.setModelSummary(null);
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
-                boolean isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
+                isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
                     log.warn("Rule based rating model " + ratingModel.getId() + " is not ready for scoring.");
-                    return null;
                 }
             }
-            return new RatingModelContainer(ratingModel, summary);
-        } else {
-            return null;
+            if (isValid) {
+                container = new RatingModelContainer(ratingModel, summary);
+            }
         }
+        return container;
     }
 
     private boolean isValidAIModel(AIModel model) {
+        boolean valid = true;
         if (model.getModelSummary() == null) {
             log.warn("AI model " + model.getId() + " has null model summary.");
-            return false;
+            valid = false;
+        } else if (StringUtils.isNotBlank(model.getModelGuid())) {
+            valid = true;
+        } else if (model.getModelSummary() == null  || StringUtils.isBlank(model.getModelSummary().getId())) {
+            log.warn("AI model " + model.getId() + " has blank model guid.");
+            valid = false;
         }
-        if (StringUtils.isBlank(model.getModelSummary().getId())) {
-            log.warn("AI model " + model.getId() + " has black model guid.");
-            return false;
-        }
-        return true;
+        return valid;
     }
 
     private boolean isValidRuleBasedModel(RuleBasedModel model) {

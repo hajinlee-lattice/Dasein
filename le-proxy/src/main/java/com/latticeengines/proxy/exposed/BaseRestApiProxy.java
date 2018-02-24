@@ -50,7 +50,8 @@ public abstract class BaseRestApiProxy {
             java.sql.SQLTimeoutException.class, //
             com.mchange.v2.resourcepool.TimeoutException.class, //
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
-            io.netty.handler.timeout.TimeoutException.class //
+            io.netty.handler.timeout.TimeoutException.class, //
+            org.apache.http.NoHttpResponseException.class
     );
 
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset by peer");
@@ -376,7 +377,7 @@ public abstract class BaseRestApiProxy {
             }
         }
         if ((kryoContent || kryoResponse) && !headers.isEmpty()) {
-            log.info("Headers: " + headers.toSingleValueMap());
+            log.info("Headers: " + headers.toSingleValueMap() + " Url: " + url);
         }
         HttpEntity<P> entity;
         if (payload == null) {

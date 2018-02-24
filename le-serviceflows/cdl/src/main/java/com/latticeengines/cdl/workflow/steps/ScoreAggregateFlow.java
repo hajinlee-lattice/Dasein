@@ -48,6 +48,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
         } else {
             postProcessSingleModel(records);
         }
+        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), aggrTable.getName());
     }
 
     private void postProcessSingleModel(List<GenericRecord> records) {
@@ -78,10 +79,10 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             Map<String, String> scoreFieldMap = new HashMap<>();
             containers.forEach(container -> {
                 AIModel model = (AIModel) container.getModel();
-                String modelGuid = model.getModelSummary().getId();
+                String modelGuid = model.getModelGuid();
                 PredictionType predictionType = model.getPredictionType();
                 if (PredictionType.EXPECTED_VALUE.equals(predictionType)) {
-                    scoreFieldMap.put(modelGuid, InterfaceName.ExpectedValue.name());
+                    scoreFieldMap.put(modelGuid, InterfaceName.ExpectedRevenue.name());
                 } else {
                     scoreFieldMap.put(modelGuid, InterfaceName.Probability.name());
                 }

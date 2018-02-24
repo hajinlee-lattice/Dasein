@@ -15,6 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.OneToOne;
+import javax.persistence.Transient;
 
 import org.apache.commons.collections4.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -93,6 +94,10 @@ public class AIModel extends RatingModel {
     @Column(name = "MODELING_CONFIG_FILTERS", length = 10000)
     @Type(type = "text")
     private String modelingConfigFilters;
+
+    @Transient
+    @JsonProperty("modelGuid")
+    private String modelGuid;
 
     @JsonProperty("targetProducts")
     public List<String> getTargetProducts() {
@@ -198,5 +203,13 @@ public class AIModel extends RatingModel {
 
     public void setModelSummary(ModelSummary modelSummary) {
         this.modelSummary = modelSummary;
+    }
+
+    public String getModelGuid() {
+        return modelGuid;
+    }
+
+    public void setModelGuid(String modelGuid) {
+        this.modelGuid = modelGuid;
     }
 }

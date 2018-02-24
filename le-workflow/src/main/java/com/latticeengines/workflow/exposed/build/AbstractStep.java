@@ -193,6 +193,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         }
     }
 
+    protected void removeObjectFromContext(String key) {
+        log.info("Removing " + key + " from context.");
+        executionContext.remove(key);
+    }
+
     protected void putStringValueInContext(String key, String val) {
         executionContext.put(key, val);
     }

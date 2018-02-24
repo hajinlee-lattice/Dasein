@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
@@ -56,6 +60,26 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
     public static final String DEFAULT_NAME_PATTERN = "RATING ENGINE -- %s";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+
+    public static final Map<ScoreType, String> SCORE_ATTR_SUFFIX = ImmutableMap.of( //
+            ScoreType.Probability, "prob", //
+            ScoreType.ExpectedRevenue, "ev", //
+            ScoreType.NormalizedScore, "score" //
+    );
+
+    public static final Map<ScoreType, Class<? extends Serializable>> SCORE_ATTR_CLZ = ImmutableMap.of( //
+            ScoreType.Probability, Double.class, //
+            ScoreType.ExpectedRevenue, Double.class, //
+            ScoreType.NormalizedScore, Double.class //
+    );
+
+    // needed for both prediction types
+    public static final List<ScoreType> COMMON_SCORES = Arrays.asList(
+            ScoreType.Probability, ScoreType.NormalizedScore
+    );
+
+    // needed for ev models
+    public static final List<ScoreType> EV_SCORES = Collections.singletonList(ScoreType.ExpectedRevenue);
 
     public RatingEngine() {
     }
@@ -318,4 +342,17 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             return String.format(RATING_ENGINE_FORMAT, RATING_ENGINE_PREFIX, engineId);
         }
     }
+
+    public static String toRatingAttrName(String engineId, ScoreType scoreType) {
+        String attr = toRatingAttrName(engineId);
+        if (!ScoreType.Rating.equals(scoreType)) {
+            attr += "_" + SCORE_ATTR_SUFFIX.get(scoreType);
+        }
+        return attr;
+    }
+
+    public enum ScoreType {
+        Rating, Probability, NormalizedScore, ExpectedRevenue
+    }
+
 }

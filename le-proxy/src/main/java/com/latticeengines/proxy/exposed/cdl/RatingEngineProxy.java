@@ -138,8 +138,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     public Map<String, Long> updateRatingEngineCounts(String customerSpace, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/counts", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
-        // TODO: to convert to PUT
-        Map map = post("update rating engine counts", url, null, Map.class);
+        Map map = put("update rating engine counts", url, null, Map.class);
         return JsonUtils.convertMap(map, String.class, Long.class);
     }
 

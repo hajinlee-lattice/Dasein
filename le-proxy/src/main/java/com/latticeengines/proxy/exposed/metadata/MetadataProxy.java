@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.Artifact;
@@ -122,7 +123,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     @SuppressWarnings("unchecked")
     public List<ColumnMetadata> getTableColumns(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/columns", customerSpace, tableName);
-        return get("get table columns", url, List.class);
+        return JsonUtils.convertList(get("get table columns", url, List.class), ColumnMetadata.class);
     }
 
     public List<Table> getTables(String customerSpace) {

@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.steps.rating;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
@@ -24,6 +25,8 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
 
     private static final String MODEL_GUID = "Model_GUID";
 
+    private AtomicLong evaluationPeriod = new AtomicLong(-1);
+
     @Override
     protected void postIngestion() {
         super.postIngestion();
@@ -31,7 +34,7 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
         String modelIds = StringUtils.join(containers.stream().map(container -> {
             AIModel aiModel = (AIModel) container.getModel();
-            String modelSummaryId = aiModel.getModelSummary().getId();
+            String modelSummaryId = aiModel.getModelGuid();
             if (StringUtils.isBlank(modelSummaryId)) {
                 throw new RuntimeException("Found an empty model summary id in AI model: " + JsonUtils.serialize(aiModel));
             } else {
@@ -39,6 +42,7 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
             }
         }).collect(Collectors.toList()), "|");
         putStringValueInContext(SCORING_MODEL_ID, modelIds);
+        putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
     }
 
     @Override
@@ -49,7 +53,6 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         columns.add(Pair.of(InterfaceName.PeriodId.name(), Long.class));
         columns.add(Pair.of(InterfaceName.ModelId.name(), String.class));
         columns.add(Pair.of(MODEL_GUID, String.class));
-        columns.add(Pair.of(InterfaceName.__Revenue.name(), Double.class));
         columns.add(Pair.of(InterfaceName.CDLUpdatedTime.name(), Long.class));
         return AvroUtils.constructSchema(targetTableName, columns);
     }
@@ -59,25 +62,21 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         List<GenericRecord> records = new ArrayList<>();
         long currentTime = System.currentTimeMillis();
         data.forEach(map -> {
-            System.out.println(JsonUtils.pprint(map));
             GenericRecordBuilder builder = new GenericRecordBuilder(schema);
             String accountIdAttr = InterfaceName.AccountId.name();
-            String periodIdAttr = InterfaceName.PeriodId.name();
-            String revenue = InterfaceName.__Revenue.name().substring(2).toLowerCase();
             try {
                 String accountId = (String) map.get(accountIdAttr.toLowerCase());
-                Long periodId = Long.valueOf(String.valueOf(map.get(periodIdAttr.toLowerCase())));
+                String periodIdAttr = InterfaceName.PeriodId.name();
+                if (evaluationPeriod.get() < 0) {
+                    Long periodId = Long.valueOf(String.valueOf(map.get(InterfaceName.PeriodId.name().toLowerCase())));
+                    evaluationPeriod.set(periodId);
+                }
                 String compositeKey = String.format("%s_%s", accountId, modelId);
                 builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
                 builder.set(accountIdAttr, map.get(accountIdAttr.toLowerCase()));
-                builder.set(periodIdAttr, periodId);
+                builder.set(periodIdAttr, evaluationPeriod.get());
                 builder.set(InterfaceName.ModelId.name(), modelId);
                 builder.set(MODEL_GUID, modelGuid);
-                if (map.containsKey(revenue)) {
-                    builder.set(InterfaceName.__Revenue.name(), Double.valueOf(String.valueOf(map.get(revenue))));
-                } else {
-                    builder.set(InterfaceName.__Revenue.name(), null);
-                }
                 builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
                 records.add(builder.build());
             } catch (Exception e) {

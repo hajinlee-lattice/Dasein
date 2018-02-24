@@ -66,6 +66,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
     protected static final String SCORING_AVG_SCORE = "SCORING_AVG_SCORE";
     protected static final String SCORING_AVG_SCORES = "SCORING_AVG_SCORES";
+    protected static final String SCORING_SCORE_FIELDS = "SCORING_SCORE_FIELDS";
     protected static final String SCORING_RESULT_TABLE_NAME = "SCORING_RESULT_TABLE_NAME";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";
     protected static final String SCORING_MODEL_TYPE = "SCORING_MODEL_TYPE";
@@ -93,13 +94,17 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
     public static final String RATING_MODELS = "RATING_MODELS";
-    protected static final String RAW_RATING_TABLE_NAME = "RAW_RATING_TABLE_NAME";
+    protected static final String RULE_RAW_RATING_TABLE_NAME = "RULE_RAW_RATING_TABLE_NAME";
+    protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
+    protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
+    protected static final String RATING_LIFTS = "RATING_LIFTS";
+
 
     @Autowired
     protected Configuration yarnConfiguration;

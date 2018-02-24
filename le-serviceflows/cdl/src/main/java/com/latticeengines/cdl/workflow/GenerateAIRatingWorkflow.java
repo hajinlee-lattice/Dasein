@@ -9,6 +9,8 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
 import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
 import com.latticeengines.domain.exposed.serviceflows.cdl.GenerateRatingWorkflowConfiguration;
+import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -34,6 +36,12 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWor
     @Inject
     private ScoreAggregateFlow scoreAggregate;
 
+    @Inject
+    private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
+
+    @Inject
+    private ComputeLiftDataFlow computeLift;
+
     @Override
     public Workflow defineWorkflow() {
         return new WorkflowBuilder() //
@@ -42,6 +50,8 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWor
                 .next(matchDataCloud) //
                 .next(scoreEventTable) //
                 .next(scoreAggregate) //
+                .next(combineInputTableWithScore) //
+                .next(computeLift) //
                 .build();
     }
 

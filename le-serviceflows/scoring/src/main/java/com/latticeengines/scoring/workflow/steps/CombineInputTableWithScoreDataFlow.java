@@ -1,18 +1,22 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
@@ -29,7 +33,12 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     public void execute() {
         setupDataFlow();
         super.execute();
-        configureExport();
+    }
+
+    @Override
+    public void onExecutionCompleted() {
+        putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(AI_RAW_RATING_TABLE_NAME, configuration.getTargetTableName());
     }
 
     private void setupDataFlow() {
@@ -73,7 +82,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
 
         containers.forEach(container -> {
             CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
-            String modelGuid = ((AIModel) container.getModel()).getModelSummary().getId();
+            String modelGuid = ((AIModel) container.getModel()).getModelGuid();
             bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
             scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());
             scoreMultiplierMap.put(modelGuid, singleModelParams.getScoreMultiplier());
@@ -82,17 +91,66 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         params.setBucketMetadataMap(bucketMetadataMap);
         params.setScoreFieldMap(scoreFieldMap);
         params.setScoreMultiplierMap(scoreMultiplierMap);
-
-        if (configuration.isLiftChart())
-            params.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
-
+        params.setScoreAvgMap(getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class));
         params.setIdColumn(InterfaceName.__Composite_Key__.toString());
+        params.setModelIdField("Model_GUID");
+        putObjectInContext(SCORING_SCORE_FIELDS, scoreFieldMap);
     }
 
     private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
         CombineInputTableWithScoreParameters params =
                 new CombineInputTableWithScoreParameters(getScoreResultTableName(), getInputTableName());
+        AIModel aiModel = (AIModel) container.getModel();
+        PredictionType predictionType = aiModel.getPredictionType();
+        params.setBucketMetadata(getDefaultBucketMetadata(predictionType));
+        params.setScoreFieldName(getScoreFieldName(predictionType));
+        // no multiplier, because always calculate lift chart
+        params.setScoreMultiplier(null);
         return params;
+    }
+
+    private String getScoreFieldName(PredictionType predictionType) {
+        String scoreField;
+        switch (predictionType) {
+            case PROPENSITY:
+                scoreField = InterfaceName.Probability.name();
+                break;
+            case EXPECTED_VALUE:
+                scoreField = InterfaceName.ExpectedRevenue.name();
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        }
+        return scoreField;
+    }
+
+    private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
+        List<BucketMetadata> buckets = new ArrayList<>();
+        switch (predictionType) {
+            case PROPENSITY:
+                buckets.add(addBucket(10, 4, BucketName.A));
+                buckets.add(addBucket(4, 2, BucketName.B));
+                buckets.add(addBucket(2, 1, BucketName.C));
+                buckets.add(addBucket(1, 0, BucketName.D));
+                break;
+            case EXPECTED_VALUE:
+                buckets.add(addBucket(10, 4, BucketName.A));
+                buckets.add(addBucket(4, 2, BucketName.B));
+                buckets.add(addBucket(2, 1, BucketName.C));
+                buckets.add(addBucket(1, 0, BucketName.D));
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        }
+        return buckets;
+    }
+
+    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+        BucketMetadata bucket = new BucketMetadata();
+        bucket.setLeftBoundScore(leftBoundScore);
+        bucket.setRightBoundScore(rightBoundScore);
+        bucket.setBucket(bucketName);
+        return bucket;
     }
 
     private List<RatingModelContainer> getModelContainers() {
@@ -102,12 +160,12 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
                 .collect(Collectors.toList());
     }
 
-    private void configureExport() {
-        putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
-    }
-
     private String getInputTableName() {
-        return getDataFlowParams().getInputTableName();
+        String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+        if (StringUtils.isBlank(inputTableName)) {
+            inputTableName = getDataFlowParams().getInputTableName();
+        }
+        return inputTableName;
     }
 
     private String getScoreResultTableName() {

@@ -125,7 +125,7 @@ public class ColumnMetadataResource {
     }
 
     @ApiIgnore
-    @DeleteMapping(value = "/refreshcache")
+    @DeleteMapping(value = "/caches")
     @ApiOperation(value = "Refresh metadata caches.")
     public void refreshCache() {
         CacheService cacheService = CacheServiceBase.getCacheService();

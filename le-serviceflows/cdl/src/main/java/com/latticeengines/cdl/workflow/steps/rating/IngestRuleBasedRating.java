@@ -20,7 +20,7 @@ public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRating
 
     protected void postIngestion() {
         super.postIngestion();
-        putStringValueInContext(RAW_RATING_TABLE_NAME, targetTableName);
+        putStringValueInContext(RULE_RAW_RATING_TABLE_NAME, targetTableName);
     }
 
     @Override
@@ -30,7 +30,6 @@ public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRating
         columns.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         columns.add(Pair.of(InterfaceName.ModelId.name(), String.class));
         columns.add(Pair.of(InterfaceName.Rating.name(), String.class));
-        columns.add(Pair.of(InterfaceName.CDLCreatedTime.name(), Long.class));
         columns.add(Pair.of(InterfaceName.CDLUpdatedTime.name(), Long.class));
         return AvroUtils.constructSchema(targetTableName, columns);
     }
@@ -49,7 +48,6 @@ public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRating
             builder.set(accountIdAttr, map.get(accountIdAttr));
             builder.set(InterfaceName.ModelId.name(), modelId);
             builder.set(InterfaceName.Rating.name(), map.get(modelId));
-            builder.set(InterfaceName.CDLCreatedTime.name(), currentTime);
             builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
             records.add(builder.build());
         });

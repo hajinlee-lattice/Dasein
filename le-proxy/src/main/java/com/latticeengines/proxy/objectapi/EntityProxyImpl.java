@@ -103,7 +103,8 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
     @Override
     public Map<String, Long> getRatingCount(String customerSpace, FrontEndQuery frontEndQuery) {
         frontEndQuery = getRatingCountQuery(frontEndQuery);
-        return getRatingCountFromCache(customerSpace, frontEndQuery);
+        Map map = _entityProxy.getRatingCountFromCache(customerSpace, frontEndQuery);
+        return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
     @Override

@@ -37,16 +37,20 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         boolean notPMMLModel = parameters.getModelType() == null
                 || parameters.getModelType().equals(ModelType.PYTHONMODEL.getModelType());
 
-        if (inputTable.getFieldNames().contains(InterfaceName.ModelId.name())) {
+        if (StringUtils.isNotBlank(parameters.getModelIdField())) {
             log.info("Enter multi-model mode");
             Map<String, List<BucketMetadata>> bucketMetadataMap = parameters.getBucketMetadataMap();
             String modelIdField = parameters.getModelIdField();
             Map<String, String> scoreFieldMap = parameters.getScoreFieldMap();
+            Map<String, Double> scoreAvgMap = parameters.getScoreAvgMap();
+            Map<String, Integer> scoreMultiplierMap = parameters.getScoreMultiplierMap();
+            List<String> applyToFields = new ArrayList<>();
+            applyToFields.add(modelIdField);
+            applyToFields.addAll(scoreFieldMap.values());
             scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(scoreFieldMap, modelIdField,
-                            ScoreResultField.Rating.displayName, bucketMetadataMap, parameters.getScoreMultiplier(),
-                            parameters.getAvgScore()),
-                    new FieldList(parameters.getScoreFieldName()),
+                    new AddRatingColumnFunction(scoreFieldMap, modelIdField, ScoreResultField.Rating.displayName,
+                            bucketMetadataMap, scoreMultiplierMap, scoreAvgMap),
+                    new FieldList(applyToFields),
                     new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         } else if (noRatingColumnInScoreTable && notPMMLModel) {
             log.info("Enter single-model mode");

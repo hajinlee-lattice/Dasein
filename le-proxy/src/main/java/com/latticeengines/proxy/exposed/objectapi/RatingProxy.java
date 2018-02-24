@@ -79,7 +79,8 @@ public class RatingProxy extends MicroserviceRestApiProxy implements ProxyInterf
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
+        Map map = _ratingProxy.getCoverageFromCache(customerSpace, frontEndQuery);
+        return JsonUtils.convertMap(map, String.class, Long.class);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.RatingCoverageCacheName, key = "T(java.lang.String).format(\"%s|%s|coverage\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)

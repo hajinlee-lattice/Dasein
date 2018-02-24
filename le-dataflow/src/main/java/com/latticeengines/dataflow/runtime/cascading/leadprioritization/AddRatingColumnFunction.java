@@ -36,6 +36,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     private List<BucketMetadata> bucketMetadata;
     private Map<String, List<BucketMetadata>> bucketMetadataMap;
     private Map<String, String> scoreFieldMap;
+    private Map<String, Integer> scoreMultiplierMap;
+    private Map<String, Double> scoreAvgMap;
 
     public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
             Integer scoreMultiplier, Double avgScore) {
@@ -47,13 +49,13 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     }
 
     public AddRatingColumnFunction(Map<String, String> scoreFieldMap, String modelIdFieldName, String ratingFieldName,
-            Map<String, List<BucketMetadata>> bucketMetadataMap, Integer scoreMultiplier, Double avgScore) {
+            Map<String, List<BucketMetadata>> bucketMetadataMap, Map<String, Integer> scoreMultiplierMap, Map<String, Double> scoreAvgMap) {
         super(new Fields(ratingFieldName));
         this.multiModelMode = true;
         this.scoreFieldMap = scoreFieldMap;
         this.modelIdFieldName = modelIdFieldName;
-        this.scoreMultiplier = scoreMultiplier;
-        this.avgScore = avgScore;
+        this.scoreMultiplierMap = scoreMultiplierMap;
+        this.scoreAvgMap = scoreAvgMap;
         this.bucketMetadataMap = new HashMap<>();
         bucketMetadataMap.forEach((modelId, bucketMetadata) -> //
                 this.bucketMetadataMap.put(modelId, sortBucketMetadata(bucketMetadata)));
@@ -70,7 +72,18 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         Object scoreObj = arguments.getObject(scoreField);
         double score = Double.parseDouble(scoreObj.toString());
         if (multiModelMode) {
-            //to be filled
+            String modelId = arguments.getString(modelIdFieldName);
+            Double newAvgScore = scoreAvgMap.get(modelId);
+            Integer scoreMultiplier = scoreMultiplierMap.get(modelId);
+            if (scoreMultiplier != null) {
+                score *= scoreMultiplier;
+                if (newAvgScore != null) {
+                    newAvgScore *= scoreMultiplier;
+                }
+            }
+            if (newAvgScore != null) {
+                score /= newAvgScore;
+            }
         } else {
             Double newAvgScore = avgScore;
             if (scoreMultiplier != null) {

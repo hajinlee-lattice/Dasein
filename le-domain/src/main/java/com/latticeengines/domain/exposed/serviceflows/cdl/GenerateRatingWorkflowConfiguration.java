@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFl
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
@@ -42,6 +43,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
+        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace, "processAnalyzeWorkflow");
@@ -52,6 +54,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             score.setCustomerSpace(customerSpace);
             scoreAgg.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
+            computeLift.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -63,6 +66,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             score.setMicroServiceHostPort(microServiceHostPort);
             scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
+            computeLift.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -86,6 +90,8 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(matchResult);
             configuration.add(score);
             configuration.add(scoreAgg);
+            configuration.add(combineInputWithScores);
+            configuration.add(computeLift);
             return configuration;
         }
 

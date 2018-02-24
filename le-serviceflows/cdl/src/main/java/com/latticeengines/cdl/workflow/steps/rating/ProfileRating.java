@@ -3,18 +3,19 @@ package com.latticeengines.cdl.workflow.steps.rating;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PIVOT_RATINGS;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.datacloud.dataflow.PivotRatingsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
@@ -24,7 +25,9 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
@@ -38,11 +41,14 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
     public static final Logger log = LoggerFactory.getLogger(ProfileRating.class);
 
     public static final String BEAN_NAME = "profileRating";
-    private static final String ENGINE_ATTR_PREFIX = "engine_";
+
+    private String ruleBaseRawRating;
+    private String aiBaseRawRating;
+    private boolean hasRuleRating = true;
+    private boolean hasAIRating = true;
 
     private String ratingTablePrefix;
     private String statsTablePrefix;
-    private String masterTableName;
     private List<RatingModelContainer> modelContainers;
 
     @Inject
@@ -59,28 +65,60 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
         statsTablePrefix = entity.name() + "Stats";
 
-        masterTableName = getStringValueFromContext(RAW_RATING_TABLE_NAME);
-        Table rawTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
-        if (rawTable == null) {
-            throw new IllegalStateException("Cannot find raw rating table " + masterTableName);
+        ruleBaseRawRating = getStringValueFromContext(RULE_RAW_RATING_TABLE_NAME);
+        Table ruleRawTable = metadataProxy.getTable(customerSpace.toString(), ruleBaseRawRating);
+        if (ruleRawTable == null) {
+            log.warn("Cannot find rule based raw rating table " + ruleBaseRawRating);
+            hasRuleRating = false;
         }
-
+        aiBaseRawRating = getStringValueFromContext(AI_RAW_RATING_TABLE_NAME);
+        Table aiRawTable = metadataProxy.getTable(customerSpace.toString(), aiBaseRawRating);
+        if (aiRawTable == null) {
+            log.warn("Cannot find AI based raw rating table " + aiBaseRawRating);
+            hasAIRating = false;
+        }
+        if (aiRawTable == null && ruleRawTable == null) {
+            throw new IllegalStateException("Cannot find any raw rating table");
+        }
         modelContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
     }
 
     @Override
     protected void onPostTransformationCompleted() {
+        String customerSpace = configuration.getCustomerSpace().toString();
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         String ratingTableName = TableUtils.getFullTableName(ratingTablePrefix, pipelineVersion);
 
-        Table servingStoreTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                ratingTableName);
+        Table servingStoreTable = metadataProxy.getTable(customerSpace, ratingTableName);
         enrichTableSchema(servingStoreTable);
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), ratingTableName, servingStoreTable);
+        metadataProxy.updateTable(customerSpace, ratingTableName, servingStoreTable);
 
         updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
         updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
+
+        if (StringUtils.isNotBlank(ruleBaseRawRating)) {
+            metadataProxy.deleteTable(customerSpace, ruleBaseRawRating);
+        }
+        if (StringUtils.isNotBlank(aiBaseRawRating)) {
+            metadataProxy.deleteTable(customerSpace, aiBaseRawRating);
+        }
+        String filterTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+        if (StringUtils.isNotBlank(filterTableName)) {
+            metadataProxy.deleteTable(customerSpace, filterTableName);
+        }
+        Table preMatchTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (preMatchTable != null) {
+            metadataProxy.deleteTable(customerSpace, preMatchTable.getName());
+        }
+        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        if (eventTable != null) {
+            metadataProxy.deleteTable(customerSpace, eventTable.getName());
+        }
+        String scoreResultTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
+        if (StringUtils.isNotBlank(scoreResultTableName)) {
+            metadataProxy.deleteTable(customerSpace, scoreResultTableName);
+        }
     }
 
     @Override
@@ -117,13 +155,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     private TransformationStepConfig pivot() {
         TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
-        step.setBaseTables(baseTables);
+        setRawRatingInputs(step);
         step.setTransformer(TRANSFORMER_PIVOT_RATINGS);
         PivotRatingsConfig conf = createPivotRatingsConfig();
         String confStr = appendEngineConf(conf, lightEngineConfig());
@@ -131,15 +163,54 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         return step;
     }
 
+    private void setRawRatingInputs(TransformationStepConfig step) {
+        String ruleSourceName = "RuleBasedRawRating";
+        SourceTable ruleSourceTable = new SourceTable(ruleBaseRawRating, customerSpace);
+        String aiSourceName = "AIBasedRawRating";
+        SourceTable aiSourceTable = new SourceTable(aiBaseRawRating, customerSpace);
+
+        List<String> baseSources = new ArrayList<>();
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        if (hasAIRating) {
+            baseSources.add(aiSourceName);
+            baseTables.put(aiSourceName, aiSourceTable);
+        }
+        if (hasRuleRating) {
+            baseSources.add(ruleSourceName);
+            baseTables.put(ruleSourceName, ruleSourceTable);
+        }
+        step.setBaseSources(baseSources);
+        step.setBaseTables(baseTables);
+    }
+
     private PivotRatingsConfig createPivotRatingsConfig() {
         PivotRatingsConfig config = new PivotRatingsConfig();
         Map<String, String> modelIdToEngineIdMap = new HashMap<>();
+        List<String> evModelIds = new ArrayList<>();
+        List<String> aiModelIds = new ArrayList<>();
         for (RatingModelContainer modelContainer : modelContainers) {
             String engineId = modelContainer.getEngineSummary().getId();
             String modelId = modelContainer.getModel().getId();
             modelIdToEngineIdMap.put(modelId, RatingEngine.toRatingAttrName(engineId));
+            if (RatingEngineType.AI_BASED.equals(modelContainer.getEngineSummary().getType())) {
+                aiModelIds.add(modelId);
+                AIModel aiModel = (AIModel) modelContainer.getModel();
+                if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())){
+                    evModelIds.add(modelId);
+                }
+            }
         }
+        config.setEvModelIds(evModelIds);
+        config.setAiModelIds(aiModelIds);
         config.setIdAttrsMap(modelIdToEngineIdMap);
+        if (hasAIRating) {
+            config.setAiSourceIdx(0);
+            if (hasRuleRating) {
+                config.setRuleSourceIdx(1);
+            }
+        } else if (hasRuleRating) {
+            config.setRuleSourceIdx(0);
+        }
         return config;
     }
 

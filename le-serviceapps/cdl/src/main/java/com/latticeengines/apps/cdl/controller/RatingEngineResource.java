@@ -8,8 +8,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -59,7 +62,7 @@ public class RatingEngineResource {
         this.ratingCoverageService = ratingCoverageService;
     }
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
@@ -68,14 +71,14 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
     }
 
-    @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/types")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")
     public List<RatingEngineType> getRatingEngineTypes(@PathVariable String customerSpace) {
         return Arrays.asList(RatingEngineType.values());
     }
 
-    @RequestMapping(value = "/ids", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/ids")
     @ResponseBody
     @ApiOperation(value = "Get ids for Rating Engines. Can be filtered by segment name.")
     public List<String> getRatingEngineIds(@PathVariable String customerSpace,
@@ -83,14 +86,14 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineIdsInSegment(segment);
     }
 
-    @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Get a Rating Engine given its id")
     public RatingEngine getRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         return ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
     public RatingEngine createRatingEngine(@PathVariable String customerSpace, @RequestBody RatingEngine ratingEngine) {
@@ -105,7 +108,7 @@ public class RatingEngineResource {
         return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
     }
 
-    @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
+    @DeleteMapping(value = "/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
@@ -113,12 +116,11 @@ public class RatingEngineResource {
         return true;
     }
 
-    @RequestMapping(value = "/{ratingEngineId}/counts", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PutMapping(value = "/{ratingEngineId}/counts")
     @ResponseBody
     @ApiOperation(value = "Update rating engine counts")
     public Map<String, Long> updateRatingEngineCounts(@PathVariable String customerSpace,
             @PathVariable String ratingEngineId) {
-        // TODO: to convert to PUT
         return ratingEngineService.updateRatingEngineCounts(ratingEngineId);
     }
 

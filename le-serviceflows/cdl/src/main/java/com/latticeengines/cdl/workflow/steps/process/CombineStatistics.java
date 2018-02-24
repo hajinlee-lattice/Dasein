@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
@@ -112,7 +114,8 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
                 }
             });
             if (statsTableMap.size() != originalStatsTables) {
-                log.info("Removed " + (originalStatsTables - statsTableMap.size()) + " stats tables due to entity reset.");
+                log.info("Removed " + (originalStatsTables - statsTableMap.size())
+                        + " stats tables due to entity reset.");
             }
         }
 
@@ -150,16 +153,47 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, paths);
         StatsCube statsCube = StatsCubeUtils.parseAvro(records);
         if (BusinessEntity.PurchaseHistory.equals(entity)) {
-            Map<String, AttributeStats> newStatsMap = new HashMap<>();
-            statsCube.getStatistics().forEach((attrName, attrStats) -> {
-                AttributeStats newStats = StatsCubeUtils.convertPurchaseHistoryStats(attrName, attrStats);
-                if (newStats != null) {
-                    newStatsMap.put(attrName, attrStats);
-                }
-            });
-            statsCube.setStatistics(newStatsMap);
+            processPHCube(statsCube);
+        }
+        if (BusinessEntity.Rating.equals(entity)) {
+            processRatingCube(statsCube);
         }
         return statsCube;
+    }
+
+    private void processPHCube(StatsCube statsCube) {
+        Map<String, AttributeStats> newStatsMap = new HashMap<>();
+        statsCube.getStatistics().forEach((attrName, attrStats) -> {
+            AttributeStats newStats = StatsCubeUtils.convertPurchaseHistoryStats(attrName, attrStats);
+            if (newStats != null) {
+                newStatsMap.put(attrName, attrStats);
+            }
+        });
+        statsCube.setStatistics(newStatsMap);
+    }
+
+    private void processRatingCube(StatsCube statsCube) {
+        Map<String, Map> liftMap = getMapObjectFromContext(RATING_LIFTS, String.class, Map.class);
+        if (MapUtils.isNotEmpty(liftMap)) {
+            statsCube.getStatistics().forEach((attrName, attrStats) -> {
+                if (isRatingAttr(attrName)) {
+                    StatsCubeUtils.sortRatingBuckets(attrStats);
+                }
+                if (liftMap.containsKey(attrName)) {
+                    Map<String, Double> lifts = JsonUtils.convertMap(liftMap.get(attrName), String.class, Double.class);
+                    StatsCubeUtils.addLift(attrStats, lifts);
+                }
+            });
+        }
+        removeObjectFromContext(RATING_LIFTS);
+    }
+
+    private boolean isRatingAttr(String attrName) {
+        return attrName.startsWith(RatingEngine.RATING_ENGINE_PREFIX + "_") && !hasRatingAttrSuffix(attrName);
+    }
+
+    private boolean hasRatingAttrSuffix(String attrName) {
+        return RatingEngine.SCORE_ATTR_SUFFIX.values().stream().map(s -> "_" + s).anyMatch(attrName::endsWith);
     }
 
 }

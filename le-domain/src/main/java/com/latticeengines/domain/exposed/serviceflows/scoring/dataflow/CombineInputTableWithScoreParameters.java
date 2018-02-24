@@ -50,6 +50,9 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     @JsonProperty("score_multiplier_map")
     private Map<String, Integer> scoreMultiplierMap;
 
+    @JsonProperty("score_avg_map")
+    private Map<String, Double> scoreAvgMap;
+
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
     }
@@ -168,6 +171,14 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setScoreMultiplierMap(Map<String, Integer> scoreMultiplierMap) {
         this.scoreMultiplierMap = scoreMultiplierMap;
+    }
+
+    public Map<String, Double> getScoreAvgMap() {
+        return scoreAvgMap;
+    }
+
+    public void setScoreAvgMap(Map<String, Double> scoreAvgMap) {
+        this.scoreAvgMap = scoreAvgMap;
     }
 
     @Override

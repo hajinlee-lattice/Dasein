@@ -3,6 +3,8 @@ package com.latticeengines.dataflow.runtime.cascading.cdl;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 
@@ -14,6 +16,8 @@ import cascading.tuple.TupleEntry;
 
 public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregator.Context>
         implements Aggregator<AverageScoreAggregator.Context> {
+
+    private static final Logger log = LoggerFactory.getLogger(AverageScoreAggregator.class);
 
     private static final long serialVersionUID = -3342650400167761862L;
 
@@ -34,7 +38,7 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
 
     @Override
     protected boolean isDummyGroup(TupleEntry group) {
-        return StringUtils.isNotBlank(group.getString(modelGuidField));
+        return StringUtils.isBlank(group.getString(modelGuidField));
     }
 
     @Override
@@ -46,7 +50,6 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
 
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
-        long count = context.count + 1;
         double sum = context.sum;
 
         String modelGuid = arguments.getString(modelGuidField);
@@ -60,10 +63,14 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
                 score = Double.valueOf(String.valueOf(scoreObj));
             }
             sum += score;
+        } else {
+            log.info("score object is null for " + modelGuid + "." + scoreField);
         }
 
-        context.count = count;
+        context.count++;
         context.sum = sum;
+        log.info("context sum is updated to " + context.sum);
+        log.info("context count is updated to " + context.count);
         return context;
     }
 
@@ -76,6 +83,7 @@ public class AverageScoreAggregator extends BaseAggregator<AverageScoreAggregato
             avg = context.sum / context.count;
         }
         result.set(1, avg);
+        log.info("Output tuple:" + result.toString());
         return result;
     }
 }

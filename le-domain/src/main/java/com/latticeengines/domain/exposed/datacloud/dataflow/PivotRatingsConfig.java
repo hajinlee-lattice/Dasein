@@ -17,11 +17,17 @@ public class PivotRatingsConfig extends TransformerConfig {
     @JsonProperty("id_attrs_map")
     private Map<String, String> idAttrsMap; // model id to engine id mapping
 
+    @JsonProperty("rule_source_idx")
+    private Integer ruleSourceIdx;
+
+    @JsonProperty("ai_source_idx")
+    private Integer aiSourceIdx;
+
     @JsonProperty("ev_model_ids")
     private List<String> evModelIds;
 
-    @JsonProperty("lift_chart_model_ids")
-    private List<String> liftChartModelIds;
+    @JsonProperty("ai_model_ids")
+    private List<String> aiModelIds;
 
     public Map<String, String> getIdAttrsMap() {
         return idAttrsMap;
@@ -29,6 +35,22 @@ public class PivotRatingsConfig extends TransformerConfig {
 
     public void setIdAttrsMap(Map<String, String> idAttrsMap) {
         this.idAttrsMap = idAttrsMap;
+    }
+
+    public Integer getRuleSourceIdx() {
+        return ruleSourceIdx;
+    }
+
+    public void setRuleSourceIdx(Integer ruleSourceIdx) {
+        this.ruleSourceIdx = ruleSourceIdx;
+    }
+
+    public Integer getAiSourceIdx() {
+        return aiSourceIdx;
+    }
+
+    public void setAiSourceIdx(Integer aiSourceIdx) {
+        this.aiSourceIdx = aiSourceIdx;
     }
 
     public List<String> getEvModelIds() {
@@ -39,11 +61,11 @@ public class PivotRatingsConfig extends TransformerConfig {
         this.evModelIds = evModelIds;
     }
 
-    public List<String> getLiftChartModelIds() {
-        return liftChartModelIds;
+    public List<String> getAiModelIds() {
+        return aiModelIds;
     }
 
-    public void setLiftChartModelIds(List<String> liftChartModelIds) {
-        this.liftChartModelIds = liftChartModelIds;
+    public void setAiModelIds(List<String> aiModelIds) {
+        this.aiModelIds = aiModelIds;
     }
 }

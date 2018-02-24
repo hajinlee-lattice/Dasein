@@ -1,9 +1,9 @@
 package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
 import java.util.List;
-import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoringDataFlowStepConfiguration {
@@ -18,7 +18,7 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoring
 
     public CombineInputTableWithScoreDataFlowConfiguration() {
         setBeanName("combineInputTableWithScore");
-        setTargetTableName("CombineInputTableWithScore_" + UUID.randomUUID().toString());
+        setTargetTableName(NamingUtils.uuid("CombineInputTableWithScore"));
     }
 
     @JsonProperty

@@ -229,6 +229,28 @@ public class StatsCubeUtils {
         bucket.setComparisonType(ComparisonType.EQUAL);
     }
 
+    public static void sortRatingBuckets(AttributeStats attrStats) {
+        Buckets buckets = attrStats.getBuckets();
+        if (buckets != null && BucketType.Enum.equals(buckets.getType())
+                && CollectionUtils.isNotEmpty(buckets.getBucketList())) {
+            List<Bucket> bucketList = buckets.getBucketList().stream().sorted(Comparator.comparing(Bucket::getLabel))
+                    .collect(Collectors.toList());
+            buckets.setBucketList(bucketList);
+        }
+    }
+
+    public static void addLift(AttributeStats attrStats, Map<String, Double> lift) {
+        Buckets buckets = attrStats.getBuckets();
+        if (buckets != null && CollectionUtils.isNotEmpty(buckets.getBucketList())) {
+            buckets.getBucketList().forEach(bkt -> {
+                String label = bkt.getLabel();
+                if (lift.containsKey(label)) {
+                    bkt.setLift(lift.get(label));
+                }
+            });
+        }
+    }
+
     public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
         if (!attrName.startsWith("PH_")) {
             return attrStats;
@@ -368,10 +390,11 @@ public class StatsCubeUtils {
         }
         CategoryTopNTree catTopNTree = topNTree.getCategory(Category.RATING);
         Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
-        ratingEngineSummaries.forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
+        ratingEngineSummaries
+                .forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
         Map<String, List<TopAttribute>> subcatMap = new HashMap<>();
         catTopNTree.getSubcategories().values().forEach(attrs -> attrs.forEach(attr -> {
-            String engineId =  attr.getAttribute();
+            String engineId = attr.getAttribute();
             String subcategory = "Other";
             if (summaryMap.containsKey(engineId)) {
                 RatingEngineSummary summary = summaryMap.get(engineId);
@@ -388,12 +411,13 @@ public class StatsCubeUtils {
     }
 
     public static void injectRatingEngineMetadata(List<ColumnMetadata> cms,
-                                                  List<RatingEngineSummary> ratingEngineSummaries) {
+            List<RatingEngineSummary> ratingEngineSummaries) {
         if (CollectionUtils.isEmpty(ratingEngineSummaries)) {
             return;
         }
         Map<String, RatingEngineSummary> summaryMap = new HashMap<>();
-        ratingEngineSummaries.forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
+        ratingEngineSummaries
+                .forEach(summary -> summaryMap.put(RatingEngine.toRatingAttrName(summary.getId()), summary));
         cms.forEach(cm -> {
             String attrName = cm.getAttrName();
             if (summaryMap.containsKey(attrName)) {
@@ -406,9 +430,8 @@ public class StatsCubeUtils {
         });
     }
 
-    public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap,
-                                             Map<String, List<ColumnMetadata>> cmMap,
-                                             boolean includeTopBkt) {
+    public static TopNTree constructTopNTree(Map<String, StatsCube> cubeMap, Map<String, List<ColumnMetadata>> cmMap,
+            boolean includeTopBkt) {
         TopNTree topNTree = new TopNTree();
         for (Map.Entry<String, StatsCube> cubeEntry : cubeMap.entrySet()) {
             String key = cubeEntry.getKey();
@@ -424,8 +447,8 @@ public class StatsCubeUtils {
         return topNTree;
     }
 
-    private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList,
-                                      TopNTree topNTree, boolean includeTopBkt) {
+    private static void addToTopNTree(String key, StatsCube cube, List<ColumnMetadata> cmList, TopNTree topNTree,
+            boolean includeTopBkt) {
         BusinessEntity entity = BusinessEntity.valueOf(key);
         Map<String, ColumnMetadata> cmMap = new HashMap<>();
         cmList.forEach(cm -> cmMap.put(cm.getColumnId(), cm));
@@ -457,15 +480,15 @@ public class StatsCubeUtils {
         }
         if (includeTopBkt) {
             topNTree.getCategories().forEach((category, categoryTopNTree) -> //
-                    categoryTopNTree.getSubcategories().forEach((subCat, topAttrs) -> {
-                        Comparator<TopAttribute> comparator = getTopAttrComparatorForCategory(category);
-                        topAttrs.sort(comparator);
-                    }));
+            categoryTopNTree.getSubcategories().forEach((subCat, topAttrs) -> {
+                Comparator<TopAttribute> comparator = getTopAttrComparatorForCategory(category);
+                topAttrs.sort(comparator);
+            }));
         }
     }
 
-    private static TopAttribute toTopAttr(Category category, BusinessEntity entity, String attrName, AttributeStats attributeStats,
-                                          boolean includeTopBkt) {
+    private static TopAttribute toTopAttr(Category category, BusinessEntity entity, String attrName,
+            AttributeStats attributeStats, boolean includeTopBkt) {
         AttributeLookup attributeLookup = new AttributeLookup(entity, attrName);
         TopAttribute topAttribute = new TopAttribute(attributeLookup, attributeStats.getNonNullCount());
         if (includeTopBkt && attributeStats.getBuckets() != null) {
@@ -540,17 +563,17 @@ public class StatsCubeUtils {
 
     private static Comparator<TopAttribute> getTopAttrComparatorForCategory(Category category) {
         switch (category) {
-            case FIRMOGRAPHICS:
-                return firmographicTopAttrComparator();
-            case INTENT:
-                return intentTopAttrComparator();
-            case WEBSITE_PROFILE:
-            case TECHNOLOGY_PROFILE:
-                return techTopAttrComparator();
-            case PRODUCT_SPEND:
-                return productTopAttrComparator();
-            default:
-                return defaultTopAttrComparator();
+        case FIRMOGRAPHICS:
+            return firmographicTopAttrComparator();
+        case INTENT:
+            return intentTopAttrComparator();
+        case WEBSITE_PROFILE:
+        case TECHNOLOGY_PROFILE:
+            return techTopAttrComparator();
+        case PRODUCT_SPEND:
+            return productTopAttrComparator();
+        default:
+            return defaultTopAttrComparator();
         }
     }
 
@@ -656,6 +679,5 @@ public class StatsCubeUtils {
         });
         return cubes;
     }
-
 
 }

@@ -109,6 +109,7 @@ public enum InterfaceName {
     Rating,
     ExpectedValue,
     Likelihood,
+    Lift,
 
     // Internal
     __Composite_Key__ // primary key for internal use

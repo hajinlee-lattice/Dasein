@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.persistence.Transient;
 
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +50,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
         @JsonSubTypes.Type(value = CascadingBulkMatchDataflowParameters.class, name = "cascadingBulkMatchDataflowParameters"), //
         @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = CdlPivotScoreAndEventParameters.class, name = "cdlPivotScoreAndEventParameters"), //
+        @JsonSubTypes.Type(value = ComputeLiftParameters.class, name = "computeLiftParameters"), //
 })
 public class DataFlowParameters {
 
