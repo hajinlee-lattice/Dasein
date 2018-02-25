@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -13,6 +12,8 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.core.document.repository.AttrConfigEntityRepository;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -23,8 +24,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 @Component("attrConfigEntityMgr")
-public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfigEntity>
-        implements AttrConfigEntityMgr {
+public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfigEntity> implements AttrConfigEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(AttrConfigEntityMgrImpl.class);
 
@@ -36,42 +36,14 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
         return repository;
     }
 
-    // this will do save/update/delete all together
     @Override
-    public List<AttrConfigEntity> reset(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
-        return saveAll(tenantId, entity, attrConfigs, true);
-    }
-
-    @Override
-    public List<AttrConfigEntity> upsert(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
-        return saveAll(tenantId, entity, attrConfigs, false);
-    }
-
-    @Override
-     public void delete(String tenantId, BusinessEntity entity) {
-        repository.removeByTenantIdAndEntity(tenantId, entity);
-    }
-
-    @Override
-    public List<AttrConfig> findAllForEntity(String tenantId, BusinessEntity entity) {
-        List<AttrConfigEntity> attrConfigEntities = repository.findByTenantIdAndEntity(tenantId, entity);
-        return attrConfigEntities.stream() //
-                .map(AttrConfigEntity::getDocument) //
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public void cleanupTenant(String tenantId) {
-        List<AttrConfigEntity> entities = repository.removeByTenantId(tenantId);
-        log.info("Deleted " + entities.size() + " documents from " + tenantId);
-    }
-
-    private List<AttrConfigEntity> saveAll(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs, boolean removeOrphan) {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<AttrConfigEntity> save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
         List<AttrConfigEntity> existing = repository.findByTenantIdAndEntity(tenantId, entity);
         Map<String, AttrConfigEntity> existingMap = new HashMap<>();
         existing.forEach(config -> existingMap.put(config.getDocument().getAttrName(), config));
         List<AttrConfigEntity> toCreateOrUpdate = new ArrayList<>();
-        for (AttrConfig attrConfig : attrConfigs) {
+        for (AttrConfig attrConfig: attrConfigs) {
             String attrName = attrConfig.getAttrName();
             AttrConfigEntity attrConfigEntity;
             if (existingMap.containsKey(attrName)) {
@@ -85,15 +57,30 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
             attrConfigEntity.setDocument(attrConfig);
             toCreateOrUpdate.add(attrConfigEntity);
         }
-        List<AttrConfigEntity> saved = repository.saveAll(toCreateOrUpdate);
-        if (removeOrphan) {
-            Set<String> savedAttrNames = saved.stream().map(AttrConfigEntity::getDocument).map(AttrConfig::getAttrName)
-                    .collect(Collectors.toSet());
-            List<AttrConfigEntity> toDelete = existing.stream()
-                    .filter(e -> !savedAttrNames.contains(e.getDocument().getAttrName())).collect(Collectors.toList());
-            repository.deleteAll(toDelete);
-        }
-        return saved;
+        return repository.saveAll(toCreateOrUpdate);
+    }
+
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void delete(String tenantId, BusinessEntity entity) {
+        repository.removeByTenantIdAndEntity(tenantId, entity);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttrConfig> findAllForEntity(String tenantId, BusinessEntity entity) {
+        List<AttrConfigEntity> attrConfigEntities = repository.findByTenantIdAndEntity(tenantId, entity);
+        return attrConfigEntities.stream() //
+                .map(AttrConfigEntity::getDocument) //
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void cleanupTenant(String tenantId) {
+        List<AttrConfigEntity> entities = repository.removeByTenantId(tenantId);
+        log.info("Deleted " + entities.size() + " documents from " + tenantId);
     }
 
 }
