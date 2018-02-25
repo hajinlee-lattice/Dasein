@@ -173,6 +173,12 @@ public class PLSComponentManager {
             }
         }
 
+        try {
+            Thread.sleep(500); // wait for replication lag
+        } catch (Exception e) {
+            // ignore
+        }
+
         assignAccessLevelByEmails(internalAdminEmails, AccessLevel.INTERNAL_ADMIN, tenant.getId());
         assignAccessLevelByEmails(superAdminEmails, AccessLevel.SUPER_ADMIN, tenant.getId());
         assignAccessLevelByEmails(externalAdminEmails, AccessLevel.EXTERNAL_ADMIN, tenant.getId());
@@ -229,6 +235,7 @@ public class PLSComponentManager {
                 UserRegistration uReg = createAdminUserRegistration(email, accessLevel);
                 try {
                     userService.createUser(uReg);
+                    Thread.sleep(500);
                     user = userService.findByEmail(email);
                     if (user == null) {
                         throw new RuntimeException(String.format("Cannot find the new user %s.", email));
