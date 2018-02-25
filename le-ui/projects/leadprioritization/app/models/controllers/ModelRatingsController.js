@@ -168,8 +168,8 @@ angular.module('lp.models.ratings', [
                     right_bound_score: 100 - Math.round(vm.relativeSliderChartPosition * 100)
                 };
 
-            vm.currentConfiguration.push(addSlider);
-            vm.currentConfiguration.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
+            vm.workingBuckets.push(addSlider);
+            vm.workingBuckets.sort(function(a, b){return b.right_bound_score - a.right_bound_score});
 
             vm.chartNotUpdated = false;
             vm.canAddBucket = true;
@@ -320,7 +320,7 @@ angular.module('lp.models.ratings', [
                     vm.updateContent = false;
                     vm.showSuccess = false;
                     
-                }, 2500);
+                }, 200);
 
             } else {
                 vm.savingConfiguration = false;
