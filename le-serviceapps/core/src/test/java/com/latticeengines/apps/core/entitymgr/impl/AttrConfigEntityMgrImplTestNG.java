@@ -63,7 +63,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
             }
         });
 
-        attrConfigEntityMgr.delete(tenantName, entity);
+        attrConfigEntityMgr.deleteAllForEntity(tenantName, entity);
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isEmpty(attrConfigs));

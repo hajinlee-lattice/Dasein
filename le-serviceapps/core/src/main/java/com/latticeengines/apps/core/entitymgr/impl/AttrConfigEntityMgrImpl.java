@@ -63,7 +63,7 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(String tenantId, BusinessEntity entity) {
+    public void deleteAllForEntity(String tenantId, BusinessEntity entity) {
         repository.removeByTenantIdAndEntity(tenantId, entity);
     }
 
