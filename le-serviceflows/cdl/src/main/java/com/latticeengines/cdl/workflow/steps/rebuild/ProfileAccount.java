@@ -257,7 +257,7 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
                 attr.setSubcategory(removeNonAscII(cm.getSubcategory()));
                 attr.setFundamentalType(cm.getFundamentalType());
                 attr.setCategory(cm.getCategory());
-                attr.setGroupsViaList(new ArrayList<>(cm.getGroups().keySet()));
+                attr.setGroupsViaList(cm.getEnabledGroups());
                 dcCount.incrementAndGet();
             } else if (masterAttrs.containsKey(attr0.getName())) {
                 attr = copyMasterAttr(masterAttrs, attr0);

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
@@ -137,6 +139,12 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             attr.setNumOfBits(attr0.getNumOfBits());
             attr.setBitOffset(attr0.getBitOffset());
             attr.setPhysicalDataType(Schema.Type.STRING.getName());
+        }
+        if (attr.getGroupsAsList() == null) {
+            attr.setGroupsViaList(new ArrayList<>());
+        }
+        if (!attr.getGroupsAsList().contains(ColumnSelection.Predefined.Segment)) {
+            attr.getGroupsAsList().add(ColumnSelection.Predefined.Segment);
         }
         return attr;
     }
