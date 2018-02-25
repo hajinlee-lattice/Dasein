@@ -235,8 +235,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (role == null) {
             return Collections.emptyList();
         }
-        List list = _dataLakeService.getAttributesInTableRole(customerSpace, role);
-        List<ColumnMetadata> cms = JsonUtils.convertList(list, ColumnMetadata.class);
+//        List list = _dataLakeService.getAttributesInTableRole(customerSpace, role);
+//        List<ColumnMetadata> cms = JsonUtils.convertList(list, ColumnMetadata.class);
+        List<ColumnMetadata> cms = _dataLakeService.getAttributesInTableRole(customerSpace, role);
         cms.forEach(cm -> cm.setEntity(entity));
         if (BusinessEntity.Rating.equals(entity)) {
             List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);

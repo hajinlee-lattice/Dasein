@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import reactor.core.publisher.Flux;
 
-public interface MetadataStore {
+public interface JpaMetadataStore {
 
     String getName();
 

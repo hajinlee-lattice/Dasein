@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.http.message.BasicNameValuePair;
@@ -44,7 +45,7 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.HttpClientWithOptionalRetryUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.documentdb.annotation.TenantIdColumn;
-import com.latticeengines.documentdb.entity.MetadataEntity;
+import com.latticeengines.documentdb.entity.BaseMultiTenantDocEntity;
 import com.latticeengines.domain.exposed.admin.DeleteVisiDBDLRequest;
 import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -354,14 +355,14 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
     private Map<String, String> findAllMultiTenantDocStores() {
         Reflections reflections = new Reflections("com.latticeengines.documentdb.entity");
 
-        List<Class<? extends MetadataEntity>> allClasses = reflections.getSubTypesOf(MetadataEntity.class)
+        List<Class<? extends BaseMultiTenantDocEntity>> allClasses = reflections.getSubTypesOf(BaseMultiTenantDocEntity.class)
                 .stream().filter(clz -> !Modifier.toString(clz.getModifiers()).contains("abstract"))
                 .collect(Collectors.toList());
 
         Map<String, String> tables = new HashMap<>();
         allClasses.forEach(clz -> {
             log.info("Found a multi-tenant entity class " + clz);
-            Field tenantIdField = findTenantIdField(clz);
+            Field tenantIdField = FieldUtils.getFieldsListWithAnnotation(clz, TenantIdColumn.class).get(0);
             if (tenantIdField != null) {
                 String tenantIdColumn = findTenantIdColumn(tenantIdField);
                 log.info("Found tenantId column name for " + clz + " : " + tenantIdColumn);
@@ -376,19 +377,6 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
             }
         });
         return tables;
-    }
-
-    private Field findTenantIdField(Class<? extends MetadataEntity> clz) {
-        Class<?> c = clz;
-        while (c != null) {
-            for (Field field : c.getDeclaredFields()) {
-                if (field.isAnnotationPresent(TenantIdColumn.class)) {
-                    return field;
-                }
-            }
-            c = c.getSuperclass();
-        }
-        return null;
     }
 
     private String findTenantIdColumn(Field field) {
@@ -410,7 +398,7 @@ public class GlobalAuthCleanupTestNG extends AbstractTestNGSpringContextTests {
         return null;
     }
 
-    private String findTableName(Class<? extends MetadataEntity> clz) {
+    private String findTableName(Class<? extends BaseMultiTenantDocEntity> clz) {
         Annotation[] annotations = clz.getAnnotations();
         for (Annotation annotation : annotations) {
             Class<? extends Annotation> type = annotation.annotationType();

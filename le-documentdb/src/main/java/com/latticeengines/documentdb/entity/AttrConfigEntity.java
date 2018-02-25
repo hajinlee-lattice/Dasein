@@ -12,13 +12,12 @@ import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 @Entity
 @Table(name = "AttributeConfiguration", //
         indexes = {@Index(name = "IX_NAMESPACE", columnList = "TenantId,Entity")})
-public class AttrConfigEntity extends BaseColumnMetadataDocEntity implements MetadataEntity {
-
-    private static final long serialVersionUID = 104466407857299607L;
+public class AttrConfigEntity extends BaseMultiTenantDocEntity<AttrConfig> implements ColumnMetadataDocument<AttrConfig> {
 
     @JsonProperty("Entity")
     @Enumerated(EnumType.STRING)

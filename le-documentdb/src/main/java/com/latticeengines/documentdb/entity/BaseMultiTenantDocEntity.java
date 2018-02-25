@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.documentdb.annotation.TenantIdColumn;
 
 @MappedSuperclass
-public abstract class BaseMultiTenantDocEntity extends BaseDocumentEntity {
+public abstract class BaseMultiTenantDocEntity<T> extends BaseDocumentEntity<T> {
 
     @TenantIdColumn
     @JsonProperty("TenantId")

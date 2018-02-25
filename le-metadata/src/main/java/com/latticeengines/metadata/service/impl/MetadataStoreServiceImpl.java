@@ -10,7 +10,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.metadata.mds.MetadataStore;
+import com.latticeengines.metadata.mds.JpaMetadataStore;
 import com.latticeengines.metadata.mds.impl.AttrConfigMetadataStore;
 import com.latticeengines.metadata.service.MetadataStoreService;
 
@@ -22,15 +22,15 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
     @Inject
     private AttrConfigMetadataStore attrConfigMetadataStore;
 
-    private ConcurrentMap<String, MetadataStore> registry;
+    private ConcurrentMap<String, JpaMetadataStore> registry;
 
     public Flux<ColumnMetadata> getMetadata(String metadataStoreName, String... namespace) {
-        MetadataStore metadataStore = getMetadataStore(metadataStoreName);
+        JpaMetadataStore metadataStore = getMetadataStore(metadataStoreName);
         Serializable[] keys = metadataStore.parseNameSpace(namespace);
         return metadataStore.getMetadata(keys);
     }
 
-    private MetadataStore getMetadataStore(String metadataStoreName) {
+    private JpaMetadataStore getMetadataStore(String metadataStoreName) {
         registerMetadataStores();
         if (registry.containsKey(metadataStoreName)) {
             return registry.get(metadataStoreName);
@@ -47,7 +47,7 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
         }
     }
 
-    private void registerMetadataStore(MetadataStore metadataStore) {
+    private void registerMetadataStore(JpaMetadataStore metadataStore) {
         registry.put(metadataStore.getName(), metadataStore);
     }
 

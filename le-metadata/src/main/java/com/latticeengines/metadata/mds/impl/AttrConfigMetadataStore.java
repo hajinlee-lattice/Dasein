@@ -10,18 +10,18 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.domain.exposed.metadata.MetadataStoreName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.metadata.mds.MetadataStore;
+import com.latticeengines.metadata.mds.JpaMetadataStore;
 import com.latticeengines.metadata.repository.AttrConfigRepository;
 import com.latticeengines.metadata.repository.MetadataStoreRepository;
 
 @Component("attrConfigMetadataStore")
-public class AttrConfigMetadataStore extends JpaRepositoryMetadataStore<AttrConfigEntity> implements MetadataStore {
+public class AttrConfigMetadataStore extends JpaRepositoryMetadataStore<AttrConfigEntity> implements JpaMetadataStore {
 
     @Inject
     private AttrConfigRepository repository;
 
     @Override
-    protected Class<AttrConfigEntity> getEntityClz() {
+    protected Class<AttrConfigEntity> getDAOClz() {
         return AttrConfigEntity.class;
     }
 

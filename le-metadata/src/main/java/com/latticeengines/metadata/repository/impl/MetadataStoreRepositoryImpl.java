@@ -9,16 +9,15 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.criteria.Predicate;
 
-import org.nustaq.serialization.annotations.OneOf;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 
 import com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl;
-import com.latticeengines.documentdb.entity.MetadataEntity;
+import com.latticeengines.documentdb.entity.NameSpacedDocument;
 import com.latticeengines.metadata.repository.MetadataStoreRepository;
 
-public class MetadataStoreRepositoryImpl<T extends MetadataEntity> extends BaseJpaRepositoryImpl<T, String>
+public class MetadataStoreRepositoryImpl<T extends NameSpacedDocument> extends BaseJpaRepositoryImpl<T, String>
         implements MetadataStoreRepository<T> {
 
     private final JpaEntityInformation<T, ?> entityInformation;
@@ -82,6 +81,7 @@ public class MetadataStoreRepositoryImpl<T extends MetadataEntity> extends BaseJ
         };
     }
 
+    @SuppressWarnings("unchecked")
     private List<String> getNamespaceKeys(Class<T> clz) {
         T instance;
         try {

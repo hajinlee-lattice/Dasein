@@ -10,17 +10,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class AttrConfigProp implements Serializable {
+public class AttrConfigProp<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 3252663465868093601L;
 
     @JsonProperty("AllowCustomization")
     private boolean allowCustomization;
 
     @JsonProperty("SystemValue")
-    private Serializable systemValue;
+    private T systemValue;
 
     @JsonProperty("CustomValue")
-    private Serializable customValue;
+    private T customValue;
 
     public boolean isAllowCustomization() {
         return allowCustomization;
@@ -30,19 +30,20 @@ public class AttrConfigProp implements Serializable {
         this.allowCustomization = allowCustomization;
     }
 
-    public Serializable getSystemValue() {
+    public T getSystemValue() {
         return systemValue;
     }
 
-    public void setSystemValue(Serializable systemValue) {
+    public void setSystemValue(T systemValue) {
         this.systemValue = systemValue;
     }
 
-    public Serializable getCustomValue() {
+    public T getCustomValue() {
         return customValue;
     }
 
-    public void setCustomValue(Serializable customValue) {
+    public void setCustomValue(T customValue) {
         this.customValue = customValue;
     }
+
 }

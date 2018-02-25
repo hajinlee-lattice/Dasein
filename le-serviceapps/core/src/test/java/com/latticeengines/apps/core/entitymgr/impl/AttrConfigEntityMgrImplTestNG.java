@@ -44,7 +44,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Assert.assertEquals(attrConfigs.size(), 3);
 
-        AttrConfigProp attrConfigProp = new AttrConfigProp();
+        AttrConfigProp<String> attrConfigProp = new AttrConfigProp<>();
         attrConfigProp.setCustomValue("Display Name 1");
         attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp);
         AttrConfig attrConfig4 = new AttrConfig();
