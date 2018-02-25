@@ -92,8 +92,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
-    public void testGetRecommendationById() {
+    public void testGetRecommendationById() throws InterruptedException {
         MultiTenantContext.setTenant(tenant);
+        Thread.sleep(500); // wait for replication lag
         Recommendation result = recommendationEntityMgr.findByRecommendationId(recommendation.getRecommendationId());
         Assert.assertEquals(result.getAccountId(), recommendation.getAccountId());
         Assert.assertEquals(result.getPid(), recommendation.getPid());
