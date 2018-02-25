@@ -38,18 +38,18 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         List<AttrConfig> attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isEmpty(attrConfigs));
 
-        attrConfigEntityMgr.save(tenantName, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
+        attrConfigEntityMgr.upsert(tenantName, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
         Assert.assertEquals(attrConfigs.size(), 3);
 
         AttrConfigProp<String> attrConfigProp = new AttrConfigProp<>();
-        attrConfigProp.setCustomValue("Display Name 1");
+        attrConfigProp.setCustomValue("Display Name 2");
         attrConfig2.putProperty(ColumnMetadataKey.DisplayName, attrConfigProp);
         AttrConfig attrConfig4 = new AttrConfig();
         attrConfig4.setAttrName("Attr4");
-        List<AttrConfigEntity> response = attrConfigEntityMgr.save(tenantName, entity, Arrays.asList(attrConfig2, attrConfig4));
+        List<AttrConfigEntity> response = attrConfigEntityMgr.upsert(tenantName, entity, Arrays.asList(attrConfig2, attrConfig4));
         Assert.assertEquals(response.size(), 2);
         response.forEach(entity1 -> Assert.assertNotNull(entity1.getCreatedDate()));
         response.forEach(entity1 -> Assert.assertNotNull(entity1.getLastModifiedDate()));
@@ -59,7 +59,22 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         attrConfigs.forEach(attrConfig -> {
             if (attrConfig.getAttrName().equals("Attr2")) {
                 Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.DisplayName));
-                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(), "Display Name 1");
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.DisplayName).getCustomValue(), "Display Name 2");
+            }
+        });
+
+        attrConfigProp = new AttrConfigProp<>();
+        attrConfigProp.setCustomValue("Description 3");
+        attrConfig3.putProperty(ColumnMetadataKey.Description, attrConfigProp);
+        response = attrConfigEntityMgr.reset(tenantName, entity, Arrays.asList(attrConfig2, attrConfig3));
+        Assert.assertEquals(response.size(), 2);
+        Thread.sleep(500); // wait for replication lag
+        attrConfigs = attrConfigEntityMgr.findAllForEntity(tenantName, entity);
+        Assert.assertEquals(attrConfigs.size(), 2);
+        attrConfigs.forEach(attrConfig -> {
+            if (attrConfig.getAttrName().equals("Attr3")) {
+                Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.Description));
+                Assert.assertEquals(attrConfig.getAttrProps().get(ColumnMetadataKey.Description).getCustomValue(), "Description 3");
             }
         });
 
@@ -84,8 +99,8 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         AttrConfig attrConfig3 = new AttrConfig();
         attrConfig3.setAttrName("Attr3");
 
-        attrConfigEntityMgr.save(tenant1, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
-        attrConfigEntityMgr.save(tenant2, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
+        attrConfigEntityMgr.upsert(tenant1, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
+        attrConfigEntityMgr.upsert(tenant2, entity, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
         Thread.sleep(500); // wait for replication lag
 
         List<AttrConfig> attrConfigs = attrConfigEntityMgr.findAllForEntity(tenant1, entity);
@@ -104,7 +119,7 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
         Assert.assertEquals(attrConfigs.size(), 3);
 
         attrConfigEntityMgr.cleanupTenant(TestFrameworkUtils.generateTenantName());
-        attrConfigEntityMgr.save(tenant2, BusinessEntity.Contact, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
+        attrConfigEntityMgr.upsert(tenant2, BusinessEntity.Contact, Arrays.asList(attrConfig1, attrConfig2, attrConfig3));
         Thread.sleep(500); // wait for replication lag
         attrConfigs = attrConfigEntityMgr.findAllForEntity(tenant2, BusinessEntity.Contact);
         Assert.assertTrue(CollectionUtils.isNotEmpty(attrConfigs));
