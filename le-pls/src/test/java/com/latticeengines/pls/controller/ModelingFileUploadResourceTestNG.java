@@ -6,6 +6,7 @@ import static org.testng.Assert.assertTrue;
 import java.io.File;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -32,9 +33,9 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv";
     private static final String COMPRESSED_PATH = "com/latticeengines/pls/service/impl/fileuploadserviceimpl/file1.csv.gz";
@@ -47,8 +48,9 @@ public class ModelingFileUploadResourceTestNG extends PlsFunctionalTestNGBaseDep
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%sPLSTenant1", contractId));
         setupMarketoEloquaTestEnvironment();
+        String tenantId = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
+        HdfsUtils.rmdir(yarnConfiguration, String.format("/Pods/Default/Contracts/%s", tenantId));
     }
 
     @BeforeMethod

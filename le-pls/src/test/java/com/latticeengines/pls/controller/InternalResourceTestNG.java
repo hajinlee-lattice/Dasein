@@ -1,6 +1,5 @@
 package com.latticeengines.pls.controller;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -22,13 +20,12 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component("internalResourceTestNG")
-public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class InternalResourceTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
@@ -76,15 +73,12 @@ public class InternalResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Test(groups = "functional")
     public void updateModelSummaryNotExists() {
-        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
-        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
-
         AttributeMap attrMap = new AttributeMap();
         attrMap.put("Status", "UpdateAsActive");
         String restAPIHostPort = getRestAPIHostPort();
         String url = String.format("%s/pls/internal/modelsummaries/%s", restAPIHostPort, "xyz");
         HttpEntity<AttributeMap> requestEntity = new HttpEntity<>(attrMap);
-        ResponseEntity<ResponseDocument> response = restTemplate.exchange(url, HttpMethod.PUT, requestEntity,
+        ResponseEntity<ResponseDocument> response = magicRestTemplate.exchange(url, HttpMethod.PUT, requestEntity,
                 ResponseDocument.class);
         ResponseDocument responseDoc = response.getBody();
         Assert.assertFalse(responseDoc.isSuccess());

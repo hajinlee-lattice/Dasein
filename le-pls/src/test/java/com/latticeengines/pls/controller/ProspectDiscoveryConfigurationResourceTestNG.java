@@ -8,9 +8,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryProperty;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_PROSPECT_DISCOVERY_CONFIGURATION_URL = "pls/prospectdiscoveryconfigs/";
     
@@ -20,8 +20,7 @@ public class ProspectDiscoveryConfigurationResourceTestNG extends PlsFunctionalT
         PROSPECT_DISCOVERY_OPTION_1.setValue(STRING_VALUE);
         PROSPECT_DISCOVERY_OPTION_2.setOption(OPTION_2.toString());
         PROSPECT_DISCOVERY_OPTION_2.setValue(DOUBLE_VALUE);
-        
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
         cleanupProspectDiscoveryOptionDB();
     }
     

@@ -15,9 +15,9 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ReportResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ReportResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String REPORT_DATA = "{\"report\":\"abd\"}";
 
@@ -78,7 +78,7 @@ public class ReportResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
             createOrUpdate().isSuccess();
         } catch (Exception e) {
             exception = true;
-            assertEquals(e.getMessage(), "403");
+            assertTrue(e.getMessage().contains("403"));
         }
         assertTrue(exception, "Exception should have been thrown.");
     }

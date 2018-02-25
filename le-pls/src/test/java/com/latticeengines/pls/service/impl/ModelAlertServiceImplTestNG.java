@@ -6,6 +6,7 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.net.URL;
+import java.util.UUID;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -21,12 +22,12 @@ import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelAlerts;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelAlertService;
 
-public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBase {
 
-    private String modelId = generateRandomModelId();
+    private String modelId = String.format("ms__%s-PLSModel", UUID.randomUUID());
     private String tenantId;
     private String dir;
 
@@ -53,9 +54,9 @@ public class ModelAlertServiceImplTestNG extends PlsFunctionalTestNGBaseDeprecat
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
 
-        tenantId = testingTenants.get(0).getId();
+        tenantId = mainTestTenant.getId();
         System.out.println("modelId is " + modelId);
         dir = modelingServiceHdfsBaseDir + "/" + tenantId + "/models/ANY_TABLE/" + UuidUtils.extractUuid(modelId)
                 + "/container_01/";

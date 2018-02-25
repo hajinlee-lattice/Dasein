@@ -9,15 +9,15 @@ import java.util.List;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class MarketoCredentialResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class MarketoCredentialResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_MARKETO_CREDENTIAL_URL = "/pls/marketo/credentials/";
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
     }
 
     @Test(groups = { "functional" })

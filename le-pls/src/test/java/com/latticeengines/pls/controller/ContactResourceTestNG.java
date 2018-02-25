@@ -14,9 +14,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Contact;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ContactResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ContactResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_CONTACT_URL = "pls/contacts/";
     private static final String PLS_COUNT_URL = "pls/contacts/count/";
@@ -24,7 +24,7 @@ public class ContactResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
     }
 
     @BeforeMethod(groups = { "functional" })

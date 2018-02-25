@@ -9,9 +9,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Quota;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class QuotaResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class QuotaResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_QUOTA_URL = "pls/quotas/";
 
@@ -20,7 +20,7 @@ public class QuotaResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         QUOTA.setId(TEST_QUOTA_ID);
         QUOTA.setBalance(BALANCE);
 
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
         cleanupQuotaDB();
     }
 

@@ -10,9 +10,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.ProspectDiscoveryOption;
 import com.latticeengines.pls.entitymanager.ProspectDiscoveryOptionEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
     @Autowired
     ProspectDiscoveryOptionEntityMgr prospectDiscoveryOptionEntityMgr;
@@ -22,7 +22,7 @@ public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTes
         PROSPECT_DISCOVERY_OPTION_1.setOption(OPTION_1.toString());
         PROSPECT_DISCOVERY_OPTION_1.setValue(STRING_VALUE);
         
-        setupUsers();
+        setupTestEnvironmentWithGATenants(2);
         cleanupProspectDiscoveryOptionDB();
     }
     
@@ -52,7 +52,7 @@ public class ProspectDiscoveryOptionEntityMgrImplTestNG extends PlsFunctionalTes
 
     @Test(groups = { "functional" }, dependsOnMethods = { "updateOption_calledForExistingOption_assertOptionValueIsUpdated" })
     public void findOption_calledFromAnotherTenant_assertOptionCannotBeFound() {
-        setupSecurityContext(ALTERNATIVE_TESTING_TENANT);
+        setupSecurityContext(testTenants().get(1));
         
         ProspectDiscoveryOption option = this.prospectDiscoveryOptionEntityMgr.findProspectDiscoveryOption(OPTION_1.toString());
         

@@ -24,9 +24,9 @@ import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class AmAttributeResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_ATTR_URL = "pls/amattributes/";
 

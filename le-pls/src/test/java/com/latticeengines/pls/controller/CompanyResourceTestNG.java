@@ -14,9 +14,9 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.pls.Company;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
+import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class CompanyResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
+public class CompanyResourceTestNG extends PlsFunctionalTestNGBase {
 
     private static final String PLS_COMPANY_URL = "pls/companies/";
     private static final String PLS_COUNT_URL = "pls/companies/count/";
@@ -24,7 +24,7 @@ public class CompanyResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
 
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
-        setupUsers();
+        setupTestEnvironmentWithOneGATenant();
     }
 
     @BeforeMethod(groups = { "functional" })
