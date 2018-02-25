@@ -2,7 +2,7 @@
     <div class="le-row">
         <div class="le-col-span-10">
             <span ng-if="vm.showItem('Boolean')" class="query-section-item-operation">
-                <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
+                <span class="query-section-item-value">
                     <strong>is</strong>
                 </span>
 
@@ -12,6 +12,7 @@
                     <option value="" ng-if="vm.showEmptyOption()">Empty</option>
                 </select>
             </span>
+            
             <span ng-if="vm.showItem('Enum')" class="query-section-item-operation">
                 <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
                     <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL">is</option>
@@ -19,15 +20,10 @@
                     <option ng-selected="vm.enumCmpModel == 'IS_EMPTY'" ng-value="IS_EMPTY">is empty</option>
                 </select>
 
-                <span ng-if="vm.showItem('Enum')" class="query-section-item-operation">
-                    <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()" ng-options="k as v for (k, v) in vm.enum_operations">
-                    </select>
+                <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add or Remove Values</a>
 
-                    <a ng-click="vm.goToEnumPicker()" href="javascript:void(0)" class="default-link">Add or Remove Values</a>
-
-                    <span class="query-section-item-value" ng-model="vm.tree.bucketRestriction.bkt.Vals" ng-change="vm.changeBktVal(0)">
-                        <strong ng-repeat="bucket in vm.vals">{{ vm.vals.length > 1 && $index != 0 ? ', ' : ''; }}{{ bucket }}</strong>
-                    </span>
+                <span class="query-section-item-value" ng-model="vm.tree.bucketRestriction.bkt.Vals" ng-change="vm.changeBktVal(0)">
+                    <strong ng-repeat="bucket in vm.vals">{{ vm.vals.length > 1 && $index != 0 ? ', ' : ''; }}{{ bucket }}</strong>
                 </span>
             </span>
 
@@ -67,7 +63,6 @@
         </div>
 
         <div class="le-col-span-2">
-            
             <div class="edit-controllers">
                 <button class="button blue-button set" ng-click="vm.setBucket($event)">SET</button>
                 <!-- <button class="button gray-button unset" ng-click="vm.setBucket($event, true)">UNSET</button> -->

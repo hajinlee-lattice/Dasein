@@ -104,23 +104,25 @@ angular.module('common.datacloud.valuepicker', [])
     }
 
     vm.updateCounts = function(vals) {
-        QueryStore.setEntitiesProperty('loading', true);
+        if ($state.current.name != 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker') {
+            QueryStore.setEntitiesProperty('loading', true);
 
-        var segment = { 
-            'free_form_text_search': "",
-            'page_filter': {
-                'num_rows': 10,
-                'row_offset': 0
-            }
-        };
+            var segment = { 
+                'free_form_text_search': "",
+                'page_filter': {
+                    'num_rows': 10,
+                    'row_offset': 0
+                }
+            };
 
-        segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
-        segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
+            segment['account_restriction'] = angular.copy(QueryStore.accountRestriction);
+            segment['contact_restriction'] = angular.copy(QueryStore.contactRestriction);
 
-        QueryStore.getEntitiesCounts(segment).then(function(result) {
-            QueryStore.setResourceTypeCount('accounts', false, result['Account']);
-            QueryStore.setResourceTypeCount('contacts', false, result['Contact']);
-        });
+            QueryStore.getEntitiesCounts(segment).then(function(result) {
+                QueryStore.setResourceTypeCount('accounts', false, result['Account']);
+                QueryStore.setResourceTypeCount('contacts', false, result['Contact']);
+            });
+        }
 
         if (vals && vals.length > 0) {
             vm.controller.updateBucketCount();

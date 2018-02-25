@@ -9,7 +9,6 @@ angular
     'common.datacloud.targettabs',
     'common.datacloud.query',
     'common.datacloud.explorer.export',
-    'lp.segments.segments',
     'mainApp.core.utilities.BrowserStorageUtility'
 ])
 .run(function($rootScope, $state, DataCloudStore, DataCloudService) {

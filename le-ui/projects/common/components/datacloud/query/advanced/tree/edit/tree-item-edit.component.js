@@ -78,7 +78,11 @@ angular
                         restriction: vm.tree
                     });
 
-                    $state.go('home.segment.explorer.enumpicker', { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
+                    var state = (vm.root.mode == 'rules') 
+                        ? 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker' 
+                        : 'home.segment.explorer.enumpicker';
+
+                    $state.go(state, { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
                 }
             }
         }

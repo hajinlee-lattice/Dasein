@@ -1,3 +1,4 @@
+<!-- AND/OR operator container -->
 <div    ng-if="vm.tree.logicalRestriction"
         class="row query-section noselect-children"
         ng-class="{
@@ -21,21 +22,6 @@
             }">
         <i class="query-section-label-expand fa fa-{{ vm.tree.collapsed ? 'plus' : 'minus' }}-square-o" ng-click="vm.clickCollapsed()"></i>
         
-        <!--div class="button-group" role="group" ng-click="vm.clickOperator(vm.tree.logicalRestriction.operator == 'AND' ? 'OR' : 'AND')">
-            <button type="button" 
-                    class="button icon-button {{vm.tree.logicalRestriction.operator == 'AND' ? 'white' : 'light-gray'}}-button" 
-                    value="{{vm.tree.logicalRestriction.operator == 'AND' ? 'All' : 'Any'}}">
-                <span ng-if="vm.tree.logicalRestriction.operator == 'AND'">All</span>
-                <i class="fa fa-bars fa-rotate-90" ng-if="vm.tree.logicalRestriction.operator == 'OR'"></i>
-            </button>
-            <button type="button" 
-                    class="button icon-button {{vm.tree.logicalRestriction.operator == 'OR' ? 'white' : 'light-gray'}}-button" 
-                    value="{{vm.tree.logicalRestriction.operator == 'AND' ? 'All' : 'Any'}}">
-                <i class="fa fa-bars fa-rotate-90" ng-if="vm.tree.logicalRestriction.operator == 'AND'"></i>
-                <span ng-if="vm.tree.logicalRestriction.operator == 'OR'">Any</span>
-            </button>
-        </div-->
-        
         <span class="query-helper-text">Build a segment with <strong>{{vm.entity.toLowerCase()}}s</strong> that have</span>
         <select class="query-section-operator-dropdown" 
                 ng-model="vm.tree.logicalRestriction.operator"
@@ -48,16 +34,13 @@
             </option>
         </select>
 
-        <!--span class="query-section-label-text">
-            of the selected attribute value combinations ({{ vm.tree.logicalRestriction.operator }})
-        </span-->
-
         <div class="query-section-controls">
             <i class="fa fa-close" ng-click="vm.clickDelete()"></i>
         </div>
     </div>
 </div>
 
+<!-- Drag and Drop item outline (insert before item) -->
 <div    class="dashed dashed-top query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
         ng-style="{ 'marginBottom': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
         ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == false && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
@@ -66,6 +49,7 @@
     <div class="query-section-item-label"><strong>{{vm.root.draggedItem.root.getBucketLabel(vm.root.draggedItem.tree) || '-'}}</strong></div>
 </div>
 
+<!-- Attribute item container -->
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
         ng-class="{ 
             'dragging': vm.root.draggedItem == vm
@@ -110,15 +94,6 @@
             </span>
             <!--  -->
         </span>
-        <!--
-        <span class="item-edit-controls" ng-if="vm.editing && !vm.unused">
-            <button class="button blue-button set-button" 
-                    ng-click="vm.setBucket($event)">SET</button>
-            <button class="button gray-button unset-button"
-                    ng-if="vm.root.mode == 'rules'"
-                    ng-click="vm.setBucket($event, true)">UNSET</button>
-        </span>
-    -->
     </div>
 
     <div class="query-section-item-records" ng-if="!vm.unused && !vm.editing">
@@ -138,6 +113,7 @@
     </div>
 </div>
 
+<!-- Drag and Drop item outline (append after item) -->
 <div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 
         ng-style="{ 'marginTop': vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem) ? 0 : '.25em'  }"
         ng-if="!vm.tree.logicalRestriction && vm.root.droppedItemAppend == true && (vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem)))"
@@ -147,6 +123,7 @@
 </div>
 
 <ul ng-if="vm.tree.logicalRestriction && !vm.tree.collapsed">
+    <!-- Drag and Drop item outline directly before "add new item/operator" -->
     <li     class="query-section-item-box"
             ng-if="vm.root.droppedItem == vm || (vm.root.draggedItem == vm && (vm.root.droppedItem == vm || !vm.root.droppedItem))">
         <div    class="dashed query-section-item noselect-children category-{{ vm.root.draggedItem.item.Category.replace(' ','_') | lowercase }}" 

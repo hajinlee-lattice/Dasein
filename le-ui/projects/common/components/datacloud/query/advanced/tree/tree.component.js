@@ -208,6 +208,10 @@ angular
             }
 
             vm.mouseDown = function(event) {
+                if (vm.editing) {
+                    return false;
+                }
+                
                 vm.root.draggedItem = null;
 
                 vm.root.mouseDownTimer = $timeout(function() {

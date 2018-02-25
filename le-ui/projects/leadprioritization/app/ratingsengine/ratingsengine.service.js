@@ -18,6 +18,7 @@ angular.module('lp.ratingsengine')
             segment: true,
             attributes: true,
             add: true,
+            picker: true,
             rules: true,
             summary: true,
             prospect: false,
@@ -64,13 +65,19 @@ angular.module('lp.ratingsengine')
                     state: 'segment.attributes.add', 
                     nextLabel: 'Next, Rules'
                 },{ 
+                    hide: true,
+                    hideBack: true,
+                    label: 'Picker',
+                    state: 'segment.attributes.rules.picker', 
+                    nextLabel: 'Back to Rules'
+                },{ 
                     label: 'Rules', 
                     state: 'segment.attributes.rules', 
                     nextLabel: 'Next, Summary', 
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveRules(nextState);
                     } 
-                },{ 
+                },{
                     label: 'Summary', 
                     state: 'segment.attributes.rules.summary', 
                     nextLabel: 'Save', 
@@ -85,7 +92,13 @@ angular.module('lp.ratingsengine')
                     hideBack: true,
                     label: 'Add',
                     state: 'segment.attributes.add', 
-                    nextLabel: 'Next, Rules'
+                    nextLabel: 'Back to Rules'
+                },{ 
+                    hide: true,
+                    hideBack: true,
+                    label: 'Picker',
+                    state: 'segment.attributes.rules.picker', 
+                    nextLabel: 'Back to Rules'
                 },{
                     label: 'Rules', 
                     hideBack: true,

@@ -14,7 +14,7 @@
         </ul>
     </div>
 
-    <div class="pagination">
+    <div class="pagination" ng-if="filteredList.length / vm.page_size > 1">
         <pd-pagination-controls current="vm.page" max="filteredList.length / vm.page_size"></pd-pagination-controls>
     </div>
 
@@ -54,7 +54,7 @@
         </div>
     </div>
 
-    <div class="pagination">
+    <div class="pagination" ng-if="filteredList.length / vm.page_size > 1">
         <pd-pagination-controls current="vm.page" max="filteredList.length / vm.page_size"></pd-pagination-controls>
     </div>
 </div>
