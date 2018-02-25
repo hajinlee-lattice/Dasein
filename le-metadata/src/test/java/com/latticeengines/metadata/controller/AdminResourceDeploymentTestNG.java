@@ -6,34 +6,34 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 import com.latticeengines.security.exposed.service.TenantService;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class AdminResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(AdminResourceDeploymentTestNG.class);
 
     @Autowired
     protected TenantService tenantService;
 
-    @Override
-    @BeforeClass(groups = "deployment")
-    public void setup() {
-        super.setup();
-    }
-
     @Test(groups = "deployment")
     public void testProvisionImportTables() {
-        tenantService.discardTenant(tenant1);
-        tenantService.registerTenant(tenant1);
-        metadataProxy.provisionImportTables(tenant1);
-        List<Table> tables = metadataProxy.getImportTables(customerSpace1);
+        String tenantName = TestFrameworkUtils.generateTenantName();
+        String tenantId = CustomerSpace.parse(tenantName).toString();
+        Tenant tenant  = new Tenant();
+        tenant.setId(tenantId);
+        tenant.setName(tenantName);
+        tenantService.discardTenant(tenant);
+        tenantService.registerTenant(tenant);
+        metadataProxy.provisionImportTables(tenant);
+        List<Table> tables = metadataProxy.getImportTables(tenantId);
         assertEquals(tables.size(), 5);
         for (Table table : tables) {
             DateTime date = new DateTime(table.getLastModifiedKey().getLastModifiedTimestamp());
