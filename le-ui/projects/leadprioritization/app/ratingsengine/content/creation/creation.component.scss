@@ -45,7 +45,7 @@
         dd {
             margin-left: 140px;
         }
-        .summary-data dl:last-of-type { 
+        .summary-data dl:nth-child(2) { 
             dt {
                 width: 100%;
             }

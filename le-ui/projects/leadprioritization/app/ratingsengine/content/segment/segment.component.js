@@ -66,6 +66,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         } else {
             vm.block_user = false;
         }
+
+        RatingsEngineStore.setModelingStrategy(vm.stateParams.engineType);
     }
 
     vm.endsWith = function(item, string) {

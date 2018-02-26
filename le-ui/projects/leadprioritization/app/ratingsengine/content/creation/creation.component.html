@@ -18,22 +18,16 @@
                     <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
                     <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
 
+                    <dt ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
+                    <dd ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+
                     <dt>Prioritize by:</dt>
                     <dd>{{ vm.prioritizeBy }}</dd>
                 </dl>
-                <dl ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'] || 
-                           vm.modelingConfigFilters['SPEND_IN_PERIOD'] ||
-                           vm.modelingConfigFilters['QUANTITY_IN_PERIOD'] ||
-                           vm.modelingConfigFilters['TRAINING_SET_PERIOD'] ||
-                           vm.trainingSegment !== null || 
-                           vm.trainingProducts !== []">
+                <dl ng-if="vm.hasSettingsInfo">
                     <dt>Rating Engine Settings:</dt>
                     <dd>
                         <ul>
-                            <li 
-                                ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">
-                                Only sell to products that haven't purchased selected products in the last {{ vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'].value }} months
-                            </li>
                             <li 
                                 ng-if="vm.modelingConfigFilters['SPEND_IN_PERIOD']">
                                 Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.modelingConfigFilters['SPEND_IN_PERIOD'].value | number }}

@@ -40,6 +40,7 @@ angular.module('lp.ratingsengine')
         this.coverage = {};
         this.savedSegment = "";
         this.productsSelected = {};
+        this.modelingStrategy = '';
         this.predictionType = 'PROPENSITY';
         this.type = null;
         this.modelingConfigFilters = null;
@@ -557,15 +558,26 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+
+    this.setModelingStrategy = function(modelingStrategy) {
+        console.log(modelingStrategy);
+        this.modelingStrategy = modelingStrategy;
+    }
+    this.getModelingStrategy = function() {
+        return this.modelingStrategy;
+    }
     this.setPredictionType = function(predictionType) {
         this.predictionType = predictionType;
     }
     this.getPredictionType = function() {
         return this.predictionType;
     }
-
     
     this.setModelingConfigFilters = function(modelingConfigFilters) {
+
+
+        console.log(modelingConfigFilters);
+
         var currentConfig = this.modelingConfigFilters;
         if(currentConfig != null){
             this.modelingConfigFilters = angular.extend(currentConfig, modelingConfigFilters);
@@ -593,7 +605,9 @@ angular.module('lp.ratingsengine')
 
     this.nextSaveRatingEngineAI = function(nextState){
 
-        var engineType = $stateParams.engineType,
+        console.log(RatingsEngineStore.getModelingStrategy());
+
+        var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
                 type: "AI_BASED",
                 activeModel: {
@@ -614,10 +628,13 @@ angular.module('lp.ratingsengine')
         var ratingId = $stateParams.rating_id;
         RatingsEngineStore.getRating(ratingId).then(function(rating){
 
+            // console.log($stateParams.engineType);
+            // console.log(rating.activeModel.AI.modelingStrategy);
+
             var model = rating.activeModel.AI,
                 targetProducts = (model.targetProducts === []) ? [] : RatingsEngineStore.getProductsSelectedIds(),
                 predictionType = RatingsEngineStore.getPredictionType(),
-                modelingConfigFilters = (model.modelingConfigFilters === null) ? RatingsEngineStore.getModelingConfigFilters() : null,
+                modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
                 modelingStrategy = $stateParams.engineType,
                 trainingSegment = RatingsEngineStore.getTrainingSegment(),
                 trainingProducts = RatingsEngineStore.getTrainingProducts(),
@@ -639,7 +656,7 @@ angular.module('lp.ratingsengine')
 
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
 
-                // console.log("MODEL", model.AI);
+                console.log("MODEL", model.AI);
 
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);

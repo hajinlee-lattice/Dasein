@@ -34,8 +34,10 @@ angular.module('lp.ratingsengine.wizard.products', [
 
         vm.validateNextStep();
 
-        if (vm.engineType === 'CROSS_SELL_RETURNING_PURCHASE') {
-            vm.resellFormOnChange();    
+        console.log(vm.engineType);
+
+        if (vm.engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
+            vm.resellFormOnChange(); 
         };
 
     }
@@ -103,11 +105,13 @@ angular.module('lp.ratingsengine.wizard.products', [
         vm.productsSelected = RatingsEngineStore.getProductsSelected();
         vm.validateNextStep();
         
-        if (Object.keys(vm.productsSelected).length === vm.products.length) {
-            vm.selectedAll = true;
-        } else {
-            vm.selectedAll = false;
-        }
+
+        // Uncomment when ability to select all products is available
+        // if (Object.keys(vm.productsSelected).length === vm.products.length) {
+        //     vm.selectedAll = true;
+        // } else {
+        //     vm.selectedAll = false;
+        // }
     }
 
     vm.validateNextStep = function () {
@@ -123,6 +127,9 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.resellFormOnChange = function(){
+
+        console.log(vm.purchasedBeforePeriod);
+
         vm.modelingConfigFilters.PURCHASED_BEFORE_PERIOD = {
             "configName": "PURCHASED_BEFORE_PERIOD",
             "criteria": "PRIOR",

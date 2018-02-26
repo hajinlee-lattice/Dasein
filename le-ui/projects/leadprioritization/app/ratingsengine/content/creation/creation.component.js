@@ -9,6 +9,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     angular.extend(vm, {
         ratingEngine: Rating,
         products: Products,
+        hasSettingsInfo: true,
         status: 'Preparing Modeling Job',
         progress: '1%'
     });
@@ -18,8 +19,11 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         vm.setValidation('creation', true);
 
     	var model = vm.ratingEngine.activeModel.AI;
+        if((Object.keys(model.modelingConfigFilters).length === 0 || (model.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.modelingConfigFilters).length === 1)) && model.trainingSegment === null && model.trainingProducts.length === 0) {
+            vm.hasSettingsInfo = false;
+        }
 
-        console.log(model);
+        console.log(model.modelingStrategy);
 
     	vm.targetProducts = model.targetProducts;
         vm.modelingStrategy = model.modelingStrategy;

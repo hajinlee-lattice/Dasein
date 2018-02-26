@@ -15,7 +15,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         quantityValue: 2,
         periodsCriteria: "WITHIN",
         periodsValue: 2,
-        modelingConfigFilters: {},
+        modelingConfigFilters: RatingsEngineStore.getModelingConfigFilters(),
         trainingSegment: null,
         trainingProducts: null,
         ratingEngine: Rating,
@@ -25,6 +25,7 @@ angular.module('lp.ratingsengine.wizard.training', [
     });
 
     vm.init = function () {
+        console.log(vm.ratingEngine.activeModel.AI);
 
         vm.engineId = vm.ratingEngine.id;
         vm.modelId = vm.ratingEngine.activeModel.AI.id;
