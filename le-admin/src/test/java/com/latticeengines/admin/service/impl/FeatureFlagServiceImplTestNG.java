@@ -59,7 +59,8 @@ public class FeatureFlagServiceImplTestNG extends AdminFunctionalTestNGBase {
                 LatticeFeatureFlag.ENABLE_CDL, //
                 LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, //
                 LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, //
-                LatticeFeatureFlag.DANTE);
+                LatticeFeatureFlag.DANTE, //
+                LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
         Collection<LatticeFeatureFlag> expectedLp2Flags = Collections.singleton(LatticeFeatureFlag.DANTE);
         Collection<LatticeFeatureFlag> expectedNonLpiFlags = new HashSet<>();
         Collection<LatticeFeatureFlag> expectedDefaultFalseFlags = Arrays.asList( //

@@ -129,13 +129,13 @@ public class FeatureFlagServiceImpl implements FeatureFlagService {
         createDefaultFeatureFlag(LatticeFeatureFlag.BYPASS_DNB_CACHE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LATTICE_MARKETO_CREDENTIAL_PAGE, lpi);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_MATCH_DEBUG, lpi);
-        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, lpi);
 
         // CG flags
         Collection<LatticeProduct> cg = Collections.singleton(LatticeProduct.CG);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CAMPAIGN_UI, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_CDL, cg);
         createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_LPI_PLAYMAKER, cg);
+        createDefaultFeatureFlag(LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE, cg);
 
         // multi-product flags
         FeatureFlagDefinition enableDataEncryption = createDefaultFeatureFlag(LatticeFeatureFlag.ENABLE_DATA_ENCRYPTION,
