@@ -2,6 +2,7 @@ package com.latticeengines.pls.service.impl;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
@@ -19,11 +20,13 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.pls.service.ModelCleanUpService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("modelCleanUpService")
 public class ModelCleanUpServiceImpl implements ModelCleanUpService {
@@ -43,6 +46,9 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
 
     @Autowired
     private Configuration yarnConfiguration;
+
+    @Autowired
+    private WorkflowProxy workflowProxy;
 
     @Override
     public Boolean cleanUpModel(String modelId) {
@@ -68,18 +74,39 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
                 removeDir("training table csv file", sourceFile.getPath());
             }
 
-            removeDir("model summary supporting files", String.format(MODEL_SUMMARY_SUPPORTING_FILES_PATH,
+            removeDir("model summary supporting files",
+                    String.format(MODEL_SUMMARY_SUPPORTING_FILES_PATH,
                     customerSpace, modelSummary.getEventTableName()));
 
-            removeDir("matched and scored training csv files", String.format(MATCHED_AND_SCORED_TRAINING_CSV_FILES_PATH,
+            removeDir("matched and scored training csv files",
+                    String.format(MATCHED_AND_SCORED_TRAINING_CSV_FILES_PATH,
                     customerSpace, modelSummary.getEventTableName()));
 
             removeDir("scored training avro file", getScordTrainingAvroFilePath(modelId, tenant));
 
+            removeDirs("scored output avro file", getFilesWithFilter(String.format("RTSBulkScoreResult_%s",
+                    modelId.replace('-','_')), PathBuilder.buildDataTablePath(
+                    CamilleEnvironment.getPodId().toString(), CustomerSpace.parse(tenant.getName())).toString()));
+
+            List<Job> jobs = workflowProxy.getJobs(null, Arrays.asList("scoreWorkflow", "importAndRTSBulkScoreWorkflow"),
+                    false, customerSpace);
+            if (jobs != null) {
+                for (Job job : jobs) {
+                    if (job.getInputs().get("MODEL_ID").equals(modelId)) {
+                        String export_output_path = job.getOutputs().get("EXPORT_OUTPUT_PATH");
+                        removeDirs("scored result csv file", getFilesWithFilter(
+                                export_output_path.substring(export_output_path.lastIndexOf("/") + 1),
+                                PathBuilder.buildDataFileExportPath(CamilleEnvironment.getPodId().toString(),
+                                        CustomerSpace.parse(tenant.getName())).toString()));
+                    }
+                }
+            }
+
             modelSummaryService.deleteModelSummaryByModelId(modelId);
+            log.info(String.format("Cleanup modelSummary succeed. modelId: %s", modelId));
         }
         else {
-            log.warn(String.format("ModelSummary is not found by modelId: ", modelId));
+            log.warn(String.format("ModelSummary is not found by modelId: %s", modelId));
         }
 
         return Boolean.TRUE;
@@ -101,15 +128,11 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
     private String getScordTrainingAvroFilePath(String modelId, Tenant tenant) {
         String path = "";
         try {
-            HdfsUtils.HdfsFilenameFilter filter = new HdfsUtils.HdfsFilenameFilter() {
-                @Override
-                public boolean accept(String path) {
-                    return path.contains(modelId.replace('-','_'));
-                }
-            };
-            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration, PathBuilder.buildDataTablePath
-                            (CamilleEnvironment.getPodId().toString(), CustomerSpace.parse(tenant.getName())).toString(),
-                    filter);
+            List<String> files = HdfsUtils.getFilesForDir(yarnConfiguration,
+                    PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
+                            CustomerSpace.parse(tenant.getName())).toString(),
+                    getFilter(modelId.replace('-','_')));
+
             if (files.size() != 1) {
                 throw new FileNotFoundException("Scored training avro file path is not found.");
             }
@@ -122,6 +145,26 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
         return path;
     }
 
+    private List<String> getFilesWithFilter(String subName, String hdfsPath) {
+        List<String> files = null;
+        try {
+            files = HdfsUtils.getFilesForDir(yarnConfiguration, hdfsPath, getFilter(subName));
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+
+        return files;
+    }
+
+    private HdfsUtils.HdfsFilenameFilter getFilter(String subName) {
+        return new HdfsUtils.HdfsFilenameFilter() {
+            @Override
+            public boolean accept(String path) {
+                return path.contains(subName);
+            }
+        };
+    }
+
     private void removeDir(String pathInfo, String path) {
         try {
             if(path != "") {
@@ -130,6 +173,14 @@ public class ModelCleanUpServiceImpl implements ModelCleanUpService {
             }
         } catch (IOException e) {
             log.error(String.format("Clean up model, Remove %s error. Path: %s. Details: $s", pathInfo, path, e.getMessage()));
+        }
+    }
+
+    private void removeDirs(String pathInfo, List<String> paths) {
+        if (paths != null) {
+            for (String path : paths) {
+                removeDir(pathInfo, path);
+            }
         }
     }
 }
