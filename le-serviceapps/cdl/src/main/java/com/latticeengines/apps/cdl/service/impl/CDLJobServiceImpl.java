@@ -117,13 +117,14 @@ public class CDLJobServiceImpl implements CDLJobService {
             } catch (Exception e) {
                 log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
             }
+
             if(dataFeed != null && runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
                 int invokeHour = internalResourceRestApiProxy.getInvokeTime(CustomerSpace.parse(tenant.getId()));
                 log.info(String.format("configured invoke hour: %d", invokeHour));
 
                 CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
                 Date create_date = processAnalyzeJobDetail == null ? null : processAnalyzeJobDetail.getCreateDate();
-                Date invokeTime = getInvokeTime(invokeHour, create_date);
+                Date invokeTime = getInvokeTime(invokeHour, create_date, new Date(tenant.getRegisteredTime()));
                 log.info(String.format("next invoke time: %s", invokeTime.toString()));
 
                 if (currentTimeMillis > invokeTime.getTime()) {
@@ -158,7 +159,7 @@ public class CDLJobServiceImpl implements CDLJobService {
         }
     }
 
-    private Date getInvokeTime(int invokeHour, Date createTime) {
+    private Date getInvokeTime(int invokeHour, Date createTime, Date tenantCreateDate) {
         Calendar calendar = Calendar.getInstance();
         if (createTime == null) {
             calendar.setTime(new Date(System.currentTimeMillis()));
@@ -167,6 +168,10 @@ public class CDLJobServiceImpl implements CDLJobService {
             calendar.set(Calendar.MINUTE, 0);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
+
+            if (calendar.getTime().before(tenantCreateDate)) {
+                calendar.add(Calendar.DAY_OF_MONTH, 1);
+            }
         } else {
             calendar.setTime(createTime);
             int hour_create = calendar.get(Calendar.HOUR_OF_DAY);
