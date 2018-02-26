@@ -28,7 +28,8 @@ angular.module('common.datacloud.tabs.subheader', [])
                 icondisabled: false,
                 showSpinner: false
             }
-        }
+        },
+        counts: QueryStore.getCounts()
     });
 
     vm.init = function() {
@@ -37,15 +38,18 @@ angular.module('common.datacloud.tabs.subheader', [])
             {
                 label: 'Accounts',
                 icon: 'fa fa-building-o',
-                click: checkStatusBeforeExport.bind(null, 'ACCOUNT')
+                click: checkStatusBeforeExport.bind(null, 'ACCOUNT'),
+                disabledif: !QueryStore.counts.accounts.loading && !QueryStore.counts.accounts.value
             },{
                 label: 'Contacts',
                 icon: 'fa fa-users',
-                click: checkStatusBeforeExport.bind(null, 'CONTACT')
+                click: checkStatusBeforeExport.bind(null, 'CONTACT'),
+                disabledif: !QueryStore.counts.contacts.loading && !QueryStore.counts.contacts.value
             },{
                 label: 'Accounts and Contacts',
                 icon: 'fa fa-briefcase',
-                click: checkStatusBeforeExport.bind(null, 'ACCOUNT_AND_CONTACT')
+                click: checkStatusBeforeExport.bind(null, 'ACCOUNT_AND_CONTACT'),
+                disabledif: (!QueryStore.counts.accounts.loading && !QueryStore.counts.accounts.loading) && (QueryStore.counts.accounts.value == 0 || QueryStore.counts.contacts.value == 0)
             }
         ];
     }
@@ -248,6 +252,14 @@ angular.module('common.datacloud.tabs.subheader', [])
     vm.toggleExportDropdown = function(bool) {
         vm.header.exportSegment.icondisabled = bool;
         vm.header.exportSegment.showSpinner = bool;
+    }
+
+    vm.disableExport = function() {
+        var accountsAvailable = vm.counts.accounts.value;
+        var contactsAvailable = vm.counts.contacts.value;
+        vm.header.exportSegment.items[0].disabledif = !accountsAvailable;
+        vm.header.exportSegment.items[1].disabledif = !contactsAvailable;
+        vm.header.exportSegment.items[2].disabledif = !accountsAvailable || !contactsAvailable;
     }
 
     function checkStatusBeforeExport(exportType, $event) {

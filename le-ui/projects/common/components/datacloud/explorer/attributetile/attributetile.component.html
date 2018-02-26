@@ -81,7 +81,7 @@
                                   vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                                   !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1">
     <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
-            <h5><label>Attribute range</label><label>Records</label></h5>
+            <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? 'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
             
             <ul class="attribute-stats">
                 <li ng-repeat="stat in vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List | orderBy: ['-Cnt', 'Lbl'] | limitTo: 5"
