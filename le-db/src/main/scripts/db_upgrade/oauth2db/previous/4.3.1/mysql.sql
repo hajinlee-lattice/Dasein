@@ -1,0 +1,7 @@
+USE `oauth2DB`;
+
+ALTER TABLE `oauth2DB`.`TENANT`
+    ADD COLUMN `JDBC_PASSWORD_ENCRYPT` varchar(256) NULL;
+    
+ALTER TABLE `oauth2DB`.`TENANT`
+    ADD COLUMN `GW_API_KEY` varchar(256) NULL;
