@@ -57,6 +57,26 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
+    public void testMapRequiredFieldPLS_7102() throws IOException {
+        URL csvFileUrl = ClassLoader.getSystemResource(
+                "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/tablePLS_7102.json");
+        Table t = JsonUtils.deserialize(new FileInputStream(new File(csvFileUrl.getPath())), Table.class);
+        PythonScriptModelService pythonScriptModelService = new PythonScriptModelService();
+        List<Attribute> attrs = pythonScriptModelService.getRequiredColumns(t);
+        ScoringFileMetadataServiceImpl scoringFileMetadataService = new ScoringFileMetadataServiceImpl();
+
+        FieldMappingDocument fieldMappingDocument = scoringFileMetadataService.getFieldMapping(
+                Sets.newHashSet("Id", "Company", "Country", "Email", "City", "State"), attrs,
+                SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceLead));
+
+        String expected = FileUtils.getContentsAsString(new File(ClassLoader
+                .getSystemResource(
+                        "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedfieldmappingPLS_7102.json")
+                .getPath()));
+        Assert.assertEquals(fieldMappingDocument.getFieldMappings().toString(), expected);
+    }
+
+    @Test(groups = "unit")
     public void testResolveModelAttributeBasedOnFieldMapping() {
         List<Attribute> modelAttributes = generateTestModelAttributes();
         List<FieldMapping> fieldMappingList = generateTestFieldMappingDocument().getFieldMappings();

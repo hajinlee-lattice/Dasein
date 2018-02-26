@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -42,6 +43,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
@@ -51,7 +53,6 @@ import com.latticeengines.pls.service.ScoringFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("scoringFileMetadataService")
 public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataService {
@@ -134,8 +135,16 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         FieldMappingDocument fieldMappingDocument = new FieldMappingDocument();
         fieldMappingDocument.setFieldMappings(new ArrayList<FieldMapping>());
         fieldMappingDocument.setIgnoredFields(new ArrayList<String>());
-        matchingAttributes.removeIf(matchingAttr -> requiredAttributes.stream()
-                .anyMatch(requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
+
+        Iterator<Attribute> matchingAttrIter = matchingAttributes.iterator();
+        while (matchingAttrIter.hasNext()) {
+            Attribute matchingAttr = matchingAttrIter.next();
+            requiredAttributes.stream().filter(requiredAttr -> requiredAttr.getName().equals(matchingAttr.getName()))
+                    .forEach(requiredAttr -> {
+                        AttributeUtils.copyPropertiesFromAttribute(matchingAttr, requiredAttr);
+                        matchingAttrIter.remove();
+                    });
+        }
         requiredAttributes.addAll(matchingAttributes);
 
         Iterator<String> scoringHeaderFieldsIterator = scoringHeaderFields.iterator();
@@ -344,7 +353,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             for (int i = 0; i < modelAttribute.getAllowedDisplayNames().size(); i++) {
                 if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField)) {
                     return true;
-                }  else if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField.replace(" ", "_"))) {
+                } else if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField.replace(" ", "_"))) {
                     return true;
                 } else if (allowedDisplayNames.get(i).equalsIgnoreCase(scoringField.replace(" ", ""))) {
                     return true;
