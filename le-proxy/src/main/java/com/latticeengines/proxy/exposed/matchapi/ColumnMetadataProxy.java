@@ -46,6 +46,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
 
     private static final String STATS_CUBE = "StatsCube";
     private static final String TOPN_TREE = "TopNTree";
+    private static final String DEFAULT = "default";
 
     // has to be public because used in cache key
     public static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
@@ -55,14 +56,19 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private LocalCacheManager<String, Object> amStatsCache;
 
     private final CacheManager cacheManager;
+    private final ColumnMetadataProxy _columnMetadataProxy;
     private Scheduler parallelFluxThreadPool;
 
     @Inject
-    public ColumnMetadataProxy(CacheManager cacheManager) {
+    public ColumnMetadataProxy(CacheManager cacheManager, ColumnMetadataProxy columnMetadataProxy) {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
         this.cacheManager = cacheManager;
+        this._columnMetadataProxy = columnMetadataProxy;
         latestDataCloudVersionCache = new LocalCacheManager<>(CacheName.DataCloudVersionCache, str -> {
             String key = str.split("\\|")[1];
+            if (DEFAULT.equals(key)) {
+                key = "";
+            }
             return requestLatestVersion(key);
         }, 10);
 
@@ -111,8 +117,22 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataCloudVersionCacheName, key = "T(java.lang.String).format(\"%s|%s|latest\", T(com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy).KEY_PREFIX, #compatibleVersion)", sync = true)
+    public DataCloudVersion latestVersion() {
+        return latestVersion("");
+    }
+
     public DataCloudVersion latestVersion(String compatibleVersion) {
+        if (StringUtils.isBlank(compatibleVersion)) {
+            compatibleVersion = DEFAULT;
+        }
+        return _columnMetadataProxy.latestVersionFromCache(compatibleVersion);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.DataCloudVersionCacheName, key = "T(java.lang.String).format(\"%s|%s|latest\", T(com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy).KEY_PREFIX, #compatibleVersion)", sync = true)
+    public DataCloudVersion latestVersionFromCache(String compatibleVersion) {
+        if (DEFAULT.equals(compatibleVersion)) {
+            compatibleVersion = "";
+        }
         return requestLatestVersion(compatibleVersion);
     }
 
