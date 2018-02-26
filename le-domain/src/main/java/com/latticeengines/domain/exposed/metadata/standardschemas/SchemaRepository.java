@@ -511,7 +511,7 @@ public class SchemaRepository {
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         table.addAttribute(attr(InterfaceName.SpendAnalyticsSegment.name()) //
-                .allowedDisplayNames(Sets.newHashSet("SPENDANALYTICSSEGMENT", "SPEND_ANALYTICS_SEGMENT")) //
+                .allowedDisplayNames(Sets.newHashSet("SPENDANALYTICSSEGMENT", "SPEND_ANALYTICS_SEGMENT", "ACCOUNT_BUSINESS_SEGMENT")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.SpendAnalyticsSegment) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
