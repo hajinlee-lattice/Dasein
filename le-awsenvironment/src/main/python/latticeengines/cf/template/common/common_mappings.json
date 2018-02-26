@@ -2,11 +2,11 @@
   "AWSRegion2AMI": {
     "us-east-1": {
       "AmazonLinux": "ami-97785bed",
-      "AmazonECSLinux": "ami-28456852"
+      "AmazonECSLinux": "ami-5e414e24"
     },
     "us-west-2": {
       "AmazonLinux": "ami-f2d3638a",
-      "AmazonECSLinux": "ami-decc7fa6"
+      "AmazonECSLinux": "ami-10ed6968"
     }
   },
   "Instance2Options": {
