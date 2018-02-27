@@ -209,29 +209,6 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
         return new SessionBuilder().build(userData, sessionData, tenantData, userTenantRightData);
     }
 
-    private static void interpretGARights(Session session) {
-        List<String> GARights = session.getRights();
-        try {
-            AccessLevel level = AccessLevel.findAccessLevel(GARights);
-            session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
-            session.setAccessLevel(level.name());
-        } catch (NullPointerException e) {
-            if (!GARights.isEmpty()) {
-                AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
-                        : AccessLevel.EXTERNAL_USER;
-                session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
-                session.setAccessLevel(level.name());
-            }
-            LOGGER.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead",
-                    GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
-                    session.getAccessLevel()));
-        }
-    }
-
-    private static boolean isInternalEmail(String email) {
-        return email.toLowerCase().endsWith("lattice-engines.com");
-    }
-
     static class SessionBuilder {
 
         @SuppressWarnings("unused")
@@ -262,6 +239,29 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
             interpretGARights(session);
 
             return session;
+        }
+        
+        private void interpretGARights(Session session) {
+            List<String> GARights = session.getRights();
+            try {
+                AccessLevel level = AccessLevel.findAccessLevel(GARights);
+                session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+                session.setAccessLevel(level.name());
+            } catch (NullPointerException e) {
+                if (!GARights.isEmpty()) {
+                    AccessLevel level = isInternalEmail(session.getEmailAddress()) ? AccessLevel.INTERNAL_USER
+                            : AccessLevel.EXTERNAL_USER;
+                    session.setRights(GrantedRight.getAuthorities(level.getGrantedRights()));
+                    session.setAccessLevel(level.name());
+                }
+                LOGGER.warn(String.format("Failed to interpret GA rights: %s for user %s in tenant %s. Use %s instead",
+                        GARights.toString(), session.getEmailAddress(), session.getTenant().getId(),
+                        session.getAccessLevel()));
+            }
+        }
+
+        private boolean isInternalEmail(String email) {
+            return email.toLowerCase().endsWith("lattice-engines.com");
         }
     }
 
