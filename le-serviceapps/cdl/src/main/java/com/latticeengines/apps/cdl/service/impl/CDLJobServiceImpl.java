@@ -63,7 +63,7 @@ public class CDLJobServiceImpl implements CDLJobService {
     @Value("${cdl.processAnalyze.concurrent.job.count:2}")
     private int concurrentProcessAnalyzeJobs;
 
-    @Value("${cdl.processAnalyze.job.retry.count:2}")
+    @Value("${cdl.processAnalyze.job.retry.count:0}")
     private int processAnalyzeJobRetryCount;
 
     @Value("${common.pls.url}")
