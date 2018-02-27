@@ -263,8 +263,8 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
             ruleBasedModelDao.create(ruleBasedModel);
             ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
+            ratingEngine.setActiveModel(ruleBasedModel);
             ratingEngineDao.update(ratingEngine);
-
             break;
         case AI_BASED:
             AIModel aiModel = new AIModel();
@@ -272,6 +272,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             aiModel.setRatingEngine(ratingEngine);
             aiModelDao.create(aiModel);
             ratingEngine.setActiveModelPid(aiModel.getPid());
+            ratingEngine.setActiveModel(aiModel);
             ratingEngineDao.update(ratingEngine);
             break;
         default:

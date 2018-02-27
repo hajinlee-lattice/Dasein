@@ -85,6 +85,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
         log.info(String.format("Updating AI Model with id %s for ratingEngine %s", aiModel.getId(), ratingEngineId));
 
         retrievedAIModel.setPredictionType(aiModel.getPredictionType());
+        retrievedAIModel.setModelingStrategy(aiModel.getModelingStrategy());
         retrievedAIModel.setWorkflowType(aiModel.getWorkflowType());
         retrievedAIModel.setTargetProducts(aiModel.getTargetProducts());
         retrievedAIModel.setTrainingProducts(aiModel.getTrainingProducts());
