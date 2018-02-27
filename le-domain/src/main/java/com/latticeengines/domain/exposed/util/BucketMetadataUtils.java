@@ -17,7 +17,7 @@ public class BucketMetadataUtils {
     public static BucketMetadata bucketMetadata(List<BucketMetadata> sortedBucketMetadataList, double score) {
         BucketMetadata result = null;
         for (BucketMetadata bucketMetadata : sortedBucketMetadataList) {
-            if (score >= bucketMetadata.getLeftBoundScore()) {
+            if (score >= bucketMetadata.getRightBoundScore()) {
                 result = bucketMetadata;
             } else {
                 break;
