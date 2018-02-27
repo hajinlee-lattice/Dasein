@@ -77,6 +77,7 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government" },
                 { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education" },
                 { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education" },
+                { "velocity.com", "DUNS26", "DUNS8", null, 131314L, "232", 1, "Media" },
                 // domains present in OwnershipTable : rootDuns match
                 { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media" },
                 { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal" },
@@ -237,6 +238,7 @@ public class DomainOwnershipForDomCleanupTestNG
             { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government"},
             { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education" },
             { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education" },
+            { "velocity.com", "DUNS26", "DUNS8", null, 131314L, "232", 1, "Media" },
             // domains present in OwnershipTable (rootDuns match) : result =
             // domain not cleaned up
             { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media"},
@@ -330,6 +332,6 @@ public class DomainOwnershipForDomCleanupTestNG
             }
             rowCount++;
         }
-        Assert.assertEquals(rowCount, 35);
+        Assert.assertEquals(rowCount, 36);
     }
 }
