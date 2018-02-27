@@ -25,6 +25,7 @@ public final class DataCloudConstants {
     public static final String ATTR_IS_PRIMARY_LOCATION = "LE_IS_PRIMARY_LOCATION";
     public static final String ATTR_LDC_NAME = "LDC_Name";
     public static final String ATTR_LDC_DOMAIN = "LDC_Domain";
+    public static final String ATTR_LDC_INDUSTRY = "LDC_PrimaryIndustry";
     public static final String ATTR_IS_PRIMARY_ACCOUNT = "IsPrimaryAccount";
     public static final String ATTR_LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
     public static final String ATTR_DU_DUNS = "LE_PRIMARY_DUNS";
