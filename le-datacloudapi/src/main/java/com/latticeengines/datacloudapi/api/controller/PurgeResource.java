@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.datacloud.core.util.HdfsPodContext;
+import com.latticeengines.datacloudapi.engine.purge.service.PurgeService;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
 import io.swagger.annotations.Api;
@@ -21,6 +23,10 @@ import springfox.documentation.annotations.ApiIgnore;
 @RestController
 @RequestMapping("/purge")
 public class PurgeResource {
+
+    @Autowired
+    private PurgeService purgeService;
+
     @RequestMapping(value = "sources", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiIgnore
@@ -53,6 +59,8 @@ public class PurgeResource {
             PurgeSource src_singlever = new PurgeSource("ldc_ldcdev_dnbcacheseedsample_2017_10_27_03_14_49_utc",
                     null, hdfsPaths, hiveTables, true);
             list.add(src_singlever);
+
+            list.addAll(purgeService.scan(hdfsPod, false));
             return list;
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();

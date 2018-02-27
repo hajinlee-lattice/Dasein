@@ -33,6 +33,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private PurgeService purgeService;
 
     private PurgeSource pipelineTempSourceToPurge;
+    private PurgeSource operationalSourceToPurge;
 
     private Map<String, PurgeSource> validationMapNonDebugMode;
     private Map<String, PurgeSource> validationMapDebugMode;
@@ -41,6 +42,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     public void setup() throws Exception {
         prepareCleanPod(POD_ID);
         preparePipelineTempSource();
+        prepareOperationalSourceToPurge();
         prepareValidationMap();
     }
 
@@ -49,6 +51,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         List<PurgeSource> toPurge = purgeService.scan(POD_ID, false);
         toPurge.forEach(purgeSrc -> System.out.println(JsonUtils.serialize(purgeSrc)));
         validatePurgeSourcesNonDebugMode(toPurge);
+
         toPurge = purgeService.scan(POD_ID, true);
         toPurge.forEach(purgeSrc -> System.out.println(JsonUtils.serialize(purgeSrc)));
         validatePurgeSourcesDebugMode(toPurge);
@@ -62,11 +65,20 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         pipelineTempSourceToPurge = new PurgeSource(srcName, null, hdfsPaths, null, false);
     }
 
+    private void prepareOperationalSourceToPurge() throws IOException {
+        String srcName = "LDCDEV_SuspectRecords";
+        String hdfsPath = hdfsPathBuilder.constructSourceBaseDir().append(srcName).toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
+        operationalSourceToPurge = new PurgeSource(srcName, null, hdfsPaths, null, false);
+    }
+
     private void prepareValidationMap() {
         validationMapNonDebugMode = new HashMap<>();
 
         validationMapDebugMode = new HashMap<>();
         validationMapDebugMode.put(getValidationKey(pipelineTempSourceToPurge), pipelineTempSourceToPurge);
+        validationMapDebugMode.put(getValidationKey(operationalSourceToPurge), operationalSourceToPurge);
     }
 
     private String getValidationKey(PurgeSource purgeSource) {
@@ -78,7 +90,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void validatePurgeSourcesDebugMode(List<PurgeSource> toPurge) {
-        Assert.assertEquals(1, toPurge.size());
+        Assert.assertEquals(2, toPurge.size());
         toPurge.forEach(purgeSource -> {
             PurgeSource expected = validationMapDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
