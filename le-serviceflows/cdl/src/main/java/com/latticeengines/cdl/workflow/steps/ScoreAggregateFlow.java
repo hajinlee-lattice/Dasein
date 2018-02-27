@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +73,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
     private void setupDataFlow() {
         ScoreAggregateParameters params = new ScoreAggregateParameters();
         params.setScoreResultsTableName(getScoreResultTableName());
+        params.setExpectedValue(configuration.getExpectedValue());
 
         List<RatingModelContainer> containers = getModelContainers();
         if (CollectionUtils.isNotEmpty(containers)) {
@@ -108,6 +110,9 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
 
     private List<RatingModelContainer> getModelContainers() {
         List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        if (CollectionUtils.isEmpty(allContainers)) {
+            return Collections.emptyList();
+        }
         return allContainers.stream() //
                 .filter(container -> RatingEngineType.AI_BASED.equals(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());

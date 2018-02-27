@@ -30,6 +30,7 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
         minimumScore = defaultMinimumScorePercent;
         maximumScore = defaultMaximumScorePercent;
         try {
+            log.info("User raw score based Normalizer.");
             initialize();
         } catch (Exception e) {
             log.error(new LedpException(LedpCode.LEDP_20042, new String[] { e.getMessage() }).getMessage());

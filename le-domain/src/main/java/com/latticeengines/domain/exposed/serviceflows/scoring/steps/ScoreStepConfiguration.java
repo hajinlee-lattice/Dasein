@@ -14,7 +14,7 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
     
     private Boolean useScorederivation = null;
 
-    private boolean readModelIdFromRecord = true;
+    private Boolean readModelIdFromRecord = true;
 
     public String getModelId() {
         return modelId;
@@ -56,11 +56,11 @@ public class ScoreStepConfiguration extends MicroserviceStepConfiguration {
         this.useScorederivation = useScorederivation;
     }
 
-    public boolean readModelIdFromRecord() {
+    public Boolean getReadModelIdFromRecord() {
         return readModelIdFromRecord;
     }
 
-    public void setModelIdFromRecord(boolean readModelIdFromRecord) {
+    public void setModelIdFromRecord(Boolean readModelIdFromRecord) {
         this.readModelIdFromRecord = readModelIdFromRecord;
     }
 

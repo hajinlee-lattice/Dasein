@@ -221,6 +221,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder setExpectedValue(boolean expectedValue) {
             combineInputWithScores.setExpectedValue(expectedValue);
+            scoreAggregate.setExpectedValue(expectedValue);
             return this;
         }
 

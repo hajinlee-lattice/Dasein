@@ -334,6 +334,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
             combineInputWithScores.setExpectedValue(expectedValue);
             pivotScoreAndEvent.setExpectedValue(expectedValue);
+            scoreAggregate.setExpectedValue(expectedValue);
             return this;
         }
 
