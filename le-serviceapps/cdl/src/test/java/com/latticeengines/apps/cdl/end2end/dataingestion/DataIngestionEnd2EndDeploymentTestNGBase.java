@@ -219,6 +219,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Start processing and analyzing ...");
         ApplicationId appId = cdlProxy.processAnalyze(mainTestTenant.getId(), request);
         processAnalyzeAppId = appId.toString();
+        logger.info("processAnalyzeAppId=" + processAnalyzeAppId);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(appId.toString(),
                 false);
         assertEquals(completedStatus, com.latticeengines.domain.exposed.workflow.JobStatus.COMPLETED);

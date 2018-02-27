@@ -42,8 +42,21 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     @Inject
     private IngestRuleBasedRating ingestRuleBasedRating;
 
+    @Inject
+    private ProcessAccountChoreographer accountChoreographer;
+
+    @Inject
+    private ProcessContactChoreographer contactChoreographer;
+
+    @Inject
+    private ProcessProductChoreographer productChoreographer;
+
+    @Inject
+    private ProcessTransactionChoreographer transactionChoreographer;
+
     private boolean initialized;
     private boolean enforceRebuild = false;
+    private boolean hasDataChange = false;
     private boolean hasAIModels = false;
     private boolean hasRuleModels = false;
 
@@ -61,6 +74,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             initialize(step);
         }
 
+        log.info("Step namespace = " + getStepNamespace(seq) + " generateAIRatingWorkflow.name()=" + generateAIRatingWorkflow.name());
+
         if (isAIWorkflow(seq)) {
             return !shouldProcessAI;
         }
@@ -69,22 +84,21 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             return !shouldProcessRuleBased;
         }
 
-        return !enforceRebuild;
-
-        // TODO: resume following after rating workflow is complete
-        // return !enforceRebuild || !hasModels;
+        return !hasAIModels && !hasRuleModels;
     }
 
     private void initialize(AbstractStep<? extends BaseStepConfiguration> step) {
         if (!initialized) {
             List<RatingModelContainer> containers = step.getListObjectFromContext(RATING_MODELS,
                     RatingModelContainer.class);
+            hasDataChange = hasDataChange();
             hasAIModels = hasAIModels(containers);
             hasRuleModels = hasRuleModels(containers);
             shouldProcessAI = shouldProcessAI();
             shouldProcessRuleBased = shouldProcessRuleBased();
-            String[] msgs = new String[]{ //
+            String[] msgs = new String[] { //
                     "enforced=" + enforceRebuild, //
+                    "hasDataChange=" + hasDataChange, //
                     "hasAIModels=" + hasAIModels, //
                     "hasRuleModels=" + hasRuleModels, //
                     "shouldProcessAI=" + shouldProcessAI, //
@@ -113,19 +127,28 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     }
 
     private boolean shouldProcessAI() {
-        if (!hasAIModels) {
-            log.info("Has no AI models, skip generating AI ratings");
-            return false;
-        }
-        return enforceRebuild;
+        return shouldProcessModelOfOneType(hasAIModels, "AI");
     }
 
     private boolean shouldProcessRuleBased() {
-        if (!hasRuleModels) {
-            log.info("Has no rule based models, skip generating rule based ratings");
-            return false;
+        return shouldProcessModelOfOneType(hasRuleModels, "rule based");
+    }
+
+    private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
+        boolean shouldProcess = true;
+        if (!hasModels) {
+            log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
+            shouldProcess = false;
+        } else if (enforceRebuild) {
+            shouldProcess = true;
+        } else if (!hasDataChange) {
+            log.warn("Has no underlying data change, should skip generating " + modelType + " ratings");
+            // TODO: (M19) to be turn on when integrated with rating engine actions
+            // for now always process regardless of data change.
+            // log.info("Has no underlying data change, skip generating " + modelType + " ratings");
+            // shouldProcess = false;
         }
-        return enforceRebuild;
+        return shouldProcess;
     }
 
     private void checkEnforcedRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -141,6 +164,11 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean hasRuleModels(Collection<RatingModelContainer> containers) {
         return CollectionUtils.isNotEmpty(containers) && containers.stream()
                 .anyMatch(container -> RatingEngineType.RULE_BASED.equals(container.getEngineSummary().getType()));
+    }
+
+    private boolean hasDataChange() {
+        return accountChoreographer.hasAnyChange() || contactChoreographer.hasAnyChange()
+                || productChoreographer.hasAnyChange() || transactionChoreographer.hasAnyChange();
     }
 
 }

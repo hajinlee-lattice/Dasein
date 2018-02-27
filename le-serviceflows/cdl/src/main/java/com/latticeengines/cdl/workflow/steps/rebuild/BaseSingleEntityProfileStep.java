@@ -1,12 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,10 +141,9 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
             attr.setBitOffset(attr0.getBitOffset());
             attr.setPhysicalDataType(Schema.Type.STRING.getName());
         }
-        if (attr.getGroupsAsList() == null) {
-            attr.setGroupsViaList(new ArrayList<>());
-        }
-        if (!attr.getGroupsAsList().contains(ColumnSelection.Predefined.Segment)) {
+        if (CollectionUtils.isEmpty(attr.getGroupsAsList())) {
+            attr.setGroupsViaList(Collections.singletonList(ColumnSelection.Predefined.Segment));
+        } else if (!attr.getGroupsAsList().contains(ColumnSelection.Predefined.Segment)) {
             attr.getGroupsAsList().add(ColumnSelection.Predefined.Segment);
         }
         return attr;

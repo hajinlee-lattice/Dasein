@@ -227,6 +227,10 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         return false;
     }
 
+    protected boolean hasAnyChange() {
+        return rebuild || update;
+    }
+
     protected abstract AbstractStep mergeStep();
 
     protected abstract AbstractStep cloneStep();

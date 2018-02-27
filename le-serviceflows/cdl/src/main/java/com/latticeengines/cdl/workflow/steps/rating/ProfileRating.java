@@ -44,8 +44,8 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
 
     private String ruleBaseRawRating;
     private String aiBaseRawRating;
-    private boolean hasRuleRating = true;
-    private boolean hasAIRating = true;
+    private boolean hasRuleRating = false;
+    private boolean hasAIRating = false;
 
     private String ratingTablePrefix;
     private String statsTablePrefix;
@@ -65,21 +65,33 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
         statsTablePrefix = entity.name() + "Stats";
 
+        Table ruleRawTable =null;
+        Table aiRawTable = null;
+
         ruleBaseRawRating = getStringValueFromContext(RULE_RAW_RATING_TABLE_NAME);
-        Table ruleRawTable = metadataProxy.getTable(customerSpace.toString(), ruleBaseRawRating);
-        if (ruleRawTable == null) {
-            log.warn("Cannot find rule based raw rating table " + ruleBaseRawRating);
-            hasRuleRating = false;
+        if (StringUtils.isNotBlank(ruleBaseRawRating)) {
+            ruleRawTable = metadataProxy.getTable(customerSpace.toString(), ruleBaseRawRating);
+            if (ruleRawTable == null) {
+                log.warn("Cannot find rule based raw rating table " + ruleBaseRawRating);
+            } else {
+                hasRuleRating = true;
+            }
         }
+
         aiBaseRawRating = getStringValueFromContext(AI_RAW_RATING_TABLE_NAME);
-        Table aiRawTable = metadataProxy.getTable(customerSpace.toString(), aiBaseRawRating);
-        if (aiRawTable == null) {
-            log.warn("Cannot find AI based raw rating table " + aiBaseRawRating);
-            hasAIRating = false;
+        if (StringUtils.isNotBlank(aiBaseRawRating)) {
+            aiRawTable = metadataProxy.getTable(customerSpace.toString(), aiBaseRawRating);
+            if (aiRawTable == null) {
+                log.warn("Cannot find AI based raw rating table " + aiBaseRawRating);
+            } else {
+                hasAIRating = true;
+            }
         }
+
         if (aiRawTable == null && ruleRawTable == null) {
             throw new IllegalStateException("Cannot find any raw rating table");
         }
+
         modelContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
     }
 

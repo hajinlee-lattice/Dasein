@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -67,15 +68,16 @@ public class TransactionServiceImpl implements TransactionService {
     public TimeFilterTranslator getTimeFilterTranslator(DataCollection.Version version) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         initializeTimeTranslatorCache();
+        String versionStr = version == null ? "" : version.name();
         return timeTranslatorCache.getWatcherCache() //
-                .get(String.format("%s|%s", customerSpace.getTenantId(), version.name()));
+                .get(String.format("%s|%s", customerSpace.getTenantId(), versionStr));
     }
 
     @SuppressWarnings("unchecked")
     private TimeFilterTranslator getTimeFilterTranslatorBehindCache(String key) {
         String[] tokens = key.split("\\|");
         CustomerSpace customerSpace = CustomerSpace.parse(tokens[0]);
-        DataCollection.Version version = DataCollection.Version.valueOf(tokens[1]);
+        DataCollection.Version version = StringUtils.isBlank(key) ? null : DataCollection.Version.valueOf(tokens[1]);
 
         Mono<Object> strategiesMono = Mono.fromCallable(() -> getPeriodStrategies(customerSpace));
         Mono<Object> maxDateMono = Mono.fromCallable(() -> getMaxTransactionDate(customerSpace, version));
