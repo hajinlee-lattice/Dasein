@@ -2,12 +2,12 @@ package com.latticeengines.metadata.entitymgr;
 
 import java.util.List;
 
-import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 
-public interface DataFeedExecutionEntityMgr extends BaseEntityMgr<DataFeedExecution> {
+public interface DataFeedExecutionEntityMgr extends BaseEntityMgrRepository<DataFeedExecution, Long> {
 
     DataFeedExecution findByPid(Long executionId);
 

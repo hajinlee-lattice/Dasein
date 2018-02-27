@@ -5,14 +5,16 @@ import static org.testng.Assert.assertEquals;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -22,16 +24,19 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedTaskTableEntityMgr;
 import com.latticeengines.metadata.functionalframework.DataCollectionFunctionalTestNGBase;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTestNGBase {
 
-    @Autowired
+    @Inject
     private DataFeedEntityMgr datafeedEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
+
+    @Inject
+    private DataFeedTaskTableEntityMgr datafeedTaskTableEntityMgr;
 
     private DataFeed datafeed = new DataFeed();
 
@@ -90,7 +95,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 0);
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 0);
 
         Table dataTable = new Table();
         dataTable.setName("dataTable2");
@@ -98,8 +103,8 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         dataTable.setTenant(MultiTenantContext.getTenant());
         datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
 
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
-        assertEquals(datafeedTaskEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
+        assertEquals(datafeedTaskTableEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
     }
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
@@ -114,8 +119,9 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         extract1.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract1);
         task = datafeedTaskEntityMgr.findByKey(task);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract1.getPid());
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
+        assertEquals(datafeedTaskTableEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(),
+                extract1.getPid());
         assertEquals(task.getStatus(), DataFeedTask.Status.Active);
 
     }
@@ -142,8 +148,9 @@ public class DataFeedTaskEntityMgrImplTestNG extends DataCollectionFunctionalTes
         extract2.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.clearTableQueue();
         datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract2);
-        assertEquals(datafeedTaskEntityMgr.getDataTableSize(task), 1);
-        assertEquals(datafeedTaskEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(), extract2.getPid());
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
+        assertEquals(datafeedTaskTableEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(),
+                extract2.getPid());
     }
 
     @Test(groups = "functional", dependsOnMethods = "registerExtractWhenDataTableConsumed")

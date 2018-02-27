@@ -2,13 +2,13 @@ package com.latticeengines.metadata.entitymgr;
 
 import java.util.List;
 
-import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
-public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
+public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Long> {
 
     DataFeed findByName(String datafeedName);
 

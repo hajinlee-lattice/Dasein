@@ -68,7 +68,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
         if (executionId == null) {
             return null;
         }
-        DataFeedExecution execution = dataFeedExecutionRepository.findById(executionId).get();
+        DataFeedExecution execution = dataFeedExecutionRepository.findById(executionId).orElse(null);
         inflateDataFeedImport(execution);
         return execution;
     }

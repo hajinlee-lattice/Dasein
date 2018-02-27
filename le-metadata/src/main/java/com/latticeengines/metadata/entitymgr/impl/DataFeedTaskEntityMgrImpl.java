@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -31,11 +30,11 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.dao.AttributeDao;
 import com.latticeengines.metadata.dao.DataFeedTaskDao;
-import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.datafeed.repository.DataFeedTaskRepository;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedTaskTableEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedTaskEntityMgr")
@@ -47,22 +46,22 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Inject
     private DataFeedTaskRepository datafeedTaskRepository;
 
-    @Autowired
+    @Inject
     private DataFeedTaskDao datafeedTaskDao;
 
-    @Autowired
-    private DataFeedTaskTableDao datafeedTaskTableDao;
+    @Inject
+    private DataFeedTaskTableEntityMgr datafeedTaskTableEntityMgr;
 
-    @Autowired
+    @Inject
     private TableEntityMgr tableEntityMgr;
 
-    @Autowired
+    @Inject
     private TableTypeHolder tableTypeHolder;
 
-    @Autowired
+    @Inject
     private AttributeDao attributeDao;
 
-    @Autowired
+    @Inject
     private LastModifiedKeyDao lastModifiedKeyDao;
 
     @Autowired
@@ -97,40 +96,6 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     }
 
     @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public Table peekFirstDataTable(DataFeedTask datafeedTask) {
-        Table table = datafeedTaskTableDao.peekFirstDataTable(datafeedTask);
-        TableEntityMgr.inflateTable(table);
-        return table;
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public Table pollFirstDataTable(DataFeedTask datafeedTask) {
-        Table table = datafeedTaskTableDao.pollFirstDataTable(datafeedTask);
-        TableEntityMgr.inflateTable(table);
-        return table;
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public int getDataTableSize(DataFeedTask datafeedTask) {
-        if (datafeedTask == null) {
-            return 0;
-        }
-        return datafeedTaskTableDao.getDataFeedTaskTables(datafeedTask).size();
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<DataFeedTaskTable> getDataTables(DataFeedTask datafeedTask) {
-        if (datafeedTask == null) {
-            return Collections.emptyList();
-        }
-        return datafeedTaskTableDao.getDataFeedTaskTables(datafeedTask);
-    }
-
-    @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addTableToQueue(DataFeedTask datafeedTask, Table table) {
         if (table.getPid() == null) {
@@ -144,19 +109,19 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
         DataFeedTaskTable datafeedTaskTable = new DataFeedTaskTable();
         datafeedTaskTable.setFeedTask(datafeedTask);
         datafeedTaskTable.setTable(table);
-        datafeedTaskTableDao.create(datafeedTaskTable);
+        datafeedTaskTableEntityMgr.create(datafeedTaskTable);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void clearTableQueue() {
-        datafeedTaskTableDao.deleteAll();
+        datafeedTaskTableEntityMgr.deleteAll();
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void clearTableQueuePerTask(DataFeedTask dataFeedTask) {
-        datafeedTaskTableDao.deleteDataFeedTaskTables(dataFeedTask);
+        datafeedTaskTableEntityMgr.deleteDataFeedTaskTables(dataFeedTask);
     }
 
     @Override
@@ -349,10 +314,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public List<Extract> getExtractsPendingInQueue(DataFeedTask task) {
-        List<DataFeedTaskTable> datafeedTaskTables = getDataTables(task);
+        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableEntityMgr.getInflatedDataFeedTaskTables(task);
         List<Extract> extracts = new ArrayList<>();
         datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(t -> {
-            TableEntityMgr.inflateTable(t);
             extracts.addAll(t.getExtracts());
         });
         return extracts;
@@ -360,18 +324,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
-    public List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task) {
-        return datafeedTaskTableDao.getDataFeedTaskTables(task);
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task) {
-        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableDao.getDataFeedTaskTables(task);
+        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableEntityMgr.getInflatedDataFeedTaskTables(task);
         List<DataFeedTaskTable> inflatedDatafeedTaskTables = new ArrayList<>();
         datafeedTaskTables.stream().forEach(datafeedtaskTable -> {
             Table dataTable = datafeedtaskTable.getTable();
-            TableEntityMgr.inflateTable(dataTable);
             if (dataTable != null) {
                 if (!dataTable.getExtracts().isEmpty()) {
                     inflatedDatafeedTaskTables.add(datafeedtaskTable);
