@@ -1,6 +1,9 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -11,7 +14,10 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.camille.exposed.locks.LockManager;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -19,13 +25,17 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
 import com.latticeengines.domain.exposed.metadata.datafeed.DrainingStatus;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+import com.latticeengines.domain.exposed.util.DataFeedImportUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
+import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.service.DataCollectionService;
 import com.latticeengines.metadata.service.DataFeedService;
 import com.latticeengines.metadata.service.DataFeedTaskService;
@@ -43,6 +53,9 @@ public class DataFeedServiceImpl implements DataFeedService {
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
 
     @Inject
+    private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
+
+    @Inject
     private DataCollectionService dataCollectionService;
 
     @Inject
@@ -53,8 +66,24 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     private static final String LockType = "DataFeedExecutionLock";
 
+    public DataFeedServiceImpl() {
+    }
+
+    @VisibleForTesting
+    DataFeedServiceImpl(DataFeedEntityMgr datafeedEntityMgr, DataFeedExecutionEntityMgr datafeedExecutionEntityMgr,
+            DataFeedTaskEntityMgr datafeedTaskEntityMgr, DataCollectionService dataCollectionService,
+            DataFeedTaskService datafeedTaskService, WorkflowProxy workflowProxy) {
+        this.datafeedEntityMgr = datafeedEntityMgr;
+        this.datafeedExecutionEntityMgr = datafeedExecutionEntityMgr;
+        this.datafeedTaskEntityMgr = datafeedTaskEntityMgr;
+        this.dataCollectionService = dataCollectionService;
+        this.datafeedTaskService = datafeedTaskService;
+        this.workflowProxy = workflowProxy;
+    }
+
     @Override
-    public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeed lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         String lockName = new Path("/").append(LockType).append("/").append(customerSpace).toString();
         try {
             LockManager.registerCrossDivisionLock(lockName);
@@ -65,32 +94,96 @@ public class DataFeedServiceImpl implements DataFeedService {
                 DataFeedExecution execution = datafeed.getActiveExecution();
                 if (execution == null || execution.getWorkflowId() == null
                         || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
-                    return false;
+                    return null;
                 }
                 Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
                 if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
-                    return false;
+                    return null;
                 }
-                failExecution(customerSpace, datafeedName,
-                        job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
+                failExecution(datafeed, job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
-            prepareExecution(customerSpace, datafeedName, jobType);
-            return true;
+            prepareExecution(datafeed, jobType);
+            return datafeed;
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            return false;
+            return null;
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
     }
 
-    private void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
-        datafeedEntityMgr.prepareExecution(customerSpace, datafeedName, jobType);
+    private DataFeedExecution prepareExecution(DataFeed datafeed, DataFeedExecutionJobType jobType) {
+        DataFeedExecution execution = new DataFeedExecution();
+        execution.setDataFeed(datafeed);
+        execution.setStatus(DataFeedExecution.Status.Started);
+        execution.setDataFeedExecutionJobType(jobType);
+        log.info(String.format("preparing execution %s", execution));
+        datafeedExecutionEntityMgr.create(execution);
+
+        datafeed.setActiveExecutionId(execution.getPid());
+        datafeed.setActiveExecution(execution);
+        datafeed.setStatus(jobType.getRunningStatus());
+        log.info(String.format("preparing execution: updating data feed to %s", datafeed));
+        datafeedEntityMgr.update(datafeed);
+        return execution;
     }
 
     @Override
-    public DataFeedExecution startExecution(String customerSpace, String datafeedName) {
-        return datafeedEntityMgr.startExecution(datafeedName);
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeedExecution startExecution(String customerSpace, String datafeedName,
+            DataFeedExecutionJobType jobType) {
+        DataFeed datafeed = lockExecution(customerSpace, datafeedName, jobType);
+        if (datafeed == null) {
+            throw new RuntimeException("can't lock execution for job type:" + jobType);
+        }
+        if (DataFeedExecutionJobType.PA == jobType) {
+            return startPnAExecution(datafeed);
+        }
+        return datafeedEntityMgr.findByNameInflated(datafeedName).getActiveExecution();
+    }
+
+    private DataFeedExecution startPnAExecution(DataFeed datafeed) {
+        if (datafeed == null) {
+            log.info("Can't find data feed");
+            return null;
+        }
+
+        List<DataFeedImport> imports = new ArrayList<>();
+        List<DataFeedTask> tasks = datafeed.getTasks();
+        tasks.forEach(task -> {
+            imports.addAll(createImports(task));
+            datafeedTaskEntityMgr.clearTableQueuePerTask(task);
+        });
+        log.info("imports for processanalyze are: " + imports);
+
+        Collections.sort(imports, (a, b) -> Long.compare(a.getDataTable().getPid(), b.getDataTable().getPid()));
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        execution.setStatus(DataFeedExecution.Status.Started);
+        execution.addImports(imports);
+        log.info(String.format("starting processanalyze execution %s", execution));
+        datafeedExecutionEntityMgr.updateImports(execution);
+
+        datafeed.setStatus(Status.ProcessAnalyzing);
+        tasks = datafeed.getTasks();
+        tasks.forEach(task -> {
+            datafeedTaskEntityMgr.update(task, new Date());
+        });
+        log.info(String.format("starting execution: updating data feed to %s", datafeed));
+
+        datafeedEntityMgr.update(datafeed);
+        return execution;
+    }
+
+    private List<DataFeedImport> createImports(DataFeedTask task) {
+        List<DataFeedImport> imports = new ArrayList<>();
+
+        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskEntityMgr.getInflatedDataFeedTaskTables(task);
+        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(dataTable -> {
+            task.setImportData(dataTable);
+            imports.add(DataFeedImportUtils.createImportFromTask(task));
+        });
+        return imports;
+
     }
 
     @Override
@@ -167,6 +260,17 @@ public class DataFeedServiceImpl implements DataFeedService {
             datafeed.setStatus(status);
             datafeedEntityMgr.update(datafeed);
         }
+    }
+
+    private DataFeedExecution failExecution(DataFeed datafeed, String initialDataFeedStatus) {
+        DataFeedExecution execution = datafeed.getActiveExecution();
+        execution.setStatus(DataFeedExecution.Status.Failed);
+        datafeedExecutionEntityMgr.update(execution);
+
+        datafeed.setStatus(getFailedDataFeedStatus(initialDataFeedStatus));
+        log.info(String.format("updating data feed %s to %s", datafeed.getName(), datafeed));
+        datafeedEntityMgr.update(datafeed);
+        return execution;
     }
 
     @Override
@@ -272,5 +376,28 @@ public class DataFeedServiceImpl implements DataFeedService {
                 datafeedTaskService.resetImport(customerSpace, task);
             }
         }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public DataFeedExecution restartExecution(String customerSpace, String datafeedName,
+            DataFeedExecutionJobType jobType) {
+        DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
+        if (datafeedExecutionEntityMgr.countByDataFeedAndJobType(datafeed, jobType) == 0) {
+            return null;
+        }
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed,
+                jobType);
+        datafeed = lockExecution(customerSpace, datafeedName, jobType);
+        if (datafeed == null) {
+            throw new RuntimeException("can't lock execution for job type:" + jobType);
+        }
+        DataFeedExecution newExecution = datafeed.getActiveExecution();
+        if (DataFeedExecutionJobType.PA == jobType) {
+            newExecution.setImports(execution.getImports());
+            newExecution.setWorkflowId(execution.getWorkflowId());
+            datafeedExecutionEntityMgr.update(newExecution);
+        }
+        return newExecution;
     }
 }

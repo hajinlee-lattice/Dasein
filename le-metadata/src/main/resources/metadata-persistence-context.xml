@@ -12,5 +12,8 @@
                       base-class="com.latticeengines.metadata.repository.impl.MetadataStoreRepositoryImpl"
                       entity-manager-factory-ref="documentEntityManagerFactory"
                       transaction-manager-ref="documentTransactionManager"  />
+    
+    <jpa:repositories base-package="com.latticeengines.metadata.datafeed.repository" base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+        entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="transactionManager"  />
 
 </beans>

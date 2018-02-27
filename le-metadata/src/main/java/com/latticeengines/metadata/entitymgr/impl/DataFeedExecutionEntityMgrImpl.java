@@ -2,34 +2,46 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.metadata.dao.DataFeedExecutionDao;
+import com.latticeengines.metadata.datafeed.repository.DataFeedExecutionRepository;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedImportEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedExecutionEntityMgr")
-public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedExecution>
+public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeedExecution, Long>
         implements DataFeedExecutionEntityMgr {
 
-    @Autowired
+    @Inject
+    private DataFeedExecutionRepository dataFeedExecutionRepository;
+
+    @Inject
     private DataFeedExecutionDao datafeedExecutionDao;
 
-    @Autowired
+    @Inject
     private DataFeedImportEntityMgr datafeedImportEntityMgr;
 
     @Override
     public BaseDao<DataFeedExecution> getDao() {
         return datafeedExecutionDao;
+    }
+
+    @Override
+    public BaseJpaRepository<DataFeedExecution, Long> getRepository() {
+        return dataFeedExecutionRepository;
     }
 
     @Override
@@ -52,19 +64,11 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
-    public DataFeedExecution findByExecutionId(Long executionId) {
+    public DataFeedExecution findByPid(Long executionId) {
         if (executionId == null) {
             return null;
         }
-        DataFeedExecution execution = findByField("pid", executionId);
-        inflateDataFeedImport(execution);
-        return execution;
-    }
-
-    @Override
-    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
-    public DataFeedExecution findConsolidatingExecution(DataFeed datafeed) {
-        DataFeedExecution execution = datafeedExecutionDao.findConsolidatingExecution(datafeed);
+        DataFeedExecution execution = dataFeedExecutionRepository.findByPid(executionId);
         inflateDataFeedImport(execution);
         return execution;
     }
@@ -72,11 +76,24 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrImpl<DataFeedEx
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public List<DataFeedExecution> findByDataFeed(DataFeed datafeed) {
-        List<DataFeedExecution> executions = datafeedExecutionDao.findByDataFeed(datafeed);
+        List<DataFeedExecution> executions = dataFeedExecutionRepository.findByDataFeed(datafeed);
         for (DataFeedExecution execution : executions) {
             inflateDataFeedImport(execution);
         }
         return executions;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
+    public DataFeedExecution findFirstByDataFeedAndJobTypeOrderByPidDesc(DataFeed datafeed,
+            DataFeedExecutionJobType jobType) {
+        return dataFeedExecutionRepository.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed, jobType);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
+    public int countByDataFeedAndJobType(DataFeed datafeed, DataFeedExecutionJobType jobType) {
+        return dataFeedExecutionRepository.countByDataFeedAndJobType(datafeed, jobType);
     }
 
     private void inflateDataFeedImport(DataFeedExecution execution) {

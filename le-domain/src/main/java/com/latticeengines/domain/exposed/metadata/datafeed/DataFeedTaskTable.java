@@ -43,7 +43,7 @@ public class DataFeedTaskTable implements HasPid, Serializable {
     private DataFeedTask dataFeedTask;
 
     @JsonIgnore
-    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @OneToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
     @JoinColumn(name = "`FK_TABLE_ID`", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Table table;

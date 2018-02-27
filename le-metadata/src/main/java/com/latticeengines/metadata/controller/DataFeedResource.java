@@ -28,14 +28,24 @@ public class DataFeedResource {
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
-            @PathVariable String datafeedName) {
-        return datafeedService.startExecution(customerSpace, datafeedName);
+            @PathVariable String datafeedName, //
+            @PathVariable DataFeedExecutionJobType jobType) {
+        return datafeedService.startExecution(customerSpace, datafeedName, jobType);
+    }
+
+    @RequestMapping(value = "/{datafeedName}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "restart data feed execution")
+    public DataFeedExecution restartExecution(@PathVariable String customerSpace, //
+            @PathVariable String datafeedName, //
+            @PathVariable DataFeedExecutionJobType jobType) {
+        return datafeedService.restartExecution(customerSpace, datafeedName, jobType);
     }
 
     @RequestMapping(value = "/{datafeedName}/jobtype/{jobType}/lockexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
-    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
+    public ResponseDocument<DataFeed> lockExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName, //
             @PathVariable DataFeedExecutionJobType jobType) {
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, datafeedName, jobType));

@@ -103,16 +103,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
-        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
-            throw new RuntimeException("We can't restart processanalyze workflow right now");
-        }
-
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
+        DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace, DataFeedExecutionJobType.PA);
+        log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         try {
-            DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace);
-            log.info(String.format("started execution of %s with status: %s", datafeed.getName(),
-                    execution.getStatus()));
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
             updateActions(customerSpace, actionAndJobIds.getLeft());
 
@@ -221,18 +216,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     public ApplicationId retryLatestFailed(String customerSpace) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
-        DataFeedExecution execution = datafeed.getActiveExecution();
-        if (execution == null) {
-            throw new RuntimeException("There is no previously failed processanalyze workflow to restart");
-        }
-        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
-            throw new RuntimeException("We can't restart processanalyze workflow right now");
-        }
-
+        DataFeedExecution execution = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         try {
             log.info(String.format("restarted execution with status: %s", execution.getStatus()));
             return workflowJobService.restart(execution.getWorkflowId());
-
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());

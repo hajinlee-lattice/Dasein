@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -31,7 +32,6 @@ import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("datafeedTaskEntityMgr")
 public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> implements DataFeedTaskEntityMgr {
@@ -341,5 +341,30 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
             extracts.addAll(t.getExtracts());
         });
         return extracts;
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
+    public List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task) {
+        return datafeedTaskTableDao.getDataFeedTaskTables(task);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
+    public List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task) {
+        List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskTableDao.getDataFeedTaskTables(task);
+        List<DataFeedTaskTable> inflatedDatafeedTaskTables = new ArrayList<>();
+        datafeedTaskTables.stream().forEach(datafeedtaskTable -> {
+            Table dataTable = datafeedtaskTable.getTable();
+            TableEntityMgr.inflateTable(dataTable);
+            if (dataTable != null) {
+                if (!dataTable.getExtracts().isEmpty()) {
+                    inflatedDatafeedTaskTables.add(datafeedtaskTable);
+                } else {
+                    log.info(String.format("skip table: %s as this table extract is empty", dataTable.getName()));
+                }
+            }
+        });
+        return inflatedDatafeedTaskTables;
     }
 }

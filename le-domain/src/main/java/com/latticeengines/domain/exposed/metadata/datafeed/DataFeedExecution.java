@@ -62,6 +62,11 @@ public class DataFeedExecution implements HasPid, Serializable {
     @Column(name = "WORKFLOW_ID", nullable = true)
     private Long workflowId;
 
+    @Column(name = "JOB_TYPE", nullable = false)
+    @JsonProperty("job_type")
+    @Enumerated(EnumType.STRING)
+    private DataFeedExecutionJobType jobType;
+
     @Override
     public Long getPid() {
         return pid;
@@ -112,6 +117,14 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     public void setWorkflowId(Long workflowId) {
         this.workflowId = workflowId;
+    }
+
+    public DataFeedExecutionJobType getDataFeedExecutionJobType() {
+        return this.jobType;
+    }
+
+    public void setDataFeedExecutionJobType(DataFeedExecutionJobType jobType) {
+        this.jobType = jobType;
     }
 
     @Override

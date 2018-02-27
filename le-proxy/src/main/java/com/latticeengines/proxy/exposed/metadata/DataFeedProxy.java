@@ -46,17 +46,23 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
-    public DataFeedExecution startExecution(String customerSpace) {
+    public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startexecution",
-                shortenCustomerSpace(customerSpace));
+                shortenCustomerSpace(customerSpace), jobType);
         return post("startExecution", url, null, DataFeedExecution.class);
+    }
+
+    public DataFeedExecution restartExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/restartexecution",
+                shortenCustomerSpace(customerSpace), jobType);
+        return post("restartExecution", url, null, DataFeedExecution.class);
     }
 
     @SuppressWarnings("unchecked")
     public boolean lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/lockexecution",
                 shortenCustomerSpace(customerSpace), jobType);
-        ResponseDocument<Boolean> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
+        ResponseDocument<DataFeed> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return Boolean.FALSE;
         }

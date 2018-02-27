@@ -133,7 +133,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 .forEach(e -> {
                     log.info("enabling step:" + e.getKey());
                     e.getValue().setSkipStep(false);
-                    ((BaseWrapperStepConfiguration) e.getValue()).setPhase(Phase.PRE_PROCESSING);
+                    (BaseWrapperStepConfiguration.class.cast(e.getValue())).setPhase(Phase.PRE_PROCESSING);
                     putObjectInContext(e.getKey(), e.getValue());
                 });
     }

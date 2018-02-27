@@ -6,12 +6,9 @@ import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
-
-    DataFeedExecution startExecution(String datafeedName);
 
     DataFeed findByName(String datafeedName);
 
@@ -29,6 +26,4 @@ public interface DataFeedEntityMgr extends BaseEntityMgr<DataFeed> {
     List<DataFeed> getAllDataFeeds();
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
-
-    void prepareExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 }

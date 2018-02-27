@@ -48,4 +48,8 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     List<Extract> getExtractsPendingInQueue(DataFeedTask task);
 
+    List<DataFeedTaskTable> getDataFeedTaskTables(DataFeedTask task);
+
+    List<DataFeedTaskTable> getInflatedDataFeedTaskTables(DataFeedTask task);
+
 }
