@@ -1,5 +1,6 @@
 package com.latticeengines.dataflow.runtime.cascading.leadprioritization;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -135,8 +136,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     }
 
     private List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
-        return bucketMetadata.stream().sorted((o1, o2) -> //
-                Integer.compare(o1.getLeftBoundScore(), o2.getRightBoundScore())).collect(Collectors.toList());
+        return bucketMetadata.stream().sorted(Comparator.comparingInt(BucketMetadata::getRightBoundScore)).collect(Collectors.toList());
     }
 
 }
