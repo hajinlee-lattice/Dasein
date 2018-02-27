@@ -380,8 +380,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public DataFeedExecution restartExecution(String customerSpace, String datafeedName,
-            DataFeedExecutionJobType jobType) {
+    public Long restartExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
         if (datafeedExecutionEntityMgr.countByDataFeedAndJobType(datafeed, jobType) == 0) {
             return null;
@@ -394,10 +393,9 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
         DataFeedExecution newExecution = datafeed.getActiveExecution();
         if (DataFeedExecutionJobType.PA == jobType) {
-            newExecution.setImports(execution.getImports());
-            newExecution.setWorkflowId(execution.getWorkflowId());
-            datafeedExecutionEntityMgr.update(newExecution);
+            newExecution.addImports(execution.getImports());
+            datafeedExecutionEntityMgr.updateImports(newExecution);
         }
-        return newExecution;
+        return execution.getWorkflowId();
     }
 }

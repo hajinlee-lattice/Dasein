@@ -45,5 +45,5 @@ public interface DataFeedService {
 
     DataFeed lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
-    DataFeedExecution restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
+    Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
 }

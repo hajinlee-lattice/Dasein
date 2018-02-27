@@ -52,10 +52,10 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return post("startExecution", url, null, DataFeedExecution.class);
     }
 
-    public DataFeedExecution restartExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+    public Long restartExecution(String customerSpace, DataFeedExecutionJobType jobType) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/restartexecution",
                 shortenCustomerSpace(customerSpace), jobType);
-        return post("restartExecution", url, null, DataFeedExecution.class);
+        return post("restartExecution", url, null, Long.class);
     }
 
     @SuppressWarnings("unchecked")

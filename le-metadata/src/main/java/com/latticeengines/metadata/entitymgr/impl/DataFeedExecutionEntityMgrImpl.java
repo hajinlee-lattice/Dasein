@@ -58,7 +58,7 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
     public void updateImports(DataFeedExecution execution) {
         super.update(execution);
         for (DataFeedImport datafeedImport : execution.getImports()) {
-            datafeedImportEntityMgr.create(datafeedImport);
+            datafeedImportEntityMgr.createOrUpdate(datafeedImport);
         }
     }
 
@@ -87,7 +87,10 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public DataFeedExecution findFirstByDataFeedAndJobTypeOrderByPidDesc(DataFeed datafeed,
             DataFeedExecutionJobType jobType) {
-        return dataFeedExecutionRepository.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed, jobType);
+        DataFeedExecution execution = dataFeedExecutionRepository.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed,
+                jobType);
+        inflateDataFeedImport(execution);
+        return execution;
     }
 
     @Override

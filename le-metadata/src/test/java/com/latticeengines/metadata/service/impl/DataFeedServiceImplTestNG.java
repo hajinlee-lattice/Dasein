@@ -209,6 +209,8 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
         DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
         DataFeedExecution exec0 = df.getActiveExecution();
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Completed);
+        int size = exec0.getImports().size();
+        assertEquals(size, 1);
 
         exec0.setWorkflowId(2L);
         exec0.setStatus(DataFeedExecution.Status.Started);
@@ -216,18 +218,18 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
         df.setStatus(Status.ProcessAnalyzing);
         datafeedEntityMgr.update(df);
 
-        DataFeedExecution exec1 = datafeedService.restartExecution(MultiTenantContext.getTenant().getId(),
-                DATA_FEED_NAME, DataFeedExecutionJobType.PA);
-        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
+        Long workflowId = datafeedService.restartExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+                DataFeedExecutionJobType.PA);
+        assertEquals(exec0.getWorkflowId(), workflowId);
 
         exec0 = datafeedExecutionEntityMgr.findByPid(exec0.getPid());
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Failed);
-        assertEquals(exec0.getImports().size(), exec1.getImports().size());
 
         df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
-        assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
-        assertEquals(exec1.getStatus(), df.getActiveExecution().getStatus());
-
+        DataFeedExecution exec1 = df.getActiveExecution();
+        assertEquals(exec1.getImports().size(), size);
+        assertEquals(exec1.getPid(), new Long(exec0.getPid() + 1L));
+        assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
     }
 }

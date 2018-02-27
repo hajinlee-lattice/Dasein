@@ -74,7 +74,7 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
-    public DataFeedExecution restartExecution(@PathVariable String customerSpace, //
+    public Long restartExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return datafeedService.restartExecution(customerSpace, "", jobType);

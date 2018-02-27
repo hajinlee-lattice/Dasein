@@ -36,7 +36,7 @@ public class DataFeedResource {
     @RequestMapping(value = "/{datafeedName}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
-    public DataFeedExecution restartExecution(@PathVariable String customerSpace, //
+    public Long restartExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName, //
             @PathVariable DataFeedExecutionJobType jobType) {
         return datafeedService.restartExecution(customerSpace, datafeedName, jobType);
