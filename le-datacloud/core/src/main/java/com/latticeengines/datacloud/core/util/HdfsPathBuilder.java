@@ -104,6 +104,10 @@ public class HdfsPathBuilder {
                 .append(avscFile);
     }
 
+    public Path constructSourceBaseDir() {
+        return propDataDir().append(SOURCES);
+    }
+
     @Deprecated
     public Path constructSourceDir(Source source) {
         String sourceName = source.getSourceName();

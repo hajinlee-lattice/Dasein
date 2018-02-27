@@ -30,8 +30,9 @@ public class PurgeResource {
         try {
             if (StringUtils.isEmpty(hdfsPod)) {
                 hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
-                HdfsPodContext.changeHdfsPodId(hdfsPod);
             }
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+
             // Mock a response temporarily for Richa to test
             List<PurgeSource> list = new ArrayList<>();
             List<String> hdfsPaths = new ArrayList<>();
