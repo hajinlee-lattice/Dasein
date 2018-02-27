@@ -62,6 +62,10 @@ public class TimeFilterTranslator {
                 return null;
             case WITHIN:
                 return translateWithIn(timeFilter.getPeriod(), timeFilter.getValues());
+            case PRIOR_ONLY:
+                return translatePrior(timeFilter.getPeriod(), timeFilter.getValues());
+            case BETWEEN:
+                return translateBetween(timeFilter.getPeriod(), timeFilter.getValues());
             case IN_CURRENT_PERIOD:
                 return translateInCurrent(timeFilter.getPeriod());
             default:
@@ -72,52 +76,26 @@ public class TimeFilterTranslator {
     @SuppressWarnings("unchecked")
     private Pair<String, String> translateDateFilter(TimeFilter timeFilter) {
         ComparisonType operator = timeFilter.getRelation();
+        List<Object> vals = timeFilter.getValues();
         switch (operator) {
             case BETWEEN:
-                List<Object> vals = timeFilter.getValues();
-                if (CollectionUtils.isEmpty(vals) || vals.size() != 2) {
-                    throw new IllegalArgumentException(ComparisonType.BETWEEN + //
-                            " operator is only compatible with 2 values, but " + vals + " was provided.");
-                }
-                List<String> dates = vals.stream().map(val -> {
-                    try {
-                        return LocalDate.parse((String) val).format(DateTimeFormatter.ISO_DATE);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse value " + val + " to an ISO date.", e);
-                    }
-                }).collect(Collectors.toList());
+                verifyDoubleVals(operator, vals);
+                List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
                 return Pair.of(dates.get(0), dates.get(1));
+            case BEFORE:
+                verifySingleVal(operator, vals);
+                return Pair.of(null, castToDate(vals.get(0)));
+            case AFTER:
+                verifySingleVal(operator, vals);
+                return Pair.of(castToDate(vals.get(0)), null);
             default:
                 throw new UnsupportedOperationException("Operator " + operator + " is not supported for date queries.");
         }
     }
 
     private Pair<String, String> translateWithIn(String period, List<Object> vals) {
-        if (CollectionUtils.isEmpty(vals) || vals.size() != 1) {
-            throw new IllegalArgumentException(ComparisonType.WITHIN + //
-                    " operator is only compatible with single value, but " + vals + " was provided.");
-        }
-        Object val = vals.get(0);
-        Integer offset;
-        if (val instanceof Integer) {
-            offset = (Integer) val;
-        } else if (val instanceof String) {
-            offset = Integer.valueOf((String) val);
-        } else {
-            try {
-                offset = Integer.valueOf(String.valueOf(val));
-            } catch (Exception e) {
-                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.", e);
-            }
-        }
-
-        if (!periodBuilders.containsKey(period)) {
-            throw new RuntimeException("Cannot find a period builder for period " + period);
-        }
-
-        if (!maxPeriodIds.containsKey(period)) {
-            throw new RuntimeException("Cannot determine max period id for period " + period);
-        }
+        verifyPeriodIsValid(period);
+        int offset = parseSingleInteger(ComparisonType.WITHIN, vals);
 
         int maxPeriodId = maxPeriodIds.get(period);
         int targetPeriod = maxPeriodId - offset;
@@ -127,6 +105,97 @@ public class TimeFilterTranslator {
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);
+    }
+
+    private Pair<String, String> translatePrior(String period, List<Object> vals) {
+        verifyPeriodIsValid(period);
+        int offset = parseSingleInteger(ComparisonType.PRIOR_ONLY, vals);
+
+        int maxPeriodId = maxPeriodIds.get(period);
+        int targetPeriod = maxPeriodId - offset - 1;
+
+        PeriodBuilder builder = periodBuilders.get(period);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, targetPeriod);
+        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
+        return Pair.of(null, end);
+    }
+
+    private Pair<String, String> translateBetween(String period, List<Object> vals) {
+        verifyPeriodIsValid(period);
+        List<Integer> offsets = parseDoubleIntegers(ComparisonType.BETWEEN, vals);
+        int offset1 = Math.max(offsets.get(0), offsets.get(1));
+        int offset2 = Math.min(offsets.get(0), offsets.get(1));
+
+        int maxPeriodId = maxPeriodIds.get(period);
+        int fromPeriod = maxPeriodId - offset1;
+        int toPeriod = maxPeriodId - offset2;
+
+        PeriodBuilder builder = periodBuilders.get(period);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(fromPeriod, toPeriod);
+        String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
+        String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
+        return Pair.of(start, end);
+    }
+
+    private void verifyPeriodIsValid(String period) {
+        if (!periodBuilders.containsKey(period)) {
+            throw new RuntimeException("Cannot find a period builder for period " + period);
+        }
+
+        if (!maxPeriodIds.containsKey(period)) {
+            throw new RuntimeException("Cannot determine max period id for period " + period);
+        }
+    }
+
+    private Integer parseSingleInteger(ComparisonType operator, List<Object> vals) {
+        verifySingleVal(operator, vals);
+        Object val = vals.get(0);
+        return castToInteger(val);
+    }
+
+    private List<Integer> parseDoubleIntegers(ComparisonType operator, List<Object> vals) {
+        verifyDoubleVals(operator, vals);
+        Integer offset1 = castToInteger(vals.get(0));
+        Integer offset2 = castToInteger(vals.get(1));
+        return Arrays.asList(offset1, offset2);
+    }
+
+    private void verifySingleVal(ComparisonType operator, List<Object> vals) {
+        if (CollectionUtils.isEmpty(vals) || vals.size() != 1) {
+            throw new IllegalArgumentException(operator + //
+                    " operator is only compatible with single value, but " + vals + " was provided.");
+        }
+    }
+
+    private void verifyDoubleVals(ComparisonType operator, List<Object> vals) {
+        if (CollectionUtils.isEmpty(vals) || vals.size() != 2) {
+            throw new IllegalArgumentException(operator + //
+                    " operator is only compatible with two values, but " + vals + " was provided.");
+        }
+    }
+
+    private String castToDate(Object val) {
+        try {
+            return LocalDate.parse((String) val).format(DateTimeFormatter.ISO_DATE);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse value " + val + " to an ISO date.", e);
+        }
+    }
+
+    private Integer castToInteger(Object val) {
+        Integer integer;
+        if (val instanceof Integer) {
+            integer = (Integer) val;
+        } else if (val instanceof String) {
+            integer = Integer.valueOf((String) val);
+        } else {
+            try {
+                integer = Integer.valueOf(String.valueOf(val));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Cannot cast value " + val + " to an Integer.", e);
+            }
+        }
+        return integer;
     }
 
     private Pair<String, String> translateInCurrent(String period) {

@@ -11,6 +11,8 @@ import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -207,7 +209,7 @@ abstract class QueryTranslator {
             search.run(restriction, (object, ctx) -> {
                 if (object instanceof TransactionRestriction) {
                     TransactionRestriction txRestriction = (TransactionRestriction) object;
-                    txRestriction.setTimeFilter(timeTranslator.translate(txRestriction.getTimeFilter()));
+                    modifyTxnRestriction(txRestriction, timeTranslator);
                     Restriction concrete = new DateRangeTranslator().convert(txRestriction, queryFactory, repository);
                     LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
                     parent.getRestrictions().remove(txRestriction);
@@ -217,12 +219,27 @@ abstract class QueryTranslator {
             translated = restriction;
         } else if (restriction instanceof TransactionRestriction) {
             TransactionRestriction txRestriction = (TransactionRestriction) restriction;
-            txRestriction.setTimeFilter(timeTranslator.translate(txRestriction.getTimeFilter()));
+            modifyTxnRestriction(txRestriction, timeTranslator);
             translated = new DateRangeTranslator().convert(txRestriction, queryFactory, repository);
         } else {
             translated = restriction;
         }
         return translated;
+    }
+
+    private static void modifyTxnRestriction(TransactionRestriction txRestriction, TimeFilterTranslator timeTranslator) {
+        txRestriction.setTimeFilter(timeTranslator.translate(txRestriction.getTimeFilter()));
+        if (txRestriction.getUnitFilter() != null) {
+            txRestriction.setUnitFilter(setAggToSum(txRestriction.getUnitFilter()));
+        }
+        if (txRestriction.getSpentFilter() != null) {
+            txRestriction.setSpentFilter(setAggToSum(txRestriction.getSpentFilter()));
+        }
+    }
+
+    private static AggregationFilter setAggToSum(AggregationFilter filter) {
+        return new AggregationFilter(filter.getSelector(), AggregationType.SUM, //
+                filter.getComparisonType(), filter.getValues());
     }
 
     static Sort translateFrontEndSort(FrontEndSort frontEndSort) {

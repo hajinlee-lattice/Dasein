@@ -25,7 +25,9 @@ public enum ComparisonType {
     PRIOR, //
     PRIOR_ONLY, //
     FOLLOWING,  //
-    WITHIN; //
+    WITHIN, //
+    BEFORE, //
+    AFTER; //
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

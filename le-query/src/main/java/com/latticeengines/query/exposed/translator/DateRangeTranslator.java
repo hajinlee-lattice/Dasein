@@ -63,7 +63,6 @@ public class DateRangeTranslator extends TranslatorCommon {
 
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(query);
-        // subQuery.setAlias(TranslatorUtils.generateAlias(transaction.name().toLowerCase()));
         return subQuery;
     }
 

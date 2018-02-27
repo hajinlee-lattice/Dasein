@@ -29,20 +29,38 @@ public class TimeFilterTranslatorUnitTestNG {
 
     @DataProvider(name = "timeFilterProvider")
     public Object[][] provideTimeFilters() {
+        TimeFilter currentMonth = new TimeFilter( //
+                ComparisonType.IN_CURRENT_PERIOD, TimeFilter.Period.Month.name(), Collections.emptyList());
         TimeFilter within1Month = new TimeFilter( //
                 ComparisonType.WITHIN, TimeFilter.Period.Month.name(), Collections.singletonList(1));
         TimeFilter within3Month = new TimeFilter( //
                 ComparisonType.WITHIN, TimeFilter.Period.Month.name(), Collections.singletonList(3));
         TimeFilter within2Quarter = new TimeFilter( //
                 ComparisonType.WITHIN, TimeFilter.Period.Quarter.name(), Collections.singletonList(2));
+        TimeFilter prior1Month = new TimeFilter( //
+                ComparisonType.PRIOR_ONLY, TimeFilter.Period.Month.name(), Collections.singletonList(1));
+        TimeFilter prior3Month = new TimeFilter( //
+                ComparisonType.PRIOR_ONLY, TimeFilter.Period.Month.name(), Collections.singletonList(3));
+        TimeFilter between1And3Month = new TimeFilter( //
+                ComparisonType.BETWEEN, TimeFilter.Period.Month.name(), Arrays.asList(1, 3));
         TimeFilter betweenDates = new TimeFilter( //
                 ComparisonType.BETWEEN, TimeFilter.Period.Date.name(), Arrays.asList("2018-02-01", "2019-01-01"));
+        TimeFilter beforeDate = new TimeFilter( //
+                ComparisonType.BEFORE, TimeFilter.Period.Date.name(), Collections.singletonList("2018-02-01"));
+        TimeFilter afterDate = new TimeFilter( //
+                ComparisonType.AFTER, TimeFilter.Period.Date.name(), Collections.singletonList("2018-02-01"));
         return new Object[][] { //
                 { TimeFilter.ever(), null }, //
+                { currentMonth, Pair.of("2018-02-01", "2018-02-28") }, //
                 { within1Month, Pair.of("2018-01-01", "2018-01-31") }, //
                 { within3Month, Pair.of("2017-11-01", "2018-01-31") }, //
                 { within2Quarter, Pair.of("2017-07-01", "2017-12-31") }, //
+                { prior1Month, Pair.of(null, "2017-12-31") }, //
+                { prior3Month, Pair.of(null, "2017-10-31") }, //
+                { between1And3Month, Pair.of("2017-11-01", "2018-01-31") }, //
                 { betweenDates, Pair.of("2018-02-01", "2019-01-01") }, //
+                { beforeDate, Pair.of(null, "2018-02-01") }, //
+                { afterDate, Pair.of("2018-02-01", null) }, //
         };
     }
 
