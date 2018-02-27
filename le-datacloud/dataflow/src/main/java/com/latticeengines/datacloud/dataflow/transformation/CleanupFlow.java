@@ -70,7 +70,7 @@ public class CleanupFlow extends ConfigurableFlowBase<CleanupConfig> {
                             .retain(new FieldList(fields));
                     Node partC = resultNode
                             .filter(deleteColumns.get(1) + " != null && " +
-                                deleteColumns.get(1) + " != "  + baseColumns.get(1),
+                                String.format("!%s.equals(%s)", deleteColumns.get(1), baseColumns.get(1)),
                                 new FieldList(deleteColumns.get(1), baseColumns.get(1)))
                             .retain(new FieldList(fields));
                     resultNode = partA.merge(partC);
