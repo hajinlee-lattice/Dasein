@@ -4,8 +4,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -165,15 +165,16 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
                 Thread.sleep(100L);
                 MultiTenantContext.setTenant(t);
                 log.info("thread started locking execution");
-                assertNull(datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
+                assertFalse(datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
         log.info("started locking execution");
-        assertNotNull(datafeedService.startExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA)
-                .getImports());
+        datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA);
         log.info("already locked execution");
+        assertNotNull(datafeedService.startExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA, 2L)
+                .getImports());
         DataFeed df = datafeedService.findDataFeedByName(customerSpace, DATA_FEED_NAME);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
@@ -225,10 +226,13 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
         exec0 = datafeedExecutionEntityMgr.findByPid(exec0.getPid());
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Failed);
 
+        DataFeedExecution exec1 = datafeedService.startExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+                DataFeedExecutionJobType.PA, workflowId + 1L);
         df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
-        DataFeedExecution exec1 = df.getActiveExecution();
+
         assertEquals(exec1.getImports().size(), size);
+        assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
         assertEquals(exec1.getPid(), new Long(exec0.getPid() + 1L));
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);
     }

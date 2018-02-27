@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
@@ -30,13 +34,18 @@ import com.latticeengines.metadata.dao.DataFeedTaskDao;
 import com.latticeengines.metadata.dao.DataFeedTaskTableDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
+import com.latticeengines.metadata.datafeed.repository.DataFeedTaskRepository;
 import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedTaskEntityMgr")
-public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> implements DataFeedTaskEntityMgr {
+public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeedTask, Long>
+        implements DataFeedTaskEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedTaskEntityMgrImpl.class);
+
+    @Inject
+    private DataFeedTaskRepository datafeedTaskRepository;
 
     @Autowired
     private DataFeedTaskDao datafeedTaskDao;
@@ -62,6 +71,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     public BaseDao<DataFeedTask> getDao() {
         return datafeedTaskDao;
+    }
+
+    @Override
+    public BaseJpaRepository<DataFeedTask, Long> getRepository() {
+        return datafeedTaskRepository;
     }
 
     @Override
@@ -194,7 +208,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeedTask findByKey(DataFeedTask task) {
-        DataFeedTask datafeedTask = datafeedTaskDao.findByKey(task);
+        DataFeedTask datafeedTask = datafeedTaskRepository.findById(task.getPid()).get();
         TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
         TableEntityMgr.inflateTable(datafeedTask.getImportData());
         return datafeedTask;
@@ -202,8 +216,9 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId) {
-        DataFeedTask dataFeedTask = datafeedTaskDao.getDataFeedTask(source, dataFeedType, entity, dataFeedId);
+    public DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, DataFeed datafeed) {
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findBySourceAndFeedTypeAndEntityAndDataFeed(source,
+                dataFeedType, entity, datafeed);
         if (dataFeedTask != null) {
             TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
             TableEntityMgr.inflateTable(dataFeedTask.getImportData());
@@ -214,7 +229,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(Long pid) {
-        DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", pid);
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findById(pid).orElse(null);
         if (dataFeedTask != null) {
             TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
             TableEntityMgr.inflateTable(dataFeedTask.getImportData());
@@ -225,7 +240,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
     public DataFeedTask getDataFeedTask(String uniqueId) {
-        DataFeedTask dataFeedTask = datafeedTaskDao.findByField("UNIQUE_ID", uniqueId);
+        DataFeedTask dataFeedTask = datafeedTaskRepository.findByUniqueId(uniqueId);
         if (dataFeedTask != null) {
             TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
             TableEntityMgr.inflateTable(dataFeedTask.getImportData());
@@ -235,8 +250,8 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true, isolation = Isolation.READ_COMMITTED)
-    public List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, Long dataFeedId) {
-        List<DataFeedTask> dataFeedTasks = datafeedTaskDao.getDataFeedTaskWithSameEntity(entity, dataFeedId);
+    public List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, DataFeed datafeed) {
+        List<DataFeedTask> dataFeedTasks = datafeedTaskRepository.findByEntityAndDataFeed(entity, datafeed);
         if (dataFeedTasks != null) {
             for (DataFeedTask dataFeedTask : dataFeedTasks) {
                 TableEntityMgr.inflateTable(dataFeedTask.getImportTemplate());
@@ -249,16 +264,16 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrImpl<DataFeedTask> i
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void deleteByTaskId(Long taskId) {
-        DataFeedTask dataFeedTask = datafeedTaskDao.findByField("PID", taskId);
-        if (dataFeedTask != null) {
-            datafeedTaskDao.delete(dataFeedTask);
+        DataFeedTask datafeedTask = datafeedTaskRepository.findById(taskId).orElse(null);
+        if (datafeedTask != null) {
+            datafeedTaskRepository.delete(datafeedTask);
         }
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateDataFeedTask(DataFeedTask dataFeedTask) {
-        DataFeedTask task = datafeedTaskDao.findByKey(dataFeedTask);
+        DataFeedTask task = datafeedTaskRepository.findById(dataFeedTask.getPid()).get();
         TableEntityMgr.inflateTable(task.getImportTemplate());
         TableEntityMgr.inflateTable(task.getImportData());
         task.setLastImported(dataFeedTask.getLastImported());

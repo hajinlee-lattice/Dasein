@@ -9,8 +9,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 
 public interface DataFeedExecutionRepository extends BaseJpaRepository<DataFeedExecution, Long> {
 
-    DataFeedExecution findByPid(Long pid);
-
     List<DataFeedExecution> findByDataFeed(DataFeed datafeed);
 
     int countByDataFeedAndJobType(DataFeed datafeed, DataFeedExecutionJobType jobType);

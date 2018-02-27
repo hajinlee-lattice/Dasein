@@ -6,6 +6,7 @@ import java.util.List;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTaskTable;
@@ -28,13 +29,13 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgr<DataFeedTask> {
 
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
 
-    DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, Long dataFeedId);
+    DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, DataFeed datafeed);
 
     DataFeedTask getDataFeedTask(Long pid);
 
     DataFeedTask getDataFeedTask(String uniqueId);
 
-    List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, Long dataFeedId);
+    List<DataFeedTask> getDataFeedTaskWithSameEntity(String entity, DataFeed datafeed);
 
     void deleteByTaskId(Long taskId);
 

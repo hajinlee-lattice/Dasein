@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -103,10 +102,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));
 
+        if (!dataFeedProxy.lockExecution(customerSpace, DataFeedExecutionJobType.PA)) {
+            throw new RuntimeException("We can't start processanalyze workflow right now");
+        }
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
-        DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace, DataFeedExecutionJobType.PA);
-        log.info(String.format("started execution of %s with status: %s", datafeed.getName(), execution.getStatus()));
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
             updateActions(customerSpace, actionAndJobIds.getLeft());

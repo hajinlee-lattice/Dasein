@@ -46,9 +46,9 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(list, SimpleDataFeed.class);
     }
 
-    public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType) {
+    public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType, long jobId) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startexecution",
-                shortenCustomerSpace(customerSpace), jobType);
+                shortenCustomerSpace(customerSpace), jobType, jobId);
         return post("startExecution", url, null, DataFeedExecution.class);
     }
 

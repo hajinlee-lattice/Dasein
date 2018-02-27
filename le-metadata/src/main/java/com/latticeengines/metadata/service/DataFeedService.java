@@ -9,7 +9,8 @@ import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
 public interface DataFeedService {
 
-    DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobTyp);
+    DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobTyp,
+            long jobId);
 
     DataFeed findDataFeedByName(String customerSpace, String datafeedName);
 
@@ -43,7 +44,7 @@ public interface DataFeedService {
 
     List<SimpleDataFeed> getAllSimpleDataFeeds();
 
-    DataFeed lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
+    boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType);
 
     Long restartExecution(String id, String datafeedName, DataFeedExecutionJobType jobType);
 }

@@ -2,18 +2,21 @@ package com.latticeengines.metadata.entitymgr.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -22,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 import com.latticeengines.metadata.dao.DataFeedDao;
+import com.latticeengines.metadata.datafeed.repository.DataFeedRepository;
 import com.latticeengines.metadata.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.metadata.entitymgr.DataFeedExecutionEntityMgr;
@@ -29,25 +33,33 @@ import com.latticeengines.metadata.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedEntityMgr")
-public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implements DataFeedEntityMgr {
+public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed, Long> implements DataFeedEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(DataFeedEntityMgrImpl.class);
 
-    @Autowired
+    @Inject
+    private DataFeedRepository datafeedRepository;
+
+    @Inject
     private DataFeedDao datafeedDao;
 
-    @Autowired
+    @Inject
     private DataFeedExecutionEntityMgr datafeedExecutionEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFeedTaskEntityMgr datafeedTaskEntityMgr;
 
-    @Autowired
+    @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
     @Override
     public BaseDao<DataFeed> getDao() {
         return datafeedDao;
+    }
+
+    @Override
+    public BaseJpaRepository<DataFeed, Long> getRepository() {
+        return datafeedRepository;
     }
 
     @Override
@@ -79,7 +91,19 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeed findByName(String datafeedName) {
         datafeedName = StringUtils.isBlank(datafeedName) ? findDefaultFeed().getName() : datafeedName;
-        return findByField("name", datafeedName);
+        DataFeed datafeed = datafeedRepository.findByName(datafeedName);
+        if (datafeed == null) {
+            return null;
+        }
+        Long executionId = datafeed.getActiveExecutionId();
+        if (executionId == null) {
+            return datafeed;
+        }
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
+        if (execution != null) {
+            datafeed.setActiveExecution(execution);
+        }
+        return datafeed;
     }
 
     @Override
@@ -93,10 +117,6 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         for (DataFeedTask datafeedTask : datafeed.getTasks()) {
             TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
             TableEntityMgr.inflateTable(datafeedTask.getImportData());
-        }
-        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
-        if (execution != null) {
-            datafeed.setActiveExecution(execution);
         }
         return datafeed;
     }
@@ -113,7 +133,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
             Status datafeedStatus) {
-        DataFeed datafeed = findByNameInflated(datafeedName);
+        DataFeed datafeed = findByName(datafeedName);
         if (datafeed == null) {
             log.error("Can't find data feed: " + datafeedName);
             return null;
@@ -127,7 +147,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
             datafeed.setLastPublished(new Date());
         }
         log.info(String.format("terminating execution, updating data feed %s to %s", datafeedName, datafeed));
-        datafeedDao.update(datafeed);
+        datafeedDao.update(datafeedDao.merge(datafeed));
         return execution;
     }
 
@@ -138,7 +158,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         if (collection == null) {
             throw new IllegalStateException("Default collection has not been initialized.");
         }
-        return datafeedDao.findDefaultFeed(collection.getName());
+        return datafeedRepository.findByDataCollection(collection);
     }
 
     @Override
@@ -153,7 +173,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
         if (collection == null) {
             return null;
         } else {
-            DataFeed dataFeed = datafeedDao.findDefaultFeed(collection.getName());
+            DataFeed dataFeed = datafeedRepository.findByDataCollection(collection);
             return findByNameInflated(dataFeed.getName());
         }
     }
@@ -161,7 +181,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<DataFeed> getAllDataFeeds() {
-        List<DataFeed> dataFeeds = datafeedDao.findAll();
+        List<DataFeed> dataFeeds = findAll();
         for (DataFeed datafeed : dataFeeds) {
             HibernateUtils.inflateDetails(datafeed.getTasks());
             for (DataFeedTask datafeedTask : datafeed.getTasks()) {
@@ -179,6 +199,8 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrImpl<DataFeed> implement
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
-        return datafeedDao.findAllSimpleDataFeeds();
+        List<DataFeed> dataFeeds = findAll();
+        return dataFeeds.stream().map(df -> new SimpleDataFeed(df.getTenant(), df.getStatus()))
+                .collect(Collectors.toList());
     }
 }

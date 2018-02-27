@@ -37,10 +37,10 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
-    public void createOrUpdateDataFeedTask(String customerSpace, String source, String dataFeedType, String entity, String tableName) {
+    public void createOrUpdateDataFeedTask(String customerSpace, String source, String dataFeedType, String entity,
+            String tableName) {
         DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        DataFeedTask dataFeedTask = dataFeedTaskEntityMgr.getDataFeedTask(source, dataFeedType, entity, dataFeed
-                .getPid());
+        DataFeedTask dataFeedTask = dataFeedTaskEntityMgr.getDataFeedTask(source, dataFeedType, entity, dataFeed);
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setDataFeed(dataFeed);
@@ -72,7 +72,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         if (dataFeed == null) {
             return null;
         }
-        return dataFeedTaskEntityMgr.getDataFeedTask(source, dataFeedType, entity, dataFeed.getPid());
+        return dataFeedTaskEntityMgr.getDataFeedTask(source, dataFeedType, entity, dataFeed);
     }
 
     @Override
@@ -87,11 +87,11 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
 
     @Override
     public List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity) {
-        DataFeed dataFeed = dataFeedService.getOrCreateDataFeed(customerSpace);
-        if (dataFeed == null) {
+        DataFeed datafeed = dataFeedService.getOrCreateDataFeed(customerSpace);
+        if (datafeed == null) {
             return null;
         }
-        return dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, dataFeed.getPid());
+        return dataFeedTaskEntityMgr.getDataFeedTaskWithSameEntity(entity, datafeed);
     }
 
     @Override

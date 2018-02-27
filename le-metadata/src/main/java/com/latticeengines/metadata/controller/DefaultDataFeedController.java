@@ -66,9 +66,10 @@ public class DefaultDataFeedController {
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
-            @PathVariable DataFeedExecutionJobType jobType) {
+            @PathVariable DataFeedExecutionJobType jobType, //
+            @PathVariable long jobId) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.startExecution(customerSpace, "", jobType);
+        return datafeedService.startExecution(customerSpace, "", jobType, jobId);
     }
 
     @RequestMapping(value = "/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -83,7 +84,7 @@ public class DefaultDataFeedController {
     @RequestMapping(value = "/jobtype/{jobType}/lockexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
-    public ResponseDocument<DataFeed> lockExecution(@PathVariable String customerSpace, //
+    public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
             @PathVariable DataFeedExecutionJobType jobType) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));

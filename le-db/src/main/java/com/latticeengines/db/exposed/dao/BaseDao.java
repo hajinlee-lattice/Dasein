@@ -29,4 +29,6 @@ public interface BaseDao<T> {
     T findByFields(Object... fieldsAndValues);
 
     List<T> findAllByFields(Object... fieldsAndValues);
+
+    T merge(T entity);
 }

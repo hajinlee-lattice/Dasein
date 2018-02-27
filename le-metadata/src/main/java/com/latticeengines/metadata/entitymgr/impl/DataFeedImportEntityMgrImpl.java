@@ -1,26 +1,38 @@
 package com.latticeengines.metadata.entitymgr.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.metadata.dao.DataFeedImportDao;
+import com.latticeengines.metadata.datafeed.repository.DataFeedImportRepository;
 import com.latticeengines.metadata.entitymgr.DataFeedImportEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 
 @Component("datafeedImportEntityMgr")
-public class DataFeedImportEntityMgrImpl extends BaseEntityMgrImpl<DataFeedImport> implements DataFeedImportEntityMgr {
+public class DataFeedImportEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeedImport, Long>
+        implements DataFeedImportEntityMgr {
 
-    @Autowired
+    @Inject
+    private DataFeedImportRepository dataFeedImportRepository;
+
+    @Inject
     private DataFeedImportDao datafeedImportDao;
 
-    @Autowired
+    @Inject
     private TableEntityMgr tableEntityMgr;
+
+    @Override
+    public BaseJpaRepository<DataFeedImport, Long> getRepository() {
+        return dataFeedImportRepository;
+    }
 
     @Override
     public BaseDao<DataFeedImport> getDao() {

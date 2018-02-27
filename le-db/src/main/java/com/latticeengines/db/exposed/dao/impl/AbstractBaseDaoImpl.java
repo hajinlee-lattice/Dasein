@@ -74,7 +74,6 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         return (T) getSessionFactory().getCurrentSession().get(clz, entity.getPid());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public T findByKey(Class<T> entityClz, Long key) {
         return (T) getSessionFactory().getCurrentSession().get(entityClz, key);
@@ -84,7 +83,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public <F> T findByField(String fieldName, F fieldValue) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
-        Query query = session.createQuery(queryStr);
+        Query<T> query = session.createQuery(queryStr);
         query.setParameter("value", fieldValue);
         List<T> results = query.list();
         if (results.size() == 0) {
@@ -101,7 +100,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public <F> List<T> findAllByField(String fieldName, F fieldValue) {
         Session session = getSessionFactory().getCurrentSession();
         String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
-        Query query = session.createQuery(queryStr);
+        Query<T> query = session.createQuery(queryStr);
         query.setParameter("value", fieldValue);
         List<T> results = query.list();
         if (results.size() == 0) {
@@ -136,7 +135,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             sb.append(String.format("%s = ?", fieldsAndValues[2 * i]));
         }
         String queryStr = String.format("from %s where %s", getEntityClass().getSimpleName(), sb.toString());
-        Query query = session.createQuery(queryStr);
+        Query<T> query = session.createQuery(queryStr);
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
             query.setParameter(i, fieldsAndValues[2 * i + 1]);
         }
@@ -148,14 +147,22 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public List<T> findAll() {
         Session session = getSessionFactory().getCurrentSession();
         Class<T> entityClz = getEntityClass();
-        Query query = session.createQuery("from " + entityClz.getSimpleName());
+        Query<T> query = session.createQuery("from " + entityClz.getSimpleName());
         return query.list();
     }
 
     @Override
     public void update(T entity) {
         setAuditingFields(entity);
-        getSessionFactory().getCurrentSession().update(entity);
+        Session currSession = getSessionFactory().getCurrentSession();
+        currSession.update(entity);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public T merge(T entity) {
+        setAuditingFields(entity);
+        return (T) getSessionFactory().getCurrentSession().merge(entity);
     }
 
     @Override
@@ -175,7 +182,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public void deleteAll() {
         Session session = getSessionFactory().getCurrentSession();
         Class<T> entityClz = getEntityClass();
-        Query query = session.createQuery("delete from " + entityClz.getSimpleName());
+        Query<?> query = session.createQuery("delete from " + entityClz.getSimpleName());
         query.executeUpdate();
     }
 

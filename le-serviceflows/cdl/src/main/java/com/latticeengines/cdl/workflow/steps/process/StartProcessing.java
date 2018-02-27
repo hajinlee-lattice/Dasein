@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -98,7 +99,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         customerSpace = configuration.getCustomerSpace();
         determineVersions();
 
-        DataFeedExecution execution = dataFeedProxy.updateExecutionWorkflowId(customerSpace.toString(), jobId);
+        DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace.toString(),
+                DataFeedExecutionJobType.PA, jobId);
         log.info(String.format("current running execution %s", execution));
 
         DataFeed datafeed = dataFeedProxy.getDataFeed(configuration.getCustomerSpace().toString());

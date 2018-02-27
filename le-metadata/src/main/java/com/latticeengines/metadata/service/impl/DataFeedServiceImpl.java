@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -83,30 +84,30 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public DataFeed lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
+    public boolean lockExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType) {
         String lockName = new Path("/").append(LockType).append("/").append(customerSpace).toString();
         try {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
-            DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+            DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
             Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
             if (!allowedJobType.contains(jobType)) {
                 DataFeedExecution execution = datafeed.getActiveExecution();
                 if (execution == null || execution.getWorkflowId() == null
                         || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
-                    return null;
+                    return false;
                 }
                 Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
                 if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
-                    return null;
+                    return false;
                 }
                 failExecution(datafeed, job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
             }
             prepareExecution(datafeed, jobType);
-            return datafeed;
+            return true;
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            return null;
+            return false;
         } finally {
             LockManager.releaseWriteLock(lockName);
         }
@@ -130,19 +131,16 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public DataFeedExecution startExecution(String customerSpace, String datafeedName,
-            DataFeedExecutionJobType jobType) {
-        DataFeed datafeed = lockExecution(customerSpace, datafeedName, jobType);
-        if (datafeed == null) {
-            throw new RuntimeException("can't lock execution for job type:" + jobType);
-        }
+    public DataFeedExecution startExecution(String customerSpace, String datafeedName, DataFeedExecutionJobType jobType,
+            long jobId) {
         if (DataFeedExecutionJobType.PA == jobType) {
-            return startPnAExecution(datafeed);
+            return startPnAExecution(customerSpace, datafeedName, jobId);
         }
-        return datafeedEntityMgr.findByNameInflated(datafeedName).getActiveExecution();
+        return datafeedEntityMgr.findByName(datafeedName).getActiveExecution();
     }
 
-    private DataFeedExecution startPnAExecution(DataFeed datafeed) {
+    private DataFeedExecution startPnAExecution(String customerSpace, String datafeedName, long jobId) {
+        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
         if (datafeed == null) {
             log.info("Can't find data feed");
             return null;
@@ -158,12 +156,11 @@ public class DataFeedServiceImpl implements DataFeedService {
 
         Collections.sort(imports, (a, b) -> Long.compare(a.getDataTable().getPid(), b.getDataTable().getPid()));
         DataFeedExecution execution = datafeed.getActiveExecution();
-        execution.setStatus(DataFeedExecution.Status.Started);
         execution.addImports(imports);
+        execution.setWorkflowId(jobId);
         log.info(String.format("starting processanalyze execution %s", execution));
         datafeedExecutionEntityMgr.updateImports(execution);
 
-        datafeed.setStatus(Status.ProcessAnalyzing);
         tasks = datafeed.getTasks();
         tasks.forEach(task -> {
             datafeedTaskEntityMgr.update(task, new Date());
@@ -178,10 +175,12 @@ public class DataFeedServiceImpl implements DataFeedService {
         List<DataFeedImport> imports = new ArrayList<>();
 
         List<DataFeedTaskTable> datafeedTaskTables = datafeedTaskEntityMgr.getInflatedDataFeedTaskTables(task);
-        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable).forEach(dataTable -> {
-            task.setImportData(dataTable);
-            imports.add(DataFeedImportUtils.createImportFromTask(task));
-        });
+        datafeedTaskTables.stream().map(DataFeedTaskTable::getTable)//
+                .filter(Objects::nonNull)//
+                .forEach(dataTable -> {
+                    task.setImportData(dataTable);
+                    imports.add(DataFeedImportUtils.createImportFromTask(task));
+                });
         return imports;
 
     }
@@ -281,7 +280,7 @@ public class DataFeedServiceImpl implements DataFeedService {
 
     @Override
     public DataFeedExecution updateExecutionWorkflowId(String customerSpace, String datafeedName, Long workflowId) {
-        DataFeed datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
         if (datafeed == null) {
             return null;
         }
@@ -387,10 +386,10 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
         DataFeedExecution execution = datafeedExecutionEntityMgr.findFirstByDataFeedAndJobTypeOrderByPidDesc(datafeed,
                 jobType);
-        datafeed = lockExecution(customerSpace, datafeedName, jobType);
-        if (datafeed == null) {
+        if (!lockExecution(customerSpace, datafeedName, jobType)) {
             throw new RuntimeException("can't lock execution for job type:" + jobType);
         }
+        datafeed = datafeedEntityMgr.findByName(datafeedName);
         DataFeedExecution newExecution = datafeed.getActiveExecution();
         if (DataFeedExecutionJobType.PA == jobType) {
             newExecution.addImports(execution.getImports());
