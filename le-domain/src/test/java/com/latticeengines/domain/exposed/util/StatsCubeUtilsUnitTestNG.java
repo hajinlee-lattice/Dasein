@@ -82,7 +82,7 @@ public class StatsCubeUtilsUnitTestNG {
         ));
 
         TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-        StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
+//         StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
         // JsonUtils.serialize(topNTree, new FileOutputStream(new File("tree.json")));
 
         verifyDateAttrInTopN(topNTree, cmMap);
@@ -92,8 +92,6 @@ public class StatsCubeUtilsUnitTestNG {
         verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
-
-        System.out.println(JsonUtils.serialize(topNTree.getCategory(Category.PRODUCT_SPEND)));
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {

@@ -57,6 +57,10 @@ public class CustomerSpace {
         return new CustomerSpace(parts[0], parts[1], parts[2]);
     }
 
+    public static String shortenCustomerSpace(String customerSpace) {
+        return CustomerSpace.parse(customerSpace).getTenantId();
+    }
+
     /**
      * @return the 1-part identifier of this customer space, if possible.
      *         Otherwise, returns a 3-part identifier.

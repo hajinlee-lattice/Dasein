@@ -92,11 +92,13 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String columnName;
 
     @Deprecated // should use AttrName
+    @JsonProperty("ColumnId")
     public String getColumnId() {
         return getAttrName();
     }
 
     @Deprecated
+    @JsonProperty("ColumnId")
     public void setColumnId(String columnId) {
         setAttrName(columnId);
     }

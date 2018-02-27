@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import com.latticeengines.documentdb.entity.ColumnMetadataDocument;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.metadata.repository.MetadataStoreRepository;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -21,34 +22,45 @@ import reactor.core.scheduler.Schedulers;
 
 public abstract class JpaRepositoryMetadataStore<T extends ColumnMetadataDocument> {
 
-    protected abstract Class<T> getDAOClz();
+    protected abstract Class<T> getEntityClz();
     protected abstract MetadataStoreRepository<T> getRepository();
+    private static final int PAGE_SIZE = 5000;
 
-    private static Scheduler scheduler = Schedulers.newParallel("metadata-store");
+    private Scheduler jpaScheduler = Schedulers.newParallel("jpa-mds");
     private String idField = null;
 
-    public Flux<ColumnMetadata> getMetadata(Serializable... namespace) {
-        Class<T> clz = getDAOClz();
+    protected Long count(Serializable... namespace) {
+        Class<T> clz = getEntityClz();
+        MetadataStoreRepository<T> repository = getRepository();
+        return repository.countByNameSpace(clz, namespace);
+    }
+
+    protected Flux<ColumnMetadata> getMetadata(Serializable... namespace) {
+        Class<T> clz = getEntityClz();
         MetadataStoreRepository<T> repository = getRepository();
         long count = repository.countByNameSpace(clz, namespace);
-        if (count < 5000) {
-            return Mono.fromCallable(() -> repository.findByNamespace(clz, null, namespace)) //
+        if (count < 2 * PAGE_SIZE) {
+            return Mono.fromCallable(() -> repository.findByNamespace(getEntityClz(), null, namespace)) //
                     .flatMapMany(Flux::fromIterable).map(ColumnMetadataDocument::getColumnMetadata);
         } else {
-            int pageSize = 2000;
-            int pages = (int) Math.ceil(1.0 * count / pageSize);
+            int pages = (int) Math.ceil(1.0 * count / PAGE_SIZE);
             String idField = findIdField();
-            return Flux.range(0, pages).parallel().runOn(scheduler).concatMap(page -> {
-                PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(idField));
-                List<T> dataPage = repository.findByNamespace(clz, pageRequest, namespace);
-                return Flux.fromIterable(dataPage);
-            }).map(ColumnMetadataDocument::getColumnMetadata).sequential();
+            return Flux.range(0, pages) //
+                    .parallel().runOn(jpaScheduler) //
+                    .concatMap(page -> {
+                        try (PerformanceTimer timer = new PerformanceTimer()) {
+                            PageRequest pageRequest = PageRequest.of(page, PAGE_SIZE, Sort.by(idField));
+                            List<T> dataPage = repository.findByNamespace(clz, pageRequest, namespace);
+                            timer.setTimerMessage("Fetched a page of " + dataPage.size() + " records.");
+                            return Flux.fromIterable(dataPage);
+                        }
+                    }).map(ColumnMetadataDocument::getColumnMetadata).sequential();
         }
     }
 
     private String findIdField() {
         if (StringUtils.isBlank(idField)) {
-            Class<?> c = getDAOClz();
+            Class<?> c = getEntityClz();
             while (c != null) {
                 for (Field field : c.getDeclaredFields()) {
                     if (field.isAnnotationPresent(Id.class)) {
@@ -61,11 +73,6 @@ public abstract class JpaRepositoryMetadataStore<T extends ColumnMetadataDocumen
             idField = "uuid";
         }
         return idField;
-    }
-
-    // default impl assumes all namespace keys are string
-    public Serializable[] parseNameSpace(String... namespace) {
-        return namespace;
     }
 
 }

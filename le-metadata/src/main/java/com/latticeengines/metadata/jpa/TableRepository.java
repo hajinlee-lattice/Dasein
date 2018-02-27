@@ -1,0 +1,15 @@
+package com.latticeengines.metadata.jpa;
+
+import org.springframework.data.jpa.repository.Query;
+
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import org.springframework.transaction.annotation.Transactional;
+
+@Transactional(readOnly = true)
+public interface TableRepository extends BaseJpaRepository<Attribute, Long> {
+
+    @Query("select t.pid from Table t where t.tenant.id = ?1 and t.name = ?2 and t.tableTypeCode = 0")
+    Long findPidByTenantIdAndName(String tenantId, String tableName);
+
+}

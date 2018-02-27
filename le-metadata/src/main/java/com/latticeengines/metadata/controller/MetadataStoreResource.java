@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.controller;
 
-
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,6 +26,13 @@ public class MetadataStoreResource {
             @PathVariable(name = "mdsName") String mdsName, //
             @PathVariable(name = "namespace") String[] namespace) {
         return metadataStoreService.getMetadata(mdsName, namespace);
+    }
+
+    @GetMapping("/{mdsName}/namespace/{namespace}/count")
+    public Long count( //
+            @PathVariable(name = "mdsName") String mdsName, //
+            @PathVariable(name = "namespace") String[] namespace) {
+        return metadataStoreService.count(mdsName, namespace);
     }
 
 }

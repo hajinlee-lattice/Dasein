@@ -1,6 +1,5 @@
 package com.latticeengines.metadata.service.impl;
 
-import java.io.Serializable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -10,7 +9,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.metadata.mds.JpaMetadataStore;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
+import com.latticeengines.metadata.mds.NamedMetadataStore;
 import com.latticeengines.metadata.mds.impl.AttrConfigMetadataStore;
 import com.latticeengines.metadata.service.MetadataStoreService;
 
@@ -22,15 +22,24 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
     @Inject
     private AttrConfigMetadataStore attrConfigMetadataStore;
 
-    private ConcurrentMap<String, JpaMetadataStore> registry;
+    private ConcurrentMap<String, NamedMetadataStore> registry;
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Long count(String metadataStoreName, String... namespace) {
+        NamedMetadataStore metadataStore = getMetadataStore(metadataStoreName);
+        Namespace keys = metadataStore.parseNameSpace(namespace);
+        return metadataStore.count(keys);
+    }
+
+    @SuppressWarnings("unchecked")
     public Flux<ColumnMetadata> getMetadata(String metadataStoreName, String... namespace) {
-        JpaMetadataStore metadataStore = getMetadataStore(metadataStoreName);
-        Serializable[] keys = metadataStore.parseNameSpace(namespace);
+        NamedMetadataStore metadataStore = getMetadataStore(metadataStoreName);
+        Namespace keys = metadataStore.parseNameSpace(namespace);
         return metadataStore.getMetadata(keys);
     }
 
-    private JpaMetadataStore getMetadataStore(String metadataStoreName) {
+    private NamedMetadataStore getMetadataStore(String metadataStoreName) {
         registerMetadataStores();
         if (registry.containsKey(metadataStoreName)) {
             return registry.get(metadataStoreName);
@@ -47,7 +56,7 @@ public class MetadataStoreServiceImpl implements MetadataStoreService {
         }
     }
 
-    private void registerMetadataStore(JpaMetadataStore metadataStore) {
+    private void registerMetadataStore(NamedMetadataStore metadataStore) {
         registry.put(metadataStore.getName(), metadataStore);
     }
 

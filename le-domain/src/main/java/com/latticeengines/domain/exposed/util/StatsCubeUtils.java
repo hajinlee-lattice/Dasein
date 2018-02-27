@@ -366,6 +366,7 @@ public class StatsCubeUtils {
         return attributeStats;
     }
 
+    @Deprecated
     public static void processPurchaseHistoryCategory(TopNTree topNTree, Map<String, String> productMap) {
         if (MapUtils.isEmpty(productMap) || !topNTree.hasCategory(Category.PRODUCT_SPEND)) {
             return;

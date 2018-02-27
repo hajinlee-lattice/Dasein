@@ -96,7 +96,6 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
         mainTestTenant = testBed.getMainTestTenant();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
-
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 

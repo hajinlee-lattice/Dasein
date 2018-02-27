@@ -6,6 +6,8 @@ import reactor.core.publisher.Flux;
 
 public interface MetadataStoreService {
 
+    Long count(String metadataStoreName, String... namespace);
+
     Flux<ColumnMetadata> getMetadata(String metadataStoreName, String... namespace);
 
 }

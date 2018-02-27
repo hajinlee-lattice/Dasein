@@ -1,7 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.List;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -55,7 +54,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             List<RatingModelContainer> activeModels = Flux.fromIterable(summaries) //
                     .parallel().runOn(Schedulers.parallel()) //
                     .map(this::getValidRatingModel) //
-                    .filter(Objects::nonNull) //
+                    .filter(container -> container.getModel() != null) //
                     .sequential().collectList().block();
             if (CollectionUtils.isNotEmpty(activeModels)) {
                 log.info("Found " + activeModels.size() + " active rating models.");
@@ -67,7 +66,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private RatingModelContainer getValidRatingModel(RatingEngineSummary summary) {
-        RatingModelContainer container = null;
+        RatingModelContainer container = new RatingModelContainer(null, summary);
         String engineId = summary.getId();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
         RatingModel ratingModel = engine.getActiveModel();

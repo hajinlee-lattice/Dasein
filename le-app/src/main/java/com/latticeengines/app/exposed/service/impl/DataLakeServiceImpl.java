@@ -41,9 +41,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
-import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -55,9 +53,13 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+
+import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @Component("dataLakeService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -65,11 +67,10 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private static final Logger log = LoggerFactory.getLogger(DataLakeServiceImpl.class);
 
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
+    private static final Scheduler scheduler = Schedulers.newParallel("data-lake-service");
 
     @Inject
-    private MetadataProxy metadataProxy;
+    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private AttributeCustomizationService attributeCustomizationService;
@@ -82,6 +83,9 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     private final DataLakeService _dataLakeService;
 
@@ -96,12 +100,11 @@ public class DataLakeServiceImpl implements DataLakeService {
             String customerSpace = tokens[0];
             return getStatsCubes(customerSpace);
         }, 100); //
-
         cmCache = new LocalCacheManager<>(CacheName.DataLakeCMCache, str -> {
             String[] tokens = str.split("\\|");
-            TableRoleInCollection role = TableRoleInCollection.valueOf(tokens[1]);
+            BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
             String customerSpace = tokens[0];
-            return getAttributesInTableRole(customerSpace, role);
+            return getServingMetadataForEntity(customerSpace, entity);
         }, 100); //
     }
 
@@ -143,20 +146,20 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     private List<ColumnMetadata> getAllAttributes() {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        List<ColumnMetadata> cms = new ArrayList<>();
-        for (BusinessEntity entity : BusinessEntity.SEGMENT_ENTITIES) {
-            cms.addAll(getAttributesInEntity(customerSpace, entity));
-        }
-        return cms.parallelStream() //
-                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm)).collect(Collectors.toList());
+        String tenantId = MultiTenantContext.getTenantId();
+        return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES)
+                .parallel().runOn(scheduler)
+                .flatMap(entity -> Flux.fromIterable(_dataLakeService.getServingMetadataForEntity(tenantId, entity)))
+                .sequential().parallel().runOn(scheduler)
+                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm))
+                .sequential().collectList().block();
     }
 
     @Override
     public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
         // Only return attributes for account now
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, BusinessEntity.Account);
+        String tenantId = MultiTenantContext.getTenantId();
+        List<ColumnMetadata> cms = _dataLakeService.getServingMetadataForEntity(tenantId, BusinessEntity.Account);
         return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
         // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
@@ -166,19 +169,14 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public Map<String, StatsCube> getStatsCubes() {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        return _dataLakeService.getStatsCubes(customerSpace);
+        String tenantId = MultiTenantContext.getTenantId();
+        return _dataLakeService.getStatsCubes(tenantId);
     }
 
     @Override
     public TopNTree getTopNTree() {
-        String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
-        TopNTree topNTree = _dataLakeService.getTopNTree(customerSpace);
-        if (topNTree.hasCategory(Category.RATING)) {
-            List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
-            StatsCubeUtils.processRatingCategory(topNTree, engineSummaries);
-        }
-        return topNTree;
+        String tenantId = MultiTenantContext.getTenantId();
+        return _dataLakeService.getTopNTree(tenantId);
     }
 
     @Override
@@ -230,47 +228,12 @@ public class DataLakeServiceImpl implements DataLakeService {
         return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    private List<ColumnMetadata> getAttributesInEntity(String customerSpace, BusinessEntity entity) {
-        TableRoleInCollection role = entity.getServingStore();
-        if (role == null) {
-            return Collections.emptyList();
-        }
-//        List list = _dataLakeService.getAttributesInTableRole(customerSpace, role);
-//        List<ColumnMetadata> cms = JsonUtils.convertList(list, ColumnMetadata.class);
-        List<ColumnMetadata> cms = _dataLakeService.getAttributesInTableRole(customerSpace, role);
-        cms.forEach(cm -> cm.setEntity(entity));
-        if (BusinessEntity.Rating.equals(entity)) {
-            List<RatingEngineSummary> engineSummaries = getRatingSummaries(customerSpace);
-            StatsCubeUtils.injectRatingEngineMetadata(cms, engineSummaries);
-        }
-        return cms;
-    }
-
     private void personalize(List<ColumnMetadata> list) {
         attributeCustomizationService
                 .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
     }
 
-    private Map<String, String> getProductMap(String customerSpace) {
-        String tableName = dataCollectionProxy.getTableName(customerSpace, BusinessEntity.Product.getServingStore());
-        if (StringUtils.isNotBlank(tableName)) {
-            FrontEndQuery frontEndQuery = new FrontEndQuery();
-            frontEndQuery.setMainEntity(BusinessEntity.Product);
-            DataPage dataPage = entityProxy.getData(customerSpace, frontEndQuery);
-            Map<String, String> productMap = new HashMap<>();
-            dataPage.getData()
-                    .forEach(row -> productMap.put( //
-                            (String) row.get(InterfaceName.ProductId.name()), //
-                            (String) row.get(InterfaceName.ProductName.name()) //
-            ));
-            return productMap;
-        } else {
-            return Collections.emptyMap();
-        }
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", "
-            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id)")
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)")
     public TopNTree getTopNTree(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
@@ -279,7 +242,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
-            List<ColumnMetadata> cms = getAttributesInEntity(customerSpace, entity);
+            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+            List<ColumnMetadata> cms = _dataLakeService.getServingMetadataForEntity(tenantId, entity);
             if (CollectionUtils.isNotEmpty(cms)) {
                 cmMap.put(key, cms);
             }
@@ -289,20 +253,11 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
         String timerMsg = "Construct top N tree with " + cubes.size() + " cubes.";
         try (PerformanceTimer timer = new PerformanceTimer(timerMsg)) {
-            TopNTree topNTree = StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
-            if (topNTree.hasCategory(Category.PRODUCT_SPEND)) {
-                Map<String, String> productMap = getProductMap(customerSpace);
-                timerMsg = "Construct top N tree with " + cubes.size() + " cubes and " + productMap.size()
-                        + " products.";
-                timer.setTimerMessage(timerMsg);
-                StatsCubeUtils.processPurchaseHistoryCategory(topNTree, productMap);
-            }
-            return topNTree;
+            return StatsCubeUtils.constructTopNTree(cubes, cmMap, true);
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", "
-            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id)")
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", sync = true)
     public Map<String, StatsCube> getStatsCubes(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
@@ -311,27 +266,19 @@ public class DataLakeServiceImpl implements DataLakeService {
         return null;
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|columnmetadata\", "
-            + "T(com.latticeengines.db.exposed.util.MultiTenantContext).tenant.id, #role)")
-    public List<ColumnMetadata> getAttributesInTableRole(String customerSpace, TableRoleInCollection role) {
-        if (role == null) {
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|metadata\", #customerSpace, #entity)", sync = true)
+    public List<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
+        if (entity == null) {
             return Collections.emptyList();
         }
-        String batchTableName = dataCollectionProxy.getTableName(customerSpace, role);
-        if (StringUtils.isBlank(batchTableName)) {
-            return Collections.emptyList();
-        } else {
-            List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace, batchTableName);
-            if (BusinessEntity.Account.getServingStore().equals(role)) {
+        try(PerformanceTimer timer = new PerformanceTimer()) {
+            List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadata(customerSpace, entity).collectList().block();
+            if (BusinessEntity.Account.equals(entity) && CollectionUtils.isNotEmpty(cms)) {
                 ImportanceOrderingUtils.addImportanceOrdering(cms);
-            } else if (BusinessEntity.PurchaseHistory.getServingStore().equals(role)) {
-                Map<String, String> productMap = getProductMap(customerSpace);
-                cms.forEach(cm -> {
-                    String prodId = TransactionMetrics.getProductIdFromAttr(cm.getAttrName());
-                    String prodName = productMap.getOrDefault(prodId, "Other");
-                    cm.setSubcategory(prodName);
-                });
             }
+            int count = CollectionUtils.isEmpty(cms) ? 0 : cms.size();
+            String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity + " in " + customerSpace;
+            timer.setTimerMessage(msg);
             return cms;
         }
     }

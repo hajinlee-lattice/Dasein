@@ -112,7 +112,7 @@ public class TranslatorCommon {
         CaseBuilder.Cases<Number, Expression<Number>> cases;
         NumberExpression zero = Expressions.asNumber(0);
         cases = caseBuilder.when(stringPath.isNull()).then(zero);
-        NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getMetadata());
+        NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getDecoratedMetadata());
         cases.otherwise(numberPath);
         */
 
