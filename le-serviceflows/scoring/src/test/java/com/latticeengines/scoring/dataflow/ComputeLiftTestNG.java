@@ -45,11 +45,12 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         return parameters;
     }
 
+    @SuppressWarnings("unused")
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         int numRows = 0;
         for (GenericRecord record : records) {
-//            System.out.println(record);
+            // System.out.println(record);
             numRows++;
         }
         Assert.assertEquals(numRows, 2);

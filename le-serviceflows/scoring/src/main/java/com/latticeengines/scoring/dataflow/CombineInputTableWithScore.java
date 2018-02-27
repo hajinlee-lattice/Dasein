@@ -23,7 +23,6 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineIn
 @Component("combineInputTableWithScore")
 public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineInputTableWithScoreParameters> {
 
-    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(CombineInputTableWithScore.class);
 
     @Override
@@ -50,8 +49,7 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
             scoreWithRating = scoreTable.apply(
                     new AddRatingColumnFunction(scoreFieldMap, modelIdField, ScoreResultField.Rating.displayName,
                             bucketMetadataMap, scoreMultiplierMap, scoreAvgMap),
-                    new FieldList(applyToFields),
-                    new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
+                    new FieldList(applyToFields), new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
         } else if (noRatingColumnInScoreTable && notPMMLModel) {
             log.info("Enter single-model mode");
             scoreWithRating = scoreTable.apply(

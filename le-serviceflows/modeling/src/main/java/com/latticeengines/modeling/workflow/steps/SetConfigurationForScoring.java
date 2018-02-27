@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -14,7 +13,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("setConfigurationForScoring")
@@ -31,7 +29,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
         matchStepConfig.setInputTableName(matchResultTable.getName());
         putObjectInContext(MatchStepConfiguration.class.getName(), matchStepConfig);
-        
+
         ProcessMatchResultConfiguration processMatchResultStepConfig = getConfigurationFromJobParameters(
                 ProcessMatchResultConfiguration.class);
 

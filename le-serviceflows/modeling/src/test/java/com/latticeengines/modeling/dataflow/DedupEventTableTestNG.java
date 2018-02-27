@@ -44,8 +44,7 @@ public class DedupEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGB
 
         uploadDataToSharedAvroInput(getData(), fields);
 
-        DedupEventTableParameters parameters = new DedupEventTableParameters();
-        parameters.eventTable = AVRO_INPUT;
+        DedupEventTableParameters parameters = new DedupEventTableParameters(AVRO_INPUT);
         return parameters;
     }
 
