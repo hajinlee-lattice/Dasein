@@ -1,7 +1,6 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +59,7 @@ public class DomainOwnershipForDomCleanupTestNG
         schema.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
         schema.add(Pair.of("EMPLOYEES_TOTAL", String.class));
         schema.add(Pair.of("LE_NUMBER_OF_LOCATIONS", Integer.class));
-        schema.add(Pair.of("LDC_PrimaryIndustry", String.class));
+        schema.add(Pair.of("PrimaryIndustry", String.class));
         Object[][] data = new Object[][] {
                 // domains not present in domainOwnershipTable
                 { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production" },
@@ -312,23 +311,20 @@ public class DomainOwnershipForDomCleanupTestNG
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         int rowCount = 0;
-        List<Integer> attrNameIndex = Arrays.asList(6, 1, 7, 0, 5, 2, 3, 4);
         Map<String, Object[]> amSeedExpectedValues = new HashMap<>();
         for (Object[] data : amSeedCleanedUpValues) {
             amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
+        String[] expectedValueOrder = { "Domain", "DUNS", "GLOBAL_ULTIMATE_DUNS_NUMBER", "LE_PRIMARY_DUNS",
+                "SALES_VOLUME_US_DOLLARS", "EMPLOYEES_TOTAL", "LE_NUMBER_OF_LOCATIONS", "PrimaryIndustry" };
         while (records.hasNext()) {
             GenericRecord record = records.next();
             log.info("record : " + record);
-            String domain = String.valueOf(record.get(attrNameIndex.get(0)));
-            String duns = String.valueOf(record.get(attrNameIndex.get(1)));
+            String domain = String.valueOf(record.get("Domain"));
+            String duns = String.valueOf(record.get("DUNS"));
             Object[] expectedVal = amSeedExpectedValues.get(domain + duns);
-            int columnCounter = 0;
-            int totalColumns = 8;
-            while (columnCounter < totalColumns) {
-                Assert.assertTrue(
-                        isObjEquals(record.get(attrNameIndex.get(columnCounter)), expectedVal[columnCounter]));
-                columnCounter++;
+            for (int i = 0; i < expectedValueOrder.length; i++) {
+                Assert.assertTrue(isObjEquals(record.get(expectedValueOrder[i]), expectedVal[i]));
             }
             rowCount++;
         }

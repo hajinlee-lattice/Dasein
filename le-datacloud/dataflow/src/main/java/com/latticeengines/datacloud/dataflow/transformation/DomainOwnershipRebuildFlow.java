@@ -113,7 +113,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
                 .filter(rootDunsFirmo, new FieldList(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS)) //
                 .retain(new FieldList(ROOT_DUNS, DataCloudConstants.ATTR_SALES_VOL_US,
                         DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS,
-                        DataCloudConstants.ATTR_LDC_INDUSTRY)) //
+                        DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY)) //
                 .renamePipe("RootOfTrees");
         fieldList.remove(DataCloudConstants.ATTR_GU_DUNS);
         fieldList.remove(DataCloudConstants.ATTR_DU_DUNS);
@@ -132,7 +132,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
         fieldList.add(DataCloudConstants.ATTR_SALES_VOL_US);
         fieldList.add(DataCloudConstants.ATTR_EMPLOYEE_TOTAL);
         fieldList.add(DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS);
-        fieldList.add(DataCloudConstants.ATTR_LDC_INDUSTRY);
+        fieldList.add(DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY);
         return fieldList;
     }
 
@@ -143,7 +143,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
                         IS_NON_PROFITABLE),
                 DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE,
                 DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
-                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, DataCloudConstants.ATTR_LDC_INDUSTRY,
+                DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY,
                 config.getMultLargeCompThreshold(), config.getFranchiseThreshold());
 
         List<FieldMetadata> fmsForDomRowSelect = fieldMetadataWithReason(config);

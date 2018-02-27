@@ -25,7 +25,6 @@ public final class DataCloudConstants {
     public static final String ATTR_IS_PRIMARY_LOCATION = "LE_IS_PRIMARY_LOCATION";
     public static final String ATTR_LDC_NAME = "LDC_Name";
     public static final String ATTR_LDC_DOMAIN = "LDC_Domain";
-    public static final String ATTR_LDC_INDUSTRY = "LDC_PrimaryIndustry";
     public static final String ATTR_IS_PRIMARY_ACCOUNT = "IsPrimaryAccount";
     public static final String ATTR_LE_NUMBER_OF_LOCATIONS = "LE_NUMBER_OF_LOCATIONS";
     public static final String ATTR_DU_DUNS = "LE_PRIMARY_DUNS";
@@ -42,6 +41,7 @@ public final class DataCloudConstants {
     public static final String AMS_ATTR_COUNTRY = "Country";
     public static final String AMS_ATTR_STATE = "State";
     public static final String AMS_ATTR_ZIP = "ZipCode";
+    public static final String AMS_ATTR_PRIMARY_INDUSTRY = "PrimaryIndustry";
 
     public static final String PROFILE_STAGE_SEGMENT = "SEGMENT";
     public static final String PROFILE_STAGE_ENRICH = "ENRICH";

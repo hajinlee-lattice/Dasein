@@ -46,7 +46,7 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
         schema.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
         schema.add(Pair.of("EMPLOYEES_TOTAL", String.class));
         schema.add(Pair.of("LE_NUMBER_OF_LOCATIONS", Integer.class));
-        schema.add(Pair.of("LDC_PrimaryIndustry", String.class));
+        schema.add(Pair.of("PrimaryIndustry", String.class));
         Object[][] data = new Object[][] {
                 // domain only case with another entry present
                 { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production" },
@@ -145,7 +145,7 @@ public class AMSeedDedupTestNG extends TransformationServiceImplTestNGBase<Pipel
             amSeedExpectedValues.put(String.valueOf(data[0]) + String.valueOf(data[1]), data);
         }
         String[] expectedValueOrder = { "Domain", "DUNS", "GLOBAL_ULTIMATE_DUNS_NUMBER", "LE_PRIMARY_DUNS",
-                "SALES_VOLUME_US_DOLLARS", "EMPLOYEES_TOTAL", "LE_NUMBER_OF_LOCATIONS", "LDC_PrimaryIndustry" };
+                "SALES_VOLUME_US_DOLLARS", "EMPLOYEES_TOTAL", "LE_NUMBER_OF_LOCATIONS", "PrimaryIndustry" };
         while (records.hasNext()) {
             GenericRecord record = records.next();
             String domain = String.valueOf(record.get("Domain"));
