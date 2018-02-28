@@ -89,8 +89,8 @@ public final class BusinessCalendarUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
         int days = (int) Duration.between(startDate.atStartOfDay(), endDate.atStartOfDay()).toDays();
         int weeks = days / 7;
-        return String.format("The year **%d** will be from **%s** to **%s**, which is **%d** weeks in total.", evaluationYear,
-                startDate.format(formatter), endDate.format(formatter), weeks);
+        return String.format("The Fiscal Year **%d** has **%d** weeks, **%s** to **%s**.", evaluationYear, weeks,
+                startDate.format(formatter), endDate.format(formatter));
     }
 
     private static LocalDate parseDate(int month, int idx, int dayOfWeek, int evaluationYear) {
@@ -147,7 +147,7 @@ public final class BusinessCalendarUtils {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate localDate = LocalDate.parse(String.format("%04d-02-01", evaluationYear), formatter);
         int daysInLastWeek = localDate.isLeapYear() ? 9 : 8;
-        return String.format("Last week of **%4d** will have **%d** days.", evaluationYear, daysInLastWeek);
+        return String.format("The last week of Fiscal Year **%4d** will have **%d** days.", evaluationYear, daysInLastWeek);
     }
 
     private static int getCurrentYear() {
