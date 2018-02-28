@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -34,13 +35,13 @@ public class DataFeedImport implements HasPid, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
     @JsonIgnore
-    @ManyToOne
+    @ManyToOne(cascade = { CascadeType.MERGE })
     @JoinColumn(name = "`FK_FEED_EXEC_ID`", nullable = false)
     private DataFeedExecution execution;
 

@@ -231,7 +231,6 @@ public class DataFeedServiceImplTestNG extends MetadataFunctionalTestNGBase {
         df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
-        assertEquals(exec1.getImports().size(), size);
         assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
         assertEquals(exec1.getPid(), new Long(exec0.getPid() + 1L));
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Started);

@@ -93,8 +93,7 @@ public class DataFeedServiceImpl implements DataFeedService {
             Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
             if (!allowedJobType.contains(jobType)) {
                 DataFeedExecution execution = datafeed.getActiveExecution();
-                if (execution == null || execution.getWorkflowId() == null
-                        || !DataFeedExecution.Status.Started.equals(execution.getStatus())) {
+                if (execution == null || execution.getWorkflowId() == null) {
                     return false;
                 }
                 Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
@@ -118,13 +117,13 @@ public class DataFeedServiceImpl implements DataFeedService {
         execution.setDataFeed(datafeed);
         execution.setStatus(DataFeedExecution.Status.Started);
         execution.setDataFeedExecutionJobType(jobType);
-        log.info(String.format("preparing execution %s", execution));
         datafeedExecutionEntityMgr.create(execution);
+        log.info(String.format("preparing execution %s", execution));
 
         datafeed.setActiveExecutionId(execution.getPid());
         datafeed.setActiveExecution(execution);
         datafeed.setStatus(jobType.getRunningStatus());
-        log.info(String.format("preparing execution: updating data feed to %s", datafeed));
+        log.info(String.format("preparing execution: updating data feed %d", datafeed.getPid()));
         datafeedEntityMgr.update(datafeed);
         return execution;
     }
@@ -267,7 +266,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         datafeedExecutionEntityMgr.update(execution);
 
         datafeed.setStatus(getFailedDataFeedStatus(initialDataFeedStatus));
-        log.info(String.format("updating data feed %s to %s", datafeed.getName(), datafeed));
+        log.info(String.format("updating data feed %s to %d", datafeed.getName(), datafeed.getPid()));
         datafeedEntityMgr.update(datafeed);
         return execution;
     }
@@ -391,12 +390,15 @@ public class DataFeedServiceImpl implements DataFeedService {
         }
         // TODO remove this part until return statement when registering extract
         // moved to startprocessing in p&a
-        datafeed = datafeedEntityMgr.findByName(datafeedName);
-        DataFeedExecution newExecution = datafeed.getActiveExecution();
-        if (DataFeedExecutionJobType.PA == jobType) {
-            newExecution.addImports(execution.getImports());
-            datafeedExecutionEntityMgr.updateImports(newExecution);
-        }
+        // datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
+        // DataFeedExecution newExecution = datafeed.getActiveExecution();
+        // log.info(String.format("new execution pid: %d",
+        // newExecution.getPid()));
+        // if (DataFeedExecutionJobType.PA == jobType) {
+        // execution.getImports().forEach(dfi -> dfi.setPid(null));
+        // newExecution.addImports(execution.getImports());
+        // datafeedExecutionEntityMgr.updateImports(newExecution);
+        // }
         return execution.getWorkflowId();
     }
 }

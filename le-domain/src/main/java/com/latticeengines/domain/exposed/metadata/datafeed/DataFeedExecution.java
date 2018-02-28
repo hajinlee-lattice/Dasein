@@ -37,7 +37,7 @@ public class DataFeedExecution implements HasPid, Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
+    @JsonProperty("pid")
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
@@ -54,7 +54,7 @@ public class DataFeedExecution implements HasPid, Serializable {
     private Status status;
 
     @JsonProperty("imports")
-    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER, mappedBy = "execution")
+    @OneToMany(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY, mappedBy = "execution")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private List<DataFeedImport> imports = new ArrayList<>();
 

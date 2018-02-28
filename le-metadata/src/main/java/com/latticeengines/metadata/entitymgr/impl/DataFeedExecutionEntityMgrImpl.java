@@ -56,10 +56,10 @@ public class DataFeedExecutionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateImports(DataFeedExecution execution) {
-        super.update(execution);
         for (DataFeedImport datafeedImport : execution.getImports()) {
             datafeedImportEntityMgr.createOrUpdate(datafeedImport);
         }
+        super.update(execution);
     }
 
     @Override

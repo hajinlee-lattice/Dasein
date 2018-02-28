@@ -99,7 +99,7 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
         if (executionId == null) {
             return datafeed;
         }
-        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
+        DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(executionId);
         if (execution != null) {
             datafeed.setActiveExecution(execution);
         }
@@ -188,9 +188,11 @@ public class DataFeedEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataFeed,
                 TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
                 TableEntityMgr.inflateTable(datafeedTask.getImportData());
             }
-            DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
-            if (execution != null) {
-                datafeed.setActiveExecution(execution);
+            if (datafeed.getActiveExecutionId() != null) {
+                DataFeedExecution execution = datafeedExecutionEntityMgr.findByPid(datafeed.getActiveExecutionId());
+                if (execution != null) {
+                    datafeed.setActiveExecution(execution);
+                }
             }
         }
         return dataFeeds;
