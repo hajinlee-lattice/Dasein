@@ -28,7 +28,6 @@
                             | filter: vm.enrichmentsFilter()
                             | filter: vm.filterHideTrue
                             | orderBy: vm.categoryOrderBy(vm.category, subcategory)
-                            | sortByKey: 'TopBkt'
                             | limitTo: 5))"
                         ng-class="{
                             'ignore-ngclick': vm.section !== 'segment.analysis',

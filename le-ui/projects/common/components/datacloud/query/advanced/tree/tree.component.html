@@ -52,6 +52,7 @@
 <!-- Attribute item container -->
 <div    class="query-section-item noselect-children category-{{ vm.item.Category.replace(' ','_') | lowercase }}" 
         ng-class="{ 
+            'editing': vm.editing,
             'dragging': vm.root.draggedItem == vm
         }"
         ng-if="vm.tree.bucketRestriction && vm.root.draggedItem != vm"" 

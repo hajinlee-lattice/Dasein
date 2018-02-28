@@ -416,18 +416,126 @@ div.advanced-query-builder {
                 }
             } 
  
-            &.category-contact_attributes { border-left-color: #457eba; }
-            &.category-product { border-left-color: #cd80bc; }
-            &.category-firmographics { border-left-color: #33bdb7; }
-            &.category-intent { border-left-color: #f15a5a; }
-            &.category-technology_profile { border-left-color: #70bf4a; }
-            &.category-website_profile { border-left-color: #26649b; }
-            &.category-growth_trends { border-left-color: #65b7e6; }
-            &.category-engagement { border-left-color: #aac43b; }
-            &.category-online_presence { border-left-color: #8e71b2; }
-            &.category-website_keywords { border-left-color: #fdbc49; }
-            &.category-product_spend { border-left-color: #cd80bc; }
-            &.category-my_attributes { border-left-color: #457eba; }
+            &.category-contact_attributes {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #457eba;
+                }
+            }
+
+            &.category-product {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #cd80bc;
+                }
+            }
+
+            &.category-firmographics {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #33bdb7;
+                }
+            }
+
+            &.category-intent {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #f15a5a;
+                }
+            }
+
+            &.category-technology_profile {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #70bf4a;
+                }
+            }
+
+            &.category-website_profile {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #26649b;
+                }
+            }
+
+            &.category-growth_trends {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #65b7e6;
+                }
+            }
+
+            &.category-engagement {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #aac43b;
+                }
+            }
+
+            &.category-online_presence {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #8e71b2;
+                }
+            }
+
+            &.category-website_keywords {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #fdbc49;
+                }
+            }
+
+            &.category-product_spend {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #cd80bc;
+                }
+            }
+
+            &.category-my_attributes {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #457eba;
+                }
+            }
+
         }
 
         .query-section-item-box {

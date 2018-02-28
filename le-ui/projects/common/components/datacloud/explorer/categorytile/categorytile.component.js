@@ -67,7 +67,7 @@ angular
                     ];
 
                 if (vm.section == 'segment.analysis') {
-                    var order = ['SegmentChecked','!ImportanceOrdering','-ImportanceOrdering'];
+                    var order = ['!TopBkt','SegmentChecked','!ImportanceOrdering','-ImportanceOrdering'];
 
                     if (category && YesCategories.indexOf(category) >= 0) {
                         order.push(function(attribute) {
