@@ -13,8 +13,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -23,13 +25,11 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -351,7 +351,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
             + "              \"attribute\": \"" + LDC_NAME + "\" " //
             + "            } " //
             + "          }, " //
-            + "          \"relation\": \"IN_RANGE\", " //
+            + "          \"relation\": \"WITHIN\", " //
             + "          \"rhs\": { " //
             + "            \"range\": { " //
             + "              \"min\": \"A\", " //
