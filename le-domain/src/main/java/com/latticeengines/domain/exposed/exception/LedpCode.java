@@ -295,6 +295,7 @@ public enum LedpCode {
     LEDP_18176("PlayLaunch for Play {0} cannot be started since it does not have any launchble accounts."), //
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
     LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
+    LEDP_18179("Error finding the AI Model for {0}."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

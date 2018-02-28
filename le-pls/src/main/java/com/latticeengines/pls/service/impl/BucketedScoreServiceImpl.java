@@ -5,30 +5,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 @Component("bucketedScoreService")
 public class BucketedScoreServiceImpl implements BucketedScoreService {
@@ -38,36 +46,44 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private static final String TOTAL_EVENTS = "TotalEvents";
     private static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
 
-    @Autowired
+    @Inject
     private ModelSummaryService modelSummaryService;
 
-    @Autowired
+    @Inject
     private WorkflowJobService workflowJobService;
 
-    @Autowired
+    @Inject
     private Configuration yarnConfiguration;
 
-    @Autowired
+    @Inject
     private BucketMetadataEntityMgr bucketMetadataEntityMgr;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
-        BucketedScoreSummary bucketedScoreSummary = new BucketedScoreSummary();
         ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+        return getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
+    }
 
+    private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
+            throws Exception {
+        BucketedScoreSummary bucketedScoreSummary = new BucketedScoreSummary();
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
 
         if (jobId == null || workflowJobService.find(jobId) == null) {
-            throw new LedpException(LedpCode.LEDP_18125, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         } else {
             Job job = workflowJobService.find(jobId);
             pivotAvroDirPath = job.getOutputs().get(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH);
         }
 
-        log.info(String.format("Looking for pivoted score avro for model: %s at path: %s", modelId, pivotAvroDirPath));
+        log.info(String.format("Looking for pivoted score avro for model: %s at path: %s", modelSummary.getId(),
+                pivotAvroDirPath));
         if (pivotAvroDirPath == null) {
-            throw new LedpException(LedpCode.LEDP_18125, new String[] { modelId });
+            throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         }
         HdfsUtils.HdfsFileFilter hdfsFileFilter = new HdfsUtils.HdfsFileFilter() {
             @Override
@@ -144,17 +160,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
                 .getBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
-        Map<Long, List<BucketMetadata>> creationTimesToBucketMetadatas = new HashMap<>();
-
-        for (BucketMetadata bucketMetadata : bucketMetadatas) {
-            if (!creationTimesToBucketMetadatas.containsKey(bucketMetadata.getCreationTimestamp())) {
-                creationTimesToBucketMetadatas.put(bucketMetadata.getCreationTimestamp(),
-                        new ArrayList<BucketMetadata>());
-            }
-            creationTimesToBucketMetadatas.get(bucketMetadata.getCreationTimestamp()).add(bucketMetadata);
-        }
-
-        return creationTimesToBucketMetadatas;
+        return groupByCreationTime(bucketMetadatas);
     }
 
     @Override
@@ -190,6 +196,95 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
                 .getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
         return bucketMetadatas;
+    }
+
+    @Override
+    public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas,
+            String userId) {
+        log.info(
+                String.format("Creating BucketMetadata for RatingEngine %s, Rating Model %s", ratingEngineId, modelId));
+        ImmutablePair<RatingEngine, ModelSummary> ReAndMs = getModelSummaryAndRatingEngine(ratingEngineId, modelId);
+        Long creationTimestamp = System.currentTimeMillis();
+        modelSummaryService.updateLastUpdateTime(ReAndMs.getRight().getId());
+        for (BucketMetadata bucketMetadata : bucketMetadatas) {
+            bucketMetadata.setLastModifiedByUser(userId);
+            bucketMetadata.setCreationTimestamp(creationTimestamp);
+            bucketMetadata.setModelSummary(ReAndMs.getRight());
+            bucketMetadata.setRatingEngine(ReAndMs.getLeft());
+            bucketMetadataEntityMgr.create(bucketMetadata);
+        }
+
+    }
+
+    @Override
+    public List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("Get udpate-to-date BucketMetadata for RatingEngine %s, Tenant %s", ratingEngineId,
+                tenant.getId()));
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
+        if (ratingEngine == null) {
+            throw new NullPointerException(String.format("Cannot find Rating Engine with Id %s", ratingEngineId));
+        }
+        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasBasedOnRatingEngine(ratingEngine);
+    }
+
+    @Override
+    public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(
+            String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("Get BucketMetadata grouped by Creation Time for RatingEngine %s, Tenant %s",
+                ratingEngineId, tenant.getId()));
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
+        if (ratingEngine == null) {
+            throw new NullPointerException(String.format("Cannot find Rating Engine with Id %s", ratingEngineId));
+        }
+
+        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr
+                .getBucketMetadatasBasedOnRatingEngine(ratingEngine);
+        return groupByCreationTime(bucketMetadatas);
+    }
+
+    private Map<Long, List<BucketMetadata>> groupByCreationTime(List<BucketMetadata> bucketMetadatas) {
+        Map<Long, List<BucketMetadata>> creationTimesToBucketMetadatas = new HashMap<>();
+
+        for (BucketMetadata bucketMetadata : bucketMetadatas) {
+            if (!creationTimesToBucketMetadatas.containsKey(bucketMetadata.getCreationTimestamp())) {
+                creationTimesToBucketMetadatas.put(bucketMetadata.getCreationTimestamp(),
+                        new ArrayList<BucketMetadata>());
+            }
+            creationTimesToBucketMetadatas.get(bucketMetadata.getCreationTimestamp()).add(bucketMetadata);
+        }
+
+        return creationTimesToBucketMetadatas;
+    }
+
+    @Override
+    public BucketedScoreSummary getBuckedScoresSummaryBasedOnRatingEngineAndRatingModel(String ratingEngineId,
+            String modelId) throws Exception {
+        log.info(String.format("Get BuckedScoresSummary given RatingEngineId %s and ModelId %s", ratingEngineId,
+                modelId));
+        ImmutablePair<RatingEngine, ModelSummary> ReAndMs = getModelSummaryAndRatingEngine(ratingEngineId, modelId);
+        ModelSummary modelSummary = ReAndMs.getRight();
+        return getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
+    }
+
+    private ImmutablePair<RatingEngine, ModelSummary> getModelSummaryAndRatingEngine(String ratingEngineId,
+            String modelId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngineId);
+        if (ratingEngine == null) {
+            throw new NullPointerException(String.format("Cannot find Rating Engine with Id %s", ratingEngineId));
+        }
+        RatingModel ratingModel = ratingEngineProxy.getRatingModel(tenant.getId(), ratingEngineId, modelId);
+        ModelSummary modelSummary = null;
+        if (ratingModel != null && ratingModel instanceof AIModel) {
+            AIModel aiModel = (AIModel) ratingModel;
+            modelSummary = aiModel.getModelSummary();
+        } else {
+            throw new LedpException(LedpCode.LEDP_18179, new String[] { modelId });
+        }
+        modelSummary = modelSummaryService.getModelSummaryByModelId(modelSummary.getId());
+        return new ImmutablePair<>(ratingEngine, modelSummary);
     }
 
 }

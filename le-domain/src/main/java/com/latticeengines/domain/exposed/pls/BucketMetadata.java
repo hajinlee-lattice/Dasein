@@ -21,6 +21,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
@@ -44,6 +45,12 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     private ModelSummary modelSummary;
+
+    @ManyToOne
+    @JoinColumn(name = "RATING_ENGINE_ID", nullable = true)
+    @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private RatingEngine ratingEngine;
 
     @JsonProperty("bucket_name")
     @Column(name = "NAME", nullable = false)
@@ -149,6 +156,14 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         this.creationTimestamp = creationTimestamp;
     }
 
+    public RatingEngine getRatingEngine() {
+        return this.ratingEngine;
+    }
+
+    public void setRatingEngine(RatingEngine ratingEngine) {
+        this.ratingEngine = ratingEngine;
+    }
+
     @Override
     public String getLastModifiedByUser() {
         return lastModifiedByUser;
@@ -157,6 +172,11 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     @Override
     public void setLastModifiedByUser(String lastModifiedByUser) {
         this.lastModifiedByUser = lastModifiedByUser;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }

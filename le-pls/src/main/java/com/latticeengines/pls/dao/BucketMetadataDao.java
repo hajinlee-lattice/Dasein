@@ -11,4 +11,6 @@ public interface BucketMetadataDao extends BaseDao<BucketMetadata> {
 
     List<BucketMetadata> findUpToDateBucketMetadatasForModelId(String modelId);
 
+    List<BucketMetadata> findUpToDateBucketMetadatasForRatingEngine(Long ratingEnginePid);
+
 }

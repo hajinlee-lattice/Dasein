@@ -7,6 +7,7 @@ public enum BucketName {
     C("C", 84, 50), //
     D("D", 49, 5), //
     A_PLUS("A+"), //
+    E("E"), //
     F("F");//
 
     private String value;
