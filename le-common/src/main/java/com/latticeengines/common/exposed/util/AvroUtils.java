@@ -810,6 +810,7 @@ public class AvroUtils {
                 }
                 data.add(datum);
             }
+            inputStream.close();
         }
         return data;
     }
@@ -828,6 +829,7 @@ public class AvroUtils {
         try (DataFileStream<GenericRecord> stream = new DataFileStream<>(inputStream, //
                 new GenericDatumReader<GenericRecord>())) {
             schema = stream.getSchema();
+            inputStream.close();
         }
         return schema;
     }

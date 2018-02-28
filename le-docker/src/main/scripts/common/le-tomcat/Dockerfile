@@ -13,7 +13,7 @@ ENV TOMCAT_TAR_URL_PREFIX=http://10.41.1.10/tars
 RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apr-${APR_VERSION}-1.x86_64.rpm -O /root/chefcache/apr-${APR_VERSION}-1.x86_64.rpm \
     && wget -q ${TOMCAT_TAR_URL_PREFIX}/apr-util-${APR_UTIL_VERSION}-1.x86_64.rpm -O /root/chefcache/apr-util-${APR_UTIL_VERSION}-1.x86_64.rpm \
     && wget -q ${TOMCAT_TAR_URL_PREFIX}/tcnative-${TCNATIVE_VERSION}-1.x86_64.rpm -O /root/chefcache/tcnative-${TCNATIVE_VERSION}-1.x86_64.rpm \
-    && yum -y localinstall /root/chefcache/apr-${APR_VERSION}-1.x86_64.rpm   /root/chefcache/apr-util-${APR_UTIL_VERSION}-1.x86_64.rpm /root/chefcache/tcnative-${TCNATIVE_VERSION}-1.x86_64.rpm
+    && yum -y localinstall /root/chefcache/apr-${APR_VERSION}-1.x86_64.rpm /root/chefcache/apr-util-${APR_UTIL_VERSION}-1.x86_64.rpm /root/chefcache/tcnative-${TCNATIVE_VERSION}-1.x86_64.rpm
 
 
 

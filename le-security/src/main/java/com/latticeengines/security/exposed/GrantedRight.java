@@ -243,6 +243,12 @@ public enum GrantedRight implements GrantedAuthority {
             return "View_PLS_CDL_Data";
         }
     }, //
+    EDIT_PLS_CDL_DATA {
+        @Override
+        public String getAuthority() {
+            return "Edit_PLS_CDL_Data";
+        }
+    }, //
     EDIT_PLS_SSO_CONFIG {
         @Override
         public String getAuthority() {

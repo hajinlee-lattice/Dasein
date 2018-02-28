@@ -96,7 +96,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         return retrievedSegment;
     }
 
-    private void setupTestEnvironment() {
+    protected void setupTestEnvironment() {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
         mainTestTenant = testBed.getMainTestTenant();

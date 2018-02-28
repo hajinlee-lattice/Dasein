@@ -691,7 +691,8 @@ public enum LedpCode {
     LEDP_40011("Cross sell Repeat Purchase model {0} is missing PURCHASED_BEFORE_PERIOD configuration."), //
     LEDP_40012("Cannot model AI Model {0} since no target products were defined. Customer Space {1}"), //
     LEDP_40013("No Rating Engine provided. Customer Space {0}"), //
-    LEDP_40014("RatingModel for the Rating Engine {0} cannot be null. Customer Space {1}") //
+    LEDP_40014("RatingModel for the Rating Engine {0} cannot be null. Customer Space {1}"), //
+    LEDP_40015("Cannot parse {0} to a valid starting date") //
     ;
 
     private String message;

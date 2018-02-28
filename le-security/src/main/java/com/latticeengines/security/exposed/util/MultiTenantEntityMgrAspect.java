@@ -53,7 +53,7 @@ public class MultiTenantEntityMgrAspect {
                 .setParameter("tenantFilterId", tenant.getPid());
         
         if (entityManager != null) {
-            Filter filter = (Filter)entityManager.unwrap(Session.class).enableFilter("tenantFilter");
+            Filter filter = (Filter) entityManager.unwrap(Session.class).enableFilter("tenantFilter");
             filter.setParameter("tenantFilterId", tenant.getPid());
         }
         
