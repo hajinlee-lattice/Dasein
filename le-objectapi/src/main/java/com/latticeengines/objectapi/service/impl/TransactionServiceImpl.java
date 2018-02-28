@@ -77,7 +77,7 @@ public class TransactionServiceImpl implements TransactionService {
     private TimeFilterTranslator getTimeFilterTranslatorBehindCache(String key) {
         String[] tokens = key.split("\\|");
         CustomerSpace customerSpace = CustomerSpace.parse(tokens[0]);
-        DataCollection.Version version = DEFAULT.endsWith(key) ? null : DataCollection.Version.valueOf(tokens[1]);
+        DataCollection.Version version = DEFAULT.equalsIgnoreCase(tokens[1]) ? null : DataCollection.Version.valueOf(tokens[1]);
 
         Mono<Object> strategiesMono = Mono.fromCallable(() -> getPeriodStrategies(customerSpace));
         Mono<Object> maxDateMono = Mono.fromCallable(() -> getMaxTransactionDate(customerSpace, version));
