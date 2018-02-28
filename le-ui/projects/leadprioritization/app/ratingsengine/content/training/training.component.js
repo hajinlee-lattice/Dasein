@@ -25,10 +25,10 @@ angular.module('lp.ratingsengine.wizard.training', [
     });
 
     vm.init = function () {
-        console.log(vm.ratingEngine.activeModel.AI);
-
+        
         vm.engineId = vm.ratingEngine.id;
         vm.modelId = vm.ratingEngine.activeModel.AI.id;
+        vm.modelingStrategy = vm.ratingEngine.activeModel.AI.modelingStrategy;
 
         vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);

@@ -122,8 +122,8 @@
                             </dd>  
                         </dl>
                         <dl class="stats">
-                            <dt>First Purchases</dt>
-                            <dt ng-if="vm.type.engineType === 'CROSS_SELL_RETURNING_PURCHASE'">Returning Purchases</dt>
+                            <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE'">First Purchases</dt>
+                            <dt ng-if="vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE'">Returning Purchases</dt>
                             <dd>
                                 <span ng-if="!vm.purchasesCountReturned"><i class="fa fa-spinner fa-pulse fw"></i></span>
                                 <span ng-if="vm.purchasesCountReturned">{{ vm.purchasesCount | number }}</span>

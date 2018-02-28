@@ -1,7 +1,7 @@
 <div class="ratingengine-creation playbook-content container" ng-class="{'dashboard-content': vm.stateParams.section && vm.stateParams.section.indexOf('dashboard.') !== -1}">
     <div class="inner-container">
         <div class="header">
-            <h2>The rating engine is being created.</h2>
+            <h2>The model is being created.</h2>
             <p>Your jobs will not be affected when you leave this page.</p>
         </div>
         <div class="content-body">
@@ -9,7 +9,7 @@
             <h3>Summary</h3>
             <div class="summary-data">
                 <dl>
-                    <dt>Rating Engine Type:</dt>
+                    <dt>Model Type:</dt>
                     <dd>{{ vm.ratingEngineType }}</dd>
                     <dt>Segment:</dt>
                     <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
@@ -25,7 +25,7 @@
                     <dd>{{ vm.prioritizeBy }}</dd>
                 </dl>
                 <dl ng-if="vm.hasSettingsInfo">
-                    <dt>Rating Engine Settings:</dt>
+                    <dt>Model Settings:</dt>
                     <dd>
                         <ul>
                             <li 

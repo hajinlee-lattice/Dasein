@@ -11,6 +11,8 @@ angular.module('lp.ratingsengine')
         bucketCountMap: {}
     };
 
+    this.ratingsSet = false;
+
     this.init = function() {
         this.settings = {};
 
@@ -147,10 +149,10 @@ angular.module('lp.ratingsengine')
                     label: 'Creation', 
                     state: 'segment.products.prioritization.training.creation', 
                     hideBack: true,
-                    secondaryLinkLabel: 'Go to Rating Engine List',
+                    secondaryLinkLabel: 'Go to Model List',
                     secondaryLink: 'home.ratingsengine',
                     lastRoute: true,
-                    nextLabel: 'Create another Rating Engine',
+                    nextLabel: 'Create another Model',
                     nextFn: function(nextState) {
                         $state.go('home.ratingsengine.ratingsenginetype');
                     } 
@@ -215,7 +217,7 @@ angular.module('lp.ratingsengine')
         var currentRating = RatingsEngineStore.getCurrentRating();
         var currentSegment = RatingsEngineStore.getSegment();
 
-        console.log("save engine", currentRating);
+        // console.log("save engine", currentRating);
         if (currentRating.segment != null && currentSegment != null && currentRating.segment.name != currentSegment.name) {
             RatingsEngineStore.setRating({});
         }
@@ -325,6 +327,7 @@ angular.module('lp.ratingsengine')
     this.setRatings = function(ratings, ignoreGetCoverage) {
         
         this.current.ratings = ratings;
+        RatingsEngineStore.ratingsSet = true;
 
         if (!ignoreGetCoverage) {
             var ids = [];
@@ -350,10 +353,14 @@ angular.module('lp.ratingsengine')
                     bucketCoverageCounts: coverage
                 };
             });
+
         }
     }
     
     this.getRatings = function(active, cacheOnly) {
+
+        this.ratingsSet = false;
+
         var deferred = $q.defer();
 
         if (this.current.ratings.length > 0) {
@@ -560,7 +567,6 @@ angular.module('lp.ratingsengine')
 
 
     this.setModelingStrategy = function(modelingStrategy) {
-        console.log(modelingStrategy);
         this.modelingStrategy = modelingStrategy;
     }
     this.getModelingStrategy = function() {
@@ -574,10 +580,6 @@ angular.module('lp.ratingsengine')
     }
     
     this.setModelingConfigFilters = function(modelingConfigFilters) {
-
-
-        console.log(modelingConfigFilters);
-
         var currentConfig = this.modelingConfigFilters;
         if(currentConfig != null){
             this.modelingConfigFilters = angular.extend(currentConfig, modelingConfigFilters);
@@ -604,9 +606,6 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
-
-        console.log(RatingsEngineStore.getModelingStrategy());
-
         var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
                 type: "AI_BASED",
@@ -627,9 +626,6 @@ angular.module('lp.ratingsengine')
 
         var ratingId = $stateParams.rating_id;
         RatingsEngineStore.getRating(ratingId).then(function(rating){
-
-            // console.log($stateParams.engineType);
-            // console.log(rating.activeModel.AI.modelingStrategy);
 
             var model = rating.activeModel.AI,
                 targetProducts = (model.targetProducts === []) ? [] : RatingsEngineStore.getProductsSelectedIds(),
@@ -656,7 +652,7 @@ angular.module('lp.ratingsengine')
 
             RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
 
-                console.log("MODEL", model.AI);
+                // console.log("MODEL", model.AI);
 
                 var route = nextState,
                     lastRoute = route.split(/[\.]+/);

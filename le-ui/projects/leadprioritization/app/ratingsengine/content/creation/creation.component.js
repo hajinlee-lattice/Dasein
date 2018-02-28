@@ -23,8 +23,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             vm.hasSettingsInfo = false;
         }
 
-        console.log(model.modelingStrategy);
-
     	vm.targetProducts = model.targetProducts;
         vm.modelingStrategy = model.modelingStrategy;
         vm.predictionType = model.predictionType;
@@ -35,7 +33,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
         	vm.ratingEngineType = 'First Purchase Cross-Sell'
         } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
-        	vm.ratingEngineType = 'Returning Purchase Cross-Sell'
+        	vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
         }
 
     	if (vm.predictionType === 'PROPENSITY') {

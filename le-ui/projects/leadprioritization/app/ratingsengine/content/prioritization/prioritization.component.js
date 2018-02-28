@@ -8,7 +8,6 @@ angular.module('lp.ratingsengine.wizard.prioritization', [])
         vm.init = function () {
             if($stateParams.rating_id) {
                 RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
-                    console.log(rating);
                     vm.predictionType = rating.activeModel.AI.predictionType;
                     vm.validateNextStep();
                 });

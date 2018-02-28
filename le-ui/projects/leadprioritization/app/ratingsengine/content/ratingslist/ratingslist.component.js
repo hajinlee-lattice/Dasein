@@ -12,6 +12,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     angular.extend(vm, {
         current: RatingsEngineStore.current,
         inEditing: {},
+        isRatingsSet: RatingsEngineStore.ratingsSet,
         query: '',
         ceil: window.Math.ceil,
         createRatingState: 'home.ratingsengine.ratingsenginetype',
@@ -46,8 +47,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-        // console.log(vm.current);
-
         RatingsEngineStore.clear();
 
         vm.totalLength = vm.count();
@@ -64,6 +63,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         // });
         
         $scope.$watch('vm.current.ratings', function() {
+            vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             vm.header.filter.unfiltered = vm.current.ratings;
         });
     }

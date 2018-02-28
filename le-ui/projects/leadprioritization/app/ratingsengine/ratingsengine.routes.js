@@ -21,7 +21,7 @@ angular
         $stateProvider
             .state('home.ratingsengine', {
                 url: '/ratings_engine',
-                redirectTo: 'home.ratingsengine.list.ratings'
+                redirectTo: 'home.ratingsengine.list'
             })
             .state('home.ratingsengine.list', {
                 url: '/list',
@@ -49,7 +49,7 @@ angular
                 url: '/ratings',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines'
+                    pageTitle: 'Models'
                 },
                 views: {
                     "main@": {
@@ -63,7 +63,7 @@ angular
                 url: '/creationhistory',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines'
+                    pageTitle: 'Models'
                 },
                 views: {
                     "main@": {
@@ -77,7 +77,7 @@ angular
                 url: '/ratingsenginetype',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines'
+                    pageTitle: 'Models'
                 },
                 views: {
                     "summary@": {
@@ -94,7 +94,7 @@ angular
                 url: '/dashboard/:rating_id',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engine'
+                    pageTitle: 'Model'
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -197,7 +197,7 @@ angular
                         var rating_id = $stateParams.rating_id || '',
                             wizard_steps = $stateParams.wizard_steps || 'rulesprospects';
 
-                        console.log(wizard_steps);
+                        // console.log(wizard_steps);
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     }
@@ -229,7 +229,7 @@ angular
                     'wizard_header@home.ratingsengine.rulesprospects': {
                         resolve: {
                             WizardHeaderTitle: function () {
-                                return 'Create Rating Engine';
+                                return 'Create Model';
                             },
                             WizardCustomHeaderSteps: function() {
                                 return ['segment.attributes', 'segment.attributes.add', 'segment.attributes.rules'];
@@ -265,7 +265,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment'
                 },
                 resolve: {
@@ -298,7 +298,7 @@ angular
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
@@ -374,7 +374,7 @@ angular
                                 model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                             }
 
-                            console.log(model);
+                            // console.log(model);
 
                             RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
 
@@ -396,7 +396,7 @@ angular
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
@@ -412,7 +412,7 @@ angular
                 url: '/rules',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines'
+                    pageTitle: 'Models'
                 },
                 resolve: {
                     Cube: function ($q, DataCloudStore) {
@@ -427,7 +427,7 @@ angular
                     RatingEngineModel: function (DataCloudStore, RatingsEngineModels) {
                         var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
 
-                        console.log(RatingsEngineModels);
+                        // console.log(RatingsEngineModels);
 
                         if (selectedAttributes) {
                             RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
@@ -471,7 +471,7 @@ angular
                 url: '/summary',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -530,9 +530,9 @@ angular
                                     title = '';
 
                                 if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
-                                    title = 'Create Rating Engine: Customers that will purchase a product for the first time';
+                                    title = 'Create Model: Customers that will purchase a product for the first time';
                                 } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
-                                    title = 'Create Rating Engine: Customers that will purchase again next quarter';
+                                    title = 'Create Model: Customers that will purchase again next quarter';
                                 }
 
                                 return title;
@@ -572,7 +572,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_segment'
                 },
                 resolve: {
@@ -676,7 +676,7 @@ angular
                 url: '/creation',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Rating Engines',
+                    pageTitle: 'Models',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {

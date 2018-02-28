@@ -12,7 +12,7 @@
                 <a
                     class="button blue-button"
                     ui-sref="{{vm.createRatingState}}">
-                    Create Rating Engine
+                    Create Model
                 </a>
             </div>
         </div>
@@ -22,6 +22,36 @@
 
         <div class="twelve columns">
             <ul class="tiles">
+                <li ng-if="vm.isRatingsSet == false" class="loading-tile">
+                    <div class="tile-header">
+                        <h2><span></span></h2>
+                        <div class="edit">
+                            <button type="button">
+                                <span class="fa fa-ellipsis-v"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="tile-metadata">
+                        <ul>
+                            <li>Created By: <span></span></li>
+                            <li>Created On: <span></span></li>
+                            <li>Segment: <span></span></li>
+                            <li>Last Data Refresh: <span></span></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="tile-body">
+                        <div>
+                            <i class="fa fa-spinner fa-pulse fw"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="tile-footer">
+                        <span class="pull-right">Loading ...</span>
+                    </div>
+
+                </li>
+
                 <li
                     ng-repeat="
                         rating in vm.current.ratings |
@@ -73,8 +103,8 @@
                         ng-if="!vm.current.tileStates[rating.id].editRating">
                         
                         <ul>
-                            <li>Created by <span class="blue-text">{{rating.createdBy}}</span></li>
-                            <li>Created on <span class="blue-text">{{rating.created | date}}</span></li>
+                            <li>Created By: <span class="blue-text">{{rating.createdBy}}</span></li>
+                            <li>Created On: <span class="blue-text">{{rating.created | date}}</span></li>
                             <li class="text-ellipsis">
                                 Segment: 
                                 <span ng-if="rating.segmentDisplayName != null" class="blue-text" title="{{rating.segmentDisplayName}}">{{rating.segmentDisplayName}}</span>
@@ -197,7 +227,7 @@
                         class="button new-tile-button"
                         ui-sref="{{vm.createRatingState}}">
                         <span>&#43;</span>
-                        Create Rating Engine
+                        Create Model
                     </a>
                 </li>
 

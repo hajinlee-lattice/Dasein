@@ -25,6 +25,30 @@
         &:active {
             border-color: #72b8e8;
         }
+        &.loading-tile {
+            background-color: rgba(255, 255, 255, 0.3);
+            .tile-header h2, .tile-metadata, .tile-body {
+                span {
+                    display: inline-block;
+                    background: #ececec;
+                    height: 10px;
+                    width: 35%;
+                }
+            }
+            .tile-body {
+                div {
+                    text-align: center;
+                    margin-top: 20px;
+                }
+                i {
+                    font-size: 26px;
+                    color: #ddd;
+                }
+            }
+            .tile-footer {
+                color: #8a8a8a;
+            }
+        }
         &.no-style {
             background: none;
             border: none;
@@ -201,7 +225,6 @@
         font-size: 11px;
     }
 }
-
 
 
 @media (min-width: 640px) and (max-width: 799px) {
