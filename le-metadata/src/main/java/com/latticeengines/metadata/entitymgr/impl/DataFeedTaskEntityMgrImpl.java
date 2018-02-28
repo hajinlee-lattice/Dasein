@@ -173,9 +173,11 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public DataFeedTask findByKey(DataFeedTask task) {
-        DataFeedTask datafeedTask = datafeedTaskRepository.findById(task.getPid()).get();
-        TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
-        TableEntityMgr.inflateTable(datafeedTask.getImportData());
+        DataFeedTask datafeedTask = datafeedTaskRepository.findById(task.getPid()).orElse(null);
+        if (datafeedTask != null) {
+            TableEntityMgr.inflateTable(datafeedTask.getImportTemplate());
+            TableEntityMgr.inflateTable(datafeedTask.getImportData());
+        }
         return datafeedTask;
     }
 
@@ -231,7 +233,7 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
     public void deleteByTaskId(Long taskId) {
         DataFeedTask datafeedTask = datafeedTaskRepository.findById(taskId).orElse(null);
         if (datafeedTask != null) {
-            datafeedTaskRepository.delete(datafeedTask);
+            delete(datafeedTask);
         }
     }
 
