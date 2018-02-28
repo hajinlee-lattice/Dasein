@@ -1,5 +1,5 @@
 angular
-.module('lp.jobs', ['lp.jobs.model', 'lp.jobs.import'])
+.module('lp.jobs', ['lp.jobs.model', 'lp.jobs.import', 'lp.jobs.export'])
 .config(function($stateProvider, $routeProvider, $httpProvider) {
     $stateProvider
         .state('home.jobs', {
@@ -105,6 +105,21 @@ angular
                     controller: 'DataProcessingComponent',
                     controllerAs: 'vm',
                     templateUrl: 'app/jobs/processing/dataprocessing.component.html'
+                }
+            }
+        })
+        .state('home.jobs.export', {
+            url: '/status/export',
+            params: {
+                pageIcon: 'ico-cog',
+                pageTitle: 'Jobs',
+                jobCreationSuccess: null
+            },
+            views: {
+                "main@": {
+                    controller: 'ExportJobsController',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/jobs/export/export.component.html'
                 }
             }
         })

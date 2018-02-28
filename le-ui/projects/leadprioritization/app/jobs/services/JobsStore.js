@@ -22,10 +22,13 @@ angular
 .service('JobsStore', function($q, $filter, JobsService) {
     var JobsStore = this;
     this.importJobsMap = {};
+    this.exportJobsMap = {};
     this.subjobsRunnigMap = {};
+    this.jobTypes = ['import', 'export'],
     this.data = {
         jobs: [],
         importJobs:[],
+        exportJobs: [],
         subjobsRunning:[],
         loadingJobs: false,
         models: {},
@@ -41,6 +44,11 @@ angular
         }
     }
 
+    function isExportJob(job) {
+        return (job.jobType === 'segmentExportWorkflow');
+    }
+
+
     function isImportSubJob(job){
         switch (job.jobType) {
             case 'cdlDataFeedImportWorkflow': 
@@ -54,12 +62,23 @@ angular
         }
     }
 
+    function isType(job, type) {
+        switch (type) {
+            case 'import':
+                return isImportJob(job);
+            case 'export':
+                return isExportJob(job);
+        }
+    }
+
     this.getJob = function(jobId) {
         var deferred = $q.defer();
 
         JobsService.getJobStatus(jobId).then(function(response) {
-            if(isImportJob(response.resultObj)){
+            if (isImportJob(response.resultObj)){
                 JobsStore.addImportJob(response.resultObj);
+            } else if (isExportJob(response.resultObj)) {
+                JobsStore.addExportJob(response.resultObj);
             }
             deferred.resolve(response.resultObj);
         });
@@ -114,7 +133,11 @@ angular
                     }
                 } else {
                     JobsStore.data.jobs.length = 0;
-                    var idNullImportJobs = false;
+
+                    var nullIdsMap = {};
+                    JobsStore.jobTypes.forEach(function(type) {
+                        nullIdsMap[type] = false;
+                    })
 
                     for (var i=0; i<res.length; i++) {
                         var job = res[i];
@@ -123,11 +146,13 @@ angular
                             JobsStore.addJobMap(job.id, job);
                             JobsStore.addJob(job, modelId);
                             if(isImportJob(job) && job.id == null){
-                                idNullImportJobs = true;
+                                nullIdsMap['import'] = true;
+                            } else if (isExportJob(job) && job.id == null) {
+                                nullIdsMap['export'] = true;
                             }
                         }
                     }
-                    JobsStore.synchImportJobs(idNullImportJobs, res);
+                    JobsStore.synchJobs(nullIdsMap, res);
                 }
                 deferred.resolve(JobsStore.data.jobs);
             });
@@ -141,15 +166,47 @@ angular
         if (modelId) {
             JobsStore.data.models[modelId].push(job);
         } else {
-            if(isImportJob(job)){
-                JobsStore.addImportJob(job);
-            }else if (isImportSubJob(job)){
-                JobsStore.manageSubjobsRunning(job);
-            }else{
-                JobsStore.data.jobs.push(job);
+            switch (job.jobType) {
+                case 'processAnalyzeWorkflow':
+                    JobsStore.addImportJob(job);
+                    break;
+                case 'segmentExportWorkflow':
+                    JobsStore.addExportJob(job);
+                    break;
+                case 'cdlDataFeedImportWorkflow': 
+                case 'cdlOperationWorkflow':
+                case 'metadataChange': {
+                    JobsStore.manageSubjobsRunning(job);
+                    break;
+                };
+                default:
+                    JobsStore.data.jobs.push(job);
+                    break;
             }
         }
     };
+
+    this.getMap = function(type) {
+        switch (type) {
+            case 'import':
+                return JobsStore.importJobsMap;
+            case 'export':
+                return JobsStore.exportJobsMap;
+            default:
+                return {};
+        }
+    }
+
+    this.getList = function(type) {
+        switch (type){
+            case 'import':
+                return JobsStore.data.importJobs;
+            case 'export':
+                return JobsStore.data.exportJobs;
+            default:
+                return [];
+        }
+    }
 
     this.addJobMap = function(jobId, job) {
         this.data.jobsMap[jobId] = job;
@@ -184,6 +241,31 @@ angular
         }
     }
 
+    this.addExportJob = function(job) {
+        job.displayName = "Segment Export";
+        var jobId = job.id;
+        var inMap = JobsStore.exportJobsMap[jobId];
+        if (inMap === undefined) {
+            JobsStore.data.exportJobs.push(job);
+            JobsStore.exportJobsMap[jobId] = JobsStore.data.exportJobs.length - 1;
+        } else {
+            JobsStore.data.exportJobs[inMap].jobStatus = job.jobStatus;
+        }
+    }
+
+
+    this.getDisplayName = function(type) {
+        switch (type) {
+            case 'import':
+                return 'Data Processing & Analysis';
+            case 'export':
+                return 'Segment Export';
+            default:
+                console.log('job type not defined');
+                return '';
+        }
+    }
+
     this.manageSubjobsRunning = function(job){
         var applicationidJob = job.applicationId;
         var inMap = JobsStore.subjobsRunnigMap[applicationidJob];
@@ -207,18 +289,35 @@ angular
         }
     }
 
-    this.synchImportJobs = function(inNullId, retApi){
-        if((inNullId == true &&  JobsStore.importJobsMap[null] == undefined) || (inNullId == false && JobsStore.importJobsMap[null]) != undefined){
-            JobsStore.data.importJobs.splice(0, JobsStore.data.importJobs.length);
-            JobsStore.importJobsMap = {};
-            for(var i = 0; i < retApi.length; i++){
-                if(isImportJob(retApi[i])){
-                    JobsStore.data.importJobs.push(retApi[i]);
-                    JobsStore.importJobsMap[retApi[i].id] = JobsStore.data.importJobs.length - 1;
+    this.synchJobs = function(nullIdsMap, retApi) {
+        this.jobTypes.forEach(function(type) {
+            var jobsMap = JobsStore.getMap(type);
+            var jobsList = JobsStore.getList(type);
+            if ((nullIdsMap[type] == true && jobsMap[null] == undefined) || (nullIdsMap[type] == false && jobsMap[null]) != undefined) {
+                jobsList.splice(0, jobsList.length);
+                jobsMap = {};
+                for (var i = 0; i < retApi.length; i++) {
+                    if (isType(retApi[i], type)) {
+                        jobsList.push(retApi[i]);
+                        jobsMap[retApi[i].id] = jobsList.length - 1;
+                    }
                 }
+                JobsStore.setJobsByType(jobsMap, jobsList, type);
             }
+        });
+    }
+
+    this.setJobsByType = function(map, list, type) {
+        if (type == 'import') {
+            JobsStore.importJobsMap = map;
+            JobsStore.data.importJobs = list;
+        } else if (type == 'export') {
+            JobsStore.exportJobsMap = map;
+            JobsStore.data.exportJobs = list;
         }
     }
+
+
     this.clearImportJobs = function(){
         JobsStore.data.importJobs = [];
         JobsStore.importJobsMap = {};   
