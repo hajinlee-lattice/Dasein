@@ -81,9 +81,18 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
             if (pivoted == null) {
                 pivoted = aiPivoted;
             } else {
-                pivoted = pivoted.join(idCol, aiPivoted, idCol, JoinType.OUTER);
+                String aiIdCol = "AI_" + idCol;
+                aiPivoted = aiPivoted.apply(idCol, new FieldList(idCol), new FieldMetadata(aiIdCol, String.class));
+                pivoted = pivoted.join(idCol, aiPivoted, aiIdCol, JoinType.OUTER);
+                List<String> fields = new ArrayList<>(pivoted.getFieldNames());
+                fields.addAll(aiPivoted.getFieldNames());
+                String mergedIdCol = "Merged_" + idCol;
+                pivoted = pivoted.apply(String.format("%s == null ? %s : %s", idCol, aiIdCol, idCol),
+                        new FieldList(idCol, aiIdCol), new FieldMetadata(mergedIdCol, String.class));
+                pivoted = pivoted.discard(aiIdCol, idCol);
+                pivoted = pivoted.rename(new FieldList(mergedIdCol), new FieldList(idCol));
                 pivoted = pivoted.discard(findFieldsToDiscard(pivoted));
-                List<String> fields = pivoted.getFieldNames();
+                fields = pivoted.getFieldNames();
                 Collections.sort(fields);
                 pivoted = pivoted.retain(new FieldList(fields));
             }
@@ -100,15 +109,16 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
     private Node pivotAIBased(Node rawRatings) {
         rawRatings = renameIds(rawRatings);
-        rawRatings = rawRatings.discard(InterfaceName.CDLUpdatedTime.name(), "Model_GUID", InterfaceName.__Composite_Key__.name());
+        rawRatings = rawRatings.discard(InterfaceName.CDLUpdatedTime.name(), "Model_GUID",
+                InterfaceName.__Composite_Key__.name());
         Node rating = pivotField(rawRatings, aiEngineIds, InterfaceName.Rating.name(), String.class, null)
                 .renamePipe("ai_rating");
         List<Node> rhs = new ArrayList<>();
-        for (RatingEngine.ScoreType scoreType: RatingEngine.COMMON_SCORES) {
-            rhs.add(pivotScoreField(rawRatings,aiEngineIds, scoreType));
+        for (RatingEngine.ScoreType scoreType : RatingEngine.COMMON_SCORES) {
+            rhs.add(pivotScoreField(rawRatings, aiEngineIds, scoreType));
         }
         if (CollectionUtils.isNotEmpty(evEngineIds)) {
-            for (RatingEngine.ScoreType scoreType: RatingEngine.EV_SCORES) {
+            for (RatingEngine.ScoreType scoreType : RatingEngine.EV_SCORES) {
                 rhs.add(pivotScoreField(rawRatings, evEngineIds, scoreType));
             }
         }
