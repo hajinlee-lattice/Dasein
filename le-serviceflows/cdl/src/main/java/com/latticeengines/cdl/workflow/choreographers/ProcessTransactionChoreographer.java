@@ -84,6 +84,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
         checkActiveRawStores(step);
         checkHasProducts(step);
+        checkHasAccounts(step);
         hasActiveServingStore = hasActiveServingStore && hasRawStore && hasProducts;
     }
 
