@@ -46,6 +46,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         readActiveRatingModels();
         removeObjectFromContext(TABLE_GOING_TO_REDSHIFT);
         removeObjectFromContext(APPEND_TO_REDSHIFT_TABLE);
+        removeObjectFromContext(STATS_TABLE_NAMES);
     }
 
     private void readActiveRatingModels() {
