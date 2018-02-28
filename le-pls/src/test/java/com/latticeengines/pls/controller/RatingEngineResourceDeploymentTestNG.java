@@ -265,7 +265,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 RatingEngine.class);
         Assert.assertNotNull(createdRe);
         re.setId(createdRe.getId());
-        Assert.assertNull(createdRe.getActiveModel());
+        Assert.assertNotNull(createdRe.getActiveModel());
         RatingEngine retrievedRe = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + createdRe.getId(), RatingEngine.class);
 
