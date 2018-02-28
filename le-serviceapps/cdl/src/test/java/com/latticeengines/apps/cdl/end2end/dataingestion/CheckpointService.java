@@ -54,6 +54,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -403,8 +404,9 @@ public class CheckpointService {
 
     private Long createExecution(long feedPid, long workflowPid) {
         String sql = "INSERT INTO `DATAFEED_EXECUTION` ";
-        sql += "(`FK_FEED_ID`, `WORKFLOW_ID`, `STATUS`) VALUES ";
-        sql += String.format("(%d, %d, '%s')", feedPid, workflowPid, DataFeedExecution.Status.Completed.name());
+        sql += "(`FK_FEED_ID`, `WORKFLOW_ID`, `STATUS`, `JOB_TYPE`) VALUES ";
+        sql += String.format("(%d, %d, '%s, %s')", feedPid, workflowPid, DataFeedExecution.Status.Completed.name(),
+                DataFeedExecutionJobType.PA.name());
         jdbcTemplate.execute(sql);
 
         sql = "SELECT `PID` FROM `DATAFEED_EXECUTION` WHERE `FK_FEED_ID` = " + feedPid;
