@@ -47,13 +47,13 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     }
 
     public DataFeedExecution startExecution(String customerSpace, DataFeedExecutionJobType jobType, long jobId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/startexecution",
-                shortenCustomerSpace(customerSpace), jobType, jobId);
-        return post("startExecution", url, null, DataFeedExecution.class);
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/startexecution",
+                shortenCustomerSpace(customerSpace), jobType);
+        return post("startExecution", url, jobId, DataFeedExecution.class);
     }
 
     public Long restartExecution(String customerSpace, DataFeedExecutionJobType jobType) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/restartexecution",
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/restartexecution",
                 shortenCustomerSpace(customerSpace), jobType);
         return post("restartExecution", url, null, Long.class);
     }

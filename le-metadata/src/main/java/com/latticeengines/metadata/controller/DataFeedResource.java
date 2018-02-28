@@ -2,6 +2,7 @@ package com.latticeengines.metadata.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -24,17 +25,17 @@ public class DataFeedResource {
     @Autowired
     private DataFeedService datafeedService;
 
-    @RequestMapping(value = "/{datafeedName}/startexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{datafeedName}/jobtype/{jobType}startexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
             @PathVariable String datafeedName, //
             @PathVariable DataFeedExecutionJobType jobType, //
-            @PathVariable long jobId) {
+            @RequestBody long jobId) {
         return datafeedService.startExecution(customerSpace, datafeedName, jobType, jobId);
     }
 
-    @RequestMapping(value = "/{datafeedName}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "/{datafeedName}/jobtype/{jobType}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
     public Long restartExecution(@PathVariable String customerSpace, //
