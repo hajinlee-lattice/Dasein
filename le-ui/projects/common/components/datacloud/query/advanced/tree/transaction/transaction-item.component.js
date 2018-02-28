@@ -1,5 +1,5 @@
 angular
-    .module('common.datacloud.query.builder.tree.edit.transaction', [])
+    .module('common.datacloud.query.builder.tree.edit.transaction', ['common.datacloud.query.builder.tree.transaction.service'])
     .directive('transactionDirective', function () {
         return {
             restrict: 'E',
@@ -9,23 +9,11 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, QueryTreeTransactionService, QueryTreeService) {
                 var vm = $scope.vm;
 
                 vm.init = function () {
-                    vm.values = {
-                        time1: { val: 0, position: 0, type: 'Time' },
-                        time2: { val: 0, position: 1, type: 'Time' },
-                        qty1: { val: 0, position: 0, type: 'Qty' },
-                        qty2: { val: 0, position: 1, type: 'Qty' },
-                        amt1: { val: 0, position: 0, type: 'Amt' },
-                        amt2: { val: 0, position: 1, type: 'Amt' },
-                    }
 
-                    var keys = Object.keys(vm.values);
-                    keys.forEach(function (element) {
-                        vm.values[element].val = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.values[element].position, vm.values[element].type);
-                    });
                 }
                 vm.init();
 

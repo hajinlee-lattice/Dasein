@@ -1,6 +1,47 @@
 angular.module('common.datacloud.query.builder.tree.purchasehistory.service', [])
     .service('QueryTreePurchaseHistoryService', function () {
 
+        function setValsBasedOnPosition(cmp, valsArray, position, value) {
+            switch (cmp) {
+                case 'GTE_AND_LT': {
+                    valsArray[position] = value;
+                    break;
+                }
+                default: {
+                    valsArray[0] = value;
+                }
+            }
+        }
+        function getValsBasedOnPosition(cmp, valsArray, position) {
+            switch (cmp) {
+                case 'GTE_AND_LT': {
+                    return valsArray[position];
+                    break;
+                }
+                case 'GREATER_THAN':
+                case 'GREATER_OR_EQUAL': {
+                    if (position == valsArray.length - 1 || valsArray.length == 0) {
+                        return valsArray[valsArray.length - 1];
+                    } else {
+                        return null;
+                    }
+                    break;
+                }
+                case 'LESS_THAN':
+                case 'LESS_OR_EQUAL': {
+                    if (position == valsArray.length - 1 || valsArray.length == 0) {
+                        return null;
+                    } else {
+                        return valsArray[valsArray.length - 1];
+                    }
+                    break;
+                    ;
+                }
+                default: {
+                    return null;
+                }
+            }
+        }
         /**
          * type is 'TimeSeries'
          * How to identify 'Boolean':
@@ -210,26 +251,26 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
             }
         }
 
-        this.getValue = function(bucketRestriction, type, position, subType){
-            if(type === 'TimeSeries' && bucketRestriction.bkt.Txn){
+        this.getValue = function (bucketRestriction, type, position, subType) {
+            if (type === 'TimeSeries' && bucketRestriction.bkt.Txn) {
                 var txn = bucketRestriction.bkt.Txn;
-                switch(subType){
+                switch (subType) {
                     case 'Time': {
                         var tsTime = txn.Time;
-                        if(tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1){
+                        if (tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1) {
                             return tsTime.Vals[position];
                         }
                     }
                     case 'Qty': {
                         var qty = txn.Qty;
-                        if(qty && qty.Vals && position <= qty.Vals.length - 1){
-                            return qty.Vals[position];
+                        if (qty) {
+                            return getValsBasedOnPosition(qty.Cmp, qty.Vals, position);
                         }
                     }
                     case 'Amt': {
                         var amt = txn.Amt;
-                        if(amt && amt.Vals && position <= amt.Vals.length - 1){
-                            return amt.Vals[position];
+                        if (amt) {
+                            return getValsBasedOnPosition(amt.Cmp, amt.Vals, position);
                         }
                     }
 
@@ -240,25 +281,25 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
             }
         }
 
-        this.getValues = function(bucketRestriction, type, subType){
-            if(type === 'TimeSeries' && bucketRestriction.bkt.Txn){
+        this.getValues = function (bucketRestriction, type, subType) {
+            if (type === 'TimeSeries' && bucketRestriction.bkt.Txn) {
                 var txn = bucketRestriction.bkt.Txn;
-                switch(subType){
+                switch (subType) {
                     case 'Time': {
                         var tsTime = txn.Time;
-                        if(tsTime && tsTime.Vals){
+                        if (tsTime && tsTime.Vals) {
                             return tsTime.Vals;
                         }
                     }
                     case 'Qty': {
                         var qty = txn.Qty;
-                        if(qty && qty.Vals){
+                        if (qty && qty.Vals) {
                             return qty.Vals;
                         }
                     }
                     case 'Amt': {
                         var amt = txn.Amt;
-                        if(amt && amt.Vals){
+                        if (amt && amt.Vals) {
                             return amt.Vals;
                         }
                     }
@@ -266,7 +307,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return [];
                     }
                 }
-            }else{
+            } else {
                 return [];
             }
         }
@@ -313,14 +354,16 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         case 'Qty': {
                             var qty = txn.Qty;
                             if (qty && value !== undefined) {
-                                qty.Vals[position] = value;
+                                setValsBasedOnPosition(qty.Cmp, qty.Vals, position, value);
                             }
+                            // console.log('Changed ', bucketRestriction);
                             break;
                         }
                         case 'Amt': {
                             var amt = txn.Amt;
                             if (amt && value !== undefined) {
-                                amt.Vals[position] = value;
+                                setValsBasedOnPosition(amt.Cmp, amt.Vals, position, value);
+                                // amt.Vals[position] = value;
                             }
                             break;
                         }
@@ -386,6 +429,57 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                                     Cmp: value,
                                     Vals: []
                                 };
+                            }
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        this.removeKey = function (bucketRestriction, type, subType) {
+            if (type === 'TimeSeries') {
+                var txn = bucketRestriction.bkt.Txn;
+                // console.log('Change Cmp', value, subType);
+                if (txn) {
+                    switch (subType) {
+                        case 'Qty': {
+                            delete txn.Qty;
+                            break;
+                        }
+                        case 'Amt': {
+                            delete txn.Amt;
+                            break;
+                        }
+                    }
+
+                }
+            }
+        }
+        this.resetBktValues = function (bucketRestriction, type, subType) {
+            if (type === 'TimeSeries') {
+                var txn = bucketRestriction.bkt.Txn;
+                // console.log('Change Cmp', value, subType);
+                if (txn) {
+                    switch (subType) {
+                        case 'Time': {
+                            console.warn('Not implemented');
+                            break;
+                        }
+                        case 'Qty': {
+                            var qty = txn.Qty;
+                            if (qty) {
+                                qty.Vals = [];
+                            }
+                            console.log('RESET Vals ', bucketRestriction);
+
+                            break;
+                        }
+                        case 'Amt': {
+                            var amt = txn.Amt;
+                            if (amt) {
+                                amt.Vals = [];
                             }
                             break;
                         }

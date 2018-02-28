@@ -31,21 +31,19 @@
         <div class="transaction-element-title">units purchased</div>
         <div class="transaction-element">
             <select ng-model="vm.unitPurchasedCmp" ng-change="vm.changeCmp(vm.unitPurchasedCmp, 'Qty')">
-                <option ng-repeat="row in vm.unitPurchasedCmpChoises | orderBy: 'displayName'" value="{{row.name}}">{{row.displayName}}</option>
+                <option ng-repeat="row in vm.unitPurchasedCmpChoises" value="{{row.name}}">{{row.displayName}}</option>
             </select>
         </div>
-        <div class="transaction-element">
-            <input type="number" 
-                    min="1" 
-                    ng-model="vm.values.qty1.val"
-                    ng-if="vm.showUnitFrom()"
-                    ng-change="vm.changeVal('qty1')">
-            <span ng-if="vm.showUnitFrom() && vm.showUnitTo()"> - </span>
-            <input type="number" min="1" 
-                    ng-if="vm.showUnitTo()" 
-                    ng-model="vm.values.qty2.val"
-                    ng-change="vm.changeVal('qty2')">
-        </div>
+        <numerical-range-directive class="transaction-element" 
+                                    ng-if="vm.showFromUnit || vm.showToUnit" 
+                                    config ="{{vm.getQtyConfigString()}}"
+                                    showfrom="vm.showFromUnit"
+                                    showto="vm.showToUnit"
+                                    vm="vm" 
+                                    type="{{vm.type}}" 
+                                    bucketrestriction="vm.bucketrestriction"
+                                    changed="vm.callbackChangedValue(type, position, value)">
+        </numerical-range-directive>
     </div>
 
     <!-- Amount Spent (Amt)-->
@@ -53,20 +51,20 @@
         <div class="transaction-element-title">amount spent</div>
         <div class="transaction-element">
             <select ng-model="vm.amtCmp" ng-change="vm.changeCmp(vm.amtCmp, 'Amt')">
-                <option ng-repeat="(key, value) in vm.amountSpentCmpChoises" value="{{value.name}}">{{value.displayName}}</option>
+                <option ng-repeat="row in vm.amountSpentCmpChoises" value="{{row.name}}">{{row.displayName}}</option>
             </select>
         </div>
-        <div class="transaction-element">
-            <span ng-if="vm.showAmtFrom()"> $</span>
-            <input type="text" 
-                    ng-if="vm.showAmtFrom()"
-                    ng-model="vm.values.amt1.val"
-                    ng-change="vm.changeVal('amt1')">
-            <span ng-if="vm.showAmtFrom() && vm.showAmtTo()"> - $</span>
-            <input type="text"
-                    ng-if="vm.showAmtTo()"
-                    ng-model="vm.values.amt2.val"
-                    ng-change="vm.changeVal('amt2')">
-        </div>
+        <numerical-range-directive class="transaction-element" 
+                                    ng-if="vm.showFromAmt || vm.showToAmt" 
+                                    config ="{{vm.getAmtConfigString()}}"
+                                    showfrom="vm.showFromAmt"
+                                    showto="vm.showToAmt"
+                                    vm="vm" 
+                                    type="{{vm.type}}" 
+                                    bucketrestriction="vm.bucketrestriction"
+                                    changed="vm.callbackChangedValue(type, position, value)"
+                                    fromlabel="$"
+                                    tolabel="$">
+        </numerical-range-directive>
     </div>
 </div>

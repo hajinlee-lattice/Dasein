@@ -1,0 +1,22 @@
+<div class="range-container">
+        <span ng-if="showFromLabel() && showFrom()"> {{fromlabel}} </span>
+        <input type="number" 
+                name="{{getName(0)}}" 
+                max="{{getMaxVal(0)}}"
+                ng-if="showFrom()"        
+                ng-model="values.from.value" 
+                ng-change="changeValue(0)"
+                ng-class="!isValValid(0) ? 'invalid-field' : ''" 
+                required>
+        <span ng-if="showFrom() && showTo()"> - </span>
+        <span ng-if="showFromLabel() && showTo()"> {{tolabel}} </span>
+        <input type="number" 
+                name="{{getName(1)}}" 
+                min="{{getMinVal(1)}}"
+                ng-if="showTo()" 
+                ng-model="values.to.value"
+                ng-change="changeValue(1)"
+                ng-class="!isValValid(1) ? 'invalid-field' : ''" 
+                required>
+        <span style="color:red;" ng-show="!isValValid(0) || !isValValid(1)"><i class="fa fa-exclamation-circle"></i> Please enter a valid numerical range.</span>
+</div>

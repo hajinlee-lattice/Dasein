@@ -1,5 +1,5 @@
-angular
-    .module('common.datacloud.query.builder.tree.edit', [])
+angular.module('common.datacloud.query.builder.tree.edit', [])
+
     .directive('queryItemEditDirective', function () {
         return {
             restrict: 'E',
@@ -83,6 +83,12 @@ angular
                         : 'home.segment.explorer.enumpicker';
 
                     $state.go(state, { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
+                }
+
+                vm.isValid = function(){
+                    // console.log('VM ------------------->', $scope.form.$valid, $scope.form.$invalid);
+                    return $scope.form.$valid;
+
                 }
             }
         }

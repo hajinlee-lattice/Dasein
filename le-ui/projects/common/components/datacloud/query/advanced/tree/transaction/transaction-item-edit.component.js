@@ -1,105 +1,167 @@
 angular
-    .module('common.datacloud.query.builder.tree.edit.transaction.edit', [])
+    .module('common.datacloud.query.builder.tree.edit.transaction.edit', ['common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range', 
+                                                                            'common.datacloud.query.builder.tree.transaction.service'])
     .directive('transactionEditDirective', function () {
         return {
             restrict: 'E',
             scope: {
                 type: '=',
-                bucketrestriction: '='
+                bucketrestriction: '=',
+                form: '='
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, QueryTreeTransactionService, QueryTreeService) {
                 var vm = $scope.vm;
+                vm.type = $scope.type;
+                vm.form = $scope.form;
+                vm.bucketrestriction = $scope.bucketrestriction;
+                vm.showFromUnit = false;
+                vm.showToUnit = false;
+                vm.showFromAmt = false;
+                vm.showToAmt = false;
+                vm.showFromTime = false;
+                vm.showToTime = false;
+                
+                vm.qtyConf = QueryTreeTransactionService.getQtyConfig();
+                vm.amtConf = QueryTreeTransactionService.getAmtConfig();
+                
+                vm.cmpsList = QueryTreeTransactionService.getCmpsList()
+                vm.periodList = QueryTreeTransactionService.periodList();
+                vm.unitPurchasedCmpChoises = QueryTreeTransactionService.unitPurchasedCmpChoises();
+                vm.amountSpentCmpChoises = QueryTreeTransactionService.amountSpentCmpChoises();
 
-                vm.cmpsList = [
-                    { 'name': 'EVER', 'displayName': 'Ever' },
-                    { 'name': 'IN_CURRENT', 'displayName': 'Current' },
-                    { 'name': 'PREVIOUS', 'displayName': 'Previous' },
-                    { 'name': 'PRIOR_OLY_LT', 'displayName': 'Only Prior to Last' },
-                    { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
-                    { 'name': 'BETWEEN', 'displayName': 'Between' },
-                    { 'name': 'BEFORE', 'displayName': 'Before' },
-                    { 'name': 'AFTER', 'displayName': 'After' }
-                ];
+                function initQty(reset) {
+                    // console.log($scope.bucketrestriction);
+                    var tmpUnit = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Qty');
+                    vm.unitPurchasedCmp = tmpUnit !== '' ? tmpUnit : 'ANY';
 
-                vm.periodList = [
-                    { 'name': 'Week', 'displayName': 'Week' },
-                    { 'name': 'Month', 'displayName': 'Month' },
-                    { 'name': 'Quarter', 'displayName': 'Quarter' },
-                    { 'name': 'Year', 'displayName': 'Year' }
-                ];
-                vm.unitPurchasedCmpChoises = [
-                    { 'name': 'EQUAL', 'displayName': 'Equal' },
-                    { 'name': 'NOT_EQUAL', 'displayName': 'Not Equal' },
-                    { 'name': 'GREATER_THAN', 'displayName': 'Greater Than' },
-                    { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater or Equal' },
-                    { 'name': 'LESS_THAN', 'displayName': 'Less Than' },
-                    { 'name': 'LESS_OR_EQUAL', 'displayName': 'Lesser or Equal' },
-                    { 'name': 'GTE_AND_LT', 'displayName': 'Between' },
-                    { 'name': 'ANY', 'displayName': 'Any' },
-                ];
-                vm.amountSpentCmpChoises = [
-                    { 'name': 'GREATER_THAN', 'displayName': 'Greater Than' },
-                    { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater or Equal' },
-                    { 'name': 'LESS_THAN', 'displayName': 'Less Than' },
-                    { 'name': 'LESS_THAN', 'displayName': 'Lesser or Equal' },
-                    { 'name': 'GTE_AND_LT', 'displayName': 'Between' },
-                    { 'name': 'ANY', 'displayName': 'Any' },
-                ];
+                    if (!reset) {
+                        var fromQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['from'].position, 'Qty');
+                        vm.qtyConf['from'].value = (fromQty != null && fromQty != 0) ? Number(fromQty) : undefined;
+
+                        var toQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['to'].position, 'Qty');
+                        vm.qtyConf['to'].value = (toQty != null && toQty != 0) ? Number(toQty) : undefined;
+
+                        vm.showFromUnit = vm.showUnitFrom();
+                        vm.showToUnit = vm.showUnitTo();
+                    } else {
+                        vm.qtyConf['from'].value = undefined;
+                        vm.qtyConf['to'].value = undefined;
+                        vm.showFromUnit = false;
+                        vm.showToUnit = false;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Qty');
+                        setTimeout(function () {
+                            vm.showFromUnit = vm.showUnitFrom();
+                            vm.showToUnit = vm.showUnitTo();
+                        }, 0);
+                    }
+
+                }
+
+                function initAmt(reset) {
+                    // console.log($scope.bucketrestriction);
+                    var tmpAmt = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Amt');
+                    vm.amtCmp = tmpAmt !== '' ? tmpAmt : 'ANY';
+
+                    vm.showFromAmt = false;
+                    vm.showToAmt = false;
+
+                    if (!reset) {
+                        var fromAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['from'].position, 'Amt');
+                        vm.amtConf['from'].value = fromAmt != 0 ? Number(fromAmt) : undefined;
+
+                        var toAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['to'].position, 'Amt');
+                        vm.amtConf['to'].value = toAmt != 0 ? Number(toAmt) : undefined;
+
+                        vm.showFromAmt = vm.showAmtFrom();
+                        vm.showToAmt = vm.showAmtTo();
+
+                    } else {
+                        vm.amtConf['from'].value = undefined;
+                        vm.amtConf['to'].value = undefined;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Amt');
+                        setTimeout(function () {
+                            vm.showFromAmt = vm.showAmtFrom();
+                            vm.showToAmt = vm.showAmtTo();
+                        }, 0);
+                    }
+                }
+
+                function removeKey(cmpValue, subType) {
+
+                    switch (cmpValue) {
+                        case 'ANY': {
+                            // console.log('CMP value ', cmpValue);
+                            QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, subType);
+                            break;
+                        }
+                    }
+                }
 
                 vm.init = function () {
+                    // console.log(vm.form);
                     vm.values = {
-                        time1: { val: 0, position: 0, type: 'Time' },
-                        time2: { val: 0, position: 1, type: 'Time' },
-                        qty1: { val: 0, position: 0, type: 'Qty' },
-                        qty2: { val: 0, position: 1, type: 'Qty' },
-                        amt1: { val: 0, position: 0, type: 'Amt' },
-                        amt2: { val: 0, position: 1, type: 'Amt' },
+                        time1: { val: undefined, position: 0, type: 'Time' },
+                        time2: { val: undefined, position: 1, type: 'Time' }
                     }
-                    var keys = Object.keys(vm.values);
-                    keys.forEach(function (element) {
-                        vm.values[element].val = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.values[element].position, vm.values[element].type);
-                    });
-
 
                     var tmp = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Time');
                     vm.timeCmp = tmp !== '' ? tmp : 'EVER';
                     var periodTmp = QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time');
                     vm.timeframePeriod = periodTmp !== '' ? periodTmp : vm.periodList[0].name;
 
-                    var tmpUnit = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Qty');
-                    vm.unitPurchasedCmp = tmpUnit !== '' ? tmpUnit : 'ANY';
 
-                    var tmpAmt = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Amt');
-                    vm.amtCmp = tmpAmt !== '' ? tmpAmt : 'ANY';
-                    
+                    initQty();
+                    initAmt();
                 }
-                vm.init();
 
-                vm.changeVal = function (keyName) {
-                    switch (keyName) {
-                        case 'time1':
-                        case 'time2': {
-                            QueryTreeService.changeBktValue($scope.bucketrestriction, $scope.type, vm.values[keyName].val, vm.values[keyName].position, 'Time');
-                            break;
-                        }
 
-                        case 'qty1':
-                        case 'qty2': {
-                            QueryTreeService.changeBktValue($scope.bucketrestriction, $scope.type, vm.values[keyName].val, vm.values[keyName].position, 'Qty');
-                            break;
-                        }
-                        case 'amt1':
-                        case 'amt2': {
-                            QueryTreeService.changeBktValue($scope.bucketrestriction, $scope.type, vm.values[keyName].val, vm.values[keyName].position, 'Amt');
-                            break;
-                        }
-                    }
+                vm.getQtyConfigString = function () {
+                    var ret = JSON.stringify(vm.qtyConf);
+                    return ret;
+                }
+
+                vm.getAmtConfigString = function () {
+                    var ret = JSON.stringify(vm.amtConf);
+                    return ret;
+                }
+
+                vm.callbackChangedValue = function (type, position, value) {
+                    QueryTreeService.changeBktValue($scope.bucketrestriction, $scope.type, value, position, type);
                 }
 
                 vm.changeCmp = function (value, type) {
+                    // console.log('TYPE ==> ', type);
                     QueryTreeService.changeCmp($scope.bucketrestriction, $scope.type, value, type);
+
+                    switch (type) {
+                        case 'Qty': {
+                            vm.showFromUnit = vm.showUnitFrom();
+                            vm.showToUnit = vm.showUnitTo();
+                            initQty(true);
+                            removeKey(value, 'Qty');
+                            break;
+                        }
+                        case 'Amt': {
+                            vm.showFromAmt = vm.showAmtFrom();
+                            vm.showToAmt = vm.showAmtTo();
+                            initAmt(true);
+                            removeKey(value, 'Amt');
+                            break;
+                        }
+                        case 'Time': {
+                            break;
+                        }
+                        default: {
+                            vm.showFromUnit = vm.showUnitFrom();
+                            vm.showToUnit = vm.showUnitTo();
+
+                            vm.showFromAmt = vm.showAmtFrom();
+                            vm.showToAmt = vm.showAmtTo();
+                        }
+                    }
+
                 }
 
                 //************************ Txn *********************/
@@ -208,11 +270,13 @@ angular
                         case 'GREATER_OR_EQUAL':
                         case 'GREATER_THAN':
                         case 'GTE_AND_LT':
-                        case 'NOT_EQUAL':
-                            {
-                                return true;
-                            }
-                        default: return false;
+                        case 'NOT_EQUAL': {
+                            return true;
+                        }
+                        default: {
+                            // vm.values.qty1.val = 1;
+                            return false
+                        };
                     }
                 }
                 vm.showUnitTo = function () {
@@ -220,9 +284,13 @@ angular
                         case 'GTE_AND_LT':
                         case 'LESS_OR_EQUAL':
                         case 'LESS_THAN': {
+
                             return true;
                         }
-                        default: return false;
+                        default: {
+                            // vm.values.qty2.val = 1;
+                            return false;
+                        }
                     }
                 }
 
@@ -230,20 +298,8 @@ angular
 
                 vm.showAmtFrom = function () {
                     switch (vm.amtCmp) {
-                        case 'GTE_AND_LT':
+                        case 'GREATER_OR_EQUAL':
                         case 'GREATER_THAN':
-                        case 'GREATER_OR_EQUAL': {
-                            return true;
-                        }
-                        default:
-                            return false;
-                    }
-
-                }
-                vm.showAmtTo = function () {
-                    switch (vm.amtCmp) {
-                        case 'LESS_THAN':
-                        case 'LESS_THAN':
                         case 'GTE_AND_LT': {
                             return true;
                         }
@@ -251,6 +307,18 @@ angular
                             return false;
                     }
                 }
+                vm.showAmtTo = function () {
+                    switch (vm.amtCmp) {
+                        case 'GTE_AND_LT':
+                        case 'LESS_OR_EQUAL':
+                        case 'LESS_THAN': {
+                            return true;
+                        }
+                        default:
+                            return false;
+                    }
+                }
+                vm.init();
             }
         }
     });

@@ -334,6 +334,25 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 console.warn(' changeNumericalCmpValue() Service not implemented');
             }
         }
+        
+        this.removeKey = function(bucketRestriction, type, subType){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.removeKey(bucketRestriction, type, subType);
+            } else {
+                console.warn(' removeKey() Service not implemented');
+            }
+        }
+        this.resetBktValues = function(bucketRestriction, type, subType){
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.resetBktValues(bucketRestriction, type, subType);
+            } else {
+                console.warn(' resetBktValues() Service not implemented');
+            }
+        }
 
         this.getBktValue = function (bucketRestriction, position) {
             var entity = getEntity(bucketRestriction);
@@ -592,6 +611,12 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
         }
 
+        this.resetBktValues = function(bucketRestriction, type, subType){
+            console.warn('NOT implemented')
+        }
+        this.removeKey = function(bucketRestriction, type, subtype){
+            console.warn('Not implemented');
+        }
         this.getBooleanModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Vals[0];
         }
