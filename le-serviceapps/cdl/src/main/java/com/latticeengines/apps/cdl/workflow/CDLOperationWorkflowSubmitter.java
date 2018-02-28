@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -13,8 +16,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
+import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -81,7 +87,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         }
         String filePath = "";
         String tableName = "";
-        String fileName = "";
+        String fileName = generateFakeFileName(maintenanceOperationConfiguration);
         String fileDisplayName = "";
         boolean isUseDLData = false;
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
@@ -108,5 +114,33 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
                         .build())
                 .build();
+    }
+
+    private String generateFakeFileName(MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+        String fileName = "";
+        if (maintenanceOperationConfiguration instanceof CleanupAllConfiguration) {
+            CleanupAllConfiguration cleanupAllConfiguration = ((CleanupAllConfiguration) maintenanceOperationConfiguration);
+            if (cleanupAllConfiguration.getEntity() == null) {
+                if (cleanupAllConfiguration.getCleanupOperationType() == CleanupOperationType.ALL) {
+                    fileName = "All Types, Full";
+                } else if (cleanupAllConfiguration.getCleanupOperationType() == CleanupOperationType.ALLDATA) {
+                    fileName = "All Types, Data Only";
+                }
+            } else {
+                if (cleanupAllConfiguration.getCleanupOperationType() == CleanupOperationType.ALL) {
+                    fileName = String.format("All %s, Full", cleanupAllConfiguration.getEntity().name());
+                } else if (cleanupAllConfiguration.getCleanupOperationType() == CleanupOperationType.ALLDATA) {
+                    fileName = String.format("All %s, Data Only", cleanupAllConfiguration.getEntity().name());
+                }
+            }
+        } else if (maintenanceOperationConfiguration instanceof CleanupByDateRangeConfiguration) {
+            CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration =
+                    ((CleanupByDateRangeConfiguration) maintenanceOperationConfiguration);
+            DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+            String start = dateFormat.format(cleanupByDateRangeConfiguration.getStartTime());
+            String end = dateFormat.format(cleanupByDateRangeConfiguration.getEndTime());
+            fileName = String.format("Transactions, Data during %s - %s", start, end);
+        }
+        return fileName;
     }
 }
