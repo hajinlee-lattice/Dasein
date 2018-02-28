@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +154,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument) {
+        decodeFieldMapping(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table = getTableFromParameters(sourceFile.getSchemaInterpretation());
         resolveMetadata(sourceFile, fieldMappingDocument, table, false);
@@ -161,6 +163,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     @Override
     public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
                                 String entity, String source, String feedType) {
+        decodeFieldMapping(fieldMappingDocument);
         fulfillFieldMapping(fieldMappingDocument);
         setCDLExternalSystems(fieldMappingDocument);
         SourceFile sourceFile = getSourceFile(sourceFileName);
@@ -173,6 +176,15 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             table = dataFeedTask.getImportTemplate();
         }
         resolveMetadata(sourceFile, fieldMappingDocument, table, true);
+    }
+
+    private void decodeFieldMapping(FieldMappingDocument fieldMappingDocument) {
+        if (fieldMappingDocument == null || fieldMappingDocument.getFieldMappings() == null) {
+            return;
+        }
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            fieldMapping.setUserField(StringEscapeUtils.unescapeHtml4(fieldMapping.getUserField()));
+        }
     }
 
     private void setCDLExternalSystems(FieldMappingDocument fieldMappingDocument) {

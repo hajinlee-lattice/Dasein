@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -247,7 +248,7 @@ public class MetadataResolver {
         for (final String headerField : headerFields) {
             FieldMapping unknownColumn = new FieldMapping();
 
-            unknownColumn.setUserField(headerField);
+            unknownColumn.setUserField(StringEscapeUtils.escapeHtml4(headerField));
             unknownColumn.setFieldType(getFieldTypeFromColumnContent(headerField));
             unknownColumn.setMappedToLatticeField(false);
 
