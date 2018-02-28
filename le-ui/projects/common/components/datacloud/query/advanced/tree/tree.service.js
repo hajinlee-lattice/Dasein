@@ -305,13 +305,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
             }
         }
 
-        this.changeBktValue = function (bucketRestriction, type, value, position, subType) {
+        this.changeValue = function (bucketRestriction, type, value, position, subType) {
             if (subType === undefined) {
                 this.changeBktValue(bucketRestriction, value, position);
             } else {
                 var entity = getEntity(bucketRestriction);
                 var service = getService(entity);
-                service.changeBktValue(bucketRestriction, type, value, position, subType);
+                service.changeValue(bucketRestriction, type, value, position, subType);
             }
         }
 
@@ -605,7 +605,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             bucketRestriction.bkt.Vals[position] = value;
         }
 
-        this.changeBktValue = function (bucketRestriction, type, value, position, subType) { }
+        this.changeValue = function (bucketRestriction, type, value, position, subType) { }
 
         this.changeTimeframePeriod = function (bucketRestriction, type, value) {
 

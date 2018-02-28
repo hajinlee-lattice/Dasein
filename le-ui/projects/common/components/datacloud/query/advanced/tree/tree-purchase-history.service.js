@@ -339,7 +339,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
             bucketRestriction.bkt.Vals[position] = value;
         }
 
-        this.changeBktValue = function (bucketRestriction, type, value, position, subType) {
+        this.changeValue = function (bucketRestriction, type, value, position, subType) {
             if (type === 'TimeSeries') {
                 var txn = bucketRestriction.bkt.Txn;
                 if (txn) {

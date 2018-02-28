@@ -128,7 +128,7 @@ angular
                 }
 
                 vm.callbackChangedValue = function (type, position, value) {
-                    QueryTreeService.changeBktValue($scope.bucketrestriction, $scope.type, value, position, type);
+                    QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, value, position, type);
                 }
 
                 vm.changeCmp = function (value, type) {
