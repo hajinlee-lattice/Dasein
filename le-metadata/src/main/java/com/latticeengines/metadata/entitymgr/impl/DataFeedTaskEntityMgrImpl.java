@@ -286,15 +286,15 @@ public class DataFeedTaskEntityMgrImpl extends BaseEntityMgrRepositoryImpl<DataF
 
     private void createReferences(Table table) {
         if (table.getPrimaryKey() != null) {
-            primaryKeyDao.create(table.getPrimaryKey());
+            primaryKeyDao.create(primaryKeyDao.merge(table.getPrimaryKey()));
         }
         if (table.getLastModifiedKey() != null) {
-            lastModifiedKeyDao.create(table.getLastModifiedKey());
+            lastModifiedKeyDao.create(lastModifiedKeyDao.merge(table.getLastModifiedKey()));
         }
 
         if (table.getAttributes() != null) {
             for (Attribute attr : table.getAttributes()) {
-                attributeDao.create(attr);
+                attributeDao.create(attributeDao.merge(attr));
             }
         }
     }
