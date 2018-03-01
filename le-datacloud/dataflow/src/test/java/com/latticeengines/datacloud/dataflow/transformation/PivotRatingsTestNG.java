@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.avro.generic.GenericRecord;
 import org.testng.annotations.Test;
 
@@ -38,12 +37,11 @@ public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
         config.setIdAttrsMap(ImmutableMap.of( //
                 "rule_y2dvrdmfqc2f6tsl1uqc7g", "engine_rule1", //
                 "rule_yt0b97azssea_i_gch6cww", "engine_rule2", //
-                "ai_i_2tncmeqhkllu3pnjrjza", "engine_ai3", //
-                "ai_jpbt0qxzq72_kd4cd7f_ga", "engine_ai4"));
+                "ai_dy4cicoutpw_bmraclvlfg", "engine_ai3", //
+                "ai_lhydyrfaq52ro_pke_t8aa", "engine_ai4"));
 
-
-        config.setEvModelIds(Collections.singletonList("ai_i_2tncmeqhkllu3pnjrjza"));
-        config.setAiModelIds(Arrays.asList("ai_jpbt0qxzq72_kd4cd7f_ga", "ai_i_2tncmeqhkllu3pnjrjza"));
+        config.setEvModelIds(Collections.singletonList("ai_dy4cicoutpw_bmraclvlfg"));
+        config.setAiModelIds(Arrays.asList("ai_dy4cicoutpw_bmraclvlfg", "ai_lhydyrfaq52ro_pke_t8aa"));
         config.setAiSourceIdx(0);
         config.setRuleSourceIdx(1);
 
@@ -57,7 +55,7 @@ public class PivotRatingsTestNG extends DataCloudDataFlowFunctionalTestNGBase {
     private void verifyResult() {
         List<GenericRecord> records = readOutput();
         for (GenericRecord record : records) {
-            System.out.println(record);
+//            System.out.println(record);
         }
     }
 
