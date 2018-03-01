@@ -14,7 +14,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
-public abstract class EntireSourcePurger implements SourcePurger {
+public abstract class PatternedSourcePurger implements SourcePurger {
 
     @Autowired
     HdfsPathBuilder hdfsPathBuilder;
@@ -80,7 +80,7 @@ public abstract class EntireSourcePurger implements SourcePurger {
         srcNames.forEach(srcName -> {
             String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-            PurgeSource purgeSource = new PurgeSource(srcName, null, hdfsPaths, null, isToBak());
+            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, null, isToBak());
             toPurge.add(purgeSource);
         });
         return toPurge;

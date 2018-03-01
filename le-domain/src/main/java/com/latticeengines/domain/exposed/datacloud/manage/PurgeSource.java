@@ -11,9 +11,6 @@ public class PurgeSource implements Serializable {
     @JsonProperty("SourceName")
     private String sourceName;
 
-    @JsonProperty("Version")
-    private String version;
-
     @JsonProperty("HdfsPaths")
     private List<String> hdfsPaths;
 
@@ -23,14 +20,19 @@ public class PurgeSource implements Serializable {
     @JsonProperty("ToBak")
     private boolean toBak;
 
+    @JsonProperty("S3Days")
+    private Integer s3Days;
+
+    @JsonProperty("GlacierDays")
+    private Integer glacierDays;
+
     public PurgeSource() {
 
     }
 
-    public PurgeSource(String sourceName, String version, List<String> hdfsPaths, List<String> hiveTables,
+    public PurgeSource(String sourceName, List<String> hdfsPaths, List<String> hiveTables,
             boolean toBak) {
         this.sourceName = sourceName;
-        this.version = version;
         this.hdfsPaths = hdfsPaths;
         this.hiveTables = hiveTables;
         this.toBak = toBak;
@@ -42,14 +44,6 @@ public class PurgeSource implements Serializable {
 
     public void setSourceName(String sourceName) {
         this.sourceName = sourceName;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public List<String> getHdfsPaths() {
@@ -74,6 +68,22 @@ public class PurgeSource implements Serializable {
 
     public void setToBak(boolean toBak) {
         this.toBak = toBak;
+    }
+
+    public Integer getS3Days() {
+        return s3Days;
+    }
+
+    public void setS3Days(Integer s3Days) {
+        this.s3Days = s3Days;
+    }
+
+    public Integer getGlacierDays() {
+        return glacierDays;
+    }
+
+    public void setGlacierDays(Integer glacierDays) {
+        this.glacierDays = glacierDays;
     }
 
 }

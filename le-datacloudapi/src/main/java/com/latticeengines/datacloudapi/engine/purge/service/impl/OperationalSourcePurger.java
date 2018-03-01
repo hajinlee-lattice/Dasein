@@ -3,7 +3,7 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import org.springframework.stereotype.Component;
 
 @Component("operationalSourcePurger")
-public class OperationalSourcePurger extends EntireSourcePurger {
+public class OperationalSourcePurger extends PatternedSourcePurger {
     public String getSourcePrefix() {
         return "LDCDEV_";
     }

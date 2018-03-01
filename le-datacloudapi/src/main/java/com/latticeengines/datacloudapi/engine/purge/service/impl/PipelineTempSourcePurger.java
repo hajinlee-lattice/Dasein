@@ -3,7 +3,7 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import org.springframework.stereotype.Component;
 
 @Component("pipelineTempSourcePurger")
-public class PipelineTempSourcePurger extends EntireSourcePurger {
+public class PipelineTempSourcePurger extends PatternedSourcePurger {
 
     public String getSourcePrefix() {
         return "Pipeline_";

@@ -302,10 +302,17 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Override
     public List<String> getVersions(Source source) {
-        String snapshot = hdfsPathBuilder.constructSnapshotRootDir(source.getSourceName()).toString();
+        String basePath;
+        if (source instanceof TableSource) {
+            throw new UnsupportedOperationException("Not support getting versions for TableSource");
+        } else if (source instanceof IngestionSource) {
+            basePath = hdfsPathBuilder.constructIngestionDir(((IngestionSource) source).getIngestionName()).toString();
+        } else {
+            basePath = hdfsPathBuilder.constructSnapshotRootDir(source.getSourceName()).toString();
+        }
         List<String> versions = new ArrayList<>();
         try {
-            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, snapshot)) {
+            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, basePath)) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
                     String version = dir.substring(dir.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
                     versions.add(version);

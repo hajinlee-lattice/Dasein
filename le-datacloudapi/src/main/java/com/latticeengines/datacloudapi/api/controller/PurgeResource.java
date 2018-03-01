@@ -1,6 +1,5 @@
 package com.latticeengines.datacloudapi.api.controller;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -39,28 +38,7 @@ public class PurgeResource {
             }
             HdfsPodContext.changeHdfsPodId(hdfsPod);
 
-            // Mock a response temporarily for Richa to test
-            List<PurgeSource> list = new ArrayList<>();
-            List<String> hdfsPaths = new ArrayList<>();
-            hdfsPaths.add("/Pods/Production/Services/PropData/Sources/LDCDEV_AccountMasterSample");
-            List<String> hiveTables = new ArrayList<>();
-            hiveTables.add("ldc_ldcdev_accountmastersample_2017_10_12_01_14_37_utc");
-            hiveTables.add("ldc_ldcdev_accountmastersample_2017_10_25_22_40_52_utc");
-            PurgeSource src_allvers = new PurgeSource("LDCDEV_AccountMasterSample", null, hdfsPaths, hiveTables,
-                    false);
-            list.add(src_allvers);
-            hdfsPaths = new ArrayList<>();
-            hdfsPaths.add(
-                    "/Pods/Production/Services/PropData/Sources/LDCDEV_DnBCacheSeedSample/Snapshot/2017-10-27_03-14-49_UTC");
-            hdfsPaths.add(
-                    "/Pods/Production/Services/PropData/Sources/LDCDEV_DnBCacheSeedSample/Schema/2017-10-27_03-14-49_UTC");
-            hiveTables = new ArrayList<>();
-            hiveTables.add("ldc_ldcdev_dnbcacheseedsample_2017_10_27_03_14_49_utc");
-            PurgeSource src_singlever = new PurgeSource("ldc_ldcdev_dnbcacheseedsample_2017_10_27_03_14_49_utc",
-                    null, hdfsPaths, hiveTables, true);
-            list.add(src_singlever);
-
-            list.addAll(purgeService.scan(hdfsPod, false));
+            List<PurgeSource> list = purgeService.scan(hdfsPod, false);
             return list;
         } finally {
             hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
