@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
+import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.PurgeService;
 import com.latticeengines.datacloudapi.engine.testframework.PropDataEngineFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
@@ -38,9 +39,13 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     @Autowired
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
+    @Autowired
+    private HiveTableService hiveTableService;
+
     private PurgeSource pipelineTempSourceToPurge;
     private PurgeSource operationalSourceToPurge;
     private PurgeSource ingestionToPurge;
+    private PurgeSource generalSourceToPurge;
 
     private Map<String, PurgeSource> validationMapNonDebugMode;
     private Map<String, PurgeSource> validationMapDebugMode;
@@ -51,6 +56,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         preparePipelineTempSource();
         prepareOperationalSourceToPurge();
         prepareIngestionToPurge();
+        prepareGeneralSourceToPurge();
         prepareValidationMap();
     }
 
@@ -107,14 +113,39 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
+    private void prepareGeneralSourceToPurge() throws IOException {
+        String sourceName = "TestGeneralSource";
+        String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.writeToFile(yarnConfiguration,
+                hdfsPathBuilder.constructSnapshotRootDir(sourceName).toString() + "/_SUCCESS", "");
+        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
+        String hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
+        List<String> hiveTables = Collections.singletonList(hiveTable);
+        generalSourceToPurge = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
+        PurgeStrategy strategy = new PurgeStrategy();
+        strategy.setSource(sourceName);
+        strategy.setSourceType(SourceType.GENERAL_SOURCE);
+        strategy.setHdfsVersions(2);
+        strategy.setS3Days(100);
+        strategy.setGlacierDays(100);
+        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
+    }
+
     private void prepareValidationMap() {
         validationMapNonDebugMode = new HashMap<>();
         validationMapNonDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
+        validationMapNonDebugMode.put(getValidationKey(generalSourceToPurge), generalSourceToPurge);
 
         validationMapDebugMode = new HashMap<>();
         validationMapDebugMode.put(getValidationKey(pipelineTempSourceToPurge), pipelineTempSourceToPurge);
         validationMapDebugMode.put(getValidationKey(operationalSourceToPurge), operationalSourceToPurge);
         validationMapDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
+        validationMapDebugMode.put(getValidationKey(generalSourceToPurge), generalSourceToPurge);
     }
 
     private String getValidationKey(PurgeSource purgeSource) {
@@ -122,7 +153,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void validatePurgeSourcesNonDebugMode(List<PurgeSource> toPurge) {
-        Assert.assertEquals(1, toPurge.size());
+        Assert.assertEquals(2, toPurge.size());
         toPurge.forEach(purgeSource -> {
             PurgeSource expected = validationMapNonDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
@@ -133,7 +164,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void validatePurgeSourcesDebugMode(List<PurgeSource> toPurge) {
-        Assert.assertEquals(3, toPurge.size());
+        Assert.assertEquals(4, toPurge.size());
         toPurge.forEach(purgeSource -> {
             PurgeSource expected = validationMapDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);

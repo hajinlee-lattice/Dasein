@@ -8,7 +8,10 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
+import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
@@ -19,11 +22,23 @@ public abstract class ConfigurablePurger implements SourcePurger {
     @Autowired
     PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
+    @Autowired
+    HdfsSourceEntityMgr hdfsSourceEntityMgr;
+
+    @Autowired
+    HdfsPathBuilder hdfsPathBuilder;
+
+    @Autowired
+    HiveTableService hiveTableService;
+
     public abstract boolean isToBak();
 
     public abstract SourceType getSourceType();
 
-    public abstract Pair<List<String>, List<String>> getHdfsPathsHiveTablesToPurge(PurgeStrategy strategy);
+    public abstract List<String> findAllVersions(PurgeStrategy strategy);
+
+    public abstract Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
+            List<String> versions);
 
     @Override
     public List<PurgeSource> findSourcesToPurge(boolean debug) {
@@ -51,5 +66,33 @@ public abstract class ConfigurablePurger implements SourcePurger {
         purgeSource.setS3Days(strategy.getS3Days());
         purgeSource.setGlacierDays(strategy.getGlacierDays());
         return purgeSource;
+    }
+
+    private Pair<List<String>, List<String>> getHdfsPathsHiveTablesToPurge(PurgeStrategy strategy) {
+        if (strategy.getHdfsVersions() == 0) {
+            throw new RuntimeException(
+                    "HDFS version for source " + strategy.getSource() + " is set as 0. Too dangerous");
+        }
+        List<String> versionsToPurge = findVersionsToPurge(strategy);
+        if (CollectionUtils.isEmpty(versionsToPurge)) {
+            return null;
+        }
+        return constructHdfsPathsHiveTables(strategy, versionsToPurge);
+    }
+
+    private List<String> findVersionsToPurge(PurgeStrategy strategy) {
+        List<String> versionsToPurge = findAllVersions(strategy);
+        if (CollectionUtils.isEmpty(versionsToPurge)) {
+            return null;
+        }
+        Collections.sort(versionsToPurge);
+        if (versionsToPurge.size() <= strategy.getHdfsVersions()) {
+            return null;
+        }
+        for (int i = 0; i < strategy.getHdfsVersions(); i++) {
+            versionsToPurge.remove(versionsToPurge.size() - 1); // Retain latest
+                                                                // versions
+        }
+        return versionsToPurge;
     }
 }

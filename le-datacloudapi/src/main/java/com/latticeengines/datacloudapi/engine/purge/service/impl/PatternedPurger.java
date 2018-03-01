@@ -14,7 +14,7 @@ import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
-public abstract class PatternedSourcePurger implements SourcePurger {
+public abstract class PatternedPurger implements SourcePurger {
 
     @Autowired
     HdfsPathBuilder hdfsPathBuilder;

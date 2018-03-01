@@ -8,4 +8,5 @@ public interface HiveTableService {
 
     void createTable(String tableName, CustomerSpace customerSpace, String namespace);
 
+    String tableName(String sourceName, String version);
 }

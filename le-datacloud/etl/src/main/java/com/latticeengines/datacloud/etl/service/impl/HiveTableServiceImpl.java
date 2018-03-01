@@ -52,7 +52,8 @@ public class HiveTableServiceImpl implements HiveTableService {
         }
     }
 
-    private static String tableName(String sourceName, String version) {
+    @Override
+    public String tableName(String sourceName, String version) {
         return "LDC_" + sourceName + "_" + version.replace("-", "_");
     }
 }

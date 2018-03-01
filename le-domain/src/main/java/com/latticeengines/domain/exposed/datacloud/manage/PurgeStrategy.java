@@ -32,7 +32,7 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "PID", unique = true, nullable = false)
     private Long pid;
 
-    @Column(name = "Source", nullable = false, length = 100)
+    @Column(name = "Source", unique = true, nullable = false, length = 100)
     private String source;
 
     @Enumerated(EnumType.STRING)
@@ -111,6 +111,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     }
 
     public enum SourceType {
-        INGESTION_SOURCE, ACCOUNT_MASTER, RAW_SOURCE, GENERAL_SOURCE
+        INGESTION_SOURCE, ACCOUNT_MASTER, GENERAL_SOURCE
     }
 }
