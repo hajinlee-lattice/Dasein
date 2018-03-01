@@ -34,6 +34,7 @@ import com.latticeengines.testframework.exposed.rest.StandaloneHttpServer;
 
 public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
+    private static final String POD_ID = PublicationServiceImplTestNG.class.getSimpleName();
     private static final String PUBLICATION_NAME = "TestPublication2";
     private static final String CURRENT_VERSION = "version2";
     private final String SUBMITTER = this.getClass().getSimpleName();
@@ -66,7 +67,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        prepareCleanPod(this.getClass().getSimpleName());
+        prepareCleanPod(POD_ID);
         hdfsSourceEntityMgr.setCurrentVersion(source, CURRENT_VERSION);
         publicationRequest = new PublicationRequest();
         publicationRequest.setSubmitter(SUBMITTER);
@@ -91,11 +92,11 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
         Assert.assertEquals(progresses.size(), 0, "Should have zero progress at beginning");
 
         publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should have a new progress");
         publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 1, "Should still have one progress");
 
@@ -103,9 +104,9 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
                 .status(ProgressStatus.FAILED).commit();
-        Thread.sleep(500);
+        Thread.sleep(2000);
         publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         progresses = progressEntityMgr.findAllForPublication(publication);
         Assert.assertEquals(progresses.size(), 2, "Should have one more progress.");
         // test status of latest publication progress with required version
@@ -133,7 +134,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
             }
         });
         publicationService.kickoff(PUBLICATION_NAME, publicationRequest);
-        Thread.sleep(500);
+        Thread.sleep(2000);
         try {
             workflowProxy.setHostport("http://localhost:8234");
             publicationService.scan();

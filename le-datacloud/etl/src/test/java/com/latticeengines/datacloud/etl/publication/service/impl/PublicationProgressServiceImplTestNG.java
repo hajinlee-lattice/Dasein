@@ -51,15 +51,16 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
     }
 
     @Test(groups = "functional")
-    public void testCanFindExistingProgress() {
+    public void testCanFindExistingProgress() throws InterruptedException {
         progressEntityMgr.startNewProgress(publication, getDestination(), CURRENT_VERSION, SUBMITTER);
+        Thread.sleep(2000);
         PublicationProgress progress2 = progressEntityMgr.findBySourceVersionUnderMaximumRetry(publication,
                 CURRENT_VERSION);
         Assert.assertNotNull(progress2, "Should find the existing progress");
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCanFindExistingProgress")
-    public void testCheckNewProgress() {
+    public void testCheckNewProgress() throws InterruptedException {
         PublicationProgress progress = publicationProgressService.publishVersion(publication, CURRENT_VERSION, SUBMITTER);
         Assert.assertNull(progress, "Should not allow new progress when there is already one");
 
@@ -67,6 +68,7 @@ public class PublicationProgressServiceImplTestNG extends DataCloudEtlFunctional
                 CURRENT_VERSION);
         publicationProgressService.update(progress1).retry().retry().retry()
                 .status(ProgressStatus.FAILED).commit();
+        Thread.sleep(2000);
         progress = publicationProgressService.publishVersion(publication, CURRENT_VERSION, CURRENT_VERSION);
         Assert.assertNotNull(progress,
                 "Should allow new progress when the old one exceed max retry and is in FAILED status.");
