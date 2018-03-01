@@ -16,8 +16,7 @@ public class DnBCacheSeed implements DerivedSource, DomainBased, DunsBased {
     
     private String cronExpression;
 
-    @Autowired
-    private DnBCacheSeedRaw baseSource;
+    private GeneralSource baseSource = new GeneralSource("DnBCacheSeedRaw");
 
     @Override
     public String getSourceName() {

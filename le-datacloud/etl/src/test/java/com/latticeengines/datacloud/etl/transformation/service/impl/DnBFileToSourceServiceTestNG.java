@@ -19,7 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.datacloud.core.source.IngestionNames;
 import com.latticeengines.datacloud.core.source.Source;
-import com.latticeengines.datacloud.core.source.impl.DnBCacheSeedRaw;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -32,13 +32,10 @@ public class DnBFileToSourceServiceTestNG
         extends TransformationServiceImplTestNGBase<PipelineTransformationConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(DnBFileToSourceServiceTestNG.class);
 
-    @Autowired
-    DnBCacheSeedRaw source;
+    GeneralSource source = new GeneralSource("DnBCacheSeedRaw");
 
     @Autowired
     IngestionSource baseSource;
-
-    String targetSourceName = "DnBCacheSeedRaw";
 
     ObjectMapper om = new ObjectMapper();
 
@@ -67,7 +64,7 @@ public class DnBFileToSourceServiceTestNG
 
     @Override
     protected String getPathToUploadBaseData() {
-        return hdfsPathBuilder.constructSnapshotDir(targetSourceName, targetVersion).toString();
+        return hdfsPathBuilder.constructSnapshotDir(source.getSourceName(), targetVersion).toString();
     }
 
     @Override
@@ -84,7 +81,7 @@ public class DnBFileToSourceServiceTestNG
             baseSources.add("IngestionSource");
             step1.setBaseSources(baseSources);
             step1.setTransformer("ingestedFileToSourceTransformer");
-            step1.setTargetSource(targetSourceName);
+            step1.setTargetSource(source.getSourceName());
             String confParamStr1 = getIngestedFileToSourceTransformerConfig();
             step1.setConfiguration(confParamStr1);
 
@@ -118,7 +115,6 @@ public class DnBFileToSourceServiceTestNG
         return hdfsPathBuilder.constructTransformationSourceDir(source, targetVersion).toString();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected void verifyResultAvroRecords(Iterator<GenericRecord> records) {
         log.info("Start to verify records one by one.");

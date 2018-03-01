@@ -19,7 +19,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.DnBCacheSeed;
-import com.latticeengines.datacloud.core.source.impl.DnBCacheSeedRaw;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TypeConvertStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -36,8 +36,7 @@ public class DnBStandardizeTestNG
     @Autowired
     DnBCacheSeed source;
 
-    @Autowired
-    DnBCacheSeedRaw baseSource;
+    GeneralSource baseSource = new GeneralSource("DnBCacheSeedRaw");
 
     String targetSourceName = "DnBCacheSeed";
 
@@ -74,7 +73,7 @@ public class DnBStandardizeTestNG
 
             TransformationStepConfig step1 = new TransformationStepConfig();
             List<String> baseSources = new ArrayList<String>();
-            baseSources.add("DnBCacheSeedRaw");
+            baseSources.add(baseSource.getSourceName());
             step1.setBaseSources(baseSources);
             step1.setTransformer("standardizationTransformer");
             step1.setTargetSource(targetSourceName);
@@ -193,7 +192,7 @@ public class DnBStandardizeTestNG
     protected void uploadBaseAvro(Source baseSource, String baseSourceVersion) {
         InputStream baseAvroStream = ClassLoader
                 .getSystemResourceAsStream("sources/" + baseSource.getSourceName() + ".avro");
-        String targetPath = hdfsPathBuilder.constructRawDir(baseSource).append(baseSourceVersion)
+        String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource.getSourceName(), baseSourceVersion)
                 .append("part-0000.avro").toString();
         try {
             if (HdfsUtils.fileExists(yarnConfiguration, targetPath)) {
