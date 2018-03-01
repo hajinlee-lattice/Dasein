@@ -36,11 +36,16 @@
                                 </goals>
                                 <configuration>
                                     <skip>${skipTests}</skip>
-                                    <executable>py.test</executable>
+                                    <executable>scripts/pytestrunner.sh</executable>
                                     <workingDirectory>src/test/python</workingDirectory>
                                     <arguments>
+                                        <argument>lattice</argument>
                                         <argument>.</argument>
-                                    </arguments>
+                                </arguments>
+                                <environmentVariables>
+                                    <PYTHONPATH>../../main/python:$PYTHONPATH
+                                    </PYTHONPATH>
+                                </environmentVariables>
                                 </configuration>
                             </execution>
                         </executions>
