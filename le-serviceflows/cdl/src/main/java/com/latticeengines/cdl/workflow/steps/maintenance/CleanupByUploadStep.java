@@ -3,7 +3,6 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedRawTransaction;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -99,7 +98,18 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
     }
 
     private void createDeleteReport(Long currentRows) {
-        ObjectNode json = JsonUtils.createObjectNode();
+        Report existReport = retrieveReport(configuration.getCustomerSpace(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY);
+        ObjectNode json;
+        if (existReport == null) {
+            json = JsonUtils.createObjectNode();
+
+        } else {
+            if (existReport.getJson() == null || existReport.getJson().getPayload() == null) {
+                json = JsonUtils.createObjectNode();
+            } else {
+                json = JsonUtils.deserialize(existReport.getJson().getPayload(), ObjectNode.class);
+            }
+        }
         json.put(cleanupByUploadConfiguration.getEntity().name() + "_Deleted", totalRecords - currentRows);
         Report report = createReport(json.toString(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY, UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
