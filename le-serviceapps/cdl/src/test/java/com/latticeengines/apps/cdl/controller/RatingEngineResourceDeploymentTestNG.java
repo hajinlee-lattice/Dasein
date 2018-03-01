@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 
@@ -233,7 +233,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         RatingEngine createdRe = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re);
         Assert.assertNotNull(createdRe);
         re.setId(createdRe.getId());
-        Assert.assertNull(createdRe.getActiveModel());
+        Assert.assertNotNull(createdRe.getActiveModel());
         RatingEngine retrievedRe = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), createdRe.getId());
 
         if (retrievedRe.getActiveModel() instanceof RuleBasedModel) {

@@ -110,7 +110,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertNotNull(createdRatingEngine.getNote());
 
         Assert.assertEquals(createdRatingEngine.getCreatedBy(), CREATED_BY);
-        Assert.assertNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
         switch (createdRatingEngine.getType()) {
         case RULE_BASED:

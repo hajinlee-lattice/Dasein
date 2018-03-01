@@ -84,7 +84,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     }
 
     protected void assertRatingEngine(RatingEngine createdRatingEngine) {
-        Assert.assertNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         Assert.assertTrue(MapUtils.isEmpty(createdRatingEngine.getCountsAsMap()));
     }
 
