@@ -35,9 +35,16 @@ public class SegmentExportWorkflowSubmitter extends WorkflowSubmitter {
         String path = metadataSegmentExport.getPath();
         String avroPath = metadataSegmentExport.getPath();
 
-        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_EXPORT_ID, metadataSegmentExport.getExportId());
+        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_EXPORT_ID, //
+                metadataSegmentExport.getExportId());
         inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_INPUT_PATH, avroPath);
         inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_OUTPUT_PATH, path);
+        inputProperties.put(SegmentExportWorkflowConfiguration.EXPORT_OBJECT_TYPE, //
+                metadataSegmentExport.getType().getDisplayName());
+        inputProperties.put(SegmentExportWorkflowConfiguration.SEGMENT_DISPLAY_NAME, //
+                metadataSegmentExport.getExportPrefix());
+        inputProperties.put(SegmentExportWorkflowConfiguration.EXPIRE_BY_UTC_TIMESTAMP, //
+                new Long(metadataSegmentExport.getCleanupBy().getTime()).toString());
         inputProperties.put(ExportProperty.TARGET_FILE_NAME, getTimestampFromPath(path));
 
         SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration.Builder()

@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 public enum MetadataSegmentExportType {
-    ACCOUNT( //
+    ACCOUNT("Accounts", //
             Arrays.asList(//
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.AccountId.name(), //
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.LDC_Name.name(), //
@@ -25,7 +25,7 @@ public enum MetadataSegmentExportType {
             ), //
             Arrays.asList("Account Id", "Company Name", "Website", "Street", //
                     "City", "State", "Zip", "Country", "Phone", "Salesforce Id")), //
-    CONTACT( //
+    CONTACT("Contacts", //
             Arrays.asList(//
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactId.name(), //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactName.name(), //
@@ -34,7 +34,7 @@ public enum MetadataSegmentExportType {
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.AccountId.name() //
             ), //
             Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id")), //
-    ACCOUNT_AND_CONTACT( //
+    ACCOUNT_AND_CONTACT("Accounts and Contacts", //
             Arrays.asList( //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactId.name(), //
                     MetadataSegmentExport.CONTACT_PREFIX + InterfaceName.ContactName.name(), //
@@ -54,9 +54,11 @@ public enum MetadataSegmentExportType {
             Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id", //
                     "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id"));
 
+    String displayName;
+
     List<Pair<String, String>> fieldNamePairs;
 
-    private MetadataSegmentExportType(List<String> fieldNames, List<String> fieldDisplayNames) {
+    private MetadataSegmentExportType(String displayName, List<String> fieldNames, List<String> fieldDisplayNames) {
         fieldNamePairs = new ArrayList<>();
         for (int i = 0; i < fieldNames.size(); i++) {
             fieldNamePairs.add( //
@@ -64,6 +66,10 @@ public enum MetadataSegmentExportType {
                             fieldNames.get(i), //
                             fieldDisplayNames.get(i)));
         }
+    }
+
+    public String getDisplayName() {
+        return displayName;
     }
 
     public List<Pair<String, String>> getFieldNamePairs() {

@@ -13,6 +13,9 @@ public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfigura
     public static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
     public static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     public static final String SEGMENT_EXPORT_ID = "SEGMENT_EXPORT_ID";
+    public static final String SEGMENT_DISPLAY_NAME = "SEGMENT_DISPLAY_NAME";
+    public static final String EXPORT_OBJECT_TYPE = "EXPORT_OBJECT_TYPE";
+    public static final String EXPIRE_BY_UTC_TIMESTAMP = "EXPIRE_BY_UTC_TIMESTAMP";
 
     public static class Builder {
         private SegmentExportWorkflowConfiguration configuration = new SegmentExportWorkflowConfiguration();
