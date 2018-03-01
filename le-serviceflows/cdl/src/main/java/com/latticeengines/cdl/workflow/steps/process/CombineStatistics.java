@@ -45,7 +45,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
-    private Map<BusinessEntity, Table> statsTableMap = new HashMap<>();
+    private Map<BusinessEntity, Table> statsTableMap;
     private String customerSpaceStr;
 
     @Override
@@ -94,6 +94,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
 
         Map<BusinessEntity, String> statsTableNames = getMapObjectFromContext(STATS_TABLE_NAMES, BusinessEntity.class,
                 String.class);
+        statsTableMap = new HashMap<>();
         if (statsTableNames != null) {
             statsTableNames.forEach((entity, tableName) -> {
                 log.info(String.format("statsTableName for entity %s and customer %s is %s", entity, customerSpaceStr,

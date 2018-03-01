@@ -65,8 +65,7 @@ public enum TableRoleInCollection {
         AggregatedPeriodTransaction.primaryKey = InterfaceName.__Composite_Key__;
         AggregatedPeriodTransaction.foreignKeys = ImmutableList.of(InterfaceName.AccountId);
 
-        // todo: append bundleId after productId as primary key
-        ConsolidatedProduct.primaryKey = InterfaceName.__Composite_Key__;
+        ConsolidatedProduct.primaryKey = InterfaceName.ProductId;
         ConsolidatedProduct.foreignKeys = ImmutableList.of(ConsolidatedProduct.primaryKey);
         SortedProduct.primaryKey = ConsolidatedProduct.primaryKey;
         SortedProduct.foreignKeys = ConsolidatedProduct.foreignKeys;

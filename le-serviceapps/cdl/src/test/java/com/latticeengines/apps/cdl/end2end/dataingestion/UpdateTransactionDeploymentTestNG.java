@@ -97,11 +97,9 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction,
-                Long.valueOf(TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, 80350L);
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction,
                 Long.valueOf(TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
         return expectedCnts;
     }
-
 }
