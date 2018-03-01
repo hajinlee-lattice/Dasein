@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.objectapi.service.EntityQueryService;
+import com.latticeengines.objectapi.service.RatingQueryService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,11 +25,11 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/rating")
 public class RatingResource {
 
-    private final EntityQueryService entityQueryService;
+    private final RatingQueryService ratingQueryService;
 
     @Inject
-    public RatingResource(EntityQueryService entityQueryService) {
-        this.entityQueryService = entityQueryService;
+    public RatingResource(RatingQueryService ratingQueryService) {
+        this.ratingQueryService = ratingQueryService;
     }
 
     @RequestMapping(value = "/count", method = RequestMethod.POST)
@@ -37,7 +37,7 @@ public class RatingResource {
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getCount(frontEndQuery, version);
+        return ratingQueryService.getCount(frontEndQuery, version);
     }
 
     @RequestMapping(value = "/data", method = RequestMethod.POST)
@@ -45,7 +45,7 @@ public class RatingResource {
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getData(frontEndQuery, version);
+        return ratingQueryService.getData(frontEndQuery, version);
     }
 
     @RequestMapping(value = "/coverage", method = RequestMethod.POST)
@@ -54,7 +54,7 @@ public class RatingResource {
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
                                             @RequestBody FrontEndQuery frontEndQuery,
                                             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getRatingCount(frontEndQuery, version);
+        return ratingQueryService.getRatingCount(frontEndQuery, version);
     }
 
 }

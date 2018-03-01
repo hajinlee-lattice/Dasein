@@ -209,7 +209,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             String lookupId = matcher.group(0);
             eventTable = matcher.group(1);
             uuid = matcher.group(2);
-            String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, lookupId, uuid);
+            String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable, uuid);
             modelSummaryContent = modelSummaryContent.replace(lookupId, newLookupId);
             modelSummaryContent = modelSummaryContent.replace(uuid, newUuid);
         } else {

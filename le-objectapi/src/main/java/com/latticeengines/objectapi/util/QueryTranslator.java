@@ -3,7 +3,10 @@ package com.latticeengines.objectapi.util;
 import static com.latticeengines.query.exposed.translator.TranslatorUtils.generateAlias;
 
 import java.util.Collections;
+import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +20,7 @@ import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
+import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -34,6 +38,9 @@ import com.latticeengines.query.exposed.translator.DateRangeTranslator;
 abstract class QueryTranslator {
 
     private static final Logger log = LoggerFactory.getLogger(QueryTranslator.class);
+
+    static final int MAX_CARDINALITY = 20000;
+    static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     QueryFactory queryFactory;
     AttributeRepository repository;
@@ -85,7 +92,7 @@ abstract class QueryTranslator {
     }
 
     Restriction translateFrontEndRestriction(BusinessEntity entity, FrontEndRestriction frontEndRestriction,
-                                             QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
         if (restriction == null) {
             return null;
@@ -96,7 +103,7 @@ abstract class QueryTranslator {
     }
 
     Restriction translateSalesforceIdRestriction(FrontEndQuery frontEndQuery, BusinessEntity entity,
-                                                         Restriction restriction) {
+            Restriction restriction) {
         // only add salesforce id restriction for account entity now
         if (BusinessEntity.Account == entity) {
             if (frontEndQuery.restrictNullSalesforceId()) {
@@ -112,24 +119,21 @@ abstract class QueryTranslator {
     }
 
     Restriction translateInnerRestriction(FrontEndQuery frontEndQuery, BusinessEntity outerEntity,
-                                          Restriction outerRestriction) {
+            Restriction outerRestriction) {
         BusinessEntity innerEntity = null;
-        String joinEntityKey = null;
         switch (outerEntity) {
-            case Contact:
-                innerEntity = BusinessEntity.Account;
-                joinEntityKey = InterfaceName.AccountId.name();
-                break;
-            case Account:
-                innerEntity = BusinessEntity.Contact;
-                joinEntityKey = InterfaceName.AccountId.name();
-                break;
-            default:
-                break;
+        case Contact:
+            innerEntity = BusinessEntity.Account;
+            break;
+        case Account:
+            innerEntity = BusinessEntity.Contact;
+            break;
+        default:
+            break;
         }
         FrontEndRestriction innerFrontEndRestriction = getEntityFrontEndRestriction(innerEntity, frontEndQuery);
         Restriction innerRestriction = translateFrontEndRestriction(innerFrontEndRestriction);
-        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction, joinEntityKey);
+        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
     Restriction joinRestrictions(Restriction outerRestriction, Restriction innerRestriction) {
@@ -180,28 +184,37 @@ abstract class QueryTranslator {
 
     // this is only used by non-event-table translations
     private Restriction translateTransactionRestriction(BusinessEntity entity, Restriction restriction, //
-                                                        QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
-//        // translateRange mutli-product "has engaged" to logical grouping
-//        if (restriction instanceof LogicalRestriction) {
-//            BreadthFirstSearch bfs = new BreadthFirstSearch();
-//            bfs.run(restriction, (object, ctx) -> {
-//                if (object instanceof TransactionRestriction) {
-//                    TransactionRestriction txRestriction = (TransactionRestriction) object;
-//                    if (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction)) {
-//                        Restriction newRestriction = TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
-//                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-//                        parent.getRestrictions().remove(txRestriction);
-//                        parent.getRestrictions().add(newRestriction);
-//                    }
-//                }
-//            });
-//        } else if (restriction instanceof TransactionRestriction) {
-//            TransactionRestriction txRestriction = (TransactionRestriction) restriction;
-//
-//            if (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction)) {
-//                restriction = TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
-//            }
-//        }
+            QueryBuilder queryBuilder, TimeFilterTranslator timeTranslator) {
+        // // translateRange mutli-product "has engaged" to logical grouping
+        // if (restriction instanceof LogicalRestriction) {
+        // BreadthFirstSearch bfs = new BreadthFirstSearch();
+        // bfs.run(restriction, (object, ctx) -> {
+        // if (object instanceof TransactionRestriction) {
+        // TransactionRestriction txRestriction = (TransactionRestriction)
+        // object;
+        // if
+        // (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction))
+        // {
+        // Restriction newRestriction =
+        // TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
+        // LogicalRestriction parent = (LogicalRestriction)
+        // ctx.getProperty("parent");
+        // parent.getRestrictions().remove(txRestriction);
+        // parent.getRestrictions().add(newRestriction);
+        // }
+        // }
+        // });
+        // } else if (restriction instanceof TransactionRestriction) {
+        // TransactionRestriction txRestriction = (TransactionRestriction)
+        // restriction;
+        //
+        // if
+        // (TransactionRestrictionTranslator.isHasEngagedRestriction(txRestriction))
+        // {
+        // restriction =
+        // TransactionRestrictionTranslator.translateHasEngagedToLogicalGroup(txRestriction);
+        // }
+        // }
 
         Restriction translated;
         if (restriction instanceof LogicalRestriction) {
@@ -227,7 +240,8 @@ abstract class QueryTranslator {
         return translated;
     }
 
-    private static void modifyTxnRestriction(TransactionRestriction txRestriction, TimeFilterTranslator timeTranslator) {
+    private static void modifyTxnRestriction(TransactionRestriction txRestriction,
+            TimeFilterTranslator timeTranslator) {
         txRestriction.setTimeFilter(timeTranslator.translate(txRestriction.getTimeFilter()));
         if (txRestriction.getUnitFilter() != null) {
             txRestriction.setUnitFilter(setAggToSum(txRestriction.getUnitFilter()));
@@ -250,29 +264,51 @@ abstract class QueryTranslator {
         }
     }
 
-    Restriction addSubselectRestriction(BusinessEntity outerEntity,
-                                                Restriction outerRestriction,
-                                                BusinessEntity innerEntity,
-                                                Restriction innerRestriction,
-                                                String joinEntityKey) {
+    Restriction addSubselectRestriction(BusinessEntity outerEntity, Restriction outerRestriction,
+            BusinessEntity innerEntity, Restriction innerRestriction) {
         if (innerRestriction != null) {
-            Query innerQuery = Query.builder().from(innerEntity)
-                    .where(innerRestriction)
-                    .select(innerEntity, joinEntityKey).build();
+            BusinessEntity.Relationship relationship = outerEntity.join(innerEntity);
+            if (relationship == null || CollectionUtils.isEmpty(relationship.getJoinKeys())) {
+                throw new IllegalArgumentException(
+                        "Cannot find join keys between  " + outerEntity + " and " + innerEntity);
+            }
+            List<Pair<InterfaceName, InterfaceName>> joinKeys = relationship.getJoinKeys();
+            if (joinKeys.size() != 1) {
+                throw new UnsupportedOperationException("Can only handle entities joined by single key, but "
+                        + outerEntity + " and " + innerEntity + " are joined by " + joinKeys.size() + " keys.");
+            }
+            String lhsKey = joinKeys.stream().map(Pair::getLeft).map(InterfaceName::name).findFirst().orElse(null);
+            String rhsKey = joinKeys.stream().map(Pair::getRight).map(InterfaceName::name).findFirst().orElse(null);
+            Query innerQuery = Query.builder().from(innerEntity).where(innerRestriction).select(innerEntity, lhsKey)
+                    .build();
             SubQuery subQuery = new SubQuery(innerQuery, generateAlias(innerEntity.name()));
-            innerRestriction = Restriction.builder().let(outerEntity, joinEntityKey)
-                    .inCollection(subQuery, joinEntityKey).build();
+            innerRestriction = Restriction.builder().let(outerEntity, rhsKey).inCollection(subQuery, lhsKey).build();
         }
         return joinRestrictions(outerRestriction, innerRestriction);
     }
 
     Restriction addExistsRestriction(Restriction outerRestriction, BusinessEntity innerEntity,
-                                             Restriction innerRestriction) {
+            Restriction innerRestriction) {
         Restriction existsRestriction = null;
         if (innerRestriction != null) {
             existsRestriction = Restriction.builder().exists(innerEntity).that(innerRestriction).build();
         }
         return joinRestrictions(outerRestriction, existsRestriction);
+    }
+
+    void configurePagination(FrontEndQuery frontEndQuery) {
+        if (frontEndQuery.getPageFilter() == null) {
+            frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
+        } else {
+            int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size()
+                    : 1;
+            int maxRows = Math.floorDiv(MAX_CARDINALITY, rowSize);
+            if (frontEndQuery.getPageFilter().getNumRows() > maxRows) {
+                log.warn(String.format("Refusing to accept a query requesting more than %s rows."
+                        + " Currently specified page filter: %s", maxRows, frontEndQuery.getPageFilter()));
+                frontEndQuery.getPageFilter().setNumRows(maxRows);
+            }
+        }
     }
 
 }

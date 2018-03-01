@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
 
 import io.swagger.annotations.Api;
@@ -51,7 +52,7 @@ public class EntityResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
-                                            @RequestBody FrontEndQuery frontEndQuery,
+                                            @RequestBody RatingEngineFrontEndQuery frontEndQuery,
                                             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return entityQueryService.getRatingCount(frontEndQuery, version);
     }

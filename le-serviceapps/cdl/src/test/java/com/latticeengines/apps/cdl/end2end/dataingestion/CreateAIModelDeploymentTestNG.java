@@ -56,6 +56,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             super.setup();
             resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         }
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         attachProtectedProxy(plsModelProxy);
     }
@@ -100,7 +101,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction txnRestriction = new BucketRestriction(attrLookup, bucket);
 
-        MetadataSegment segment = constructTestSegment2();
+        MetadataSegment segment = constructModelingSegment();
         Restriction accountRestriction = segment.getAccountRestriction();
 
         Restriction restriction = Restriction.builder().and(txnRestriction, accountRestriction).build();

@@ -39,6 +39,7 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.proxy.objectapi.EntityProxyImpl;
+import com.latticeengines.proxy.objectapi.RatingProxyImpl;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed;
 
@@ -187,7 +188,7 @@ public class TestPlayCreationHelper {
 
     public RatingProxy initRatingProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        RatingProxy ratingProxy = new RatingProxy(null, null);
+        RatingProxy ratingProxy = new RatingProxyImpl(null, null);
 
         Field f1 = ratingProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);

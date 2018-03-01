@@ -1,17 +1,13 @@
 package com.latticeengines.objectapi.service.impl;
 
-import static org.mockito.ArgumentMatchers.any;
-
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -27,28 +23,18 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.EventQueryService;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
-public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
+public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
     @Autowired
     private EventQueryService eventQueryService;
-
-    @Autowired
-    private QueryEvaluatorService queryEvaluatorService;
 
     private static final String PRODUCT_ID = "6368494B622E0CB60F9C80FEB1D0F95F";
 
     @BeforeClass(groups = "functional")
     public void setup() {
-        mockDataCollectionProxy();
-        Tenant tenant = new Tenant("LocalTest");
-        tenant.setPid(1L);
-        MultiTenantContext.setTenant(tenant);
+        super.setup();
     }
 
     @Test(groups = "functional")
@@ -212,9 +198,4 @@ public class EventQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
         return eventQueryService.getEventCount(frontEndQuery, DataCollection.Version.Blue);
     }
 
-    private void mockDataCollectionProxy() {
-        DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
-        Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
-        queryEvaluatorService.setDataCollectionProxy(proxy);
-    }
 }

@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -23,7 +22,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.CaseLookup;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
-import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -34,9 +32,6 @@ import com.latticeengines.query.exposed.factory.QueryFactory;
 
 public class RatingQueryTranslator extends QueryTranslator {
     private static final Logger log = LoggerFactory.getLogger(RatingQueryTranslator.class);
-
-    private static final int MAX_CARDINALITY = 20000;
-    private static final PageFilter DEFAULT_PAGE_FILTER = new PageFilter(0, 100);
 
     public RatingQueryTranslator(QueryFactory queryFactory, AttributeRepository repository) {
         super(queryFactory, repository);
@@ -90,18 +85,7 @@ public class RatingQueryTranslator extends QueryTranslator {
                     decorator.getFreeTextSearchAttrs());
         }
 
-        if (frontEndQuery.getPageFilter() == null) {
-            frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);
-        } else {
-            int rowSize = CollectionUtils.isNotEmpty(frontEndQuery.getLookups()) ? frontEndQuery.getLookups().size()
-                    : 1;
-            int maxRows = Math.floorDiv(MAX_CARDINALITY, rowSize);
-            if (frontEndQuery.getPageFilter().getNumRows() > maxRows) {
-                log.warn(String.format("Refusing to accept a query requesting more than %s rows."
-                        + " Currently specified page filter: %s", maxRows, frontEndQuery.getPageFilter()));
-                frontEndQuery.getPageFilter().setNumRows(maxRows);
-            }
-        }
+        configurePagination(frontEndQuery);
 
         return queryBuilder.build();
     }
@@ -110,15 +94,12 @@ public class RatingQueryTranslator extends QueryTranslator {
             Restriction outerRestriction, QueryBuilder queryBuilder, Map<String, Lookup> ruleBasedModels,
             TimeFilterTranslator timeTranslator) {
         BusinessEntity innerEntity = null;
-        String joinEntityKey = null;
         switch (outerEntity) {
         case Contact:
             innerEntity = BusinessEntity.Account;
-            joinEntityKey = InterfaceName.AccountId.name();
             break;
         case Account:
             innerEntity = BusinessEntity.Contact;
-            joinEntityKey = InterfaceName.AccountId.name();
             break;
         default:
             break;
@@ -127,7 +108,7 @@ public class RatingQueryTranslator extends QueryTranslator {
         Restriction innerRestriction = translateFrontEndRestriction(innerEntity, innerFrontEndRestriction, queryBuilder,
                 timeTranslator);
         translateRatingRuleRestriction(ruleBasedModels, innerRestriction);
-        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction, joinEntityKey);
+        return addSubselectRestriction(outerEntity, outerRestriction, innerEntity, innerRestriction);
     }
 
     private void translateRatingRuleRestriction(Map<String, Lookup> ruleBasedModels, Restriction restriction) {

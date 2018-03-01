@@ -1,6 +1,5 @@
 package com.latticeengines.app.exposed.service.impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -43,7 +42,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
-import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -52,7 +50,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -80,9 +77,6 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Inject
     private EntityProxy entityProxy;
-
-    @Inject
-    private RatingEngineProxy ratingEngineProxy;
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
@@ -199,7 +193,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         String customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId()).toString();
 
         List<String> attributes = getAttributesInPredefinedGroup(predefined).stream() //
-                .map(ColumnMetadata::getColumnId).collect(Collectors.toList());
+                .map(ColumnMetadata::getAttrName).collect(Collectors.toList());
 
         attributes.add(InterfaceName.AccountId.name());
         attributes.add(InterfaceName.SalesforceAccountID.name());
@@ -281,15 +275,5 @@ public class DataLakeServiceImpl implements DataLakeService {
             timer.setTimerMessage(msg);
             return cms;
         }
-    }
-
-    private List<RatingEngineSummary> getRatingSummaries(String customerSpace) {
-        List<RatingEngineSummary> engineSummaries = new ArrayList<>();
-        try {
-            engineSummaries = ratingEngineProxy.getRatingEngineSummaries(customerSpace);
-        } catch (Exception e) {
-            log.warn("Failed to retrieve engine summaries.", e);
-        }
-        return engineSummaries;
     }
 }

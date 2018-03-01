@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -319,7 +320,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     }
 
     public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        return toRatingEngineFrontEndQuery(mainEntity);
+    }
+
+    public RatingEngineFrontEndQuery toRatingEngineFrontEndQuery(BusinessEntity mainEntity) {
+        RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         frontEndQuery.setMainEntity(mainEntity);
         FrontEndRestriction accountRestriction = getAccountRestriction() == null ? getAccountFrontEndRestriction()
                 : new FrontEndRestriction(getAccountRestriction());

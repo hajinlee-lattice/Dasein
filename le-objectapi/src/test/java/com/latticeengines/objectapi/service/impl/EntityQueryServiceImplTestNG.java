@@ -1,19 +1,15 @@
 package com.latticeengines.objectapi.service.impl;
 
 import static com.latticeengines.domain.exposed.util.RestrictionUtils.TRANSACTION_LOOKUP;
-import static org.mockito.ArgumentMatchers.any;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -21,17 +17,13 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
-import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -42,20 +34,13 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
-import com.latticeengines.domain.exposed.query.util.ExpressionTemplateUtils;
-import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
-import com.latticeengines.objectapi.service.TransactionService;
-import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
-import com.latticeengines.query.exposed.translator.TransactionRestrictionTranslator;
 
-public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase {
+public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
+
     private static final Logger log = LoggerFactory.getLogger(EntityQueryServiceImplTestNG.class);
 
     private static final String ATTR_ACCOUNT_NAME = "name";
@@ -64,25 +49,9 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     @Inject
     private EntityQueryService entityQueryService;
 
-    @Inject
-    private TransactionService transactionService;
-
-    @Inject
-    private QueryEvaluatorService queryEvaluatorService;
-
-    private Tenant tenant;
-
     @BeforeClass(groups = "functional")
     public void setup() {
-        mockDataCollectionProxy();
-        mockPeriodProxy();
-        tenant = new Tenant("LocalTest");
-        tenant.setPid(1L);
-        MultiTenantContext.setTenant(tenant);
-        String maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
-        log.info("Max txn date is " + maxTransactionDate);
-        ExpressionTemplateUtils.setCurrentDate(String.format("'%s'", maxTransactionDate));
-        TransactionRestrictionTranslator.setCurrentDate(String.format("'%s'", maxTransactionDate));
+        super.setup();
     }
 
     @Test(groups = "functional")
@@ -129,7 +98,8 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         Assert.assertEquals(totalCount, expectedTotal);
 
         // Ever, Amount > 0, Quantity > 0
-        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN, Collections.singletonList(0));
+        AggregationFilter greaterThan0 = new AggregationFilter(ComparisonType.GREATER_THAN,
+                Collections.singletonList(0));
         txn = new Bucket.Transaction(prodId, timeFilter, greaterThan0, greaterThan0, false);
         long count = countTxnBkt(txn);
         Assert.assertEquals(count, totalCount);
@@ -137,7 +107,8 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         // Check add up
         AggregationFilter filter1 = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         AggregationFilter filter2 = new AggregationFilter(ComparisonType.GTE_AND_LT, Arrays.asList(1000, 3000));
-        AggregationFilter filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL, Collections.singletonList(3000));
+        AggregationFilter filter3 = new AggregationFilter(ComparisonType.GREATER_OR_EQUAL,
+                Collections.singletonList(3000));
         Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
         Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter, filter2, null, false);
         Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter, filter3, null, false);
@@ -172,8 +143,7 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
                 ComparisonType.BETWEEN, //
                 TimeFilter.Period.Date.name(), //
                 Arrays.asList("2017-07-15", "2017-08-15"));
-        return new Object[][] {
-                { TimeFilter.ever(), 832L }, //
+        return new Object[][] { { TimeFilter.ever(), 832L }, //
                 { currentMonth, 223L }, //
                 { lastMonth, 218L }, //
                 { betweendates, 223L }, //
@@ -182,15 +152,16 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testAccountContactWithTxn() {
-        MultiTenantContext.setTenant(tenant);
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         // Check add up
         AggregationFilter filter = new AggregationFilter(ComparisonType.GT_AND_LT, Arrays.asList(0, 1000));
         Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), filter, null, false);
 
         Restriction txnRestriction = getTxnRestriction(txn);
-        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();
+        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name())
+                .eq("Buyer").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
 
@@ -217,8 +188,10 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         BucketRestriction txnRestriction = (BucketRestriction) getTxnRestriction(txn);
         txnRestriction.setIgnored(true);
 
-        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
-        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name()).eq("Buyer").build();
+        Restriction accRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
+        Restriction cntRestriction = Restriction.builder().let(BusinessEntity.Contact, InterfaceName.Title.name())
+                .eq("Buyer").build();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
 
@@ -366,8 +339,10 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
     public void testLogicalOr() {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("On").build();
-        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("Ca").build();
+        Restriction restriction1 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("On")
+                .build();
+        Restriction restriction2 = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).contains("Ca")
+                .build();
         frontEndRestriction.setRestriction(Restriction.builder().or(restriction1, restriction2).build());
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
@@ -377,50 +352,46 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
 
     @Test(groups = "functional")
     public void testScoreData() {
-        RatingModel model = ruleBasedModel();
-
+        String engineId = "engine_auoinzzzt5k4s3d_dxirvg";
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).isNotNull()
+                .build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
-        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
-        frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setSort(new FrontEndSort(
                 Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
+
+        String ratingField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.Rating);
+        String scoreField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.NormalizedScore);
+        String evField = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.ExpectedRevenue);
+        frontEndQuery.setLookups(Arrays.asList(//
+                new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name()),
+                new AttributeLookup(BusinessEntity.Rating, ratingField),
+                new AttributeLookup(BusinessEntity.Rating, scoreField),
+                new AttributeLookup(BusinessEntity.Rating, evField)));
 
         DataPage dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(dataPage);
         List<Map<String, Object>> data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
-            Assert.assertTrue(row.containsKey("Score"));
-            String score = (String) row.get("Score");
-            Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
+            Assert.assertTrue(row.containsKey(ratingField));
+            Assert.assertTrue(row.containsKey(scoreField));
+            Assert.assertTrue(row.containsKey(evField));
         });
 
-        frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
-                new AttributeLookup(BusinessEntity.Rating, model.getId())));
-        frontEndQuery.setMainEntity(BusinessEntity.Account);
-        dataPage = entityQueryService.getData(frontEndQuery, DataCollection.Version.Blue);
-        Assert.assertNotNull(dataPage);
-        data = dataPage.getData();
-        Assert.assertFalse(data.isEmpty());
-        data.forEach(row -> {
-            Assert.assertTrue(row.containsKey(model.getId()));
-            String score = (String) row.get(model.getId());
-            Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
-        });
-
-        // only get scores for A, B and FStatsCubeUtils
-        Restriction selectedScores = Restriction.builder().let(BusinessEntity.Rating, model.getId()).inCollection(
-                Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.B.getName(), RatingBucketName.F.getName()))
+        // only get scores for A, B
+        Restriction selectedScores = Restriction.builder() //
+                .let(BusinessEntity.Rating, ratingField) //
+                .inCollection(Arrays.asList( //
+                        RatingBucketName.A.getName(), RatingBucketName.B.getName())) //
                 .build();
         Restriction restriction2 = Restriction.builder().and(restriction, selectedScores).build();
         frontEndRestriction.setRestriction(restriction2);
@@ -431,77 +402,43 @@ public class EntityQueryServiceImplTestNG extends ObjectApiFunctionalTestNGBase 
         data = dataPage.getData();
         Assert.assertFalse(data.isEmpty());
         data.forEach(row -> {
-            Assert.assertTrue(row.containsKey(model.getId()));
-            String score = (String) row.get(model.getId());
-            Assert.assertEquals(score, RatingBucketName.A.getName());
+            Assert.assertTrue(row.containsKey(ratingField));
+            String score = (String) row.get(ratingField);
+            Assert.assertEquals(score, RatingBucketName.B.getName());
         });
     }
 
     @Test(groups = "functional")
     public void testScoreCount() {
-        RatingModel model = ruleBasedModel();
-
-        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        String engineId = "engine_auoinzzzt5k4s3d_dxirvg";
+        RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
         Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
-        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
 
-        frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setRatingEngineId(engineId);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
-        frontEndQuery.setSort(new FrontEndSort(
-                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
 
         Map<String, Long> ratingCounts = entityQueryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(ratingCounts);
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
-            if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 483L);
+            System.out.println(score + ":" + count);
+            if (RatingBucketName.B.getName().equals(score)) {
+                Assert.assertEquals((long) count, 2L);
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 99L);
+                Assert.assertEquals((long) count, 4L);
+            } else if (RatingBucketName.D.getName().equals(score)) {
+                Assert.assertEquals((long) count, 4L);
             }
         });
-    }
-
-    private void mockDataCollectionProxy() {
-        DataCollectionProxy proxy = Mockito.mock(DataCollectionProxy.class);
-        Mockito.when(proxy.getAttrRepo(any(), any())).thenReturn(attrRepo);
-        queryEvaluatorService.setDataCollectionProxy(proxy);
-    }
-
-    private void mockPeriodProxy() {
-        PeriodProxy periodProxy = Mockito.mock(PeriodProxy.class);
-        Mockito.when(periodProxy.getPeriodStrategies(any())).thenReturn(PeriodStrategy.NATURAL_PERIODS);
-        ((TransactionServiceImpl) transactionService).setPeriodProxy(periodProxy);
-    }
-
-    private RuleBasedModel ruleBasedModel() {
-        RuleBasedModel model = new RuleBasedModel();
-        model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
-        RatingRule rule = RatingRule.constructDefaultRule();
-
-        Map<String, Restriction> ruleA = new HashMap<>();
-        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("B", "G")));
-        ruleA.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
-                new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
-        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
-
-        Map<String, Restriction> ruleC = new HashMap<>();
-        ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
-                new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("H", "N")));
-        rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
-
-        rule.setDefaultBucketName(RatingBucketName.A.getName());
-
-        model.setRatingRule(rule);
-
-        return model;
     }
 
 }

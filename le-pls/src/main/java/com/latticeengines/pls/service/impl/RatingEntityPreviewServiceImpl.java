@@ -7,18 +7,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -29,16 +30,15 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
-import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component
 public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewService {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEntityPreviewServiceImpl.class);
 
-    @Autowired
-    private RatingProxy ratingProxy;
+    @Inject
+    private EntityProxy entityProxy;
 
     List<String> accountFields = Arrays.asList(InterfaceName.AccountId.name(), //
             InterfaceName.SalesforceAccountID.name(), //
@@ -81,24 +81,22 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
 
         setSortField(entityType, sortBy, descending, entityFrontEndQuery);
 
-        RatingModel model = setModelInfo(ratingEngine, entityFrontEndQuery);
+        String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
 
-        setLookups(entityType, entityFrontEndQuery, model, lookupFieldNames);
+        setLookups(entityType, entityFrontEndQuery, ratingField, lookupFieldNames);
 
-        setSelectedBuckets(entityFrontEndQuery, selectedBuckets, model);
+        setSelectedBuckets(entityFrontEndQuery, selectedBuckets, ratingField);
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
-        // for AI model we need to change it to EntityProxy later on as it will
-        // read rating column from redshift
-        DataPage cachedDataPage = ratingProxy.getData( //
+        DataPage cachedDataPage = entityProxy.getData( //
                 tenant.getId(), //
                 entityFrontEndQuery);
 
         DataPage resultDataPage = cachedDataPage;
 
         if (entityType == BusinessEntity.Account && StringUtils.isNotBlank(bucketFieldName)) {
-            resultDataPage = handleBucketFieldName(cachedDataPage, model.getId(), bucketFieldName);
+            resultDataPage = handleBucketFieldName(cachedDataPage, ratingField, bucketFieldName);
         }
 
         log.info(String.format("Got # %d elements", resultDataPage.getData().size()));
@@ -107,12 +105,12 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     }
 
     @VisibleForTesting
-    void setSelectedBuckets(FrontEndQuery entityFrontEndQuery, List<String> selectedBuckets, RatingModel model) {
+    void setSelectedBuckets(FrontEndQuery entityFrontEndQuery, List<String> selectedBuckets, String ratingField) {
         if (CollectionUtils.isNotEmpty(selectedBuckets)) {
             log.info(String.format("Only get data for the buckets selected: %s",
                     Arrays.toString(selectedBuckets.toArray())));
             Restriction originalRestriction = entityFrontEndQuery.getAccountRestriction().getRestriction();
-            Restriction selectedBucketRestriction = Restriction.builder().let(BusinessEntity.Rating, model.getId())
+            Restriction selectedBucketRestriction = Restriction.builder().let(BusinessEntity.Rating, ratingField)
                     .inCollection(Arrays.asList(selectedBuckets.toArray())).build();
             Restriction compoundRestriction = Restriction.builder().and(originalRestriction, selectedBucketRestriction)
                     .build();
@@ -155,7 +153,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         entityFrontEndQuery.setSort(sort);
     }
 
-    private void setLookups(BusinessEntity entityType, FrontEndQuery entityFrontEndQuery, RatingModel model,
+    private void setLookups(BusinessEntity entityType, FrontEndQuery entityFrontEndQuery, String ratingField,
             List<String> lookupFieldNames) {
         String[] fieldArray = null;
         if (CollectionUtils.isNotEmpty(lookupFieldNames)) {
@@ -173,19 +171,11 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         entityFrontEndQuery.addLookups(entityType, fieldArray);
 
         if (entityType == BusinessEntity.Account) {
-            entityFrontEndQuery.addLookups(BusinessEntity.Rating, model.getId());
+            entityFrontEndQuery.addLookups(BusinessEntity.Rating, ratingField);
         }
     }
 
-    private RatingModel setModelInfo(RatingEngine ratingEngine, FrontEndQuery entityFrontEndQuery) {
-        List<RatingModel> ratingModels = new ArrayList<>();
-        RatingModel model = ratingEngine.getActiveModel();
-        ratingModels.add(model);
-        entityFrontEndQuery.setRatingModels(ratingModels);
-        return model;
-    }
-
-    private DataPage handleBucketFieldName(DataPage cachedDataPage, String modelId, String bucketFieldName) {
+    private DataPage handleBucketFieldName(DataPage cachedDataPage, String ratingField, String bucketFieldName) {
         DataPage resultDataPage = new DataPage();
 
         List<Map<String, Object>> cachedEntityList = cachedDataPage.getData();
@@ -198,10 +188,9 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
                             .map( //
                                     cachedEntity -> {
                                         // clone cache map entity
-                                        Map<String, Object> resultMapEntity = new HashMap<>();
-                                        resultMapEntity.putAll(cachedEntity);
+                                        Map<String, Object> resultMapEntity = new HashMap<>(cachedEntity);
                                         // then replace bucket field name
-                                        replaceScoreBucketFieldName(resultMapEntity, modelId, bucketFieldName);
+                                        replaceScoreBucketFieldName(resultMapEntity, ratingField, bucketFieldName);
                                         return resultMapEntity;
                                     }) //
                             .collect(Collectors.toList());
@@ -220,7 +209,7 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     }
 
     @VisibleForTesting
-    void setRatingProxy(RatingProxy ratingProxy) {
-        this.ratingProxy = ratingProxy;
+    void setEntityProxy(EntityProxy entityProxy) {
+        this.entityProxy = entityProxy;
     }
 }

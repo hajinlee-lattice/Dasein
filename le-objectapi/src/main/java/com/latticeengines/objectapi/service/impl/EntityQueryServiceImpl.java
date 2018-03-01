@@ -6,11 +6,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -20,9 +20,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingRule;
-import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -32,20 +30,18 @@ import com.latticeengines.domain.exposed.query.GroupBy;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.SubQuery;
-import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
 import com.latticeengines.objectapi.util.ContactQueryDecorator;
+import com.latticeengines.objectapi.util.EntityQueryTranslator;
 import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.objectapi.util.TimeFilterTranslator;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 import reactor.core.publisher.Flux;
@@ -70,11 +66,11 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
         QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
         TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
         query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
         return queryEvaluatorService.getCount(attrRepo, query);
     }
@@ -91,11 +87,11 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
         QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
         TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
         if (query.getLookups() == null || query.getLookups().isEmpty()) {
             query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
         }
@@ -105,70 +101,57 @@ public class EntityQueryServiceImpl implements EntityQueryService {
     }
 
     @Override
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
-        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
-                .getData();
-        RatingModel model = frontEndQuery.getRatingModels().get(0);
-        Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
-        TreeMap<String, Long> counts = new TreeMap<>();
-        data.forEach(map -> {
-            String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
-            if (!counts.containsKey(key)) {
-                counts.put(key, 0L);
-            }
-            counts.put(key, counts.get(key) + (Long) map.get("count"));
-        });
-        return counts;
+    public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String ratingEngineId = frontEndQuery.getRatingEngineId();
+        if (StringUtils.isNotBlank(ratingEngineId)) {
+            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
+
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version);
+            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+                    .getData();
+            TreeMap<String, Long> counts = new TreeMap<>();
+            data.forEach(map -> {
+                String rating = (String) map.get(ratingField);
+                if (StringUtils.isNotBlank(rating)) {
+                    if (!counts.containsKey(ratingField)) {
+                        counts.put(rating, 0L);
+                    }
+                    counts.put(rating, counts.get(rating) + (Long) map.get("count"));
+                }
+            });
+            return counts;
+
+        } else {
+            throw new IllegalArgumentException("RatingEngineID cannot be empty for rating count query.");
+        }
     }
 
-    private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,
-            DataCollection.Version version) {
-        List<RatingModel> models = frontEndQuery.getRatingModels();
-        if (models != null && models.size() == 1) {
-            Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
-                    : frontEndQuery.getAccountRestriction().getRestriction();
-            Restriction contactRestriction = frontEndQuery.getContactRestriction() == null ? null
-                    : frontEndQuery.getContactRestriction().getRestriction();
-            if (contactRestriction != null) {
-                // merge account and contact restrictions
-                accountRestriction = accountRestriction == null ? contactRestriction
-                        : Restriction.builder().and(accountRestriction, contactRestriction).build();
-                frontEndQuery.setAccountRestriction(new FrontEndRestriction(accountRestriction));
-                frontEndQuery.setContactRestriction(null);
-            }
-            RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                    queryEvaluatorService.getAttributeRepository(customerSpace.toString(), version));
-            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-            Query query = queryTranslator.translateRatingQuery(frontEndQuery, null, timeTranslator);
-            query.setPageFilter(null);
-            query.setSort(null);
-            RatingModel model = frontEndQuery.getRatingModels().get(0);
-            if (model instanceof RuleBasedModel) {
-                RuleBasedModel ruleBasedModel = (RuleBasedModel) model;
-                Lookup ruleLookup = queryTranslator.translateRatingRule(frontEndQuery.getMainEntity(),
-                        ruleBasedModel.getRatingRule(), QueryEvaluator.SCORE, true, null, timeTranslator);
-                AttributeLookup idLookup = new AttributeLookup(BusinessEntity.Account, InterfaceName.AccountId.name());
-                query.setLookups(Arrays.asList(idLookup, ruleLookup));
-                GroupBy groupBy = new GroupBy();
-                groupBy.setLookups(Collections.singletonList(idLookup));
-                query.setGroupBy(groupBy);
-
-                SubQuery subQuery = new SubQuery(query, "q");
-                SubQueryAttrLookup subQueryAttrLookup = new SubQueryAttrLookup(subQuery, QueryEvaluator.SCORE);
-                return Query.builder() //
-                        .select(subQueryAttrLookup, AggregateLookup.count().as("Count")) //
-                        .from(subQuery) //
-                        .groupBy(subQueryAttrLookup) //
-                        .build();
-            } else {
-                throw new UnsupportedOperationException(
-                        "Can not count rating model of type " + model.getClass().getSimpleName());
-            }
-        } else {
-            throw new RuntimeException("Must specify one and only one rating model.");
+    private Query ratingCountQuery(CustomerSpace customerSpace, String ratingField,
+            RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        Restriction accountRestriction = frontEndQuery.getAccountRestriction() == null ? null
+                : frontEndQuery.getAccountRestriction().getRestriction();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Rating, ratingField).isNotNull().build();
+        if (accountRestriction != null) {
+            restriction = Restriction.builder().and(accountRestriction, restriction).build();
         }
+        frontEndQuery.setAccountRestriction(new FrontEndRestriction(restriction));
+
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
+        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                attrRepo);
+        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+        Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator);
+        query.setPageFilter(null);
+        query.setSort(null);
+        AttributeLookup ratingLookup = new AttributeLookup(BusinessEntity.Rating, ratingField);
+        AggregateLookup countLookup = AggregateLookup.count().as("Count");
+        query.setLookups(Arrays.asList(ratingLookup, countLookup));
+        GroupBy groupBy = new GroupBy();
+        groupBy.setLookups(Collections.singletonList(ratingLookup));
+        query.setGroupBy(groupBy);
+        return query;
     }
 
     private TimeFilterTranslator getTimeFilterTranslator(FrontEndQuery frontEndQuery, DataCollection.Version version) {
@@ -209,41 +192,22 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return false;
     }
 
-    private DataPage postProcess(BusinessEntity entity, DataPage data) {
-        if (BusinessEntity.Contact == entity) {
-            List<Map<String, Object>> results = data.getData();
-            List<Map<String, Object>> processed = results.stream().map(objectMap -> {
-                if (objectMap.containsKey(InterfaceName.CompanyName.toString())
-                        && objectMap.containsKey(InterfaceName.LDC_Name.toString())) {
-                    String companyName = (String) objectMap.get(InterfaceName.CompanyName.toString());
-                    String ldcName = (String) objectMap.get(InterfaceName.LDC_Name.toString());
-                    String consolidatedName = (ldcName != null) ? ldcName : companyName;
-                    if (consolidatedName != null) {
-                        objectMap.put(InterfaceName.CompanyName.toString(), consolidatedName);
-                    }
-                }
-                return objectMap;
-            }).collect(Collectors.toList());
-            data.setData(processed);
-        }
-        return data;
-    }
-
     private Map<String, Object> postProcess(BusinessEntity entity, Map<String, Object> result) {
-        if (result.containsKey(InterfaceName.CompanyName.toString())
-                && result.containsKey(InterfaceName.LDC_Name.toString())) {
-            Map<String, Object> processed = new HashMap<>();
-            result.forEach(processed::put);
-            String companyName = (String) processed.get(InterfaceName.CompanyName.toString());
-            String ldcName = (String) processed.get(InterfaceName.LDC_Name.toString());
-            String consolidatedName = (ldcName != null) ? ldcName : companyName;
-            if (consolidatedName != null) {
-                processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
+        Map<String, Object> processed = result;
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            if (result.containsKey(InterfaceName.CompanyName.toString())
+                    && result.containsKey(InterfaceName.LDC_Name.toString())) {
+                processed = new HashMap<>();
+                result.forEach(processed::put);
+                String companyName = (String) processed.get(InterfaceName.CompanyName.toString());
+                String ldcName = (String) processed.get(InterfaceName.LDC_Name.toString());
+                String consolidatedName = (ldcName != null) ? ldcName : companyName;
+                if (consolidatedName != null) {
+                    processed.put(InterfaceName.CompanyName.toString(), consolidatedName);
+                }
             }
-            return processed;
-        } else {
-            return result;
         }
+        return processed;
     }
 
     private QueryDecorator getDecorator(BusinessEntity entity, boolean addSelects) {
@@ -258,14 +222,6 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             log.warn("Cannot find a decorator for entity " + entity);
             return null;
         }
-    }
-
-    private static Map<String, String> ruleLabelReverseMapping(RatingRule ratingRule) {
-        Map<String, String> lblMap = new HashMap<>();
-        AtomicInteger idx = new AtomicInteger(0);
-        ratingRule.getBucketToRuleMap().forEach((key, val) -> lblMap.put(String.valueOf(idx.getAndIncrement()), key));
-        lblMap.put(String.valueOf(idx.get()), ratingRule.getDefaultBucketName());
-        return lblMap;
     }
 
 }

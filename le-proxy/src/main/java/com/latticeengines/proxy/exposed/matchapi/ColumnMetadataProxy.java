@@ -157,6 +157,8 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             Flux<ColumnMetadata> flux = Flux.range(0, numPages) //
                     .parallel().runOn(parallelFluxThreadPool()) //
                     .flatMap(page -> requestMetadataPage(dataCloudVersion, page, pageSize))
+                    .doOnError(throwable -> //
+                            Flux.error(new RuntimeException("Failed to request a metadata page.", throwable)))
                     .sequential();
             List<ColumnMetadata> cms = flux.collectList() //
                     .blockOptional(Duration.of(1, ChronoUnit.MINUTES)) //

@@ -125,9 +125,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_2_ACCOUNT_2 = 47;
     static final long SEGMENT_2_CONTACT_2 = 51;
 
+    protected static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
+
     static final long RATING_A_COUNT_1 = 6;
-    static final long RATING_D_COUNT_1 = 5;
-    static final long RATING_F_COUNT_1 = 0;
+    static final long RATING_D_COUNT_1 = 4;
+    static final long RATING_F_COUNT_1 = 1;
 
     static final long RATING_A_COUNT_2 = 20;
     static final long RATING_D_COUNT_2 = 27;
@@ -600,22 +602,24 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);
         Assert.assertNotNull(segment1);
         Assert.assertNotNull(segment2);
-        System.out.println(JsonUtils.pprint(segment1));
-        System.out.println(JsonUtils.pprint(segment2));
     }
 
     void createTestSegment1() {
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment1());
         MetadataSegment segment1 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_1);
         Assert.assertNotNull(segment1);
-        System.out.println(JsonUtils.pprint(segment1));
     }
 
     void createTestSegment2() {
         testMetadataSegmentProxy.createOrUpdate(constructTestSegment2());
         MetadataSegment segment2 = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_2);
         Assert.assertNotNull(segment2);
-        System.out.println(JsonUtils.pprint(segment2));
+    }
+
+    void createModelingSegment() {
+        testMetadataSegmentProxy.createOrUpdate(constructModelingSegment());
+        MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_MODELING);
+        Assert.assertNotNull(segment);
     }
 
     private MetadataSegment constructTestSegment1() {
@@ -666,6 +670,19 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         segment.setContactFrontEndRestriction(new FrontEndRestriction(contactRestriction));
 
+        return segment;
+    }
+
+    protected MetadataSegment constructModelingSegment() {
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("USA"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "LDC_Country"), stateBkt);
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_MODELING);
+        segment.setDisplayName("End2End Segment Modeling");
+        segment.setDescription("A test segment for CDL end2end modeling test.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         return segment;
     }
 

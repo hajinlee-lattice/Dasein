@@ -1,12 +1,11 @@
 package com.latticeengines.pls.controller.datacollection;
 
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -15,7 +14,6 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public abstract class BaseFrontEndEntityResource {
 
@@ -76,17 +74,6 @@ public abstract class BaseFrontEndEntityResource {
         appendSegmentRestriction(frontEndQuery);
         frontEndQuery.setMainEntity(getMainEntity());
         return entityProxy.getData(tenantId, frontEndQuery);
-    }
-
-    @Deprecated
-    public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery) {
-        String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-        if (frontEndQuery == null) {
-            frontEndQuery = new FrontEndQuery();
-        }
-        appendSegmentRestriction(frontEndQuery);
-        frontEndQuery.setMainEntity(getMainEntity());
-        return entityProxy.getRatingCount(tenantId, frontEndQuery);
     }
 
     private void appendSegmentRestriction(FrontEndQuery frontEndQuery) {

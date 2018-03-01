@@ -30,7 +30,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
+import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
@@ -54,11 +54,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private Play play;
 
-    private RatingProxy ratingProxy;
-
     private RatingEngine ratingEngine;
-
-    private RatingRule ratingRule;
 
     private Long segmentAccountsCount = null;
 
@@ -66,11 +62,11 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
-        ratingProxy = testPlayCreationHelper.initRatingProxy();
+        EntityProxy entityProxy = testPlayCreationHelper.initEntityProxy();
 
         play = testPlayCreationHelper.getPlay();
 
-        ((RatingEntityPreviewServiceImpl) ratingEntityPreviewService).setRatingProxy(ratingProxy);
+        ((RatingEntityPreviewServiceImpl) ratingEntityPreviewService).setEntityProxy(entityProxy);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
                 play.getRatingEngine().getId());
@@ -88,7 +84,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         RuleBasedModel ruleBasedModel = (RuleBasedModel) ratingEngine.getActiveModel();
         Assert.assertNotNull(ruleBasedModel);
 
-        ratingRule = ruleBasedModel.getRatingRule();
+        RatingRule ratingRule = ruleBasedModel.getRatingRule();
 
         Assert.assertNotNull(ratingRule);
         Assert.assertNotNull(ratingRule.getBucketToRuleMap());

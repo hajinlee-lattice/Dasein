@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -379,15 +379,16 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             MetadataSegment segment = ratingEngine.getSegment();
 
-            FrontEndQuery accountFrontEndQuery = //
+            FrontEndQuery accountFrontEndQuery0 = //
                     createEntityFronEndQuery(BusinessEntity.Account, //
                             isRestrictNotNullSalesforceId, segment);
             FrontEndQuery contactFrontEndQuery = //
                     createEntityFronEndQuery(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment);
 
-            List<RatingModel> ratingModels = Collections.singletonList(ratingEngine.getActiveModel());
-            accountFrontEndQuery.setRatingModels(ratingModels);
+            RatingEngineFrontEndQuery accountFrontEndQuery = RatingEngineFrontEndQuery
+                    .fromFrontEndQuery(accountFrontEndQuery0);
+            accountFrontEndQuery.setRatingEngineId(ratingEngineId);
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
             Map<String, Long> countInfo = entityProxy.getRatingCount( //

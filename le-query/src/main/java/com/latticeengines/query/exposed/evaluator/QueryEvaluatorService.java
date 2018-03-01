@@ -5,9 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -28,15 +29,14 @@ import reactor.core.publisher.Flux;
 public class QueryEvaluatorService {
 
     private static final Logger log = LoggerFactory.getLogger(QueryEvaluatorService.class);
-    private static final int MAX_RETRIES = 2;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
 
-    @Autowired
+    @Inject
     private QueryEvaluator queryEvaluator;
 
-    @Autowired
+    @Inject
     private QueryFactory queryFactory;
 
     public AttributeRepository getAttributeRepository(String customerSpace, DataCollection.Version version) {
@@ -48,14 +48,15 @@ public class QueryEvaluatorService {
     }
 
     public long getCount(AttributeRepository attrRepo, Query query) {
-        long count = -1;
+        long count;
         if (query != null && query.getMainEntity() != null && query.getMainEntity().getServingStore() != null
                 && attrRepo.getTableName(query.getMainEntity().getServingStore()) == null) {
-            return 0;
-        }
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
-            count = sqlQuery.fetchCount();
+            count = 0;
+        } else {
+            SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+            try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
+                count = sqlQuery.fetchCount();
+            }
         }
         return count;
     }
@@ -106,9 +107,7 @@ public class QueryEvaluatorService {
         }
         query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
-            return queryEvaluator.pipe(sqlQuery, query);
-        }
+        return queryEvaluator.pipe(sqlQuery, query);
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {

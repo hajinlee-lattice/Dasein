@@ -6,6 +6,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 public class Namespace0 extends Namespace {
 
+    public static final Namespace0 NS = new Namespace0();
+
     public Serializable[] coords() {
         return new Serializable[]{};
     }

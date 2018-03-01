@@ -102,16 +102,20 @@ public class ProxyRetryTemplate extends RetryTemplate {
         if (cause != null) {
             reason = cause.getClass().getCanonicalName();
         } else if (e instanceof RemoteLedpException) {
-            for (Class<? extends Throwable> c : retryExceptions) {
-                if (((RemoteLedpException) e).getRemoteStackTrace().contains(c.getCanonicalName())) {
-                    reason = c.getCanonicalName();
-                    break;
+            RemoteLedpException remoteLedpException = (RemoteLedpException) e;
+            String stackTrace = remoteLedpException.getRemoteStackTrace();
+            if (StringUtils.isNotBlank(stackTrace)) {
+                for (Class<? extends Throwable> c : retryExceptions) {
+                    if (stackTrace.contains(c.getCanonicalName())) {
+                        reason = c.getCanonicalName();
+                        break;
+                    }
                 }
-            }
-            for (String msg : retryMessages) {
-                if (((RemoteLedpException) e).getRemoteStackTrace().contains(msg)) {
-                    reason = msg;
-                    break;
+                for (String msg : retryMessages) {
+                    if (((RemoteLedpException) e).getRemoteStackTrace().contains(msg)) {
+                        reason = msg;
+                        break;
+                    }
                 }
             }
         }

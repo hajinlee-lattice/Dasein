@@ -68,15 +68,14 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
 
-        createTestSegment2();
-        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), SEGMENT_NAME_2);
+        createModelingSegment();
+        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), SEGMENT_NAME_MODELING);
         Assert.assertNotNull(segment);
 
         new Thread(() -> {
+            createTestSegment2();
             rule1 = createRuleBasedRatingEngine();
             rule2 = createRuleBasedRatingEngine();
-            ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule1.getId());
-            ratingEngineProxy.updateRatingEngineCounts(mainTestTenant.getId(), rule2.getId());
         }).start();
 
         if (ENABLE_AI_RATINGS) {
@@ -94,7 +93,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         testBed.attachProtectedProxy(modelSummaryProxy);
         testBed.switchToSuperAdmin();
         uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model.tar.gz");
-        uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/rf_model.tar.gz");
+        uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/prop_model.tar.gz");
     }
 
     private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary, PredictionType predictionType) throws InterruptedException {

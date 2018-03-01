@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
@@ -45,7 +46,7 @@ public class RatingEntityPreviewServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testSetSelectedBuckets() {
-        ratingEntityPreviewService.setSelectedBuckets(frontEndQuery, selectedBuckets, ratingModel);
+        ratingEntityPreviewService.setSelectedBuckets(frontEndQuery, selectedBuckets, RatingEngine.generateIdStr());
         String restrictionStr = frontEndQuery.getAccountRestriction().getRestriction().toString();
         Assert.assertTrue(restrictionStr.contains(RatingBucketName.A.getName()) && //
                 restrictionStr.contains(RatingBucketName.A.getName()) && //

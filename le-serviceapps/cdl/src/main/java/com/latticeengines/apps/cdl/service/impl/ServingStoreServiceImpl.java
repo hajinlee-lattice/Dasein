@@ -6,7 +6,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.mds.CustomizedServingStoreTemplate;
-import com.latticeengines.apps.cdl.mds.RatingServingStoreTemplate;
 import com.latticeengines.apps.cdl.mds.SystemServingStoreTemplate;
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -29,18 +28,11 @@ public class ServingStoreServiceImpl implements ServingStoreService {
     private SystemServingStoreTemplate systemServingStoreTemplate;
 
     @Inject
-    private RatingServingStoreTemplate ratingServingStoreTemplate;
-
-    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Override
     public ParallelFlux<ColumnMetadata> getSystemMetadata(BusinessEntity entity, DataCollection.Version version) {
-        if (BusinessEntity.Rating.equals(entity)) {
-            return ratingServingStoreTemplate.getUnorderedSchema(version);
-        } else {
-            return systemServingStoreTemplate.getUnorderedSchema(entity, version);
-        }
+        return systemServingStoreTemplate.getUnorderedSchema(entity, version);
     }
 
     @Override

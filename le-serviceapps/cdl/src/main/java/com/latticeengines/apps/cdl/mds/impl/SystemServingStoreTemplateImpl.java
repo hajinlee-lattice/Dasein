@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.mds.RatingDisplayDecorator;
 import com.latticeengines.apps.cdl.mds.SystemServingStoreTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
@@ -28,12 +29,14 @@ public class SystemServingStoreTemplateImpl extends
         implements SystemServingStoreTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
+    private final RatingDisplayDecorator ratingDisplayDecorator;
 
     @Inject
     public SystemServingStoreTemplateImpl(DataTemplateProxy dataTemplateProxy, AMMetadataStore amMetadataStore,
-            CDLNamespaceService cdlNamespaceService) {
+            CDLNamespaceService cdlNamespaceService, RatingDisplayDecorator ratingDisplayDecorator) {
         super(getBaseTemplate(dataTemplateProxy), getAMDecorator(amMetadataStore));
         this.cdlNamespaceService = cdlNamespaceService;
+        this.ratingDisplayDecorator = ratingDisplayDecorator;
     }
 
     private static DataTemplate<Namespace2<String, String>> getBaseTemplate(DataTemplateProxy proxy) {
@@ -46,13 +49,27 @@ public class SystemServingStoreTemplateImpl extends
 
     @Override
     public Flux<ColumnMetadata> getSchema(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-        return super.getSchema(namespace).map(cm -> { cm.setEntity(namespace.getCoord1()); return cm; });
+        Flux<ColumnMetadata> flux = super.getSchema(namespace).map(cm -> {
+            cm.setEntity(namespace.getCoord1());
+            return cm;
+        });
+        if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
+            flux = ratingDisplayDecorator.render(flux);
+        }
+        return flux;
     }
 
     @Override
     public ParallelFlux<ColumnMetadata> getUnorderedSchema(
             Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-        return super.getUnorderedSchema(namespace).map(cm -> { cm.setEntity(namespace.getCoord1()); return cm; });
+        ParallelFlux<ColumnMetadata> pflux = super.getUnorderedSchema(namespace).map(cm -> {
+            cm.setEntity(namespace.getCoord1());
+            return cm;
+        });
+        if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
+            pflux = ratingDisplayDecorator.render(pflux);
+        }
+        return pflux;
     }
 
     @Override

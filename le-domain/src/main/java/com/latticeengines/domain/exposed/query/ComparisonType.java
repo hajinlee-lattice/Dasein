@@ -22,12 +22,13 @@ public enum ComparisonType {
     EVER, //
     IN_CURRENT_PERIOD, //
     BETWEEN, //
-    PRIOR, //
     PRIOR_ONLY, //
     FOLLOWING,  //
     WITHIN, //
     BEFORE, //
-    AFTER; //
+    AFTER, //
+    @Deprecated
+    PRIOR; //
 
     public boolean isLikeTypeOfComparison() {
         return this == CONTAINS || this == NOT_CONTAINS || this == STARTS_WITH || this == ENDS_WITH;

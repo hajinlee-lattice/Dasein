@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -113,14 +113,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         Map<String, Long> counts = null;
         RatingEngine ratingEngine = getRatingEngineById(engineId, false, true);
         if (ratingEngine != null) {
-            // TODO: only update rule based for now
-            if (RatingEngineType.RULE_BASED.equals(ratingEngine.getType())) {
-                RatingModel ratingModel = ratingEngine.getActiveModel();
-                counts = updateRatingCount(ratingEngine, ratingModel);
-                log.info("Updated counts for rating engine " + engineId + " using model " + ratingModel.getId() + " to "
-                        + JsonUtils.serialize(counts));
-                evictRatingEngineCaches();
-            }
+            counts = updateRatingCount(ratingEngine);
+            log.info("Updated counts for rating engine " + engineId + " to " + JsonUtils.serialize(counts));
+            evictRatingEngineCaches();
         }
         return counts;
     }
@@ -199,15 +194,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         ratingModel.setId(ratingModelId);
-        RatingModel updatedModel = ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
-        try {
-            updateRatingCount(ratingEngine, updatedModel);
-        } catch (Exception e) {
-            log.warn(String.format("Failed to update rating counts for rating engine %s - rating model %s: %s",
-                    ratingEngineId, ratingModelId, e.getMessage()));
-        }
-        evictRatingEngineCaches();
-        return updatedModel;
+        return ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
     }
 
     @Override
@@ -290,27 +277,22 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
     }
 
-    private Map<String, Long> updateRatingCount(RatingEngine ratingEngine, RatingModel ratingModel) {
+    private Map<String, Long> updateRatingCount(RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Cannot find a Tenant in MultiTenantContext, skip getting rating count.");
             return Collections.emptyMap();
         } else {
-            if (RatingEngineType.RULE_BASED.equals(ratingEngine.getType())) {
-                MetadataSegment segment = ratingEngine.getSegment();
-                FrontEndQuery frontEndQuery = segment != null ? segment.toFrontEndQuery(BusinessEntity.Account)
-                        : new FrontEndQuery();
-                frontEndQuery.setRatingModels(Collections.singletonList(ratingModel));
-                frontEndQuery.setMainEntity(BusinessEntity.Account);
-                Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
-                log.info("Updating rating engine " + ratingEngine.getId() + " counts " + JsonUtils.serialize(counts));
-                ratingEngine.setCountsByMap(counts);
-                createOrUpdate(ratingEngine, tenant.getId());
-                return counts;
-            } else {
-                log.warn("Does not support AI rating engine counts yet.");
-                return Collections.emptyMap();
-            }
+            MetadataSegment segment = ratingEngine.getSegment();
+            RatingEngineFrontEndQuery frontEndQuery = segment != null ? segment.toRatingEngineFrontEndQuery(BusinessEntity.Account)
+                    : new RatingEngineFrontEndQuery();
+            frontEndQuery.setRatingEngineId(ratingEngine.getId());
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
+            Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
+            log.info("Updating rating engine " + ratingEngine.getId() + " counts " + JsonUtils.serialize(counts));
+            ratingEngine.setCountsByMap(counts);
+            createOrUpdate(ratingEngine, tenant.getId());
+            return counts;
         }
     }
 
