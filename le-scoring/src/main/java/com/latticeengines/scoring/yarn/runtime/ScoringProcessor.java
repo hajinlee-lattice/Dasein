@@ -421,7 +421,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             idAttr.setPhysicalDataType(Type.LONG.name());
         }
         Attribute modelIdAttr = new Attribute();
-        modelIdAttr.setName(ScoringDaemonService.MODEL_ID);
+        modelIdAttr.setName(ScoringDaemonService.MODEL_GUID);
         modelIdAttr.setDisplayName(ScoringDaemonService.MODEL_ID);
         modelIdAttr.setSourceLogicalDataType("");
         modelIdAttr.setPhysicalDataType(Type.STRING.name());

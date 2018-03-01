@@ -12,7 +12,8 @@ public class BucketMetadataUtils {
     private static final Logger log = LoggerFactory.getLogger(BucketMetadataUtils.class);
 
     /**
-     * @param sortedBucketMetadataList should be sorted by lower bound asc
+     * @param sortedBucketMetadataList
+     *            should be sorted by lower bound asc
      */
     public static BucketMetadata bucketMetadata(List<BucketMetadata> sortedBucketMetadataList, double score) {
         BucketMetadata result = null;

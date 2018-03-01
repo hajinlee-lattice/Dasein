@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
@@ -52,6 +53,8 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     @JsonProperty("score_avg_map")
     private Map<String, Double> scoreAvgMap;
+
+    private PredictionType predictionType;
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
@@ -179,6 +182,14 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setScoreAvgMap(Map<String, Double> scoreAvgMap) {
         this.scoreAvgMap = scoreAvgMap;
+    }
+
+    public PredictionType getPredictionType() {
+        return predictionType;
+    }
+
+    public void setPredictionType(PredictionType predictionType) {
+        this.predictionType = predictionType;
     }
 
     @Override

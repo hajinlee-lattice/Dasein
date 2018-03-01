@@ -1,6 +1,8 @@
 package com.latticeengines.scoring.workflow.steps;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
@@ -20,9 +24,9 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("pivotScoreAndEventDataFlow")
-public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfiguration> {
+public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventConfiguration> {
 
-    private Logger log = LoggerFactory.getLogger(PivotScoreAndEvent.class);
+    private Logger log = LoggerFactory.getLogger(PivotScoreAndEventDataFlow.class);
 
     @Autowired
     private MetadataProxy metadataProxy;
@@ -35,11 +39,26 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
     @Override
     public void onConfigurationInitialized() {
         String scoreTableName = getStringValueFromContext(EXPORT_TABLE_NAME);
-        Double modelAvgProbability = getDoubleValueFromContext(MODEL_AVG_PROBABILITY);
-        if (modelAvgProbability == null) {
-            throw new RuntimeException("ModelAvgProbability is null!");
+
+        PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
+        Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
+        if (avgScores != null) {
+            dataFlowParams.setAvgScores(avgScores);
+        } else {
+            dataFlowParams.setAvgScores(ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID),
+                    getDoubleValueFromContext(SCORING_AVG_SCORE))//
+            );
         }
-        configuration.setDataFlowParams(new PivotScoreAndEventParameters(scoreTableName, modelAvgProbability));
+        Map<String, PredictionType> predictionTypes = getMapObjectFromContext(PREDICTION_TYPES, String.class,
+                PredictionType.class);
+        if (predictionTypes != null) {
+            dataFlowParams.setExpectedValues(predictionTypes.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey(), e -> PredictionType.EXPECTED_VALUE == e.getValue())));
+        } else {
+            dataFlowParams.setExpectedValues(
+                    ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()));
+        }
+        configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");
     }
 
@@ -58,9 +77,8 @@ public class PivotScoreAndEvent extends RunDataFlow<PivotScoreAndEventConfigurat
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
         try {
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy
-                    .createDefaultABCDBuckets(getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(),
-                            false, false, false);
+            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
+                    getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), false, false, false);
 
             log.info(String.format("Created A bucket (%s - %s) with %s leads and %s lift,"
                     + "B bucket (%s - %s) with %s leads and %s lift," + "C bucket (%s - %s) with %s leads and %s lift,"

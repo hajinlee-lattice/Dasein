@@ -12,7 +12,7 @@ import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelComplet
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
-import com.latticeengines.scoring.workflow.steps.PivotScoreAndEvent;
+import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -57,7 +57,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Inject
-    private PivotScoreAndEvent pivotScoreAndEventDataFlow;
+    private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Inject
     private ExportData exportData;

@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
@@ -37,7 +38,7 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         parameters.setInputTableName("ScoreWithInput");
         parameters.setRatingField(InterfaceName.Rating.name());
         parameters.setLiftField(InterfaceName.Lift.name());
-        parameters.setModelGuidField("Model_GUID");
+        parameters.setModelGuidField(ScoreResultField.ModelId.displayName);
         parameters.setScoreFieldMap(ImmutableMap.of( //
                 "ms__9c1338b0-7052-4665-8960-a5acf7bfed43-CDLEnd2E", "ExpectedRevenue", //
                 "ms__21dd9b0f-f5be-4818-9efd-4ac9be61d41c-CDLEnd2E", "Probability" //

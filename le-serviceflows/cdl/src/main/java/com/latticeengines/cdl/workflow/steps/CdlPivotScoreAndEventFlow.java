@@ -1,6 +1,8 @@
 package com.latticeengines.cdl.workflow.steps;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -10,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CdlPivotScoreAndEventParameters;
@@ -36,8 +40,24 @@ public class CdlPivotScoreAndEventFlow extends RunDataFlow<CdlPivotScoreAndEvent
     public void onConfigurationInitialized() {
         String scoreTableName = getStringValueFromContext(EXPORT_TABLE_NAME);
         CdlPivotScoreAndEventParameters dataFlowParams = new CdlPivotScoreAndEventParameters(scoreTableName);
-        dataFlowParams.setAvgScore(getDoubleValueFromContext(SCORING_AVG_SCORE));
-        dataFlowParams.setExpectedValue(configuration.isExpectedValue());
+        Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
+        if (avgScores != null) {
+            dataFlowParams.setAvgScores(avgScores);
+        } else {
+            dataFlowParams.setAvgScores(ImmutableMap.<String, Double> builder().//
+                    put(getStringValueFromContext(SCORING_MODEL_ID), getDoubleValueFromContext(SCORING_AVG_SCORE))//
+                    .build());
+        }
+        Map<String, PredictionType> predictionTypes = getMapObjectFromContext(PREDICTION_TYPES, String.class,
+                PredictionType.class);
+        if (predictionTypes != null) {
+            dataFlowParams.setExpectedValue(predictionTypes.entrySet().stream()
+                    .collect(Collectors.toMap(e -> e.getKey(), e -> PredictionType.EXPECTED_VALUE == e.getValue())));
+        } else {
+            dataFlowParams.setExpectedValue(ImmutableMap.<String, Boolean> builder() //
+                    .put(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue())//
+                    .build());
+        }
         configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");
     }
@@ -58,8 +78,7 @@ public class CdlPivotScoreAndEventFlow extends RunDataFlow<CdlPivotScoreAndEvent
         try {
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
             List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
-                    getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), true,
-                    false, false);
+                    getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), true, false, false);
 
             log.info(String.format("Created A bucket (%s - %s) with %s leads and %s lift,"
                     + "B bucket (%s - %s) with %s leads and %s lift," + "C bucket (%s - %s) with %s leads and %s lift,"

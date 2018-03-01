@@ -4,12 +4,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.CdlPivotScoreAndEventFlow;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.SetCdlConfigurationForScoring;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -40,7 +40,7 @@ public class RatingEngineImportMatchAndModelWorkflow
     private RatingEngineScoreWorkflow scoreWorkflow;
 
     @Autowired
-    private CdlPivotScoreAndEventFlow pivotScoreAndEventDataFlow;
+    private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Autowired
     private ExportData exportData;

@@ -56,8 +56,9 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         if (!configuration.isCdlModel())
             return;
         String scoreFieldName = InterfaceName.Probability.name();
-        if (configuration.isExpectedValue())
+        if (configuration.isExpectedValue()) {
             scoreFieldName = InterfaceName.ExpectedRevenue.name();
+        }
         params.setScoreFieldName(scoreFieldName);
         Integer multiplier = null;
         if (!configuration.isExpectedValue() && !configuration.isLiftChart())
@@ -80,9 +81,11 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         Map<String, String> scoreFieldMap = new HashMap<>();
         Map<String, Integer> scoreMultiplierMap = new HashMap<>();
 
+        Map<String, PredictionType> predictionTypeMap = new HashMap<>();
         containers.forEach(container -> {
             CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
             String modelGuid = ((AIModel) container.getModel()).getModelGuid();
+            predictionTypeMap.put(modelGuid, singleModelParams.getPredictionType());
             bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
             scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());
             scoreMultiplierMap.put(modelGuid, singleModelParams.getScoreMultiplier());
@@ -95,15 +98,17 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         params.setIdColumn(InterfaceName.__Composite_Key__.toString());
         params.setModelIdField("Model_GUID");
         putObjectInContext(SCORING_SCORE_FIELDS, scoreFieldMap);
+        putObjectInContext(PREDICTION_TYPES, predictionTypeMap);
     }
 
     private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
-        CombineInputTableWithScoreParameters params =
-                new CombineInputTableWithScoreParameters(getScoreResultTableName(), getInputTableName());
+        CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
+                getScoreResultTableName(), getInputTableName());
         AIModel aiModel = (AIModel) container.getModel();
         PredictionType predictionType = aiModel.getPredictionType();
         params.setBucketMetadata(getDefaultBucketMetadata(predictionType));
         params.setScoreFieldName(getScoreFieldName(predictionType));
+        params.setPredictionType(predictionType);
         // no multiplier, because always calculate lift chart
         params.setScoreMultiplier(null);
         return params;
@@ -112,14 +117,14 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private String getScoreFieldName(PredictionType predictionType) {
         String scoreField;
         switch (predictionType) {
-            case PROPENSITY:
-                scoreField = InterfaceName.Probability.name();
-                break;
-            case EXPECTED_VALUE:
-                scoreField = InterfaceName.ExpectedRevenue.name();
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        case PROPENSITY:
+            scoreField = InterfaceName.Probability.name();
+            break;
+        case EXPECTED_VALUE:
+            scoreField = InterfaceName.ExpectedRevenue.name();
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
         }
         return scoreField;
     }
@@ -127,20 +132,20 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
         List<BucketMetadata> buckets = new ArrayList<>();
         switch (predictionType) {
-            case PROPENSITY:
-                buckets.add(addBucket(10, 4, BucketName.A));
-                buckets.add(addBucket(4, 2, BucketName.B));
-                buckets.add(addBucket(2, 1, BucketName.C));
-                buckets.add(addBucket(1, 0, BucketName.D));
-                break;
-            case EXPECTED_VALUE:
-                buckets.add(addBucket(10, 4, BucketName.A));
-                buckets.add(addBucket(4, 2, BucketName.B));
-                buckets.add(addBucket(2, 1, BucketName.C));
-                buckets.add(addBucket(1, 0, BucketName.D));
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        case PROPENSITY:
+            buckets.add(addBucket(10, 4, BucketName.A));
+            buckets.add(addBucket(4, 2, BucketName.B));
+            buckets.add(addBucket(2, 1, BucketName.C));
+            buckets.add(addBucket(1, 0, BucketName.D));
+            break;
+        case EXPECTED_VALUE:
+            buckets.add(addBucket(10, 4, BucketName.A));
+            buckets.add(addBucket(4, 2, BucketName.B));
+            buckets.add(addBucket(2, 1, BucketName.C));
+            buckets.add(addBucket(1, 0, BucketName.D));
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
         }
         return buckets;
     }

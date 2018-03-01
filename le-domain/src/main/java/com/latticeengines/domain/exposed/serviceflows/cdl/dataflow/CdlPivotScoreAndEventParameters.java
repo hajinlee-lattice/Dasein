@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.dataflow;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
@@ -14,11 +16,11 @@ public class CdlPivotScoreAndEventParameters extends DataFlowParameters {
     @NotNull
     private String scoreOutputTableName;
 
-    @JsonProperty("avg_score")
-    private Double avgScore;
+    @JsonProperty("avg_scores")
+    private Map<String, Double> avgScores;
 
     @JsonProperty("is_expected_value")
-    private boolean expectedValue;
+    private Map<String, Boolean> expectedValue;
 
     public CdlPivotScoreAndEventParameters() {
     }
@@ -35,19 +37,19 @@ public class CdlPivotScoreAndEventParameters extends DataFlowParameters {
         this.scoreOutputTableName = scoreOutputTableName;
     }
 
-    public Double getAvgScore() {
-        return avgScore;
+    public Map<String, Double> getAvgScores() {
+        return avgScores;
     }
 
-    public void setAvgScore(Double avgScore) {
-        this.avgScore = avgScore;
+    public void setAvgScores(Map<String, Double> avgScores) {
+        this.avgScores = avgScores;
     }
 
-    public boolean isExpectedValue() {
+    public Map<String, Boolean> isExpectedValue() {
         return expectedValue;
     }
 
-    public void setExpectedValue(boolean expectedValue) {
+    public void setExpectedValue(Map<String, Boolean> expectedValue) {
         this.expectedValue = expectedValue;
     }
 

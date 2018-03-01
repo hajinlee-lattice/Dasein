@@ -104,7 +104,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
-
+    protected static final String PREDICTION_TYPES = "PREDICTION_TYPES";
 
     @Autowired
     protected Configuration yarnConfiguration;

@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CdlPivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
@@ -29,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
@@ -56,7 +56,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAggregate = new ScoreAggregateFlowConfiguration();
-        private CdlPivotScoreAndEventConfiguration pivotScoreAndEvent = new CdlPivotScoreAndEventConfiguration();
+        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             model.setMicroServiceHostPort(microServiceHostPort);

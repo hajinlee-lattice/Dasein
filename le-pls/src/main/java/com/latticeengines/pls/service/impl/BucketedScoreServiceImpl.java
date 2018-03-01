@@ -23,13 +23,13 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.BucketedScore;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
@@ -42,9 +42,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     private static final Logger log = LoggerFactory.getLogger(BucketedScoreServiceImpl.class);
-    private static final String SCORE = "Score";
-    private static final String TOTAL_EVENTS = "TotalEvents";
-    private static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
 
     @Inject
     private ModelSummaryService modelSummaryService;
@@ -69,7 +66,6 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
             throws Exception {
-        BucketedScoreSummary bucketedScoreSummary = new BucketedScoreSummary();
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
 
@@ -99,54 +95,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         String pivotAvroFilePath = filePaths.get(0);
         List<GenericRecord> pivotedRecords = AvroUtils.getData(yarnConfiguration, new Path(pivotAvroFilePath));
 
-        int cumulativeNumLeads = 0, cumulativeNumConverted = 0;
-        int currentRecord = pivotedRecords.size() - 1, currentScore = 99;
-
-        while (currentScore >= 5) {
-            if (currentRecord < 0) {
-                break;
-            }
-            GenericRecord pivotedRecord = pivotedRecords.get(currentRecord);
-            log.info(String.format("current record index: %s, i is: %s, and generic record is: %s", currentRecord,
-                    currentScore, pivotedRecord.toString()));
-            if (pivotedRecord != null
-                    && Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue() == currentScore) {
-                bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
-                        Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()).intValue(),
-                        cumulativeNumLeads, cumulativeNumConverted);
-                cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
-                cumulativeNumConverted += new Double((double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).intValue();
-                currentRecord--;
-            } else {
-                bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(currentScore, 0, 0,
-                        cumulativeNumLeads, cumulativeNumConverted);
-            }
-            currentScore--;
-        }
-        for (; currentScore > 3; currentScore--) {
-            bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(currentScore, 0, 0,
-                    cumulativeNumLeads, cumulativeNumConverted);
-        }
-        bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
-        bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
-        bucketedScoreSummary.setOverallLift((double) cumulativeNumConverted / cumulativeNumLeads);
-
-        double totalLift = (double) cumulativeNumConverted / cumulativeNumLeads;
-        for (int i = 32; i > 0; i--) {
-            BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
-            int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads() + bucketedScores[i * 3 + 2].getNumLeads()
-                    + bucketedScores[i * 3 + 3].getNumLeads();
-            int totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
-                    + bucketedScores[i * 3 + 2].getNumConverted() + bucketedScores[i * 3 + 3].getNumConverted();
-            if (totalLeadsInBar == 0) {
-                bucketedScoreSummary.getBarLifts()[32 - i] = 0;
-            } else {
-                bucketedScoreSummary.getBarLifts()[32 - i] = ((double) totalLeadsConvertedInBar / totalLeadsInBar)
-                        / totalLift;
-            }
-        }
+        BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
+                .generateBucketedScoreSummary(pivotedRecords);
 
         return bucketedScoreSummary;
     }
