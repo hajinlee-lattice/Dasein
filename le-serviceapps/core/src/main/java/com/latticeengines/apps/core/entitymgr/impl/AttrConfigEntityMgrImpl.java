@@ -38,7 +38,7 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public List<AttrConfigEntity> save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
+    public List<AttrConfig> save(String tenantId, BusinessEntity entity, List<AttrConfig> attrConfigs) {
         List<AttrConfigEntity> existing = repository.findByTenantIdAndEntity(tenantId, entity);
         Map<String, AttrConfigEntity> existingMap = new HashMap<>();
         existing.forEach(config -> existingMap.put(config.getDocument().getAttrName(), config));
@@ -57,7 +57,8 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
             attrConfigEntity.setDocument(attrConfig);
             toCreateOrUpdate.add(attrConfigEntity);
         }
-        return repository.saveAll(toCreateOrUpdate);
+        List<AttrConfigEntity> saved = repository.saveAll(toCreateOrUpdate);
+        return saved.stream().map(AttrConfigEntity::getDocument).collect(Collectors.toList());
     }
 
 

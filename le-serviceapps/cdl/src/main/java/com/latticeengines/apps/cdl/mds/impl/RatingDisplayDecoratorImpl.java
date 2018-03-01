@@ -32,7 +32,7 @@ public class RatingDisplayDecoratorImpl extends MapDecorator implements RatingDi
 
     @Inject
     public RatingDisplayDecoratorImpl(RatingEngineProxy ratingEngineProxy) {
-        super("RatingDisplayDecorator");
+        super("RatingDisplay");
         this.ratingEngineProxy = ratingEngineProxy;
     }
 

@@ -13,6 +13,7 @@ public interface Decorator extends Named, DecoratorFactory<Namespace0> {
     Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata);
     ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata);
 
+    @Override
     default Decorator getDecorator(Namespace0 namespace0) {
         return this;
     }

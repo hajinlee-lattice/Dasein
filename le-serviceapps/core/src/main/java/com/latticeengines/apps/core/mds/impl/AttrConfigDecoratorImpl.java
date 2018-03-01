@@ -1,43 +1,50 @@
 package com.latticeengines.apps.core.mds.impl;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.mds.AttrConfigDecorator;
-import com.latticeengines.apps.core.service.NamespaceService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
-import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
-import com.latticeengines.domain.exposed.metadata.mds.MdsDecoratorFactory;
-import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
-import com.latticeengines.domain.exposed.metadata.mds.MetadataStoreName;
+import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.metadata.MetadataStoreProxy;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 @Component
 public class AttrConfigDecoratorImpl implements AttrConfigDecorator {
 
-    private final NamespaceService commonNamespaceService;
-    private final DecoratorFactory<Namespace2<String, BusinessEntity>> kernel;
+    private final AttrConfigEntityMgr entityMgr;
 
     @Inject
-    public AttrConfigDecoratorImpl(MetadataStoreProxy metadataStoreProxy, NamespaceService commonNamespaceService) {
-        this.kernel = getFactory(metadataStoreProxy);
-        this.commonNamespaceService = commonNamespaceService;
-    }
-
-    private static DecoratorFactory<Namespace2<String, BusinessEntity>> getFactory(
-            MetadataStoreProxy metadataStoreProxy) {
-        MetadataStore<Namespace2<String, BusinessEntity>> mds = metadataStoreProxy
-                .toMetadataStore(MetadataStoreName.AttrConfig, String.class, BusinessEntity.class);
-        return MdsDecoratorFactory.fromMds("AttrConfigDecorator", mds);
+    public AttrConfigDecoratorImpl(AttrConfigEntityMgr attrConfigEntityMgr) {
+        this.entityMgr = attrConfigEntityMgr;
     }
 
     @Override
     public Decorator getDecorator(Namespace1<BusinessEntity> namespace) {
-        return kernel.getDecorator(commonNamespaceService.prefixTenantId(namespace));
+        final String tenantId = MultiTenantContext.getTenantId();
+        final BusinessEntity entity = namespace.getCoord1();
+        return new MapDecorator("AttrConfig") {
+            @Override
+            protected Collection<ColumnMetadata> loadInternal() {
+                List<AttrConfig> attrConfigList = entityMgr.findAllForEntity(tenantId, entity);
+                if (CollectionUtils.isNotEmpty(attrConfigList)) {
+                    return attrConfigList.stream().map(AttrConfig::toColumnMetadata).collect(Collectors.toList());
+                } else {
+                    return Collections.emptyList();
+                }
+            }
+        };
     }
 
 }
