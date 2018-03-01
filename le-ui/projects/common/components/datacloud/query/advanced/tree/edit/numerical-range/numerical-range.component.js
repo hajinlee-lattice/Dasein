@@ -17,6 +17,7 @@ angular
                 type: '@',
                 bucketrestriction: '=',
                 config: '@',
+                showmessage: '=',
                 showfrom: '=',
                 showto: '=',
                 changed: '&',
@@ -32,11 +33,14 @@ angular
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
+  
 
                 $scope.init = function () {
                     var conf = $scope.config;
                     $scope.values = JSON.parse($scope.config);
+                    console.log($scope.values);
                 }
+
 
                 /**
                  * Return the min value from the model.
@@ -44,25 +48,27 @@ angular
                  * @param {*} position 
                  */
                 $scope.getMinVal = function (position) {
-                    if (!$scope.showFrom() || !$scope.showTo()) {
-                        return '';
-                    }
                     var conf = getConfigField(position);
+
+                    if (!$scope.showFrom() || !$scope.showTo()) {
+                        return conf.min != undefined ? conf.min : '';
+                    }
+                    
                     switch (conf.position) {
                         case 0: {
-                            return '';
+                            return conf.min != undefined ? conf.min : '';
                         }
                         case 1: {
                             var fromVal = $scope.values.from.value;
                             if (fromVal) {
                                 return fromVal + 1;
                             } else {
-                                return '';
+                                return conf.min != undefined ? conf.min : '';
                             }
 
                         }
                         default: {
-                            return '';
+                            return conf.min != undefined ? conf.min : '';
                         }
                     }
 
@@ -74,24 +80,27 @@ angular
                  * @param {*} position 
                  */
                 $scope.getMaxVal = function (position) {
-                    if (!$scope.showFrom() || !$scope.showTo()) {
-                        return '';
-                    }
+                    
                     var conf = getConfigField(position);
+
+                    if (!$scope.showFrom() || !$scope.showTo()) {
+                        return conf.max != undefined ? conf.max : '';
+                    }
+                    
                     switch (conf.position) {
                         case 0: {
                             var toVal = $scope.values.to.value;
                             if (toVal) {
                                 return toVal - 1;
                             } else {
-                                return '';
+                                return conf.max != undefined ? conf.max : '';
                             }
                         }
                         case 1: {
-                            return '';
+                            return conf.max != undefined ? conf.max : '';
                         }
                         default: {
-                            return '';
+                            return conf.max != undefined ? conf.max : '';
                         }
                     }
                 }
@@ -172,6 +181,7 @@ angular
                     }
                 }
 
+
                 /**
                  * Check is a input field containes a valid value
                  * @param {*} position 
@@ -183,6 +193,11 @@ angular
                         valid = $scope.form[conf.name].$valid;
                     }
                     return valid;
+                }
+
+                $scope.showErrorMessage = function() {
+                    var ret = $scope.showmessage != undefined ? $scope.showmessage : true;
+                    return ret;
                 }
 
                 /**

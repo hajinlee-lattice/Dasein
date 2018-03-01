@@ -1,6 +1,6 @@
 angular
-    .module('common.datacloud.query.builder.tree.edit.transaction.edit', ['common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range', 
-                                                                            'common.datacloud.query.builder.tree.transaction.service'])
+    .module('common.datacloud.query.builder.tree.edit.transaction.edit', ['common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range',
+        'common.datacloud.query.builder.tree.transaction.service'])
     .directive('transactionEditDirective', function () {
         return {
             restrict: 'E',
@@ -15,19 +15,33 @@ angular
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
-                // $scope.form;
-                
+
                 vm.bucketrestriction = $scope.bucketrestriction;
+                /******************** Qty **************/
                 vm.showFromUnit = false;
                 vm.showToUnit = false;
+                /***************************************/
+
+                /******************* Amt ***************/
                 vm.showFromAmt = false;
                 vm.showToAmt = false;
+                /***************************************/
+
+                /************** Date Range ************/
+
                 vm.showFromTime = false;
                 vm.showToTime = false;
-                
+                /**************************************/
+
+                /*********** Numerical range **********/
+                vm.showFromPeriod = false;
+                vm.showToPeriod = false;
+                /**************************************/
+
                 vm.qtyConf = QueryTreeTransactionService.getQtyConfig();
                 vm.amtConf = QueryTreeTransactionService.getAmtConfig();
-                
+                vm.periodNumericalConf = QueryTreeTransactionService.getPeriodNumericalConfig();
+
                 vm.cmpsList = QueryTreeTransactionService.getCmpsList()
                 vm.periodList = QueryTreeTransactionService.periodList();
                 vm.unitPurchasedCmpChoises = QueryTreeTransactionService.unitPurchasedCmpChoises();
@@ -90,6 +104,38 @@ angular
                     }
                 }
 
+                function initTime() {
+                    var tmpTimeCmp = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Time');
+                    vm.timeCmp = tmpTimeCmp !== '' ? tmpTimeCmp : 'Month';
+                }
+
+                function initTimePeriod(reset) {
+
+
+                    vm.showFromPeriod = false;
+                    vm.showToPeriod = false;
+
+                    if (!reset) {
+                        var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf['from'].position, 'Time');
+                        vm.periodNumericalConf['from'].value = fromPeriod != 0 ? Number(fromPeriod) : undefined;
+
+                        var toPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf['to'].position, 'Time');
+                        vm.periodNumericalConf['to'].value = toPeriod != 0 ? Number(toPeriod) : undefined;
+
+                        vm.showFromPeriod = vm.showPeriodFrom();
+                        vm.showToPeriod = vm.showPeriodTo();
+
+                    } else {
+                        vm.periodNumericalConf['from'].value = undefined;
+                        vm.periodNumericalConf['to'].value = undefined;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
+                        setTimeout(function () {
+                            vm.showFromPeriod = vm.showPeriodFrom();
+                            vm.showToPeriod = vm.showPeriodTo();
+                        }, 0);
+                    }
+                }
+
                 function removeKey(cmpValue, subType) {
 
                     switch (cmpValue) {
@@ -98,6 +144,19 @@ angular
                             QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, subType);
                             break;
                         }
+                    }
+                }
+
+                function initDatePicker() {
+                    var from = document.getElementById(vm.getFromDateId());
+
+                    if (from != null) {
+                        var fromPicker = new Pikaday({ field: from });
+                    }
+                    var to = document.getElementById(vm.getToDateId());
+
+                    if (to != null) {
+                        var toPicker = new Pikaday({ field: to });
                     }
                 }
 
@@ -116,6 +175,8 @@ angular
 
                     initQty();
                     initAmt();
+                    initTime();
+                    initTimePeriod();
                 }
 
 
@@ -126,6 +187,10 @@ angular
 
                 vm.getAmtConfigString = function () {
                     var ret = JSON.stringify(vm.amtConf);
+                    return ret;
+                }
+                vm.getPeriodNumericalConfString = function () {
+                    var ret = JSON.stringify(vm.periodNumericalConf);
                     return ret;
                 }
 
@@ -153,6 +218,11 @@ angular
                             break;
                         }
                         case 'Time': {
+                            vm.showFromPeriod = vm.showPeriodFrom();
+                            vm.showToPeriod = vm.showPeriodTo();
+                            initTimePeriod(true);
+                            $timeout(initDatePicker, 0);
+                            // removeKey(value, 'Qty');
                             break;
                         }
                         default: {
@@ -167,13 +237,31 @@ angular
                 }
 
                 //************************ Txn *********************/
+                function getConfigField(position) {
+                    // console.log('CONF ', vm.getPeriodNumericalConfString());
+                    var values = JSON.parse(vm.getPeriodNumericalConfString());
+                    var config = values[Object.keys(values)[position]];
+                    return config;
+                }
+                vm.isPeriodRangeValid = function () {
+                    var valid = true;
+                    var confFrom = getConfigField(0);
+                    var confTo = getConfigField(1);
+                    if (vm.form[confFrom.name] && !vm.form[confFrom.name].$valid) {
+                        valid = false;
+                    }
+                    if (vm.form[confTo.name] && !vm.form[confTo.name].$valid) {
+                        valid = false;
+                    }
+                    return valid;
+                }
 
-                vm.getFromId = function () {
+                vm.getFromDateId = function () {
                     var id = $scope.bucketrestriction.attr;
                     return id + '.txn_from';
                 }
 
-                vm.getToId = function () {
+                vm.getToDateId = function () {
                     var id = $scope.bucketrestriction.attr;
                     return id + '.txn_to';
                 }
@@ -188,6 +276,19 @@ angular
                         }
                         default:
                             return true;
+
+                    }
+                }
+                
+                vm.showTimeFrameDate = function(){
+                    switch (vm.timeCmp) {
+                        case 'BETWEEN':
+                        case 'BEFORE':
+                        case 'AFTER': {
+                            return true;
+                        }
+                        default:
+                            return false;
 
                     }
                 }
@@ -216,7 +317,8 @@ angular
                     }
                 }
 
-                vm.showQtyTimeframeFrom = function () {
+
+                vm.showPeriodFrom = function () {
                     switch (vm.timeCmp) {
                         case 'EVER':
                         case 'IN_CURRENT':
@@ -229,8 +331,9 @@ angular
                             return true;
                     }
                 }
-                vm.showQtyTimeframeTo = function () {
+                vm.showPeriodTo = function () {
                     switch (vm.timeCmp) {
+                        case 'AFTER':
                         case 'BETWEEN_LT': {
                             return true;
                         }
@@ -243,25 +346,9 @@ angular
                     QueryTreeService.changeTimeframePeriod($scope.bucketrestriction, $scope.type, vm.timeframePeriod);
                 }
 
-                vm.changeTimeCmp = function () {
-                    QueryTreeService.changeCmp($scope.bucketrestriction, $scope.type, vm.timeCmp, 'Time');
-                    $timeout(initDatePicker, 0);
 
-                }
 
-                function initDatePicker() {
-                    var from = document.getElementById(vm.getFromId());
-
-                    if (from != null) {
-                        var fromPicker = new Pikaday({ field: from });
-                    }
-                    var to = document.getElementById(vm.getToId());
-
-                    if (to != null) {
-                        var toPicker = new Pikaday({ field: to });
-                    }
-                }
-                $timeout(initDatePicker, 0);
+                
 
 
                 /*********************** Qty *************************/

@@ -3,7 +3,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
 
         function setValsBasedOnPosition(cmp, valsArray, position, value) {
             switch (cmp) {
-                case 'GTE_AND_LT': {
+                case 'GTE_AND_LT':
+                case 'BETWEEN_LT':{
                     valsArray[position] = value;
                     break;
                 }
@@ -347,7 +348,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         case 'Time': {
                             var tsTime = txn.Time;
                             if (tsTime && value !== undefined) {
-                                tsTime.Vals[position] = value;
+                                setValsBasedOnPosition(tsTime.Cmp, tsTime.Vals, position, value);
+                                // tsTime.Vals[position] = value;
                             }
                             break;
                         }
@@ -464,7 +466,11 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 if (txn) {
                     switch (subType) {
                         case 'Time': {
-                            console.warn('Not implemented');
+                            var t = txn.Time;
+                            if (t) {
+                                t.Vals = [];
+                            }
+                            console.log('RESET Vals ', bucketRestriction);
                             break;
                         }
                         case 'Qty': {
@@ -472,7 +478,6 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                             if (qty) {
                                 qty.Vals = [];
                             }
-                            console.log('RESET Vals ', bucketRestriction);
 
                             break;
                         }

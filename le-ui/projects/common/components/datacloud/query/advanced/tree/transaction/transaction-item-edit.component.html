@@ -3,26 +3,39 @@
     <div class="query-section-item-operation transaction-row">
         <div class="transaction-element-title">in timeframe</div>
         <div class="transaction-element">
-            <select ng-model="vm.timeCmp" ng-change="vm.changeTimeCmp()">
+            <select ng-model="vm.timeCmp" ng-change="vm.changeCmp(vm.timeCmp, 'Time')">
                 <option ng-repeat="(key, value) in vm.cmpsList" value="{{value.name}}">{{value.displayName}}</option>
             </select>
         </div>
 
         <!--  -->
-        <div class="transaction-element">
-            <input type="number" ng-if="vm.showQtyTimeframeFrom()" min="1">
-            <span ng-if="vm.showQtyTimeframeFrom() && vm.showQtyTimeframeTo()"> - </span>
-            <input type="number" ng-if="vm.showQtyTimeframeTo()" min="1">
-            <select ng-if="vm.showTimeframePeriod()" ng-model="vm.timeframePeriod" ng-change="vm.changeTimeFramePeriod()">
+        <div class="transaction-element" ng-if="(vm.showFromPeriod || vm.showToPeriod) && vm.showTimeframePeriod()">
+
+            <numerical-range-directive  
+                                    ng-if="vm.showFromPeriod || vm.showToPeriod" 
+                                    config ="{{vm.getPeriodNumericalConfString()}}"
+                                    showmessage="false"
+                                    showfrom="vm.showFromPeriod"
+                                    showto="vm.showToPeriod"
+                                    vm="vm" 
+                                    form="vm.form"
+                                    type="{{vm.type}}" 
+                                    bucketrestriction="vm.bucketrestriction"
+                                    changed="vm.callbackChangedValue(type, position, value)">
+            </numerical-range-directive>
+        </div>
+        <div class="transaction-element" ng-if="vm.showTimeframePeriod()">
+            <select ng-model="vm.timeframePeriod" ng-change="vm.changeTimeFramePeriod()">
                 <option ng-repeat="(key, value) in vm.periodList" value="{{value.name}}">{{value.displayName}}</option>
             </select>
+            <span class="error-message" ng-if="!vm.isPeriodRangeValid()"><i class="fa fa-exclamation-circle"></i> Please enter a valid numerical range.</span>
         </div>
 
         <!--  -->
-        <div class="query-section-item-operation">
-            <input type="text" id="{{vm.getFromId()}}" ng-if="vm.showTimeFrom()">
-            <span ng-if="vm.showFrom() && vm.showTo()"> - </span>
-            <input type="text" id="{{vm.getToId()}}" ng-if="vm.showTimeTo()">
+        <div class="transaction-element" ng-if="vm.showTimeFrameDate()">
+            <input type="text" id="{{vm.getFromDateId()}}" ng-if="vm.showTimeFrom()">
+            <span ng-if="vm.showTimeFrom() && vm.showTimeTo()"> - </span>
+            <input type="text" id="{{vm.getToDateId()}}" ng-if="vm.showTimeTo()">
         </div>
     </div>
 

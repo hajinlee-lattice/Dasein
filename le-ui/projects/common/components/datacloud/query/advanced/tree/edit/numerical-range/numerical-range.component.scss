@@ -1,15 +1,14 @@
 .range-container {
-    .error-message{
-        color: red;
-    }
     input[type=number] {
         border-width: 1px;
         max-width: 80px;
         border-color: rgba(204, 204, 204, 0.747);
+        height: 1.65em;
+        font-size: 12px;
     }
     input[type=number].invalid-field {
         border-left-width: 5px;
-        border-left-color: red;
+        border-left-color: #D52E57;
         border-top-width: 1px;
         border-top-color: #ccc;
         padding-left: 3px;

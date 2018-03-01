@@ -4,15 +4,22 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         this.getAmtConfig = function () {
             return {
-                from: { name: 'from-amt', value: undefined, position: 0, type: 'Amt' },
-                to: { name: 'to-amt', value: undefined, position: 1, type: 'Amt' }
+                from: { name: 'from-amt', value: undefined, position: 0, type: 'Amt', min: '1', max: '' },
+                to: { name: 'to-amt', value: undefined, position: 1, type: 'Amt', min: '1', max: '' }
             };
         }
 
         this.getQtyConfig = function () {
             return {
-                from: { name: 'from-qty', value: undefined, position: 0, type: 'Qty' },
-                to: { name: 'to-qty', value: undefined, position: 1, type: 'Qty' }
+                from: { name: 'from-qty', value: undefined, position: 0, type: 'Qty'},
+                to: { name: 'to-qty', value: undefined, position: 1, type: 'Qty'}
+            };
+        }
+
+        this.getPeriodNumericalConfig = function() {
+            return {
+                from: { name: 'from-period', value: undefined, position: 0, type: 'Time', min: '1', max: '' },
+                to: { name: 'to-period', value: undefined, position: 1, type: 'Time', min: '1', max: '' }
             };
         }
 
