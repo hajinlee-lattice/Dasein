@@ -15,6 +15,8 @@ angular
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
+                // $scope.form;
+                
                 vm.bucketrestriction = $scope.bucketrestriction;
                 vm.showFromUnit = false;
                 vm.showToUnit = false;

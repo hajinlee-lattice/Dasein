@@ -190,16 +190,20 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return service.getAttributeRules(bkt, bucket, isSameAttribute);
         }
 
-        this.getValue = function(bucketRestriction, type, position, subType){
-            var entity = getEntity(bucketRestriction);
-            var service = getService(entity);
-            return service.getValue(bucketRestriction, type, position, subType);
+        this.getValue = function (bucketRestriction, type, position, subType) {
+            if (subType != undefined) {
+                var entity = getEntity(bucketRestriction);
+                var service = getService(entity);
+                return service.getValue(bucketRestriction, type, position, subType);
+            }else{
+                return this.getBktValue(bucketRestriction, position);
+            }
         }
 
-        this.getValues = function(bucketRestriction, type, subType){
-            if(subType === undefined){
+        this.getValues = function (bucketRestriction, type, subType) {
+            if (subType === undefined) {
                 return this.getBktVals(bucketRestriction, type);
-            }else {
+            } else {
                 var entity = getEntity(bucketRestriction);
                 var service = getService(entity);
                 return service.getValues(bucketRestriction, type, subType);
@@ -334,8 +338,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 console.warn(' changeNumericalCmpValue() Service not implemented');
             }
         }
-        
-        this.removeKey = function(bucketRestriction, type, subType){
+
+        this.removeKey = function (bucketRestriction, type, subType) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
@@ -344,7 +348,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 console.warn(' removeKey() Service not implemented');
             }
         }
-        this.resetBktValues = function(bucketRestriction, type, subType){
+        this.resetBktValues = function (bucketRestriction, type, subType) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
             if (service) {
@@ -459,6 +463,49 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
     })
     .service('QueryTreeAccountEntityService', function () {
+        function setValsBasedOnPosition(cmp, valsArray, position, value) {
+            switch (cmp) {
+                case 'GTE_AND_LT': {
+                    valsArray[position] = value;
+                    break;
+                }
+                default: {
+                    valsArray[0] = value;
+                }
+            }
+        }
+        function getValsBasedOnPosition(cmp, valsArray, position) {
+            switch (cmp) {
+                case 'GTE_AND_LT': {
+                    return valsArray[position];
+                    break;
+                }
+                case 'GREATER_THAN':
+                case 'GREATER_OR_EQUAL':
+                case 'NOT_EQUAL':
+                case 'EQUAL': {
+                    if (position == valsArray.length - 1 || valsArray.length == 0) {
+                        return valsArray[valsArray.length - 1];
+                    } else {
+                        return null;
+                    }
+                    break;
+                }
+                case 'LESS_THAN':
+                case 'LESS_OR_EQUAL': {
+                    if (position == valsArray.length - 1 || valsArray.length == 0) {
+                        return null;
+                    } else {
+                        return valsArray[valsArray.length - 1];
+                    }
+                    break;
+                    ;
+                }
+                default: {
+                    return null;
+                }
+            }
+        }
 
         this.showType = function (bucketRestriction, type, typeToShow) {
             switch (typeToShow) {
@@ -586,9 +633,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return bucketRestriction.bkt.Vals;
         }
 
-        this.getValue = function(bucketRestriction, type, position, subType){}
+        this.getValue = function (bucketRestriction, type, position, subType) { }
 
-        this.getValues = function(bucketRestriction, type, subType){}
+        this.getValues = function (bucketRestriction, type, subType) { }
 
         //******************** Editing mode *********************************/
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
@@ -602,7 +649,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.changeBktValue = function (bucketRestriction, value, position) {
-            bucketRestriction.bkt.Vals[position] = value;
+            setValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position, value);
+            // bucketRestriction.bkt.Vals[position] = value;
         }
 
         this.changeValue = function (bucketRestriction, type, value, position, subType) { }
@@ -611,10 +659,10 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
         }
 
-        this.resetBktValues = function(bucketRestriction, type, subType){
-            console.warn('NOT implemented')
+        this.resetBktValues = function (bucketRestriction, type, subType) {
+            bucketRestriction.bkt.Vals = [];
         }
-        this.removeKey = function(bucketRestriction, type, subtype){
+        this.removeKey = function (bucketRestriction, type, subtype) {
             console.warn('Not implemented');
         }
         this.getBooleanModel = function (bucketRestriction) {
@@ -630,7 +678,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.getBktValue = function (bucketRestriction, position) {
-            return bucketRestriction.bkt.Vals[position];
+            return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
+            // return bucketRestriction.bkt.Vals[position];
         }
 
         this.getCubeBktList = function (cube) {

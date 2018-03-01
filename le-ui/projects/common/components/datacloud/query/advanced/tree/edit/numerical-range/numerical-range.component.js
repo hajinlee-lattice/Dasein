@@ -4,6 +4,7 @@
         from: { name: 'from', val: undefined, position: 0, type: 'Qty' },
         to: { name: 'to', val: undefined, position: 1, type: 'Qty' }
     };
+    'type' can be a subtype or a basic type like Boolean, Numerical ecc.
  */
 angular
     .module('common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range', [])
@@ -12,6 +13,7 @@ angular
             restrict: 'E',
             scope: {
                 vm: '=',
+                form: '=',
                 type: '@',
                 bucketrestriction: '=',
                 config: '@',
@@ -115,7 +117,7 @@ angular
                 }
 
                 /**
-                 * If from input is visible
+                 * If 'from' input is visible
                  */
                 $scope.showFrom = function () {
                     return $scope.showfrom;
@@ -133,7 +135,7 @@ angular
                 }
 
                 /** 
-                 * If to input is visible
+                 * If 'to' input is visible
                 */
                 $scope.showTo = function () {
                     return $scope.showto;
@@ -177,8 +179,8 @@ angular
                 $scope.isValValid = function (position) {
                     var conf = getConfigField(position);
                     var valid = true;
-                    if ($scope.vm.form[conf.name]) {
-                        valid = $scope.vm.form[conf.name].$valid;
+                    if ($scope.form[conf.name]) {
+                        valid = $scope.form[conf.name].$valid;
                     }
                     return valid;
                 }
@@ -190,7 +192,7 @@ angular
                  */
                 $scope.checkValue = function (position) {
                     var conf = getConfigField(position);
-                    if (!$scope.vm.form[conf.name].$valid) {
+                    if (!$scope.form[conf.name].$valid) {
                         var input = $element[0].querySelector('input[name="' + conf.name + '"]');
                         var min = input.min;
                         var max = input.max;

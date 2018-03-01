@@ -1,6 +1,9 @@
 @import "./input/input.component.scss";
 @import "./tree/tree.component.scss";
 @import "./tree/transaction/transaction.component.scss";
+@import "./tree/edit/numerical-range/numerical-range.component.scss";
+@import "./tree/edit/tree-item-edit.component.scss";
+
 
 div.advanced-query-builder {
     position: relative;

@@ -17,8 +17,9 @@
         <span ng-if="vm.showTo()" class="operation-and">-</span>
         <strong ng-if="vm.showTo()">{{vm.getOperationValue('Numerical', 1)}}</strong>
     </span>
-    
-    <strong class="query-section-item-value" ng-if="vm.showItem('Enum')" ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
 
-    <transaction-directive ng-if="vm.showItem('Transaction')" class="query-section-item-value" bucketrestriction="vm.tree.bucketRestriction" type="vm.type"></transaction-directive>
+    <strong class="query-section-item-value" ng-if="vm.showItem('Enum')" ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
+    <span class="query-section-item-value" ng-if="vm.showItem('Transaction')">
+        <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type"></transaction-directive>
+    </span>
 </span>
