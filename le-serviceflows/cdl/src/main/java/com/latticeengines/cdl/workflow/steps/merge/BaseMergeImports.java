@@ -139,11 +139,6 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     }
 
     protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly) {
-        return mergeInputs(useTargetTable, isDedupeSource, mergeOnly, null);
-    }
-
-    protected TransformationStepConfig mergeInputs(boolean useTargetTable, boolean isDedupeSource, boolean mergeOnly,
-                                                   List<String> compositeKeys) {
         TransformationStepConfig step = new TransformationStepConfig();
         List<String> baseSources = inputTableNames;
         step.setBaseSources(baseSources);
@@ -154,7 +149,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         }
         step.setBaseTables(baseTables);
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly, compositeKeys));
+        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly));
         if (useTargetTable) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -164,15 +159,13 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
-                                              List<String> compositeKeys) {
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
         config.setMasterIdField(batchStorePrimaryKey);
         config.setDedupeSource(isDedupeSource);
         config.setMergeOnly(isMergeOnly);
         config.setAddTimestamps(addTimettamps);
-        config.setCompositeKeys(compositeKeys);
         return appendEngineConf(config, lightEngineConfig());
     }
 
