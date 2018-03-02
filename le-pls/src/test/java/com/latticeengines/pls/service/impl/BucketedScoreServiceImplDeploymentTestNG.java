@@ -92,7 +92,7 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         RatingEngine re = new RatingEngine();
         re.setSegment(retrievedSegment);
         re.setCreatedBy(CREATED_BY);
-        re.setType(RatingEngineType.AI_BASED);
+        re.setType(RatingEngineType.CROSS_SELL);
         ratingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), re);
         Assert.assertNotNull(ratingEngine);
         aiModel = createAIModel((AIModel) ratingEngine.getActiveModel(), modelSummary, PredictionType.EXPECTED_VALUE);

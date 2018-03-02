@@ -101,7 +101,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setSegment(segment);
         ratingEngine.setDisplayName("CDL End2End AI Engine");
-        ratingEngine.setType(RatingEngineType.AI_BASED);
+        ratingEngine.setType(RatingEngineType.CROSS_SELL);
 
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());

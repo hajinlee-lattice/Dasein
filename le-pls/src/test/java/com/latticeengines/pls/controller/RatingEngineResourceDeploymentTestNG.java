@@ -138,7 +138,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
         ratingEngineSummarieObjects = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=AI_BASED", List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
 
         // test get specific rating engine
@@ -199,7 +199,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
-        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=AI_BASED",
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL",
                 List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);

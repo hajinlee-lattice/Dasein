@@ -114,7 +114,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             return Collections.emptyList();
         }
         return allContainers.stream() //
-                .filter(container -> RatingEngineType.AI_BASED.equals(container.getEngineSummary().getType())) //
+                .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());
     }
 

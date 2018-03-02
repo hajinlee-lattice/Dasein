@@ -142,7 +142,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         // test find all by type and status
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, null);
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(), null);
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(), null);
         Assert.assertEquals(ratingEngineList.size(), 0);
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(), null);
         Assert.assertEquals(ratingEngineList.size(), 1);
@@ -156,10 +156,10 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 1);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(),
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
-        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.AI_BASED.name(),
+        ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
 

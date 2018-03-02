@@ -608,7 +608,7 @@ angular.module('lp.ratingsengine')
     this.nextSaveRatingEngineAI = function(nextState){
         var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
-                type: "AI_BASED",
+                type: "CROSS_SELL",
                 activeModel: {
                     AI: {
                         workflowType: 'CROSS_SELL',

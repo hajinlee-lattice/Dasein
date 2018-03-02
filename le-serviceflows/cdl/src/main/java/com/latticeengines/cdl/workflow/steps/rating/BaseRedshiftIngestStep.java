@@ -189,7 +189,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             this.modelId = this.ratingModel.getId();
             this.engineSummary = container.getEngineSummary();
             this.engineType = container.getEngineSummary().getType();
-            if (RatingEngineType.AI_BASED.equals(this.engineType)) {
+            if (RatingEngineType.CROSS_SELL.equals(this.engineType)) {
                 this.modelGuid = ((AIModel) this.ratingModel).getModelGuid();
             }
             this.hdfsPath = hdfsPath;

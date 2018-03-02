@@ -123,20 +123,20 @@
                         
                         <div 
                             ng-class="{'inactive': rating.status === 'INACTIVE'}"
-                            ng-if="rating.type != 'AI_BASED'">
+                            ng-if="rating.type != 'CROSS_SELL'">
                             <barchart 
-                                header="Account Ratings"
+                                header="Account Ratings"	
                                 ratings="true" 
                                 data="vm.current.bucketCountMap[rating.id].bucketCoverageCounts">
                             </barchart>
                         </div>
 
-                        <!-- <div ng-if="!rating.hasBuckets && rating.type != 'AI_BASED'">
+                        <!-- <div ng-if="!rating.hasBuckets && rating.type != 'CROSS_SELL'">
                             <h4>No Ratings Available</h4>
                         </div> -->
 
                         <div 
-                            ng-if="rating.type === 'AI_BASED'"
+                            ng-if="rating.type === 'CROSS_SELL'"
                             class="ai-based">
                         </div>
 

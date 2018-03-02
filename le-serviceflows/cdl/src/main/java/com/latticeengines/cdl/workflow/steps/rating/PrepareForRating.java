@@ -73,7 +73,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         RatingModel ratingModel = engine.getActiveModel();
         if (ratingModel != null) {
             boolean isValid = false;
-            if (RatingEngineType.AI_BASED.equals(summary.getType())) {
+            if (RatingEngineType.CROSS_SELL.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidAIModel(aiModel);
                 if (!isValid) {

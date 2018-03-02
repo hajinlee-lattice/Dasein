@@ -59,7 +59,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setNote(RATING_ENGINE_NOTE);
         ratingEngine.setSegment(testSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
-        ratingEngine.setType(RatingEngineType.AI_BASED);
+        ratingEngine.setType(RatingEngineType.CROSS_SELL);
 
         RatingEngine createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine,
                 mainTestTenant.getId());

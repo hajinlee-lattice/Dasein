@@ -204,7 +204,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             throw new LedpException(LedpCode.LEDP_40014, new String[] { ratingEngine.getId(), customerSpace });
         }
 
-        if (ratingEngine.getType() == RatingEngineType.AI_BASED && ratingModel instanceof AIModel) {
+        if (ratingEngine.getType() == RatingEngineType.CROSS_SELL && ratingModel instanceof AIModel) {
             AIModelService aiModelService = (AIModelService) RatingModelServiceBase
                     .getRatingModelService(ratingEngine.getType());
             return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,

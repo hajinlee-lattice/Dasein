@@ -158,7 +158,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean hasAIModels(Collection<RatingModelContainer> containers) {
         return CollectionUtils.isNotEmpty(containers) && containers.stream()
-                .anyMatch(container -> RatingEngineType.AI_BASED.equals(container.getEngineSummary().getType()));
+                .anyMatch(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType()));
     }
 
     private boolean hasRuleModels(Collection<RatingModelContainer> containers) {

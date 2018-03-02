@@ -88,7 +88,7 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
 
     @Override
     protected RatingEngineType getTargetEngineType() {
-        return RatingEngineType.AI_BASED;
+        return RatingEngineType.CROSS_SELL;
     }
 
 }

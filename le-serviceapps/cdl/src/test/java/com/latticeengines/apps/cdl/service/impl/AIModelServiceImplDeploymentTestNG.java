@@ -119,8 +119,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment")
     public void testCreate() {
-        aiRatingEngine = createTestRatingEngine(RatingEngineType.AI_BASED);
-        Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.AI_BASED);
+        aiRatingEngine = createTestRatingEngine(RatingEngineType.CROSS_SELL);
+        Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.CROSS_SELL);
         aiRatingEngineId = aiRatingEngine.getId();
 
         List<RatingModel> ratingModels = ratingEngineService.getRatingModelsByRatingEngineId(aiRatingEngineId);

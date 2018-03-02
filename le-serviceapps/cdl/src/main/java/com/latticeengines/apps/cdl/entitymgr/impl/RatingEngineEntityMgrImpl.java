@@ -112,7 +112,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                     RatingModel ruleBasedModel = ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid);
                     ratingEngine.setActiveModel(ruleBasedModel);
                     break;
-                case AI_BASED:
+                case CROSS_SELL:
                     RatingModel aiModel = aiModelDao.findByKey(AIModel.class, activeModelPid);
                     ratingEngine.setActiveModel(aiModel);
                     break;
@@ -266,7 +266,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ratingEngine.setActiveModel(ruleBasedModel);
             ratingEngineDao.update(ratingEngine);
             break;
-        case AI_BASED:
+        case CROSS_SELL:
             AIModel aiModel = new AIModel();
             aiModel.setId(AIModel.generateIdStr());
             aiModel.setRatingEngine(ratingEngine);

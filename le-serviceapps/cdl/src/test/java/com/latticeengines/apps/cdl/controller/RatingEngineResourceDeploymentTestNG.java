@@ -69,7 +69,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         re2 = new RatingEngine();
         re2.setSegment(retrievedSegment);
         re2.setCreatedBy(CREATED_BY);
-        re2.setType(RatingEngineType.AI_BASED);
+        re2.setType(RatingEngineType.CROSS_SELL);
     }
 
     @Test(groups = "deployment")
@@ -117,7 +117,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
                 "RULE_BASED");
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
-                "AI_BASED");
+                "CROSS_SELL");
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
 
         // test RuleBased rating engine
@@ -191,7 +191,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE", null);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
-        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), null, "AI_BASED");
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), null, "CROSS_SELL");
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), null, "RULE_BASED");

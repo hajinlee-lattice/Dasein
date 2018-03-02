@@ -83,8 +83,8 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         rbRatingEngineId = rbRatingEngine.getId();
 
         // Test AI Rating Engine
-        aiRatingEngine = createRatingEngine(RatingEngineType.AI_BASED);
-        Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.AI_BASED);
+        aiRatingEngine = createRatingEngine(RatingEngineType.CROSS_SELL);
+        Assert.assertEquals(aiRatingEngine.getType(), RatingEngineType.CROSS_SELL);
         assertRatingEngine(aiRatingEngine);
         aiRatingEngineId = aiRatingEngine.getId();
     }
@@ -116,7 +116,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         case RULE_BASED:
             Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
             break;
-        case AI_BASED:
+        case CROSS_SELL:
             break;
         default:
             break;
@@ -141,7 +141,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         // test get list of ratingEngine summaries filtered by type and status
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(null, null);
         Assert.assertEquals(summaries.size(), 2);
-        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(), null);
+        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(), null);
         Assert.assertEquals(summaries.size(), 1);
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(), null);
         Assert.assertEquals(summaries.size(), 1);
@@ -155,17 +155,17 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.RULE_BASED.name(),
                 RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
-        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
 
         // test basic find For RuleBased
         assertFindRatingEngine(rbRatingEngineId, RatingEngineType.RULE_BASED);
         // test basic find For AIBased
-        assertFindRatingEngine(aiRatingEngineId, RatingEngineType.AI_BASED);
+        assertFindRatingEngine(aiRatingEngineId, RatingEngineType.CROSS_SELL);
     }
 
     protected RatingEngine assertFindRatingEngine(String ratingEngineId, RatingEngineType type) {
@@ -195,7 +195,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
             Assert.assertEquals(((RuleBasedModel) rm).getRatingRule().getDefaultBucketName(),
                     RatingRule.DEFAULT_BUCKET_NAME);
             break;
-        case AI_BASED:
+        case CROSS_SELL:
             List<RatingModel> ratingModels = getRatingModelsByRatingEngineId(ratingEngineId);
             Assert.assertNotNull(ratingModels);
             Assert.assertEquals(ratingModels.size(), 1);
@@ -228,7 +228,7 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
 
-        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.AI_BASED.name(),
+        summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
     }

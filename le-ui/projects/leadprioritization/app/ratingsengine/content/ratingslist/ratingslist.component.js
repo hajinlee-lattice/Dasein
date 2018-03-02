@@ -90,7 +90,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.isAIRating = function(rating){
-        if(rating && rating.type === "AI_BASED"){
+        if(rating && rating.type === "CROSS_SELL"){
             return true;
         }
         return false;
@@ -128,7 +128,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             url = 'home.ratingsengine.dashboard';
 
         if(tileState.editRating !== true){
-            if (rating.type === 'AI_BASED') {
+            if (rating.type === 'CROSS_SELL') {
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
 
                     RatingsEngineStore.setRating(engine);

@@ -2,7 +2,10 @@ package com.latticeengines.domain.exposed.pls;
 
 public enum RatingEngineType {
     RULE_BASED("RuleBased"), //
-    AI_BASED("AiBased");
+    CROSS_SELL("Cross-Sell"), //
+    CUSTOM_EVENT("Custom-Event"), //
+    ACCOUNT_PROSPECTING("Account-Prospecting"), //
+    PRODUCT_PROSPECTING("Product-Prospecting");
 
     private String name;
 

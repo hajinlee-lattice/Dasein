@@ -52,7 +52,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     private AIModelEntityMgr aiModelEntityMgr;
 
     protected AIModelServiceImpl() {
-        super(RatingEngineType.AI_BASED);
+        super(RatingEngineType.CROSS_SELL);
     }
 
     @Override

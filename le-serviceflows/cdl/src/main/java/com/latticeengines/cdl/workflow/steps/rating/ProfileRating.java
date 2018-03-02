@@ -204,7 +204,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
             String engineId = modelContainer.getEngineSummary().getId();
             String modelId = modelContainer.getModel().getId();
             modelIdToEngineIdMap.put(modelId, RatingEngine.toRatingAttrName(engineId));
-            if (RatingEngineType.AI_BASED.equals(modelContainer.getEngineSummary().getType())) {
+            if (RatingEngineType.CROSS_SELL.equals(modelContainer.getEngineSummary().getType())) {
                 aiModelIds.add(modelId);
                 AIModel aiModel = (AIModel) modelContainer.getModel();
                 if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())){

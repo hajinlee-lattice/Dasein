@@ -78,7 +78,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, String> getModelGuidToEngineIdMap() {
         List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         List<RatingModelContainer> containers = allContainers.stream() //
-                .filter(container -> RatingEngineType.AI_BASED.equals(container.getEngineSummary().getType())) //
+                .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());
         Map<String, String> modelGuidToEngineIdMap = new HashMap<>();
         containers.forEach(container -> {
