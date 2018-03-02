@@ -40,8 +40,9 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             Node node = entry.getValue();
             double avgScore = avgScoresMap.get(modelGuid);
             boolean isEV = isExpectedValueMap.get(modelGuid);
-            Node aggregatedNode = aggregate(node, isEV);
-            Node output = createLift(aggregatedNode, avgScore, isEV);
+            boolean isCDL = node.getFieldNames().contains(InterfaceName.NormalizedScore.name());
+            Node aggregatedNode = aggregate(node, isCDL, isEV);
+            Node output = createLift(aggregatedNode, isCDL, avgScore, isEV);
             if (merged == null) {
                 merged = output;
             } else {
@@ -64,10 +65,10 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         return nodes;
     }
 
-    private Node aggregate(Node inputTable, boolean isEV) {
+    private Node aggregate(Node inputTable, boolean isCDL, boolean isEV) {
         List<Aggregation> aggregations = new ArrayList<>();
         aggregations.add(new Aggregation(ScoreResultField.Percentile.displayName, TOTAL_EVENTS, AggregationType.COUNT));
-        if (!inputTable.getFieldNames().contains(InterfaceName.NormalizedScore.name())) {
+        if (!isCDL) {
             inputTable = inputTable.apply(String.format("%s ? 1 : 0", InterfaceName.Event.name()),
                     new FieldList(InterfaceName.Event.name()), new FieldMetadata("IsPositiveEvent", Integer.class));
             aggregations.add(new Aggregation("IsPositiveEvent", TOTAL_POSITIVE_EVENTS, AggregationType.SUM));
@@ -83,8 +84,8 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         return aggregatedNode;
     }
 
-    private Node createLift(Node aggregatedNode, double avgScore, boolean isEV) {
-        if (!aggregatedNode.getFieldNames().contains(InterfaceName.NormalizedScore.name())) {
+    private Node createLift(Node aggregatedNode, boolean isCDL, double avgScore, boolean isEV) {
+        if (!isCDL) {
             double modelAvgProbability = avgScore;
             String expression = String.format("%s / %f", "ConversionRate", modelAvgProbability);
             aggregatedNode = aggregatedNode.apply(

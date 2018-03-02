@@ -25,11 +25,16 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
     private static final Logger log = LoggerFactory.getLogger(PivotScoreAndEventTestNG.class);
 
     private PivotScoreAndEventParameters getStandardParameters() {
-        PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("ScoreOutput");
+        PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
         String modelguid = "ms__f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06-PLS_model";
         params.setAvgScores(ImmutableMap.of(modelguid, 0.05));
         params.setExpectedValues(ImmutableMap.of(modelguid, false));
         return params;
+    }
+
+    @Override
+    protected String getScenarioName() {
+        return "ScoreOutput";
     }
 
     @Override
@@ -46,7 +51,7 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
         CSVFormat format = LECSVFormat.format.withSkipHeaderRecord(true);
         try (CSVParser parser = new CSVParser(new InputStreamReader(
                 ClassLoader.getSystemResourceAsStream(String.format("%s/%s/pivot_score_event_result.csv", //
-                        getFlowBeanName(), getStandardParameters().getScoreOutputTableName()))),
+                        getFlowBeanName(), getScenarioName()))),
                 format)) {
             List<CSVRecord> csvRecords = parser.getRecords();
 
