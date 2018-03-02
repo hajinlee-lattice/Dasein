@@ -73,6 +73,9 @@ public enum InterfaceName {
     OrderId, //
     Margin, //
     HasPurchased, //
+    ShareOfWallet, //
+    SpendChange, //
+    SpendOvertime, //
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb

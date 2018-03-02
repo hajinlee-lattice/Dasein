@@ -79,4 +79,14 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     public void findBusinessCalendar(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
     }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PurchaseMetricsEntityMgrImpl.find*(..))")
+    public void findPurchaseMetrics(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PurchaseMetricsEntityMgrImpl.delete*(..))")
+    public void deletePurchaseMetrics(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+    }
 }

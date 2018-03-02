@@ -45,8 +45,8 @@ public class TimeFilter {
         this.values = values;
     }
 
-    public TimeFilter(ComparisonType relation, String p, List<Object> values) {
-        this(null, relation, p, values);
+    public TimeFilter(ComparisonType relation, String period, List<Object> values) {
+        this(null, relation, period, values);
     }
 
     public TimeFilter(Lookup lhs, ComparisonType relation, String period, List<Object> values) {
