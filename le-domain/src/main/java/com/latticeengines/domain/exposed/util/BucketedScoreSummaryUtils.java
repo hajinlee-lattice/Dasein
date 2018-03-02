@@ -57,7 +57,7 @@ public class BucketedScoreSummaryUtils {
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
         bucketedScoreSummary.setOverallLift(totalLift);
 
-        for (int i = bucketedScores.length; i > 0; i--) {
+        for (int i = bucketedScoreSummary.getBarLifts().length; i > 0; i--) {
             int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads() + bucketedScores[i * 3 + 2].getNumLeads()
                     + bucketedScores[i * 3 + 3].getNumLeads();
             int totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
