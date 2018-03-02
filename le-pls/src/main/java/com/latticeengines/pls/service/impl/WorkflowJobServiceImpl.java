@@ -122,7 +122,10 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
-            job = workflowProxy.getWorkflowExecution(jobId, MultiTenantContext.getCustomerSpace().toString());
+            // TODO going to add back the customer space after making changes to
+            // the Model copy about the workflow artifact
+            log.info("Getting job with id " + jobId);
+            job = workflowProxy.getWorkflowExecution(jobId);
             updateJobWithModelSummary(job);
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);
