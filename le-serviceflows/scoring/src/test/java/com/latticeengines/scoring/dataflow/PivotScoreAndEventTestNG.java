@@ -60,7 +60,7 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
                 GenericRecord avroRecord = outputRecords.get(i);
                 log.info("avro:" + avroRecord);
                 log.info("csv:" + csvRecord);
-                for (int j = 0; j < csvRecord.size(); j++) {
+                for (int j = 1; j < csvRecord.size(); j++) {
                     assertEquals(Double.valueOf(csvRecord.get(j)) - Double.valueOf(avroRecord.get(j).toString()), 0.0);
                 }
             }

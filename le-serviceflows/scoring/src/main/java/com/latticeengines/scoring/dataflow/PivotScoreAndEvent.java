@@ -80,7 +80,9 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             }
         }
 
-        Node aggregatedNode = inputTable.groupBy(new FieldList(ScoreResultField.Percentile.displayName), aggregations);
+        Node aggregatedNode = inputTable.groupBy(
+                new FieldList(ScoreResultField.Percentile.displayName, ScoreResultField.ModelId.displayName),
+                aggregations);
         return aggregatedNode;
     }
 
@@ -108,8 +110,8 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             aggregatedNode = aggregatedNode.apply(expression, new FieldList(scoreFieldName),
                     new FieldMetadata(LIFT, Double.class));
         }
-        aggregatedNode = aggregatedNode.retain(ScoreResultField.Percentile.displayName, TOTAL_POSITIVE_EVENTS,
-                TOTAL_EVENTS, LIFT);
+        aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
+                ScoreResultField.Percentile.displayName, TOTAL_POSITIVE_EVENTS, TOTAL_EVENTS, LIFT);
         return aggregatedNode;
     }
 
