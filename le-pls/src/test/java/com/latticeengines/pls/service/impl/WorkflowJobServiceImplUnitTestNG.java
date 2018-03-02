@@ -13,7 +13,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -194,7 +193,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     private void mockWorkflowProxy() {
         when(workflowProxy.getWorkflowExecution(anyString(), anyString())).thenReturn(createJob(jobIds[0]));
-
+        when(workflowProxy.getWorkflowExecution(anyString())).thenReturn(createJob(jobIds[0]));
         List<Job> jobs = new ArrayList<>();
         jobs.add(createJob(jobIds[0]));
         jobs.add(createJob(jobIds[1]));
