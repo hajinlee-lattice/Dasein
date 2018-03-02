@@ -1,7 +1,5 @@
 package com.latticeengines.datacloud.dataflow.transformation;
 
-import static com.latticeengines.datacloud.dataflow.transformation.ProductMapperFlow.BEAN_NAME;
-
 import java.util.List;
 import java.util.Arrays;
 
@@ -12,10 +10,11 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ProductMapperFunction;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProductMapperConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 
-@Component(BEAN_NAME)
+@Component(ProductMapperFlow.BEAN_NAME)
 public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig> {
     public static final String BEAN_NAME = "productMapperFlow";
 
@@ -47,11 +46,11 @@ public class ProductMapperFlow extends ConfigurableFlowBase<ProductMapperConfig>
 
     @Override
     public String getDataFlowBeanName() {
-        return "productMapperFlow";
+        return ProductMapperFlow.BEAN_NAME;
     }
 
     @Override
     public String getTransformerName() {
-        return "productMapper";
+        return DataCloudConstants.PRODUCT_MAPPER;
     }
 }

@@ -64,12 +64,15 @@ public enum InterfaceName {
     TransactionTime, //
     TransactionDate, //
     TransactionDayPeriod, //
+    TransactionCount, //
     ProductName, //
     Quantity, //
     TotalQuantity, //
     Amount, //
     TotalAmount, //
     OrderId, //
+    Margin, //
+    HasPurchased, //
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb
@@ -93,6 +96,7 @@ public enum InterfaceName {
     DoNotCall,
     LeadStatus,
     Cost,
+    TotalCost, //
 
     // CDL External
     SalesforceSandboxAccountID,

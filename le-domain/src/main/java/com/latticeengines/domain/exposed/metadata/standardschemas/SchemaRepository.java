@@ -1001,6 +1001,13 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Metric) //
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .build());
+        table.addAttribute(attr(InterfaceName.TotalCost.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COST", "TOTAL COST")) //
+                .type(Schema.Type.DOUBLE) //
+                .interfaceName(InterfaceName.TotalCost) //
+                .logicalType(LogicalDataType.Metric) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .build());
         table.addAttribute(attr(InterfaceName.TotalQuantity.name()) //
                 .allowedDisplayNames(Sets.newHashSet("QUANTITY", "TOTAL QUANTITY")) //
                 .type(Schema.Type.LONG) //
@@ -1335,8 +1342,7 @@ public class SchemaRepository {
         }
 
         public AttributeBuilder allowedDisplayNames(Set<String> allowedDisplayNames) {
-            List<String> list = new ArrayList<>();
-            list.addAll(allowedDisplayNames);
+            List<String> list = new ArrayList<>(allowedDisplayNames);
             attribute.setAllowedDisplayNames(list);
             return this;
         }
@@ -1366,5 +1372,4 @@ public class SchemaRepository {
             return this;
         }
     }
-
 }

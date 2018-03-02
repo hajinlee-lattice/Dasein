@@ -84,6 +84,7 @@ public final class DataCloudConstants {
 
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
     public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";
+    public static final String TRANSFORMER_ATTRIBUTES_DERIVER = "purchaseAttributesDeriver";
     public static final String PERIOD_DATA_CLEANER = "periodDataCleaner";
     public static final String PERIOD_DATA_FILTER = "periodDatafilter";
     public static final String PERIOD_DATA_AGGREGATER = "periodDataAggregater";
