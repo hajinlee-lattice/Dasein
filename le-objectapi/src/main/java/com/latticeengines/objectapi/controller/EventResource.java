@@ -99,7 +99,7 @@ public class EventResource {
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
-            return eventQueryService.getTrainingTuples(frontEndQuery, version);
+            return eventQueryService.getEventTuples(frontEndQuery, version);
         });
     }
 
