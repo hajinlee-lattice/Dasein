@@ -158,9 +158,14 @@ public class HdfsPathBuilder {
     }
 
     public Path constructSchemaFile(String sourceName, String version) {
-        Path baseDir = constructSourceDir(sourceName);
+        Path baseDir = constructSchemaDir(sourceName, version);
         String avscFile = sourceName + AVRO_SCHEMA_FILE_EXTENSION;
-        return baseDir.append(SCHEMA).append(version).append(avscFile);
+        return baseDir.append(avscFile);
+    }
+
+    public Path constructSchemaDir(String sourceName, String version) {
+        Path baseDir = constructSourceDir(sourceName);
+        return baseDir.append(SCHEMA).append(version);
     }
 
     public Path constructVersionFile(Ingestion ingestion) {

@@ -34,7 +34,9 @@ public class GeneralSourcePurger extends ConfigurablePurger {
         List<String> hiveTables = new ArrayList<>();
         versions.forEach(version -> {
             String hdfsPath = hdfsPathBuilder.constructSnapshotDir(strategy.getSource(), version).toString();
+            String schemaPath = hdfsPathBuilder.constructSchemaDir(strategy.getSource(), version).toString();
             hdfsPaths.add(hdfsPath);
+            hdfsPaths.add(schemaPath);
             String hiveTable = hiveTableService.tableName(strategy.getSource(), version);
             hiveTables.add(hiveTable);
         });

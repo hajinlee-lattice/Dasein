@@ -1,6 +1,7 @@
 package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -116,14 +117,20 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void prepareGeneralSourceToPurge() throws IOException {
         String sourceName = "TestGeneralSource";
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
+        String schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
         HdfsUtils.writeToFile(yarnConfiguration,
                 hdfsPathBuilder.constructSnapshotRootDir(sourceName).toString() + "/_SUCCESS", "");
-        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
+        List<String> hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
         String hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
         List<String> hiveTables = Collections.singletonList(hiveTable);
         generalSourceToPurge = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
