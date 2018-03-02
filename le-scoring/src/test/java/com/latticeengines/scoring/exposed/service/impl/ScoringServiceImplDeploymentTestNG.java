@@ -43,7 +43,6 @@ import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
-import com.latticeengines.scoring.orchestration.service.ScoringDaemonService;
 import com.latticeengines.scoring.util.ScoringTestUtils;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.impl.ModelRetrieverImpl;
@@ -155,7 +154,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         for (GenericRecord record : list) {
             System.out.println(record);
             Assert.assertNotNull(record.get(InterfaceName.Id.toString()));
-            Assert.assertNotNull(record.get(ScoringDaemonService.MODEL_ID));
+            Assert.assertNotNull(record.get(ScoreResultField.ModelId.displayName));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             Assert.assertNotNull(record.get(ScoreResultField.Rating.displayName));
             Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
@@ -167,7 +166,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         List<Schema.Field> fields = schema.getFields();
         System.out.println(schema);
         Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
-        Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
+        Assert.assertEquals(fields.get(1).name(), ScoreResultField.ModelId.displayName);
         Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
         Assert.assertEquals(fields.get(3).name(), ScoreResultField.Rating.displayName);
         Assert.assertEquals(fields.size(), 7);

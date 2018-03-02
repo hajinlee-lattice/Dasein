@@ -259,7 +259,7 @@ public class ScoringProcessorTestNG extends ScoringFunctionalTestNGBase {
             Schema schema = record.getSchema();
             List<Schema.Field> fields = schema.getFields();
             Assert.assertEquals(fields.get(0).name(), InterfaceName.Id.toString());
-            Assert.assertEquals(fields.get(1).name(), ScoringDaemonService.MODEL_ID);
+            Assert.assertEquals(fields.get(1).name(), ScoreResultField.ModelId.displayName);
             Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
             Assert.assertEquals(fields.get(3).name(), ScoreResultField.Rating.displayName);
             System.out.println(record.get(0));

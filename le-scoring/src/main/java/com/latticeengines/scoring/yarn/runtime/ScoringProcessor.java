@@ -421,8 +421,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             idAttr.setPhysicalDataType(Type.LONG.name());
         }
         Attribute modelIdAttr = new Attribute();
-        modelIdAttr.setName(ScoringDaemonService.MODEL_GUID);
-        modelIdAttr.setDisplayName(ScoringDaemonService.MODEL_ID);
+        modelIdAttr.setName(ScoreResultField.ModelId.displayName);
+        modelIdAttr.setDisplayName(ScoreResultField.ModelId.displayName);
         modelIdAttr.setSourceLogicalDataType("");
         modelIdAttr.setPhysicalDataType(Type.STRING.name());
         Attribute scoreAttr = new Attribute();
@@ -516,7 +516,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     }
                     builder.set(ScoreResultField.RawScore.displayName, rawScore);
                 }
-                builder.set(ScoringDaemonService.MODEL_ID, modelId);
+                builder.set(ScoreResultField.ModelId.displayName, modelId);
                 builder.set(ScoreResultField.Percentile.displayName, score);
 
                 writeToErrorFile(csvFilePrinter, id, tuple.getErrorDescription());

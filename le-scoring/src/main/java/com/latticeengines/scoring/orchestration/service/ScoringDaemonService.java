@@ -50,6 +50,5 @@ public interface ScoringDaemonService {
     public static final String UNIQUE_KEY_COLUMN = "LeadID";
 
     public static final String IMPORT_ERROR_FILE_NAME = "error.csv";
-    public static final String MODEL_ID = "ModelId";
 
 }
