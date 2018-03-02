@@ -404,6 +404,12 @@ public abstract class BaseRestApiProxy {
         return appendLogInterceptors(flux, channel, url);
     }
 
+    protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,false);
+        Mono<T> flux = request.retrieve().bodyToMono(clz);
+        return appendLogInterceptors(flux, channel, url);
+    }
+
     protected <K, V, P> Flux<Map<K, V>> postMapFlux(String channel, String url, P payload) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Flux<Map<K, V>> flux = request.retrieve().bodyToFlux(new ParameterizedTypeReference<Map<K, V>>() {});
@@ -411,7 +417,7 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, true);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {});
         return appendLogInterceptors(mono, channel, url);
     }

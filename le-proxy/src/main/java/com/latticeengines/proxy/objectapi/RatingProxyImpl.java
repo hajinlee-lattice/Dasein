@@ -30,6 +30,8 @@ import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 
+import reactor.core.publisher.Mono;
+
 @Component("ratingProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingProxy {
@@ -117,6 +119,16 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
             url = constructUrl("/{customerSpace}/rating/data", tenantId);
         }
         return postKryo("getData", url, frontEndQuery, DataPage.class);
+    }
+
+    public Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url;
+        if (version != null) {
+            url = constructUrl("/{customerSpace}/rating/data?version={version}", tenantId, version);
+        } else {
+            url = constructUrl("/{customerSpace}/rating/data", tenantId);
+        }
+        return postMono("getData", url, frontEndQuery, DataPage.class);
     }
 
     @SuppressWarnings({ "rawtypes", "unchecked" })

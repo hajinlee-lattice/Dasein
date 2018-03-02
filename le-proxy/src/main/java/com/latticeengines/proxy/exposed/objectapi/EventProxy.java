@@ -8,8 +8,11 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
+
+import reactor.core.publisher.Mono;
 
 @Component("eventProxy")
 public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -19,69 +22,87 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
     }
 
     public Long getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getScoringCount(customerSpace, frontEndQuery, null);
+        return getScoringCount(customerSpace, frontEndQuery, null).block();
     }
 
     public Long getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getTrainingCount(customerSpace, frontEndQuery, null);
+        return getTrainingCount(customerSpace, frontEndQuery, null).block();
     }
 
     public Long getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getEventCount(customerSpace, frontEndQuery, null);
-    }
-
-    public DataPage getScoringTuples(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getScoringTuples(customerSpace, frontEndQuery, null);
-    }
-
-    public DataPage getTrainingTuples(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getTrainingTuples(customerSpace, frontEndQuery, null);
-    }
-
-    public DataPage getEventTuples(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getEventTuples(customerSpace, frontEndQuery, null);
-    }
-
-    public Long getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/scoring", shortenCustomerSpace(customerSpace));
-        url = appendDataCollectionVersion(url, version);
-        RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getScoringCount", url, frontEndQuery, Long.class);
-    }
-
-    public Long getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/training", shortenCustomerSpace(customerSpace));
-        url = appendDataCollectionVersion(url, version);
-        RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getTrainingCount", url, frontEndQuery, Long.class);
-    }
-
-    public Long getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/count/event", shortenCustomerSpace(customerSpace));
-        url = appendDataCollectionVersion(url, version);
-        RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getEventCount", url, frontEndQuery, Long.class);
+        return getEventCount(customerSpace, frontEndQuery, null).block();
     }
 
     public DataPage getScoringTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
-        url = appendDataCollectionVersion(url, version);
-        RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getScoringTuples", url, frontEndQuery, DataPage.class);
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            DataPage dataPage = getScoringTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            int count = dataPage == null ? 0 : dataPage.getData().size();
+            String msg = "Fetched a page of " + count + " scoring tuples.";
+            timer.setTimerMessage(msg);
+            return dataPage;
+        }
     }
 
     public DataPage getTrainingTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url = constructUrl("/{customerSpace}/event/data/training", shortenCustomerSpace(customerSpace));
-        url = appendDataCollectionVersion(url, version);
-        RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getTrainingTuples", url, frontEndQuery, DataPage.class);
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            DataPage dataPage = getTrainingTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            int count = dataPage == null ? 0 : dataPage.getData().size();
+            String msg = "Fetched a page of " + count + " training tuples.";
+            timer.setTimerMessage(msg);
+            return dataPage;
+        }
     }
 
     public DataPage getEventTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            DataPage dataPage = getEventTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            int count = dataPage == null ? 0 : dataPage.getData().size();
+            String msg = "Fetched a page of " + count + " event tuples.";
+            timer.setTimerMessage(msg);
+            return dataPage;
+        }
+    }
+
+    private Mono<Long> getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/scoring", shortenCustomerSpace(customerSpace));
+        url = appendDataCollectionVersion(url, version);
+        RestrictionOptimizer.optimize(frontEndQuery);
+        return postMono("getScoringCount", url, frontEndQuery, Long.class);
+    }
+
+    private Mono<Long> getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/training", shortenCustomerSpace(customerSpace));
+        url = appendDataCollectionVersion(url, version);
+        RestrictionOptimizer.optimize(frontEndQuery);
+        return postMono("getTrainingCount", url, frontEndQuery, Long.class);
+    }
+
+    private Mono<Long> getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/count/event", shortenCustomerSpace(customerSpace));
+        url = appendDataCollectionVersion(url, version);
+        RestrictionOptimizer.optimize(frontEndQuery);
+        return postMono("getEventCount", url, frontEndQuery, Long.class);
+    }
+
+    public Mono<DataPage> getScoringTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
+        url = appendDataCollectionVersion(url, version);
+        RestrictionOptimizer.optimize(frontEndQuery);
+        return postMono("getScoringTuples", url, frontEndQuery, DataPage.class);
+    }
+
+    private Mono<DataPage> getTrainingTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+        String url = constructUrl("/{customerSpace}/event/data/training", shortenCustomerSpace(customerSpace));
+        url = appendDataCollectionVersion(url, version);
+        RestrictionOptimizer.optimize(frontEndQuery);
+        return postMono("getTrainingTuples", url, frontEndQuery, DataPage.class);
+    }
+
+    private Mono<DataPage> getEventTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url = constructUrl("/{customerSpace}/event/data/event", shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
-        return post("getEventTuples", url, frontEndQuery, DataPage.class);
+        return postMono("getEventTuples", url, frontEndQuery, DataPage.class);
     }
 
     private String appendDataCollectionVersion(String url, DataCollection.Version version) {

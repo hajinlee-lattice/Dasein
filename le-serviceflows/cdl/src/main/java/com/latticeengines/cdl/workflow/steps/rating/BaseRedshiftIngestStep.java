@@ -47,12 +47,15 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+
+import reactor.core.publisher.Mono;
 
 abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration> extends BaseWorkflowStep<T> {
 
@@ -210,19 +213,26 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             int fileId = 0;
             String targetFile = prepareTargetFile(hdfsPath, ratingModel.getId(), fileId);
             FrontEndQuery frontEndQuery = dataQuery();
-            List<Map<String, Object>> data;
+            List<Map<String, Object>> data = new ArrayList<>();
             do {
                 frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
-                DataPage dataPage;
+                Mono<DataPage> dataPageMono;
                 if (RatingEngineType.RULE_BASED.equals(engineType)) {
-                    dataPage = ratingProxy.getDataFromObjectApi(customerSpace.getTenantId(), frontEndQuery, inactive);
+                    dataPageMono = ratingProxy.getDataNonBlocking(customerSpace.getTenantId(), frontEndQuery, inactive);
                 } else {
-                    dataPage = eventProxy.getScoringTuples(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
+                    dataPageMono = eventProxy.getScoringTuplesNonBlocking(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
                             inactive);
                 }
-                data = dataPage.getData();
+                try (PerformanceTimer timer = new PerformanceTimer()) {
+                    DataPage dataPage = dataPageMono.block();
+                    if (dataPage != null) {
+                        data = dataPage.getData();
+                    }
+                    String msg = "Fetched a page of " + data.size() + " tuples.";
+                    timer.setTimerMessage(msg);
+                }
                 if (CollectionUtils.isNotEmpty(data)) {
-                    List<GenericRecord> records = dataPageToRecords(modelId, modelGuid, dataPage.getData());
+                    List<GenericRecord> records = dataPageToRecords(modelId, modelGuid, data);
                     recordsInCurrentFile += records.size();
                     synchronized (this) {
                         try {

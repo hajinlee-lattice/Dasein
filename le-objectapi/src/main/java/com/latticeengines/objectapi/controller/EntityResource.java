@@ -11,14 +11,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.service.EntityQueryService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Mono;
 
 @Api(value = "entities", description = "REST resource for entities")
 @RestController
@@ -35,17 +38,27 @@ public class EntityResource {
     @PostMapping(value = "/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+    public Mono<Long> getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getCount(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return entityQueryService.getCount(frontEndQuery, version);
+        });
+
     }
 
     @PostMapping(value = "/data")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+    public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                             @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return entityQueryService.getData(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return entityQueryService.getData(frontEndQuery, version);
+        });
+
     }
 
     @PostMapping(value = "/ratingcount")

@@ -2,20 +2,23 @@ package com.latticeengines.objectapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.service.EventQueryService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import reactor.core.publisher.Mono;
 
 @Api(value = "events", description = "REST resource for modeling events")
 @RestController
@@ -28,52 +31,76 @@ public class EventResource {
         this.eventQueryService = eventQueryService;
     }
 
-    @RequestMapping(value = "/count/scoring", method = RequestMethod.POST)
+    @PostMapping(value = "/count/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getScoringCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public Mono<Long> getScoringCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
                                 @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getScoringCount(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getScoringCount(frontEndQuery, version);
+        });
     }
 
-    @RequestMapping(value = "/count/training", method = RequestMethod.POST)
+    @PostMapping(value = "/count/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public Mono<Long> getTrainingCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
                                  @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getTrainingCount(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getTrainingCount(frontEndQuery, version);
+        });
     }
 
-    @RequestMapping(value = "/count/event", method = RequestMethod.POST)
+    @PostMapping(value = "/count/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getEventCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public Mono<Long> getEventCount(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
                               @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getEventCount(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getEventCount(frontEndQuery, version);
+        });
     }
 
-    @RequestMapping(value = "/data/scoring", method = RequestMethod.POST)
+    @PostMapping(value = "/data/scoring")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public Mono<DataPage> getScoringTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
                                      @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getScoringTuples(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getScoringTuples(frontEndQuery, version);
+        });
     }
 
-    @RequestMapping(value = "/data/training", method = RequestMethod.POST)
+    @PostMapping(value = "/data/training")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
-                                      @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getTrainingTuples(frontEndQuery, version);
+    public Mono<DataPage> getTrainingTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+                                            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getTrainingTuples(frontEndQuery, version);
+        });
     }
 
-    @RequestMapping(value = "/data/event", method = RequestMethod.POST)
+    @PostMapping(value = "/data/event")
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
+    public Mono<DataPage> getEventTuples(@PathVariable String customerSpace, @RequestBody EventFrontEndQuery frontEndQuery,
                                    @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        return eventQueryService.getEventTuples(frontEndQuery, version);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        return Mono.fromCallable(() -> {
+            MultiTenantContext.setTenant(tenant);
+            return eventQueryService.getTrainingTuples(frontEndQuery, version);
+        });
     }
 
 }

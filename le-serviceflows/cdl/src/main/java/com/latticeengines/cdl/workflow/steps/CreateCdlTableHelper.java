@@ -81,7 +81,7 @@ public class CreateCdlTableHelper {
         long total = 0;
         while (true) {
             query.setPageFilter(new PageFilter(rowNumber, pageSize));
-            DataPage dataPage = null;
+            DataPage dataPage;
             switch (type) {
             case Train:
                 dataPage = eventProxy.getTrainingTuples(customerSpace.toString(), query, version);
