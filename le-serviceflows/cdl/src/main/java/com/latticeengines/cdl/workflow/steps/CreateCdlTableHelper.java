@@ -77,7 +77,7 @@ public class CreateCdlTableHelper {
         String accountIdKey = InterfaceName.AccountId.name().toLowerCase();
         String periodIdKey = InterfaceName.PeriodId.name().toLowerCase();
         String revenueKey = InterfaceName.__Revenue.name().toLowerCase().substring(2);
-        int rowNumber = 0, pageSize = 1000;
+        int rowNumber = 0, pageSize = 100000;
         long total = 0;
         while (true) {
             query.setPageFilter(new PageFilter(rowNumber, pageSize));
