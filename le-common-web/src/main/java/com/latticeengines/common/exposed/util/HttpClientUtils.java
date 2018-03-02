@@ -35,7 +35,6 @@ public class HttpClientUtils {
     private static final HttpComponentsClientHttpRequestFactory SSL_ENFORCED_HC_FACTORY = constructHttpRequestFactory(
             constructPoolingConnectionMgr(SSLConnectionSocketFactory.getSocketFactory()));
     private static final ClientHttpConnector SSL_BLINK_HTTP_CONNECTOR = SSLUtils.newSslBlindHttpConnector();
-    private static final List<ClientHttpRequestInterceptor> DEFAULT_INTERCEPTORS = defaultInterceptors();
 
     /**
      * gives a reactive web client using connection pool and IGNORE ssl name

@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PrimaryField {
 
+    public static final String FIELD_TYPE_STRING = "STRING";
+
     @JsonProperty("fieldName")
     @ApiModelProperty(required = true, value = "Name of the field")
     private String fieldName;
@@ -19,6 +21,10 @@ public class PrimaryField {
     @JsonProperty("displayName")
     @ApiModelProperty(required = false, value = "Display name of the field")
     private String displayName;
+
+    @JsonProperty("externalSystemName")
+    @ApiModelProperty(required = false, value = "Customer provided name of the external system")
+    private String externalSystemName;
 
     public PrimaryField() {
         super();
@@ -35,6 +41,12 @@ public class PrimaryField {
         this.displayName = displayName;
     }
 
+    public PrimaryField(String fieldName, String fieldType, String displayName, String externalSystemName) {
+        this(fieldName, fieldType);
+        this.displayName = displayName;
+        this.externalSystemName = externalSystemName;
+    }
+
     public String getFieldName() {
         return fieldName;
     }
@@ -47,4 +59,7 @@ public class PrimaryField {
         return displayName;
     }
 
+    public String getExternalSystemName() {
+        return externalSystemName;
+    }
 }

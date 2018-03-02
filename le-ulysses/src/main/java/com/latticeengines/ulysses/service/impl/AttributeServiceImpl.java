@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
-import com.latticeengines.domain.exposed.ulysses.PrimaryField;
+import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldValidationExpression;
 import com.latticeengines.ulysses.service.AttributeService;
 
