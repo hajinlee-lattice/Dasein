@@ -172,8 +172,8 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
 
     private class RedshiftIngest implements Callable<RatingModel> {
 
-        private final int PAGE_SIZE = 10000;
-        private final int ROWS_PER_FILE = 1000_000;
+        private final int PAGE_SIZE = 100_000;
+        private final int ROWS_PER_FILE = 1_000_000;
         private final RatingModel ratingModel;
         private final RatingEngineSummary engineSummary;
         private final RatingEngineType engineType;
