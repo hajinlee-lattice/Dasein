@@ -99,7 +99,7 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
             return;
         }
         try {
-            Job job = workflowProxy.getWorkflowExecution(workflowId.toString());
+            Job job = workflowProxy.getWorkflowExecution(workflowId.toString(), customerSpace);
             if ((job != null) && (job.isRunning())) {
                 workflowProxy.stopWorkflowExecution(workflowId.toString(), customerSpace);
             }
