@@ -9,11 +9,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ConfigurationType")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = CDLBootstrapRequest.class, name = CDL),
-        @JsonSubTypes.Type(value = CDLBootstrapRequest.class, name = LP)
+        @JsonSubTypes.Type(value = LPBootstrapRequest.class, name = LP)
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
