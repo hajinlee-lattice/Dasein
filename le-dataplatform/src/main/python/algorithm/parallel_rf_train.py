@@ -90,5 +90,5 @@ def writeModel(schema, modelDir, clf):
         with open(filename, 'w') as f:
             f = tree.export_graphviz(estimators[i].tree_, out_file=f)
 
-def getExecutor():
+def getExecutor(runtimeProperties=None):
     return ParallelLearningExecutor()

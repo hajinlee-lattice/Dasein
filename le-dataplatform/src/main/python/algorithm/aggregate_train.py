@@ -6,5 +6,5 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     aggregatedclf =  AggregatedModel()
     return aggregatedclf
 
-def getExecutor():
-    return AggregationExecutor()
+def getExecutor(runtimeProperties=None):
+    return AggregationExecutor(runtimeProperties)

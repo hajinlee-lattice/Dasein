@@ -1,8 +1,4 @@
 import logging
-
-from pandas import DataFrame
-from pandas import Series
-
 from leframework.codestyle import overrides
 from leframework.executor import Executor
 from leframework.model.statemachine import StateMachine
@@ -18,6 +14,7 @@ from leframework.model.states.initialize import Initialize
 from leframework.model.states.initializerevenue import InitializeRevenue
 from leframework.model.states.modeldetailgenerator import ModelDetailGenerator
 from leframework.model.states.modelgenerator import ModelGenerator
+from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
 from leframework.model.states.namegenerator import NameGenerator
 from leframework.model.states.normalizationgenerator import NormalizationGenerator
 from leframework.model.states.percentilebucketgenerator import PercentileBucketGenerator
@@ -32,8 +29,8 @@ from leframework.model.states.samplegenerator import SampleGenerator
 from leframework.model.states.scorederivationgenerator import ScoreDerivationGenerator
 from leframework.model.states.segmentationgenerator import SegmentationGenerator
 from leframework.model.states.summarygenerator import SummaryGenerator
-from leframework.model.states.modelpredictorgenerator import ModelPredictorGenerator
-
+from pandas import DataFrame
+from pandas import Series
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -43,6 +40,7 @@ logger = logging.getLogger(name='aggregationexecutor')
 class AggregationExecutor(Executor):
 
     def __init__(self, runtimeProperties=None):
+        self.__runtimeProps = runtimeProperties
         if runtimeProperties is None:
             logger.warn("No runtime properties available")
             self.amHost = None

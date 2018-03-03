@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(name='data_profile')
 
-def getExecutor():
+def getExecutor(runtimeProperties=None):
     return DataProfilingExecutor()
 
 def getSchema():

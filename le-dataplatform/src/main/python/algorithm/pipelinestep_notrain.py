@@ -5,5 +5,5 @@ def train(trainingData, testData, schema, modelDir, algorithmProperties, runtime
     logging.getLogger(name='dummy_train').info("NO TRAINING EXECUTED")
     return None
 
-def getExecutor():
+def getExecutor(runtimeProperties=None):
     return PipelineStepExecutor()

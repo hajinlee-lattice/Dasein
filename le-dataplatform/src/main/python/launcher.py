@@ -1,15 +1,14 @@
 import logging
 import os
-from pandas.core.frame import DataFrame
 import pwd
 import sys
+from pandas.core.frame import DataFrame
 from urlparse import urlparse
 
 from leframework.argumentparser import ArgumentParser
 from leframework.executors.learningexecutor import LearningExecutor
 from leframework.progressreporter import ProgressReporter
 from leframework.webhdfs import WebHDFS
-
 
 logging.basicConfig(level=logging.DEBUG, datefmt='%m/%d/%Y %I:%M:%S %p',
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -118,7 +117,7 @@ class Launcher(object):
 
         executor = LearningExecutor(runtimeProperties)
         if 'getExecutor' in globals():
-            executor = globals()["getExecutor"]()
+            executor = globals()["getExecutor"](runtimeProperties)
 
         # Get hdfs model dir
         modelHdfsDir = executor.getModelDirPath(schema)
