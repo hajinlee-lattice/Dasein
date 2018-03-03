@@ -41,7 +41,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace, "rtsBulkScoreWorkflow");
+            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
             matchResult.setCustomerSpace(customerSpace);

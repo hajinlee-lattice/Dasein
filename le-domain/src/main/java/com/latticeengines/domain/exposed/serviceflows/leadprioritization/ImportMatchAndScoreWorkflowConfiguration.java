@@ -46,7 +46,7 @@ public class ImportMatchAndScoreWorkflowConfiguration extends BaseLPWorkflowConf
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("importMatchAndScoreWorkflow", customerSpace,
-                    "importMatchAndScoreWorkflow");
+                    configuration.getClass().getSimpleName());
             importDataConfiguration.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             scoreWorkflowConfigurationBuilder.customer(customerSpace);

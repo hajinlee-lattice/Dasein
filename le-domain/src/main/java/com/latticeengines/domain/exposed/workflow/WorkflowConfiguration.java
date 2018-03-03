@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.BaseModelingWorkf
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflowConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({ @Type(value = BaseCDLWorkflowConfiguration.class, name = "BaseCDLWorkflowConfiguration"),
         @Type(value = BaseDataCloudWorkflowConfiguration.class, name = "BaseDataCloudWorkflowConfiguration"),
         @Type(value = BaseLPWorkflowConfiguration.class, name = "BaseLPWorkflowConfiguration"),

@@ -51,7 +51,7 @@ public class FitModelWorkflowConfiguration extends BasePDWorkflowConfiguration {
         private RunAttributeLevelSummaryDataFlowsConfiguration attrLevelSummaryDataFlows = new RunAttributeLevelSummaryDataFlowsConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            fitModel.setContainerConfiguration("fitModelWorkflow", customerSpace, "FitModelWorkflow");
+            fitModel.setContainerConfiguration("fitModelWorkflow", customerSpace, fitModel.getClass().getName());
             microservice.setCustomerSpace(customerSpace);
             return this;
         }

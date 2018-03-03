@@ -17,7 +17,7 @@ public class CDLDataFeedImportWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlDataFeedImportWorkflow", customerSpace,
-                    "cdlDataFeedImportWorkflow");
+                    configuration.getClass().getSimpleName());
             importDataFeedTaskConfiguration.setCustomerSpace(customerSpace);
             return this;
         }

@@ -25,7 +25,8 @@ public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfigurat
         private CleanupByUploadWrapperConfiguration cleanupByUploadWrapperConfiguration = new CleanupByUploadWrapperConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("cdlOperationWorkflow", customerSpace, "cdlOperationWorkflow");
+            configuration.setContainerConfiguration("cdlOperationWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             deleteFileUploadStepConfiguration.setCustomerSpace(customerSpace);
             startMaintenanceConfiguration.setCustomerSpace(customerSpace);
             operationExecuteConfiguration.setCustomerSpace(customerSpace);

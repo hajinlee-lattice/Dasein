@@ -25,10 +25,6 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
-    private ProcessAnalyzeWorkflowConfiguration() {
-
-    }
-
     @Override
     public Collection<String> getSwpkgNames() {
         return ImmutableSet.<String> builder() //
@@ -58,7 +54,8 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace, "processAnalyzeWorkflow");
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             processStepConfiguration.setCustomerSpace(customerSpace);
             processAccountStepConfiguration.setCustomerSpace(customerSpace);
             processContactStepConfiguration.setCustomerSpace(customerSpace);

@@ -95,6 +95,8 @@ public class CreateAttributeLevelSummaryWorkflowConfiguration extends BasePDWork
             attributeSummary.add(attrLevelSummaryDataFlows);
             attributeSummary.add(runScoreTableDataFlow);
             attributeSummary.add(targetMarketConfiguration);
+            attributeSummary.setWorkflowName("createAttributeLevelSummaryWorkflow");
+            attributeSummary.setName(attributeSummary.getClass().getSimpleName());
 
             return attributeSummary;
         }

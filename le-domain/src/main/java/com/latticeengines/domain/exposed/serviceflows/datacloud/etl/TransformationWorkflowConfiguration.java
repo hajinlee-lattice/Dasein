@@ -34,7 +34,6 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
         private TransformationStepExecutionConfiguration executeStep = new TransformationStepExecutionConfiguration();
         private CustomerSpace customerSpace;
         private String workflowName;
-        private String payloadName;
         private String rootOperationUid;
         private String hdfsPodId;
         private TransformationConfiguration transformationConfiguration;
@@ -43,7 +42,8 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
         private Integer mem;
 
         public TransformationWorkflowConfiguration build() {
-            configuration.setContainerConfiguration(workflowName, customerSpace, payloadName);
+            configuration.setContainerConfiguration(workflowName, customerSpace,
+                    configuration.getClass().getSimpleName());
             configuration.setContainerMemoryMB(mem);
             prepareConfig.setCustomerSpace(customerSpace);
             prepareConfig.setRootOperationUid(rootOperationUid);
@@ -85,11 +85,6 @@ public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowCo
 
         public Builder workflowName(String workflowName) {
             this.workflowName = workflowName;
-            return this;
-        }
-
-        public Builder payloadName(String payloadName) {
-            this.payloadName = payloadName;
             return this;
         }
 

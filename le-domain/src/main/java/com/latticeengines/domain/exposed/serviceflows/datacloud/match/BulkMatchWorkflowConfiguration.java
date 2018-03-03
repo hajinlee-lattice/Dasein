@@ -83,7 +83,8 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
         }
 
         public BulkMatchWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("bulkMatchWorkflow", customerSpace, "BulkMatchWorkflow");
+            configuration.setContainerConfiguration("bulkMatchWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             configuration.add(prepareConfig);
             configuration.add(parallelExecConfig);
             return configuration;

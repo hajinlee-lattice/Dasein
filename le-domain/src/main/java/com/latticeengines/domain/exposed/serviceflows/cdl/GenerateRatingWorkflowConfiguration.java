@@ -46,7 +46,8 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace, "processAnalyzeWorkflow");
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);

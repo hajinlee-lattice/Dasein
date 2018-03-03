@@ -44,7 +44,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("importAndRTSBulkScoreWorkflow", customerSpace,
-                    "importAndRTSBulkScoreWorkflow");
+                    configuration.getClass().getSimpleName());
             importDataConfiguration.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowConfigurationBuilder.customer(customerSpace);

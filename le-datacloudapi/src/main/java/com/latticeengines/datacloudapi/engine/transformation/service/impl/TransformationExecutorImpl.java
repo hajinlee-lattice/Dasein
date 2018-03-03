@@ -92,22 +92,20 @@ public class TransformationExecutorImpl implements TransformationExecutor {
             log.error(e.getMessage(), e);
             throw e;
         }
-        throw new LedpException(LedpCode.LEDP_25015,
-                new String[] { transformationService.getSource().getSourceName(), retries.toString(),
-                        RequestContext.getErrors() == null ? null
-                                : String.join("  &&  ", RequestContext.getErrors()) });
+        throw new LedpException(LedpCode.LEDP_25015, new String[] { transformationService.getSource().getSourceName(),
+                retries.toString(),
+                RequestContext.getErrors() == null ? null : String.join("  &&  ", RequestContext.getErrors()) });
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public TransformationWorkflowConfiguration generateNewPipelineWorkflowConf(PipelineTransformationRequest request) {
         PipelineTransformationService service = (PipelineTransformationService) transformationService;
-        TransformationConfiguration transformationConfiguration = service
-                .createTransformationConfiguration(request);
+        TransformationConfiguration transformationConfiguration = service.createTransformationConfiguration(request);
 
         if (transformationConfiguration != null) {
-            TransformationProgress progress = transformationService
-                    .startNewProgress(transformationConfiguration, jobSubmitter);
+            TransformationProgress progress = transformationService.startNewProgress(transformationConfiguration,
+                    jobSubmitter);
             return getTransformationWorkflowConf(transformationConfiguration, progress);
         } else {
             throw new RuntimeException("Cannot create  TransformationConfiguration");
@@ -128,10 +126,9 @@ public class TransformationExecutorImpl implements TransformationExecutor {
         transformationProgressEntityMgr.updateProgress(progress);
     }
 
-    private TransformationWorkflowConfiguration getTransformationWorkflowConf(TransformationConfiguration transformationConfiguration,
-                                                TransformationProgress progress) {
+    private TransformationWorkflowConfiguration getTransformationWorkflowConf(
+            TransformationConfiguration transformationConfiguration, TransformationProgress progress) {
         builder = builder.workflowName("transformationWorkflow") //
-                .payloadName("Transformation") //
                 .customerSpace(customerSpace) //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
                 .transformationConfiguration(transformationConfiguration) //

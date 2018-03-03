@@ -23,7 +23,8 @@ public class SegmentExportWorkflowConfiguration extends BaseCDLWorkflowConfigura
         private ExportStepConfiguration avroToCsvExportStepConf = new ExportStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("segmentExportWorkflow", customerSpace, "segmentExportWorkflow");
+            configuration.setContainerConfiguration("segmentExportWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             initStepConf.setCustomerSpace(customerSpace);
             avroToCsvExportStepConf.setCustomerSpace(customerSpace);
             return this;

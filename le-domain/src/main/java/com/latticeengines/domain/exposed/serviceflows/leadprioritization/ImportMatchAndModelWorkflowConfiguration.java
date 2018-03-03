@@ -84,7 +84,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("importMatchAndModelWorkflow", customerSpace,
-                    "ImportMatchAndModelWorkflow");
+                    configuration.getClass().getSimpleName());
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             createEventTableReport.setCustomerSpace(customerSpace);

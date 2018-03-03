@@ -58,7 +58,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("ratingEngineScoreWorkflow", customerSpace,
-                    "ratingEngineScoreWorkflow");
+                    configuration.getClass().getSimpleName());
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
             score.setCustomerSpace(customerSpace);

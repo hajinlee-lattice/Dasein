@@ -13,7 +13,8 @@ public class PlayLaunchWorkflowConfiguration extends BaseCDLWorkflowConfiguratio
         private PlayLaunchInitStepConfiguration initStepConf = new PlayLaunchInitStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("playLaunchWorkflow", customerSpace, "playLaunchWorkflow");
+            configuration.setContainerConfiguration("playLaunchWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             initStepConf.setCustomerSpace(customerSpace);
             return this;
         }

@@ -27,7 +27,7 @@ public class CDLImportWorkflowConfiguration extends BaseCDLWorkflowConfiguration
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("cdlCreateStagingTablesWorkflow", customerSpace,
-                    "cdlCreateStagingTablesWorkflow");
+                    configuration.getClass().getSimpleName());
             return this;
         }
 

@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.match.CascadingB
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({ @Type(value = BulkMatchWorkflowConfiguration.class, name = "BulkMatchWorkflowConfiguration"),
         @Type(value = CascadingBulkMatchWorkflowConfiguration.class, name = "CascadingBulkMatchWorkflowConfiguration"),
         @Type(value = IngestionWorkflowConfiguration.class, name = "IngestionWorkflowConfiguration"),

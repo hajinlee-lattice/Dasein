@@ -69,7 +69,7 @@ public class CdlMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder workflow(String workflowName) {
             configuration.setWorkflowName(workflowName);
-            configuration.setName(workflowName);
+            configuration.setName(configuration.getClass().getSimpleName());
             return this;
         }
 

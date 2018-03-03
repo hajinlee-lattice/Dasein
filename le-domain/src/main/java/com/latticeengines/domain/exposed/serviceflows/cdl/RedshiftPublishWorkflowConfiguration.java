@@ -22,7 +22,7 @@ public class RedshiftPublishWorkflowConfiguration extends BaseCDLWorkflowConfigu
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("redshiftPublishWorkflow", customerSpace,
-                    "redshiftPublishWorkflow");
+                    configuration.getClass().getSimpleName());
             exportDataToRedshiftConfiguration.setCustomerSpace(customerSpace);
             exportDataToRedshiftReportConfiguration.setCustomerSpace(customerSpace);
             return this;
