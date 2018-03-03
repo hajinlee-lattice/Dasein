@@ -52,8 +52,11 @@ public interface WorkflowService {
 
     JobParameters createJobParams(WorkflowConfiguration workflowConfiguratio);
 
-    void registerJob(String name, ApplicationContext context);
+    // void registerJob(WorkflowConfiguration workflowConfig, ApplicationContext
+    // context);
 
     WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob);
+
+    <T extends WorkflowConfiguration> void registerJob(T workflowConfig, ApplicationContext context);
 
 }

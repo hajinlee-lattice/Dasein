@@ -23,7 +23,7 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeW
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(profileTransactionWrapper) //
                 .next(profilePurchaseHistoryWrapper) //

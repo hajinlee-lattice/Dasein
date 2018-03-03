@@ -1,12 +1,10 @@
 package com.latticeengines.datacloud.workflow.engine;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.IngestionWorkflowConfiguration;
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.workflow.engine.steps.IngestionStep;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.IngestionWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -16,13 +14,8 @@ public class IngestionWorkflow extends AbstractWorkflow<IngestionWorkflowConfigu
     @Autowired
     private IngestionStep ingestionStep;
 
-    @Bean
-    public Job ingestionWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(IngestionWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(ingestionStep) //
                 .build();

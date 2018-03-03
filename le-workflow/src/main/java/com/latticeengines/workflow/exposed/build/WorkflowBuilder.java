@@ -1,5 +1,7 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.util.List;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -14,10 +16,15 @@ public class WorkflowBuilder {
         return this;
     }
 
+    public WorkflowBuilder next(List<AbstractStep<? extends BaseStepConfiguration>> steps) {
+        steps.forEach(step -> workflow.step(step, null));
+        return this;
+    }
+
     public WorkflowBuilder next(AbstractWorkflow<?> nextWorkflow) {
         int idx = 0;
-        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            String namespace = nextWorkflow.defineWorkflow().getStepNamespaces().get(idx);
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(null).getSteps()) {
+            String namespace = nextWorkflow.defineWorkflow(null).getStepNamespaces().get(idx);
             namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
             workflow.step(step, namespace);
             idx++;
@@ -28,8 +35,8 @@ public class WorkflowBuilder {
 
     public WorkflowBuilder next(WorkflowInterface<?> nextWorkflow) {
         int idx = 0;
-        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow().getSteps()) {
-            String namespace = nextWorkflow.defineWorkflow().getStepNamespaces().get(idx);
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(null).getSteps()) {
+            String namespace = nextWorkflow.defineWorkflow(null).getStepNamespaces().get(idx);
             namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
             workflow.step(step, namespace);
             idx++;

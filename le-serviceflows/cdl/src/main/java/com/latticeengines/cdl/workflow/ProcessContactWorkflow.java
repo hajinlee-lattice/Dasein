@@ -29,7 +29,7 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ResetContact resetContact;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(mergeContactWrapper) //
                 .next(updateContactWorkflow) //

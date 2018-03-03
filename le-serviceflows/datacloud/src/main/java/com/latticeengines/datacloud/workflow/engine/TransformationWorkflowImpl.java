@@ -1,8 +1,6 @@
 package com.latticeengines.datacloud.workflow.engine;
 
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -23,13 +21,8 @@ public class TransformationWorkflowImpl extends AbstractWorkflow<TransformationW
     @Autowired
     private TransformationStep transformationStep;
 
-    @Bean
-    public Job transformationWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(TransformationWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(transformationStep) //
                 .build();

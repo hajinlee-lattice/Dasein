@@ -31,7 +31,7 @@ public class ImportAndRTSBulkScoreWorkflow extends AbstractWorkflow<ImportAndRTS
     private SendEmailAfterRTSBulkScoringCompletionListener sendEmailAfterRTSBulkScoringCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ImportAndRTSBulkScoreWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(importData) //
                 .next(createTableImportReport) //

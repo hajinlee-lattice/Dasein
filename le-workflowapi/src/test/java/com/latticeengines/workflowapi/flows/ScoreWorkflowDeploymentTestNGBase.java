@@ -93,7 +93,7 @@ public class ScoreWorkflowDeploymentTestNGBase extends ImportMatchAndModelWorkfl
         ScoreWorkflowConfiguration workflowConfig = scoreWorkflowSubmitter.generateConfiguration(modelId, tableToScore,
                 new Table(), tableToScore, TransformationGroup.STANDARD);
 
-        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
+        workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);

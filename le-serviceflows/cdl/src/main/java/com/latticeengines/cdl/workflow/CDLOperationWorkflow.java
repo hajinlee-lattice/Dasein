@@ -34,8 +34,13 @@ public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowC
     private MaintenanceOperationListener maintenanceOperationListener;
 
     @Override
-    public Workflow defineWorkflow() {
-        return new WorkflowBuilder().next(deleteFileUploadStep).next(startMaintenanceStep).next(cleanupByUploadWrapper)
-                .next(operationExecuteStep).listener(maintenanceOperationListener).build();
+    public Workflow defineWorkflow(CDLOperationWorkflowConfiguration config) {
+        return new WorkflowBuilder()//
+                .next(deleteFileUploadStep)//
+                .next(startMaintenanceStep)//
+                .next(cleanupByUploadWrapper)//
+                .next(operationExecuteStep)//
+                .listener(maintenanceOperationListener)//
+                .build();
     }
 }

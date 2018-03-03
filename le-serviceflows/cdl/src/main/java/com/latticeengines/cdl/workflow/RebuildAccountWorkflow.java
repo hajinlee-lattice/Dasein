@@ -19,7 +19,7 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ProfileAccountWrapper profileAccountWrapper;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(profileAccountWrapper) //
                 .build();

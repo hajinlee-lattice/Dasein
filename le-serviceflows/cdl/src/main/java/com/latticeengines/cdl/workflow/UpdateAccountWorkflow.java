@@ -23,7 +23,7 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProcessAccountDiffWrapper processAccountDiffWrapper;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(cloneAccount) //
                 .next(processAccountDiffWrapper) //

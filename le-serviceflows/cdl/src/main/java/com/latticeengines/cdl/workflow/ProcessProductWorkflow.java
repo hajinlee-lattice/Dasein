@@ -29,7 +29,7 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ResetProduct resetProduct;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(mergeProductWrapper) //
                 .next(updateProductWorkflow) //

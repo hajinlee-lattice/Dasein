@@ -56,7 +56,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(matchDataCloudWorkflow) //
                 .next(dedupEventTableDataFlow) //

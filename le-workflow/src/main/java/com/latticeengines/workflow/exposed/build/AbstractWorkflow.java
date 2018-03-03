@@ -7,13 +7,13 @@ import com.latticeengines.workflow.core.WorkflowTranslator;
 
 public abstract class AbstractWorkflow<T> extends AbstractNameAwareBean {
 
-    public abstract Workflow defineWorkflow();
+    public abstract Workflow defineWorkflow(T workflowConfig);
 
     @Autowired
     private WorkflowTranslator workflowTranslator;
 
-    public Job buildWorkflow() throws Exception {
-        return workflowTranslator.buildWorkflow(name(), defineWorkflow());
+    public Job buildWorkflow(T workflowConfig) throws Exception {
+        return workflowTranslator.buildWorkflow(name(), defineWorkflow(workflowConfig));
     }
 
 }

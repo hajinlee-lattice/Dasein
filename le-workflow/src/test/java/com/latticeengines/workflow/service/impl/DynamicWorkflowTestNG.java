@@ -20,7 +20,6 @@ import org.springframework.batch.core.BatchStatus;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -73,7 +72,10 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
-        workflowService.registerJob(dynamicWorkflow.name(), applicationContext);
+        workflowConfig = new WorkflowConfiguration();
+        workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        workflowConfig.setWorkflowName(dynamicWorkflow.name());
+        workflowService.registerJob(workflowConfig, applicationContext);
     }
 
     @AfterClass(groups = "functional")
@@ -86,17 +88,10 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
         super.cleanup(workflowId.getId());
     }
 
-    @BeforeMethod(groups = "functional")
-    public void setupMethod() {
-        workflowConfig = new WorkflowConfiguration();
-        workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
-    }
-
     @Test(groups = "functional", dataProvider = "dynamicWorkflowTestConfig")
     public void testDynamicWorkflow(String skipStrategy, List<Integer> stepsShouldBeSkipped) throws Exception {
         choreographer.examinedSteps = new ArrayList<>();
         choreographer.setSkipStrategy(skipStrategy);
-        workflowConfig.setWorkflowName(dynamicWorkflow.name());
 
         workflowId = workflowService.start(workflowConfig);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 1000).getStatus();

@@ -23,7 +23,7 @@ public class UpdateProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProcessProductDiff processProductDiff;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(cloneProduct) //
                 .next(processProductDiff) //

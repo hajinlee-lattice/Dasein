@@ -62,7 +62,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder().next(importData) //
                 .next(createTableImportReport) //
                 .next(modelValidationWorkflow) //

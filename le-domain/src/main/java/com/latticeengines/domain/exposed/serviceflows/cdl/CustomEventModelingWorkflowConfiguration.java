@@ -14,4 +14,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
                 .addAll(super.getSwpkgNames()) //
                 .build();
     }
+
+    public static class Builder {
+        private CustomEventModelingWorkflowConfiguration configuration = new CustomEventModelingWorkflowConfiguration();
+
+    }
 }

@@ -43,7 +43,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWor
     private ComputeLiftDataFlow computeLift;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(GenerateRatingWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(createScoringTargetTable) //
                 .next(createCdlEventTable) //

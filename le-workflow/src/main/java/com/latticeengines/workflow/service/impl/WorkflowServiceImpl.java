@@ -93,10 +93,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
 
     @Override
-    public void registerJob(String name, ApplicationContext context) {
-        Job job;
+    public <T extends WorkflowConfiguration> void registerJob(T workflowConfig, ApplicationContext context) {
         try {
-            job = context.getBean(name, AbstractWorkflow.class).buildWorkflow();
+            @SuppressWarnings("unchecked")
+            AbstractWorkflow<T> workflow = context.getBean(workflowConfig.getWorkflowName(), AbstractWorkflow.class);
+            Job job = workflow.buildWorkflow(workflowConfig);
             JobFactory jobFactory = new ReferenceJobFactory(job);
             jobRegistry.register(jobFactory);
         } catch (Exception e) {

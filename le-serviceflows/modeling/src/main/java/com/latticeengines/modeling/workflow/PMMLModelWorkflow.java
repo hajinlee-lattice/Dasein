@@ -27,7 +27,7 @@ public class PMMLModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowCon
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder().next(createPMMLModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .listener(sendEmailAfterModelCompletionListener) //

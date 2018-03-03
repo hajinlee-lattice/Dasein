@@ -2,8 +2,6 @@ package com.latticeengines.workflow.functionalframework;
 
 import javax.annotation.Resource;
 
-import org.springframework.batch.core.Job;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -20,13 +18,8 @@ public class DynamicSubWorkflowB extends AbstractWorkflow<WorkflowConfiguration>
     @Resource(name = "stepD")
     private NamedStep stepD;
 
-    @Bean
-    public Job dynamicSubWorkflowBJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(stepC) //
                 .next(stepD) //

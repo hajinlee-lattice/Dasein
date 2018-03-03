@@ -27,7 +27,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWo
     private ProcessTransactionDiffWrapper processTransactionDiffWrapper;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(cloneTransaction).next(clonePurchaseHistory) //
                 .next(processTransactionDiffWrapper) //

@@ -1,8 +1,6 @@
 package com.latticeengines.workflowapi.flows.testflows.testreport;
 
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -14,13 +12,8 @@ public class TestReportWorkflow extends AbstractWorkflow<TestReportWorkflowConfi
     @Autowired
     private TestRegisterReport registerReport;
 
-    @Bean
-    public Job testReportWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(TestReportWorkflowConfiguration config) {
         return new WorkflowBuilder().next(registerReport).build();
     }
 }

@@ -109,7 +109,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         ImportMatchAndModelWorkflowConfiguration workflowConfig = importMatchAndModelWorkflowSubmitter
                 .generateConfiguration(parameters);
 
-        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
+        workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
 
         waitForCompletion(workflowId);

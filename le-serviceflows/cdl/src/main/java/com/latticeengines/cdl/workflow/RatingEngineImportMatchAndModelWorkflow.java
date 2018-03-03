@@ -49,7 +49,7 @@ public class RatingEngineImportMatchAndModelWorkflow
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(RatingEngineImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //

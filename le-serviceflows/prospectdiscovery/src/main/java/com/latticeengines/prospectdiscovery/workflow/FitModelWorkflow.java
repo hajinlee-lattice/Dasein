@@ -1,8 +1,6 @@
 package com.latticeengines.prospectdiscovery.workflow;
 
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -77,13 +75,8 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     @Autowired
     private CreateAttributeLevelSummaryWorkflow createAttributeLevelSummaryWorkflow;
 
-    @Bean
-    public Job fitModelWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder().next(markReportOutOfDate) //
                 .next(importData) //
                 .next(createPreMatchEventTable) //

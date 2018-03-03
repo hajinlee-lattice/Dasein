@@ -38,7 +38,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ExportDataToRedshift exportDataToRedshift;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //

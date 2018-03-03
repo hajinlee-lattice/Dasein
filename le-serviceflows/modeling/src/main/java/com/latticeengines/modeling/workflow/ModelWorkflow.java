@@ -63,7 +63,7 @@ public class ModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfigu
     InvokeDataScienceAnalysis invokeDataScienceAnalysis;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder().next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //

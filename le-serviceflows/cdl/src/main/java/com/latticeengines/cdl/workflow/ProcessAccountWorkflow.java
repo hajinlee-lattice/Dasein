@@ -29,7 +29,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ResetAccount resetAccount;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(mergeAccountWrapper) //
                 .next(updateAccountWorkflow) //

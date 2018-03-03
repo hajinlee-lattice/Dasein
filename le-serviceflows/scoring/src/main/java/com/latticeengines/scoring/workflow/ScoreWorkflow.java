@@ -43,7 +43,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(ScoreWorkflowConfiguration config) {
         return new WorkflowBuilder().next(matchDataCloudWorkflow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(score) //

@@ -59,19 +59,21 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
     protected String modelName;
     private String modelDisplayName;
     private int modelCount = 1;
+    private PMMLModelWorkflowConfiguration workflowConfig;
 
     @Override
     @BeforeClass(groups = { "deployment", "workflow" })
     public void setup() throws Exception {
         super.setup();
-        workflowService.registerJob("pmmlModelWorkflow", applicationContext);
+        workflowConfig = generatePMMLModelWorkflowConfiguration();
+        workflowService.registerJob(workflowConfig, applicationContext);
     }
 
     @Test(groups = "workflow", dataProvider = "pmmlFileNameProvider", enabled = true)
     public void testWorkflow(String pmmlFileName, String pivotValueFileName) throws Exception {
         MultiTenantContext.setTenant(mainTestTenant);
         setupFiles(mainTestCustomerSpace, pmmlFileName, pivotValueFileName);
-        PMMLModelWorkflowConfiguration workflowConfig = generatePMMLModelWorkflowConfiguration();
+
         for (String key : workflowConfig.getConfigRegistry().keySet()) {
             if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
                 ObjectMapper om = new ObjectMapper();

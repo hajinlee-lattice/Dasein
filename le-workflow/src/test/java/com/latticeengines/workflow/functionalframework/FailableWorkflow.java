@@ -1,8 +1,6 @@
 package com.latticeengines.workflow.functionalframework;
 
-import org.springframework.batch.core.Job;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
@@ -22,13 +20,8 @@ public class FailableWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     @Autowired
     private FailableStep failableStep;
 
-    @Bean
-    public Job failableWorkflowJob() throws Exception {
-        return buildWorkflow();
-    }
-
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder().next(successfulStep) //
                 .next(failableStep) //
                 .next(anotherSuccessfulStep) //

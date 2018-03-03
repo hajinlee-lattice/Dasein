@@ -1,11 +1,14 @@
 package com.latticeengines.cdl.workflow;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
@@ -16,8 +19,8 @@ import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
-import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
+import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -33,13 +36,10 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private CreateTableImportReport createTableImportReport;
 
     @Inject
-    private ModelDataValidationWorkflow modelValidationWorkflow;
+    private CustomEventMatchWorkflow customEventMatchWorkflow;
 
     @Inject
-    private MatchDataCloudWorkflow matchDataCloudWorkflow;
-
-    // @Inject
-    // private MatchCDLWorkflow matchCDLWorkflow;
+    private ModelDataValidationWorkflow modelValidationWorkflow;
 
     @Inject
     private DedupEventTable dedupEventTableDataFlow;
@@ -66,12 +66,12 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
+        List<AbstractStep<? extends BaseStepConfiguration>> steps = customEventMatchWorkflow.getSteps(null);
         return new WorkflowBuilder().next(importData) //
                 .next(createTableImportReport) //
+                .next(steps) //
                 .next(modelValidationWorkflow) //
-                .next(matchDataCloudWorkflow) //
-                // .next(matchCDLWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //

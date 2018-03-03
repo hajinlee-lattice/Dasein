@@ -46,7 +46,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
 
     @Override
-    public Workflow defineWorkflow() {
+    public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
         return new WorkflowBuilder().next(createCdlScoringTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //

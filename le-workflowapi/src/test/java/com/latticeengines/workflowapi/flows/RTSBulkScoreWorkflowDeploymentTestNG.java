@@ -189,7 +189,7 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
         RTSBulkScoreWorkflowConfiguration workflowConfig = rtsBulkScoreWorkflowSubmitter.generateConfiguration(modelId,
                 tableToScore, tableToScore, true, false);
 
-        workflowService.registerJob(workflowConfig.getWorkflowName(), applicationContext);
+        workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
     }
