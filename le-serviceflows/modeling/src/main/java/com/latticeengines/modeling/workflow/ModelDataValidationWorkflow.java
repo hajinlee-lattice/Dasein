@@ -22,7 +22,7 @@ public class ModelDataValidationWorkflow extends AbstractWorkflow<WorkflowConfig
     @Inject
     private ValidatePrematchEventTable validatePrematchEventTable;
 
-    @Inject
+    @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder().next(createPrematchEventTableReport) //
                 .next(validatePrematchEventTable) //
