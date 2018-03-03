@@ -47,15 +47,12 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-
-import reactor.core.publisher.Mono;
 
 abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration> extends BaseWorkflowStep<T> {
 
@@ -216,20 +213,15 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
             List<Map<String, Object>> data = new ArrayList<>();
             do {
                 frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
-                Mono<DataPage> dataPageMono;
+                DataPage dataPage;
                 if (RatingEngineType.RULE_BASED.equals(engineType)) {
-                    dataPageMono = ratingProxy.getDataNonBlocking(customerSpace.getTenantId(), frontEndQuery, inactive);
+                    dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, inactive);
                 } else {
-                    dataPageMono = eventProxy.getScoringTuplesNonBlocking(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
+                    dataPage = eventProxy.getScoringTuples(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
                             inactive);
                 }
-                try (PerformanceTimer timer = new PerformanceTimer()) {
-                    DataPage dataPage = dataPageMono.block();
-                    if (dataPage != null) {
-                        data = dataPage.getData();
-                    }
-                    String msg = "Fetched a page of " + data.size() + " tuples.";
-                    timer.setTimerMessage(msg);
+                if (dataPage != null) {
+                    data = dataPage.getData();
                 }
                 if (CollectionUtils.isNotEmpty(data)) {
                     List<GenericRecord> records = dataPageToRecords(modelId, modelGuid, data);

@@ -3,7 +3,6 @@ package com.latticeengines.apps.lp.controller;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
 
-import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -11,10 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.Loggers;
 
+/**
+ * This is a debug endpoint to experiment some async server behaviors
+ */
 @RestController
 @RequestMapping("/long")
 public class LongResource {

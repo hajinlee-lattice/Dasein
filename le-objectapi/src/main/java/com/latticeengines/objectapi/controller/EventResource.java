@@ -1,7 +1,6 @@
 package com.latticeengines.objectapi.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,7 +18,6 @@ import com.latticeengines.objectapi.service.EventQueryService;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Api(value = "events", description = "REST resource for modeling events")
@@ -72,41 +70,41 @@ public class EventResource {
 
     @PostMapping(value = "/data/scoring")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<DataPage> getScoringTuples(@PathVariable String customerSpace,
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public Mono<DataPage> getScoringTuples(@PathVariable String customerSpace,
                                            @RequestBody EventFrontEndQuery frontEndQuery,
                                            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
             return eventQueryService.getScoringTuples(frontEndQuery, version);
-        }).flux();
+        });
     }
 
     @PostMapping(value = "/data/training")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<DataPage> getTrainingTuples(@PathVariable String customerSpace,
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public Mono<DataPage> getTrainingTuples(@PathVariable String customerSpace,
             @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
             return eventQueryService.getTrainingTuples(frontEndQuery, version);
-        }).flux();
+        });
     }
 
     @PostMapping(value = "/data/event")
     @ResponseBody
-    @ApiOperation(value = "Retrieve the rows for the specified query", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Flux<DataPage> getEventTuples(@PathVariable String customerSpace,
+    @ApiOperation(value = "Retrieve the rows for the specified query")
+    public Mono<DataPage> getEventTuples(@PathVariable String customerSpace,
             @RequestBody EventFrontEndQuery frontEndQuery,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
             return eventQueryService.getEventTuples(frontEndQuery, version);
-        }).flux();
+        });
     }
 
 }

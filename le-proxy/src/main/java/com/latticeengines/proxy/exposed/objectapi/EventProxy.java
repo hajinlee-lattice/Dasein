@@ -86,7 +86,7 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         return postMono("getEventCount", url, frontEndQuery, Long.class);
     }
 
-    public Mono<DataPage> getScoringTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
+    private Mono<DataPage> getScoringTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);

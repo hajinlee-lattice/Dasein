@@ -23,7 +23,7 @@ public class LatticeAccount extends BaseFabricEntity<LatticeAccount> implements 
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
 
     private static final String SCHEMA_TEMPLATE = String.format(
-            "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
+            "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Lattice Account\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
             RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, ATTRIBUTES);

@@ -6,8 +6,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
-import reactor.core.publisher.Mono;
-
 public interface RatingProxy {
 
     DataPage getData(String customerSpace, FrontEndQuery frontEndQuery);
@@ -17,7 +15,5 @@ public interface RatingProxy {
     Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
     DataPage getData(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
-
-    Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
 }

@@ -399,7 +399,7 @@ public abstract class BaseRestApiProxy {
      * Retry should handle retry in callers, because it may be an infinite stream
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,true);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
         Mono<T> flux = request.retrieve().bodyToMono(clz);
         return appendLogInterceptors(flux, channel, url);
     }
@@ -417,8 +417,8 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,true);
-        Mono<T> flux = request.retrieve().bodyToFlux(clz).next();
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,false);
+        Mono<T> flux = request.retrieve().bodyToMono(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
@@ -438,8 +438,8 @@ public abstract class BaseRestApiProxy {
         return flux //
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s flux from %s", channel, url)))
-                .doOnError(throwable ->
-                        log.error(String.format("Failed to read %s flux from %s", channel, url), throwable));
+                .onErrorResume(throwable ->
+                        Flux.error(new RuntimeException(String.format("Failed to read %s mono from %s", channel, url), throwable)));
     }
 
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
@@ -447,8 +447,8 @@ public abstract class BaseRestApiProxy {
         return mono //
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s mono from %s", channel, url)))
-                .doOnError(throwable ->
-                        log.error(String.format("Failed to read %s mono from %s", channel, url), throwable));
+                .onErrorResume(throwable ->
+                        Mono.error(new RuntimeException(String.format("Failed to read %s mono from %s", channel, url), throwable)));
     }
 
     private <P> WebClient.RequestHeadersSpec prepareReactiveRequest(String url, HttpMethod method, P payload,

@@ -38,14 +38,9 @@ public class EntityResource {
     @PostMapping(value = "/count")
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Mono<Long> getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
+    public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
                          @RequestParam(value = "version", required = false) DataCollection.Version version) {
-        final Tenant tenant = MultiTenantContext.getTenant();
-        return Mono.fromCallable(() -> {
-            MultiTenantContext.setTenant(tenant);
-            return entityQueryService.getCount(frontEndQuery, version);
-        });
-
+        return entityQueryService.getCount(frontEndQuery, version);
     }
 
     @PostMapping(value = "/data")

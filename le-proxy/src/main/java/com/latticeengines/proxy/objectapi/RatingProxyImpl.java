@@ -120,10 +120,10 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         } else {
             url = constructUrl("/{customerSpace}/rating/count", tenantId);
         }
-        return post("getCount", url, frontEndQuery, Long.class);
+        return postMono("getCount", url, frontEndQuery, Long.class).block(Duration.ofHours(1));
     }
 
-    public Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    private Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url;
         if (version != null) {
             url = constructUrl("/{customerSpace}/rating/data?version={version}", tenantId, version);
@@ -133,13 +133,16 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         return postMono("getData", url, frontEndQuery, DataPage.class);
     }
 
-    @SuppressWarnings({ "rawtypes", "unchecked" })
     private Map<String, Long> getCoverageFromApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
+        return getCoverageMonoFromApi(tenantId, frontEndQuery).block(Duration.ofHours(1));
+    }
+
+    private Mono<Map<String, Long>> getCoverageMonoFromApi(String tenantId, FrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/rating/coverage", tenantId);
-        return post("getRatingCoverage", url, frontEndQuery, Map.class);
+        return postMapMono("getRatingCoverage", url, frontEndQuery);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {

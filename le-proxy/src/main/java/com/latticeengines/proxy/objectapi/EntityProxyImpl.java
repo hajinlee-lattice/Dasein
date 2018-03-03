@@ -2,6 +2,7 @@ package com.latticeengines.proxy.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -29,6 +30,8 @@ import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuer
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
+
+import reactor.core.publisher.Mono;
 
 @Component("entityProxy")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -178,8 +181,12 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         RatingEngineFrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, RatingEngineFrontEndQuery.class);
+        return getRatingCountMonoFromApi(tenantId, frontEndQuery).block(Duration.ofHours(1));
+    }
+
+    private Mono<Map<String, Long>> getRatingCountMonoFromApi(String tenantId, RatingEngineFrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
-        return post("getRatingCount", url, frontEndQuery, Map.class);
+        return postMapMono("getRatingCount", url, frontEndQuery);
     }
 
     private void optimizeRestrictions(FrontEndQuery frontEndQuery) {
