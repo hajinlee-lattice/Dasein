@@ -7,9 +7,25 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.BasePayloadConfiguration;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.BaseDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.BaseLPWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.BaseModelingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.BasePDWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflowConfiguration;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT)
+@JsonSubTypes({ @Type(value = BaseCDLWorkflowConfiguration.class, name = "BaseCDLWorkflowConfiguration"),
+        @Type(value = BaseDataCloudWorkflowConfiguration.class, name = "BaseDataCloudWorkflowConfiguration"),
+        @Type(value = BaseLPWorkflowConfiguration.class, name = "BaseLPWorkflowConfiguration"),
+        @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
+        @Type(value = BaseScoringWorkflowConfiguration.class, name = "BaseScoringWorkflowConfiguration"),
+        @Type(value = BasePDWorkflowConfiguration.class, name = "BasePDWorkflowConfiguration"), })
 public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     private Map<String, String> configRegistry = new HashMap<>();
