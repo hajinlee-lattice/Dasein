@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.controller;
+package com.latticeengines.apps.cdl.controller;
 
 
 import javax.inject.Inject;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.apps.core.service.ApplicationTenantService;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -28,7 +28,7 @@ public class ApplicationTenantResource {
     @PostMapping(value = "/")
     @ApiOperation(value = "Bootstrap a tenant for a service app")
     @NoCustomerSpace
-    public SimpleBooleanResponse bootstrap(BootstrapRequest bootstrapRequest) {
+    public SimpleBooleanResponse bootstrap(CDLBootstrapRequest bootstrapRequest) {
         applicationTenantService.bootstrap(bootstrapRequest);
         return SimpleBooleanResponse.successResponse();
     }
