@@ -3,6 +3,7 @@ package com.latticeengines.query.exposed.evaluator;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -82,13 +83,9 @@ public class QueryEvaluatorService {
         }
         query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("getData", attrRepo, sqlQuery))) {
-            List<Map<String, Object>> results = queryEvaluator.pipe(sqlQuery, query).toStream() //
-                    .collect(Collectors.toList());
-            dataPage = new DataPage(results);
-        }
-
-        return dataPage;
+        List<Map<String, Object>> results = queryEvaluator.pipe(sqlQuery, query).toStream() //
+                .collect(Collectors.toList());
+        return new DataPage(results);
     }
 
     public Flux<Map<String, Object>> getDataFlux(AttributeRepository attrRepo, Query query) {
@@ -107,7 +104,19 @@ public class QueryEvaluatorService {
         }
         query.setLookups(filteredLookups);
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        return queryEvaluator.pipe(sqlQuery, query);
+        AtomicLong startTime = new AtomicLong();
+        AtomicLong counter = new AtomicLong(0);
+        return queryEvaluator.pipe(sqlQuery, query) //
+                .doOnSubscribe(s -> startTime.set(System.currentTimeMillis())) //
+                .doOnNext(m -> counter.getAndIncrement()) //
+                .doOnComplete(() -> {
+                    String msg = String.format(
+                            "[Metric] Finished fetching %d records. tenantId=%s SQLQuery=%s ElapsedTime=%d ms",
+                            counter.get(), attrRepo.getCustomerSpace().getTenantId(),
+                            sqlQuery.getSQL().getSQL().trim().replaceAll(System.lineSeparator(), " "),
+                            System.currentTimeMillis() - startTime.get());
+                    log.info(msg);
+                });
     }
 
     private String timerMessage(String method, AttributeRepository attrRepo, SQLQuery<?> sqlQuery) {
