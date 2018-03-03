@@ -33,12 +33,8 @@ public enum CacheName {
         return this.name;
     }
 
-    public static CacheName[] getDataCloudCacheGroup() {
-        return new CacheName[] { DataCloudVersionCache };
-    }
-
     public static CacheName[] getDataCloudLocalCacheGroup() {
-        return new CacheName[] { DataCloudCMCache, DataCloudStatsCache };
+        return new CacheName[] { DataCloudVersionCache, DataCloudCMCache, DataCloudStatsCache };
     }
 
     public static CacheName[] getCdlCacheGroup() {

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.BeanDispatcher;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
@@ -128,9 +127,6 @@ public class ColumnMetadataResource {
     @DeleteMapping(value = "/caches")
     @ApiOperation(value = "Refresh metadata caches.")
     public void refreshCache() {
-        CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
-                CacheName.getDataCloudCacheGroup());
         localCacheService.refreshKeysByPattern(DataCloudConstants.SERVICE_TENANT,
                 CacheName.getDataCloudLocalCacheGroup());
     }

@@ -7,16 +7,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
@@ -48,39 +44,19 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private static final String TOPN_TREE = "TopNTree";
     private static final String DEFAULT = "default";
 
-    // has to be public because used in cache key
-    public static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
+    private static final String KEY_PREFIX = DataCloudConstants.SERVICE_TENANT;
 
     private LocalCacheManager<String, List<ColumnMetadata>> columnMetadataCache = null;
     private LocalCacheManager<String, DataCloudVersion> latestDataCloudVersionCache;
     private LocalCacheManager<String, Object> amStatsCache;
 
-    private final CacheManager cacheManager;
     private final ColumnMetadataProxy _columnMetadataProxy;
     private Scheduler parallelFluxThreadPool;
 
     @Inject
-    public ColumnMetadataProxy(CacheManager cacheManager, ColumnMetadataProxy columnMetadataProxy) {
+    public ColumnMetadataProxy(ColumnMetadataProxy columnMetadataProxy) {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
-        this.cacheManager = cacheManager;
         this._columnMetadataProxy = columnMetadataProxy;
-        latestDataCloudVersionCache = new LocalCacheManager<>(CacheName.DataCloudVersionCache, str -> {
-            String key = str.split("\\|")[1];
-            if (DEFAULT.equals(key)) {
-                key = "";
-            }
-            return requestLatestVersion(key);
-        }, 10);
-
-    }
-
-    @SuppressWarnings("unchecked")
-    @PostConstruct
-    private void postConstruct() {
-        if (cacheManager instanceof CompositeCacheManager) {
-            log.info("adding local " + CacheName.DataCloudVersionCache + " to composite cache manager");
-            ((CompositeCacheManager) cacheManager).setCacheManagers(Collections.singleton(latestDataCloudVersionCache));
-        }
     }
 
     public void scheduleLoadColumnMetadataCache() {
@@ -91,7 +67,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         List<ColumnMetadata> allColumns = getAllColumns(dataCloudVersion);
         return allColumns.stream() //
                 .filter(cm -> StringUtils.isNotBlank(cm.getDataLicense())) //
-                .map(ColumnMetadata::getColumnId) //
+                .map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toSet());
     }
 
@@ -125,15 +101,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         if (StringUtils.isBlank(compatibleVersion)) {
             compatibleVersion = DEFAULT;
         }
-        return _columnMetadataProxy.latestVersionFromCache(compatibleVersion);
-    }
-
-    @Cacheable(cacheNames = CacheName.Constants.DataCloudVersionCacheName, key = "T(java.lang.String).format(\"%s|%s|latest\", T(com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy).KEY_PREFIX, #compatibleVersion)", sync = true)
-    public DataCloudVersion latestVersionFromCache(String compatibleVersion) {
-        if (DEFAULT.equals(compatibleVersion)) {
-            compatibleVersion = "";
-        }
-        return requestLatestVersion(compatibleVersion);
+        return latestDataCloudVersionCache.getWatcherCache().get(compatibleVersion);
     }
 
     public List<ColumnMetadata> getAllColumns() {
@@ -220,6 +188,23 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             url = constructUrl("/versions/latest");
         }
         return get("latest version", url, DataCloudVersion.class);
+    }
+
+    private void initializeLatestVersionCache() {
+        if (latestDataCloudVersionCache == null) {
+            synchronized (this) {
+                if (latestDataCloudVersionCache == null) {
+                    latestDataCloudVersionCache = new LocalCacheManager<>(CacheName.DataCloudVersionCache, str -> {
+                        String key = str.split("\\|")[1];
+                        if (DEFAULT.equals(key)) {
+                            key = "";
+                        }
+                        return requestLatestVersion(key);
+                    }, 10);
+                    log.info("Initialized local cache DataCloudCMCache.");
+                }
+            }
+        }
     }
 
     private void initializeColumnMetadataCache() {
