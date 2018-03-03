@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -67,24 +66,7 @@ public class QueryEvaluatorService {
     }
 
     public DataPage getData(AttributeRepository attrRepo, Query query) {
-        DataPage dataPage = null;
-        List<Lookup> filteredLookups = new ArrayList<>();
-        for (Lookup lookup : query.getLookups()) {
-            if (lookup instanceof AttributeLookup) {
-                AttributeLookup attrLookup = (AttributeLookup) lookup;
-                if (BusinessEntity.Rating.equals(attrLookup.getEntity()) || attrRepo.hasAttribute(attrLookup)) {
-                    filteredLookups.add(lookup);
-                } else {
-                    log.warn("Cannot find metadata for attribute lookup " + lookup.toString() + ", skip it.");
-                }
-            } else {
-                filteredLookups.add(lookup);
-            }
-        }
-        query.setLookups(filteredLookups);
-        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-        List<Map<String, Object>> results = queryEvaluator.pipe(sqlQuery, query).toStream() //
-                .collect(Collectors.toList());
+        List<Map<String, Object>> results = getDataFlux(attrRepo, query).collectList().block();
         return new DataPage(results);
     }
 
