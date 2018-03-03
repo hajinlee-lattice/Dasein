@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.CreatePMMLModel;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
@@ -15,7 +15,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("pmmlModelWorkflow")
 @Lazy
-public class PMMLModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
+public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfiguration> {
 
     @Inject
     private CreatePMMLModel createPMMLModel;
@@ -27,7 +27,7 @@ public class PMMLModelWorkflow extends AbstractWorkflow<MatchAndModelWorkflowCon
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
+    public Workflow defineWorkflow(PMMLModelWorkflowConfiguration config) {
         return new WorkflowBuilder().next(createPMMLModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .listener(sendEmailAfterModelCompletionListener) //
