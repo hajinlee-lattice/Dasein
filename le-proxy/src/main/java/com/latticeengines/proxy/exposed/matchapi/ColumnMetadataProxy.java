@@ -7,14 +7,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
@@ -36,7 +32,6 @@ import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @Component("columnMetadataProxyMatchapi")
-@Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
 public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetadataInterface {
     private static final Logger log = LoggerFactory.getLogger(ColumnMetadataProxy.class);
 
@@ -50,13 +45,10 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     private LocalCacheManager<String, DataCloudVersion> latestDataCloudVersionCache;
     private LocalCacheManager<String, Object> amStatsCache;
 
-    private final ColumnMetadataProxy _columnMetadataProxy;
     private Scheduler parallelFluxThreadPool;
 
-    @Inject
-    public ColumnMetadataProxy(ColumnMetadataProxy columnMetadataProxy) {
+    public ColumnMetadataProxy() {
         super(PropertyUtils.getProperty("common.matchapi.url"), "/match/metadata");
-        this._columnMetadataProxy = columnMetadataProxy;
     }
 
     public void scheduleLoadColumnMetadataCache() {
@@ -101,6 +93,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         if (StringUtils.isBlank(compatibleVersion)) {
             compatibleVersion = DEFAULT;
         }
+        initializeLatestVersionCache();
         return latestDataCloudVersionCache.getWatcherCache().get(compatibleVersion);
     }
 
