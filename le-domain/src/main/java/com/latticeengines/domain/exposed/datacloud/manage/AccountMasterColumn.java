@@ -18,12 +18,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -39,8 +39,10 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 @Entity
 @Access(AccessType.FIELD)
-@Table(name = "AccountMasterColumn", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" }) })
+@Table(name = "AccountMasterColumn", indexes = { //
+        @Index(name = "IX_VERSION", columnList = "DataCloudVersion"), //
+        @Index(name = "IX_GROUPS", columnList = "Groups") //
+}, uniqueConstraints = { @UniqueConstraint(columnNames = { "AMColumnID", "DataCloudVersion" }) })
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn {
 
@@ -54,7 +56,6 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "AMColumnID", nullable = false, length = 64)
     private String amColumnId;
 
-    @Index(name = "IX_VERSION")
     @Column(name = "DataCloudVersion", nullable = false, length = 50)
     private String dataCloudVersion;
 
@@ -85,7 +86,6 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
     @Column(name = "ApprovedUsage")
     private String approvedUsage;
 
-    @Index(name = "IX_GROUPS")
     @Column(name = "Groups", nullable = false, length = 250)
     private String groups;
 
@@ -446,8 +446,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         if (StringUtils.isNotBlank(getGroups())) {
             Map<ColumnSelection.Predefined, Boolean> map = new HashMap<>();
             Arrays.stream(getGroups().split(",")) //
-                    .map(ColumnSelection.Predefined::fromName)
-                    .filter(Objects::nonNull) //
+                    .map(ColumnSelection.Predefined::fromName).filter(Objects::nonNull) //
                     .forEach(g -> map.put(g, true));
             return map;
         } else {

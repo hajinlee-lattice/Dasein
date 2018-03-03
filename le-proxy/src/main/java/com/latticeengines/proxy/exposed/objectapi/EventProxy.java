@@ -2,6 +2,8 @@ package com.latticeengines.proxy.exposed.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.time.Duration;
+
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -22,20 +24,20 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
     }
 
     public Long getScoringCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getScoringCount(customerSpace, frontEndQuery, null).block();
+        return getScoringCount(customerSpace, frontEndQuery, null).block(Duration.ofHours(1));
     }
 
     public Long getTrainingCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getTrainingCount(customerSpace, frontEndQuery, null).block();
+        return getTrainingCount(customerSpace, frontEndQuery, null).block(Duration.ofHours(1));
     }
 
     public Long getEventCount(String customerSpace, EventFrontEndQuery frontEndQuery) {
-        return getEventCount(customerSpace, frontEndQuery, null).block();
+        return getEventCount(customerSpace, frontEndQuery, null).block(Duration.ofHours(1));
     }
 
     public DataPage getScoringTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getScoringTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            DataPage dataPage = getScoringTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " scoring tuples.";
             timer.setTimerMessage(msg);
@@ -45,7 +47,7 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
 
     public DataPage getTrainingTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getTrainingTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            DataPage dataPage = getTrainingTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " training tuples.";
             timer.setTimerMessage(msg);
@@ -55,7 +57,7 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
 
     public DataPage getEventTuples(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getEventTuplesNonBlocking(customerSpace, frontEndQuery, version).block();
+            DataPage dataPage = getEventTuplesNonBlocking(customerSpace, frontEndQuery, version).block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " event tuples.";
             timer.setTimerMessage(msg);

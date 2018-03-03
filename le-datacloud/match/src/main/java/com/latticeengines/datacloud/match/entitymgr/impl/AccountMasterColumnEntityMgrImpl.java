@@ -65,8 +65,14 @@ public class AccountMasterColumnEntityMgrImpl
     }
 
     @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public ParallelFlux<AccountMasterColumn> findAll(String dataCloudVersion) {
-        long count = repository.countByDataCloudVersion(dataCloudVersion);
+        long count;
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            count = repository.countByDataCloudVersion(dataCloudVersion);
+            String msg = "Got the count of AMColumns for version " + dataCloudVersion + ": " + count;
+            timer.setTimerMessage(msg);
+        }
         int pages = (int) Math.ceil(1.0 * count / PAGE_SIZE);
         return Flux.range(0, pages).parallel().runOn(scheduler) //
                 .map(k -> {

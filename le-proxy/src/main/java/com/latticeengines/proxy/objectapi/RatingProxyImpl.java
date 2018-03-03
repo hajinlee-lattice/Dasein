@@ -2,6 +2,7 @@ package com.latticeengines.proxy.objectapi;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
 
     public DataPage getData(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            DataPage dataPage = getDataNonBlocking(tenantId, frontEndQuery, version).block();
+            DataPage dataPage = getDataNonBlocking(tenantId, frontEndQuery, version).block(Duration.ofHours(1));
             int count = dataPage == null ? 0 : dataPage.getData().size();
             String msg = "Fetched a page of " + count + " rows.";
             timer.setTimerMessage(msg);
