@@ -16,7 +16,7 @@ public interface RatingProxy {
 
     Long getCountFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
-    DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
+    DataPage getData(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 
     Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version);
 

@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 
@@ -65,7 +66,17 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
     }
 
     public DataPage getData(String customerSpace, FrontEndQuery frontEndQuery) {
-        return getDataFromObjectApi(shortenCustomerSpace(customerSpace), frontEndQuery, null);
+        return getData(shortenCustomerSpace(customerSpace), frontEndQuery, null);
+    }
+
+    public DataPage getData(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            DataPage dataPage = getDataNonBlocking(tenantId, frontEndQuery, version).block();
+            int count = dataPage == null ? 0 : dataPage.getData().size();
+            String msg = "Fetched a page of " + count + " rows.";
+            timer.setTimerMessage(msg);
+            return dataPage;
+        }
     }
 
     public Map<String, Long> getCoverage(String customerSpace, FrontEndQuery frontEndQuery) {
@@ -109,16 +120,6 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
             url = constructUrl("/{customerSpace}/rating/count", tenantId);
         }
         return post("getCount", url, frontEndQuery, Long.class);
-    }
-
-    public DataPage getDataFromObjectApi(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        String url;
-        if (version != null) {
-            url = constructUrl("/{customerSpace}/rating/data?version={version}", tenantId, version);
-        } else {
-            url = constructUrl("/{customerSpace}/rating/data", tenantId);
-        }
-        return postKryo("getData", url, frontEndQuery, DataPage.class);
     }
 
     public Mono<DataPage> getDataNonBlocking(String tenantId, FrontEndQuery frontEndQuery, DataCollection.Version version) {

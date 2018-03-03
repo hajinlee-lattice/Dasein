@@ -4,6 +4,7 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -37,11 +38,15 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     private TestProxy testProxy;
 
     private Undertow server;
+    private int port;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        server = getHttpServer();
+        ServerSocket s = new ServerSocket(0);
+        port = s.getLocalPort();
+        server = getHttpServer(port);
         server.start();
+        testProxy.setHostport("https://localhost:" + port);
     }
 
     @AfterClass(groups = "functional")
@@ -80,7 +85,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         };
     }
 
-    private Undertow getHttpServer() throws Exception {
+    private Undertow getHttpServer(int port) throws Exception {
         HttpHandler retryHdlr = new ErrorHandler(new HttpHandler() {
             private AtomicLong counter = new AtomicLong();
             @Override
@@ -106,8 +111,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         sslContext.init(getKeyManagers(), null, null);
 
         return Undertow.builder()
-                .addHttpListener(8084, "localhost")
-                .addHttpsListener(9084, "localhost", sslContext)
+                .addHttpsListener(port, "localhost", sslContext)
                 .setHandler(Handlers.path() //
                         .addExactPath("/foo/baz/retry", retryHdlr) //
                         .addExactPath("/foo/baz/runtime", runtimeHdlr) //

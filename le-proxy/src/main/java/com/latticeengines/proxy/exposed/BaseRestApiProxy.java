@@ -398,15 +398,27 @@ public abstract class BaseRestApiProxy {
      * Data transmission starts when the flux is first time subscribed.
      * Retry should handle retry in callers, because it may be an infinite stream
      */
+    protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,true);
+        Mono<T> flux = request.retrieve().bodyToMono(clz);
+        return appendLogInterceptors(flux, channel, url);
+    }
+
     protected <T> Flux<T> getFlux(String channel, String url, Class<T> clz) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
         Flux<T> flux = request.retrieve().bodyToFlux(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
+    protected <T> Flux<T> getStream(String channel, String url, Class<T> clz) {
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,true);
+        Flux<T> flux = request.retrieve().bodyToFlux(clz);
+        return appendLogInterceptors(flux, channel, url);
+    }
+
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,false);
-        Mono<T> flux = request.retrieve().bodyToMono(clz);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,true);
+        Mono<T> flux = request.retrieve().bodyToFlux(clz).next();
         return appendLogInterceptors(flux, channel, url);
     }
 
@@ -440,7 +452,7 @@ public abstract class BaseRestApiProxy {
     }
 
     private <P> WebClient.RequestHeadersSpec prepareReactiveRequest(String url, HttpMethod method, P payload,
-                                                                    boolean useKryo) {
+                                                                    boolean streaming) {
         WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
@@ -453,8 +465,8 @@ public abstract class BaseRestApiProxy {
             request = request.header(header.getKey(), header.getValue());
         }
 
-        if (useKryo) {
-            return request.accept(KryoHttpMessageConverter.KRYO);
+        if (streaming) {
+            return request.accept(MediaType.APPLICATION_STREAM_JSON);
         } else {
             return request.accept((MediaType.APPLICATION_JSON));
         }
