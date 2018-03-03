@@ -127,6 +127,10 @@ public final class JobStepDisplayInfoMapping {
             "launch_play" //
     };
 
+    private static final String[] EXPORT_SEGMENT_STEPS = { //
+            "Segment Export" //
+    };
+
     private static final String[] PROCESS_ANALYZE_STEPS = { //
             "Merging, De-duping & matching to Lattice Data Cloud", //
             "Merging, De-duping & matching to Lattice Data Cloud", //
@@ -213,6 +217,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_NAME.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
+        DISPLAY_NAME.put("segmentExportWorkflow", EXPORT_SEGMENT_STEPS);
         DISPLAY_NAME.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_NAME.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
@@ -224,6 +229,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
+        DISPLAY_DESCRIPTION.put("segmentExportWorkflow", EXPORT_SEGMENT_STEPS);
         DISPLAY_DESCRIPTION.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_DESCRIPTION.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
