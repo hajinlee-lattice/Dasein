@@ -85,6 +85,7 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
                 double avgProbability = (double) modelSummary.getTotalConversionCount()
                         / (double) modelSummary.getTotalRowCount();
                 putDoubleValueInContext(MODEL_AVG_PROBABILITY, avgProbability);
+                putDoubleValueInContext(SCORING_AVG_SCORE, avgProbability);
             } else {
                 log.info("TotalRowCount is 0!");
             }
