@@ -107,6 +107,11 @@ public class WorkflowServiceImpl implements WorkflowService {
     }
 
     @Override
+    public void unRegisterJob(String workflowName) {
+        jobRegistry.unregister(workflowName);
+    }
+
+    @Override
     public long startWorkflowJob(WorkflowConfiguration workflowConfiguration) {
         Job workflow = null;
         try {
