@@ -313,7 +313,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         int countA = random.nextInt(700);
         int countB = random.nextInt(800 - countA);
         int countC = random.nextInt(900 - countA - countB);
-        int countD = random.nextInt(1000 - countA - countB - countC);
+        int countD = 1000 - countA - countB - countC;
         return ImmutableMap.of( //
                 RatingBucketName.A, (long) countA, //
                 RatingBucketName.B, (long) countB, //
