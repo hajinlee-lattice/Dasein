@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Method;
 import java.nio.charset.Charset;
+import java.sql.JDBCType;
+import java.sql.SQLType;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -595,6 +597,35 @@ public class AvroUtils {
             }
             throw new IllegalArgumentException("Cannot convert SQL type " + typeStr);
         }
+    }
+
+    public static SQLType getSqlType(Class<?> javaClz) {
+        return getSqlType(getAvroType(javaClz));
+    }
+
+    private static SQLType getSqlType(Type avroType) {
+        SQLType type;
+        switch (avroType) {
+            case BOOLEAN:
+                type = JDBCType.BOOLEAN;
+                break;
+            case STRING:
+                type = JDBCType.VARCHAR;
+                break;
+            case INT:
+                type = JDBCType.INTEGER;
+                break;
+            case LONG:
+                type = JDBCType.BIGINT;
+                break;
+            case FLOAT:
+            case DOUBLE:
+                type = JDBCType.FLOAT;
+                break;
+            default:
+                throw new RuntimeException(String.format("Unsupported avro type %s", avroType));
+        }
+        return type;
     }
 
     public static Type getAvroType(Class<?> javaType) {

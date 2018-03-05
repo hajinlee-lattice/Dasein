@@ -3,6 +3,7 @@ package com.latticeengines.redshiftdb.exposed.service;
 import java.util.List;
 
 import org.apache.avro.Schema;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 
@@ -18,6 +19,8 @@ public interface RedshiftService {
     void createStagingTable(String stageTableName, String targetTableName);
 
     void updateExistingRowsFromStagingTable(String stageTableName, String targetTableName, String... joinFields);
+
+    void insertValuesIntoTable(String tableName, List<Pair<String, Class<?>>> schema, List<List<Object>> data);
 
     void renameTable(String originalTableName, String newTableName);
 

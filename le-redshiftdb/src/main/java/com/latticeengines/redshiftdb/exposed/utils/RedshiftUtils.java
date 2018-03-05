@@ -1,8 +1,10 @@
 package com.latticeengines.redshiftdb.exposed.utils;
 
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,7 @@ public class RedshiftUtils {
         if (redshiftTableConfig.getSortKeys() != null && !redshiftTableConfig.getSortKeys().isEmpty()) {
             keys.addAll(redshiftTableConfig.getSortKeys());
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(String.format( //
                 "CREATE TABLE IF NOT EXISTS %s (%s)", //
                 redshiftTableConfig.getTableName(), //
@@ -62,33 +64,33 @@ public class RedshiftUtils {
     }
 
     private static String getColumnSQLStatement(Schema.Field field, Set<String> keys) {
-        return String.format("\"%s\" %s", field.name(), getSQLType(field, !keys.contains(field.name())));
+        return String.format("\"%s\" %s", field.name(), getSQLTypeStr(field, !keys.contains(field.name())));
     }
 
-    public static String getSQLType(Schema.Field field, boolean encode) {
+    private static String getSQLTypeStr(Schema.Field field, boolean encode) {
         Schema.Type type = AvroUtils.getType(field);
         StringBuilder sb = new StringBuilder();
         switch (type) {
-        case BOOLEAN:
-            sb.append("BOOLEAN");
-            encode = false;
-            break;
-        case STRING:
-            sb.append("NVARCHAR(1000)");
-            break;
-        case INT:
-            sb.append("INT");
-            break;
-        case LONG:
-            sb.append("BIGINT");
-            break;
-        case FLOAT:
-        case DOUBLE:
-            sb.append("FLOAT");
-            encode = false;
-            break;
-        default:
-            throw new RuntimeException(String.format("Unsupported avro type %s", type));
+            case BOOLEAN:
+                sb.append("BOOLEAN");
+                encode = false;
+                break;
+            case STRING:
+                sb.append("NVARCHAR(1000)");
+                break;
+            case INT:
+                sb.append("INT");
+                break;
+            case LONG:
+                sb.append("BIGINT");
+                break;
+            case FLOAT:
+            case DOUBLE:
+                sb.append("FLOAT");
+                encode = false;
+                break;
+            default:
+                throw new RuntimeException(String.format("Unsupported avro type %s", type));
         }
         if (encode) {
             if (Schema.Type.FLOAT.equals(type) || Schema.Type.DOUBLE.equals(type)) {
@@ -114,19 +116,44 @@ public class RedshiftUtils {
 
     public static String updateExistingRowsFromStagingTableStatement(String stageTableName, String targetTableName,
             String... joinFields) {
-        StringBuffer sb = new StringBuffer();
-        sb.append(String.format("DELETE FROM %s USING %s WHERE %s; ", targetTableName, stageTableName,
-                getJoinStatement(stageTableName, targetTableName, joinFields)));
-        sb.append(String.format("INSERT INTO %s SELECT * FROM %s; ", targetTableName, stageTableName));
-        return sb.toString();
+        return String.format("DELETE FROM %s USING %s WHERE %s; ", targetTableName, stageTableName,
+                getJoinStatement(stageTableName, targetTableName, joinFields)) +
+                String.format("INSERT INTO %s SELECT * FROM %s; ", targetTableName, stageTableName);
     }
 
     private static String getJoinStatement(String stageTableName, String targetTableName, String... joinFields) {
-        return Arrays.asList(joinFields).stream().map(f -> {
-            return String.format("%1$s.%3$s = %2$s.%3$s", stageTableName, targetTableName, f).toString();
-        }).reduce((e1, e2) -> {
-            return e1 + " AND " + e2;
-        }).orElse(null);
+        return Arrays.stream(joinFields) //
+                .map(f -> String.format("%1$s.%3$s = %2$s.%3$s", stageTableName, targetTableName, f)) //
+                .reduce((e1, e2) -> e1 + " AND " + e2) //
+                .orElse(null);
+    }
+
+    public static String insertValuesIntoTableStatement(String tableName, List<String> fields, int rows) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("INSERT INTO ").append(tableName).append("(");
+        sb.append(StringUtils.join(fields, ","));
+        sb.append(") VALUES");
+        String params = valuesOfLength(fields.size());
+        for (int i = 0; i < rows; i++) {
+            sb.append(params);
+            if (i < rows - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append(";");
+        return sb.toString();
+    }
+
+    private static String valuesOfLength(int numVals) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("(");
+        List<String> questionMarks = new ArrayList<>();
+        for (int i = 0; i < numVals; i++) {
+            questionMarks.add("?");
+        }
+        sb.append(StringUtils.join(questionMarks, ","));
+        sb.append(")");
+        return sb.toString();
     }
 
     public static String prependTenantToTableName(CustomerSpace customerSpace, String tableName) {

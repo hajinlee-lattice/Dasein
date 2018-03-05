@@ -1,21 +1,25 @@
 package com.latticeengines.redshiftdb.service.impl;
 
+import java.sql.SQLType;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
+
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCallback;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
@@ -25,8 +29,7 @@ public class RedshiftServiceImpl implements RedshiftService {
 
     private static final Logger log = LoggerFactory.getLogger(RedshiftServiceImpl.class);
 
-    @Autowired
-    @Qualifier(value = "redshiftJdbcTemplate")
+    @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Value("${aws.default.access.key}")
@@ -46,6 +49,31 @@ public class RedshiftServiceImpl implements RedshiftService {
         } catch (Exception e) {
             throw new RuntimeException(
                     String.format("Could not create table %s in Redshift", redshiftTableConfig.getTableName()), e);
+        }
+    }
+
+    @Override
+    public void insertValuesIntoTable(String tableName, List<Pair<String, Class<?>>> schema, List<List<Object>> data) {
+        List<String> fields = schema.stream().map(Pair::getLeft).collect(Collectors.toList());
+        List<SQLType> sqlTypes = schema.stream().map(Pair::getRight).map(AvroUtils::getSqlType).collect(Collectors.toList());
+        int totoRows = data.size();
+        int totalCardinality = 5000;
+        int pageSize = Math.max(totalCardinality / sqlTypes.size(), 1);
+        int inserted = 0;
+        while (inserted < totoRows) {
+            List<List<Object>> page = data.subList(inserted, Math.min(inserted + pageSize, totoRows));
+            String sql = RedshiftUtils.insertValuesIntoTableStatement(tableName, fields, page.size());
+            redshiftJdbcTemplate.execute(sql, (PreparedStatementCallback<Boolean>) ps -> {
+                int paramIdx = 1;
+                for (List<Object> row : page) {
+                    for (int i = 0; i < row.size(); i++) {
+                        Object val = row.get(i);
+                        SQLType sqlType = sqlTypes.get(i);
+                        ps.setObject(paramIdx++, val, sqlType);
+                    }
+                }
+                return ps.execute();
+            });
         }
     }
 

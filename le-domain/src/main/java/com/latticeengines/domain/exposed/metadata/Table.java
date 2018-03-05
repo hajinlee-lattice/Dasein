@@ -31,6 +31,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -641,7 +642,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     @Transient
     @JsonProperty("extracts_directory")
     public String getExtractsDirectory() {
-        if (extracts.size() == 0) {
+        if (CollectionUtils.isEmpty(extracts)) {
             return null;
         }
 
