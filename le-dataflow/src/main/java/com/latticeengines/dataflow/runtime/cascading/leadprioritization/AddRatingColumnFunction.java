@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +51,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     }
 
     public AddRatingColumnFunction(Map<String, String> scoreFieldMap, String modelIdFieldName, String ratingFieldName,
-            Map<String, List<BucketMetadata>> bucketMetadataMap, Map<String, Integer> scoreMultiplierMap, Map<String, Double> scoreAvgMap) {
+            Map<String, List<BucketMetadata>> bucketMetadataMap, Map<String, Integer> scoreMultiplierMap,
+            Map<String, Double> scoreAvgMap) {
         super(new Fields(ratingFieldName));
         this.multiModelMode = true;
         this.scoreFieldMap = scoreFieldMap;
@@ -59,7 +61,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         this.scoreAvgMap = scoreAvgMap;
         this.bucketMetadataMap = new HashMap<>();
         bucketMetadataMap.forEach((modelId, bucketMetadata) -> //
-                this.bucketMetadataMap.put(modelId, sortBucketMetadata(bucketMetadata)));
+        this.bucketMetadataMap.put(modelId, sortBucketMetadata(bucketMetadata)));
     }
 
     @Override
@@ -75,11 +77,13 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         if (multiModelMode) {
             String modelId = arguments.getString(modelIdFieldName);
             Double newAvgScore = scoreAvgMap.get(modelId);
-            Integer scoreMultiplier = scoreMultiplierMap.get(modelId);
-            if (scoreMultiplier != null) {
-                score *= scoreMultiplier;
-                if (newAvgScore != null) {
-                    newAvgScore *= scoreMultiplier;
+            if (MapUtils.isNotEmpty(scoreMultiplierMap)) {
+                Integer scoreMultiplier = scoreMultiplierMap.get(modelId);
+                if (scoreMultiplier != null) {
+                    score *= scoreMultiplier;
+                    if (newAvgScore != null) {
+                        newAvgScore *= scoreMultiplier;
+                    }
                 }
             }
             if (newAvgScore != null) {
@@ -136,7 +140,8 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     }
 
     private List<BucketMetadata> sortBucketMetadata(List<BucketMetadata> bucketMetadata) {
-        return bucketMetadata.stream().sorted(Comparator.comparingInt(BucketMetadata::getRightBoundScore)).collect(Collectors.toList());
+        return bucketMetadata.stream().sorted(Comparator.comparingInt(BucketMetadata::getRightBoundScore))
+                .collect(Collectors.toList());
     }
 
 }

@@ -45,7 +45,11 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
             Map<String, Integer> scoreMultiplierMap = parameters.getScoreMultiplierMap();
             List<String> applyToFields = new ArrayList<>();
             applyToFields.add(modelIdField);
-            applyToFields.addAll(scoreFieldMap.values());
+            scoreFieldMap.values().forEach(scoreField -> {
+                if (!applyToFields.contains(scoreField)) {
+                    applyToFields.add(scoreField);
+                }
+            });
             scoreWithRating = scoreTable.apply(
                     new AddRatingColumnFunction(scoreFieldMap, modelIdField, ScoreResultField.Rating.displayName,
                             bucketMetadataMap, scoreMultiplierMap, scoreAvgMap),
