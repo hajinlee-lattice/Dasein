@@ -7,14 +7,16 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.proxy.exposed.BaseRestApiProxyTestNG;
 
-public class WorkflowProxyTestNG extends BaseRestApiProxyTestNG {
+@ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
+public class WorkflowProxyTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private WorkflowProxy workflowProxy;
