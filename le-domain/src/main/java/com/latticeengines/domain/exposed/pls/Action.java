@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
@@ -80,6 +81,10 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "DESCRIPTION")
     @Type(type = "text")
     private String description;
+
+    @JsonProperty("actionConfiguration")
+    @Transient
+    private ActionConfiguration actionConfiguration;
 
     @Override
     public Long getPid() {
@@ -159,6 +164,14 @@ public class Action implements HasPid, HasTenant, HasAuditingFields {
     @Override
     public Date getUpdated() {
         return this.updated;
+    }
+
+    public ActionConfiguration getActionConfiguration() {
+        return this.actionConfiguration;
+    }
+
+    public void setActionConfiguration(ActionConfiguration actionConfiguration) {
+        this.actionConfiguration = actionConfiguration;
     }
 
     @Override

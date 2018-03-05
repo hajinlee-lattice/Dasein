@@ -23,14 +23,18 @@ import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.controller.RatingEngineResourceDeploymentTestNG;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -48,6 +52,9 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
     @Inject
     private BucketedScoreService bucketedScoreService;
+
+    @Inject
+    private ActionService actionService;
 
     private static final String SEGMENT_NAME = "segment";
 
@@ -124,6 +131,7 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         System.out.println("newLastUpdateTime is " + newLastUpdateTime);
         assertTrue(newLastUpdateTime > oldLastUpdateTime);
         BucketedScoreServiceTestUtils.testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(timestamp));
+        testCreationOfFirstAction();
     }
 
     @Test(groups = { "deployment" }, dependsOnMethods = "testCreationFirstSetOfBuckets")
@@ -150,6 +158,7 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
         BucketedScoreServiceTestUtils.testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(earlierTimestamp));
         BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(creationTimeToBucketMetadatas.get(laterTimestamp));
+        testCreationOfSecondAction();
     }
 
     @Test(groups = { "deployment" }, dependsOnMethods = "testCreationSecondSetOfBuckets")
@@ -157,6 +166,37 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         List<BucketMetadata> bucketMetadatas = bucketedScoreService
                 .getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngine.getId());
         BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(bucketMetadatas);
+    }
+
+    // AI_MODEL_BUCKET_CHANGE
+    private void testCreationOfFirstAction() {
+        List<Action> actions = actionService.findAll();
+        Assert.assertEquals(actions.size(), 1);
+        Action action = actions.get(0);
+        Assert.assertNotNull(action);
+        Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
+        Assert.assertEquals(action.getActionInitiator(), MultiTenantContext.getEmailAddress());
+        Assert.assertNotNull(action.getDescription());
+        log.info("AI_MODEL_BUCKET_CHANGE description is " + action.getDescription());
+
+        RatingEngine retrievedRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(),
+                ratingEngine.getId());
+        Assert.assertEquals(retrievedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+    }
+
+    private void testCreationOfSecondAction() {
+        List<Action> actions = actionService.findAll();
+        Assert.assertEquals(actions.size(), 2);
+        Action action = actions.get(1);
+        Assert.assertNotNull(action);
+        Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
+        Assert.assertEquals(action.getActionInitiator(), MultiTenantContext.getEmailAddress());
+        Assert.assertNotNull(action.getDescription());
+        log.info("AI_MODEL_BUCKET_CHANGE description is " + action.getDescription());
+
+        RatingEngine retrievedRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(),
+                ratingEngine.getId());
+        Assert.assertEquals(retrievedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
     }
 
 }

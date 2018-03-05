@@ -22,17 +22,23 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
@@ -45,6 +51,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ModelSummaryService modelSummaryService;
+
+    @Inject
+    private ActionService actionService;
 
     @Inject
     private WorkflowJobService workflowJobService;
@@ -163,7 +172,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             bucketMetadata.setRatingEngine(ReAndMs.getLeft());
             bucketMetadataEntityMgr.create(bucketMetadata);
         }
+        // Register RatingEngineConfiguration.SubType.AI_MODEL_BUCKET_CHANGE
+        // Action
+        log.info(String.format("Register AI_MODEL_BUCKET_CHANGE creation Action for RatingEngine %s, Rating Model %s",
+                ratingEngineId, modelId));
+        registerAction(ratingEngineId, modelId);
 
+        // Update the status of the Rating Engine to be active by default
+        activateRatingEngine(ReAndMs.getLeft());
     }
 
     @Override
@@ -235,6 +251,30 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
         modelSummary = modelSummaryService.getModelSummaryByModelId(modelSummary.getId());
         return new ImmutablePair<>(ratingEngine, modelSummary);
+    }
+
+    private void registerAction(String ratingEngineId, String ratingModelId) {
+        Action action = new Action();
+        action.setTenant(MultiTenantContext.getTenant());
+        action.setType(ActionType.RATING_ENGINE_CHANGE);
+        action.setActionInitiator(MultiTenantContext.getEmailAddress());
+        ActionConfiguration actionConfiguration = new RatingEngineActionConfiguration();
+        ((RatingEngineActionConfiguration) actionConfiguration)
+                .setSubType(RatingEngineActionConfiguration.SubType.AI_MODEL_BUCKET_CHANGE);
+        ((RatingEngineActionConfiguration) actionConfiguration).setRatingEngineId(ratingEngineId);
+        ((RatingEngineActionConfiguration) actionConfiguration).setModelId(ratingModelId);
+        action.setActionConfiguration(actionConfiguration);
+        action.setDescription(action.getActionConfiguration().serialize());
+        log.debug(String.format("Registering action %s", action));
+        actionService.create(action);
+    }
+
+    private void activateRatingEngine(RatingEngine ratingEngine) {
+        if (ratingEngine.getStatus() == RatingEngineStatus.INACTIVE) {
+            ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+            ratingEngineProxy.createOrUpdateRatingEngine(MultiTenantContext.getCustomerSpace().toString(),
+                    ratingEngine);
+        }
     }
 
 }

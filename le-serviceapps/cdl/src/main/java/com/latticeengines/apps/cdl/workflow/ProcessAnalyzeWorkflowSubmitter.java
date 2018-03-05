@@ -152,6 +152,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .map(action -> action.getPid()).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
+        List<Long> ratingEngineActionIds = actions.stream()
+                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(action -> action.getPid())
+                .collect(Collectors.toList());
+        log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
+
         Pair<List<Long>, List<Long>> idPair = new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
         return idPair;
     }

@@ -20,20 +20,24 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineNoteEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
@@ -86,7 +90,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         log.info("Rating Engine is " + createdRatingEngine.toString());
         Assert.assertNotNull(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getActiveModelPid());
-        Assert.assertNull(createdRatingEngine.getActiveModel());
+        Assert.assertNotNull(createdRatingEngine.getActiveModel());
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         ratingEngineId = createdRatingEngine.getId();
@@ -192,6 +196,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         validateRatingModelCreation(createdRatingEngine);
         Assert.assertNotNull(createdRatingEngine.getSegment());
         Assert.assertEquals(RATING_ENGINE_NAME, createdRatingEngine.getDisplayName());
+        validateActionContext(createdRatingEngine);
 
         log.info("The update date for the newly updated one is "
                 + ratingEngineEntityMgr.findById(ratingEngine.getId()).getUpdated());
@@ -258,6 +263,18 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.createOrUpdatePlay(play);
         createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.DELETED);
+    }
+
+    private void validateActionContext(RatingEngine ratingEngine) {
+        Action action = ActionContext.getAction();
+        Assert.assertNotNull(action);
+        Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
+        Assert.assertEquals(action.getActionInitiator(), CREATED_BY);
+        Assert.assertTrue(action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
+                RatingEngineActionConfiguration.SubType.ACTIVATION);
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getRatingEngineId(),
+                ratingEngine.getId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })

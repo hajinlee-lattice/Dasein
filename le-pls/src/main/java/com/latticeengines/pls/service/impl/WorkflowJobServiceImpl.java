@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -60,11 +59,11 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
-    @Inject
-    private WorkflowProxy workflowProxy;
+    private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
+            Arrays.asList(ActionType.METADATA_CHANGE, ActionType.RATING_ENGINE_CHANGE));
 
     @Inject
-    private TenantEntityMgr tenantEntityMgr;
+    private WorkflowProxy workflowProxy;
 
     @Inject
     private SourceFileEntityMgr sourceFileEntityMgr;
@@ -231,7 +230,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
-                if (action.getType() != ActionType.METADATA_CHANGE) {
+                if (!NON_WORKFLOW_JOB_TYPES.contains(action.getType())) {
                     job.setJobStatus(JobStatus.RUNNING);
                 } else {
                     job.setJobStatus(JobStatus.COMPLETED);

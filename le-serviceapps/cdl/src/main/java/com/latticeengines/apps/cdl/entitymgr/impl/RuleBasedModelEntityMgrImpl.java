@@ -13,9 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 
 @Component("ruleBasedModelEntityMgr")
@@ -53,9 +57,28 @@ public class RuleBasedModelEntityMgrImpl extends BaseEntityMgrImpl<RuleBasedMode
             } else {
                 updateExistingRuleBasedModel(retrievedRuleBasedModel, ruleBasedModel, ratingEngineId);
                 ruleBasedModelDao.update(retrievedRuleBasedModel);
+                // set Rule-based Rating Action Context
+                if (ruleBasedModel.getRatingRule() != null) {
+                    setRuleChangeActionContext(ratingEngineId, retrievedRuleBasedModel);
+                }
                 return retrievedRuleBasedModel;
             }
         }
+    }
+
+    private void setRuleChangeActionContext(String ratingEngineId, RuleBasedModel retrievedRuleBasedModel) {
+        log.info(String.format("Set Rule Change Action Context for Rating Model %s, Rating Engine %s",
+                retrievedRuleBasedModel.getId(), ratingEngineId));
+        Action ruleChangeAction = new Action();
+        ruleChangeAction.setType(ActionType.RATING_ENGINE_CHANGE);
+        RatingEngine ratingEngine = ratingEngineDao.findById(ratingEngineId);
+        ruleChangeAction.setActionInitiator(ratingEngine.getCreatedBy());
+        RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
+        reActionConfig.setModelId(retrievedRuleBasedModel.getId());
+        reActionConfig.setRatingEngineId(ratingEngineId);
+        reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+        ruleChangeAction.setActionConfiguration(reActionConfig);
+        ActionContext.setAction(ruleChangeAction);
     }
 
     private void updateExistingRuleBasedModel(RuleBasedModel retrievedRuleBasedModel, RuleBasedModel ruleBasedModel,

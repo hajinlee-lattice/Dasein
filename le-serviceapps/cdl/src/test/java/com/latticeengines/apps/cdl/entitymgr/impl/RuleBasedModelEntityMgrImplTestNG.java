@@ -20,12 +20,17 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RuleBasedModelEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -96,10 +101,25 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ruleBasedModel.setRatingRule(generateRatingRule());
         ruleBasedModel.setSelectedAttributes(generateSeletedAttributes());
         ruleBasedModelEntityMgr.createOrUpdateRuleBasedModel(ruleBasedModel, ratingEngineId);
+        validateActionContext(ruleBasedModel);
         ruleBasedModelList = ruleBasedModelEntityMgr.findAllByRatingEngineId(ratingEngineId);
         Assert.assertNotNull(ruleBasedModelList);
         Assert.assertEquals(ruleBasedModelList.size(), 1);
         assertUpdatedRuleBasedModel(ruleBasedModelList.get(0));
+    }
+
+    private void validateActionContext(RatingModel ratingModel) {
+        Action action = ActionContext.getAction();
+        Assert.assertNotNull(action);
+        Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
+        Assert.assertEquals(action.getActionInitiator(), CREATED_BY);
+        Assert.assertTrue(action.getActionConfiguration() instanceof RatingEngineActionConfiguration);
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getSubType(),
+                RatingEngineActionConfiguration.SubType.RULE_MODEL_BUCKET_CHANGE);
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getRatingEngineId(),
+                ratingEngineId);
+        Assert.assertEquals(((RatingEngineActionConfiguration) action.getActionConfiguration()).getModelId(),
+                ratingModel.getId());
     }
 
     private void assertDefaultRuleBasedModel(RuleBasedModel ruleBasedModel) {

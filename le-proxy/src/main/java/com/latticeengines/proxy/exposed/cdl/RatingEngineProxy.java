@@ -25,9 +25,11 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -99,6 +101,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("create rating engine", url, ratingEngine, RatingEngine.class);
     }
 
+    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
+            RatingEngine ratingEngine) {
+        String url = constructUrl(URL_PREFIX + "/with-action", shortenCustomerSpace(customerSpace));
+        return post("create rating engine with action", url, ratingEngine, RatingEngineAndActionDTO.class);
+    }
+
     @SuppressWarnings("rawtypes")
     public List<RatingModel> getRatingModels(String customerSpace, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels", shortenCustomerSpace(customerSpace),
@@ -118,6 +126,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}",
                 shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
         return post("update rating model", url, ratingModel, ratingModel.getClass());
+    }
+
+    public RatingModelAndActionDTO updateRatingModelAndActionDTO(String customerSpace, String ratingEngineId,
+            String ratingModelId, RatingModel ratingModel) {
+        String url = constructUrl(URL_PREFIX + "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+        return post("update rating model with action", url, ratingModel, RatingModelAndActionDTO.class);
     }
 
     @SuppressWarnings("rawtypes")

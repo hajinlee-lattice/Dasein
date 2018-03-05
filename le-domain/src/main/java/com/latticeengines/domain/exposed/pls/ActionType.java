@@ -7,6 +7,7 @@ public enum ActionType {
 
     CDL_DATAFEED_IMPORT_WORKFLOW("cdlDataFeedImportWorkflow"), //
     CDL_OPERATION_WORKFLOW("cdlOperationWorkflow"), //
+    RATING_ENGINE_CHANGE("ratingEngineChange"), //
     METADATA_CHANGE("metadataChange"); //
 
     private String name;

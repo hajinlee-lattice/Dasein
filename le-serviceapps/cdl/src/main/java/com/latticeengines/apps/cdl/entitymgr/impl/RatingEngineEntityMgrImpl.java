@@ -25,6 +25,7 @@ import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -34,9 +35,12 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.PlayStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -196,6 +200,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
+
+        // set Activation Action Context
+        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+            setActivationActionContext(retrievedRatingEngine);
+        }
     }
 
     @VisibleForTesting
@@ -253,6 +262,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         ratingEngineDao.create(ratingEngine);
 
+        // set Activation Action Context
+        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+            setActivationActionContext(ratingEngine);
+        }
+
         switch (type) {
         case RULE_BASED:
             RuleBasedModel ruleBasedModel = new RuleBasedModel();
@@ -278,6 +292,18 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         default:
             break;
         }
+    }
+
+    private void setActivationActionContext(RatingEngine ratingEngine) {
+        log.info(String.format("Set Activation Action Context for Rating Engine %s", ratingEngine.getId()));
+        Action ratingEngineActivateAction = new Action();
+        ratingEngineActivateAction.setType(ActionType.RATING_ENGINE_CHANGE);
+        ratingEngineActivateAction.setActionInitiator(ratingEngine.getCreatedBy());
+        RatingEngineActionConfiguration reActionConfig = new RatingEngineActionConfiguration();
+        reActionConfig.setRatingEngineId(ratingEngine.getId());
+        reActionConfig.setSubType(RatingEngineActionConfiguration.SubType.ACTIVATION);
+        ratingEngineActivateAction.setActionConfiguration(reActionConfig);
+        ActionContext.setAction(ratingEngineActivateAction);
     }
 
     @VisibleForTesting

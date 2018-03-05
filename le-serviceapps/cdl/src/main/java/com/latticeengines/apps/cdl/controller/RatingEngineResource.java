@@ -23,16 +23,19 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -96,7 +99,8 @@ public class RatingEngineResource {
     @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
-    public RatingEngine createRatingEngine(@PathVariable String customerSpace, @RequestBody RatingEngine ratingEngine) {
+    public RatingEngine createOrUpdateRatingEngine(@PathVariable String customerSpace,
+            @RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.warn("Tenant is null for the request.");
@@ -106,6 +110,19 @@ public class RatingEngineResource {
             throw new NullPointerException("Rating Engine is null.");
         }
         return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
+    }
+
+    @PostMapping(value = "/with-action")
+    @ResponseBody
+    @ApiOperation(value = "Register or update a Rating Engine, returns RatingEngineAndActionDTO")
+    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
+            @RequestBody RatingEngine ratingEngine) {
+        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine);
+        RatingEngineAndActionDTO ratingEngineAndActionDTO = new RatingEngineAndActionDTO(updatedRatingEngine,
+                ActionContext.getAction());
+        // reset context
+        ActionContext.setAction(null);
+        return ratingEngineAndActionDTO;
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
@@ -137,6 +154,20 @@ public class RatingEngineResource {
     public RatingModel getRatingModel(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
+    }
+
+    @RequestMapping(value = "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id, returns RatingModelAndActionDTO")
+    public RatingModelAndActionDTO updateRatingModelAndActionDTO(@PathVariable String customerSpace,
+            @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
+            @PathVariable String ratingModelId) {
+        RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel, ratingEngineId, ratingModelId);
+        RatingModelAndActionDTO ratingModelAndAction = new RatingModelAndActionDTO(updatedRatingModel,
+                ActionContext.getAction());
+        // reset context
+        ActionContext.setAction(null);
+        return ratingModelAndAction;
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")

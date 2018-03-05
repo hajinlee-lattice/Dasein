@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,20 +20,24 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineDashboard;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryDownloadFlagEntityMgr;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
@@ -54,17 +57,17 @@ public class RatingEngineResource {
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
-    @Autowired
+    @Inject
     private RatingEngineDashboardService ratingEngineDashboardService;
 
-    @Autowired
+    @Inject
     private RatingCoverageService ratingCoverageService;
 
-    @Autowired
+    @Inject
     private RatingEntityPreviewService ratingEntityPreviewService;
 
-    @Autowired
-    private ModelSummaryDownloadFlagEntityMgr modelSummaryDownloadFlagEntityMgr;
+    @Inject
+    private ActionService actionService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -129,9 +132,13 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
-    public RatingEngine createRatingEngine(@RequestBody RatingEngine ratingEngine) {
+    public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine);
+        RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy
+                .createOrUpdateRatingEngineAndActionDTO(tenant.getId(), ratingEngine);
+        Action action = ratingEngineAndAction.getAction();
+        registerAction(action, tenant);
+        return ratingEngineAndAction.getRatingEngine();
     }
 
     @RequestMapping(value = "/{ratingEngineId}", method = RequestMethod.DELETE, headers = "Accept=application/json")
@@ -173,7 +180,23 @@ public class RatingEngineResource {
     public RatingModel updateRatingModel(@RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.updateRatingModel(tenant.getId(), ratingEngineId, ratingModelId, ratingModel);
+        RatingModelAndActionDTO ratingModelAndAction = ratingEngineProxy.updateRatingModelAndActionDTO(tenant.getId(),
+                ratingEngineId, ratingModelId, ratingModel);
+        Action action = ratingModelAndAction.getAction();
+        registerAction(action, tenant);
+        return ratingModelAndAction.getRatingModel();
+    }
+
+    private void registerAction(Action action, Tenant tenant) {
+        if (action != null) {
+            action.setTenant(tenant);
+            log.info(String.format("Registering action %s", action));
+            ActionConfiguration actionConfig = action.getActionConfiguration();
+            if (actionConfig != null) {
+                action.setDescription(actionConfig.serialize());
+            }
+            actionService.create(action);
+        }
     }
 
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.GET)
