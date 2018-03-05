@@ -19,10 +19,10 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -122,6 +122,10 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
             for (Resource resource : sourceResources) {
                 String path = resource.getFile().getAbsolutePath();
                 String[] parts = path.split("\\/");
+                if (parts[parts.length - 1].contains(".avro")) {
+                    path = path.substring(0, path.lastIndexOf("/"));
+                    path += "/*.avro";
+                }
                 sourcePaths.put(parts[parts.length - 2], path);
             }
             if (!local) {
@@ -139,9 +143,7 @@ public abstract class DataFlowCascadingTestNGBase extends AbstractTestNGSpringCo
                 sourcePaths.put(AVRO_INPUT, AVRO_DIR + "/" + AVRO_INPUT + ".avro");
             }
             Map<String, String> extraSourcePaths = extraSourcePaths();
-            extraSourcePaths.forEach((n, p) -> {
-                sourcePaths.put(n, p);
-            });
+            extraSourcePaths.forEach((n, p) -> sourcePaths.put(n, p));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
