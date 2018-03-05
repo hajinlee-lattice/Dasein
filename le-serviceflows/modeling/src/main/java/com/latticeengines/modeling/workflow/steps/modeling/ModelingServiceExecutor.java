@@ -47,8 +47,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.modeling.workflow.steps.modeling.ProductType;
-import com.latticeengines.modeling.workflow.steps.modeling.ProvenanceProperties;
 
 public class ModelingServiceExecutor {
 
@@ -304,7 +302,8 @@ public class ModelingServiceExecutor {
     }
 
     private String submitModel(Model model) throws Exception, InterruptedException {
-        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures();
+        AbstractMap.SimpleEntry<List<String>, List<String>> targetAndFeatures = getTargetAndFeatures(
+                model.getFeaturesThreshold());
         model.setTargetsList(targetAndFeatures.getKey());
         model.setFeaturesList(targetAndFeatures.getValue());
 
@@ -406,12 +405,13 @@ public class ModelingServiceExecutor {
         return status;
     }
 
-    private AbstractMap.SimpleEntry<List<String>, List<String>> getTargetAndFeatures() {
+    private AbstractMap.SimpleEntry<List<String>, List<String>> getTargetAndFeatures(int featuresThreshold) {
         Model model = new Model();
         model.setName("Model-" + System.currentTimeMillis());
         model.setTable(builder.getTable());
         model.setMetadataTable(builder.getMetadataTable());
         model.setCustomer(builder.getCustomer());
+        model.setFeaturesThreshold(featuresThreshold);
         StringList features = modelProxy.getFeatures(model);
         return new AbstractMap.SimpleEntry<>(Arrays.asList(builder.getTargets()), features.getElements());
     }
