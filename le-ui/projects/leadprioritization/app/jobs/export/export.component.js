@@ -53,6 +53,10 @@ angular.module('lp.jobs.export', [])
 
         this.init();
 
+        vm.isExpired = function(job) {
+            var currentTime = Date.now();
+            return 'EXPIRE_BY_UTC_TIMESTAMP' in job.inputs ? currentTime > job.inputs['EXPIRE_BY_UTC_TIMESTAMP'] : false;
+        }
 
         vm.downloadSegmentExport = function(jobId) {
             if (jobId && jobId !== null) {
