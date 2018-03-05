@@ -14,6 +14,8 @@ import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -34,16 +36,18 @@ import io.undertow.util.Headers;
 @ContextConfiguration(locations = { "classpath:test-proxy-context.xml" })
 public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseRestApiProxyTestNG.class);
+
     @Autowired
     private TestProxy testProxy;
 
     private Undertow server;
-    private int port;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         ServerSocket s = new ServerSocket(0);
-        port = s.getLocalPort();
+        int port = s.getLocalPort();
+        log.info("Using local port " + port);
         server = getHttpServer(port);
         server.start();
         testProxy.setHostport("https://localhost:" + port);
