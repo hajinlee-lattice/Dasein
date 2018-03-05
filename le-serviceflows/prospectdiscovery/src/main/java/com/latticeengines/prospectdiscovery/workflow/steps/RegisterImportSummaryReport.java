@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.MathUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.prospectdiscovery.dataflow.CreateImportSummary;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("registerImportSummaryReport")
 public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketStepConfiguration> {

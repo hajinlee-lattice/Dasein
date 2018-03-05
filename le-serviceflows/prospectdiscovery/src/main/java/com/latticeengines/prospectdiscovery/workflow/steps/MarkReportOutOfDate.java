@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("markReportOutOfDate")
 public class MarkReportOutOfDate extends BaseWorkflowStep<TargetMarketStepConfiguration> {

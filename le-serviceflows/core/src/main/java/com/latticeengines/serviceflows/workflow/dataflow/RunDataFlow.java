@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepCon
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.dataflowapi.DataFlowApiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class RunDataFlow<T extends DataFlowStepConfiguration> extends BaseWorkflowStep<T> {
 

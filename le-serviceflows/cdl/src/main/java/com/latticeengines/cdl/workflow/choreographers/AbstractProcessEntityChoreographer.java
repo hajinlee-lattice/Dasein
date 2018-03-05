@@ -1,9 +1,9 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CDL_ACTIVE_VERSION;
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.CUSTOMER_SPACE;
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
 
 import java.util.List;
 import java.util.Map;

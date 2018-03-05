@@ -31,9 +31,9 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
-                .next(mergeProductWrapper) //
-                .next(updateProductWorkflow) //
-                .next(rebuildProductWorkflow) //
+                .next(mergeProductWrapper, null) //
+                .next(updateProductWorkflow, null) //
+                .next(rebuildProductWorkflow, null) //
                 .next(resetProduct) //
                 .build();
     }

@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.Ta
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 public abstract class RegisterReport {
     private static final Logger log = LoggerFactory.getLogger(RegisterReport.class);

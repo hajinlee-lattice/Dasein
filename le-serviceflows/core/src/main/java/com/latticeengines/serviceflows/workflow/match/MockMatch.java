@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileSystem;
@@ -17,7 +19,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
 
 @Component("mockMatch")
 public class MockMatch extends BaseWorkflowStep<MatchStepConfiguration> {

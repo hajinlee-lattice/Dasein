@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("processProductDiff")
 public class ProcessProductDiff extends BaseWorkflowStep<ProcessProductStepConfiguration> {

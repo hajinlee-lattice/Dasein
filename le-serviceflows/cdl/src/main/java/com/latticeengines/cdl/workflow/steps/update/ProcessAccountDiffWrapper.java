@@ -5,10 +5,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("processAccountDiffWrapper")
-public class ProcessAccountDiffWrapper extends BaseTransformationWrapper<ProcessAccountDiff> {
+public class ProcessAccountDiffWrapper
+        extends BaseTransformationWrapper<ProcessAccountStepConfiguration, ProcessAccountDiff> {
 
     @Inject
     private ProcessAccountDiff processAccountDiff;

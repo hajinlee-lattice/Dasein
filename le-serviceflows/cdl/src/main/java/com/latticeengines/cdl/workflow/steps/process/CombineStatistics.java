@@ -32,7 +32,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatistic
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("combineStatistics")
 public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfiguration> {

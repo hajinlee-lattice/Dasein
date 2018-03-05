@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;

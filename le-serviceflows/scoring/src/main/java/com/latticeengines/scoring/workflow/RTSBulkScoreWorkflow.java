@@ -40,11 +40,12 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
 
     @Override
     public Workflow defineWorkflow(RTSBulkScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(matchDataCloudWorkflow)//
+        return new WorkflowBuilder()//
+                .next(matchDataCloudWorkflow, null)//
                 .next(score) //
                 .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
-                .next(exportWorkflow) //
+                .next(exportWorkflow, null) //
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
     }

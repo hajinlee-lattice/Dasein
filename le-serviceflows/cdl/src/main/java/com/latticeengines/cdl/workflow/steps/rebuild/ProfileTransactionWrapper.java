@@ -5,10 +5,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("profileTransactionWrapper")
-public class ProfileTransactionWrapper extends BaseTransformationWrapper<ProfileTransaction> {
+public class ProfileTransactionWrapper
+        extends BaseTransformationWrapper<ProcessTransactionStepConfiguration, ProfileTransaction> {
 
     @Inject
     private ProfileTransaction aggregateTransaction;

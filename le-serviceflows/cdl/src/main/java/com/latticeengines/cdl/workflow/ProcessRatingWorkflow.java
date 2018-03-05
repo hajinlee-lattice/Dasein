@@ -42,8 +42,8 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
         return new WorkflowBuilder() //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //
-                .next(generateRatingWorkflow) //
-                .next(profileRatingWrapper) //
+                .next(generateRatingWorkflow, null) //
+                .next(profileRatingWrapper, null) //
                 .next(combineStatistics) //
                 .next(exportDataToRedshift) //
                 .build();

@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.scoring.ScoringProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends BaseWorkflowStep<T> {
     private static final Logger log = LoggerFactory.getLogger(Score.class);

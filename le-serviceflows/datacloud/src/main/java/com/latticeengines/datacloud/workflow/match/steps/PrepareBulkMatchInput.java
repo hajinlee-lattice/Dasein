@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.datacloud.DataCloudJobConfiguration;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.PrepareBulkMatchInputConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("prepareBulkMatchInput")
 @Scope("prototype")

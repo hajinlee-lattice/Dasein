@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.core;
+package com.latticeengines.workflow.exposed.build;
 
 import static com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase.POST_PROCESSING;
 import static com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.Phase.PRE_PROCESSING;

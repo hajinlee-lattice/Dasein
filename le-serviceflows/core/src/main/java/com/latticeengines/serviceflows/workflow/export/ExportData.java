@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfi
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("exportData")
 public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {

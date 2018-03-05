@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.core;
+package com.latticeengines.workflow.exposed.build;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
-import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
@@ -282,7 +281,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                         String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
             }
         }
-        Map<String, String> registry = workflow.getConfigRegistry();
+        Map<String, String> registry = workflow.getStepConfigRegistry();
         return registry.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
             Class<?> configClass = null;
             try {

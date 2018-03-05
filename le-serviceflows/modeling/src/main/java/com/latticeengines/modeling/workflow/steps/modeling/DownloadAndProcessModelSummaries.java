@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("downloadAndProcessModelSummaries")
 public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStepConfiguration> {

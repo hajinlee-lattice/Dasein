@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.core;
+package com.latticeengines.workflow.exposed.build;
 
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 

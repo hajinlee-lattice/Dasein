@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWrapperStep;
+import com.latticeengines.workflow.exposed.build.BaseWrapperStep;
 
 public abstract class BaseTransformWrapperStep<T extends BaseWrapperStepConfiguration>
         extends BaseWrapperStep<T, TransformationWorkflowConfiguration> {

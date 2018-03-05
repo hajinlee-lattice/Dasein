@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public abstract class EntityAwareWorkflowStep<T extends BaseProcessEntityStepConfiguration> extends BaseWorkflowStep<T> {
 

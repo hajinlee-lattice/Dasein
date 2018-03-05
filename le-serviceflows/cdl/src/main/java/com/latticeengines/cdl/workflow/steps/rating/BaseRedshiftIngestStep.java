@@ -52,7 +52,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration> extends BaseWorkflowStep<T> {
 

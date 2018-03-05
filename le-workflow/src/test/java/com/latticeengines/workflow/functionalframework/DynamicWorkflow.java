@@ -39,9 +39,9 @@ public class DynamicWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
         return new WorkflowBuilder() //
                 .next(stepA) //
                 .next(stepB) //
-                .next(subWorkflowA) //
+                .next(subWorkflowA, null) //
                 .next(stepC) //
-                .next(subWorkflowB) //
+                .next(subWorkflowB, null) //
                 .next(stepD) //
                 .choreographer(choreographer) //
                 .build();

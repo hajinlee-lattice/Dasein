@@ -5,10 +5,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("mergeAccountWrapper")
-public class MergeAccountWrapper extends BaseTransformationWrapper<MergeAccount> {
+public class MergeAccountWrapper extends BaseTransformationWrapper<ProcessAccountStepConfiguration, MergeAccount> {
 
     @Inject
     private MergeAccount mergeAccount;

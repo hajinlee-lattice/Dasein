@@ -1,4 +1,4 @@
-package com.latticeengines.serviceflows.workflow.core;
+package com.latticeengines.workflow.exposed.build;
 
 import static org.testng.Assert.assertEquals;
 
@@ -6,6 +6,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class BaseWorkflowStepUnitTestNG {
 

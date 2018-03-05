@@ -5,10 +5,12 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("processContactDiffWrapper")
-public class ProcessContactDiffWrapper extends BaseTransformationWrapper<ProcessContactDiff> {
+public class ProcessContactDiffWrapper
+        extends BaseTransformationWrapper<ProcessContactStepConfiguration, ProcessContactDiff> {
 
     @Inject
     private ProcessContactDiff processContactDiff;

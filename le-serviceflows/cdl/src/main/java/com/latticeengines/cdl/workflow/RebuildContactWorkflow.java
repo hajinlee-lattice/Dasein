@@ -21,7 +21,7 @@ public class RebuildContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
-                .next(profileContactWrapper) //
+                .next(profileContactWrapper, null) //
                 .build();
     }
 }

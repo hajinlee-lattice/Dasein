@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.pls.DataScienceInvocationInfo;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("invokeDataScienceAnalysis")
 public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfiguration> {

@@ -1,14 +1,12 @@
 package com.latticeengines.cdl.workflow;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
@@ -20,7 +18,6 @@ import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
-import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -67,16 +64,17 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
-        List<AbstractStep<? extends BaseStepConfiguration>> steps = customEventMatchWorkflow.getSteps(null);
         return new WorkflowBuilder().next(importData) //
                 .next(createTableImportReport) //
-                .next(steps) //
-                .next(modelValidationWorkflow) //
+                .next(customEventMatchWorkflow,
+                        (CustomEventMatchWorkflowConfiguration) config.getSubWorkflowConfigRegistry()
+                                .get(CustomEventMatchWorkflowConfiguration.class.getSimpleName())) //
+                .next(modelValidationWorkflow, null) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
-                .next(modelWorkflow) //
+                .next(modelWorkflow, null) //
                 .next(setConfigurationForScoring) //
-                .next(rtsBulkScoreWorkflow) //
+                .next(rtsBulkScoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

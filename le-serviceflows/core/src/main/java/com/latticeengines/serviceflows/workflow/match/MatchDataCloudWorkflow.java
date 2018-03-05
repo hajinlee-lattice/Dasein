@@ -24,7 +24,7 @@ public class MatchDataCloudWorkflow extends AbstractWorkflow<WorkflowConfigurati
     public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(prepareMatchConfig) //
-                .next(bulkMatchWorkflow) //
+                .next(bulkMatchWorkflow, null) //
                 .next(processMatchResult) //
                 .build();
     }

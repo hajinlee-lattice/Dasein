@@ -49,11 +49,11 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
         return new WorkflowBuilder().next(createCdlScoringTableFilterStep) //
                 .next(createCdlEventTableStep) //
-                .next(matchDataCloudWorkflow) //
+                .next(matchDataCloudWorkflow, null) //
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //
-                .next(exportWorkflow) //
+                .next(exportWorkflow, null) //
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
 

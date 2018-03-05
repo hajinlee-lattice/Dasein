@@ -13,7 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("registerAttributeLevelSummaryReport")
 public class RegisterAttributeLevelSummaryReport extends BaseWorkflowStep<TargetMarketStepConfiguration> {

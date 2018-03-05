@@ -20,8 +20,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("chooseModel")
 public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> {

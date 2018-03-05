@@ -53,7 +53,7 @@ import com.latticeengines.domain.exposed.util.PmmlModelUtils;
 import com.latticeengines.modeling.steps.pmml.PMMLModelingServiceExecutor;
 import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("createPMMLModel")
 public class CreatePMMLModel extends BaseWorkflowStep<CreatePMMLModelConfiguration> {

@@ -13,8 +13,8 @@ import com.google.common.base.Joiner;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("waitForDownloadedModelSummaries")
 public class WaitForDownloadedModelSummaries {

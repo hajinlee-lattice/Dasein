@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PublicationProgress;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.publication.PublicationDestination;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.PublishConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("publish")
 @Scope("prototype")

@@ -13,8 +13,8 @@ import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("activateModel")
 public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {

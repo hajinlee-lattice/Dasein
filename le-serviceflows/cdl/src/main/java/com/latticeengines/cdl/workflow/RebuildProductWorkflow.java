@@ -21,7 +21,7 @@ public class RebuildProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
-                .next(profileProductWrapper) //
+                .next(profileProductWrapper, null) //
                 .build();
     }
 }

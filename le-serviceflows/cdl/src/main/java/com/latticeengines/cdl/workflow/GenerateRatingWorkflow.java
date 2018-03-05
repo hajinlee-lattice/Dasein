@@ -24,7 +24,7 @@ public class GenerateRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkf
     @Override
     public Workflow defineWorkflow(GenerateRatingWorkflowConfiguration config) {
         return new WorkflowBuilder() //
-                .next(generateAIRatingWorkflow) //
+                .next(generateAIRatingWorkflow, null) //
                 .next(ingestRatingFromRedshift) //
                 .build();
     }

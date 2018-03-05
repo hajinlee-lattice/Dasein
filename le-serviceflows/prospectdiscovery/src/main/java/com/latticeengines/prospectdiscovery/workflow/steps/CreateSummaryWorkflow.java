@@ -3,7 +3,8 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class CreateSummaryWorkflow<T extends RunAttributeLevelSummaryDataFlowsConfiguration> extends BaseWorkflowStep<T> {

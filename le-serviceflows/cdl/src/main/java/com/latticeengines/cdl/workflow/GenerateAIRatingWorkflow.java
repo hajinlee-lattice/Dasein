@@ -47,7 +47,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWor
         return new WorkflowBuilder() //
                 .next(createScoringTargetTable) //
                 .next(createCdlEventTable) //
-                .next(matchDataCloud) //
+                .next(matchDataCloud, null) //
                 .next(scoreEventTable) //
                 .next(scoreAggregate) //
                 .next(combineInputTableWithScore) //

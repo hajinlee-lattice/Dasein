@@ -5,10 +5,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("profileProductWrapper")
-public class ProfileProductWrapper extends BaseTransformationWrapper<ProfileProduct> {
+public class ProfileProductWrapper extends BaseTransformationWrapper<ProcessProductStepConfiguration, ProfileProduct> {
 
     @Inject
     private ProfileProduct profileProduct;

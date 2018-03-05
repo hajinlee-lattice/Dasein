@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.pls.NoteOrigin;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("createNote")
 public class CreateNote extends BaseModelStep<ModelStepConfiguration> {

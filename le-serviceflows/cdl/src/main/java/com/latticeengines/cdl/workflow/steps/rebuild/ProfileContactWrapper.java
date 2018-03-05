@@ -5,10 +5,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformationWrapper;
 
 @Component("profileContactWrapper")
-public class ProfileContactWrapper extends BaseTransformationWrapper<ProfileContact> {
+public class ProfileContactWrapper extends BaseTransformationWrapper<ProcessContactStepConfiguration, ProfileContact> {
 
     @Inject
     private ProfileContact profileContact;

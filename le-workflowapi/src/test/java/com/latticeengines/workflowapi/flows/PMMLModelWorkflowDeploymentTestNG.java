@@ -76,13 +76,13 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         workflowService.unRegisterJob(workflowConfig.getWorkflowName());
         workflowService.registerJob(workflowConfig, applicationContext);
 
-        for (String key : workflowConfig.getConfigRegistry().keySet()) {
+        for (String key : workflowConfig.getStepConfigRegistry().keySet()) {
             if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
                 ObjectMapper om = new ObjectMapper();
-                CreatePMMLModelConfiguration modelConfig = om.readValue(workflowConfig.getConfigRegistry().get(key),
+                CreatePMMLModelConfiguration modelConfig = om.readValue(workflowConfig.getStepConfigRegistry().get(key),
                         CreatePMMLModelConfiguration.class);
                 modelName = modelConfig.getModelName();
-                System.out.println(workflowConfig.getConfigRegistry().get(key));
+                System.out.println(workflowConfig.getStepConfigRegistry().get(key));
                 System.out.println("Model name = " + modelName);
             }
         }

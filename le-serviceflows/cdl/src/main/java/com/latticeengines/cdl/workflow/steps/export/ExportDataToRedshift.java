@@ -36,7 +36,7 @@ import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("exportDataToRedshift")
 public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftConfiguration> {

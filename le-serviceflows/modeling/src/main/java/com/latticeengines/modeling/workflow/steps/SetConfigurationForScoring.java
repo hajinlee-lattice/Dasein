@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchRes
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.RTSScoreStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setConfigurationForScoring")
 public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfigurationForScoringConfiguration> {

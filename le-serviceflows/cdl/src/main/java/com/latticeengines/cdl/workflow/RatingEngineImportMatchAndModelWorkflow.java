@@ -53,10 +53,10 @@ public class RatingEngineImportMatchAndModelWorkflow
         return new WorkflowBuilder() //
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
-                .next(matchDataCloudWorkflow) //
-                .next(modelWorkflow) //
+                .next(matchDataCloudWorkflow, null) //
+                .next(modelWorkflow, null) //
                 .next(setCdlConfigurationForScoring) //
-                .next(scoreWorkflow) //
+                .next(scoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

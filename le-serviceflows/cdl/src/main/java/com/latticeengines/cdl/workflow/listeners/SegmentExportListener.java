@@ -59,8 +59,8 @@ public class SegmentExportListener extends LEJobListener {
                 log.info(String.format("userId: %s; segmentExportId: %s", metadataSegmentExport.getCreatedBy(),
                         metadataSegmentExport.getExportId()));
 
-                com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy emailProxy //
-                        = new com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy(
+                com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy emailProxy //
+                        = new com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy(
                                 internalResourceHostPort);
                 String jobStatus = jobExecution.getStatus().name();
                 if (metadataSegmentExport.getStatus() == Status.FAILED) {

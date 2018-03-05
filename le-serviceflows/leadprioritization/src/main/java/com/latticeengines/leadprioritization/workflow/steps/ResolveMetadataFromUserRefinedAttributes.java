@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("resolveMetadataFromUserRefinedAttributes")
 public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<ResolveMetadataFromUserRefinedAttributesConfiguration> {

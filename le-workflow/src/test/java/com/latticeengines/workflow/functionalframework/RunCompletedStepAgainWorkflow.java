@@ -20,7 +20,7 @@ public class RunCompletedStepAgainWorkflow extends AbstractWorkflow<WorkflowConf
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
         return new WorkflowBuilder().next(runAgainWhenCompleteStep) //
-                .next(failableWorkflow) //
+                .next(failableWorkflow, null) //
                 .build();
     }
 

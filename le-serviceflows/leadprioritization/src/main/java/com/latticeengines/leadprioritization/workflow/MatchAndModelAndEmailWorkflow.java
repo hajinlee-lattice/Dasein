@@ -58,13 +58,13 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     @Override
     public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder() //
-                .next(matchDataCloudWorkflow) //
+                .next(matchDataCloudWorkflow, null) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
-                .next(modelWorkflow) //
+                .next(modelWorkflow, null) //
                 .next(setConfigurationForScoring) //
-                .next(rtsBulkScoreWorkflow) //
+                .next(rtsBulkScoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

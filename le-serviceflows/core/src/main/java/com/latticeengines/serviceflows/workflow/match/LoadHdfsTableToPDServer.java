@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("loadHdfsTableToPDServer")
 public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfiguration> {

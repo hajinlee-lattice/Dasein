@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.RATING_MODELS;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
 
 import java.util.Collection;
 import java.util.List;

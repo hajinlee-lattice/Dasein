@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurat
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setCdlConfigurationForScoring")
 public class SetCdlConfigurationForScoring extends BaseWorkflowStep<SetCdlConfigurationForScoringConfiguration> {

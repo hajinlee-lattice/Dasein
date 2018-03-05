@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("createEventTableFromMatchResult")
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {

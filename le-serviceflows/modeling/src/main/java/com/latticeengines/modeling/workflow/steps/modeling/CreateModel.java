@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
 import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("createModel")
 public class CreateModel extends BaseModelStep<ModelStepConfiguration> {

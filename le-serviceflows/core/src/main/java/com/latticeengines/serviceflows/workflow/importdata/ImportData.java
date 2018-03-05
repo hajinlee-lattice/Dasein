@@ -21,8 +21,8 @@ import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("importData")
 public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {

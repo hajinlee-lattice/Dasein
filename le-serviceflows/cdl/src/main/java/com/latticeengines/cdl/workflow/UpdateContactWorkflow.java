@@ -26,7 +26,7 @@ public class UpdateContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(cloneContact) //
-                .next(processContactDiffWrapper) //
+                .next(processContactDiffWrapper, null) //
                 .build();
     }
 }

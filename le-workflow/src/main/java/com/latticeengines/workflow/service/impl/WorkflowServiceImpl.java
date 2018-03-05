@@ -148,13 +148,25 @@ public class WorkflowServiceImpl implements WorkflowService {
             } else {
                 parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
             }
-            for (String configurationClassName : workflowConfiguration.getConfigRegistry().keySet()) {
-                parmsBuilder.addString(configurationClassName,
-                        workflowConfiguration.getConfigRegistry().get(configurationClassName));
-            }
+            addConfigParams(workflowConfiguration, parmsBuilder);
         }
 
         return parmsBuilder.toJobParameters();
+    }
+
+    // make sure let's don't have a cycle in workflow config graph
+    private void addConfigParams(WorkflowConfiguration workflowConfiguration, JobParametersBuilder parmsBuilder) {
+        if (workflowConfiguration == null) {
+            return;
+        }
+        for (String configurationClassName : workflowConfiguration.getStepConfigRegistry().keySet()) {
+            parmsBuilder.addString(configurationClassName,
+                    workflowConfiguration.getStepConfigRegistry().get(configurationClassName));
+        }
+        for (WorkflowConfiguration subWorkflowConfiguration : workflowConfiguration.getSubWorkflowConfigRegistry()
+                .values()) {
+            addConfigParams(subWorkflowConfiguration, parmsBuilder);
+        }
     }
 
     @Override

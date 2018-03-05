@@ -35,7 +35,7 @@ public class ImportAndRTSBulkScoreWorkflow extends AbstractWorkflow<ImportAndRTS
         return new WorkflowBuilder() //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(rtsBulkScoreWorkflow)//
+                .next(rtsBulkScoreWorkflow, null)//
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
     }

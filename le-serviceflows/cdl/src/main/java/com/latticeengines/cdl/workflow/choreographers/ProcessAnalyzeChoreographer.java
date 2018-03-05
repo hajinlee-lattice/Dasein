@@ -1,6 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.serviceflows.workflow.core.BaseWorkflowStep.TABLE_GOING_TO_REDSHIFT;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLE_GOING_TO_REDSHIFT;
 
 import java.util.List;
 import java.util.Map;

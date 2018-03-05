@@ -182,7 +182,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
             WorkflowConfiguration workflowConfiguration = (WorkflowConfiguration) val;
             Map<String, Class<?>> stepConfigClasses = workflowConfiguration.getStepConfigClasses();
             if (!stepConfigClasses.isEmpty()) {
-                Map<String, String> configRegistry = workflowConfiguration.getConfigRegistry();
+                Map<String, String> configRegistry = workflowConfiguration.getStepConfigRegistry();
                 configRegistry.forEach((name, config) -> {
                     Class<?> stepConfigClass = stepConfigClasses.get(name);
                     putObjectInContext(name, JsonUtils.deserialize(config, stepConfigClass));

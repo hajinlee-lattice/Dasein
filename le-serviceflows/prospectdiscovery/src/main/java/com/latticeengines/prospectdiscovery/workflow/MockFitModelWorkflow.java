@@ -56,13 +56,13 @@ public class MockFitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration
         return new WorkflowBuilder().next(markReportOutOfDate) //
                 .next(importData) //
                 .next(createPreMatchEventTable) //
-                .next(mockMatchWorkflow) //
-                .next(createImportSummaryWorkflow) //
+                .next(mockMatchWorkflow, null) //
+                .next(createImportSummaryWorkflow, null) //
                 .next(sample) //
                 .next(mockProfileAndModel) //
                 .next(chooseModel) //
                 .next(score) //
-                .next(mockCreateAttributeLevelSummaryWorkflow) //
+                .next(mockCreateAttributeLevelSummaryWorkflow, null) //
                 .build();
     }
 

@@ -1,10 +1,11 @@
 package com.latticeengines.workflow.exposed.build;
 
-import java.util.List;
-
 import org.apache.commons.lang3.StringUtils;
 
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 public class WorkflowBuilder {
@@ -16,15 +17,10 @@ public class WorkflowBuilder {
         return this;
     }
 
-    public WorkflowBuilder next(List<AbstractStep<? extends BaseStepConfiguration>> steps) {
-        steps.forEach(step -> workflow.step(step, null));
-        return this;
-    }
-
-    public WorkflowBuilder next(AbstractWorkflow<?> nextWorkflow) {
+    public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow, T config) {
         int idx = 0;
-        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(null).getSteps()) {
-            String namespace = nextWorkflow.defineWorkflow(null).getStepNamespaces().get(idx);
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(config).getSteps()) {
+            String namespace = nextWorkflow.defineWorkflow(config).getStepNamespaces().get(idx);
             namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
             workflow.step(step, namespace);
             idx++;
@@ -33,10 +29,23 @@ public class WorkflowBuilder {
         return this;
     }
 
-    public WorkflowBuilder next(WorkflowInterface<?> nextWorkflow) {
+    public <S extends BaseWrapperStepConfiguration, W extends WorkflowConfiguration, R extends BaseWrapperStep<S, W>, I extends WorkflowInterface<W>> WorkflowBuilder next(
+            WorkflowWrapper<S, W, R, I> nextWorkflow, TransformationConfiguration config) {
         int idx = 0;
-        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(null).getSteps()) {
-            String namespace = nextWorkflow.defineWorkflow(null).getStepNamespaces().get(idx);
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(config).getSteps()) {
+            String namespace = nextWorkflow.defineWorkflow(config).getStepNamespaces().get(idx);
+            namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
+            workflow.step(step, namespace);
+            idx++;
+        }
+
+        return this;
+    }
+
+    public <T> WorkflowBuilder next(WorkflowInterface<T> nextWorkflow, T config) {
+        int idx = 0;
+        for (AbstractStep<? extends BaseStepConfiguration> step : nextWorkflow.defineWorkflow(config).getSteps()) {
+            String namespace = nextWorkflow.defineWorkflow(config).getStepNamespaces().get(idx);
             namespace = StringUtils.isBlank(namespace) ? nextWorkflow.name() : nextWorkflow.name() + "." + namespace;
             workflow.step(step, namespace);
             idx++;

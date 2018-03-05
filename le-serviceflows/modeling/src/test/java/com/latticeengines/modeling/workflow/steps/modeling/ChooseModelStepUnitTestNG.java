@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ChooseModelStepConfiguration;
-import com.latticeengines.serviceflows.workflow.core.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 public class ChooseModelStepUnitTestNG {
 

@@ -64,14 +64,14 @@ public class ProcessAnalyzeWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
         return new WorkflowBuilder() //
                 .next(startProcessing) //
-                .next(processAccountWorkflow) //
-                .next(processContactWorkflow) //
-                .next(processProductWorkflow) //
-                .next(processTransactionWorkflow) //
+                .next(processAccountWorkflow, null) //
+                .next(processContactWorkflow, null) //
+                .next(processProductWorkflow, null) //
+                .next(processTransactionWorkflow, null) //
                 .next(combineStatistics) //
-                .next(redshiftPublishWorkflow) //
+                .next(redshiftPublishWorkflow, null) //
                 .next(awsApsGeneratorStep) //
-                .next(processRatingWorkflow) //
+                .next(processRatingWorkflow, null) //
                 .next(generateProcessingReport) //
                 .next(finishProcessing) //
                 .listener(processAnalyzeListener) //

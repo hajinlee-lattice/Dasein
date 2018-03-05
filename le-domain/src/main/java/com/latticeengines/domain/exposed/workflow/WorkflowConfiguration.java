@@ -28,7 +28,11 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
         @Type(value = BasePDWorkflowConfiguration.class, name = "BasePDWorkflowConfiguration"), })
 public class WorkflowConfiguration extends BasePayloadConfiguration {
 
-    private Map<String, String> configRegistry = new HashMap<>();
+    @JsonProperty("stepConfigRegistry")
+    private Map<String, String> stepConfigRegistry = new HashMap<>();
+
+    @JsonProperty("subWorkflowConfigRegistry")
+    private Map<String, WorkflowConfiguration> subWorkflowConfigRegistry = new HashMap<>();
 
     @JsonProperty("workflowName")
     private String workflowName;
@@ -64,15 +68,19 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     }
 
     public void add(BaseStepConfiguration configuration) {
-        configRegistry.put(configuration.getClass().getName(), configuration.toString());
+        stepConfigRegistry.put(configuration.getClass().getName(), configuration.toString());
     }
 
     protected void add(WorkflowConfiguration configuration) {
-        configRegistry.putAll(configuration.configRegistry);
+        subWorkflowConfigRegistry.put(configuration.getName(), configuration);
     }
 
-    public Map<String, String> getConfigRegistry() {
-        return configRegistry;
+    public Map<String, String> getStepConfigRegistry() {
+        return stepConfigRegistry;
+    }
+
+    public Map<String, WorkflowConfiguration> getSubWorkflowConfigRegistry() {
+        return subWorkflowConfigRegistry;
     }
 
     public void setContainerConfiguration(String workflowName, CustomerSpace customerSpace, String payloadName) {

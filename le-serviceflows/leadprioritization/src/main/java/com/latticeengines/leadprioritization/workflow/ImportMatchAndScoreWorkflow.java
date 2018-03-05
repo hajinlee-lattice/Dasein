@@ -35,7 +35,7 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
         return new WorkflowBuilder() //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(scoreWorkflow)//
+                .next(scoreWorkflow, null)//
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
     }
