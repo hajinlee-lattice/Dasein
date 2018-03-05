@@ -101,6 +101,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         this.redshiftService = redshiftService;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void populateData(String tenantId) {
         final String shortTenantId = CustomerSpace.parse(tenantId).getTenantId();
@@ -227,7 +228,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
 
         Schema schema = AvroUtils.constructSchema(ratingTableName, columns);
-        Table table = MetadataConverter.getTable(schema, null, InterfaceName.AccountId.name(), null,false);
+        Table table = MetadataConverter.getTable(schema, null, InterfaceName.AccountId.name(), null, false);
         metadataProxy.createTable(tenantId, ratingTableName, table);
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(tenantId);
         dataCollectionProxy.upsertTable(tenantId, ratingTableName, TableRoleInCollection.PivotedRating, active);

@@ -81,7 +81,7 @@ public class TestPlayCreationHelper {
 
     private MetadataSegment segment;
 
-    public void setupTenant() {
+    public void setupTenantAndPopuldateData() {
         tenant = deploymentTestBed.bootstrapForProduct(LatticeProduct.CG);
         tenantIdentifier = tenant.getId();
         cdlTestDataService.populateData(tenantIdentifier);
@@ -91,12 +91,10 @@ public class TestPlayCreationHelper {
     }
 
     public void setupTenantAndCreatePlay() throws Exception {
-        setupTenant();
+        setupTenantAndPopuldateData();
 
         playResourceDeploymentTestNG.setShouldSkipAutoTenantCreation(true);
-        playResourceDeploymentTestNG.setMainTestTenant(tenant);
-        playResourceDeploymentTestNG.setup(); // This will populate cdl test
-                                              // data, so don't populate again
+        playResourceDeploymentTestNG.setTenant(tenant);
 
         Restriction accountRestriction = createAccountRestriction();
         Restriction contactRestriction = createContactRestriction();
@@ -104,6 +102,8 @@ public class TestPlayCreationHelper {
 
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
 
         playResourceDeploymentTestNG.getCrud();
         playResourceDeploymentTestNG.createPlayLaunch();

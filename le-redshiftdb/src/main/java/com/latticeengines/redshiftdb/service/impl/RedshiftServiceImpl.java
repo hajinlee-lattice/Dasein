@@ -55,7 +55,8 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void insertValuesIntoTable(String tableName, List<Pair<String, Class<?>>> schema, List<List<Object>> data) {
         List<String> fields = schema.stream().map(Pair::getLeft).collect(Collectors.toList());
-        List<SQLType> sqlTypes = schema.stream().map(Pair::getRight).map(AvroUtils::getSqlType).collect(Collectors.toList());
+        List<SQLType> sqlTypes = schema.stream().map(Pair::getRight).map(AvroUtils::getSqlType)
+                .collect(Collectors.toList());
         int totoRows = data.size();
         int totalCardinality = 5000;
         int pageSize = Math.max(totalCardinality / sqlTypes.size(), 1);
@@ -74,6 +75,7 @@ public class RedshiftServiceImpl implements RedshiftService {
                 }
                 return ps.execute();
             });
+            inserted += page.size();
         }
     }
 
@@ -173,7 +175,8 @@ public class RedshiftServiceImpl implements RedshiftService {
     @Override
     public void vacuumTable(String tableName) {
         log.info("Vacuum table " + tableName);
-        redshiftJdbcTemplate.execute(String.format("SET wlm_query_slot_count to 4; VACUUM FULL %s; SET wlm_query_slot_count to 1;", tableName));
+        redshiftJdbcTemplate.execute(String
+                .format("SET wlm_query_slot_count to 4; VACUUM FULL %s; SET wlm_query_slot_count to 1;", tableName));
     }
 
     @Override

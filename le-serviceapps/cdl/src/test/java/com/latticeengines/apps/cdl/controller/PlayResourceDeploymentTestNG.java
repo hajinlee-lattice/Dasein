@@ -81,6 +81,10 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         createRatingEngine(retrievedSegment, new RatingRule());
     }
 
+    public void setTenant(Tenant tenant) {
+        this.tenant = tenant;
+    }
+
     public RatingEngine createRatingEngine(MetadataSegment retrievedSegment, RatingRule ratingRule) {
         ratingEngine1 = new RatingEngine();
         ratingEngine1.setSegment(retrievedSegment);

@@ -209,7 +209,8 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             String lookupId = matcher.group(0);
             eventTable = matcher.group(1);
             uuid = matcher.group(2);
-            String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable, uuid);
+            String newLookupId = String.format("%s.%s.Production|%s|%s", newTenantName, newTenantName, eventTable,
+                    uuid);
             modelSummaryContent = modelSummaryContent.replace(lookupId, newLookupId);
             modelSummaryContent = modelSummaryContent.replace(uuid, newUuid);
         } else {
@@ -245,7 +246,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
             log.info(String.format("Getting the model whose id contains %s", uuid));
             List<ModelSummary> summaries = modelSummaryProxy.getSummaries();
             if (CollectionUtils.isNotEmpty(summaries)) {
-                for (ModelSummary summary: summaries) {
+                for (ModelSummary summary : summaries) {
                     if (summary.getId().contains(uuid)) {
                         found = summary;
                         break;
