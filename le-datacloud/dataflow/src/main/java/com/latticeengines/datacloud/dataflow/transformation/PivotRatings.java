@@ -68,6 +68,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
                 ruleEngineIds = new HashSet<>(idAttrsMap.values());
             }
             Node ruleRating = addSource(parameters.getBaseTables().get(ruleSrcIdx));
+            ruleRating = ruleRating.filter(idCol + " != null", new FieldList(idCol));
             ruleRating = ruleRating.discard(InterfaceName.__Composite_Key__.name(),
                     InterfaceName.CDLUpdatedTime.name());
             ruleRating = renameIds(ruleRating);
@@ -77,6 +78,7 @@ public class PivotRatings extends ConfigurableFlowBase<PivotRatingsConfig> {
 
         if (aiSrcIdx != null) {
             Node aiRating = addSource(parameters.getBaseTables().get(aiSrcIdx));
+            aiRating = aiRating.filter(idCol + " != null", new FieldList(idCol));
             Node aiPivoted = pivotAIBased(aiRating);
             if (pivoted == null) {
                 pivoted = aiPivoted;
