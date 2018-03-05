@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -16,6 +17,7 @@ import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.objectapi.util.ModelingQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 @Service("eventQueryService")
 public class EventQueryServiceImpl implements EventQueryService {
@@ -61,17 +63,25 @@ public class EventQueryServiceImpl implements EventQueryService {
     private long getCount(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
                           DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
-        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
-        return queryEvaluatorService.getCount(attrRepo, query);
+        try {
+            ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
+            return queryEvaluatorService.getCount(attrRepo, query);
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+        }
     }
 
     private DataPage getData(CustomerSpace customerSpace, EventFrontEndQuery frontEndQuery, EventType eventType,
                              DataCollection.Version version) {
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
-        ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
-        Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
-        return queryEvaluatorService.getData(attrRepo, query);
+        try {
+            ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(queryEvaluatorService.getQueryFactory(), attrRepo);
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
+            return queryEvaluatorService.getData(attrRepo, query);
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+        }
     }
 
 }

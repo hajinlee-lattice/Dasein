@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -47,6 +48,7 @@ import com.latticeengines.objectapi.util.RatingQueryTranslator;
 import com.latticeengines.objectapi.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 import reactor.core.publisher.Flux;
 
@@ -71,13 +73,17 @@ public class RatingQueryServiceImpl implements RatingQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
-        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
-        query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-        return queryEvaluatorService.getCount(attrRepo, query);
+        try {
+            RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                    attrRepo);
+            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+            query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
+            return queryEvaluatorService.getCount(attrRepo, query);
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+        }
     }
 
     @Override
@@ -91,36 +97,44 @@ public class RatingQueryServiceImpl implements RatingQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
-        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
-        if (query.getLookups() == null || query.getLookups().isEmpty()) {
-            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+        try {
+            RatingQueryTranslator queryTranslator = new RatingQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                    attrRepo);
+            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            Query query = queryTranslator.translateRatingQuery(frontEndQuery, decorator, timeTranslator);
+            if (query.getLookups() == null || query.getLookups().isEmpty()) {
+                query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+            }
+            query = preProcess(frontEndQuery.getMainEntity(), query);
+            return queryEvaluatorService.getDataFlux(attrRepo, query) //
+                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
         }
-        query = preProcess(frontEndQuery.getMainEntity(), query);
-        return queryEvaluatorService.getDataFlux(attrRepo, query) //
-                .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
     }
 
     @Override
     public Map<String, Long> getRatingCount(FrontEndQuery frontEndQuery, DataCollection.Version version) {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
-        List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
-                .getData();
-        RatingModel model = frontEndQuery.getRatingModels().get(0);
-        Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
-        TreeMap<String, Long> counts = new TreeMap<>();
-        data.forEach(map -> {
-            String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
-            if (!counts.containsKey(key)) {
-                counts.put(key, 0L);
-            }
-            counts.put(key, counts.get(key) + (Long) map.get("count"));
-        });
-        return counts;
+        try {
+            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+            Query query = ratingCountQuery(customerSpace, frontEndQuery, version);
+            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+                    .getData();
+            RatingModel model = frontEndQuery.getRatingModels().get(0);
+            Map<String, String> lblMap = ruleLabelReverseMapping(((RuleBasedModel) model).getRatingRule());
+            TreeMap<String, Long> counts = new TreeMap<>();
+            data.forEach(map -> {
+                String key = lblMap.get((String) map.get(QueryEvaluator.SCORE));
+                if (!counts.containsKey(key)) {
+                    counts.put(key, 0L);
+                }
+                counts.put(key, counts.get(key) + (Long) map.get("count"));
+            });
+            return counts;
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+        }
     }
 
     private Query ratingCountQuery(CustomerSpace customerSpace, FrontEndQuery frontEndQuery,

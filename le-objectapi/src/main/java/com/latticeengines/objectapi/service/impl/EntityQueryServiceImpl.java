@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -43,6 +44,7 @@ import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.objectapi.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 import reactor.core.publisher.Flux;
 
@@ -66,13 +68,17 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
-        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
-        query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
-        return queryEvaluatorService.getCount(attrRepo, query);
+        try {
+            EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                    attrRepo);
+            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
+            query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
+            return queryEvaluatorService.getCount(attrRepo, query);
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+        }
     }
 
     @Override
@@ -87,41 +93,47 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
                 queryEvaluatorService);
-        EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
-                attrRepo);
-        QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
-        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
-        Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
-        if (query.getLookups() == null || query.getLookups().isEmpty()) {
-            query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+        try {
+            EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
+                    attrRepo);
+            QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
+            if (query.getLookups() == null || query.getLookups().isEmpty()) {
+                query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
+            }
+            query = preProcess(frontEndQuery.getMainEntity(), query);
+            return queryEvaluatorService.getDataFlux(attrRepo, query) //
+                    .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
+        } catch (Exception e) {
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
         }
-        query = preProcess(frontEndQuery.getMainEntity(), query);
-        return queryEvaluatorService.getDataFlux(attrRepo, query) //
-                .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
     }
 
     @Override
     public Map<String, Long> getRatingCount(RatingEngineFrontEndQuery frontEndQuery, DataCollection.Version version) {
         String ratingEngineId = frontEndQuery.getRatingEngineId();
         if (StringUtils.isNotBlank(ratingEngineId)) {
-            String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
-
-            CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-            Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version);
-            List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
-                    .getData();
-            TreeMap<String, Long> counts = new TreeMap<>();
-            data.forEach(map -> {
-                String rating = (String) map.get(ratingField);
-                if (StringUtils.isNotBlank(rating)) {
-                    if (!counts.containsKey(ratingField)) {
-                        counts.put(rating, 0L);
+            try {
+                String ratingField = RatingEngine.toRatingAttrName(ratingEngineId, RatingEngine.ScoreType.Rating);
+                CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+                Query query = ratingCountQuery(customerSpace, ratingField, frontEndQuery, version);
+                List<Map<String, Object>> data = queryEvaluatorService.getData(customerSpace.toString(), version, query)
+                        .getData();
+                TreeMap<String, Long> counts = new TreeMap<>();
+                data.forEach(map -> {
+                    String rating = (String) map.get(ratingField);
+                    if (StringUtils.isNotBlank(rating)) {
+                        if (!counts.containsKey(ratingField)) {
+                            counts.put(rating, 0L);
+                        }
+                        counts.put(rating, counts.get(rating) + (Long) map.get("count"));
                     }
-                    counts.put(rating, counts.get(rating) + (Long) map.get("count"));
-                }
-            });
-            return counts;
-
+                });
+                return counts;
+            } catch (Exception e) {
+                throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            }
         } else {
             throw new IllegalArgumentException("RatingEngineID cannot be empty for rating count query.");
         }
