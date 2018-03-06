@@ -45,7 +45,7 @@ angular.module('lp.ratingsengine')
         this.modelingStrategy = '';
         this.predictionType = 'PROPENSITY';
         this.type = null;
-        this.modelingConfigFilters = null;
+        this.modelingConfigFilters = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
 
