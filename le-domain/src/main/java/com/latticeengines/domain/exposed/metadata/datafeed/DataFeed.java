@@ -327,14 +327,32 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     }
 
     public enum Status {
-        Initing("initing"), //
+        Initing("initing") {
+            @Override
+            public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.values());
+            }
+        }, //
         Initialized("initialized") {
+            @Override
+            public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.CDLOperation, //
+                        DataFeedExecutionJobType.PA);
+            }
+
             @Override
             public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
                 return Collections.singleton(DataFeedExecutionJobType.Import);
             }
         }, // import is ready to run
         InitialLoaded("initialLoaded") {
+
+            @Override
+            public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
+                return Arrays.asList(DataFeedExecutionJobType.CDLOperation, //
+                        DataFeedExecutionJobType.PA);
+            }
+
             @Override
             public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
                 return Arrays.asList(DataFeedExecutionJobType.Import, //
@@ -344,9 +362,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         Active("active") {
             @Override
             public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
-                return Arrays.asList(DataFeedExecutionJobType.Import, //
-                        DataFeedExecutionJobType.CDLOperation, //
-                        DataFeedExecutionJobType.PA);
+                return Arrays.asList(DataFeedExecutionJobType.values());
             }
 
         }, // master table has formed and pushed to data store
@@ -357,6 +373,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
         private static Map<String, Status> nameMap;
 
         public Collection<DataFeedExecutionJobType> getAllowedJobTypes() {
+            return Collections.emptySet();
+        }
+
+        public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
             return Collections.emptySet();
         }
 

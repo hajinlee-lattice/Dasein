@@ -1,7 +1,6 @@
 package com.latticeengines.metadata.service.impl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -90,14 +89,20 @@ public class DataFeedServiceImpl implements DataFeedService {
             LockManager.registerCrossDivisionLock(lockName);
             LockManager.acquireWriteLock(lockName, 5, TimeUnit.MINUTES);
             DataFeed datafeed = datafeedEntityMgr.findByName(datafeedName);
-            Collection<DataFeedExecutionJobType> allowedJobType = datafeed.getStatus().getAllowedJobTypes();
-            if (!allowedJobType.contains(jobType)) {
+            if (datafeed.getStatus().getDisallowedJobTypes().contains(jobType)) {
+                log.info(String.format("job type %s is disallowed by current data feed status %s", jobType,
+                        datafeed.getStatus()));
+                return false;
+            }
+            if (!datafeed.getStatus().getAllowedJobTypes().contains(jobType)) {
                 DataFeedExecution execution = datafeed.getActiveExecution();
                 if (execution == null || execution.getWorkflowId() == null) {
+                    log.info("can't lock execution due to either execution or workflowid is null");
                     return false;
                 }
                 Job job = workflowProxy.getWorkflowExecution(String.valueOf(execution.getWorkflowId()), customerSpace);
                 if (job == null || job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
+                    log.info("can't lock execution due to workflow job is not terminated yet");
                     return false;
                 }
                 failExecution(datafeed, job.getInputs().get(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS));
