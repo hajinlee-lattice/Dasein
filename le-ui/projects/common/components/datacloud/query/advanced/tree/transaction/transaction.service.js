@@ -32,17 +32,17 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         
         this.getCmpsList = function () {
-            return QueryTreeTransactionStore.periods;
-            // return [
-            //     { 'name': 'EVER', 'displayName': 'Ever' },
-            //     { 'name': 'IN_CURRENT', 'displayName': 'Current' },
-            //     { 'name': 'PREVIOUS', 'displayName': 'Previous' },
-            //     { 'name': 'PRIOR_OLY_LT', 'displayName': 'Only Prior to Last' },
-            //     { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
-            //     { 'name': 'BETWEEN', 'displayName': 'Between' },
-            //     { 'name': 'BEFORE', 'displayName': 'Before' },
-            //     { 'name': 'AFTER', 'displayName': 'After' }
-            // ];
+            // return QueryTreeTransactionStore.periods;
+            return [
+                { 'name': 'EVER', 'displayName': 'Ever' },
+                { 'name': 'IN_CURRENT', 'displayName': 'Current' },
+                { 'name': 'PREVIOUS', 'displayName': 'Previous' },
+                { 'name': 'PRIOR_OLY_LT', 'displayName': 'Only Prior to Last' },
+                { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
+                { 'name': 'BETWEEN', 'displayName': 'Between' },
+                { 'name': 'BEFORE', 'displayName': 'Before' },
+                { 'name': 'AFTER', 'displayName': 'After' }
+            ];
         }
 
         this.periodList = function () {
