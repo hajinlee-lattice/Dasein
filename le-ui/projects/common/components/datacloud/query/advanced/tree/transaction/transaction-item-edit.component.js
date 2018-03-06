@@ -326,7 +326,9 @@ angular
                         case 'IN_CURRENT':
                         case 'BETWEEN':
                         case 'BEFORE':
-                        case 'AFTER': {
+                        case 'AFTER':
+                        case 'WITHIN': 
+                        case 'PRIOR_ONLY':{
                             return false;
                         }
                         default:
@@ -336,7 +338,9 @@ angular
                 vm.showPeriodTo = function () {
                     switch (vm.timeCmp) {
                         case 'AFTER':
-                        case 'BETWEEN_LT': {
+                        case 'BETWEEN_LT':
+                        case 'WITHIN': 
+                        case 'PRIOR_ONLY':{
                             return true;
                         }
                         default:

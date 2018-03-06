@@ -35,7 +35,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 case 'LESS_THAN':
                 case 'LESS_OR_EQUAL':
                 case 'BEFORE':
-                case 'PREVIOUS': {
+                case 'WITHIN': 
+                case 'PRIOR_ONLY':{
                     if (position == valsArray.length - 1 || valsArray.length == 0) {
                         return null;
                     } else {
