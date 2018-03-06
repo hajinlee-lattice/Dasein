@@ -55,6 +55,7 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 }
             );
             return QueryTreeTransactionStore.periods;
+            // List that will be supported by the back end
             // return [
             //     { 'name': 'Week', 'displayName': 'Week' },
             //     { 'name': 'Month', 'displayName': 'Month' },
