@@ -124,10 +124,11 @@ public class PlaymakerTenantEntityMgrImpl implements PlaymakerTenantEntityMgr {
 
     @Override
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRED)
-    public void updateByTenantName(PlaymakerTenant tenant) {
+    public PlaymakerTenant updateByTenantName(PlaymakerTenant tenant) {
         encryptPassword(tenant);
         tenantDao.updateByTenantName(tenant);
         log.info("Updated the following tenantName=" + tenant.getTenantName());
+        return tenant;
     }
 
     @Transactional(value = "oauth2", propagation = Propagation.REQUIRES_NEW, readOnly = true)

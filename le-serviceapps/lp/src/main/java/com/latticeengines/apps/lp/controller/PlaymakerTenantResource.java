@@ -42,8 +42,8 @@ public class PlaymakerTenantResource {
     @ResponseBody
     @ApiOperation(value = "Update playmaker API tenant")
     @NoCustomerSpace
-    public void updateTenant(@PathVariable String tenantName, @RequestBody PlaymakerTenant tenant) {
-        playmakerEntityMgr.updateByTenantName(tenant);
+    public PlaymakerTenant updateTenant(@PathVariable String tenantName, @RequestBody PlaymakerTenant tenant) {
+        return playmakerEntityMgr.updateByTenantName(tenant);
     }
 
     @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.GET, headers = "Accept=application/json")

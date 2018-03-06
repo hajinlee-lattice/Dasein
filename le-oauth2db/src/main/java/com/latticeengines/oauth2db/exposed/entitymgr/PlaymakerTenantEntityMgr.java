@@ -16,7 +16,7 @@ public interface PlaymakerTenantEntityMgr {
 
     void deleteByTenantName(String tenantName);
 
-    void updateByTenantName(PlaymakerTenant tenant);
+    PlaymakerTenant updateByTenantName(PlaymakerTenant tenant);
 
     List<PlaymakerTenant> findAll();
 

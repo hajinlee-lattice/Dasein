@@ -2,7 +2,6 @@ package com.latticeengines.objectapi.service.impl;
 
 import java.util.Collections;
 
-import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -10,7 +9,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -25,6 +23,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 
 public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 

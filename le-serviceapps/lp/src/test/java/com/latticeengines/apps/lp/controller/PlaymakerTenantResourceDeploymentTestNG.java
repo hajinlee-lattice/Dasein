@@ -67,9 +67,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     public void updateTenantWithTenantName() {
         PlaymakerTenant tenant = tenantProxy.getTenant(tenantName);
         tenant.setExternalId("externalId2");
-        tenantProxy.updateTenant(tenantName, tenant);
-
-        PlaymakerTenant newTenant = tenantProxy.getTenant(tenantName);
+        PlaymakerTenant newTenant = tenantProxy.updateTenant(tenantName, tenant);
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getExternalId(), "externalId2");
         Assert.assertNull(newTenant.getTenantPassword());
@@ -93,8 +91,9 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     }
 
     @Test(groups = "deployment", dependsOnMethods = "getOauthTokenToTenant")
-    public void deleteTenantWithTenantName() {
+    public void deleteTenantWithTenantName() throws InterruptedException{
         tenantProxy.deleteTenant(tenantName);
+        Thread.sleep(500); // wait for replication lag
         PlaymakerTenant newTenant = tenantProxy.getTenant(tenantName);
         Assert.assertNull(newTenant.getTenantName());
     }

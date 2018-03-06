@@ -16,9 +16,9 @@ public class PlaymakerTenantProxy extends MicroserviceRestApiProxy {
         return post("create playmaker tenant", constructUrl("/"), tenant, PlaymakerTenant.class);
     }
 
-    public void updateTenant(String tenantName, PlaymakerTenant tenant) {
+    public PlaymakerTenant updateTenant(String tenantName, PlaymakerTenant tenant) {
         String url = constructUrl("/{tenantName}", tenantName);
-        put("update playmaker tenant", url, tenant);
+        return put("update playmaker tenant", url, tenant, PlaymakerTenant.class);
     }
 
     public PlaymakerTenant getTenant(String tenantName) {

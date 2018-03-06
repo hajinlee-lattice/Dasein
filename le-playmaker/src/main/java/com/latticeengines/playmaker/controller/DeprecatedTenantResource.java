@@ -40,9 +40,9 @@ public class DeprecatedTenantResource {
     @RequestMapping(value = "/{tenantName}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update playmaker API tenant")
-    public void updateTenant(@PathVariable String tenantName, //
+    public PlaymakerTenant updateTenant(@PathVariable String tenantName, //
             @RequestBody PlaymakerTenant tenant) {
-        playmakerEntityMgr.updateByTenantName(tenant);
+        return playmakerEntityMgr.updateByTenantName(tenant);
     }
 
     @RequestMapping(value = "/{tenantName:.+}", method = RequestMethod.GET, headers = "Accept=application/json")
