@@ -41,6 +41,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String javaClass;
     @JsonProperty(ColumnMetadataKey.DisplayName)
     private String displayName;
+    @JsonProperty(ColumnMetadataKey.SecondaryDisplayName)
+    private String secondaryDisplayName;
     private Category category;
     @JsonProperty(ColumnMetadataKey.Subcategory)
     private String subcategory;
@@ -153,6 +155,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getSecondaryDisplayName() {
+        return secondaryDisplayName;
+    }
+
+    public void setSecondaryDisplayName(String secondaryDisplayName) {
+        this.secondaryDisplayName = secondaryDisplayName;
     }
 
     @JsonIgnore
