@@ -23,9 +23,14 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
             };
         }
 
-        this.getTimeConfig = function () {
-
+        this.getPeriodTimeConfig = function() {
+            return {
+                from: { name: 'from-time', initial: undefined, position: 0, type: 'Time', visible: true },
+                to: { name: 'to-time', initial: undefined, position: 1, type: 'Time', visible: true }
+            };
         }
+
+        
         this.getCmpsList = function () {
             return [
                 { 'name': 'EVER', 'displayName': 'Ever' },

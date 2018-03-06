@@ -4,7 +4,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         function setValsBasedOnPosition(cmp, valsArray, position, value) {
             switch (cmp) {
                 case 'GTE_AND_LT':
-                case 'BETWEEN_LT':{
+                case 'BETWEEN_LT':
+                case 'BETWEEN':{
                     valsArray[position] = value;
                     break;
                 }
@@ -15,12 +16,15 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         }
         function getValsBasedOnPosition(cmp, valsArray, position) {
             switch (cmp) {
-                case 'GTE_AND_LT': {
+                case 'GTE_AND_LT':
+                case 'BETWEEN_LT':
+                case 'BETWEEN': {
                     return valsArray[position];
                     break;
                 }
                 case 'GREATER_THAN':
-                case 'GREATER_OR_EQUAL': {
+                case 'GREATER_OR_EQUAL':
+                case 'AFTER': {
                     if (position == valsArray.length - 1 || valsArray.length == 0) {
                         return valsArray[valsArray.length - 1];
                     } else {
@@ -29,7 +33,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     break;
                 }
                 case 'LESS_THAN':
-                case 'LESS_OR_EQUAL': {
+                case 'LESS_OR_EQUAL':
+                case 'BEFORE':
+                case 'PREVIOUS': {
                     if (position == valsArray.length - 1 || valsArray.length == 0) {
                         return null;
                     } else {
@@ -258,9 +264,12 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 switch (subType) {
                     case 'Time': {
                         var tsTime = txn.Time;
-                        if (tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1) {
-                            return tsTime.Vals[position];
+                        if(tsTime){
+                            return getValsBasedOnPosition(tsTime.Cmp, tsTime.Vals, position);
                         }
+                        // if (tsTime && tsTime.Vals && position <= tsTime.Vals.length - 1) {
+                        //     return tsTime.Vals[position];
+                        // }
                     }
                     case 'Qty': {
                         var qty = txn.Qty;

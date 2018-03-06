@@ -1,21 +1,19 @@
 div.transaction-container {
-
     margin-left: 87px;
     margin-top: -22px;
     margin-bottom: 0px;
     .transaction-row {
         display: flex;
         justify-content: flex-start;
-
-        .transaction-element-title{
+        .transaction-element-title {
             min-width: 100px;
             font-weight: bold;
         }
-       .transaction-element{
-           padding: 3px 0 3px 5px;
-           select{
-               min-width: 120px;
-           }
-       }
+        .transaction-element {
+            padding: 3px 0 3px 5px;
+            select {
+                min-width: 120px;
+            }
+        }
     }
 }

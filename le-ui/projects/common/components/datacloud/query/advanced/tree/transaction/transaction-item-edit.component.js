@@ -1,6 +1,8 @@
 angular
-    .module('common.datacloud.query.builder.tree.edit.transaction.edit', ['common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range',
-        'common.datacloud.query.builder.tree.transaction.service'])
+    .module('common.datacloud.query.builder.tree.edit.transaction.edit', [
+        'common.datacloud.query.builder.tree.edit.transaction.edit.numerical.range',
+        'common.datacloud.query.builder.tree.edit.transaction.edit.date.range',
+        'common.datacloud.query.builder.tree.transaction.service', 'angularMoment'])
     .directive('transactionEditDirective', function () {
         return {
             restrict: 'E',
@@ -11,10 +13,11 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, QueryTreeTransactionService, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, moment, QueryTreeTransactionService, QueryTreeService) {
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
+                vm.moment = moment;
 
                 vm.bucketrestriction = $scope.bucketrestriction;
                 /******************** Qty **************/
@@ -31,6 +34,7 @@ angular
 
                 vm.showFromTime = false;
                 vm.showToTime = false;
+                vm.showTimeFrame = false;
                 /**************************************/
 
                 /*********** Numerical range **********/
@@ -41,14 +45,16 @@ angular
                 vm.qtyConf = QueryTreeTransactionService.getQtyConfig();
                 vm.amtConf = QueryTreeTransactionService.getAmtConfig();
                 vm.periodNumericalConf = QueryTreeTransactionService.getPeriodNumericalConfig();
+                vm.periodTimeConf = QueryTreeTransactionService.getPeriodTimeConfig();
+
 
                 vm.cmpsList = QueryTreeTransactionService.getCmpsList()
                 vm.periodList = QueryTreeTransactionService.periodList();
                 vm.unitPurchasedCmpChoises = QueryTreeTransactionService.unitPurchasedCmpChoises();
                 vm.amountSpentCmpChoises = QueryTreeTransactionService.amountSpentCmpChoises();
 
+
                 function initQty(reset) {
-                    // console.log($scope.bucketrestriction);
                     var tmpUnit = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Qty');
                     vm.unitPurchasedCmp = tmpUnit !== '' ? tmpUnit : 'ANY';
 
@@ -67,7 +73,7 @@ angular
                         vm.showFromUnit = false;
                         vm.showToUnit = false;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Qty');
-                        setTimeout(function () {
+                        $timeout(function () {
                             vm.showFromUnit = vm.showUnitFrom();
                             vm.showToUnit = vm.showUnitTo();
                         }, 0);
@@ -76,7 +82,6 @@ angular
                 }
 
                 function initAmt(reset) {
-                    // console.log($scope.bucketrestriction);
                     var tmpAmt = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Amt');
                     vm.amtCmp = tmpAmt !== '' ? tmpAmt : 'ANY';
 
@@ -97,7 +102,8 @@ angular
                         vm.amtConf['from'].value = undefined;
                         vm.amtConf['to'].value = undefined;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Amt');
-                        setTimeout(function () {
+
+                        $timeout(function () {
                             vm.showFromAmt = vm.showAmtFrom();
                             vm.showToAmt = vm.showAmtTo();
                         }, 0);
@@ -110,10 +116,9 @@ angular
                 }
 
                 function initTimePeriod(reset) {
-
-
                     vm.showFromPeriod = false;
                     vm.showToPeriod = false;
+
 
                     if (!reset) {
                         var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf['from'].position, 'Time');
@@ -124,15 +129,33 @@ angular
 
                         vm.showFromPeriod = vm.showPeriodFrom();
                         vm.showToPeriod = vm.showPeriodTo();
+                        vm.showTimeFrame = vm.showTimeFrameDate();
 
                     } else {
+                        vm.showFromTime = false;
+                        vm.showToTime = false;
+                        vm.showTimeFrame = false;
                         vm.periodNumericalConf['from'].value = undefined;
                         vm.periodNumericalConf['to'].value = undefined;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
-                        setTimeout(function () {
+                        $timeout(function () {
                             vm.showFromPeriod = vm.showPeriodFrom();
                             vm.showToPeriod = vm.showPeriodTo();
+                            vm.showTimeFrame = vm.showTimeFrameDate();
                         }, 0);
+                    }
+                }
+                function initDateRange() {
+                    if (QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time') === 'Date') {
+                        var tmpFrom = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, 0, 'Time');
+                        vm.periodTimeConf.from.initial = (tmpFrom != undefined && tmpFrom != 0) ? vm.moment(tmpFrom).format('YYYY-MM-DD') : undefined;
+                        var tmpTo = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, 1, 'Time');
+                        vm.periodTimeConf.to.initial = (tmpTo != undefined && tmpTo != 0) ? vm.moment(tmpTo).format('YYYY-MM-DD') : undefined;
+                        // console.log('+++++++++++++++++++++> fromDate ', vm.fromDate, 'toDate ', vm.toDate);
+                    } else {
+                        // console.log('----------->NO DATE <------------');
+                        vm.periodTimeConf.from.initial = undefined;
+                        vm.periodTimeConf.to.initial = undefined;
                     }
                 }
 
@@ -147,38 +170,18 @@ angular
                     }
                 }
 
-                function initDatePicker() {
-                    var from = document.getElementById(vm.getFromDateId());
-
-                    if (from != null) {
-                        var fromPicker = new Pikaday({ field: from });
-                    }
-                    var to = document.getElementById(vm.getToDateId());
-
-                    if (to != null) {
-                        var toPicker = new Pikaday({ field: to });
-                    }
-                }
-
                 vm.init = function () {
-                    // console.log(vm.form);
-                    vm.values = {
-                        time1: { val: undefined, position: 0, type: 'Time' },
-                        time2: { val: undefined, position: 1, type: 'Time' }
-                    }
 
                     var tmp = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, 'Time');
                     vm.timeCmp = tmp !== '' ? tmp : 'EVER';
                     var periodTmp = QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time');
                     vm.timeframePeriod = periodTmp !== '' ? periodTmp : vm.periodList[0].name;
 
-
                     initQty();
                     initAmt();
                     initTime();
                     initTimePeriod();
                 }
-
 
                 vm.getQtyConfigString = function () {
                     var ret = JSON.stringify(vm.qtyConf);
@@ -191,6 +194,13 @@ angular
                 }
                 vm.getPeriodNumericalConfString = function () {
                     var ret = JSON.stringify(vm.periodNumericalConf);
+                    return ret;
+                }
+                vm.getPeriodTimeConfString = function () {
+                    initDateRange();
+                    vm.periodTimeConf.from.visible = vm.showTimeFrom();
+                    vm.periodTimeConf.to.visible = vm.showTimeTo();
+                    var ret = JSON.stringify(vm.periodTimeConf);
                     return ret;
                 }
 
@@ -218,11 +228,11 @@ angular
                             break;
                         }
                         case 'Time': {
-                            vm.showFromPeriod = vm.showPeriodFrom();
-                            vm.showToPeriod = vm.showPeriodTo();
                             initTimePeriod(true);
-                            $timeout(initDatePicker, 0);
-                            // removeKey(value, 'Qty');
+                            if (vm.showTimeFrameDate()) {
+                                vm.timeframePeriod = 'Date';
+                                vm.changeTimeFramePeriod();
+                            }
                             break;
                         }
                         default: {
@@ -237,12 +247,14 @@ angular
                 }
 
                 //************************ Txn *********************/
+
                 function getConfigField(position) {
-                    // console.log('CONF ', vm.getPeriodNumericalConfString());
                     var values = JSON.parse(vm.getPeriodNumericalConfString());
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
+
+
                 vm.isPeriodRangeValid = function () {
                     var valid = true;
                     var confFrom = getConfigField(0);
@@ -254,16 +266,6 @@ angular
                         valid = false;
                     }
                     return valid;
-                }
-
-                vm.getFromDateId = function () {
-                    var id = $scope.bucketrestriction.attr;
-                    return id + '.txn_from';
-                }
-
-                vm.getToDateId = function () {
-                    var id = $scope.bucketrestriction.attr;
-                    return id + '.txn_to';
                 }
 
                 vm.showTimeframePeriod = function () {
@@ -279,8 +281,8 @@ angular
 
                     }
                 }
-                
-                vm.showTimeFrameDate = function(){
+
+                vm.showTimeFrameDate = function () {
                     switch (vm.timeCmp) {
                         case 'BETWEEN':
                         case 'BEFORE':
@@ -296,7 +298,7 @@ angular
                 vm.showTimeFrom = function () {
                     switch (vm.timeCmp) {
                         case 'BETWEEN':
-                        case 'BEFORE': {
+                        case 'AFTER': {
                             return true;
                         }
                         default:
@@ -307,7 +309,7 @@ angular
 
                 vm.showTimeTo = function () {
                     switch (vm.timeCmp) {
-                        case 'AFTER':
+                        case 'BEFORE':
                         case 'BETWEEN':
                         case 'PRIOR_ONLY': {
                             return true;
@@ -346,11 +348,6 @@ angular
                     QueryTreeService.changeTimeframePeriod($scope.bucketrestriction, $scope.type, vm.timeframePeriod);
                 }
 
-
-
-                
-
-
                 /*********************** Qty *************************/
 
                 vm.showUnitFrom = function () {
@@ -363,7 +360,6 @@ angular
                             return true;
                         }
                         default: {
-                            // vm.values.qty1.val = 1;
                             return false
                         };
                     }
@@ -377,7 +373,6 @@ angular
                             return true;
                         }
                         default: {
-                            // vm.values.qty2.val = 1;
                             return false;
                         }
                     }

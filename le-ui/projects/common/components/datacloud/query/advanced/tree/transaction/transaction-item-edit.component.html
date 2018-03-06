@@ -31,12 +31,19 @@
             <span class="error-message" ng-if="!vm.isPeriodRangeValid()"><i class="fa fa-exclamation-circle"></i> Please enter a valid numerical range.</span>
         </div>
 
+        <!-- Date picker -->
+            <date-range-directive   ng-if="vm.showTimeFrame"
+                                    config="{{vm.getPeriodTimeConfString()}}"
+                                    vm="vm" 
+                                    showfrom="vm.showFromTime"
+                                    showto="vm.showToTime"
+                                    form="vm.form"
+                                    type="{{vm.type}}" 
+                                    bucketrestriction="vm.bucketrestriction"
+                                    changed="vm.callbackChangedValue(type, position, value)">
+
+            </date-range-directive>
         <!--  -->
-        <div class="transaction-element" ng-if="vm.showTimeFrameDate()">
-            <input type="text" id="{{vm.getFromDateId()}}" ng-if="vm.showTimeFrom()">
-            <span ng-if="vm.showTimeFrom() && vm.showTimeTo()"> - </span>
-            <input type="text" id="{{vm.getToDateId()}}" ng-if="vm.showTimeTo()">
-        </div>
     </div>
 
     <!-- Units purchased  (Qty)-->
