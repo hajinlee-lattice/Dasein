@@ -4,19 +4,23 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.mds.RatingDisplayDecorator;
+import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemServingStoreTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DecoratedDataTemplate;
+import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
+import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory1;
 import com.latticeengines.domain.exposed.metadata.mds.MdsDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.metadata.DataTemplateProxy;
 
@@ -29,14 +33,14 @@ public class SystemServingStoreTemplateImpl extends
         implements SystemServingStoreTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
-    private final RatingDisplayDecorator ratingDisplayDecorator;
+    private final DecoratorFactory1<String> ratingDisplayDecoratorFactory;
 
     @Inject
     public SystemServingStoreTemplateImpl(DataTemplateProxy dataTemplateProxy, AMMetadataStore amMetadataStore,
-            CDLNamespaceService cdlNamespaceService, RatingDisplayDecorator ratingDisplayDecorator) {
+            CDLNamespaceService cdlNamespaceService, RatingDisplayMetadataStore ratingDisplayMetadataStore) {
         super(getBaseTemplate(dataTemplateProxy), getAMDecorator(amMetadataStore));
         this.cdlNamespaceService = cdlNamespaceService;
-        this.ratingDisplayDecorator = ratingDisplayDecorator;
+        this.ratingDisplayDecoratorFactory = getRatingDecorator(ratingDisplayMetadataStore);
     }
 
     private static DataTemplate<Namespace2<String, String>> getBaseTemplate(DataTemplateProxy proxy) {
@@ -47,14 +51,22 @@ public class SystemServingStoreTemplateImpl extends
         return MdsDecoratorFactory.fromMds("AMDecorator", amMetadataStore);
     }
 
+    @SuppressWarnings("unchecked")
+    private static DecoratorFactory1<String> getRatingDecorator(RatingDisplayMetadataStore ratingDisplayMetadataStore) {
+        return (DecoratorFactory1<String>) MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
+    }
+
     @Override
     public Flux<ColumnMetadata> getSchema(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
         Flux<ColumnMetadata> flux = super.getSchema(namespace).map(cm -> {
             cm.setEntity(namespace.getCoord1());
+            cm.enableGroup(ColumnSelection.Predefined.Segment);
             return cm;
         });
         if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
-            flux = ratingDisplayDecorator.render(flux);
+            String tenantId = MultiTenantContext.getTenantId();
+            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(tenantId);
+            flux = decorator.render(flux);
         }
         return flux;
     }
@@ -64,10 +76,13 @@ public class SystemServingStoreTemplateImpl extends
             Namespace2<BusinessEntity, DataCollection.Version> namespace) {
         ParallelFlux<ColumnMetadata> pflux = super.getUnorderedSchema(namespace).map(cm -> {
             cm.setEntity(namespace.getCoord1());
+            cm.enableGroup(ColumnSelection.Predefined.Segment);
             return cm;
         });
         if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
-            pflux = ratingDisplayDecorator.render(pflux);
+            String tenantId = MultiTenantContext.getTenantId();
+            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(tenantId);
+            pflux = decorator.render(pflux);
         }
         return pflux;
     }
