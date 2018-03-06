@@ -16,8 +16,8 @@ import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DecoratedDataTemplate;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
-import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory1;
 import com.latticeengines.domain.exposed.metadata.mds.MdsDecoratorFactory;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -33,7 +33,7 @@ public class SystemServingStoreTemplateImpl extends
         implements SystemServingStoreTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
-    private final DecoratorFactory1<String> ratingDisplayDecoratorFactory;
+    private final DecoratorFactory<Namespace1<String>> ratingDisplayDecoratorFactory;
 
     @Inject
     public SystemServingStoreTemplateImpl(DataTemplateProxy dataTemplateProxy, AMMetadataStore amMetadataStore,
@@ -52,8 +52,8 @@ public class SystemServingStoreTemplateImpl extends
     }
 
     @SuppressWarnings("unchecked")
-    private static DecoratorFactory1<String> getRatingDecorator(RatingDisplayMetadataStore ratingDisplayMetadataStore) {
-        return (DecoratorFactory1<String>) MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
+    private static DecoratorFactory<Namespace1<String>> getRatingDecorator(RatingDisplayMetadataStore ratingDisplayMetadataStore) {
+        return MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
     }
 
     @Override
@@ -65,7 +65,7 @@ public class SystemServingStoreTemplateImpl extends
         });
         if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
             String tenantId = MultiTenantContext.getTenantId();
-            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(tenantId);
+            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(Namespace.as(tenantId));
             flux = decorator.render(flux);
         }
         return flux;
@@ -81,7 +81,7 @@ public class SystemServingStoreTemplateImpl extends
         });
         if (BusinessEntity.Rating.equals(namespace.getCoord1())) {
             String tenantId = MultiTenantContext.getTenantId();
-            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(tenantId);
+            Decorator decorator = ratingDisplayDecoratorFactory.getDecorator(Namespace.as(tenantId));
             pflux = decorator.render(pflux);
         }
         return pflux;
