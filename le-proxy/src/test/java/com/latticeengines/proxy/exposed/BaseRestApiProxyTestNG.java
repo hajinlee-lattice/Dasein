@@ -46,7 +46,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         ServerSocket s = new ServerSocket(0);
-        int port = s.getLocalPort();
+        int port = 9084;
         log.info("Using local port " + port);
         server = getHttpServer(port);
         server.start();
