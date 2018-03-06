@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.workflow;
 
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
@@ -83,14 +84,11 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertTrue(CollectionUtils.isEmpty(pair.getRight()));
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
     public void testGetFullActionAndJobIds() {
         when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
                 .thenReturn(generateFullActions());
-        List<String> workflowIdStr = Arrays.asList(RUNNING_ACTION_1_TRACKING_ID, RUNNING_ACTION_2_TRACKING_ID,
-                COMPLETE_ACTION_1_TRACKING_ID, COMPLETE_ACTION_2_TRACKING_ID).stream().map(id -> id.toString())
-                .collect(Collectors.toList());
-        when(workflowProxy.getWorkflowExecutionsByJobIds(workflowIdStr)).thenReturn(generateJobs());
+        when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(generateJobs());
         Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
         Assert.assertNotNull(pair);
         log.info(String.format("actionIds=%s", pair.getLeft()));
@@ -106,7 +104,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
         Assert.assertEquals(pair.getRight().get(1), COMPLETE_ACTION_2_TRACKING_ID);
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", dependsOnMethods = { "testGetFullActionAndJobIds" })
     public void testGetProblematicActionWithoutTrackingId() {
         when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
                 .thenReturn(generateActionWithoutTrackingId());
