@@ -117,7 +117,7 @@ public class PublicationServiceImplTestNG extends PropDataEngineFunctionalTestNG
     @Test(groups = "functional", priority = 1)
     public void testScan() throws Exception {
         startWorkFlowServer(configuration -> {
-            String json = configuration.getConfigRegistry().get(PublishConfiguration.class.getCanonicalName());
+            String json = configuration.getStepConfigRegistry().get(PublishConfiguration.class.getCanonicalName());
             ObjectMapper mapper = new ObjectMapper();
             try {
                 JsonNode jsonNode = mapper.readTree(json).get("publication");
