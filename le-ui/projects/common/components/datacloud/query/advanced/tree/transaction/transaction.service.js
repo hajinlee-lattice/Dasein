@@ -1,5 +1,5 @@
 angular.module('common.datacloud.query.builder.tree.transaction.service', [])
-    .service('QueryTreeTransactionStore', function () {
+    .service('QueryTreeTransactionStore', function ( $q, $http, QueryTreeTransactionService) {
         var QueryTreeTransactionStore = this;
         QueryTreeTransactionStore.periods = [];
         this.getAmtConfig = function () {
@@ -32,7 +32,7 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         
         this.getCmpsList = function () {
-            // return QueryTreeTransactionStore.periods;
+            
             return [
                 { 'name': 'EVER', 'displayName': 'Ever' },
                 { 'name': 'IN_CURRENT', 'displayName': 'Current' },
@@ -46,12 +46,21 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
         }
 
         this.periodList = function () {
-            return [
-                { 'name': 'Week', 'displayName': 'Week' },
-                { 'name': 'Month', 'displayName': 'Month' },
-                { 'name': 'Quarter', 'displayName': 'Quarter' },
-                { 'name': 'Year', 'displayName': 'Year' }
-            ];
+            QueryTreeTransactionService.getPeriods().then(
+                function(result){
+                    result.forEach(function(element) {
+                        QueryTreeTransactionStore.periods.push({'name':element, 'displayName': element});
+                    });
+                    
+                }
+            );
+            return QueryTreeTransactionStore.periods;
+            // return [
+            //     { 'name': 'Week', 'displayName': 'Week' },
+            //     { 'name': 'Month', 'displayName': 'Month' },
+            //     { 'name': 'Quarter', 'displayName': 'Quarter' },
+            //     { 'name': 'Year', 'displayName': 'Year' }
+            // ];
         }
         this.unitPurchasedCmpChoises = function () {
             return [
@@ -79,10 +88,8 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
     .service('QueryTreeTransactionService', function($http, $q) {
     
     
-        this.GetDataByQuery = function(resourceType, query) {
+        this.getPeriods = function(resourceType, query) {
             var deferred = $q.defer();
-    
-            SegmentStore.sanitizeSegment(query);
     
             $http({
                 method: 'GET',
