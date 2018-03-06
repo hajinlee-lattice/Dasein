@@ -16,7 +16,15 @@
             <span class="label">Back to Models</span>
         </a>
     </li>
-     <li ng-if="!vm.IsPmml" role="presentation" ui-sref-active="active">
+    <li ng-if="vm.IsRatingEngine">
+        <a ui-sref="home.ratingsengine.dashboard({ rating_id: vm.ratingEngine.id, modelId: vm.ratingEngine.activeModel.AI.id })">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
+                <span class="ico ico-attributes ico-light-gray"></span>
+            </span>
+            <span class="label">Dashboard</span>
+        </a>
+    </li>
+    <li ng-if="!vm.IsPmml" role="presentation" ui-sref-active="active">
         <a ui-sref="home.model.attributes" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
@@ -116,6 +124,14 @@
                 <span class="ico ico-notes"></span>
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_NOTES')}}</span>
+        </a>
+    </li>
+    <li ng-if="vm.IsRatingEngine">
+        <a ui-sref="home.ratingsengine.dashboard.notes({ rating_id: vm.ratingEngine.id, modelId: vm.ratingEngine.activeModel.AI.id })">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
+                <span class="ico ico-attributes ico-light-gray"></span>
+            </span>
+            <span class="label">Notes</span>
         </a>
     </li>
 </ul>

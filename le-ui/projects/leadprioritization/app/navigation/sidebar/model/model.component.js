@@ -7,7 +7,7 @@ angular
 ])
 .controller('SidebarModelController', function(
     $rootScope, $state, $stateParams, FeatureFlagService, ResourceUtility, 
-    StateHistory, Model, IsPmml, IsRatingEngine, HasRatingsAvailable
+    StateHistory, Model, IsPmml, IsRatingEngine, RatingEngine, HasRatingsAvailable
 ) {
     var vm = this;
 
@@ -16,10 +16,14 @@ angular
         ResourceUtility: ResourceUtility,
         stateParams: $stateParams,
         StateHistory: StateHistory,
-        model: Model
+        model: Model,
+        ratingEngine: RatingEngine
     });
 
     vm.init = function() {
+
+        console.log(vm.ratingEngine);
+
         vm.IsPmml = IsPmml,
         vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;

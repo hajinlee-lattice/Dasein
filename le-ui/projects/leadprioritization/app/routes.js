@@ -236,8 +236,18 @@ angular
             }
         })
         .state('home.model', {
-            url: '/model/:modelId',
+            url: '/model/:modelId/:rating_id',
             resolve: {
+                RatingEngine: function($q, $stateParams, RatingsEngineStore) {
+                    var deferred = $q.defer(),
+                        id = $stateParams.rating_id;
+
+                    RatingsEngineStore.getRating(id).then(function(engine) {
+                        deferred.resolve(engine);
+                    });
+
+                    return deferred.promise;
+                },
                 Model: function($q, $stateParams, ModelStore) {
                     var deferred = $q.defer(),
                         id = $stateParams.modelId;

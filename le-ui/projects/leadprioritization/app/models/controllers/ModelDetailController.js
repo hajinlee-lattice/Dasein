@@ -14,41 +14,48 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
     'lp.navigation.review'
 ])
 .controller('ModelDetailController', function ($compile, $stateParams, $scope, $rootScope, _, ResourceUtility, RightsUtility, BrowserStorageUtility,
-    NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml) {
+    NavUtility, ModelService, ModelStore, TopPredictorService, ThresholdExplorerService, Model, IsPmml, RatingEngine) {
     $scope.ResourceUtility = ResourceUtility;
 
-    var modelId = $stateParams.modelId;
-    var model = Model;
-    
-    model.IsPmml = IsPmml;
-    model.ModelId = modelId;
-    model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
-    if (model.ChartData) {
-        model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
-        model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
-        combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
-        model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
+    if(Model !== null){
+
+        var modelId = $stateParams.modelId;
+        var model = Model;
+        
+        model.IsPmml = IsPmml;
+        model.ModelId = modelId;
+        model.ChartData = TopPredictorService.FormatDataForTopPredictorChart(model);
+        if (model.ChartData) {
+            model.InternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, false, model);
+            model.ExternalAttributes = TopPredictorService.GetNumberOfAttributesByCategory(model.ChartData.children, true, model);
+            combineInternalAndExternalAttributesDups(model.InternalAttributes, model.ExternalAttributes);
+            model.TotalPredictors = model.InternalAttributes.totalAttributeValues + model.ExternalAttributes.totalAttributeValues;
+        }
+
+        // UI BAND-AID for DP-2854 here
+
+        model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
+        var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
+        model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
+
+        thresholdData = ThresholdExplorerService.PrepareData(model);
+        model.ThresholdChartData = thresholdData.ChartData;
+        model.ThresholdDecileData = thresholdData.DecileData;
+        model.ThresholdLiftData = thresholdData.LiftData;
+
+        model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
+
+        angular.extend(ModelStore, {
+            metadata: null,
+            data: model,
+            parentData: model
+        });
+    } else {
+        $scope.RatingEngine = RatingEngine;
+
+        console.log($scope.RatingEngine);
+
     }
-
-    // UI BAND-AID for DP-2854 here
-
-    model.TopSample = ModelService.FormatLeadSampleData(model.TopSample);
-    var bottomLeads = ModelService.FormatLeadSampleData(model.BottomSample);
-    model.BottomSample = filterHighScoresInBottomLeads(bottomLeads);
-
-    thresholdData = ThresholdExplorerService.PrepareData(model);
-    model.ThresholdChartData = thresholdData.ChartData;
-    model.ThresholdDecileData = thresholdData.DecileData;
-    model.ThresholdLiftData = thresholdData.LiftData;
-
-    model.SuppressedCategories = TopPredictorService.GetSuppressedCategories(model);
-
-    angular.extend(ModelStore, {
-        metadata: null,
-        data: model,
-        parentData: model
-    });
-
 
     $compile($('#ModelDetailsArea').html('<div data-model-details-widget></div>'))($scope);
 

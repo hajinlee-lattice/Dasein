@@ -47,6 +47,9 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
+
+        console.log(vm.current.ratings);
+
         RatingsEngineStore.clear();
 
         vm.totalLength = vm.count();
@@ -130,23 +133,25 @@ angular.module('lp.ratingsengine.ratingslist', [
         if(tileState.editRating !== true){
             if (rating.type === 'CROSS_SELL') {
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
-
                     RatingsEngineStore.setRating(engine);
-
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
-                        if(model.AI.modelSummary) {
-                            $state.go('home.model.attributes', { modelId: model.AI.modelSummary.Id });
-                        } else {
-                            $state.go('home.ratingsengine.productpurchase', { rating_id: rating.id, engineType: model.AI.modelingStrategy});
-                        }
+                        
+                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null;
+
+                        $state.go('home.ratingsengine.dashboard', { 
+                            rating_id: rating.id, 
+                            modelId: modelId
+                        });
+
+                        // if(modelId != null){
+                        //     $state.go('home.model.attributes', { rating_id: rating.id, modelId: modelId });
+                        // } else {
+                        //     console.log("model not ready");
+                        // }
                     });
                 });                
             } else {
-                url = RatingsEngineStore.hasRules(rating) 
-                    ? 'home.ratingsengine.dashboard'
-                    : 'home.ratingsengine.rulesprospects.segment';
-
-                $state.go(url, { rating_id: rating.id });
+                $state.go('home.ratingsengine.dashboard', { rating_id: rating.id, modelId: '' });
             } 
         }
     };

@@ -23,7 +23,7 @@ angular.module('lp.notes', [
 
     vm.init = function($q) {
 
-        console.log(vm.notes);
+        // console.log(vm.notes);
 
         angular.forEach(vm.notes, function(note) {
             note.editContents = angular.copy(note.NotesContents);

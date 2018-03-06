@@ -91,13 +91,13 @@ angular
                 }
             })
             .state('home.ratingsengine.dashboard', {
-                url: '/dashboard/:rating_id',
+                url: '/dashboard/:modelId/:rating_id',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Model'
                 },
                 resolve: {
-                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                    Dashboard: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
                         var rating_id = $stateParams.rating_id || RatingsEngineStore.getRatingId();
 
@@ -106,21 +106,56 @@ angular
                         });
 
                         return deferred.promise;
-                    }
+                    },
+                    RatingEngine: function($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer(),
+                            id = $stateParams.rating_id;
+
+                        RatingsEngineStore.getRating(id).then(function(engine) {
+                            deferred.resolve(engine);
+                        });
+
+                        return deferred.promise;
+                    },
+                    Model: function($q, $stateParams, ModelStore, RatingEngine) {
+                        var deferred = $q.defer(),
+                            id = $stateParams.modelId;
+
+                        if (RatingEngine.type === 'RULE_BASED') {
+                            deferred.resolve(null);
+                        } else if (ModelStore.data != undefined)  {
+                            deferred.resolve(ModelStore.data);
+                        } else {
+                            ModelStore.getModel(id).then(function(result) {
+                                deferred.resolve(result);
+                            });
+                        }
+
+                        return deferred.promise;
+                    },
+                    IsRatingEngine: function(Model) {
+                        return true;
+                    },
+                    IsPmml: function(Model) {
+                        return false;
+                    },
                 },
                 views: {
                     "summary@": {
-                        templateUrl: 'app/navigation/summary/BlankLine.html'
+                        controller: 'ModelDetailController',
+                        template: '<div id="ModelDetailsArea"></div>'
                     },
                     "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
                             $scope.rating_id = $stateParams.rating_id || '';
+                            $scope.modelId = $stateParams.modelId || '';
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }
                             $rootScope.$broadcast('header-back', {
                                 path: '^home.rating.dashboard',
-                                displayName: Rating.summary.displayName,
+                                displayName: Dashboard.summary.displayName,
                                 sref: 'home.ratingsengine'
                             });
                         },
@@ -133,9 +168,139 @@ angular
                     }
                 }
             })
+            .state('home.ratingsengine.dashboard.rules', {
+                url: '/rules',
+                resolve: {
+                    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getCount().then(function (result) {
+                            DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                            deferred.resolve(result.data);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllTopAttributes().then(function (result) {
+                            deferred.resolve(result['Categories'] || result || {});
+                        });
+
+                        return deferred.promise;
+                    }],
+                    EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getPremiumSelectMaximum().then(function (result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    // below resolves are needed. Do not removed
+                    // override at child state when needed
+                    LookupResponse: [function () {
+                        return { attributes: null };
+                    }],
+                    QueryRestriction: [function () {
+                        return null;
+                    }],
+                    CurrentConfiguration: [function () {
+                        return null;
+                    }],
+                    CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if (!$stateParams.rating_id) {
+                            deferred.resolve(RatingsEngineStore.currentRating);
+                        } else {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                                deferred.resolve(result);
+                            });
+                        }
+
+                        return deferred.promise;
+                    },
+                    // end duplicates
+                    RatingsEngineModels: function ($q, $stateParams, DataCloudStore, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function (data) {
+                            var model = (data && data[0] ? data[0] : {});
+
+                            if (!model.rule.ratingRule.bucketToRuleMap) {
+                                model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
+                            }
+
+                            // console.log(model);
+
+                            RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
+
+                            deferred.resolve(model);
+                        });
+
+                        return deferred.promise;
+                    },
+                    Cube: function ($q, DataCloudStore) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.getCube().then(function (result) {
+                            deferred.resolve(result.data);
+                        });
+
+                        return deferred.promise;
+                    },
+                    RatingEngineModel: function (DataCloudStore, RatingsEngineModels) {
+                        var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
+
+                        // console.log(RatingsEngineModels);
+
+                        if (selectedAttributes) {
+                            RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
+                        }
+
+                        return RatingsEngineModels;
+                    }
+                },
+                views: {
+                    'main@': {
+                        controller: 'AdvancedQueryCtrl',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
+                    }
+                }
+            })
             .state('home.ratingsengine.dashboard.notes', {
                 url: '/notes',
                 resolve: {
+                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                            deferred.resolve(result)
+                        });
+
+                        return deferred.promise;
+                    },
                     Notes: function($q, $stateParams, NotesService) {
                         var deferred = $q.defer(),
                             id = $stateParams.rating_id;
@@ -156,23 +321,6 @@ angular
                     section: 'dashboard.notes'
                 },
                 views: {
-                    "summary@": {
-                        templateUrl: 'app/navigation/summary/BlankLine.html'
-                    },
-                    "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Rating) {
-                            $scope.rating_id = $stateParams.rating_id || '';
-                            $scope.stateName = function () {
-                                return $state.current.name;
-                            }
-                            $rootScope.$broadcast('header-back', {
-                                path: '^home.rating.dashboard',
-                                displayName: Rating.summary.displayName,
-                                sref: 'home.ratingsengine'
-                            });
-                        },
-                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
-                    },
                     "main@": {
                         controller: 'NotesController',
                         controllerAs: 'vm',

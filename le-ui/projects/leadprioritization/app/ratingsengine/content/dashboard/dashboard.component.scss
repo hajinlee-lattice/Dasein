@@ -1,146 +1,31 @@
-section.ratingsengine.dashboard-layout.dashboard.container {
-    .account-ratings {
-        .graph {
-            @include flex-container;
-            height: 200px;
-            margin: 40px 0;
-            justify-content: center;
-            -webkit-align-items: flex-end;
-            -ms-flex-align: end;
-            align-items: flex-end;
-            ._rating {
-                @include flex-item(1 1 auto);
-                max-width: 70px;
-                min-height: 4px;
-                position: relative;
-                margin: 0 10px;
-                color: black;
-                background-color: #d0d0d0;
-                font-weight: bold;
-                & > ._label,
-                & > ._count {
-                    position: absolute;
-                    right: 0;
-                    left: 0;
-                    text-align: center;
-                }
-                & > ._label {
-                    bottom: -25px;
-                    font-weight: bold;
-                }
-                & > ._count {
-                    top: -25px;
-                    color: inherit;
-                }
-                &.bucket-a\+ {
-                    background-color: #70bf4a;
-                }
-                &.bucket-a {
-                    background-color: #70bf4a;                                        
-                }
-                &.bucket-b {
-                    background-color: #33bdb7;
-                }
-                &.bucket-c {
-                    background-color: #cd80bc;
-                }
-                &.bucket-d {
-                    background-color: #8e71b2;
-                }
-                &.bucket-e {
-                    background-color: #457eba;
-                }
-                &.bucket-f {
-                    background-color: #9c9c9c;
-                }
-                &.empty {
-                    background: black;
-                    font-weight: normal;
-                    opacity: .2;
-                }
-            }
+.dashboard {
+    .header {
+        margin-bottom: 20px;
+        &:after {
+            content: '';
+            clear: both;
+            display: table;
         }
     }
-    .dashboard-section.segment {
-        p em {
-            color: blue;
+    .content {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        & > div {
+            width: 49%;
+            margin-bottom: 20px;
         }
-        .dashboard-section-header {
-            
+        h3 {
+            font-size: 16px;
         }
-    }
-    .status-toggle {
-        text-align: left;
-        & > label {
-            display: inline;
-            width: auto;
-            vertical-align: middle;
-            position: relative;
-            top: 2px;
-            margin-right: 10px;
+        dt, dd {
+            font-size: 14px;
         }
-        &[disabled] {
-            pointer-events: none;
-            opacity: .5;
+        dt {
+            width: 30%;
         }
-    }
-    .toggle-switch {
-        position: relative;
-        display: inline-block;
-        height: 20px;
-        width: 50px;
-        vertical-align: middle;
-        & > input[type="checkbox"] {
-            display: none;
+        dd {
+            margin-left: 30%;
         }
-        & > .toggle-face {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            height: 23px;
-            width: 55px;
-            background-color: #d0d0d0;
-            border-radius: 15px;
-            &:before { // peg
-                position: absolute;
-                display: block;
-                content: '';
-                height: 18px;
-                width: 18px;
-                left: 3px;
-                bottom: 3px;
-                background-color: white;
-                border-radius: 50%;
-            }
-            &:after { // text
-                position: absolute;
-                display: block;
-                content: 'No';
-                right: 8px;
-                bottom: 0;
-                color: white;
-            }
-        }
-        & > input:checked + .toggle-face {
-            background-color: #6dbd4c;
-        }
-        & > input:checked + .toggle-face:before {
-            left: auto;
-            right: 3px;
-        }        
-        & > input:checked + .toggle-face:after {
-            content: 'Yes';
-            left: 8px;
-            right: auto;
-        }        
-    }
-}
-
-section.rating-engine-deactivate{
-    .plays-used-list{
-        padding: 20px;
     }
 }

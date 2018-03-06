@@ -273,13 +273,12 @@ angular.module('lp.ratingsengine')
 
     this.getRating = function(id) {
         var deferred = $q.defer();
-
         if (this.currentRating === {}) {
             deferred.resolve(this.currentRating);
         } else {
-            RatingsEngineService.getRating(id).then(function(data) {
-                RatingsEngineStore.setRating(data);
-                deferred.resolve(data);
+            RatingsEngineService.getRating(id).then(function(engine) {
+                RatingsEngineStore.setRating(engine);
+                deferred.resolve(engine);
             });
         }
 
@@ -538,7 +537,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.getRatingId = function() {
-        return vm.rating_id;
+        return this.rating_id;
     }
 
     this.setRatingId = function() {

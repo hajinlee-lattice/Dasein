@@ -1,113 +1,119 @@
-<le-modal-window config="vm.config" callback-function="vm.modalCallback(args)">
-    <div ng-include="vm.viewUrl()"></div>
-</le-modal-window>
+<section 
+    class="rating-engine dashboard">
+    <div class="container row">
+        <div class="ten columns offset-one">
 
-<section class="ratingsengine dashboard-layout dashboard container">
-    <div class="container-body">
-        <div class="dashboard-column">
-            <div class="dashboard-section ratingengine">
-                <div class="dashboard-section-container">
-                    <div class="dashboard-section-header">
-                        <h2>
-                            <div class="text-ellipsis">
-                                <span ng-show="!focus.title" title="{{ vm.rating.summary.displayName || 'Rating Name' }}">{{ vm.rating.summary.displayName || 'Rating Name' }}</span>
-                            </div>
-                            <div class="contenteditable" ng-class="{editing: focus.title}" ng-focus="focus = {}; focus.title = true; vm.autofocus($event);" tabindex="-1">
-                                
-                                <div class="editor" ng-show="focus.title">
-                                    <input autofocus maxlength="50" ng-blur="vm.edited('displayName'); focus = {};" name="displayName" ng-model="vm.editing.displayName" ng-value="vm.rating.summary.displayName" />
-                                </div>
-                            </div>
-                        </h2>
-                    </div>
-                    <div class="dashboard-section-content">
-                        <p>
-                            {{vm.rating.summary.createdBy}} on {{vm.rating.summary.created|date}}
-                        </p>
-                        <p>
-                            Last Data Refresh: {{vm.TimestampIntervalUtility.timeAgo(vm.rating.summary.lastRefreshedDate)}}
-                        </p>
-                    </div>
-                    <div class="dashboard-section-content account-ratings" ng-if="vm.rating.coverageInfo.bucketCoverageCounts">
 
-                        <barchart 
-                            header="Account Ratings"
-                            ratings="true" 
-                            data="vm.rating.coverageInfo.bucketCoverageCounts">
-                        </barchart>
+            <div class="header">
+                <h2 class="pull-left">Model Dashboard</h2>
 
-                    </div>
-                    <div class="dashboard-section-footer">
-                        <div class="dashboard-section-footer-columns">
-                            <div class="status-toggle dashboard-section-footer-column" ng-disabled="!vm.hasRules">
-                                <label for="statusToggle">Ratings are Active:</label>
-                                <span class="toggle-switch">
-                                    <input type="checkbox" id="statusToggle" ng-model="vm.status_toggle" />
-                                    <span class="toggle-face" ng-click="vm.toggleActive()"></span>
-                                </span>
-                            </div>
-                            <div class="dashboard-section-footer-column">
-                                <button 
-                                    class="button blue-button" 
-                                    ng-disabled="vm.StateHistory.isTo('home.ratingsengine.rulesprospects.segment.attributes.rules')" 
-                                    ui-sref="home.ratingsengine.rulesprospects.segment.attributes.rules({rating_id: vm.rating.summary.id, wizard_steps: 'editrules'})">
-                                    <span ng-if="!vm.StateHistory.isTo('home.ratingsengine.rulesprospects.segment.attributes.rules')" >Edit</span>
-                                    <span ng-if="vm.StateHistory.isTo('home.ratingsengine.rulesprospects.segment.attributes.rules')">
-                                        <i class="fa fa-spinner fa-pulse fa-fw"></i>
-                                    </span>
-                                </button>
-                            </div>
-                        </div>
+                <div class="actions pull-right">
+                    <button
+                        class="button orange-button">
+                        Activate Scoring
+                    </button>
+                    <button
+                        class="button orange-button">
+                        Create Play
+                    </button>
+                </div>
+            </div>
+
+            <div class="content">
+                <div ng-if="!vm.isRulesBased">
+                    <h3>Creation Settings</h3>
+                    <dl>
+                        <dt>Model Type:</dt>
+                        <dd>{{ vm.ratingEngineType }}</dd>
+                        <dt>Segment:</dt>
+                        <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
+                        
+                        <dt>Products:</dt>
+                        <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
+                        <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
+
+                        <dt ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
+                        <dd ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+
+                        <dt>Prioritize by:</dt>
+                        <dd>{{ vm.prioritizeBy }}</dd>
+
+                        <dt ng-if="vm.hasSettingsInfo">Model Settings:</dt>
+                        <dd ng-if="vm.hasSettingsInfo">
+                            <ul>
+                                <li 
+                                    ng-if="vm.modelingConfigFilters['SPEND_IN_PERIOD']">
+                                    Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.modelingConfigFilters['SPEND_IN_PERIOD'].value | number }}
+                                </li>
+                                <li
+                                    ng-if="vm.modelingConfigFilters['QUANTITY_IN_PERIOD']">
+                                    Quantity bought was {{ vm.quantityCriteria }} {{ vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].value | number }} units
+                                </li>
+                                <li
+                                    ng-if="vm.modelingConfigFilters['TRAINING_SET_PERIOD']">
+                                    {{ vm.modelingConfigFilters['TRAINING_SET_PERIOD'].value }} months of historical records
+                                </li>
+                                <li
+                                    ng-if="vm.trainingSegment !== null">
+                                    Model with similar segment: {{ vm.trainingSegment.display_name }}
+                                </li>
+                                <li
+                                    ng-if="vm.trainingProducts.length !== 0">
+                                    Model with similar product(s): 
+                                    <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
+                                    <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
+                                </li>
+                            </ul>
+                        </dd>
+                    </dl>
+                </div>
+                <div ng-if="vm.isRulesBased">
+                    <h3>Ratings</h3>
+                    <barchart
+                        ratings="true"
+                        data="vm.dashboard.coverageInfo.bucketCoverageCounts">
+                    </barchart>
+                </div>
+                <div>
+                    <h3>Creation History (1)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Created</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ vm.ratingEngine.created | date }}</td>
+                                <td>{{ vm.ratingEngine.createdBy }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div>
+                    <h3>Used by ({{ vm.relatedItems.length }})</h3>
+                    <table ng-if="vm.relatedItems.length > 0">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Name</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in vm.relatedItems">
+                                <td>Play</td>
+                                <td>{{ item.displayName }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div ng-if="vm.relatedItems.length == 0">
+                        This model is currently not being used by any plays or segments.
                     </div>
                 </div>
             </div>
-            <div class="dashboard-section plays">
-                <div class="dashboard-section-container">
-                    <div class="dashboard-section-header">
-                        <h2>
-                            Plays Using this Model
-                        </h2>
-                    </div>
-                    <div class="dashboard-section-content">
-                        <ul class="plays" ng-if="vm.rating.plays && vm.rating.plays.length > 0">
-                            <li class="play" ng-repeat="play in vm.rating.plays">
-                                {{play.displayName}} 
-                                <span ng-if="play.launchHistory.playLaunch.updated">Launched {{vm.TimestampIntervalUtility.timeAgo(play.launchHistory.playLaunch.updated)}}</span>
-                            </li>
-                        </ul>
-                        <div ng-if="!vm.rating.plays || vm.rating.plays.length == 0">There are <strong>no</strong> Plays using this Rating</div>
-                    </div>
-                    <div class="dashboard-section-footer">
-                        <button class="button blue-button" ui-sref="home.playbook.create.rating({rating_id: vm.rating.summary.id})" ng-disabled="!vm.status_toggle">
-                            <span>Create a new play</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="dashboard-column">
-            <div class="dashboard-section segment">
-                <div class="dashboard-section-container">
-                    <div class="dashboard-section-header">
-                        <h2>
-                            <span class="text-ellipsis" title="{{vm.rating.segment.display_name}}">{{vm.rating.segment.display_name}}</span>
-                        </h2>
-                    </div>
-                    <div class="dashboard-section-content">
-                        <p>
-                            <span ng-if="vm.rating.segment.created">Created on: <em>{{vm.rating.segment.created|date}}</em></span><br />
-                            <span ng-if="vm.rating.segment.description">Description: <em>{{vm.rating.segment.description}}</em></span>
-                        </p>
-                    </div>
-                    <!--
-                    <div class="dashboard-section-footer">
-                        <button class="edit button blue-button">
-                            <span>Edit</span>
-                        </button>
-                    </div>
-                    -->
-                </div>
-            </div>
+
+
         </div>
     </div>
 </section>

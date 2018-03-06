@@ -5,8 +5,7 @@ angular.module('mainApp.appCommon.directives.barchart', [])
         templateUrl: '/components/charts/barchart.component.html',
         scope: { 
             data: '=',
-            ratings: '=',
-            header: '@'
+            ratings: '='
         },
         link: function (scope, element, attrs, ctrl) {
 
