@@ -5,6 +5,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -56,6 +58,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
+
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
                 constructSegment(SEGMENT_NAME));
         Assert.assertNotNull(createdSegment);
@@ -67,6 +70,8 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     public void testCreate() {
         // Test Rulebased Rating Engine
         rbRatingEngine = createRatingEngine(RatingEngineType.RULE_BASED);
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), rbRatingEngine.getId(),
+                generateCoverageMap());
         Assert.assertEquals(rbRatingEngine.getType(), RatingEngineType.RULE_BASED);
         assertRatingEngine(rbRatingEngine);
         rbRatingEngineId = rbRatingEngine.getId();
@@ -122,10 +127,10 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
         // test update rating model
         RuleBasedModel roleBasedModel = constructRuleModel();
-        RatingModel retrievedRoleBasedModel = ratingEngineService.updateRatingModel(rbRatingEngineId, ratingModelId,
+        RatingModel retrievedRuleBasedModel = ratingEngineService.updateRatingModel(rbRatingEngineId, ratingModelId,
                 roleBasedModel);
-        Assert.assertTrue(retrievedRoleBasedModel instanceof RuleBasedModel);
-        RatingRule ratingRule = ((RuleBasedModel) retrievedRoleBasedModel).getRatingRule();
+        Assert.assertTrue(retrievedRuleBasedModel instanceof RuleBasedModel);
+        RatingRule ratingRule = ((RuleBasedModel) retrievedRuleBasedModel).getRatingRule();
         Assert.assertNotNull(ratingRule);
         Assert.assertEquals(ratingRule.getDefaultBucketName(), RatingBucketName.D.getName());
         Assert.assertTrue(MapUtils.isNotEmpty(ratingRule.getBucketToRuleMap()));
@@ -136,12 +141,10 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         Assert.assertNotNull(
                 ratingRule.getRuleForBucket(RatingBucketName.F).get(FrontEndQueryConstants.CONTACT_RESTRICTION));
 
+        ratingEngineService.updateRatingEngineCounts(rbRatingEngineId);
         RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(rbRatingEngineId, true);
         Assert.assertTrue(MapUtils.isNotEmpty(ratingEngine.getCountsAsMap()));
         System.out.println(JsonUtils.pprint(ratingEngine));
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.A.name()), RATING_A_COUNT);
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.D.name()), RATING_D_COUNT);
-        Assert.assertEquals(ratingEngine.getCountsAsMap().get(RatingBucketName.F.name()), RATING_F_COUNT);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindAndUpdateRuleBasedModel" })
@@ -151,6 +154,15 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
+    }
+
+    private Map<RatingBucketName, Long> generateCoverageMap() {
+        Map<RatingBucketName, Long> coverageMap = new ImmutableMap.Builder<RatingBucketName, Long>() //
+                .put(RatingBucketName.A, RATING_A_COUNT) //
+                .put(RatingBucketName.D, RATING_D_COUNT) //
+                .put(RatingBucketName.F, RATING_F_COUNT) //
+                .build();
+        return coverageMap;
     }
 
     protected void deleteRatingEngine(String ratingEngineId) {
