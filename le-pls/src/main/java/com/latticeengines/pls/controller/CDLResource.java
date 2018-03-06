@@ -44,6 +44,7 @@ public class CDLResource {
     @ApiOperation(value = "Start Process And Analyze job")
     public ResponseDocument<String> processAnalyze() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        String user = MultiTenantContext.getEmailAddress();
         ApplicationId result = cdlService.processAnalyze(customerSpace.toString());
         return ResponseDocument.successResponse(result.toString());
     }

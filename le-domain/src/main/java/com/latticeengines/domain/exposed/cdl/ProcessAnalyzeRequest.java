@@ -17,12 +17,23 @@ public class ProcessAnalyzeRequest {
     @JsonProperty("RebuildEntities")
     private Set<BusinessEntity> rebuildEntities = new HashSet<>();
 
+    @JsonProperty("UserId")
+    private String userId;
+
     public Set<BusinessEntity> getRebuildEntities() {
         return rebuildEntities;
     }
 
     public void setRebuildEntities(Set<BusinessEntity> rebuildEntities) {
         this.rebuildEntities = rebuildEntities;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 }

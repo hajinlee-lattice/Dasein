@@ -243,6 +243,16 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public void sendCDLProcessAnalyzeEmail(String result, String tenantId, AdditionalEmailInfo info) {
+        try {
+            String url = constructUrl("pls/internal/emails/processanalyze/result", result, tenantId);
+            log.info(String.format("Putting to %s", url));
+            restTemplate.put(url, info);
+        } catch (Exception e) {
+            throw new RuntimeException("sendProcessAnalyzeEmail: Remote call failure", e);
+        }
+    }
+
     public void sendMetadataSegmentExportEmail(String result, String tenantId, MetadataSegmentExport export) {
         try {
             String url = constructUrl("pls/internal/emails/segmentexport/result", result, tenantId);

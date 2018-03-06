@@ -90,7 +90,8 @@ public class EmailTemplateBuilder {
                         "pls_internal_attribute_enrich_success_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL(
                                 "pls_internal_attribute_enrich_error_internal.html"), //
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_SEGMENT_ERROR(
-                "pls_export_segment_error.html");
+                "pls_export_segment_error.html"), //
+        CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html");
 
         private final static String templateRoot = "com/latticeengines/monitor/";
         private final String templateFile;

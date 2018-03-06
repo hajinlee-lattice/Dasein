@@ -941,6 +941,31 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/emails/processanalyze/result/{result}/"
+            + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Send out email after processanalyze")
+    public void sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
+            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
+            HttpServletRequest request) {
+        List<User> users = userService.getUsers(tenantId);
+        for (User user : users) {
+            if (result.equals("COMPLETED")) {
+                if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, appPublicUrl);
+                } else if (user.getEmail().equals(emailInfo.getUserId())) {
+                    emailService.sendCDLProcessAnalyzeCompletionEmail(user, appPublicUrl);
+                }
+            } else if (result.equals("FAILED")) {
+                if (user.getAccessLevel().equals(AccessLevel.EXTERNAL_ADMIN.name())) {
+                    emailService.sendCDLProcessAnalyzeErrorEmail(user, appPublicUrl);
+                } else if (user.getEmail().equals(emailInfo.getUserId())) {
+                    emailService.sendCDLProcessAnalyzeErrorEmail(user, appPublicUrl);
+                }
+            }
+        }
+    }
+
     @RequestMapping(value = "/emails/segmentexport/result/{result}/"
             + TENANT_ID_PATH, method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody

@@ -71,4 +71,8 @@ public interface EmailService {
     void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type, Date cleanupBy);
 
     void sendPlsExportSegmentErrorEmail(User user, String hostport, String exportID, String type);
+
+    void sendCDLProcessAnalyzeCompletionEmail(User user, String appPublicUrl);
+
+    void sendCDLProcessAnalyzeErrorEmail(User user, String appPublicUrl);
 }

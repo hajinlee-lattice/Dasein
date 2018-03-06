@@ -86,6 +86,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processRatingStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -148,6 +149,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
                     processRatingStepConfiguration.setRebuild(true);
                 }
             }
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            configuration.setUserId(userId);
             return this;
         }
 

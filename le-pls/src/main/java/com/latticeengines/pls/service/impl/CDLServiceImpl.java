@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -37,7 +38,9 @@ public class CDLServiceImpl implements CDLService {
 
     @Override
     public ApplicationId processAnalyze(String customerSpace) {
-        return cdlProxy.processAnalyze(customerSpace, null);
+        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
+        request.setUserId(MultiTenantContext.getEmailAddress());
+        return cdlProxy.processAnalyze(customerSpace, request);
     }
 
     @Override
