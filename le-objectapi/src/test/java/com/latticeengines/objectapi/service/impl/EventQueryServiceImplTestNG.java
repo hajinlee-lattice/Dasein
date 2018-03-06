@@ -2,6 +2,7 @@ package com.latticeengines.objectapi.service.impl;
 
 import java.util.Collections;
 
+import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
@@ -94,7 +95,7 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         }
     }
 
-    @Test(groups = "functional", expectedExceptions = LedpException.class)
+    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
     public void testCrossPeriodQuery() {
         Bucket.Transaction txn1 = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
         TimeFilter timeFilter = TimeFilter.ever();
