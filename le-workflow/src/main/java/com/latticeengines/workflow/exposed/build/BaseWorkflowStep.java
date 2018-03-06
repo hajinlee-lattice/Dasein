@@ -105,6 +105,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String PREDICTION_TYPES = "PREDICTION_TYPES";
 
+    protected static final String CUSTOM_EVENT_IMPORT_ACCOUNT_ID = "CUSTOM_EVENT_IMPORT_ACCOUNT_ID";
+    protected static final String CUSTOM_EVENT_IMPORT_WITHOUT_ACCOUNT_ID = "CUSTOM_EVENT_IMPORT_WITHOUT_ACCOUNT_ID";
+    protected static final String CUSTOM_EVENT_MATCH_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_ACCOUNT_ID";
+    protected static final String CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID";
+
     @Autowired
     protected Configuration yarnConfiguration;
 
@@ -265,6 +270,17 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
+    protected void enableEmbeddedWorkflow(Class<? extends WorkflowConfiguration> workflowClass) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(workflowClass);
+        stepConfigMap.forEach((name, step) -> {
+            if (step.isSkipStep()) {
+                step.setSkipStep(false);
+                putObjectInContext(name, step);
+                log.info("Set step " + name + " to be enabled.");
+            }
+        });
+    }
+
     protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(
             Class<? extends WorkflowConfiguration> workflowClass) {
         WorkflowConfiguration workflow = getObjectFromContext(workflowClass.getName(), workflowClass);
@@ -282,22 +298,31 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             }
         }
         Map<String, String> registry = workflow.getStepConfigRegistry();
-        return registry.entrySet().stream().collect(Collectors.toMap(e -> e.getKey(), e -> {
-            Class<?> configClass = null;
-            try {
-                configClass = Class.forName(e.getKey());
-            } catch (ClassNotFoundException e1) {
-                throw new RuntimeException(String.format("unable to find class %s", e.getKey()), e1);
-            }
-            BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(e.getKey(), configClass);
-            if (step == null) {
-                step = (BaseStepConfiguration) getConfigurationFromJobParameters(configClass);
-                if (step == null) {
-                    step = (BaseStepConfiguration) JsonUtils.deserialize(e.getValue(), configClass);
-                }
-            }
-            return step;
-        }));
+        Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
+                .collect(Collectors.toMap(e -> e.getKey(), e -> {
+                    Class<?> configClass = null;
+                    try {
+                        configClass = Class.forName(e.getKey());
+                    } catch (ClassNotFoundException e1) {
+                        throw new RuntimeException(String.format("unable to find class %s", e.getKey()), e1);
+                    }
+                    BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(e.getKey(), configClass);
+                    if (step == null) {
+                        step = (BaseStepConfiguration) getConfigurationFromJobParameters(configClass);
+                        if (step == null) {
+                            step = (BaseStepConfiguration) JsonUtils.deserialize(e.getValue(), configClass);
+                        }
+                    }
+                    return step;
+                }));
+
+        Map<String, WorkflowConfiguration> subWorkflowRegistry = workflow.getSubWorkflowConfigRegistry();
+        subWorkflowRegistry.forEach((k, v) -> {
+            Map<String, BaseStepConfiguration> currentResult = getStepConfigMapInWorkflow(v.getClass());
+            result.putAll(currentResult);
+        });
+
+        return result;
 
     }
 }

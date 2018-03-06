@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.persistence.Transient;
 
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +19,8 @@ import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CdlPivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableFilterParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.CreateCdlEventTableParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccountParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMergeParameters;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.ScoreAggregateParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.AddStandardAttributesParameters;
 import com.latticeengines.domain.exposed.serviceflows.core.dataflow.CascadingBulkMatchDataflowParameters;
@@ -31,6 +32,7 @@ import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.QuotaFlowParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.WRAPPER_OBJECT, property = "property")
@@ -51,6 +53,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
         @JsonSubTypes.Type(value = PivotScoreAndEventParameters.class, name = "pivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = CdlPivotScoreAndEventParameters.class, name = "cdlPivotScoreAndEventParameters"), //
         @JsonSubTypes.Type(value = ComputeLiftParameters.class, name = "computeLiftParameters"), //
+        @JsonSubTypes.Type(value = MatchCdlAccountParameters.class, name = "matchCdlAccountParameters"), //
+        @JsonSubTypes.Type(value = MatchCdlMergeParameters.class, name = "MatchCdlMergeParameters"), //
 })
 public class DataFlowParameters {
 
