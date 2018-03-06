@@ -1,7 +1,7 @@
 angular.module('common.datacloud.query.builder.tree.transaction.service', [])
-    .service('QueryTreeTransactionService', function () {
-        var QueryTreeTransactionService = this;
-
+    .service('QueryTreeTransactionStore', function () {
+        var QueryTreeTransactionStore = this;
+        QueryTreeTransactionStore.periods = [];
         this.getAmtConfig = function () {
             return {
                 from: { name: 'from-amt', value: undefined, position: 0, type: 'Amt', min: '1', max: '' },
@@ -32,16 +32,17 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         
         this.getCmpsList = function () {
-            return [
-                { 'name': 'EVER', 'displayName': 'Ever' },
-                { 'name': 'IN_CURRENT', 'displayName': 'Current' },
-                { 'name': 'PREVIOUS', 'displayName': 'Previous' },
-                { 'name': 'PRIOR_OLY_LT', 'displayName': 'Only Prior to Last' },
-                { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
-                { 'name': 'BETWEEN', 'displayName': 'Between' },
-                { 'name': 'BEFORE', 'displayName': 'Before' },
-                { 'name': 'AFTER', 'displayName': 'After' }
-            ];
+            return QueryTreeTransactionStore.periods;
+            // return [
+            //     { 'name': 'EVER', 'displayName': 'Ever' },
+            //     { 'name': 'IN_CURRENT', 'displayName': 'Current' },
+            //     { 'name': 'PREVIOUS', 'displayName': 'Previous' },
+            //     { 'name': 'PRIOR_OLY_LT', 'displayName': 'Only Prior to Last' },
+            //     { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
+            //     { 'name': 'BETWEEN', 'displayName': 'Between' },
+            //     { 'name': 'BEFORE', 'displayName': 'Before' },
+            //     { 'name': 'AFTER', 'displayName': 'After' }
+            // ];
         }
 
         this.periodList = function () {
@@ -74,4 +75,24 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 
             ];
         }
+    })
+    .service('QueryTreeTransactionService', function($http, $q) {
+    
+    
+        this.GetDataByQuery = function(resourceType, query) {
+            var deferred = $q.defer();
+    
+            SegmentStore.sanitizeSegment(query);
+    
+            $http({
+                method: 'GET',
+                url: '/pls/datacollection/periods/names'
+            }).success(function(result) {
+                deferred.resolve(result);
+            }).error(function(result) {
+                deferred.resolve(result);
+            });
+    
+            return deferred.promise;
+        };
     });

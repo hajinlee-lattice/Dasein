@@ -9,7 +9,7 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, QueryTreeTransactionService, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, QueryTreeService) {
                 var vm = $scope.vm;
 
                 vm.init = function () {
@@ -17,12 +17,19 @@ angular
                 }
                 vm.init();
 
+                vm.getPeriod = function(){
+                    var period = QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time');
+                    if(period != 'Date' && vm.getCmp('Time') !== 'Ever'){
+                        return period;
+                    }
+                }
 
                 vm.getCmp = function (subType) {
                     var ret = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, subType);
                     switch (subType) {
                         case 'Time': {
-                            return ret === '' ? 'Ever' : QueryTreeService.cmpMap[ret];
+                            var cmp = ret === '' ? 'Ever' : QueryTreeService.cmpMap[ret];
+                            return cmp;
                         }
                         case 'Amt':
                         case 'Qty': {

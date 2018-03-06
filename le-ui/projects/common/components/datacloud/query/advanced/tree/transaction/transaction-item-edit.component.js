@@ -13,7 +13,7 @@ angular
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.html',
             controllerAs: 'vm',
-            controller: function ($scope, $timeout, $state, moment, QueryTreeTransactionService, QueryTreeService) {
+            controller: function ($scope, $timeout, $state, moment, QueryTreeTransactionStore, QueryTreeService) {
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
@@ -42,16 +42,16 @@ angular
                 vm.showToPeriod = false;
                 /**************************************/
 
-                vm.qtyConf = QueryTreeTransactionService.getQtyConfig();
-                vm.amtConf = QueryTreeTransactionService.getAmtConfig();
-                vm.periodNumericalConf = QueryTreeTransactionService.getPeriodNumericalConfig();
-                vm.periodTimeConf = QueryTreeTransactionService.getPeriodTimeConfig();
+                vm.qtyConf = QueryTreeTransactionStore.getQtyConfig();
+                vm.amtConf = QueryTreeTransactionStore.getAmtConfig();
+                vm.periodNumericalConf = QueryTreeTransactionStore.getPeriodNumericalConfig();
+                vm.periodTimeConf = QueryTreeTransactionStore.getPeriodTimeConfig();
 
 
-                vm.cmpsList = QueryTreeTransactionService.getCmpsList()
-                vm.periodList = QueryTreeTransactionService.periodList();
-                vm.unitPurchasedCmpChoises = QueryTreeTransactionService.unitPurchasedCmpChoises();
-                vm.amountSpentCmpChoises = QueryTreeTransactionService.amountSpentCmpChoises();
+                vm.cmpsList = QueryTreeTransactionStore.getCmpsList()
+                vm.periodList = QueryTreeTransactionStore.periodList();
+                vm.unitPurchasedCmpChoises = QueryTreeTransactionStore.unitPurchasedCmpChoises();
+                vm.amountSpentCmpChoises = QueryTreeTransactionStore.amountSpentCmpChoises();
 
 
                 function initQty(reset) {

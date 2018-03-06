@@ -33,7 +33,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'STARTS_WITH': 'starts with',
             'IN_CURRENT': 'Current',
             'EVER': 'Ever',
-            'Any': 'Any'
+            'Any': 'Any',
+            'BEFORE': 'Before',
+            'BETWEEN': 'Between',
+            'AFTER': 'After',
+            'BETWEEN_LT': 'Between Last',
+            'PREVIOUS': 'Previous',
+            'PRIOR_OLY_LT': 'Only Prior to Last'
         };
 
         this.numerical_operations = {
