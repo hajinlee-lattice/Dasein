@@ -349,8 +349,7 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
             @Override
             public Collection<DataFeedExecutionJobType> getDisallowedJobTypes() {
-                return Arrays.asList(DataFeedExecutionJobType.CDLOperation, //
-                        DataFeedExecutionJobType.PA);
+                return Arrays.asList(DataFeedExecutionJobType.CDLOperation);
             }
 
             @Override
