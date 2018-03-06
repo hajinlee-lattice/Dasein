@@ -1,16 +1,13 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import java.nio.charset.Charset;
-
-import org.apache.commons.io.IOUtils;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
@@ -19,10 +16,13 @@ import org.springframework.batch.test.StepRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.workflow.core.WorkflowTranslator;
@@ -50,12 +50,14 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         SetConfigurationForScoring setConfigurationForScoring = new SetConfigurationForScoring();
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
-        String jsonStr = IOUtils.toString(
-                ClassLoader.getSystemResourceAsStream(
-                        "com/latticeengines/workflowapi/flows/leadprioritization/workflow.conf"),
-                Charset.forName("UTF-8"));
-        ImportMatchAndModelWorkflowConfiguration config = JsonUtils.deserialize(jsonStr,
-                ImportMatchAndModelWorkflowConfiguration.class);
+
+        ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder();
+        builder.customer(CustomerSpace.parse("Workflow_Tenant"));
+        builder.modelingServiceHdfsBaseDir("abc");
+        builder.microServiceHostPort("123");
+        builder.inputProperties(ImmutableMap.of(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, "abc.csv"));
+        ImportMatchAndModelWorkflowConfiguration config = builder.build();
+
         JobParameters params = workflowService.createJobParams(config);
         ExecutionContext executionContext = new ExecutionContext();
 
@@ -71,7 +73,8 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
 
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
-        runner.launchStep(workflowTranslator.step(setConfigurationForScoring, choreographer, 0), params, executionContext);
+        runner.launchStep(workflowTranslator.step(setConfigurationForScoring, choreographer, 0), params,
+                executionContext);
         Thread.sleep(10000);
         assertTrue(setConfigurationForScoring
                 .getObjectFromContext(ExportStepConfiguration.class.getName(), ExportStepConfiguration.class)
