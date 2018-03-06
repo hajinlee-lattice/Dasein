@@ -152,7 +152,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
          */
         SQLQueryFactory factory = factory();
         int followingOffset = 1;
-        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String txTableName = "query_test_period_transaction";
         String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
         String aggrAmountStr = "agg";
         StringPath tablePath = Expressions.stringPath(txTableName);
@@ -216,7 +216,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
          */
 
         int priorOffset = 5;
-        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String txTableName = "query_test_period_transaction";
         String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
         String aggrValStr = "agg";
         StringPath tablePath = Expressions.stringPath(txTableName);
@@ -296,7 +296,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         int startOffset = 10;
         int endOffset = 5;
         int amount = 5000;
-        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String txTableName = "query_test_period_transaction";
         String productIdStr = "A78DF03BAC196BE9A08508FFDB433A31";
         String aggrAmountStr = "agg";
         StringPath tablePath = Expressions.stringPath(txTableName);
@@ -337,7 +337,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         /*
         select max(periodid) from 'tftest_4_transaction_2017_10_31_19_44_08_utc'
          */
-        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String txTableName = "query_test_period_transaction";
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath periodId = Expressions.stringPath("periodid");
 
@@ -443,7 +443,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
         on  crossprod.accountid = periodrange.accountid
         where  crossprod.periodid >= periodrange.minpid - 2
          */
-        String txTableName = "tftest_4_transaction_2017_10_31_19_44_08_utc";
+        String txTableName = "query_test_period_transaction";
         StringPath tablePath = Expressions.stringPath(txTableName);
         StringPath accountId = Expressions.stringPath("accountid");
         StringPath periodId = Expressions.stringPath("periodid");
@@ -465,7 +465,7 @@ public class QueryDSLTestNG extends QueryFunctionalTestNGBase {
                 .where(crossPeriodId.goe(minPid.subtract(2)));
         SQLQuery minusProdSubQuery = crossProdSubQuery.select(crossAccountId, periodId);
         System.out.println(minusProdSubQuery.toString());
-        Assert.assertEquals(833038, minusProdSubQuery.fetchCount());
+        Assert.assertEquals(minusProdSubQuery.fetchCount(), 8529);
     }
 
     @Test(groups = "functional")
