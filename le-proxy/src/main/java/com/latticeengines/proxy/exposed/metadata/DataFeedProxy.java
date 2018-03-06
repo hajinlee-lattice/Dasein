@@ -62,11 +62,11 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
     public boolean lockExecution(String customerSpace, DataFeedExecutionJobType jobType) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/jobtype/{jobType}/lockexecution",
                 shortenCustomerSpace(customerSpace), jobType);
-        ResponseDocument<DataFeed> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
+        ResponseDocument<Boolean> responseDoc = post("lockExecution", url, null, ResponseDocument.class);
         if (responseDoc == null) {
             return Boolean.FALSE;
         }
-        return responseDoc.isSuccess();
+        return responseDoc.getResult();
     }
 
     public DataFeedExecution finishExecution(String customerSpace, String initialDataFeedStatus) {
