@@ -16,7 +16,7 @@ import org.springframework.batch.item.ExecutionContext;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.cdl.workflow.steps.process.StartProcessing;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -50,7 +50,8 @@ public class StartProcessingUnitTestNG {
     public void testRebuildOnDeleteJobTemplate() {
         Job job = new Job();
         job.setOutputs(ImmutableMap.<String, String> builder() //
-                .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES, BusinessEntity.Contact.name()) //
+                .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
+                        JsonUtils.serialize(Arrays.asList(BusinessEntity.Contact.name()))) //
                 .build());
 
         List<Job> jobs = Arrays.asList(job);
@@ -70,8 +71,8 @@ public class StartProcessingUnitTestNG {
         job = new Job();
         job.setOutputs(ImmutableMap.<String, String> builder() //
                 .put(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES,
-                        String.format("%s,%s,%s,%s", BusinessEntity.Account.name(), BusinessEntity.Contact.name(),
-                                BusinessEntity.Product.name(), BusinessEntity.Transaction.name())) //
+                        JsonUtils.serialize(Arrays.asList(BusinessEntity.Account.name(), BusinessEntity.Contact.name(),
+                                BusinessEntity.Product.name(), BusinessEntity.Transaction.name()))) //
                 .build());
 
         jobs = Arrays.asList(job);

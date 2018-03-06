@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -291,9 +290,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     if (StringUtils.isEmpty(str)) {
                         continue;
                     }
-                    List<String> entityStrs = Arrays.asList(str.split(","));
-                    rebuildEntities
-                            .addAll(entityStrs.stream().map(BusinessEntity::valueOf).collect(Collectors.toSet()));
+                    List<?> entityList = JsonUtils.deserialize(str, List.class);
+                    rebuildEntities.addAll(JsonUtils.convertList(entityList, BusinessEntity.class));
                     setEntityToRebuild();
                 }
                 return rebuildEntities;
