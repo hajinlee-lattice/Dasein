@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
@@ -54,15 +55,25 @@ public class MaintenanceOperationListener extends LEJobListener {
     public void afterJobExecution(JobExecution jobExecution) {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         String customerSpace = job.getTenant().getId();
-        String status = job.getOutputContextValue(WorkflowContextConstants.Outputs.DATAFEED_STATUS);
+        String status = job.getInputContextValue(WorkflowContextConstants.Inputs.DATAFEED_STATUS);
+        if (StringUtils.isEmpty(status)) {
+            throw new RuntimeException("Cannot get initial data feed status for customer: " + customerSpace);
+        }
         if (jobExecution.getStatus().isUnsuccessful()) {
-            if (!StringUtils.isEmpty(status)) {
-                // reset data feed status.
-                dataFeedProxy.updateDataFeedStatus(customerSpace, status);
+            // reset data feed status.
+            log.info(String.format("Maintenance workflow failed. Update datafeed status for customer %s with status %s",
+                    customerSpace, status));
+            DataFeedExecution dataFeedExecution = dataFeedProxy.failExecution(customerSpace, status);
+            if (dataFeedExecution.getStatus() != DataFeedExecution.Status.Failed) {
+                throw new RuntimeException("Cannot fail execution!");
             }
+
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             // check data feed status? should be Initing or InitialLoaded?
-            dataFeedProxy.updateDataFeedStatus(customerSpace, DataFeed.Status.Active.getName());
+            DataFeedExecution dataFeedExecution = dataFeedProxy.finishExecution(customerSpace, status);
+            if (dataFeedExecution.getStatus() != DataFeedExecution.Status.Completed) {
+                throw new RuntimeException("Cannot finish execution!");
+            }
         } else {
             log.error(String.format("CDL maintenance job ends in unknown status: %s", jobExecution.getStatus().name()));
         }

@@ -22,12 +22,15 @@ import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
@@ -41,6 +44,9 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
 
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
     private InternalResourceRestApiProxy internalResourceProxy;
 
     @PostConstruct
@@ -50,11 +56,28 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
 
     public ApplicationId submit(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
+        if (customerSpace == null) {
+            throw new IllegalArgumentException("The CustomerSpace cannot be null!");
+        }
+        DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
+        DataFeed.Status dataFeedStatus = dataFeed.getStatus();
+        log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
+        if (dataFeedStatus != DataFeed.Status.InitialLoaded && dataFeedStatus != DataFeed.Status.Active) {
+            if (dataFeedStatus == DataFeed.Status.Initing || dataFeedStatus == DataFeed.Status.Initialized) {
+                throw new RuntimeException("There is no data for customer: " + customerSpace.toString());
+            } else {
+                throw new RuntimeException("We cannot start Maintenance for customer: " + customerSpace.toString());
+            }
+        }
+        if (!dataFeedProxy.lockExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation)) {
+            throw new RuntimeException("We cannot start CDL maintenance right now!");
+        }
+
         log.info("generate Configuration");
         Action action = registerAction(customerSpace, maintenanceOperationConfiguration);
         log.info(String.format("Action=%s", action));
         CDLOperationWorkflowConfiguration configuration = generateConfiguration(customerSpace,
-                maintenanceOperationConfiguration, action.getPid());
+                maintenanceOperationConfiguration, action.getPid(), dataFeedStatus);
 
         log.info("submit Configuration");
         return workflowJobService.submit(configuration);
@@ -76,7 +99,8 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     }
 
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,
-            MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid) {
+            MaintenanceOperationConfiguration maintenanceOperationConfiguration, @NonNull Long actionPid,
+            DataFeed.Status status) {
         boolean isCleanupByUpload = false;
         BusinessEntity businessEntity = null;
         if (maintenanceOperationConfiguration instanceof CleanupOperationConfiguration) {
@@ -112,6 +136,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                         .put(WorkflowContextConstants.Inputs.ACTION_ID, actionPid.toString()) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_FILE_NAME, fileName) //
                         .put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, fileDisplayName) //
+                        .put(WorkflowContextConstants.Inputs.DATAFEED_STATUS, status.getName())
                         .build())
                 .build();
     }
