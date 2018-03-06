@@ -95,6 +95,20 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         return get("getTable", url, Table.class);
     }
 
+    public List<Table> getTables(String customerSpace, TableRoleInCollection role, DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/alltables?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        List<?> list = get("getTables", url, List.class);
+        return JsonUtils.convertList(list, Table.class);
+    }
+
     public String getTableName(String customerSpace, TableRoleInCollection role) {
         return getTableName(customerSpace, role, null);
     }
@@ -151,6 +165,21 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
         postKryo("upsertTable", url, null, null);
+    }
+
+    public void upsertTables(String customerSpace, List<String> tableNames, TableRoleInCollection role,
+            DataCollection.Version version) {
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tables/multi/{tableName}?role={role}";
+        List<Object> args = new ArrayList<>();
+        args.add(shortenCustomerSpace(customerSpace));
+        args.add(String.join(",", tableNames));
+        args.add(role);
+        if (version != null) {
+            urlPattern += "&version={version}";
+            args.add(version);
+        }
+        String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        postKryo("upsertTables", url, null, null);
     }
 
     public void unlinkTable(String customerSpace, String tableName, TableRoleInCollection role,
