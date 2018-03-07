@@ -38,7 +38,6 @@ angular
                 $scope.init = function () {
                     var conf = $scope.config;
                     $scope.values = JSON.parse($scope.config);
-                    console.log($scope.values);
                 }
 
 

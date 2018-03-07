@@ -480,7 +480,6 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                             if (t) {
                                 t.Vals = [];
                             }
-                            console.log('RESET Vals ', bucketRestriction);
                             break;
                         }
                         case 'Qty': {

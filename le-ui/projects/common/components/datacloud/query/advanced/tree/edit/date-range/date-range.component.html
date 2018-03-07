@@ -3,13 +3,14 @@
         <span>
             <i id="{{getFromDateTriggerId()}}" class="fa fa-calendar date-trigger"></i>
         </span>
-        <input type="text" id="{{getFromDateId()}}" ng-model="fromDate" disabled>
+        <input type="text" id="{{getFromDateId()}}" name="{{getName(0)}}"  ng-model="fromDate" disabled>
     </div>
     <span class="transaction-element" ng-if="show(0) && show(1)"> - </span>
     <div class="transaction-element date-picker-container" ng-if="show(1)">
         <span>
             <i id="{{getToDateTriggerId()}}" class="fa fa-calendar date-trigger"></i>
         </span>
-        <input type="text" id="{{getToDateId()}}" ng-model="toDate" disabled>
+        <input type="text" id="{{getToDateId()}}" name="{{getName(1)}}"  ng-model="toDate" disabled>
     </div>
+    <span class="error-message" ng-show="showErrorMessage(0) || showErrorMessage(1)"><i class="fa fa-exclamation-circle"></i> Please enter a valid date range.</span>
 </div>

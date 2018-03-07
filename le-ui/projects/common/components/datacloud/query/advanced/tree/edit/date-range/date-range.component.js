@@ -30,10 +30,98 @@ angular
 
                 var DATE_FORMAT = 'YYYY-MM-DD';
 
+
                 function getConfigField(position) {
                     var values = JSON.parse($scope.config);
                     var config = values[Object.keys(values)[position]];
                     return config;
+                }
+
+                function isDateValid(momentDate, otherPosition) {
+                    switch (otherPosition) {
+                        case 0: {
+                            if (getConfigField(0).visible) {
+                                if ($scope.fromDate) {
+                                    var momentFrom = moment($scope.fromDate).format(DATE_FORMAT);
+                                    var valid = moment(momentFrom).isSameOrBefore(momentDate);
+                                    console.log('Valid ==> ', valid);
+                                    return valid;
+                                } else {
+                                    return false;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                        case 1: {
+                            if (getConfigField(1).visible) {
+                                if ($scope.toDate) {
+                                    var momentTo = moment($scope.toDate).format(DATE_FORMAT);
+                                    var valid = moment(momentDate).isSameOrBefore(momentTo);
+                                    console.log('Valid ==> ', valid);
+                                    return valid;
+                                } else {
+                                    return false;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                        default:
+                            return false;
+                    }
+
+                }
+
+                function validateDates() {
+
+                    var fromConf = getConfigField(0);
+                    var toConf = getConfigField(1);
+
+                    if (fromConf.visible == true && toConf.visible && toConf.visible == true) {
+                        if (!$scope.fromDate || !$scope.toDate) {
+                            $scope.form[fromConf.name].$setValidity('datefrom', false);
+                            $scope.form[toConf.name].$setValidity('dateto', false);
+                            return;
+                        }
+                        var momentFrom = moment($scope.fromDate).format(DATE_FORMAT);
+                        var momentTo = moment($scope.toDate).format(DATE_FORMAT);
+                        if (moment(momentFrom).isSame(momentTo)) {
+                            $scope.form[fromConf.name].$setValidity('datefrom', false);
+                            $scope.form[toConf.name].$setValidity('dateto', false);
+                        } else {
+                            var valid = moment(momentFrom).isBefore(momentTo);
+                            $scope.form[fromConf.name].$setValidity('datefrom', valid);
+                            $scope.form[toConf.name].$setValidity('dateto', valid);
+                        }
+                    } else {
+                        switch (fromConf.visible) {
+                            case true: {
+                                if ($scope.fromDate) {
+                                    $scope.form[fromConf.name].$setValidity('datefrom', true);
+                                } else {
+                                    $scope.form[fromConf.name].$setValidity('datefrom', false);
+                                }
+                                return;
+                            }
+                            // default:
+                            //     $scope.form[fromConf.name].$setValidity('datefrom', true);
+                            //     return;
+                        }
+                        switch (toConf.visible) {
+                            case true: {
+                                if ($scope.toDate) {
+                                    $scope.form[toConf.name].$setValidity('dateto', true);
+                                } else {
+                                    $scope.form[toConf.name].$setValidity('dateto', false);
+                                }
+                                return;
+                            }
+                            // default:
+                            //     $scope.form[toConf.name].$setValidity('dateto', true);
+                            //     return;
+                        }
+                    }
                 }
 
                 function initDates() {
@@ -45,16 +133,11 @@ angular
                     if (toDate != undefined) {
                         $scope.toDate = moment(getConfigField(1).initial).format(DATE_FORMAT);
                     }
-
-                    // $scope.toDate = moment(getConfigField(1).initial).format(DATE_FORMAT);
-                    console.log('Values', $scope.fromDate, ' == ', $scope.toDate);
                 }
 
                 function initDatePicker() {
-                    // console.log('Values', getConfigField(0).visible, ' == ', getConfigField(1).visible);
-                    // console.log('INITI OHOHOHOHOH');
-                    console.log(JSON.parse($scope.config));
-                    if (getConfigField(0).visible && getConfigField(0).visible == true) {
+                    var fromConf = getConfigField(0);
+                    if (fromConf.visible && fromConf.visible == true) {
                         var from = document.getElementById($scope.getFromDateId());
 
                         if (from != null) {
@@ -69,15 +152,20 @@ angular
                                 },
                                 onSelect: function (date) {
                                     var val = moment(date).format(DATE_FORMAT);
-                                    $scope.changed({ type: 'Time', position: 0, value: val });
+                                    var valid = isDateValid(val, 1);
                                     $scope.fromDate = val;
+                                    validateDates();
+                                    if (valid) {
+                                        $scope.changed({ type: 'Time', position: 0, value: val });
+                                    }
                                 }
 
                             });
 
                         }
                     }
-                    if (getConfigField(1).visible && getConfigField(1).visible == true) {
+                    var toConf = getConfigField(1);
+                    if (toConf.visible && toConf.visible == true) {
                         var to = document.getElementById($scope.getToDateId());
                         if (to != null) {
                             var triggerTo = document.getElementById($scope.getToDateTriggerId());
@@ -87,8 +175,12 @@ angular
                                 trigger: triggerTo,
                                 onSelect: function (date) {
                                     var val = moment(date).format(DATE_FORMAT);
-                                    $scope.changed({ type: 'Time', position: 1, value: val });
+                                    var valid = isDateValid(val, 0);
                                     $scope.toDate = val;
+                                    validateDates();
+                                    if (valid) {
+                                        $scope.changed({ type: 'Time', position: 1, value: val });
+                                    }
                                 }
                             });
 
@@ -99,12 +191,21 @@ angular
                         (getConfigField(1).visible && getConfigField(1).visible == true)) {
                         initDates();
                     }
+                    validateDates();
                 }
-
 
 
                 $scope.init = function () {
                     $timeout(initDatePicker, 0);
+                }
+
+                /**
+                * Get the name of the input field
+                * @param {*} position 
+                */
+                $scope.getName = function (position) {
+                    var ret = getConfigField(position).name;
+                    return ret;
                 }
 
                 $scope.getFromDateId = function () {
@@ -128,16 +229,34 @@ angular
 
                 $scope.show = function (position) {
                     var visible = getConfigField(position).visible;
-                    // console.log('Position ', position, ' Visible: ', visible);
                     return visible;
-                    // if (visible && visible == false) {
-                    //     return false;
-                    // } else {
-                    //     return true;
-                    // }
                 }
 
+                $scope.showErrorMessage = function(position){
+                    switch(position){
+                        case 0: {
+                            var fromConf = getConfigField(0);
+                            if(fromConf.visible === true){
+                                return $scope.form[fromConf.name].$error.datefrom;
+                                // myForm.pw.$error.one
+                            }else{
+                                return false;
+                            }
+                        }
+                        case 1: {
+                            var toConf = getConfigField(1);
+                            if(toConf.visible === true){
+                                return $scope.form[toConf.name].$error.dateto;
+                                // myForm.pw.$error.one
+                            }else{
+                                return false;
+                            }
+                        }
 
+                        default:
+                        return false;
+                    }
+                }
 
 
                 $scope.init();

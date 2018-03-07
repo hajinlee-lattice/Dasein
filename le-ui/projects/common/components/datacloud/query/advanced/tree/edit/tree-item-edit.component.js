@@ -173,6 +173,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.isValid = function () {
+                    console.log('FORM VALID ', $scope.form.$valid, ' === > ',$scope.form);
+                    // myForm.pw.$error.one
                     return $scope.form.$valid;
                 }
 
