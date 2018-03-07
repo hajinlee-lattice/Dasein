@@ -29,7 +29,8 @@ angular
             controller: function ($scope, $element, $timeout, moment) {
 
                 var DATE_FORMAT = 'YYYY-MM-DD';
-
+                var fromPicker;
+                var toPicker;
 
                 function getConfigField(position) {
                     var values = JSON.parse($scope.config);
@@ -44,7 +45,7 @@ angular
                                 if ($scope.fromDate) {
                                     var momentFrom = moment($scope.fromDate).format(DATE_FORMAT);
                                     var valid = moment(momentFrom).isSameOrBefore(momentDate);
-                                    console.log('Valid ==> ', valid);
+                                    // console.log('Valid ==> ', valid);
                                     return valid;
                                 } else {
                                     return false;
@@ -58,7 +59,7 @@ angular
                                 if ($scope.toDate) {
                                     var momentTo = moment($scope.toDate).format(DATE_FORMAT);
                                     var valid = moment(momentDate).isSameOrBefore(momentTo);
-                                    console.log('Valid ==> ', valid);
+                                    // console.log('Valid ==> ', valid);
                                     return valid;
                                 } else {
                                     return false;
@@ -104,9 +105,6 @@ angular
                                 }
                                 return;
                             }
-                            // default:
-                            //     $scope.form[fromConf.name].$setValidity('datefrom', true);
-                            //     return;
                         }
                         switch (toConf.visible) {
                             case true: {
@@ -117,9 +115,6 @@ angular
                                 }
                                 return;
                             }
-                            // default:
-                            //     $scope.form[toConf.name].$setValidity('dateto', true);
-                            //     return;
                         }
                     }
                 }
@@ -141,10 +136,9 @@ angular
                         var from = document.getElementById($scope.getFromDateId());
 
                         if (from != null) {
-                            var triggerFrom = document.getElementById($scope.getFromDateTriggerId());
-                            var fromPicker = new Pikaday({
+                            // var triggerFrom = document.getElementById($scope.getFromDateTriggerId());
+                                fromPicker = new Pikaday({
                                 field: from,
-                                trigger: triggerFrom,
                                 format: DATE_FORMAT,
                                 keyboardInput: false,
                                 setDate: function () {
@@ -168,11 +162,10 @@ angular
                     if (toConf.visible && toConf.visible == true) {
                         var to = document.getElementById($scope.getToDateId());
                         if (to != null) {
-                            var triggerTo = document.getElementById($scope.getToDateTriggerId());
-                            var toPicker = new Pikaday({
+                            // var triggerTo = document.getElementById($scope.getToDateTriggerId());
+                                toPicker = new Pikaday({
                                 field: to,
                                 format: DATE_FORMAT,
-                                trigger: triggerTo,
                                 onSelect: function (date) {
                                     var val = moment(date).format(DATE_FORMAT);
                                     var valid = isDateValid(val, 0);
@@ -225,6 +218,19 @@ angular
                 $scope.getToDateTriggerId = function () {
                     var id = $scope.bucketrestriction.attr;
                     return id + '.txn_to_trigger';
+                }
+
+                $scope.openPicker = function(position){
+                    switch(position){
+                        case 0: {
+                            fromPicker.show();
+                            break;
+                        }
+                        case 1: {
+                            toPicker.show();
+                            break;
+                        }
+                    }
                 }
 
                 $scope.show = function (position) {

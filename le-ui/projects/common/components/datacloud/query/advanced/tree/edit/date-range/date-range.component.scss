@@ -12,7 +12,7 @@
             display: none;
         }
     }
-    input[type=text]:disabled {
+    input[type=text]:readonly {
         // border-width: 1px;
         max-width: 120px;
         border: 1px solid #eee;
