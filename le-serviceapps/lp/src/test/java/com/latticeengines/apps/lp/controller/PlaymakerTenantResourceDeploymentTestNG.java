@@ -47,7 +47,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     }
 
     @Test(groups = "deployment")
-    public void createTenantWithTenantNameByNonAdmin() {
+    public void createTenantWithTenantNameByNonAdmin() throws InterruptedException {
         PlaymakerTenant tenant = getTenant();
         PlaymakerTenant newTenant = tenantProxy.createTenant(tenant);
         oneTimePassword = newTenant.getTenantPassword();
@@ -56,7 +56,7 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
         Assert.assertNotNull(oneTimePassword);
         Assert.assertEquals(newTenant.getExternalId(), "externalId1");
         System.out.println("Tenant name=" + newTenant.getTenantName() + " password=" + newTenant.getTenantPassword());
-
+        Thread.sleep(500); // wait for replication lag
         newTenant = tenantProxy.getTenant(tenantName);
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getTenantName(), tenantName);
