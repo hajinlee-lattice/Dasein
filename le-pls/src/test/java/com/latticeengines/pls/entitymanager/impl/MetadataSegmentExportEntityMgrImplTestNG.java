@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
@@ -54,10 +55,11 @@ public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestN
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(),
-                createdSegment.getName());
-        Assert.assertNotNull(retrievedSegment);
-        log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
+        MetadataSegmentDTO segmentDTO = segmentProxy.getMetadataSegmentWithPidByName(
+                CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
+        Assert.assertNotNull(segmentDTO);
+        segment.setPid(segmentDTO.getPrimaryKey());
+        log.info(String.format("Created metadata segment with name %s", segmentDTO.getMetadataSegment().getName()));
 
     }
 
