@@ -1,32 +1,31 @@
-.range-container {
-    display: flex;
-    .date-picker-container {
-        width: 150px;
-        min-width: 150px;
-        padding: 0;
-        .date-trigger {
-            cursor: pointer !important;
+.date-picker-container {
+    flex: auto;
+    // border: 1px solid red;
+    width: 150px;
+    min-width: 150px;
+    padding: 0;
+    .date-trigger {
+        cursor: pointer !important;
+    }
+    input[type=date] {
+        &::-webkit-datetime-edit {
+            display: none;
         }
-        input[type=date] {
-            &::-webkit-datetime-edit {
-                display: none;
-            }
-        }
-        input[type=text]:disabled {
-            // border-width: 1px;
-            max-width: 120px;
-            border: 1px solid #eee;
-            border-top: 1px solid #ccc;
-            border-left: 1px solid #ccc;
-            height: 1.65em;
-            font-size: 12px;
-        }
-        input[type=text].invalid-field {
-            border-left-width: 5px;
-            border-left-color: #D52E57;
-            border-top-width: 1px;
-            border-top-color: #ccc;
-            padding-left: 3px;
-        }
+    }
+    input[type=text]:disabled {
+        // border-width: 1px;
+        max-width: 120px;
+        border: 1px solid #eee;
+        border-top: 1px solid #ccc;
+        border-left: 1px solid #ccc;
+        height: 1.65em;
+        font-size: 12px;
+    }
+    input[type=text].invalid-field {
+        border-left-width: 5px;
+        border-left-color: #D52E57;
+        border-top-width: 1px;
+        border-top-color: #ccc;
+        padding-left: 3px;
     }
 }

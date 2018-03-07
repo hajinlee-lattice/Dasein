@@ -2,9 +2,11 @@ div.transaction-container {
     margin-left: 87px;
     margin-top: -22px;
     margin-bottom: 0px;
+    // border: 1px solid yellow;
     .transaction-row {
         display: flex;
         justify-content: flex-start;
+        // border: 1px solid orange;
         .transaction-element-title {
             min-width: 100px;
             font-weight: bold;
@@ -14,6 +16,19 @@ div.transaction-container {
             select {
                 min-width: 120px;
             }
+        }
+    }
+    .group-container{
+        display: flex;
+        flex-direction: row;
+        // border: 1px solid aqua;
+    }
+    .range-container {
+        display: flex;
+        flex-direction: row;
+        // border: 1px solid green;
+        @media only screen and (max-width: 1000px) {
+            flex-direction: column;
         }
     }
 }
