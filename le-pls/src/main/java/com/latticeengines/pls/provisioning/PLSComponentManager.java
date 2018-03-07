@@ -24,7 +24,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
-import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
@@ -133,7 +132,7 @@ public class PLSComponentManager {
         try {
             if (products.contains(LatticeProduct.LPA3)) {
                 LOGGER.info("Bootstrapping " + camilleTenantId + " in LP.");
-                BootstrapRequest bootstrapRequest = new LPBootstrapRequest();
+                LPBootstrapRequest bootstrapRequest = new LPBootstrapRequest();
                 bootstrapRequest.setTenantId(PLSTenantId);
                 lpProxy.bootstrap(bootstrapRequest);
             }
@@ -144,7 +143,7 @@ public class PLSComponentManager {
         try {
             if (products.contains(LatticeProduct.CG)) {
                 LOGGER.info("Bootstrapping " + camilleTenantId + " in CDL.");
-                BootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
+                CDLBootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
                 bootstrapRequest.setTenantId(PLSTenantId);
                 cdlProxy.bootstrap(bootstrapRequest);
             }
@@ -192,7 +191,7 @@ public class PLSComponentManager {
         }
         try {
             LOGGER.info("Cleaning up " + tenantId + " from LP.");
-            BootstrapRequest bootstrapRequest = new LPBootstrapRequest();
+            LPBootstrapRequest bootstrapRequest = new LPBootstrapRequest();
             bootstrapRequest.setTenantId(tenantId);
             lpProxy.bootstrap(bootstrapRequest);
         } catch (Exception e) {
@@ -201,7 +200,7 @@ public class PLSComponentManager {
 
         try {
             LOGGER.info("Cleaning up " + tenantId + " from CDL.");
-            BootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
+            CDLBootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
             bootstrapRequest.setTenantId(tenantId);
             cdlProxy.bootstrap(bootstrapRequest);
         } catch (Exception e) {

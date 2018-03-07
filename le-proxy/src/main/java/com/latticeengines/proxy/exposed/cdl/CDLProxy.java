@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -224,7 +224,7 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         }
     }
 
-    public void bootstrap(BootstrapRequest bootstrapRequest) {
+    public void bootstrap(CDLBootstrapRequest bootstrapRequest) {
         String url = constructUrl("/tenant/");
         post("bootstrap cdl tenant", url, bootstrapRequest, ResponseDocument.class);
     }

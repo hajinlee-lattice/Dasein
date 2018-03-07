@@ -5,7 +5,7 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.ResponseDocument;
-import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
+import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 
@@ -16,7 +16,7 @@ public class LPProxy extends MicroserviceRestApiProxy {
         super("lp");
     }
 
-    public void bootstrap(BootstrapRequest bootstrapRequest) {
+    public void bootstrap(LPBootstrapRequest bootstrapRequest) {
         String url = constructUrl("/tenant/");
         post("bootstrap lp tenant", url, bootstrapRequest, ResponseDocument.class);
     }
