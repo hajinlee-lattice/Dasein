@@ -36,7 +36,7 @@ public class JobResource {
     @ApiOperation(value = "Get a job by id")
     public Job find(@PathVariable String jobId, //
             @RequestParam(value = "type", required = false) String type) {
-        log.info(String.format("Type of the job is ", type));
+        log.info(String.format("Type of the job is %s", type));
         return workflowJobService.find(jobId);
     }
 
