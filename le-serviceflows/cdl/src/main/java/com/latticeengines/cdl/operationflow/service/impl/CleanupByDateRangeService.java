@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -28,6 +29,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("cleanupByDateRangeService")
+@Lazy(value = false)
 public class CleanupByDateRangeService extends MaintenanceOperationService<CleanupByDateRangeConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(CleanupByDateRangeService.class);

@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
@@ -23,6 +24,7 @@ import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("cleanupAllService")
+@Lazy(value = false)
 public class CleanupAllService  extends MaintenanceOperationService<CleanupAllConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(CleanupAllService.class);
     @Autowired
