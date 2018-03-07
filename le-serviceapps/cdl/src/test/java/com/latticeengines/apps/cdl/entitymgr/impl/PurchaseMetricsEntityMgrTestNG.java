@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -53,7 +53,6 @@ public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Tenant tenant = new Tenant("dummy");
         tenant.setPid(-1L);
         MultiTenantContext.setTenant(tenant);
-        List<PurchaseMetrics> list = entityMgr.findAll();
         Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAll()));
     }
 

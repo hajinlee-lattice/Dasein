@@ -70,13 +70,20 @@ public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
     @JsonProperty("metrics")
     private InterfaceName metrics;
 
-    @JsonIgnore
     @JsonProperty("periods")
     @Column(name = "PERIODS", nullable = false, length = 1000)
     private String periods;
 
     @Transient
     private TimeFilter periodsConfig;
+
+    @Column(name = "IsEOL")
+    @JsonProperty("IsEOL")
+    private boolean isEOL;
+
+    @Column(name = "DEPRECATED")
+    @JsonProperty("deprecated")
+    private Date deprecated;
 
     @Override
     public Long getPid() {
@@ -141,4 +148,21 @@ public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
         this.periodsConfig = periodsConfig;
         this.periods = JsonUtils.serialize(periodsConfig);
     }
+
+    public boolean isEOL() {
+        return isEOL;
+    }
+
+    public void setEOL(boolean isEOL) {
+        this.isEOL = isEOL;
+    }
+
+    public Date getDeprecated() {
+        return deprecated;
+    }
+
+    public void setDeprecated(Date deprecated) {
+        this.deprecated = deprecated;
+    }
+
 }

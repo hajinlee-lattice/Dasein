@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -7,8 +9,13 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,11 +48,17 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
     public BaseDao<PurchaseMetrics> getDao() {
         return dao;
     }
-
+    
+    @SuppressWarnings("serial")
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<PurchaseMetrics> findAll() { // with filter on TenantID
-        return repository.findAll();
+    public List<PurchaseMetrics> findAll() {
+        return repository.findAll(new Specification<PurchaseMetrics>() {
+            @Override
+            public Predicate toPredicate(Root<PurchaseMetrics> metrics, CriteriaQuery<?> q, CriteriaBuilder cb) {
+                return cb.equal(metrics.get("isEOL"), false);
+            }
+        });
     }
 
     @Override
@@ -57,14 +70,15 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
     @Override
     @Transactional(transactionManager = "transactionManager")
     public List<PurchaseMetrics> save(List<PurchaseMetrics> metricsList) {
-        if (CollectionUtils.isEmpty(metricsList)) {
-            deleteAll();
-            return metricsList;
+        if (metricsList == null) {
+            metricsList = new ArrayList<>();
         }
 
         Tenant tenant = MultiTenantContext.getTenant();
         metricsList.forEach(metrics -> {
             metrics.setTenant(tenant);
+            metrics.setEOL(false);
+            metrics.setDeprecated(null);
         });
 
         List<PurchaseMetrics> existingList = findAll();
@@ -75,7 +89,6 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             return metricsList;
         }
 
-        // To maintain Ids for the purpose of auditing fields
         Map<InterfaceName, Long> existingIds = new HashMap<>();
         existingList.forEach(existing -> {
             existingIds.put(existing.getMetrics(), existing.getPid());
@@ -84,11 +97,13 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
         metricsList.forEach(metrics -> {
             selectedMetrics.add(metrics.getMetrics());
         });
-        existingList.forEach(existing -> {
+        for (PurchaseMetrics existing : existingList) {
             if (!selectedMetrics.contains(existing.getMetrics())) {
-                repository.delete(existing);
+                existing.setEOL(true);
+                existing.setDeprecated(new Date());
+                metricsList.add(existing);
             }
-        });
+        }
         metricsList.forEach(metrics -> {
             if (existingIds.containsKey(metrics.getMetrics())) {
                 metrics.setPid(existingIds.get(metrics.getMetrics()));
