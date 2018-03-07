@@ -74,13 +74,11 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_3,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_3,
-                BusinessEntity.Product, numProducts);
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_3);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
-                BusinessEntity.Product, numProducts);
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_2);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_2, //
@@ -92,7 +90,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.SortedContact, Long.valueOf(CONTACT_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.SortedContact, (long) CONTACT_IMPORT_SIZE_2);
         return expectedCnts;
     }
 

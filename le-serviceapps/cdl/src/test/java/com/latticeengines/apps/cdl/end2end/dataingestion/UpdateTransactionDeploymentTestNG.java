@@ -79,13 +79,11 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_4,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_4,
-                BusinessEntity.Product, numProducts);
+                BusinessEntity.Contact, SEGMENT_1_CONTACT_4);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_2,
-                BusinessEntity.Product, numProducts);
+                BusinessEntity.Contact, SEGMENT_2_CONTACT_2);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_2, //
@@ -99,7 +97,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, 80350L);
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction,
-                Long.valueOf(TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
+                (long) (TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
         return expectedCnts;
     }
 }
