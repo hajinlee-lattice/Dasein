@@ -68,8 +68,12 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         setupSecurityContext(mainTestTenant);
         String appId = "DUMMY_APP";
         OAuth2AccessToken accessToken1 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
+        long time1 = System.currentTimeMillis();
         OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
-        assertEquals(accessToken1.getValue(), accessToken2.getValue());
+        long time2 = System.currentTimeMillis();
+        if (time2 < time1 + 10 * 1000) {
+            assertEquals(accessToken1.getValue(), accessToken2.getValue());
+        }
         Thread.sleep(1000 * 10);
         OAuth2AccessToken accessToken3 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
         assertNotEquals(accessToken1.getValue(), accessToken3.getValue());
