@@ -63,7 +63,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
     private OAuth2RestTemplate oAuth2RestTemplate;
 
     @BeforeClass(groups = "deployment")
-    public void beforeClass() throws IOException {
+    public void beforeClass() throws IOException, InterruptedException {
         String featureFlag = LatticeFeatureFlag.LATTICE_INSIGHTS.getName();
         Map<String, Boolean> flags = new HashMap<>();
         flags.put(featureFlag, true);
@@ -76,7 +76,9 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         oAuthTenant.setJdbcDriver("");
         oAuthTenant.setJdbcUrl("");
         oauth2RestApiProxy.createOAuthTenant(oAuthTenant);
-        
+
+        Thread.sleep(500); // wait for replication lag
+
         String oneTimeKey = oauth2RestApiProxy.createAPIToken(tenant.getId());
 
         oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenant.getId(), oneTimeKey, CLIENT_ID);
