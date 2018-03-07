@@ -4,7 +4,6 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.net.ServerSocket;
 import java.security.KeyStore;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -19,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.util.SocketUtils;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -45,8 +45,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        ServerSocket s = new ServerSocket(0);
-        int port = 9084;
+        int port = SocketUtils.findAvailableTcpPort();
         log.info("Using local port " + port);
         server = getHttpServer(port);
         server.start();
