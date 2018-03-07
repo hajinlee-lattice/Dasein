@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.MatchDataCloudWorkflowConfiguration;
 
 public class MatchCdlWithoutAccountIdWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -8,7 +9,7 @@ public class MatchCdlWithoutAccountIdWorkflowConfiguration extends BaseCDLWorkfl
         private MatchCdlWithoutAccountIdWorkflowConfiguration configuration = new MatchCdlWithoutAccountIdWorkflowConfiguration();
 
         MatchCdlAccountConfiguration matchCdlAccountConfiguration = new MatchCdlAccountConfiguration();
-        MatchCdlLdcWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchCdlLdcWorkflowConfiguration.Builder();
+        MatchDataCloudWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public MatchCdlWithoutAccountIdWorkflowConfiguration build() {
             configuration.add(matchCdlAccountConfiguration);
