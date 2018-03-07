@@ -10,13 +10,17 @@ public class ActionContext {
 
     private static ThreadLocal<Action> action = new ThreadLocal<Action>();
 
-    public static void setAction(Action action) {
-        ActionContext.action.set(action);
-        log.info(String.format("Action %s set", action));
+    public static void setAction(Action actionVal) {
+        action.set(actionVal);
+        log.info(String.format("Action %s set", actionVal));
     }
 
     public static Action getAction() {
-        return ActionContext.action.get();
+        return action.get();
+    }
+
+    public static void remove() {
+        action.remove();
     }
 
 }

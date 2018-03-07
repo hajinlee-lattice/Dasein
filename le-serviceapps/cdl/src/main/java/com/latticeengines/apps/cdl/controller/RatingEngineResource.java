@@ -120,8 +120,6 @@ public class RatingEngineResource {
         RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine);
         RatingEngineAndActionDTO ratingEngineAndActionDTO = new RatingEngineAndActionDTO(updatedRatingEngine,
                 ActionContext.getAction());
-        // reset context
-        ActionContext.setAction(null);
         return ratingEngineAndActionDTO;
     }
 
@@ -165,8 +163,6 @@ public class RatingEngineResource {
         RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel, ratingEngineId, ratingModelId);
         RatingModelAndActionDTO ratingModelAndAction = new RatingModelAndActionDTO(updatedRatingModel,
                 ActionContext.getAction());
-        // reset context
-        ActionContext.setAction(null);
         return ratingModelAndAction;
     }
 
