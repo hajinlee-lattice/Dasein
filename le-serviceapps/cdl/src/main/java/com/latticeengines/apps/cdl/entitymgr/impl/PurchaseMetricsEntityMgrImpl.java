@@ -48,11 +48,11 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
     public BaseDao<PurchaseMetrics> getDao() {
         return dao;
     }
-    
+
     @SuppressWarnings("serial")
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<PurchaseMetrics> findAll() {
+    public List<PurchaseMetrics> findAll() { // filter by TenantID
         return repository.findAll(new Specification<PurchaseMetrics>() {
             @Override
             public Predicate toPredicate(Root<PurchaseMetrics> metrics, CriteriaQuery<?> q, CriteriaBuilder cb) {
@@ -63,7 +63,7 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
 
     @Override
     @Transactional(transactionManager = "transactionManager")
-    public void deleteAll() { // with filter on TenantID
+    public void deleteAll() { // filter by TenantID
         repository.deleteAll();
     }
 
