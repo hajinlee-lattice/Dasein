@@ -22,7 +22,6 @@ import com.latticeengines.domain.exposed.auth.GlobalAuthAuthentication;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTicket;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUser;
-import com.latticeengines.domain.exposed.auth.GlobalAuthUserConfigSummary;
 import com.latticeengines.domain.exposed.auth.GlobalAuthUserTenantRight;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -52,7 +51,11 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
     public synchronized Ticket authenticateUser(String user, String password) {
         try {
             log.info(String.format("Authenticating user %s against Global Auth.", user));
-            return globalAuthAuthenticateUser(user, password);
+            Ticket ticket = globalAuthAuthenticateUser(user, password);
+            if (ticket != null) {
+                Thread.sleep(500); // wait for replication lag
+            }
+            return ticket;
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18001, e, new String[] { user });
         }
