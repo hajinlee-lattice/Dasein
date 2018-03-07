@@ -17,6 +17,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
+/**
+ * Source is purged version by version
+ */
 public abstract class ConfigurablePurger implements SourcePurger {
 
     @Autowired

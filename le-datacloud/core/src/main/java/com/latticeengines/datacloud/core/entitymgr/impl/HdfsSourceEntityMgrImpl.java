@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.avro.Schema;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
@@ -312,14 +313,18 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
         }
         List<String> versions = new ArrayList<>();
         try {
-            for (String dir : HdfsUtils.getFilesForDir(yarnConfiguration, basePath)) {
+            List<String> dirs = HdfsUtils.getFilesForDir(yarnConfiguration, basePath);
+            if (CollectionUtils.isEmpty(dirs)) {
+                return versions;
+            }
+            for (String dir : dirs) {
                 if (HdfsUtils.isDirectory(yarnConfiguration, dir)) {
                     String version = dir.substring(dir.lastIndexOf(HDFS_PATH_SEPARATOR) + 1);
                     versions.add(version);
                 }
             }
         } catch (Exception e) {
-            throw new RuntimeException("Failed to get all versions for " + source.getSourceName());
+            throw new RuntimeException("Failed to get all versions for " + source.getSourceName(), e);
         }
         return versions;
     }

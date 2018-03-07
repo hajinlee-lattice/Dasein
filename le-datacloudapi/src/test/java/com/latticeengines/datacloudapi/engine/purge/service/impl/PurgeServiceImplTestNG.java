@@ -31,7 +31,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     public final String POD_ID = this.getClass().getSimpleName();
 
-    @SuppressWarnings("unused")
     private static Logger log = LoggerFactory.getLogger(PurgeServiceImplTestNG.class);
 
     @Autowired
@@ -69,28 +68,28 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testScan() throws IOException {
         List<PurgeSource> toPurge = purgeService.scan(POD_ID, false);
-        toPurge.forEach(purgeSrc -> System.out.println(JsonUtils.serialize(purgeSrc)));
         validatePurgeSourcesNonDebugMode(toPurge);
 
         toPurge = purgeService.scan(POD_ID, true);
-        toPurge.forEach(purgeSrc -> System.out.println(JsonUtils.serialize(purgeSrc)));
         validatePurgeSourcesDebugMode(toPurge);
     }
 
     private void preparePipelineTempSource() throws IOException {
         String srcName = "Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1";
-        String hdfsPath = hdfsPathBuilder.constructSourceBaseDir().append(srcName).toString();
+        String hdfsPath = hdfsPathBuilder.constructSnapshotRootDir(srcName).toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
+        List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
         pipelineTempSourceToPurge = new PurgeSource(srcName, hdfsPaths, null, false);
     }
 
     private void prepareOperationalSourceToPurge() throws IOException {
         String srcName = "LDCDEV_SuspectRecords";
-        String hdfsPath = hdfsPathBuilder.constructSourceBaseDir().append(srcName).toString();
+        String hdfsPath = hdfsPathBuilder.constructSnapshotDir(srcName, "2018-02-25_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
-        List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-        operationalSourceToPurge = new PurgeSource(srcName, hdfsPaths, null, false);
+        List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
+        String hiveTable = hiveTableService.tableName(srcName, "2018-02-25_00-00-00_UTC");
+        List<String> hiveTables = Collections.singletonList(hiveTable);
+        operationalSourceToPurge = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
     }
 
     private void prepareIngestionToPurge() throws IOException {
@@ -162,8 +161,10 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void validatePurgeSourcesNonDebugMode(List<PurgeSource> toPurge) {
         Assert.assertEquals(2, toPurge.size());
         toPurge.forEach(purgeSource -> {
+            log.info("Validating " + JsonUtils.serialize(purgeSource));
             PurgeSource expected = validationMapNonDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
+            log.info("Expecting " + JsonUtils.serialize(expected));
             Assert.assertTrue(isValidatedList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
             Assert.assertTrue(isValidatedList(expected.getHiveTables(), purgeSource.getHiveTables()));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
@@ -173,8 +174,10 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void validatePurgeSourcesDebugMode(List<PurgeSource> toPurge) {
         Assert.assertEquals(4, toPurge.size());
         toPurge.forEach(purgeSource -> {
+            log.info("Validating " + JsonUtils.serialize(purgeSource));
             PurgeSource expected = validationMapDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
+            log.info("Expecting " + JsonUtils.serialize(expected));
             Assert.assertTrue(isValidatedList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
             Assert.assertTrue(isValidatedList(expected.getHiveTables(), purgeSource.getHiveTables()));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());

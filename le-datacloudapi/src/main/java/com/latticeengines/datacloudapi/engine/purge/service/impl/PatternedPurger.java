@@ -5,15 +5,22 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
+import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
+/**
+ * The entire source will be purged
+ */
 public abstract class PatternedPurger implements SourcePurger {
 
     @Autowired
@@ -21,6 +28,12 @@ public abstract class PatternedPurger implements SourcePurger {
 
     @Autowired
     protected Configuration yarnConfiguration;
+
+    @Autowired
+    HiveTableService hiveTableService;
+
+    @Autowired
+    HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
     long DAY_IN_MS = 1000 * 60 * 60 * 24;
 
@@ -80,7 +93,15 @@ public abstract class PatternedPurger implements SourcePurger {
         srcNames.forEach(srcName -> {
             String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, null, isToBak());
+            List<String> versions = hdfsSourceEntityMgr.getVersions(new GeneralSource(srcName));
+            List<String> hiveTables = null;
+            if (!CollectionUtils.isEmpty(versions)) {
+                hiveTables = new ArrayList<>();
+                for (String version : versions) {
+                    hiveTables.add(hiveTableService.tableName(srcName, version));
+                }
+            }
+            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, isToBak());
             toPurge.add(purgeSource);
         });
         return toPurge;
