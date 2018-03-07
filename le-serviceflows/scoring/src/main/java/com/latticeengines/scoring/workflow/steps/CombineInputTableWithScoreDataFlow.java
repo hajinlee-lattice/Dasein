@@ -84,7 +84,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         Map<String, PredictionType> predictionTypeMap = new HashMap<>();
         containers.forEach(container -> {
             CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
-            String modelGuid = ((AIModel) container.getModel()).getModelGuid();
+            String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
             predictionTypeMap.put(modelGuid, singleModelParams.getPredictionType());
             bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
             scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());

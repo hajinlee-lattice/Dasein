@@ -81,7 +81,7 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             Map<String, String> scoreFieldMap = new HashMap<>();
             containers.forEach(container -> {
                 AIModel model = (AIModel) container.getModel();
-                String modelGuid = model.getModelGuid();
+                String modelGuid = model.getModelSummaryId();
                 PredictionType predictionType = model.getPredictionType();
                 if (PredictionType.EXPECTED_VALUE.equals(predictionType)) {
                     scoreFieldMap.put(modelGuid, InterfaceName.ExpectedRevenue.name());

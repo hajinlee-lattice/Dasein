@@ -83,7 +83,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
         Map<String, String> modelGuidToEngineIdMap = new HashMap<>();
         containers.forEach(container -> {
             AIModel aiModel = (AIModel) container.getModel();
-            String modelGuid = aiModel.getModelGuid();
+            String modelGuid = aiModel.getModelSummaryId();
             String engineId = container.getEngineSummary().getId();
             modelGuidToEngineIdMap.put(modelGuid, engineId);
         });

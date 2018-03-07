@@ -25,13 +25,13 @@ except ImportError:
     # Python 2 fallback: https://gist.github.com/carymrobbins/8940382
     from functools import partial
 
+
     class partialmethod(partial):
         def __get__(self, instance, owner):
             if instance is None:
                 return self
 
             return partial(self.func, instance, *(self.args or ()), **(self.keywords or {}))
-
 
 tomcatPid = None
 tomcatProc = None
@@ -74,7 +74,7 @@ PRESETS = {
         'modules': ['dataflowapi', 'eai', 'metadata', 'modeling', 'scoring', 'workflowapi', 'lp', 'quartz', 'sqoop']
     },
     'cdl': {
-        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml'],
+        'apps': ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'matchapi', 'ulysses', 'saml', 'scoringapi'],
         'modules': ['dataflowapi', 'eai', 'metadata', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'lp',
                     'quartz', 'cdl', 'dante',
                     'objectapi', 'sqoop']
@@ -187,6 +187,7 @@ def deployMsModule(module):
     os.rename(webappDir + ".copy", webappDir)
     logger.info('deployed %s to %s' % (moduleWar, webappDir))
 
+
 def deployMgrApp(app, wait=False):
     webappName = 'oauth' if (app == 'oauth2') else app
     webappDir = os.path.join(CATALINA_HOME, 'webapps', webappName)
@@ -295,6 +296,7 @@ def swap_cli(args):
 
     printWars()
 
+
 def run_cli(args):
     runTc()
     waitTc()
@@ -312,13 +314,14 @@ def parseCliArgs():
 
     parser1 = commands.add_parser("deploy")
     parser1.add_argument('-a', dest='apps', type=str,
-                        help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(LE_APPS))
+                         help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(
+                             LE_APPS))
     parser1.add_argument('-m', dest='modules', type=str,
-                        help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
-                            MS_MODULES))
+                         help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
+                                 MS_MODULES))
     parser1.add_argument('-p', dest='preset', type=str, default='lp',
-                        help='preset apps/modules, choose from [' + ', '.join(
-                            PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
+                         help='preset apps/modules, choose from [' + ', '.join(
+                                 PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
     parser1.set_defaults(func=deploy_cli)
 
     parser1 = commands.add_parser("run")
@@ -326,13 +329,14 @@ def parseCliArgs():
 
     parser1 = commands.add_parser("swap")
     parser1.add_argument('-a', dest='apps', type=str,
-                         help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(LE_APPS))
+                         help='comma separated list of apps to be deployed. Available choices are ' + ', '.join(
+                             LE_APPS))
     parser1.add_argument('-m', dest='modules', type=str,
                          help='comma separated list of microservice modules to be deployed. core is implicitly included. Available choices are ' + ', '.join(
-                             MS_MODULES))
+                                 MS_MODULES))
     parser1.add_argument('-p', dest='preset', type=str, default='lp',
                          help='preset apps/modules, choose from [' + ', '.join(
-                             PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
+                                 PRESETS) + '], default is lp. If -a or -m is specified, this opt is ignored.')
     parser1.set_defaults(func=swap_cli)
 
     args = parser.parse_args()
@@ -364,6 +368,7 @@ def killTc():
     for childPid in childPids:
         os.kill(childPid.pid, signal.SIGKILL)
     os.kill(tomcatPid, signal.SIGKILL)
+
 
 if __name__ == '__main__':
     fmt = '%(asctime)s [%(threadName)s] %(levelname)s %(lineno)d: - %(message)s'

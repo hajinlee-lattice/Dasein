@@ -30,10 +30,30 @@ public class TimeFilter {
     private String period;
 
     public static TimeFilter ever() {
+        return ever(Period.Month);
+    }
+
+    public static TimeFilter ever(Period period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.EVER;
-        filter.period = Period.Month.name();
+        filter.period = period != null ? period.name() : Period.Month.name();
         filter.values = Collections.singletonList(-1);
+        return filter;
+    }
+
+    public static TimeFilter priorOnly(int val, Period period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.PRIOR_ONLY;
+        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.values = Collections.singletonList(val);
+        return filter;
+    }
+
+    public static TimeFilter within(int val, Period period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.WITHIN;
+        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.values = Collections.singletonList(val);
         return filter;
     }
 

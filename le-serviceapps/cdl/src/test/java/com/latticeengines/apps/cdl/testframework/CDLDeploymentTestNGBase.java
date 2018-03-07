@@ -6,6 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -18,6 +20,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,8 +101,19 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Value("${camille.zk.pod.id}")
     private String podId;
 
-    protected void setupTestEnvironment() {
-        testBed.bootstrapForProduct(LatticeProduct.CG);
+    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+        setupTestEnvironment(null);
+    }
+
+    protected void setupTestEnvironment(String existingTenant)
+            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+
+        if (!StringUtils.isEmpty(existingTenant)) {
+            testBed.useExistingTenantAsMain(existingTenant);
+        } else {
+            testBed.bootstrapForProduct(LatticeProduct.CG);
+
+        }
         mainTestTenant = testBed.getMainTestTenant();
         mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
@@ -146,7 +160,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected JobStatus waitForWorkflowStatus(String applicationId, boolean running) {
         int retryOnException = 4;
-        Job job = null;
+        Job job;
         while (true) {
             try {
                 job = workflowProxy.getWorkflowJobFromApplicationId(applicationId,

@@ -5,6 +5,8 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -45,7 +47,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     protected DataFeedTask dataFeedTask;
 
     @BeforeClass(groups = "deployment")
-    public void setup() {
+    public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         setupTestEnvironment();
 
         createTable(TABLE_NAME);
@@ -104,10 +106,11 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     @Test(groups = "deployment", dependsOnMethods = "testUpdateDataFeedTask", enabled = false)
     public void testGetDataFeedTaskWithSameEntity() throws IOException {
-        List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(mainCustomerSpace, DATA_FEED_TASK_ENTITY);
+        List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(mainCustomerSpace,
+                DATA_FEED_TASK_ENTITY);
 
         assertNotNull(dfTasks);
-        assertEquals(dfTasks.size(),1);
+        assertEquals(dfTasks.size(), 1);
     }
 
     @Test(groups = "deployment", dependsOnMethods = "testGetDataFeedTaskWithSameEntity", enabled = false)
@@ -118,8 +121,8 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Extract extract = createExtract("Extract_Name");
         dataFeedProxy.registerExtract(mainCustomerSpace, dataFeedTask.getUniqueId(), TABLE_NAME, extract);
 
-        List<Extract> extractsPendingInQueue = dataFeedProxy.getExtractsPendingInQueue(mainCustomerSpace, DATA_FEED_TASK_SOURCE,
-                DATA_FEED_TASK_FEED_TYPE, DATA_FEED_TASK_ENTITY);
+        List<Extract> extractsPendingInQueue = dataFeedProxy.getExtractsPendingInQueue(mainCustomerSpace,
+                DATA_FEED_TASK_SOURCE, DATA_FEED_TASK_FEED_TYPE, DATA_FEED_TASK_ENTITY);
 
         assertNotNull(extractsPendingInQueue);
         assertTrue(extractsPendingInQueue.size() == 1);

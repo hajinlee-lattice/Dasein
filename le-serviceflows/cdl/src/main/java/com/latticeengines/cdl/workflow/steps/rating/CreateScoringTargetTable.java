@@ -34,7 +34,7 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
         String modelIds = StringUtils.join(containers.stream().map(container -> {
             AIModel aiModel = (AIModel) container.getModel();
-            String modelSummaryId = aiModel.getModelGuid();
+            String modelSummaryId = aiModel.getModelSummaryId();
             if (StringUtils.isBlank(modelSummaryId)) {
                 throw new RuntimeException("Found an empty model summary id in AI model: " + JsonUtils.serialize(aiModel));
             } else {

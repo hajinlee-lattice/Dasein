@@ -78,9 +78,9 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 isValid = isValidAIModel(aiModel);
                 if (!isValid) {
                     log.warn("AI rating model " + aiModel.getId() + " is not ready for scoring.");
-                } else if (StringUtils.isBlank(aiModel.getModelGuid())) {
+                } else if (StringUtils.isBlank(aiModel.getModelSummaryId())) {
                     ModelSummary modelSummary = aiModel.getModelSummary();
-                    aiModel.setModelGuid(modelSummary.getId());
+                    aiModel.setModelSummaryId(modelSummary.getId());
                     aiModel.setModelSummary(null);
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
@@ -101,7 +101,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         if (model.getModelSummary() == null) {
             log.warn("AI model " + model.getId() + " has null model summary.");
             valid = false;
-        } else if (StringUtils.isNotBlank(model.getModelGuid())) {
+        } else if (StringUtils.isNotBlank(model.getModelSummaryId())) {
             valid = true;
         } else if (model.getModelSummary() == null  || StringUtils.isBlank(model.getModelSummary().getId())) {
             log.warn("AI model " + model.getId() + " has blank model guid.");

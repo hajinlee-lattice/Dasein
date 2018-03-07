@@ -96,8 +96,8 @@ public class AIModel extends RatingModel {
     private String modelingConfigFilters;
 
     @Transient
-    @JsonProperty("modelGuid")
-    private String modelGuid;
+    @JsonProperty("modelSummaryId")
+    private String modelSummaryId;
 
     @JsonProperty("targetProducts")
     public List<String> getTargetProducts() {
@@ -205,11 +205,11 @@ public class AIModel extends RatingModel {
         this.modelSummary = modelSummary;
     }
 
-    public String getModelGuid() {
-        return modelGuid;
+    public String getModelSummaryId() {
+        return modelSummaryId;
     }
 
-    public void setModelGuid(String modelGuid) {
-        this.modelGuid = modelGuid;
+    public void setModelSummaryId(String modelSummaryId) {
+        this.modelSummaryId = modelSummaryId;
     }
 }

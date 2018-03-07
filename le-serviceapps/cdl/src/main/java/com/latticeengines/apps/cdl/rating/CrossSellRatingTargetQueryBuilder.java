@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
@@ -41,12 +42,18 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
             if (config == null) {
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
-            txn = new Bucket.Transaction(productIds, priorOnly(config.getValue()), null, null, false);
+            BucketRestriction priorOnly = new BucketRestriction(attrLookup,
+                    Bucket.txnBkt(new Bucket.Transaction(productIds,
+                            TimeFilter.priorOnly(config.getValue(), TimeFilter.Period.Month), null, null, false)));
+
+            BucketRestriction notWithin = new BucketRestriction(attrLookup,
+                    Bucket.txnBkt(new Bucket.Transaction(productIds,
+                            TimeFilter.within(config.getValue(), TimeFilter.Period.Month), null, null, true)));
+            productTxnRestriction = Restriction.builder().and(priorOnly, notWithin).build();
         } else {
             txn = new Bucket.Transaction(productIds, TimeFilter.ever(), null, null, true);
+            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
         }
-        Bucket txnBucket = Bucket.txnBkt(txn);
-        productTxnRestriction = new BucketRestriction(attrLookup, txnBucket);
     }
 
     @Override

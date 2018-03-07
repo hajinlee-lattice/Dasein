@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.rating;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -29,7 +28,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected AIModel aiModel;
     protected MetadataSegment baseSegment;
     protected String productIds;
-    protected BucketRestriction productTxnRestriction;
+    protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
 
     protected abstract void handleCustomSegment();
@@ -104,11 +103,5 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         default:
             throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
         }
-    }
-
-    protected TimeFilter priorOnly(int value) {
-        TimeFilter filter = new TimeFilter(ComparisonType.PRIOR_ONLY, Collections.singletonList(value));
-        filter.setPeriod(TimeFilter.Period.Month.name());
-        return filter;
     }
 }
