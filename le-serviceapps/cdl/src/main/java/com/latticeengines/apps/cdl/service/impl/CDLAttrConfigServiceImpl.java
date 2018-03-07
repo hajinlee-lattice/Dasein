@@ -13,7 +13,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Service("cdlAttrConfigService")
 public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implements AttrConfigService {

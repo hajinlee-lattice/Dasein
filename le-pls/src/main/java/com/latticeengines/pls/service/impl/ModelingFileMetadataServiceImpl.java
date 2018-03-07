@@ -47,7 +47,7 @@ import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 

@@ -21,8 +21,8 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 

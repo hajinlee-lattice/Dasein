@@ -10,7 +10,7 @@ import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ApplicationTenantService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 
 @Service("cdlTenantService")

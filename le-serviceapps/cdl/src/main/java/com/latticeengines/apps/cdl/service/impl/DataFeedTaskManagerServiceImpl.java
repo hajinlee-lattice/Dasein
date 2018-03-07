@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaReposito
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 

@@ -28,7 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {

@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 

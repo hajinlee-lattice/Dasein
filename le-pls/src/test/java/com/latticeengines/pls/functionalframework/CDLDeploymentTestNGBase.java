@@ -2,11 +2,7 @@ package com.latticeengines.pls.functionalframework;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.domain.exposed.admin.LatticeProduct;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionType;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 public abstract class CDLDeploymentTestNGBase extends PlsDeploymentTestNGBase {
 

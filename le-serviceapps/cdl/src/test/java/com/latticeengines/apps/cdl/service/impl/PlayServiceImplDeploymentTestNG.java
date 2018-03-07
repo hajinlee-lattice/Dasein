@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 

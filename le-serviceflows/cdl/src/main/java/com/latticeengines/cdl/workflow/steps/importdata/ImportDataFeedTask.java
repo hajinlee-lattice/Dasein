@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("importDataFeedTask")

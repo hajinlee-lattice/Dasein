@@ -65,7 +65,11 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     @JsonProperty("display_name")
     private String displayName;
 
-    @Column(name = "LENGTH", nullable = true)
+    @Column(name = "SECONDARY_DISPLAY_NAME", length = 1000)
+    @JsonProperty("secondary_display_name")
+    private String secondaryDisplayName;
+
+    @Column(name = "LENGTH")
     @JsonProperty("length")
     private Integer length;
 
@@ -159,6 +163,14 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getSecondaryDisplayName() {
+        return secondaryDisplayName;
+    }
+
+    public void setSecondaryDisplayName(String secondaryDisplayName) {
+        this.secondaryDisplayName = secondaryDisplayName;
     }
 
     public Integer getLength() {
@@ -1084,6 +1096,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
     public ColumnMetadata getColumnMetadata() {
         ColumnMetadata metadata = new ColumnMetadata();
         metadata.setDisplayName(getDisplayName());
+        metadata.setSecondaryDisplayName(getSecondaryDisplayName());
         metadata.setColumnId(getName());
         metadata.setDescription(getDescription());
         metadata.setLogicalDataType(getLogicalDataType());

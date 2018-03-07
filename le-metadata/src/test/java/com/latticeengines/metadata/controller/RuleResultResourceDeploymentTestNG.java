@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.metadata.functionalframework.MetadataDeploymentTestNGBase;
 
 public class RuleResultResourceDeploymentTestNG extends MetadataDeploymentTestNGBase {
-    private static final Logger log = LoggerFactory.getLogger(DataFeedTaskResourceDeploymentTestNG.class);
+    private static final Logger log = LoggerFactory.getLogger(RuleResultResourceDeploymentTestNG.class);
 
     private static final String MODEL_ID = "ModelId_Test";
 

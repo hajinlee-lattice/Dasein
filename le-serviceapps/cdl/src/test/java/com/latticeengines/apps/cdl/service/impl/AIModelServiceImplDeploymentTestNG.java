@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 

@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 

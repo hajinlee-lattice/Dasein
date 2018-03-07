@@ -41,7 +41,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component(ProcessTransactionDiff.BEAN_NAME)
 public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransactionStepConfiguration> {

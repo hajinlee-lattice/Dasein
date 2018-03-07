@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -108,8 +109,8 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     public void testGetProblematicActionWithoutTrackingId() {
         when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
                 .thenReturn(generateActionWithoutTrackingId());
-        List<String> workflowIdStr = Arrays.asList(RUNNING_ACTION_1_TRACKING_ID, RUNNING_ACTION_2_TRACKING_ID,
-                COMPLETE_ACTION_1_TRACKING_ID, COMPLETE_ACTION_2_TRACKING_ID).stream().map(id -> id.toString())
+        List<String> workflowIdStr = Stream.of(RUNNING_ACTION_1_TRACKING_ID, RUNNING_ACTION_2_TRACKING_ID,
+                COMPLETE_ACTION_1_TRACKING_ID, COMPLETE_ACTION_2_TRACKING_ID).map(Object::toString)
                 .collect(Collectors.toList());
         when(workflowProxy.getWorkflowExecutionsByJobIds(workflowIdStr)).thenReturn(generateJobs());
         Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
@@ -149,8 +150,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     }
 
     private List<Action> generateFullActions() {
-        List<Action> actions = new ArrayList<>();
-        actions.addAll(generateMetadataChangeActions());
+        List<Action> actions = new ArrayList<>(generateMetadataChangeActions());
         Action runningAction1 = new Action();
         runningAction1.setPid(RUNNING_ACTION_1_PID);
         runningAction1.setTrackingId(RUNNING_ACTION_1_TRACKING_ID);
@@ -192,8 +192,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     }
 
     private List<Action> generateActionWithoutTrackingId() {
-        List<Action> actions = new ArrayList<>();
-        actions.addAll(generateFullActions());
+        List<Action> actions = new ArrayList<>(generateFullActions());
         Action action = new Action();
         action.setPid(PROBLEMATIC_ACTION_NO_TRACKING_ID_PID);
         action.setType(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);

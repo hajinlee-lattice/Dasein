@@ -23,9 +23,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.apps.cdl.service.MetadataSegmentService;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -67,7 +67,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     private RatingEngineService ratingEngineService;
 
     @Autowired
-    private MetadataSegmentService metadataSegmentService;
+    private SegmentService segmentService;
 
     @Autowired
     private EntityProxy entityProxy;
@@ -252,9 +252,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             uniqueSegmentIds.stream() //
                     .forEach(segmentId -> {
                         try {
-                            MetadataSegment segment = //
-                                    metadataSegmentService.getSegmentByName( //
-                                            segmentId, false);
+                            MetadataSegment segment = segmentService.findByName(segmentId);
                             segmentMap.put(segmentId, segment);
                         } catch (Exception ex) {
                             logInErrorMap(errorMap, segmentId, "Could not load segment");
@@ -313,8 +311,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            MetadataSegment segment = //
-                    metadataSegmentService.getSegmentByName(segmentId, false);
+            MetadataSegment segment = segmentService.findByName(segmentId);
 
             if (segment == null) {
                 logInErrorMap(errorMap, segmentId, "Invalid segment");
@@ -443,9 +440,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         try {
             MultiTenantContext.setTenant(tenent);
 
-            MetadataSegment segment = //
-                    metadataSegmentService.getSegmentByName( //
-                            segmentIdModelRulesPair.getSegmentId(), false);
+            MetadataSegment segment = segmentService.findByName(segmentIdModelRulesPair.getSegmentId());
             FrontEndQuery accountFrontEndQuery = //
                     createEntityFronEndQuery(BusinessEntity.Account, //
                             isRestrictNotNullSalesforceId, segment);
@@ -675,11 +670,6 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     @VisibleForTesting
     void setRatingEngineService(RatingEngineService ratingEngineService) {
         this.ratingEngineService = ratingEngineService;
-    }
-
-    @VisibleForTesting
-    void setMetadataSegmentService(MetadataSegmentService metadataSegmentService) {
-        this.metadataSegmentService = metadataSegmentService;
     }
 
     @VisibleForTesting

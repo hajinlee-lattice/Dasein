@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.Transform
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 

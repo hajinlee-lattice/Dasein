@@ -48,7 +48,7 @@ public enum BusinessEntity implements GraphNode {
     public static Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
 
-    public static Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact, Product);
+    public static Set<BusinessEntity> COUNT_ENTITIES = ImmutableSet.of(Account, Contact);
 
     public static Set<BusinessEntity> TRANSACTION_ENTITIES = ImmutableSet.of(PurchaseHistory, Transaction,
             PeriodTransaction);

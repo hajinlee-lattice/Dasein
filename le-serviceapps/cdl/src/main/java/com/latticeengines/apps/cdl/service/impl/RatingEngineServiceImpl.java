@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;

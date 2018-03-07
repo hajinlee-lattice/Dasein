@@ -17,7 +17,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Service("cdlNamespaceService")
 public class CDLNamespaceServiceImpl implements CDLNamespaceService {

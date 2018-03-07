@@ -35,7 +35,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component("playService")
 public class PlayServiceImpl implements PlayService {

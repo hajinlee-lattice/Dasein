@@ -25,7 +25,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("cleanupByDateRangeService")
 public class CleanupByDateRangeService extends MaintenanceOperationService<CleanupByDateRangeConfiguration> {

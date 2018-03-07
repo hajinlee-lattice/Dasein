@@ -20,6 +20,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
@@ -30,11 +31,10 @@ import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
 public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -47,7 +47,7 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
     private static Play play;
 
     @Autowired
-    private SegmentService segmentService;
+    private SegmentProxy segmentProxy;
 
     private RatingEngine ratingEngine1;
     private MetadataSegment segment;
@@ -65,10 +65,10 @@ public class TalkingPointsDeploymentTestNG extends PlsDeploymentTestNGBase {
         segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
+        MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService
-                .findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy
+                .getMetadataSegmentByName(CustomerSpace.parse(mainTestTenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
 
         ratingEngine1 = new RatingEngine();

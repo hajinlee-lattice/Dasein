@@ -10,6 +10,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -17,11 +18,10 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport.Status;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
 
@@ -36,7 +36,7 @@ public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestN
     private TenantService tenantService;
 
     @Autowired
-    private SegmentService segmentService;
+    private SegmentProxy segmentProxy;
 
     private MetadataSegment segment;
 
@@ -52,9 +52,9 @@ public class MetadataSegmentExportEntityMgrImplTestNG extends PlsFunctionalTestN
         segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
+        MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(),
                 createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));

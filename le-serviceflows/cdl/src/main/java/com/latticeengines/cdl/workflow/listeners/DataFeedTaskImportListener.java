@@ -27,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;

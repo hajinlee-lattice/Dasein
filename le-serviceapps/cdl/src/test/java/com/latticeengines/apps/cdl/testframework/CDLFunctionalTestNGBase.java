@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.testframework;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -16,11 +17,18 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.Listeners;
 
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -28,7 +36,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
+import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
@@ -56,15 +64,28 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     private static final String COMPOSITE_RISK_SCORE = "COMPOSITE_RISK_SCORE";
 
     @Resource(name = "globalAuthFunctionalTestBed")
-    private GlobalAuthFunctionalTestBed testBed;
+    protected GlobalAuthFunctionalTestBed testBed;
 
     @Inject
     private SegmentService segmentService;
+
+    @Inject
+    protected TenantEntityMgr tenantEntityMgr;
+
+    @Inject
+    protected TableEntityMgr tableEntityMgr;
+
+    @Inject
+    protected DataCollectionEntityMgr dataCollectionEntityMgr;
 
     protected Tenant mainTestTenant;
     protected MetadataSegment testSegment;
     protected List<String> accountAttributes;
     protected List<String> contactAttributes;
+    protected String mainCustomerSpace;
+
+    protected DataCollection dataCollection;
+    protected String collectionName;
 
     protected void setupTestEnvironmentWithDummySegment() {
         accountAttributes = Arrays.asList(STATE, BUSINESS_TECHNOLOGIES_ANALYTICS, BUSINESS_TECHNOLOGIES_SSL,
@@ -74,6 +95,11 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         setupTestEnvironment();
         testSegment = createMetadataSegment(SEGMENT_NAME);
         log.info(String.format("Created metadata segment with name %s", testSegment.getName()));
+    }
+
+    protected void setupTestEnvironmentWithDataCollection() {
+        setupTestEnvironment();
+        createDataCollection();
     }
 
     protected MetadataSegment createMetadataSegment(String segmentName) {
@@ -99,9 +125,28 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected void setupTestEnvironment() {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
-        mainTestTenant = testBed.getMainTestTenant();
+        mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
+    }
+
+    private void createDataCollection() {
+        MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(mainTestTenant.getId()));
+        dataCollection = dataCollectionEntityMgr.findOrCreateDefaultCollection();
+        collectionName = dataCollection.getName();
+    }
+
+    protected void addTableToCollection(Table table, TableRoleInCollection role) {
+        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
+        if (tableEntityMgr.findByName(table.getName()) == null) {
+            tableEntityMgr.create(table);
+        }
+        dataCollectionEntityMgr.upsertTableToCollection(collectionName, table.getName(), role, version);
+    }
+
+    protected List<Table> getTablesInCollection() {
+        DataCollection.Version version = dataCollectionEntityMgr.findActiveVersion();
+        return dataCollectionEntityMgr.findTablesOfRole(collectionName, null, version);
     }
 
     private Restriction createAccountRestriction() {
@@ -155,11 +200,20 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
         Bucket bucket = null;
 
         if (comparisonType == ComparisonType.EQUAL) {
-            bucket = Bucket.valueBkt(comparisonType, Arrays.asList(val));
+            bucket = Bucket.valueBkt(comparisonType, Collections.singletonList(val));
         } else if (comparisonType == ComparisonType.LESS_THAN) {
             bucket = Bucket.rangeBkt(null, val);
         }
         return new BucketRestriction(new AttributeLookup(entityType, attrName), bucket);
+    }
+
+    protected void createTable(String tableName) {
+        Table newTable = new Table();
+        newTable.setName(tableName);
+        newTable.setDisplayName(tableName);
+        newTable.setTenant(mainTestTenant);
+        newTable.setTableType(TableType.DATATABLE);
+        tableEntityMgr.create(newTable);
     }
 
 }

@@ -35,8 +35,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
 import com.latticeengines.eai.service.ImportService;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component("vdbToHdfsService")
 public class VdbToHdfsService extends EaiRuntimeService<VdbToHdfsConfiguration> {

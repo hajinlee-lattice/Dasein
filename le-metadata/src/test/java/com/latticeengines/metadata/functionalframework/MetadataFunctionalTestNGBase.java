@@ -125,7 +125,6 @@ public class MetadataFunctionalTestNGBase extends AbstractTestNGSpringContextTes
         try {
             Assert.assertNotEquals(yarnConfiguration.get("fs.defaultFS"), "file:///",
                     "$HADOOP_HOME/etc/hadoop must be on the classpath, and configured to use a hadoop cluster in order for this test to run");
-
             HdfsUtils.rmdir(yarnConfiguration, tableLocation1.toString());
             HdfsUtils.mkdir(yarnConfiguration, tableLocation1.toString());
             HdfsUtils.rmdir(yarnConfiguration, tableLocation2.toString());

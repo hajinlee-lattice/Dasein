@@ -51,7 +51,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import reactor.core.publisher.Flux;
@@ -112,17 +112,13 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public long getAttributesCount() {
-        List<ColumnMetadata> cms = getAllAttributes();
-        if (cms == null) {
-            return 0;
-        } else {
-            return cms.size();
-        }
+        List<ColumnMetadata> cms = getAllSegmentAttributes();
+        return cms == null ? 0 :cms.size();
     }
 
     @Override
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
-        List<ColumnMetadata> cms = getAllAttributes();
+        List<ColumnMetadata> cms = getAllSegmentAttributes();
         Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
         try {
             if (offset != null) {
@@ -139,12 +135,13 @@ public class DataLakeServiceImpl implements DataLakeService {
         return list;
     }
 
-    private List<ColumnMetadata> getAllAttributes() {
+    private List<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getTenantId();
         return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES)
                 .parallel().runOn(scheduler)
                 .flatMap(entity -> Flux.fromIterable(_dataLakeService.getServingMetadataForEntity(tenantId, entity)))
                 .sequential().parallel().runOn(scheduler)
+                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment))
                 .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm))
                 .sequential().collectList().block();
     }

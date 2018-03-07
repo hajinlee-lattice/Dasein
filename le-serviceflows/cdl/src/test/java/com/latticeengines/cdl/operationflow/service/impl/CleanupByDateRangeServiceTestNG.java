@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.cdl.CleanupByDateRangeConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 public class CleanupByDateRangeServiceTestNG {
 

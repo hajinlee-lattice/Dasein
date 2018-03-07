@@ -33,9 +33,9 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.proxy.objectapi.EntityProxyImpl;
@@ -59,7 +59,7 @@ public class TestPlayCreationHelper {
     private RatingEngineProxy ratingEngineProxy;
 
     @Autowired
-    private SegmentService segmentService;
+    private SegmentProxy segmentProxy;
 
     @Autowired
     private TenantEntityMgr tenantEntityMgr;
@@ -249,7 +249,7 @@ public class TestPlayCreationHelper {
 
         try {
             log.info("Cleaning up segment: " + segment.getName());
-            segmentService.deleteSegmentByName(tenantIdentifier, segment.getName());
+            segmentProxy.deleteSegmentByName(tenantIdentifier, segment.getName());
         } catch (Exception ex) {
             ignoreException(ex);
         }

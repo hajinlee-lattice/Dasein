@@ -17,12 +17,6 @@ public class SetTenantAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.metadata.service.impl.SegmentServiceImpl.*(..))")
-    public void allMethodsSegmentService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace.toString());
-    }
-
     @Before("execution(* com.latticeengines.metadata.service.impl.MetadataServiceImpl.*(..))")
     public void allMethodsMetadataService(JoinPoint joinPoint) {
         CustomerSpace customerSpace = (CustomerSpace) joinPoint.getArgs()[0];
@@ -37,32 +31,6 @@ public class SetTenantAspect {
 
     @Before("execution(* com.latticeengines.metadata.service.impl.ModuleServiceImpl.*(..))")
     public void allMethodsModuleService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.service.impl.DataCollectionServiceImpl.*(..))")
-    public void allMethodsDataCollectionService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.service.impl.StatisticsContainerServiceImpl.*(..))")
-    public void allMethodsStatisticsContainerService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.*(..)) " +
-            "&& !execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.getAllDataFeeds(..))" +
-            "&& !execution(* com.latticeengines.metadata.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..))")
-    public void allMethodsDataFeedService(JoinPoint joinPoint) {
-        String customerSpace = (String) joinPoint.getArgs()[0];
-        setSecurityContext(customerSpace);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.service.impl.DataFeedTaskServiceImpl.*(..))")
-    public void allMethodsDataFeedTaskService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setSecurityContext(customerSpace);
     }

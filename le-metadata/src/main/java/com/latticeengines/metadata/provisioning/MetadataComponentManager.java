@@ -9,7 +9,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.metadata.service.MetadataProvisioningService;
-import com.latticeengines.metadata.service.TenantPurgeService;
 
 @Component
 public class MetadataComponentManager {
@@ -18,9 +17,6 @@ public class MetadataComponentManager {
 
     @Autowired
     private MetadataProvisioningService metadataProvisioningService;
-
-    @Autowired
-    private TenantPurgeService tenantPurgeService;
 
     public void provisionImportTables(CustomerSpace space, DocumentDirectory configDir) {
 
@@ -34,10 +30,9 @@ public class MetadataComponentManager {
     }
 
     public void purgeData(CustomerSpace space) {
-        log.info(String.format("Removing tenant %s", space.toString()));
+        log.info(String.format("Removing data in tenant %s", space.toString()));
         Tenant tenant = new Tenant();
         tenant.setId(space.toString());
         tenant.setName(space.getTenantId());
-        tenantPurgeService.purge(tenant);
     }
 }

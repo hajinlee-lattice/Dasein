@@ -49,7 +49,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.metadata.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;

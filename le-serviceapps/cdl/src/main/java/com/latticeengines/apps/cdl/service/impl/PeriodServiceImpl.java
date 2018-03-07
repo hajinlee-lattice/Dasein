@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -14,7 +14,12 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Override
     public List<String> getPeriodNames() {
-        return Collections.singletonList(TimeFilter.Period.Month.name());
+        return Arrays.asList( //
+                TimeFilter.Period.Week.name(), //
+                TimeFilter.Period.Month.name(), //
+                TimeFilter.Period.Quarter.name(), //
+                TimeFilter.Period.Year.name() //
+        );
     }
 
     @Override

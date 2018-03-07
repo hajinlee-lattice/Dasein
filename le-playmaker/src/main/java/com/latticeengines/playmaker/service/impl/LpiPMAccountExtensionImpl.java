@@ -9,11 +9,12 @@ import java.util.StringTokenizer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -31,7 +32,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.service.LpiPMAccountExtension;
 import com.latticeengines.playmakercore.service.EntityQueryGenerator;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("lpiPMAccountExtension")
@@ -39,13 +40,13 @@ public class LpiPMAccountExtensionImpl implements LpiPMAccountExtension {
 
     private static final Logger log = LoggerFactory.getLogger(LpiPMAccountExtensionImpl.class);
 
-    @Autowired
+    @Inject
     private EntityProxy entityProxy;
 
-    @Autowired
+    @Inject
     private EntityQueryGenerator entityQueryGenerator;
 
-    @Autowired
+    @Inject
     private DataCollectionProxy dataCollectionProxy;
 
     @Override

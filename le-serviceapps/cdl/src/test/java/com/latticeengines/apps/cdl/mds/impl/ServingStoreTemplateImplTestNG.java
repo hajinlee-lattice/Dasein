@@ -23,7 +23,7 @@ import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 import reactor.core.publisher.ParallelFlux;
 

@@ -1,0 +1,29 @@
+package com.latticeengines.apps.cdl.entitymgr;
+
+import java.util.List;
+
+import com.latticeengines.db.exposed.entitymgr.BaseEntityMgrRepository;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
+import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
+
+public interface DataFeedEntityMgr extends BaseEntityMgrRepository<DataFeed, Long> {
+
+    DataFeed findByName(String datafeedName);
+
+    DataFeedExecution updateExecutionWithTerminalStatus(String datafeedName, DataFeedExecution.Status status,
+                                                        Status datafeedStatus);
+
+    DataFeed findByNameInflatedWithAllExecutions(String datafeedName);
+
+    DataFeed findByNameInflated(String datafeedName);
+
+    DataFeed findDefaultFeed();
+
+    DataFeed findDefaultFeedReadOnly();
+
+    List<DataFeed> getAllDataFeeds();
+
+    List<SimpleDataFeed> getAllSimpleDataFeeds();
+}

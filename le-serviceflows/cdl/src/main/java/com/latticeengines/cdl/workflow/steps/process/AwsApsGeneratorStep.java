@@ -26,7 +26,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.util.AwsApsGeneratorUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 

@@ -14,9 +14,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.dante.testFramework.testDao.TestPlayLaunchDao;
 import com.latticeengines.dante.testFramework.testDao.TestRatingEngineDao;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -27,7 +29,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -65,6 +66,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
         mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        MultiTenantContext.setTenant(mainTestTenant);
     }
 
     public void createDependences() {

@@ -35,10 +35,10 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 @Component
@@ -57,7 +57,7 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private String internalResourceHostPort;
 
     @Inject
-    private SegmentService segmentService;
+    private SegmentProxy segmentProxy;
 
     private RatingEngine ratingEngine1;
     private MetadataSegment segment;
@@ -125,9 +125,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         segment.setAccountRestriction(accountRestriction);
         segment.setContactRestriction(contactRestriction);
         segment.setDisplayName(SEGMENT_NAME);
-        MetadataSegment createdSegment = segmentService
+        MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentService.findByName(CustomerSpace.parse(tenant.getId()).toString(),
+        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(),
                 createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;

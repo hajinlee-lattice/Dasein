@@ -49,7 +49,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessT
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component(ProfileTransaction.BEAN_NAME)
 public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepConfiguration> {

@@ -37,6 +37,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -51,6 +53,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.ProtectedRestApiProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
@@ -81,9 +84,13 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     private ModelProxy modelProxy;
 
     @Inject
+    protected MetadataProxy metadataProxy;
+
+    @Inject
     private Configuration yarnConfiguration;
 
     protected Tenant mainTestTenant;
+    protected String mainCustomerSpace;
 
     @Value("${common.test.pls.url}")
     protected String deployedHostPort;
@@ -94,6 +101,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     protected void setupTestEnvironment() {
         testBed.bootstrapForProduct(LatticeProduct.CG);
         mainTestTenant = testBed.getMainTestTenant();
+        mainCustomerSpace = mainTestTenant.getId();
         MultiTenantContext.setTenant(mainTestTenant);
         testBed.switchToSuperAdmin();
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
@@ -261,6 +269,15 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
         // Look up the model summary with details
         return modelSummaryProxy.getModelSummary(found.getId());
+    }
+
+    protected void createTable(String tableName) {
+        Table newTable = new Table();
+        newTable.setName(tableName);
+        newTable.setDisplayName(tableName);
+        newTable.setTenant(mainTestTenant);
+        newTable.setTableType(TableType.DATATABLE);
+        metadataProxy.createTable(mainCustomerSpace, tableName, newTable);
     }
 
 }

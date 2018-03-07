@@ -54,7 +54,7 @@ import com.latticeengines.domain.exposed.util.AwsApsGeneratorUtils;
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 

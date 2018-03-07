@@ -59,7 +59,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;

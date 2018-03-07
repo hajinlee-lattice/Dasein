@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
 import com.latticeengines.domain.exposed.pls.ModelingConfig;
@@ -181,7 +181,7 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(aiModel.getIteration(), 1);
         Assert.assertNotNull(aiModel.getRatingEngine());
 
-        Assert.assertNull(aiModel.getTargetProducts());
+        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTargetProducts()));
     }
 
     private List<String> generateSeletedProducts() {

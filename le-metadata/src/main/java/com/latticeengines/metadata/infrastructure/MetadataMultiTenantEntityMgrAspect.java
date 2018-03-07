@@ -45,16 +45,6 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 
-    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.SegmentEntityMgrImpl.*(..))")
-    public void allSegmentMethods(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.DataCollectionEntityMgrImpl.*(..))")
-    public void allDataCollectionMethods(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.ColumnRuleResultEntityMgrImpl.*(..))")
     public void allColumnRuleMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
@@ -62,18 +52,6 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     @Before("execution(* com.latticeengines.metadata.entitymgr.impl.RowRuleResultEntityMgrImpl.*(..))")
     public void allRowRuleMethods(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.StatisticsContainerEntityMgrImpl.*(..))")
-    public void allStatisticsContainerMethods(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
-    }
-
-    @Before("execution(* com.latticeengines.metadata.entitymgr.impl.DataFeedEntityMgrImpl.*(..)) && " +
-            "!execution(* com.latticeengines.metadata.entitymgr.impl.DataFeedEntityMgrImpl.getAllDataFeeds(..)) && " +
-            "!execution(* com.latticeengines.metadata.entitymgr.impl.DataFeedEntityMgrImpl.getAllSimpleDataFeeds(..))")
-    public void allDataFeedMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
     }
 

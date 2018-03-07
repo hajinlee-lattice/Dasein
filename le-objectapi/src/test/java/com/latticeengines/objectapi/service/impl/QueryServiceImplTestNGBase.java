@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
-import com.latticeengines.proxy.exposed.metadata.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTestNGBase {

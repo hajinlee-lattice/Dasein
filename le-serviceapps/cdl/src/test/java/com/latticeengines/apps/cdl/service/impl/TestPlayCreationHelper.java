@@ -16,6 +16,7 @@ import org.testng.Assert;
 
 import com.latticeengines.apps.cdl.controller.PlayResourceDeploymentTestNG;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
@@ -34,7 +35,6 @@ import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.metadata.service.SegmentService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;

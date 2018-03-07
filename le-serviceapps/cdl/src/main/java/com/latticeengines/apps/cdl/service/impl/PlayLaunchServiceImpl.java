@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
+
     @Autowired
     private PlayLaunchEntityMgr playLaunchEntityMgr;
 
