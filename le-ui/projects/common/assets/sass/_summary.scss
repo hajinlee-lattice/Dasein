@@ -8,7 +8,7 @@ Page Summary / Sub-Nav Headers
   overflow: hidden;
   width: 100%;
   position: relative;
-  &.SalesforceAccount, &.SalesforceLead {
+  &.SalesforceAccount, &.SalesforceLead, &.jobsreport {
     background-image: url("/assets/images/bkg-blue-fire.jpg");
     .stats {
       background: rgba(0,0,0,0.6);
@@ -122,6 +122,7 @@ Page Summary / Sub-Nav Headers
     }
     &.summary-header {
       margin-bottom:15px;
+      text-align: center;
     }
   }
   p {
