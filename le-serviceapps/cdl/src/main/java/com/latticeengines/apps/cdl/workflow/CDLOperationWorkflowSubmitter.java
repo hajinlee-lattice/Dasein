@@ -62,13 +62,6 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpace.toString());
         DataFeed.Status dataFeedStatus = dataFeed.getStatus();
         log.info(String.format("Current data feed: %s, status: %s", dataFeed.getName(), dataFeedStatus.getName()));
-        if (dataFeedStatus != DataFeed.Status.InitialLoaded && dataFeedStatus != DataFeed.Status.Active) {
-            if (dataFeedStatus == DataFeed.Status.Initing || dataFeedStatus == DataFeed.Status.Initialized) {
-                throw new RuntimeException("There is no data for customer: " + customerSpace.toString());
-            } else {
-                throw new RuntimeException("We cannot start Maintenance for customer: " + customerSpace.toString());
-            }
-        }
         if (!dataFeedProxy.lockExecution(customerSpace.toString(), DataFeedExecutionJobType.CDLOperation)) {
             throw new RuntimeException("We cannot start CDL maintenance right now!");
         }
