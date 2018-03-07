@@ -1,5 +1,5 @@
 angular.module('lp.jobs.export', [])
-    .controller('ExportJobsController', function ($q, $scope, $http, JobsStore, $filter, ModalStore, SegmentService) {
+    .controller('ExportJobsController', function ($q, $scope, $http, JobsStore, $filter, SegmentService) {
         var vm = this;
         vm.loading = false;
         vm.loadingJobs = JobsStore.data.loadingJobs;

@@ -1,7 +1,7 @@
 angular
 .module('lp.jobs')
 .controller('JobsSummaryController', function(
-	$scope, $http, $stateParams, JobsStore, $filter, ModalStore, InitJob, JobsService
+	$scope, $http, $stateParams, JobsStore, $filter, InitJob, JobsService
 ) {
 	var vm = this;
 
