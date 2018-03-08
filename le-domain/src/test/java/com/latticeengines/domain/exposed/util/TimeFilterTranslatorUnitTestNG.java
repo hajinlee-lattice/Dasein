@@ -1,4 +1,4 @@
-package com.latticeengines.objectapi.util;
+package com.latticeengines.domain.exposed.util;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 
 public class TimeFilterTranslatorUnitTestNG {
 

@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EntityQueryService;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.AccountQueryDecorator;
@@ -42,7 +43,6 @@ import com.latticeengines.objectapi.util.EntityQueryTranslator;
 import com.latticeengines.objectapi.util.ProductQueryDecorator;
 import com.latticeengines.objectapi.util.QueryDecorator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.objectapi.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
 

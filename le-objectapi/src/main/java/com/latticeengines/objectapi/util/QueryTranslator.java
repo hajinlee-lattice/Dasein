@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.util.RestrictionOptimizer;
 import com.latticeengines.domain.exposed.util.RestrictionUtils;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.DateRangeTranslator;
 

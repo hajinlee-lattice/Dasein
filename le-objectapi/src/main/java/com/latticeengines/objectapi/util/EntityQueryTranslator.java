@@ -12,6 +12,7 @@ import com.latticeengines.domain.exposed.query.QueryBuilder;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 
 public class EntityQueryTranslator extends QueryTranslator {

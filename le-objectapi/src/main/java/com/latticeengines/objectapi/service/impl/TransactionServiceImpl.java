@@ -31,9 +31,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.objectapi.util.TimeFilterTranslator;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
