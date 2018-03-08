@@ -110,7 +110,7 @@ angular
                         // actions: actions,
                         // actionsCount: actionsCount,
                         timestamp: job.startTimestamp,
-                        note: job.note,
+                        note: job.note ? job.note : '',
                         errorCode: job.errorCode,
                         errorMsg: job.errorMsg,
                         jobType: job.jobType,
