@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.DataFeedService;
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.SimpleDataFeed;
 
@@ -25,6 +26,7 @@ public class DataFeedInternalResource {
 
     @RequestMapping(value = "/list", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @NoCustomerSpace
     @ApiOperation(value = "get all data feeds.")
     public List<DataFeed> getAllDataFeeds() {
         return dataFeedService.getAllDataFeeds();
@@ -32,6 +34,7 @@ public class DataFeedInternalResource {
 
     @RequestMapping(value = "/simpledatafeedlist", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
+    @NoCustomerSpace
     @ApiOperation(value = "get all simple data feeds.")
     public List<SimpleDataFeed> getAllSimpleDataFeeds() {
         return dataFeedService.getAllSimpleDataFeeds();
