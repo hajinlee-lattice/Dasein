@@ -64,22 +64,22 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
-    public void updateTenantWithTenantName() throws InterruptedException {
+    public void updateTenantWithTenantName() {
         PlaymakerTenant tenant = tenantProxy.getTenant(tenantName);
         tenant.setExternalId("externalId2");
         PlaymakerTenant newTenant = tenantProxy.updateTenant(tenantName, tenant);
-        Thread.sleep(500); // wait for replication lag
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getExternalId(), "externalId2");
         Assert.assertNull(newTenant.getTenantPassword());
     }
 
     @Test(groups = "deployment", dependsOnMethods = "updateTenantWithTenantName")
-    public void getOauthTokenToTenant() {
+    public void getOauthTokenToTenant() throws InterruptedException {
         OAuth2RestTemplate oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, tenantName, oneTimePassword,
                 OauthClientType.PLAYMAKER.getValue());
         OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
         Assert.assertNotNull(accessToken);
+        Thread.sleep(500); // wait for replication lag
 
         MagicAuthenticationHeaderHttpRequestInterceptor interceptor = new MagicAuthenticationHeaderHttpRequestInterceptor(
                 INTERNAL_SERVICE_HEADERVALUE);
