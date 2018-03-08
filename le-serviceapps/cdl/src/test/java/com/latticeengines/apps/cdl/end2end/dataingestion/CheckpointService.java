@@ -6,10 +6,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -146,12 +148,16 @@ public class CheckpointService {
         DataCollection.Version activeVersion = getCheckpointVersion(checkpoint);
 
         Map<String, String> redshiftTablesToClone = new HashMap<>();
+        Set<String> uploadedTables = new HashSet<>();
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
                 Table table = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
                 if (table != null) {
                     logger.info("Creating table " + table.getName() + " for " + role + " in version " + version);
-                    metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
+                    if (!uploadedTables.contains(table.getName())) {
+                        metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
+                        uploadedTables.add(table.getName());
+                    }
                     dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
                     if (activeVersion.equals(version)) {
                         String redshiftTable = checkpointRedshiftTableName(checkpoint, role, S3_CHECKPOINTS_VERSION);
