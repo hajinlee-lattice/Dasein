@@ -20,12 +20,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
+import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -55,6 +54,9 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     @Resource(name = "localCacheService")
     private CacheService localCacheService;
 
+    @Inject
+    private DataCollectionManagerService dataCollectionManagerService;
+
     @Override
     public DataCollection getDataCollection(String customerSpace, String collectionName) {
         if (StringUtils.isBlank(collectionName)) {
@@ -72,11 +74,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         log.info("Switching " + collection.getName() + " in " + customerSpace + " to " + version);
         dataCollectionEntityMgr.update(collection);
         DataCollection.Version newVersion = getDataCollection(customerSpace, collectionName).getVersion();
-        CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheName.getCdlLocalCacheGroup());
+        dataCollectionManagerService.clearCache(customerSpace);
         return newVersion;
     }
 

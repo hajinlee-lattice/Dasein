@@ -2,13 +2,18 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
-@JsonIgnoreType
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
 
     @JsonProperty("DisplayName")
@@ -56,6 +61,9 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     @JsonProperty("IsInternal")
     private Boolean isInternal;
 
+    @JsonProperty("Entity")
+    private BusinessEntity entity;
+
     @JsonIgnore
     private FundamentalType fundamentalType;
 
@@ -67,12 +75,18 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
 
     @JsonProperty("DataLicense")
     private String dataLicense;
+
     public String getDisplayName() {
         return displayName;
     }
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    @JsonProperty("AttrName")
+    public String getAttrName() {
+        return fieldName;
     }
 
     public String getFieldName() {
@@ -171,12 +185,10 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
         this.isInternal = isInternal;
     }
 
-    @JsonIgnore
     public FundamentalType getFundamentalType() {
         return fundamentalType;
     }
 
-    @JsonIgnore
     public void setFundamentalType(FundamentalType fundamentalType) {
         this.fundamentalType = fundamentalType;
     }
@@ -217,6 +229,14 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
         this.dataLicense = dataLicense;
     }
 
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
+    }
+
     @JsonProperty("FundamentalType")
     private String getFundamentalTypeAsString() {
         if (fundamentalType == null) {
@@ -236,14 +256,13 @@ public class LeadEnrichmentAttribute implements HasAttributeCustomizations {
     }
 
     @Override
-    @JsonIgnore
     public String getCategoryAsString() {
         return category;
     }
 
     @Override
-    @JsonIgnore
     public String getColumnId() {
         return fieldName;
     }
+
 }

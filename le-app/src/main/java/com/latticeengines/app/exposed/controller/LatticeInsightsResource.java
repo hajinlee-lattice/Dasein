@@ -19,6 +19,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -31,6 +33,7 @@ import com.latticeengines.app.exposed.service.AttributeService;
 import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
@@ -41,7 +44,6 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -68,8 +70,7 @@ public class LatticeInsightsResource {
     private BatonService batonService;
 
     // ------------START for Insights-------------------//
-    @RequestMapping(value = INSIGHTS_PATH + "/categories", method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(value = INSIGHTS_PATH + "/categories")
     @ResponseBody
     @ApiOperation(value = "Get list of categories")
     public List<String> getInsightsCategories(HttpServletRequest request) {
@@ -85,8 +86,7 @@ public class LatticeInsightsResource {
         return categoryStrList;
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/subcategories", method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(value = INSIGHTS_PATH + "/subcategories")
     @ResponseBody
     @ApiOperation(value = "Get list of subcategories for a given category")
     public List<String> getInsightsSubcategories(HttpServletRequest request, //
@@ -102,9 +102,7 @@ public class LatticeInsightsResource {
         return new ArrayList<String>(subcategories);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH, //
-            method = RequestMethod.PUT, //
-            headers = "Accept=application/json")
+    @PutMapping(value = INSIGHTS_PATH)
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveInsightsAttributes(HttpServletRequest request, //
@@ -116,9 +114,7 @@ public class LatticeInsightsResource {
                 considerInternalAttributes);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH + "/save", //
-            method = RequestMethod.PUT, //
-            headers = "Accept=application/json")
+    @PutMapping(value = INSIGHTS_PATH + "/save")
     @ResponseBody
     @ApiOperation(value = "Save lead enrichment selection")
     public void saveInsightsSelectedAttributes(HttpServletRequest request, //
@@ -130,9 +126,7 @@ public class LatticeInsightsResource {
                 considerInternalAttributes);
     }
 
-    @RequestMapping(value = INSIGHTS_PATH, //
-            method = RequestMethod.GET, //
-            headers = "Accept=application/json")
+    @GetMapping(value = INSIGHTS_PATH)
     @ResponseBody
     @ApiOperation(value = "Get list of attributes with selection flag", response = List.class)
     public List<LeadEnrichmentAttribute> getInsightsAttributes(HttpServletRequest request, //
@@ -161,6 +155,7 @@ public class LatticeInsightsResource {
                 : Category.fromName(category));
         List<LeadEnrichmentAttribute> attributes = attributeService.getAttributes(tenant, attributeDisplayNameFilter,
                 categoryEnum, subcategory, onlySelectedAttributes, offset, max, considerInternalAttributes);
+        attributes.forEach(attr -> attr.setEntity(BusinessEntity.LatticeAccount));
         return attributes;
     }
 

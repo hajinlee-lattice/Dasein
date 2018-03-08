@@ -21,10 +21,8 @@ import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
-import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -227,11 +225,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Clear cache for data collection")
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
-        CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(CustomerSpace.parse(customerSpace).getTenantId(),
-                CacheName.getCdlLocalCacheGroup());
+        collectionMgrSvc.clearCache(customerSpace);
         return ResponseDocument.successResponse("Success");
     }
 
