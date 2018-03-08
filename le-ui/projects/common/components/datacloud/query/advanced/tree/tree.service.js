@@ -87,7 +87,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
         function getService(entity) {
             switch (entity) {
                 case 'Account':
-                case 'Contact': {
+                case 'Contact':
+                case 'Rating': {
                     return QueryTreeAccountEntityService;
                 };
                 case 'PurchaseHistory': {
