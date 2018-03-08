@@ -11,6 +11,10 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -18,6 +22,9 @@ import com.latticeengines.db.exposed.dao.impl.BaseGenericDaoImpl;
 import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 
 public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
+
+    private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationDaoImpl.class);
+    private static final String DATEDIFF_1970 = "DATEDIFF(s,'19700101 00:00:00:000',";
 
     public PlaymakerRecommendationDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
         super(namedJdbcTemplate);
@@ -32,15 +39,16 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "PL.[Display_Name] AS DisplayName, A.Display_Name AS CompanyName, A.External_ID AS LEAccountExternalID, "
                 + "COALESCE(PL.[Description], L.[Description]) AS Description, "
                 + "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
-                + "L.[Play_ID] AS PlayID, DATEDIFF(s,'19700101 00:00:00:000', R.Start) AS LaunchDate, "
-                + getLikelihood() + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, "
-                + "CASE WHEN L.[Expiration_Date] > '2030-03-15' THEN 1899763200 ELSE DATEDIFF(s,'19700101 00:00:00:000', L.[Expiration_Date]) END AS ExpirationDate, "
-                + getMonetaryValue() + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
+                + "L.[Play_ID] AS PlayID, " + DATEDIFF_1970 + " R.Start) AS LaunchDate, " + getLikelihood()
+                + "C.Value AS PriorityDisplayName, P.Priority_ID AS PriorityID, "
+                + "CASE WHEN L.[Expiration_Date] > '2030-03-15' THEN 1899763200 ELSE " + DATEDIFF_1970
+                + " L.[Expiration_Date]) END AS ExpirationDate, " + getMonetaryValue()
+                + "M.ISO4217_ID AS MonetaryValueIso4217ID, "
                 + "(SELECT TOP 1  ISNULL(T.[Display_Name], '') + '|' + ISNULL(T.[Phone_Number], '') + '|' + ISNULL(T.[Email_Address], '') "
                 + " + '|' +  ISNULL(T.[Address_Street_1], '') + '|' + ISNULL(T.[City], '') + '|' + ISNULL(T.[State_Province], '') "
                 + " + '|' + ISNULL(T.[Country], '') + '|' + ISNULL(T.[Zip], '') + '|' + ISNULL(CONVERT(VARCHAR, T.[LEContact_ID]), '') "
                 + getSfdcContactID() + "FROM [LEContact] T WHERE T.Account_ID = A.LEAccount_ID) AS Contacts, "
-                + "DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) AS LastModificationDate, "
+                + DATEDIFF_1970 + " L.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY L.[Last_Modification_Date], L.[PreLead_ID]) RowNum "
                 + getRecommendationFromWhereClause(syncDestination, playIds)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
@@ -131,8 +139,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "ON L.Priority_ID = P.Priority_ID JOIN ConfigResource C WITH (NOLOCK) "
                 + "ON P.Display_Text_Key = C.Key_Name AND C.Locale_ID = -1 JOIN Currency M WITH (NOLOCK) "
                 + "ON L.[Monetary_Value_Currency_ID] = M.Currency_ID " + "WHERE L.Status = 2800 AND L.IsActive = 1 AND "
-                + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") " + "%s "
-                + "AND DATEDIFF(s,'19700101 00:00:00:000',L.[Last_Modification_Date]) >= :start ";
+                + "L.Synchronization_Destination in (" + getDestinationonValues(syncDestination) + ") " + "%s " + "AND "
+                + DATEDIFF_1970 + "L.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(playIds)) {
@@ -170,8 +178,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getPlays(long start, int offset, int maximum, List<Integer> playgroupIds) {
         String sql = "SELECT * FROM (SELECT PL.[Play_ID] AS ID, PL.[External_ID] AS ExternalID, PL.[Display_Name] AS DisplayName, "
-                + "PL.[Description] AS Description, PL.[Average_Probability] AS AverageProbability,"
-                + "DATEDIFF(s,'19700101 00:00:00:000', PL.[Last_Modification_Date]) AS LastModificationDate, "
+                + "PL.[Description] AS Description, PL.[Average_Probability] AS AverageProbability," + DATEDIFF_1970
+                + " PL.[Last_Modification_Date]) AS LastModificationDate, "
                 + "(SELECT DISTINCT G.Display_Name + '|' as [text()] FROM PlayGroupMap M JOIN PlayGroup G "
                 + "ON M.PlayGroup_ID = G.PlayGroup_ID WHERE M.Play_ID = PL.Play_ID FOR XML PATH ('')) AS PlayGroups, "
                 + "(SELECT DISTINCT P.Display_Name + '|' + P.[External_Name] + '|' as [text()] "
@@ -243,13 +251,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private String getPlayFromWhereClause(List<Integer> playgroupIds) {
         if (CollectionUtils.isEmpty(playgroupIds)) {
-            return "FROM [Play] PL WITH (NOLOCK) WHERE PL.IsActive = 1 AND PL.IsVisible = 1 "
-                    + "AND DATEDIFF(s,'19700101 00:00:00:000', PL.[Last_Modification_Date]) >= :start ";
+            return "FROM [Play] PL WITH (NOLOCK) WHERE PL.IsActive = 1 AND PL.IsVisible = 1 " + "AND " + DATEDIFF_1970
+                    + " PL.[Last_Modification_Date]) >= :start ";
         }
 
         return "FROM [Play] PL WITH (NOLOCK) JOIN [PlayGroupMap] PGM ON PL.Play_ID = PGM.Play_ID WHERE PL.IsActive = 1 AND PL.IsVisible = 1 "
-                + "AND PGM.[PlayGroup_ID] IN (:playgroupIds) "
-                + "AND DATEDIFF(s,'19700101 00:00:00:000', PL.[Last_Modification_Date]) >= :start ";
+                + "AND PGM.[PlayGroup_ID] IN (:playgroupIds) " + "AND " + DATEDIFF_1970
+                + " PL.[Last_Modification_Date]) >= :start ";
     }
 
     @Override
@@ -257,14 +265,88 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
-        String extensionColumns = getAccountExtensionColumns(columns);
-        String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, " + getSfdcAccountContactIds(hasSfdcContactId)
-                + "A.External_ID AS LEAccountExternalID, " + extensionColumns + " "
-                + "DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
-                + ") AS LastModificationDate, " + "ROW_NUMBER() OVER ( ORDER BY "
-                + getAccountExtensionLastModificationDate() + ", [Item_ID]) RowNum "
-                + getAccountExtensionFromWhereClause(accountIds, filterBy)
-                + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
+        log.info("Before calling idStrListToIntList");
+        Pair<String, Long> findFirstLmdAndAccIdTuple = findFirstLmdAndAccId(start, offset, maximum, accountIds);
+
+        log.info("Completed call to getAccountExtensions");
+        log.info("Before calling getAccountExtensions");
+
+        List<Map<String, Object>> result = getAccountExtensions(start, offset, maximum, filterBy, recStart, columns,
+                hasSfdcContactId, accountIds, findFirstLmdAndAccIdTuple);
+        log.info("Completed call to getAccountExtensions");
+        return result;
+    }
+
+    private Pair<String, Long> findFirstLmdAndAccId(Long start, int offset, int maximum, List<Integer> accountIds) {
+        String accountIdKey = "LEAccount_ID";
+        String lastModificationTimeKey = "lastModificationTime";
+
+        // logic is to find first LastModifiedDate and firstAccountId for
+        // requested page
+
+        String sql = //
+                "SELECT TOP(1) " //
+                        + " * " //
+                        + "FROM (" //
+                        + "      SELECT TOP(:offset_plus_one) " //
+                        + "   " + accountIdKey + ", " //
+                        + "   " + getAccountLastModificationDate() + "AS " + lastModificationTimeKey //
+                        + "      FROM  LEAccount A " //
+                        + "      WHERE " + getAccountLastModificationDate() + " >= " //
+                        + "          DATEADD(s, :start, '1970-01-01 00:00:00')" //
+                        + "      AND   IsActive = 1 " //
+                        + "  " + getAndClauseForAccountIds(accountIds) //
+                        + "      ORDER BY " + lastModificationTimeKey + " ASC, LEAccount_ID ASC" //
+                        + "     ) z " //
+                        + " ORDER BY  " + lastModificationTimeKey + "  DESC " + ", " + accountIdKey + " DESC ";
+
+        MapSqlParameterSource source = new MapSqlParameterSource();
+        source.addValue("start", start);
+        source.addValue("offset_plus_one", offset + 1);
+        if (!CollectionUtils.isEmpty(accountIds)) {
+            source.addValue("accountIds", accountIds);
+        }
+        List<Map<String, Object>> res = queryForListOfMap(sql, source);
+
+        Pair<String, Long> pair = null;
+        if (CollectionUtils.isNotEmpty(res)) {
+            Map<String, Object> row = res.get(0);
+
+            Long accountId = Long.parseLong(row.get(accountIdKey).toString());
+            String realLMD = row.get(lastModificationTimeKey).toString();
+            pair = new ImmutablePair<String, Long>(realLMD, accountId);
+        }
+
+        if (pair == null) {
+            pair = new ImmutablePair<String, Long>(null, null);
+        }
+
+        log.info(String.format(
+                "start = %s, offset = %s, max = %s, firstLmd = %s, firstAccountId = %s, accountIds.size = %s"
+                        + "\nSQL = %s",
+                start, offset, maximum, pair.getLeft(), pair.getRight(), accountIds == null ? 0 : accountIds.size(),
+                sql));
+        return pair;
+    }
+
+    private List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, String filterBy,
+            Long recStart, String columns, boolean hasSfdcContactId, List<Integer> accountIds,
+            Pair<String, Long> findFirstLmdAndAccIdTuple) {
+        String lastModificationTime = findFirstLmdAndAccIdTuple.getLeft();
+        Long accountId = findFirstLmdAndAccIdTuple.getRight();
+
+        String sql = //
+                "SELECT TOP(:maximum) " //
+                        + "[Item_ID] AS ID, " //
+                        + getSfdcAccountContactIds(hasSfdcContactId) + " " //
+                        + "A.External_ID AS LEAccountExternalID, " //
+                        + getAccountExtensionColumns(columns) + " " //
+                        + DATEDIFF_1970 + " " //
+                        + "    " + getAccountLastModificationDate() //
+                        + "    ) AS LastModificationDate " //
+                        + getAccountExtensionFromWhereClause(accountIds, filterBy, //
+                                false, lastModificationTime == null);
+
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
                 || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
@@ -273,19 +355,20 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             }
             source.addValue("recStart", recStart);
         }
-        source.addValue("start", start);
-        source.addValue("startRow", offset + 1);
-        source.addValue("endRow", offset + maximum);
+        source.addValue("maximum", maximum);
+        source.addValue("start", lastModificationTime == null ? start : lastModificationTime);
+        source.addValue("firstAccId", accountId);
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
 
         List<Map<String, Object>> result = queryForListOfMap(sql, source);
-        if (result != null) {
-            for (Map<String, Object> map : result) {
-                map.remove("Item_ID");
-            }
-        }
+        log.info(String.format(
+                "Fetching data now => start = %s, offset = %s, max = %s, firstLmd = %s, firstAccountId = %s, accountIds.size = %s"
+                        + "\nSQL = %s",
+                start, offset, maximum, findFirstLmdAndAccIdTuple.getLeft(), findFirstLmdAndAccIdTuple.getRight(),
+                accountIds == null ? 0 : accountIds.size(), sql));
+
         return result;
     }
 
@@ -342,7 +425,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     public long getAccountExtensionCount(Long start, List<String> idStrList, String filterBy, Long recStart) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
-        String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy);
+        String sql = "SELECT COUNT(*) " + getAccountExtensionFromWhereClause(accountIds, filterBy, true, true);
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
                 || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
@@ -358,20 +441,48 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return queryForObject(sql, source, Long.class);
     }
 
-    private String getAccountExtensionFromWhereClause(List<Integer> accountIds, String filterBy) {
+    private String getAccountExtensionFromWhereClause(List<Integer> accountIds, String filterBy, boolean forCount,
+            boolean isIntegerTimestamp) {
+        String fromAndWhereClause = null;
         if (StringUtils.isNotEmpty(filterBy)) {
-            return getAccountExtensionFromWhereClauseWithFilterBy(filterBy);
-        }
-        String whereClause = getAccountExtensionFromClause() + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', "
-                + getAccountExtensionLastModificationDate() + ") >= :start ";
-
-        StringBuilder extraFilter = new StringBuilder();
-        if (CollectionUtils.isEmpty(accountIds)) {
-            extraFilter.append("");
+            fromAndWhereClause = getAccountExtensionFromWhereClauseWithFilterBy(filterBy);
+            fromAndWhereClause = String.format(fromAndWhereClause, getAndClauseForAccountIds(accountIds));
         } else {
-            extraFilter.append("AND E.[Item_ID] IN (:accountIds) ");
+            fromAndWhereClause = getAccountExtensionFromClause();
         }
-        return String.format(whereClause, extraFilter.toString());
+        fromAndWhereClause += " AND (( " + getTimestampStr(isIntegerTimestamp, true) + " %s ) " + "OR "
+                + getTimestampStr(isIntegerTimestamp, false) + " ) %s";
+
+        return String.format(fromAndWhereClause, //
+                forCount ? //
+                        "" //
+                        : "AND A.LEAccount_ID >= :firstAccId", //
+                forCount ? //
+                        "" //
+                        : "ORDER BY " + getAccountLastModificationDate() + " ASC, A.LEAccount_ID ASC");
+    }
+
+    private String getTimestampStr(boolean isIntegerTimestamp, boolean equalSign) {
+        String suffix = equalSign ? " = " //
+                : " > ";
+        suffix += isIntegerTimestamp ? //
+                " :start " //
+                : "";
+        return (isIntegerTimestamp ? //
+                DATEDIFF_1970 + " " + getAccountLastModificationDate() + ") " + suffix //
+                : //
+                getAccountLastModificationDate() + suffix + " CAST(:start AS datetime) ");
+    }
+
+    private String getAccountLastModificationDate() {
+        return " A.[Last_Modification_Date] ";
+    }
+
+    private String getAndClauseForAccountIds(List<Integer> accountIds) {
+        if (!CollectionUtils.isEmpty(accountIds)) {
+            return "AND A.[LEAccount_ID] IN (:accountIds) ";
+        }
+        return "";
     }
 
     private String getAccountExtensionFromClause() {
@@ -382,20 +493,14 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         filterBy = filterBy.trim().toUpperCase();
         String whereClause = null;
         if (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS")) {
-            whereClause = "WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', L.[Last_Modification_Date]) >= :recStart) "
-                    + " AND DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
-                    + ") >= :start ";
+            whereClause = " WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND "
+                    + DATEDIFF_1970 + " L.[Last_Modification_Date]) >= :recStart) ";
             String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
             whereClause = String.format(whereClause, oper);
         } else { // ALL or other
-            whereClause = "WHERE DATEDIFF(s,'19700101 00:00:00:000', " + getAccountExtensionLastModificationDate()
-                    + ") >= :start ";
+            whereClause = " WHERE %s ";
         }
         return getAccountExtensionFromClause() + whereClause;
-    }
-
-    protected String getAccountExtensionLastModificationDate() {
-        return "A.[Last_Modification_Date] ";
     }
 
     @Override
@@ -428,8 +533,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 + "C.[Fax_Number] AS Fax, C.[Email_Address] AS Email,"
                 + "C.[Address_Street_1] AS Address, C.[Address_Street_2] AS Address2,"
                 + "C.[City] AS City, C.[State_Province] AS State," + "C.[Country] AS Country, C.[Zip] AS ZipCode,"
-                + getSfdcContactIDFromLEContact()
-                + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
+                + getSfdcContactIDFromLEContact() + DATEDIFF_1970
+                + " C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], C.[LEContact_ID] ) RowNum "
                 + getContactFromWhereClause(contactIds, accountIds)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
@@ -463,8 +568,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getContactFromWhereClause(List<Integer> contactIds, List<Integer> accountIds) {
-        String whereClause = "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 "
-                + "%s AND DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
+        String whereClause = "FROM [LEContact] C WITH (NOLOCK) WHERE C.IsActive = 1 " + "%s AND " + DATEDIFF_1970
+                + " C.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(contactIds)) {
@@ -486,7 +591,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             List<Integer> contactIds) {
         String extensionColumns = getContactExtensionColumns();
         String sql = "SELECT * FROM (SELECT [Item_ID] AS ID, " + getSfdcContactIDFromLEContact() + extensionColumns
-                + " " + "DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) AS LastModificationDate, "
+                + " " + DATEDIFF_1970 + " C.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY C.[Last_Modification_Date], [Item_ID]) RowNum "
                 + getContactExtensionFromWhereClause(contactIds)
                 + ") AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
@@ -520,7 +625,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private String getContactExtensionFromWhereClause(List<Integer> contactIds) {
         String whereClause = "FROM [LEContact_Extensions] E WITH (NOLOCK) JOIN [LEContact] C WITH (NOLOCK) ON E.Item_ID = C.LEContact_ID AND C.IsActive = 1 "
-                + "%s " + "WHERE DATEDIFF(s,'19700101 00:00:00:000', C.[Last_Modification_Date]) >= :start ";
+                + "%s " + "WHERE " + DATEDIFF_1970 + " C.[Last_Modification_Date]) >= :start ";
 
         StringBuilder extraFilter = new StringBuilder();
         if (CollectionUtils.isEmpty(contactIds)) {
@@ -612,7 +717,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     @Override
     public List<Map<String, Object>> getPlayGroups(long start, int offset, int maximum) {
         String sql = "SELECT * FROM (SELECT [PlayGroup_ID] AS ID, External_ID AS ExternalID, Display_Name AS DisplayName, "
-                + "DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) AS LastModificationDate, "
+                + DATEDIFF_1970 + " PlayGroup.[Last_Modification_Date]) AS LastModificationDate, "
                 + "ROW_NUMBER() OVER ( ORDER BY PlayGroup.[Last_Modification_Date], PlayGroup.[PlayGroup_ID]) RowNum "
                 + getPlayGroupWhereClause()
                 + " ) AS output WHERE RowNum >= :startRow AND RowNum <= :endRow ORDER BY RowNum";
@@ -635,7 +740,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getPlayGroupWhereClause() {
-        return "FROM PlayGroup WHERE IsActive = 1 AND DATEDIFF(s,'19700101 00:00:00:000', PlayGroup.[Last_Modification_Date]) >= :start ";
+        return "FROM PlayGroup WHERE IsActive = 1 AND " + DATEDIFF_1970
+                + " PlayGroup.[Last_Modification_Date]) >= :start ";
     }
 
     private List<Integer> idStrListToIntList(List<String> idStrList) {

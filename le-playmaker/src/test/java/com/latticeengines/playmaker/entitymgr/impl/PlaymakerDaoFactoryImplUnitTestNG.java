@@ -14,11 +14,12 @@ public class PlaymakerDaoFactoryImplUnitTestNG {
     @Test(groups = "unit")
     public void normalizedVer() {
         PlaymakerDaoFactoryImpl daoFactory = new PlaymakerDaoFactoryImpl();
-        Assert.assertEquals(daoFactory.normalizedVer("7.4.0"),  "007004000");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.1"),  "007003001");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.2"),  "007003002");
-        Assert.assertEquals(daoFactory.normalizedVer("7.3.0"),  "007003000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.4.0"), "007004000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.1"), "007003001");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.2"), "007003002");
+        Assert.assertEquals(daoFactory.normalizedVer("7.3.0"), "007003000");
         Assert.assertEquals(daoFactory.normalizedVer("7.10.0"), "007010000");
+        Assert.assertEquals(daoFactory.normalizedVer("7.12.0"), "007012000");
 
     }
 
@@ -50,6 +51,9 @@ public class PlaymakerDaoFactoryImplUnitTestNG {
         Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImpl.class);
 
         dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.10.0"), defaultDao);
+        Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV710.class);
+
+        dao = daoFactory.findDao(null, daoFactory.normalizedVer("7.12.0"), defaultDao);
         Assert.assertEquals(dao.getClass(), PlaymakerRecommendationDaoImplV710.class);
 
     }

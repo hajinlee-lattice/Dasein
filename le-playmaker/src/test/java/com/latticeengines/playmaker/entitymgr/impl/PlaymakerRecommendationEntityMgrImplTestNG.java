@@ -1,9 +1,15 @@
 package com.latticeengines.playmaker.entitymgr.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -15,6 +21,7 @@ import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
 import com.latticeengines.playmaker.functionalframework.PlaymakerTestNGBase;
 
 public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGBase {
+    private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationEntityMgrImplTestNG.class);
 
     @Autowired
     private PlaymakerTenantEntityMgr playMakerTenantEntityMgr;
@@ -122,14 +129,130 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getAccountExtensions() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                1000L, 1, 100, null, null, 0L, null, false);
+                0L, 1, 100, null, null, 0L, null, false);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> plays = (List<Map<String, Object>>) result
+        List<Map<String, Object>> accExt = (List<Map<String, Object>>) result
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
-        Assert.assertTrue(plays.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
-        Assert.assertTrue(plays.size() > 0L);
+        Assert.assertTrue(accExt.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
+        Assert.assertTrue(accExt.size() > 0L);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void getAccountExtensionsWithDetailedPaging() throws Exception {
+
+        Map<String, Object> countResult = playMakerRecommendationEntityMgr
+                .getAccountextExsionCount(tenant.getTenantName(), null, 0L, null, null, 0L);
+
+        Long originalTotalAccExtCount = (Long) countResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Assert.assertTrue(originalTotalAccExtCount > 0L);
+        // will loop over maximum 250 entries
+        Long totalAccExtCount = originalTotalAccExtCount > 250 ? 250 : originalTotalAccExtCount;
+
+        Set<Integer> ids = new HashSet<>();
+        List<Object> idsList = new ArrayList<>();
+        List<Pair<Object, Object>> idsTimestampTupleInOrder = new ArrayList<>();
+        int offset = 0;
+        int max = 10;
+        long startTime = 0L;
+        int totalLoopsNeeded = (int) Math.ceil(totalAccExtCount / max);
+        Long lastUpdatedTimeForFirstIteration = 0L;
+
+        for (int idx = 0; idx < totalLoopsNeeded; idx++) {
+            Long lastUpdatedTime = loopForAccExt(totalAccExtCount, ids, idsList, idsTimestampTupleInOrder, offset, max,
+                    startTime);
+            offset += max;
+            if (idx == 0) {
+                lastUpdatedTimeForFirstIteration = lastUpdatedTime;
+            }
+            log.info("\n@@@@@@@@@@@@@@@@2\nidx=" + idx + ", idsList=" + idsList);
+        }
+
+        lastUpdatedTimeForFirstIteration++;
+        Map<String, Object> countResult2 = playMakerRecommendationEntityMgr.getAccountextExsionCount(
+                tenant.getTenantName(), null, lastUpdatedTimeForFirstIteration, null, null, 0L);
+
+        Long originalTotalAccExtCount2 = (Long) countResult2.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+
+        if (originalTotalAccExtCount2 == 0) {
+            lastUpdatedTimeForFirstIteration--;
+            countResult2 = playMakerRecommendationEntityMgr.getAccountextExsionCount(tenant.getTenantName(), null,
+                    lastUpdatedTimeForFirstIteration, null, null, 0L);
+
+            originalTotalAccExtCount2 = (Long) countResult2.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+
+        }
+        Assert.assertTrue(originalTotalAccExtCount2 > 0L);
+        log.info(String.format(
+                "originalTotalAccExtCount2 = %d, originalTotalAccExtCount = %d, lastUpdatedTimeForFirstIteration = %d",
+                originalTotalAccExtCount2, originalTotalAccExtCount, lastUpdatedTimeForFirstIteration));
+        Assert.assertTrue(originalTotalAccExtCount2 < originalTotalAccExtCount);
+        // will loop over maximum 250 entries
+        Long totalAccExtCount2 = originalTotalAccExtCount2 > 250 ? 250 : originalTotalAccExtCount2;
+
+        ids = new HashSet<>();
+        idsList = new ArrayList<>();
+        idsTimestampTupleInOrder = new ArrayList<>();
+
+        offset = 0;
+        max = 10;
+        startTime = lastUpdatedTimeForFirstIteration;
+        totalLoopsNeeded = (int) Math.ceil(totalAccExtCount2 / max);
+        lastUpdatedTimeForFirstIteration = 0L;
+
+        for (int idx = 0; idx < totalLoopsNeeded; idx++) {
+            Long lastUpdatedTime = loopForAccExt(totalAccExtCount2, ids, idsList, idsTimestampTupleInOrder, offset, max,
+                    startTime);
+            offset += max;
+            if (idx == 0) {
+                lastUpdatedTimeForFirstIteration = lastUpdatedTime;
+            }
+        }
+    }
+
+    private Long loopForAccExt(Long totalAccExtCount, Set<Integer> ids, List<Object> idsList,
+            List<Pair<Object, Object>> idsTimestampTupleInOrder, int offset, int max, long startTime) {
+        Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
+                startTime, offset, max, null, null, 0L, null, false);
+
+        Assert.assertNotNull(result);
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> accExt = (List<Map<String, Object>>) result
+                .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+
+        Assert.assertTrue(accExt.get(0).containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
+        Assert.assertTrue(accExt.size() > 0L);
+        Long lastUpdatedTime = Long.parseLong(result.get(PlaymakerRecommendationEntityMgr.END_KEY).toString());
+        Assert.assertNotNull(lastUpdatedTime);
+
+        if (totalAccExtCount >= offset + max) {
+            Assert.assertEquals(accExt.size(), max);
+        } else {
+            Assert.assertEquals(accExt.size(), offset + max - totalAccExtCount);
+        }
+
+        accExt.stream().forEach(a -> {
+            Integer id = (Integer) a.get(PlaymakerRecommendationEntityMgr.ID_KEY);
+            Object timestamp = a.get(PlaymakerRecommendationEntityMgr.LAST_MODIFIATION_DATE_KEY);
+
+            Assert.assertNotNull(id);
+            if (ids.contains(id)) {
+                log.info(String.format(
+                        "About to fail as we found repeasing id in set. RECORD[%s, %s] "
+                                + "\nset = %s, \norderedIdsList = %s, \nidsTimestampTupleInOrder = %s",
+                        id, timestamp, ids.toString(), idsList.toString(),
+                        idsTimestampTupleInOrder.stream().map(t -> String.format("[%s,%s] ", t.getLeft(), t.getRight()))
+                                .reduce((t, u) -> t + "," + u).get()));
+            }
+            Assert.assertFalse(ids.contains(id));
+            ids.add(id);
+            idsList.add(id);
+            idsTimestampTupleInOrder.add(new ImmutablePair<Object, Object>(id, timestamp));
+            Assert.assertTrue(ids.contains(id));
+        });
+
+        return lastUpdatedTime;
     }
 
     @Test(groups = "functional", enabled = true)

@@ -7,8 +7,4 @@ public class PlaymakerRecommendationDaoImplV710 extends PlaymakerRecommendationD
     public PlaymakerRecommendationDaoImplV710(NamedParameterJdbcTemplate namedJdbcTemplate) {
         super(namedJdbcTemplate);
     }
-
-    protected String getAccountExtensionLastModificationDate() {
-        return "E.[Last_Modification_Date] ";
-    }
 }
