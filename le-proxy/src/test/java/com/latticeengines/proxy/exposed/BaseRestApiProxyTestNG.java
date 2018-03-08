@@ -16,6 +16,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.SocketUtils;
@@ -40,6 +41,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
 
     @Autowired
     private TestProxy testProxy;
+
+    @Value("${proxy.test.keystore.path}")
+    private String keystorePath;
 
     private Undertow server;
 
@@ -122,9 +126,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
                 ).build();
     }
 
-    private static KeyManager[] getKeyManagers() {
+    private KeyManager[] getKeyManagers() {
         try {
-            File keyStoreFile = new File("/etc/ledp/tls/ledp_keystore.jks");
+            File keyStoreFile = new File(keystorePath);
             if (keyStoreFile.exists()) {
                 KeyStore keyStore = KeyStore.getInstance("JKS");
                 keyStore.load(new FileInputStream(keyStoreFile), "Lattice1".toCharArray());
