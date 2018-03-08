@@ -89,6 +89,7 @@ public class AttrConfig implements IsColumnMetadata {
         for (ColumnSelection.Predefined group: ColumnSelection.Predefined.values()) {
             parseUsageGroup(cm, group);
         }
+        cm.setDeprecated(AttrState.Deprecated.equals(getProperty("State", AttrState.class)));
         return cm;
     }
 
