@@ -64,10 +64,11 @@ public class PlaymakerTenantResourceDeploymentTestNG extends LPDeploymentTestNGB
     }
 
     @Test(groups = "deployment", dependsOnMethods = "createTenantWithTenantNameByNonAdmin")
-    public void updateTenantWithTenantName() {
+    public void updateTenantWithTenantName() throws InterruptedException {
         PlaymakerTenant tenant = tenantProxy.getTenant(tenantName);
         tenant.setExternalId("externalId2");
         PlaymakerTenant newTenant = tenantProxy.updateTenant(tenantName, tenant);
+        Thread.sleep(500); // wait for replication lag
         Assert.assertNotNull(newTenant);
         Assert.assertEquals(newTenant.getExternalId(), "externalId2");
         Assert.assertNull(newTenant.getTenantPassword());
