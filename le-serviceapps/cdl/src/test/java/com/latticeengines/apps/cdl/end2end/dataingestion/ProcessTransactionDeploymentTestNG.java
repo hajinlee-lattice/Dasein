@@ -32,10 +32,19 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private static final int TRANSACTION_IMPORT_SIZE_1_1 = 20000;
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
 
+    private RatingEngine ratingEngine;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
         resumeVdbCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+
+        new Thread(() -> {
+            createTestSegment1();
+            createTestSegment2();
+            ratingEngine = createRuleBasedRatingEngine();
+        }).start();
+
         importData();
         processAnalyze();
         try {
@@ -73,17 +82,14 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
-        createTestSegment1();
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_1);
         verifyTestSegment1Counts(segment1Counts);
-        createTestSegment2();
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
                 BusinessEntity.Contact, SEGMENT_2_CONTACT_1);
         verifyTestSegment2Counts(segment2Counts);
-        RatingEngine ratingEngine = createRuleBasedRatingEngine();
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_1, //
                 RatingBucketName.D, RATING_D_COUNT_1, //
