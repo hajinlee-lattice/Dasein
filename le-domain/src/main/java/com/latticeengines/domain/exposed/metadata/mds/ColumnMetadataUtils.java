@@ -19,6 +19,9 @@ public final class ColumnMetadataUtils {
         if (StringUtils.isNotBlank(overwriter.getDisplayName())) {
             overwritee.setDisplayName(overwriter.getDisplayName());
         }
+        if (StringUtils.isNotBlank(overwriter.getSecondaryDisplayName())) {
+            overwritee.setSecondaryDisplayName(overwriter.getSecondaryDisplayName());
+        }
         if (StringUtils.isNotBlank(overwriter.getDescription())) {
             overwritee.setDescription(overwriter.getDescription());
         }
@@ -39,6 +42,9 @@ public final class ColumnMetadataUtils {
         }
         if (overwriter.getFundamentalType() != null) {
             overwritee.setFundamentalType(overwriter.getFundamentalType());
+        }
+        if (overwriter.getEntity() != null) {
+            overwritee.setEntity(overwriter.getEntity());
         }
 
         // usage groups

@@ -63,7 +63,7 @@ public class SystemServingStoreTemplateImpl extends
                 ratingDisplayDecorator //
         );
 
-        return new ChainedDecoratorFactory<Namespace1<BusinessEntity>>("SystemServingStoreChain", factories) {
+        return new ChainedDecoratorFactory<Namespace1<BusinessEntity>>("ServingStoreChain", factories) {
             @Override
             protected List<Namespace> project(Namespace1<BusinessEntity> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
@@ -77,10 +77,12 @@ public class SystemServingStoreTemplateImpl extends
     }
 
     private static DecoratorFactory<Namespace1<String>> getAMDecorator(AMMetadataStore amMetadataStore) {
-        return MdsDecoratorFactory.fromMds("AMDecorator", amMetadataStore);
+        return MdsDecoratorFactory.fromMds("AMDecorator", amMetadataStore, columnMetadata -> {
+            columnMetadata.setEntity(BusinessEntity.Account);
+            return columnMetadata;
+        });
     }
 
-    @SuppressWarnings("unchecked")
     private static DecoratorFactory<Namespace1<String>> getRatingDecorator(
             RatingDisplayMetadataStore ratingDisplayMetadataStore) {
         return MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
