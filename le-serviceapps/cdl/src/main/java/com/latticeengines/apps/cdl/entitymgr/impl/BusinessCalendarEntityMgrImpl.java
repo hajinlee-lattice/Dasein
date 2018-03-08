@@ -49,11 +49,11 @@ public class BusinessCalendarEntityMgrImpl extends BaseEntityMgrRepositoryImpl<B
     @Override
     @Transactional(transactionManager = "transactionManager")
     public BusinessCalendar save(BusinessCalendar businessCalendar) {
-        BusinessCalendar existing = find();
+        Tenant tenant = MultiTenantContext.getTenant();
+        BusinessCalendar existing = repository.findByTenant(tenant);
         if (existing != null) {
             businessCalendar.setPid(existing.getPid());
         }
-        Tenant tenant = MultiTenantContext.getTenant();
         businessCalendar.setTenant(tenant);
         super.createOrUpdate(businessCalendar);
         return businessCalendar;
