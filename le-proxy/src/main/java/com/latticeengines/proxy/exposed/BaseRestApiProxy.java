@@ -34,8 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import com.latticeengines.proxy.framework.ErrorUtils;
+import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
@@ -468,7 +468,7 @@ public abstract class BaseRestApiProxy {
                     return attempt;
                 })
                 .flatMap(attempt -> {
-                    Mono delay = Mono.delay(Duration.ofMillis(backoff.get()));
+                    Mono<?> delay = Mono.delay(Duration.ofMillis(backoff.get()));
                     backoff.set((long) (backoff.get() * multiplier));
                     return delay;
                 })
