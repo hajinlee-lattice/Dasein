@@ -3,6 +3,7 @@ package com.latticeengines.proxy.exposed.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -12,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("segmentProxy")
@@ -50,6 +52,13 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}", //
                 shortenCustomerSpace(customerSpace), segmentName);
         delete("deleteSegmentByName", url);
+    }
+
+    public Map<BusinessEntity, Long> updateSegmentCounts(String customerSpace, String segmentName) {
+        String url = constructUrl("/{customerSpace}/segments/{segmentName}/counts", //
+                shortenCustomerSpace(customerSpace), segmentName);
+        Map map = put("deleteSegmentByName", url, null, Map.class);
+        return JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
     }
 
     public StatisticsContainer getSegmentStats(String customerSpace, String segmentName, DataCollection.Version version) {

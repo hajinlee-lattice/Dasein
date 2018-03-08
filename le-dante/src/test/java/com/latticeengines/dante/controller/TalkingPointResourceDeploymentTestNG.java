@@ -35,7 +35,8 @@ public class TalkingPointResourceDeploymentTestNG extends DanteTestNGBase {
     private String internalResourceHostPort;
 
     @BeforeClass(groups = "deployment")
-    public void setup() {
+    public void setup() throws Exception {
+        super.setupRunEnvironment();
         super.createDependences();
     }
 

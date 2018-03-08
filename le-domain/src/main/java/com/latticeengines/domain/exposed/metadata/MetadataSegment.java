@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -317,6 +319,17 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         default:
             throw new UnsupportedOperationException("Did not reserve a column for " + entity + " count.");
         }
+    }
+
+    public Map<BusinessEntity, Long> getEntityCounts() {
+        Map<BusinessEntity, Long> map = new HashMap<>();
+        for (BusinessEntity entity : BusinessEntity.COUNT_ENTITIES) {
+            Long count = getEntityCount(entity);
+            if (count != null) {
+                map.put(entity, count);
+            }
+        }
+        return map;
     }
 
     public FrontEndQuery toFrontEndQuery(BusinessEntity mainEntity) {

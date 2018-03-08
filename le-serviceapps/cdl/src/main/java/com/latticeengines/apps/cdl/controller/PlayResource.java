@@ -9,7 +9,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -124,17 +126,17 @@ public class PlayResource {
                 endTimestamp);
     }
 
-    @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/{playName}")
     @ResponseBody
     @ApiOperation(value = "Get full play for a specific tenant based on playName")
     public Play getPlay(//
             @PathVariable String customerSpace, //
             @PathVariable String playName) {
-        Play play = playService.getFullPlayByName(playName);
-        return play;
+        Tenant tenant = MultiTenantContext.getTenant();
+        return playService.getFullPlayByName(playName);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Register a play")
     public Play createOrUpdate(//

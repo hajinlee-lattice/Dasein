@@ -15,4 +15,7 @@ public interface SegmentEntityMgr extends BaseEntityMgr<MetadataSegment> {
     MetadataSegment findMasterSegment(String collectionName);
 
     void upsertStats(String segmentName, StatisticsContainer statisticsContainer);
+
+    MetadataSegment createOrUpdateSegment(MetadataSegment segment);
+
 }

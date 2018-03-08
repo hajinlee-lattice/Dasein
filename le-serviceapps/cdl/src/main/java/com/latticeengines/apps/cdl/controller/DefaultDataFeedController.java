@@ -1,10 +1,13 @@
 package com.latticeengines.apps.cdl.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -27,10 +30,10 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/datafeed")
 public class DefaultDataFeedController {
 
-    @Autowired
+    @Inject
     private DataFeedService datafeedService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     public DataFeed findDataFeedByName(@PathVariable String customerSpace) {
@@ -38,7 +41,7 @@ public class DefaultDataFeedController {
         return datafeedService.getOrCreateDataFeed(customerSpace);
     }
 
-    @RequestMapping(value = "/default", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "/default")
     @ResponseBody
     @ApiOperation(value = "find data feed by name")
     public DataFeed getDefaultDataFeed(@PathVariable String customerSpace) {
@@ -46,7 +49,7 @@ public class DefaultDataFeedController {
         return datafeedService.getDefaultDataFeed(customerSpace);
     }
 
-    @RequestMapping(value = "/drainingstatus/{drainingStatus}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/drainingstatus/{drainingStatus}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedDrainingStatus(@PathVariable String customerSpace, @PathVariable String drainingStatus) {
@@ -54,7 +57,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedDrainingStatus(customerSpace, drainingStatus);
     }
 
-    @RequestMapping(value = "/maintenance/{maintenanceMode}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/maintenance/{maintenanceMode}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedMaintenanceMode(@PathVariable String customerSpace,
@@ -63,7 +66,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeedMaintenanceMode(customerSpace, maintenanceMode);
     }
 
-    @RequestMapping(value = "/jobtype/{jobType}/startexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobtype/{jobType}/startexecution")
     @ResponseBody
     @ApiOperation(value = "start data feed execution")
     public DataFeedExecution startExecution(@PathVariable String customerSpace, //
@@ -73,7 +76,7 @@ public class DefaultDataFeedController {
         return datafeedService.startExecution(customerSpace, "", jobType, jobId);
     }
 
-    @RequestMapping(value = "/jobtype/{jobType}/restartexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobtype/{jobType}/restartexecution")
     @ResponseBody
     @ApiOperation(value = "restart data feed execution")
     public Long restartExecution(@PathVariable String customerSpace, //
@@ -82,7 +85,7 @@ public class DefaultDataFeedController {
         return datafeedService.restartExecution(customerSpace, "", jobType);
     }
 
-    @RequestMapping(value = "/jobtype/{jobType}/lockexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/jobtype/{jobType}/lockexecution")
     @ResponseBody
     @ApiOperation(value = "lock data feed execution")
     public ResponseDocument<Boolean> lockExecution(@PathVariable String customerSpace, //
@@ -91,7 +94,7 @@ public class DefaultDataFeedController {
         return ResponseDocument.successResponse(datafeedService.lockExecution(customerSpace, "", jobType));
     }
 
-    @RequestMapping(value = "/status/{status}", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @PutMapping(value = "/status/{status}")
     @ResponseBody
     @ApiOperation(value = "update data feed status by name")
     public void updateDataFeedStatus(@PathVariable String customerSpace, @PathVariable String status) {
@@ -99,7 +102,7 @@ public class DefaultDataFeedController {
         datafeedService.updateDataFeed(customerSpace, "", status);
     }
 
-    @RequestMapping(value = "/status/{initialDataFeedStatus}/finishexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/status/{initialDataFeedStatus}/finishexecution")
     @ResponseBody
     @ApiOperation(value = "finish data feed execution")
     public DataFeedExecution finishExecution(@PathVariable String customerSpace,
@@ -108,7 +111,7 @@ public class DefaultDataFeedController {
         return datafeedService.finishExecution(customerSpace, "", initialDataFeedStatus);
     }
 
-    @RequestMapping(value = "/status/{initialDataFeedStatus}/failexecution", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/status/{initialDataFeedStatus}/failexecution")
     @ResponseBody
     @ApiOperation(value = "fail data feed execution")
     public DataFeedExecution failExecution(@PathVariable String customerSpace,
@@ -117,7 +120,7 @@ public class DefaultDataFeedController {
         return datafeedService.failExecution(customerSpace, "", initialDataFeedStatus);
     }
 
-    @RequestMapping(value = "/execution/workflow/{workflowId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/execution/workflow/{workflowId}")
     @ResponseBody
     @ApiOperation(value = "update data feed execution")
     public DataFeedExecution updateExecutionWorkflowId(@PathVariable String customerSpace,
@@ -126,7 +129,7 @@ public class DefaultDataFeedController {
         return datafeedService.updateExecutionWorkflowId(customerSpace, "", workflowId);
     }
 
-    @RequestMapping(value = "/rebuildtransaction/{isRebuild}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/rebuildtransaction/{isRebuild}")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")
     public DataFeed rebuildTransaction(@PathVariable String customerSpace, @PathVariable Boolean isRebuild) {
@@ -134,7 +137,7 @@ public class DefaultDataFeedController {
         return datafeedService.rebuildTransaction(customerSpace, "", isRebuild);
     }
 
-    @RequestMapping(value = "/earliesttransaction/{transactionDayPeriod}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/earliesttransaction/{transactionDayPeriod}")
     @ResponseBody
     @ApiOperation(value = "rebuild transaction store")
     public DataFeed updateEarliestTransaction(@PathVariable String customerSpace,
@@ -143,7 +146,7 @@ public class DefaultDataFeedController {
         return datafeedService.updateEarliestTransaction(customerSpace, "", transactionDayPeriod);
     }
 
-    @RequestMapping(value = "/resetimport", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/resetimport")
     @ResponseBody
     @ApiOperation(value = "Reset the pending import data for this data feed")
     public void resetImport(@PathVariable String customerSpace) {
@@ -151,7 +154,7 @@ public class DefaultDataFeedController {
         datafeedService.resetImport(customerSpace, "");
     }
 
-    @RequestMapping(value = "/resetimport/{entity}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/resetimport/{entity}")
     @ResponseBody
     @ApiOperation(value = "Reset the pending import data for this data feed")
     public void resetImportByEntity(@PathVariable String customerSpace, @PathVariable String entity) {

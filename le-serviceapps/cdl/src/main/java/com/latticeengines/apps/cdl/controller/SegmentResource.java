@@ -1,9 +1,11 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -18,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -91,6 +94,13 @@ public class SegmentResource {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         segmentService.upsertStats(customerSpace, segmentName, statisticsContainer);
         return SimpleBooleanResponse.successResponse();
+    }
+
+    @PutMapping(value = "/{segmentName}/counts")
+    @ResponseBody
+    @ApiOperation(value = "Update counts for a segment")
+    public Map<BusinessEntity, Long> updateSegmentCount(@PathVariable String customerSpace, @PathVariable String segmentName) {
+        return segmentService.updateSegmentCounts(segmentName);
     }
 
 }

@@ -60,12 +60,14 @@ import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Schedulers;
 
 @Service("cdlTestDataService")
 public class CDLTestDataServiceImpl implements CDLTestDataService {
@@ -88,17 +90,19 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
     private final MetadataProxy metadataProxy;
     private final DataCollectionProxy dataCollectionProxy;
     private final RedshiftService redshiftService;
+    private final RatingEngineProxy ratingEngineProxy;
 
     @Resource(name = "redshiftJdbcTemplate")
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Inject
     public CDLTestDataServiceImpl(TestArtifactService testArtifactService, MetadataProxy metadataProxy,
-            DataCollectionProxy dataCollectionProxy, RedshiftService redshiftService) {
+            DataCollectionProxy dataCollectionProxy, RedshiftService redshiftService, RatingEngineProxy ratingEngineProxy) {
         this.testArtifactService = testArtifactService;
         this.metadataProxy = metadataProxy;
         this.dataCollectionProxy = dataCollectionProxy;
         this.redshiftService = redshiftService;
+        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     @SuppressWarnings("rawtypes")
@@ -232,6 +236,15 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         metadataProxy.createTable(tenantId, ratingTableName, table);
         DataCollection.Version active = dataCollectionProxy.getActiveVersion(tenantId);
         dataCollectionProxy.upsertTable(tenantId, ratingTableName, TableRoleInCollection.PivotedRating, active);
+
+        final String finalTenantId = tenantId;
+        Flux.fromIterable(engineIds).parallel().runOn(Schedulers.parallel()) //
+                .map(engineId -> {
+                    Map<String, Long> coverage = ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId);
+                    log.info("Updated count of rating engine " + engineId + " to " + JsonUtils.serialize(coverage));
+                    return coverage;
+                }) //
+                .sequential().collectList().block();
     }
 
     private StatsCube toStatsCube(Map<String, Map<RatingBucketName, Long>> coverages) {

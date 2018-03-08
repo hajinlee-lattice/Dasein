@@ -3,6 +3,8 @@ package com.latticeengines.dante.controller;
 import java.util.Arrays;
 import java.util.List;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -21,8 +23,8 @@ public class TalkingPointAttributesResourceDeploymentTestNG extends DanteTestNGB
     private TalkingPointsAttributesProxy talkingPointsAttributesProxy;
 
     @BeforeClass(groups = "deployment")
-    public void setup() throws Exception {
-
+    public void setup() {
+        super.setupRunEnvironment();
     }
 
     @Test(groups = "deployment")

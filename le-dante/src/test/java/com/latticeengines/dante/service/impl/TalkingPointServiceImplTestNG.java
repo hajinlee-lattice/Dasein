@@ -49,6 +49,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
     @BeforeClass(groups = "functional")
     public void setup() {
+        super.setupRunEnvironment();
         testPlay = createTestPlay();
         playProxy = spy(new PlayProxy());
         ((TalkingPointServiceImpl) talkingPointService).setPlayProxy(playProxy);

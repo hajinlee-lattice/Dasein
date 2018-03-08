@@ -3,10 +3,6 @@ package com.latticeengines.apps.cdl.entitymgr.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.latticeengines.apps.cdl.dao.SegmentDao;
-import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
-import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +11,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.cdl.dao.SegmentDao;
+import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -65,7 +65,7 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public void createOrUpdate(MetadataSegment segment) {
+    public MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
         segment.setTenant(MultiTenantContext.getTenant());
         if (segment.getDataCollection() == null) {
             DataCollection defaultCollection = dataCollectionEntityMgr.findOrCreateDefaultCollection();
@@ -91,8 +91,10 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         if (existing != null) {
             existing = cloneForUpdate(existing, segment);
             segmentDao.update(existing);
+            return existing;
         } else {
             segmentDao.create(segment);
+            return segment;
         }
     }
 

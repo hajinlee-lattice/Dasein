@@ -2,6 +2,8 @@ package com.latticeengines.dante.testFramework;
 
 import java.util.Date;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -12,9 +14,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.Assert;
-import org.testng.annotations.BeforeClass;
 
 import com.latticeengines.apps.cdl.service.SegmentService;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.dante.testFramework.testDao.TestPlayLaunchDao;
 import com.latticeengines.dante.testFramework.testDao.TestRatingEngineDao;
@@ -29,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 import com.latticeengines.testframework.service.impl.GlobalAuthFunctionalTestBed;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
@@ -49,6 +52,9 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     @Autowired
     protected TestPlayLaunchDao testPlayLaunchDao;
 
+    @Inject
+    private CDLTestDataService cdlTestDataService;
+
     protected Tenant mainTestTenant;
 
     protected CustomerSpace mainTestCustomerSpace;
@@ -61,31 +67,33 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
     protected static final String SEGMENT_NAME = "segment";
     protected static final String CREATED_BY = "lattice@lattice-engines.com";
 
-    @BeforeClass(groups = { "functional", "deployment" })
-    public void setupRunEnvironment() throws Exception {
+    protected void setupRunEnvironment() {
         testBed.bootstrap(1);
         mainTestTenant = testBed.getMainTestTenant();
         mainTestCustomerSpace = CustomerSpace.parse(mainTestTenant.getId());
         MultiTenantContext.setTenant(mainTestTenant);
     }
 
-    public void createDependences() {
+    // should only be used in deployment tests
+    protected void createDependences() throws Exception {
+        cdlTestDataService.populateData(mainTestTenant.getId());
         testMetadataSegment = createTestSegment();
         testRatingEngine = createTestRatingEngine();
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), testRatingEngine.getId(), null);
         testPlay = createTestPlay();
         testPlayLaunch = createTestPlayLaunch(testPlay);
     }
 
-    private MetadataSegment createTestSegment() {
+    private MetadataSegment createTestSegment() throws Exception {
         MetadataSegment segment = new MetadataSegment();
         segment.setAccountFrontEndRestriction(new FrontEndRestriction());
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentService
                 .createOrUpdateSegment(CustomerSpace.parse(mainTestTenant.getId()).toString(), segment);
-        segment = segmentService.findByName(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                createdSegment.getName());
-        Assert.assertNotNull(segment);
-        return segment;
+        Thread.sleep(500);
+        segmentService.updateSegmentCounts(createdSegment.getName());
+        Assert.assertNotNull(createdSegment);
+        return createdSegment;
     }
 
     private RatingEngine createTestRatingEngine() {
@@ -139,7 +147,7 @@ public class DanteTestNGBase extends AbstractTestNGSpringContextTests {
         PlayLaunch playLaunch = new PlayLaunch();
         MetadataSegment segment = new MetadataSegment();
         segment.setDisplayName("TestSegment");
-        playLaunch.setLaunchId("WorkFlowTestPlayLaunch");
+        playLaunch.setLaunchId(NamingUtils.uuid("WorkFlowTestPlayLaunch"));
         playLaunch.setPlay(play);
         playLaunch.setCreated(new Date());
         playLaunch.setTenantId(mainTestTenant.getPid());

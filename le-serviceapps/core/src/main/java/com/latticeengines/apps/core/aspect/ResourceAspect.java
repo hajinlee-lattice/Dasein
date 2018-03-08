@@ -14,12 +14,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Aspect
 public class ResourceAspect {
 
-    private final TenantEntityMgr tenantEntityMgr;
-
     @Inject
-    public ResourceAspect(TenantEntityMgr tenantEntityMgr) {
-        this.tenantEntityMgr = tenantEntityMgr;
-    }
+    private TenantEntityMgr tenantEntityMgr;
 
     @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) " +
             "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")

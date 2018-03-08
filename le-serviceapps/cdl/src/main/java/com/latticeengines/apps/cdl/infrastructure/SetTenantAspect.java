@@ -35,38 +35,42 @@ public class SetTenantAspect {
     // ===================================
     // BEGIN: legacy aspects to be removed
     // ===================================
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.SegmentServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.SegmentServiceImpl.*(..)) " +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsSegmentService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace.toString());
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataCollectionServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataCollectionServiceImpl.*(..))" +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataCollectionService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.StatisticsContainerServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.StatisticsContainerServiceImpl.*(..))" +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsStatisticsContainerService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.*(..)) " +
-            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllDataFeeds(..))" +
-            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..))")
+            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllDataFeeds(..)) " +
+            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..)) " +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataFeedService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedTaskServiceImpl.*(..))")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedTaskServiceImpl.*(..)) " +
+            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataFeedTaskService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
-
     // ===================================
     // END: legacy aspects to be removed
     // ===================================
