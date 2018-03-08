@@ -643,7 +643,7 @@ public enum LedpCode {
     LEDP_37013("Could not find data collection of type {0}"), //
     LEDP_37014("Could not find the default data collection"), //
     LEDP_37015(
-            "Could not find the attribute repository for tenant {0}. Make sure data profiling is done for the tenant."), //
+            "Could not find the attribute repository for tenant {0} at version {1}. Make sure data profiling is done for the tenant."), //
     LEDP_37016("Cannot support cross-period event query, found {0} and {1} in the query."), //
 
     // le-dante

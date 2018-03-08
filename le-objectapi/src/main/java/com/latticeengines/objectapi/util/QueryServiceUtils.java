@@ -14,7 +14,7 @@ public class QueryServiceUtils {
         String tenant = customerSpace.toString();
         AttributeRepository attrRepo = queryEvaluatorService.getAttributeRepository(tenant, version);
         if (attrRepo == null) {
-            throw new LedpException(LedpCode.LEDP_37015, new Object[]{ tenant });
+            throw new LedpException(LedpCode.LEDP_37015, new Object[]{ tenant, version });
         }
         return attrRepo;
     }
