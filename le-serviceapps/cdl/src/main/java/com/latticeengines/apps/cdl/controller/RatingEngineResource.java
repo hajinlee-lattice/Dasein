@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.latticeengines.apps.cdl.annotation.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -114,6 +115,7 @@ public class RatingEngineResource {
 
     @PostMapping(value = "/with-action")
     @ResponseBody
+    @Action
     @ApiOperation(value = "Register or update a Rating Engine, returns RatingEngineAndActionDTO")
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
             @RequestBody RatingEngine ratingEngine) {
@@ -156,6 +158,7 @@ public class RatingEngineResource {
 
     @RequestMapping(value = "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
+    @Action
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id, returns RatingModelAndActionDTO")
     public RatingModelAndActionDTO updateRatingModelAndActionDTO(@PathVariable String customerSpace,
             @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,

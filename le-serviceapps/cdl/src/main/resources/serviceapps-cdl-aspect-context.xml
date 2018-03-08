@@ -7,6 +7,7 @@
     <aop:aspectj-autoproxy proxy-target-class="true"/>
     <bean id="resourceAspect" class="com.latticeengines.apps.core.aspect.ResourceAspect"/>
     <bean id="cdlJobSetTenantAspect" class="com.latticeengines.apps.cdl.infrastructure.SetTenantAspect" />
-    <bean id="resetActionContextAspect" class="com.latticeengines.apps.cdl.controller.ResetActionContextAspect" />
+    <bean id="resetActionContextAspect" class="com.latticeengines.apps.cdl.infrastructure.ResetActionContextAspect" />
+
 
 </beans>

@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.controller;
+package com.latticeengines.apps.cdl.infrastructure;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.After;
@@ -10,12 +10,12 @@ import com.latticeengines.apps.cdl.util.ActionContext;
 @Aspect
 public class ResetActionContextAspect {
 
-    @Before("execution(* com.latticeengines.apps.cdl.controller.*AndActionDTO(..))")
+    @Before("@annotation(com.latticeengines.apps.cdl.annotation.Action)")
     public void resetActionContextBeforehand(JoinPoint joinPoint) {
         ActionContext.remove();
     }
 
-    @After("execution(* com.latticeengines.apps.cdl.controller.*AndActionDTO(..))")
+    @After("@annotation(com.latticeengines.apps.cdl.annotation.Action)")
     public void resetActionContextAfterwards(JoinPoint joinPoint) {
         ActionContext.remove();
     }
