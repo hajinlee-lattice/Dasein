@@ -468,7 +468,7 @@ public abstract class BaseRestApiProxy {
                     return attempt;
                 })
                 .flatMap(attempt -> {
-                    Mono<?> delay = Mono.delay(Duration.ofMillis(backoff.get()));
+                    Mono<Long> delay = Mono.delay(Duration.ofMillis(backoff.get()));
                     backoff.set((long) (backoff.get() * multiplier));
                     return delay;
                 })
@@ -476,6 +476,7 @@ public abstract class BaseRestApiProxy {
     }
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
+        //TODO: need to enhance error handling
         return flux //
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s flux from %s", channel, url)))
@@ -484,7 +485,6 @@ public abstract class BaseRestApiProxy {
     }
 
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
-        //TODO: need to enhance error handling
         return mono //
                 .doOnCancel(() ->
                         log.info(String.format("Cancel reading %s mono from %s", channel, url)))
