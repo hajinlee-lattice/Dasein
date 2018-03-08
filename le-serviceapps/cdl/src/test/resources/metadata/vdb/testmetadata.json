@@ -4,7 +4,7 @@
   "data_category": "LPILeadExtensions",
   "get_query_data_endpoint": "http://10.61.0.58:8888/DLRestService/GetVisiDBQueryData",
   "launch_id": "5486_Job_66325",
-  "merge_rule": "UPSERT",
+  "merge_rule": "APPEND",
   "report_status_endpoint": "http://10.61.0.58:8888/DLRestService/SetLoadDataJobStatus_DP",
   "table_name": "FS_Data_For_Dante_Accounts_1000",
   "tenant_id": "DellEB",
