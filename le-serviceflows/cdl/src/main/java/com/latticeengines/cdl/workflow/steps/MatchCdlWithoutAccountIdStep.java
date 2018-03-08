@@ -40,8 +40,10 @@ public class MatchCdlWithoutAccountIdStep extends RunDataFlow<MatchCdlAccountCon
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
-        parameters.setMatchField(Arrays.asList(InterfaceName.LatticeAccountId.name()));
+        parameters.setInputMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
+        parameters.setAccountMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         parameters.setDedupe(true);
+        parameters.setRightJoin(true);
         return parameters;
     }
 

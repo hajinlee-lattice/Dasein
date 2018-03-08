@@ -6,8 +6,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.MatchCdlMergeStep;
-import com.latticeengines.cdl.workflow.steps.MatchCdlOrchestratorStep;
+import com.latticeengines.cdl.workflow.steps.MatchCdlSplitWithAccountIdStep;
+import com.latticeengines.cdl.workflow.steps.MatchCdlSplitWithoutAccountIdStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdStartStep;
+import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithoutAccountIdStartStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -20,10 +22,16 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchWorkflowConfiguration> {
 
     @Inject
-    private MatchDataCloudWorkflow matchDataCloudWorkflow;
+    private MatchCdlWithAccountIdStep matchAccountIdStep;
 
     @Inject
-    private MatchCdlOrchestratorStep matchOrchestrator;
+    private MatchCdlSplitWithAccountIdStep matchSplitWithAccountIdStep;
+
+    @Inject
+    private MatchCdlSplitWithoutAccountIdStep matchSplitWithoutAccountIdStep;
+
+    @Inject
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Inject
     private MatchCdlWithAccountIdStartStep matchAccountIdStartStep;
@@ -49,7 +57,9 @@ public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchW
                     .build();
         default:
             return new WorkflowBuilder() //
-                    .next(matchOrchestrator) //
+                    .next(matchAccountIdStep) //
+                    .next(matchSplitWithAccountIdStep) //
+                    .next(matchSplitWithoutAccountIdStep) //
                     .next(matchAccountIdStartStep) //
                     .next(matchAccountIdWorkflow, null) //
                     .next(matchWithoutAccountIdStartStep) //

@@ -6,4 +6,14 @@ public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfigurati
         setBeanName("matchCdlAccountFlow");
     }
 
+    private String matchInputTableName;
+
+    public String getMatchInputTableName() {
+        return matchInputTableName;
+    }
+
+    public void setMatchInputTableName(String matchInputTableName) {
+        this.matchInputTableName = matchInputTableName;
+    }
+
 }

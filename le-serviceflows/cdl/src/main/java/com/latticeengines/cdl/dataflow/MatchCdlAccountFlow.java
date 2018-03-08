@@ -27,11 +27,17 @@ public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccount
         Node accountTable = addSource(parameters.accountTable);
 
         List<String> retainFields = buildRetainFields(parameters, inputTable, accountTable);
-        FieldList groupByFields = new FieldList(parameters.getMatchFields());
-        Node result = inputTable.join(groupByFields, accountTable, groupByFields, JoinType.LEFT);
+        FieldList inputMatchFields = new FieldList(parameters.getInputMatchFields());
+        FieldList accountMatchFields = new FieldList(parameters.getAccountMatchFields());
+        Node result = null;
+        if (!parameters.isRightJoin()) {
+            result = inputTable.join(inputMatchFields, accountTable, accountMatchFields, JoinType.LEFT);
+        } else {
+            result = accountTable.join(accountMatchFields, inputTable, inputMatchFields, JoinType.RIGHT);
+        }
         if (parameters.isDedupe()) {
-            result = result.groupByAndLimit(groupByFields, new FieldList(InterfaceName.CDLUpdatedTime.name()), 1, true,
-                    true);
+            result = result.groupByAndLimit(inputMatchFields, new FieldList(InterfaceName.CDLUpdatedTime.name()), 1,
+                    true, true);
         }
         result = result.retain(new FieldList(retainFields));
         log.info("Match Cdl Account table's columns=" + StringUtils.join(retainFields, ","));

@@ -40,7 +40,8 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
-        parameters.setMatchField(Arrays.asList(InterfaceName.AccountId.name()));
+        parameters.setInputMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
+        parameters.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
         parameters.setDedupe(false);
         return parameters;
     }
@@ -55,15 +56,18 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
     }
 
     private Table getInputTable() {
-        return getObjectFromContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID, Table.class);
+        Table inputTable = getObjectFromContext(CUSTOM_EVENT_IMPORT, Table.class);
+        if (inputTable != null)
+            return inputTable;
+        return metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),
+                configuration.getMatchInputTableName());
     }
 
     @Override
     public void onExecutionCompleted() {
         Table targetTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
-        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, targetTable);
-        putStringValueInContext(MATCH_FETCH_ONLY, "true");
+        putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT, targetTable);
     }
 
 }

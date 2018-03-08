@@ -13,8 +13,8 @@ public class MatchCdlWithoutAccountIdStartStep extends BaseWorkflowStep<MatchCdl
     @Override
     public void execute() {
         Table inputTable = getObjectFromContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID, Table.class);
-        if (inputTable == null) {
-            log.info("There's no table with account Id, skip the workflow.");
+        if (inputTable == null || inputTable.getCount() == 0) {
+            log.info("There's no data without account Id, skip the workflow.");
             skipEmbeddedWorkflow(MatchCdlWithoutAccountIdWorkflowConfiguration.class);
         } else {
             enableEmbeddedWorkflow(MatchCdlWithoutAccountIdWorkflowConfiguration.class);

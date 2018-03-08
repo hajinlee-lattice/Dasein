@@ -14,6 +14,9 @@ public class MatchCdlMergeParameters extends DataFlowParameters {
     @SourceTableName
     public String tableWithoutAccountId;
 
+    public MatchCdlMergeParameters() {
+    }
+
     public MatchCdlMergeParameters(String tableWithAccountId, String tableWithoutAccountId) {
         this.tableWithAccountId = tableWithAccountId;
         this.tableWithoutAccountId = tableWithoutAccountId;

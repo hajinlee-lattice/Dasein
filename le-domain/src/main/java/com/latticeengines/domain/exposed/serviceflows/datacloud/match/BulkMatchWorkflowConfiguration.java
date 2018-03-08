@@ -43,6 +43,13 @@ public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfigu
             return this;
         }
 
+        public Builder customer(CustomerSpace customerSpace) {
+            prepareConfig.setCustomerSpace(customerSpace);
+            parallelExecConfig.setCustomerSpace(customerSpace);
+            this.customerSpace = customerSpace;
+            return this;
+        }
+
         public Builder hdfsPodId(String hdfsPodId) {
             prepareConfig.setHdfsPodId(hdfsPodId);
             parallelExecConfig.setPodId(hdfsPodId);

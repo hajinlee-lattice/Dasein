@@ -23,14 +23,16 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
 
     private MatchCdlAccountParameters getMatchAccountIdParameters() {
         MatchCdlAccountParameters params = new MatchCdlAccountParameters("inputTable", "accountTable");
-        params.setMatchField(Arrays.asList(InterfaceName.AccountId.name()));
+        params.setInputMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
+        params.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
         params.setDedupe(false);
         return params;
     }
 
     private MatchCdlAccountParameters getMatchLatticeAccountIdParameters() {
         MatchCdlAccountParameters params = new MatchCdlAccountParameters("inputTable", "accountTable");
-        params.setMatchField(Arrays.asList(InterfaceName.LatticeAccountId.name()));
+        params.setInputMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
+        params.setAccountMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         params.setDedupe(true);
         return params;
     }

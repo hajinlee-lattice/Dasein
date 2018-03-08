@@ -19,20 +19,37 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
     @JsonProperty("dedupe")
     private boolean dedupe;
 
-    @JsonProperty("match_fields")
-    private List<String> matchFields;
+    @JsonProperty("input_match_fields")
+    private List<String> inputMatchFields;
+
+    @JsonProperty("account_match_fields")
+    private List<String> accountMatchFields;
+
+    @JsonProperty("right_join")
+    private boolean rightJoin;
+
+    public MatchCdlAccountParameters() {
+    }
 
     public MatchCdlAccountParameters(String inputTable, String accountTable) {
         this.inputTable = inputTable;
         this.accountTable = accountTable;
     }
 
-    public List<String> getMatchFields() {
-        return matchFields;
+    public List<String> getInputMatchFields() {
+        return inputMatchFields;
     }
 
-    public void setMatchField(List<String> matchFields) {
-        this.matchFields = matchFields;
+    public void setInputMatchFields(List<String> inputMatchFields) {
+        this.inputMatchFields = inputMatchFields;
+    }
+
+    public List<String> getAccountMatchFields() {
+        return accountMatchFields;
+    }
+
+    public void setAccountMatchFields(List<String> accountMatchFields) {
+        this.accountMatchFields = accountMatchFields;
     }
 
     public boolean isDedupe() {
@@ -41,6 +58,14 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
 
     public void setDedupe(boolean dedupe) {
         this.dedupe = dedupe;
+    }
+
+    public boolean isRightJoin() {
+        return this.rightJoin;
+    }
+
+    public void setRightJoin(boolean rightJoin) {
+        this.rightJoin = rightJoin;
     }
 
 }

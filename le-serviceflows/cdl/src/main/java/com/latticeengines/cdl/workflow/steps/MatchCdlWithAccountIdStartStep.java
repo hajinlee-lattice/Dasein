@@ -13,10 +13,12 @@ public class MatchCdlWithAccountIdStartStep extends BaseWorkflowStep<MatchCdlSte
     @Override
     public void execute() {
         Table inputTable = getObjectFromContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID, Table.class);
-        if (inputTable == null) {
-            log.info("There's no table with account Id, skip the workflow.");
+        if (inputTable == null || inputTable.getCount() == 0) {
+            log.info("There's no data with account Id, skip the workflow.");
             skipEmbeddedWorkflow(MatchCdlWithAccountIdWorkflowConfiguration.class);
         } else {
+            putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, inputTable);
+            putStringValueInContext(MATCH_FETCH_ONLY, "true");
             enableEmbeddedWorkflow(MatchCdlWithAccountIdWorkflowConfiguration.class);
         }
 
