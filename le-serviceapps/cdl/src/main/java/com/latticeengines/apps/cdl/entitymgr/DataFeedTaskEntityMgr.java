@@ -17,11 +17,15 @@ public interface DataFeedTaskEntityMgr extends BaseEntityMgrRepository<DataFeedT
 
     void clearTableQueuePerTask(DataFeedTask task);
 
-    void registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
+    List<String> registerExtract(DataFeedTask dataFeedTask, String tableName, Extract extract);
 
-    void registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);
+    List<String> registerExtracts(DataFeedTask datafeedTask, String tableName, List<Extract> extracts);
 
     void addTableToQueue(DataFeedTask dataFeedTask, Table table);
+
+    void addTableToQueue(String dataFeedTaskUniqueId, String tableName);
+
+    void addTablesToQueue(String dataFeedTaskUniqueId, List<String> tableNames);
 
     DataFeedTask getDataFeedTask(String source, String dataFeedType, String entity, DataFeed datafeed);
 

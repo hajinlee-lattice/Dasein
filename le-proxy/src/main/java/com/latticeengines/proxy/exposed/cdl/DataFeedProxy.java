@@ -152,17 +152,37 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         put("updateDataFeedTask", url, dataFeedTask);
     }
 
-    public void registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
+    public List<String> registerExtract(String customerSpace, String taskId, String tableName, Extract extract) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextract/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
-        post("registerExtract", url, extract, Void.class);
+        List<?> res = post("registerExtract", url, extract, List.class);
+        return JsonUtils.convertList(res, String.class);
     }
 
-    public void registerExtracts(String customerSpace, String taskId, String tableName, List<Extract> extracts) {
+    public List<String> registerExtracts(String customerSpace, String taskId, String tableName, List<Extract> extracts) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextracts/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
-        post("registerExtract", url, extracts, Void.class);
+        List<?> res = post("registerExtract", url, extracts, List.class);
+        return JsonUtils.convertList(res, String.class);
+    }
+
+    public void addTableToQueue(String customerSpace, String taskId, String tableName) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue/{tableName}",
+                shortenCustomerSpace(customerSpace), taskId, tableName);
+        put("addTableToQueue", url);
+    }
+
+    public void addTablesToQueue(String customerSpace, String taskId, List<String> tables) {
+        if (tables == null || tables.size() == 0) {
+            return;
+        }
+        String baseUrl = "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/addtabletoqueue?";
+        StringBuilder builder = new StringBuilder();
+        tables.forEach(tableName -> builder.append(String.format("tableName=%s&", tableName)));
+        baseUrl += builder.toString();
+        String url = constructUrl(baseUrl, shortenCustomerSpace(customerSpace), taskId);
+        put("addTablesToQueue", url);
     }
 
     public List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType,

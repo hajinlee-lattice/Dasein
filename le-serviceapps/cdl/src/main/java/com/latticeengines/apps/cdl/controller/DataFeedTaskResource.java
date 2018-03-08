@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -80,19 +81,38 @@ public class DataFeedTaskResource {
     @RequestMapping(value = "/{taskId}/registerextract/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
-    public void registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
+    public List<String> registerExtract(@PathVariable String customerSpace, @PathVariable String taskId,
             @PathVariable String tableName, @RequestBody Extract extract) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
+        return dataFeedTaskService.registerExtract(customerSpace, taskId, tableName, extract);
     }
 
     @RequestMapping(value = "/{taskId}/registerextracts/{tableName}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update data feed task")
-    public void registerExtracts(@PathVariable String customerSpace, @PathVariable String taskId,
+    public List<String> registerExtracts(@PathVariable String customerSpace, @PathVariable String taskId,
             @PathVariable String tableName, @RequestBody List<Extract> extracts) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
+        return dataFeedTaskService.registerExtracts(customerSpace, taskId, tableName, extracts);
+    }
+
+    @RequestMapping(value = "/{taskId}/addtabletoqueue/{tableName}", method = RequestMethod.PUT, headers =
+            "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Add table to data feed task table queue")
+    public void addTableToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
+                                @PathVariable String tableName) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.addTableToQueue(customerSpace, taskId, tableName);
+    }
+
+    @RequestMapping(value = "/{taskId}/addtabletoqueue", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Add tables to data feed task table queue")
+    public void addTablesToQueue(@PathVariable String customerSpace, @PathVariable String taskId,
+                                 @RequestParam(value = "tableName") List<String> tables) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataFeedTaskService.addTablesToQueue(customerSpace, taskId, tables);
     }
 
     @RequestMapping(value = "/{source}/{dataFeedType}/{entity}/unconsolidatedextracts", method = RequestMethod.GET, headers = "Accept=application/json")

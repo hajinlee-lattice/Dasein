@@ -16,6 +16,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -65,7 +66,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         dataFeedTask.setImportTemplate(metadataProxy.getTable(mainCustomerSpace, TABLE_NAME));
     }
 
-    @Test(groups = "deployment", enabled = false)
+    @Test(groups = "deployment")
     public void testCreateDataFeedTask() throws IOException {
         log.info("Creating DataFeedTask for " + mainCustomerSpace);
         dataFeedProxy.createDataFeedTask(mainCustomerSpace, dataFeedTask);
@@ -78,7 +79,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         assertNotNull(dfTask);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateDataFeedTask", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testCreateDataFeedTask")
     public void testCreateOrUpdateDataFeedTask() throws IOException {
         log.info("Create Or Update DataFeedTask for " + mainCustomerSpace);
         dataFeedProxy.createOrUpdateDataFeedTask(mainCustomerSpace, DATA_FEED_TASK_SOURCE, DATA_FEED_TASK_FEED_TYPE,
@@ -92,7 +93,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         assertNotNull(dfTask);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateOrUpdateDataFeedTask", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testCreateOrUpdateDataFeedTask")
     public void testUpdateDataFeedTask() throws IOException {
         log.info("Updating DataFeedTask for " + mainCustomerSpace);
         dataFeedTask.setSourceConfig(DATA_FEED_TASK_SOURCE_CONFIG + "Test");
@@ -104,7 +105,7 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         assertEquals(dfTask.getSourceConfig(), DATA_FEED_TASK_SOURCE_CONFIG + "Test");
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testUpdateDataFeedTask", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testUpdateDataFeedTask")
     public void testGetDataFeedTaskWithSameEntity() throws IOException {
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(mainCustomerSpace,
                 DATA_FEED_TASK_ENTITY);
@@ -113,14 +114,16 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         assertEquals(dfTasks.size(), 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testGetDataFeedTaskWithSameEntity", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testGetDataFeedTaskWithSameEntity")
     public void testRegisterExtract() throws IOException {
         dataFeedProxy.updateDataFeedStatus(mainCustomerSpace, "Active");
 
         log.info("Register Extract");
         Extract extract = createExtract("Extract_Name");
-        dataFeedProxy.registerExtract(mainCustomerSpace, dataFeedTask.getUniqueId(), TABLE_NAME, extract);
-
+        List<String> tables = dataFeedProxy.registerExtract(mainCustomerSpace, dataFeedTask.getUniqueId(), TABLE_NAME,
+                extract);
+        Assert.assertEquals(tables.size(), 1);
+        dataFeedProxy.addTableToQueue(mainCustomerSpace, dataFeedTask.getUniqueId(), tables.get(0));
         List<Extract> extractsPendingInQueue = dataFeedProxy.getExtractsPendingInQueue(mainCustomerSpace,
                 DATA_FEED_TASK_SOURCE, DATA_FEED_TASK_FEED_TYPE, DATA_FEED_TASK_ENTITY);
 
@@ -128,14 +131,16 @@ public class DataFeedTaskResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         assertTrue(extractsPendingInQueue.size() == 1);
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testRegisterExtract", enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = "testRegisterExtract")
     public void testRegisterExtracts() throws IOException {
         log.info("Register Extracts");
         List<Extract> extracts = new ArrayList<>();
         extracts.add(createExtract("Extract_Name_1"));
         extracts.add(createExtract("Extract_Name_2"));
-        dataFeedProxy.registerExtracts(mainCustomerSpace, dataFeedTask.getUniqueId(), TABLE_NAME, extracts);
-
+        List<String> tables = dataFeedProxy.registerExtracts(mainCustomerSpace, dataFeedTask.getUniqueId(), TABLE_NAME,
+                extracts);
+        Assert.assertEquals(tables.size(), 2);
+        dataFeedProxy.addTablesToQueue(mainCustomerSpace, dataFeedTask.getUniqueId(), tables);
         List<Extract> extractsPendingInQueue = dataFeedProxy.getExtractsPendingInQueue(mainCustomerSpace,
                 DATA_FEED_TASK_SOURCE, DATA_FEED_TASK_FEED_TYPE, DATA_FEED_TASK_ENTITY);
 

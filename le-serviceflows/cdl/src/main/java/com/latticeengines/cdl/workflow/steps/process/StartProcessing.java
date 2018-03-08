@@ -96,6 +96,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
+        addActionAssociateTables();
         determineVersions();
 
         DataFeedExecution execution = dataFeedProxy.startExecution(customerSpace.toString(),
@@ -161,6 +162,11 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 configuration.getActionIds(), ActionType.CDL_OPERATION_WORKFLOW);
     }
 
+    private List<Job> getImportJobs() {
+        return internalResourceProxy.findJobsBasedOnActionIdsAndType(customerSpace.toString(),
+                configuration.getActionIds(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
+    }
+
     private void determineVersions() {
         activeVersion = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         inactiveVersion = activeVersion.complement();
@@ -186,6 +192,27 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
         if (CollectionUtils.isNotEmpty(actionIds)) {
             internalResourceProxy.updateOwnerIdIn(configuration.getCustomerSpace().toString(), jobId, actionIds);
+        }
+    }
+
+    private void addActionAssociateTables() {
+        List<Job> importJobs = getImportJobs();
+        if (importJobs != null) {
+            for (Job job : importJobs) {
+                String taskId = job.getInputs().get(WorkflowContextConstants.Inputs.DATAFEEDTASK_IMPORT_IDENTIFIER);
+                if (StringUtils.isEmpty(taskId)) {
+                    continue;
+                }
+                String tablesStr = job.getOutputs()
+                        .get(WorkflowContextConstants.Outputs.DATAFEEDTASK_REGISTERED_TABLES);
+                if (StringUtils.isEmpty(tablesStr)) {
+                    log.warn(String.format("Job %s doesn't have table to be registered.", job.getApplicationId()));
+                    continue;
+                }
+                List<?> rawList = JsonUtils.deserialize(tablesStr, List.class);
+                List<String> tables = JsonUtils.convertList(rawList, String.class);
+                dataFeedProxy.addTablesToQueue(customerSpace.toString(), taskId, tables);
+            }
         }
     }
 

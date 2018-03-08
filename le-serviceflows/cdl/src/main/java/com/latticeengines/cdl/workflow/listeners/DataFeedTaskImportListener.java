@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
 import com.latticeengines.domain.exposed.eai.ImportStatus;
@@ -92,6 +93,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
             updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.FAILED);
         } else if (jobExecution.getStatus() == BatchStatus.COMPLETED) {
             try {
+                List<String> registeredTables;
                 String templateName = eaiImportJobDetail.getTemplateName();
                 List<String> pathList = eaiImportJobDetail.getPathDetail();
                 List<String> processedRecordsList = eaiImportJobDetail.getPRDetail();
@@ -113,14 +115,24 @@ public class DataFeedTaskImportListener extends LEJobListener {
                     log.info(
                             String.format("Extract %s have %s records.", pathList.get(i), processedRecordsList.get(i)));
                     long records = Long.parseLong(processedRecordsList.get(i));
-                    extracts.add(createExtract(pathList.get(i), records));
+                    if (records > 0) {
+                        extracts.add(createExtract(pathList.get(i), records));
+                    }
                 }
-                if (extracts.size() == 1) {
-                    log.info(String.format("Register single extract: %s", extracts.get(0).getName()));
-                    dataFeedProxy.registerExtract(customerSpace, importJobIdentifier, templateName, extracts.get(0));
-                } else {
-                    log.info(String.format("Register %d extracts.", extracts.size()));
-                    dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier, templateName, extracts);
+                if (extracts.size() > 0) {
+                    if (extracts.size() == 1) {
+                        log.info(String.format("Register single extract: %s", extracts.get(0).getName()));
+                        registeredTables = dataFeedProxy.registerExtract(customerSpace, importJobIdentifier, templateName,
+                                extracts.get(0));
+                    } else {
+                        log.info(String.format("Register %d extracts.", extracts.size()));
+                        registeredTables = dataFeedProxy.registerExtracts(customerSpace, importJobIdentifier, templateName,
+                                extracts);
+                    }
+                    log.info(String.format("Registered Tables are: %s", String.join(",", registeredTables)));
+                    job.setOutputContextValue(WorkflowContextConstants.Outputs.DATAFEEDTASK_REGISTERED_TABLES,
+                            JsonUtils.serialize(registeredTables));
+                    workflowJobEntityMgr.updateWorkflowJob(job);
                 }
                 updateEaiImportJobDetail(eaiImportJobDetail, ImportStatus.SUCCESS);
                 updateDataFeedStatus(customerSpace);

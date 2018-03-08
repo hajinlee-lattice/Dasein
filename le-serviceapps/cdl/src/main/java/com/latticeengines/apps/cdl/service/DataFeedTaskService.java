@@ -22,9 +22,13 @@ public interface DataFeedTaskService {
 
     void updateDataFeedTask(String customerSpace, DataFeedTask dataFeedTask);
 
-    void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);
+    List<String> registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract);
 
-    void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
+    List<String> registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts);
+
+    void addTableToQueue(String customerSpace, String taskUniqueId, String tableName);
+
+    void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames);
 
     List<Extract> getExtractsPendingInQueue(String customerSpace, String source, String dataFeedType, String entity);
 

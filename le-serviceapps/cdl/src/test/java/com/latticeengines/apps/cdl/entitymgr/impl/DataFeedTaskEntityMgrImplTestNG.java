@@ -109,8 +109,10 @@ public class DataFeedTaskEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         extract1.setExtractionTimestamp(DateTime.now().getMillis());
         extract1.setProcessedRecords(1L);
         extract1.setTable(task.getImportTemplate());
-        datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract1);
+        List<String> tables = datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract1);
         task = datafeedTaskEntityMgr.findByKey(task);
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 0);
+        datafeedTaskEntityMgr.addTableToQueue(task.getUniqueId(), tables.get(0));
         assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
         assertEquals(datafeedTaskTableEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(),
                 extract1.getPid());
@@ -139,7 +141,9 @@ public class DataFeedTaskEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         extract2.setProcessedRecords(2L);
         extract2.setTable(task.getImportTemplate());
         datafeedTaskEntityMgr.clearTableQueue();
-        datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract2);
+        List<String> tables = datafeedTaskEntityMgr.registerExtract(task, task.getImportTemplate().getName(), extract2);
+        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 0);
+        datafeedTaskEntityMgr.addTableToQueue(task.getUniqueId(), tables.get(0));
         assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
         assertEquals(datafeedTaskTableEntityMgr.peekFirstDataTable(task).getExtracts().get(0).getPid(),
                 extract2.getPid());

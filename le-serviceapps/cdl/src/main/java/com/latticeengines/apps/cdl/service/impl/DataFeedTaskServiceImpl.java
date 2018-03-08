@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -101,25 +102,35 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
     }
 
     @Override
-    public void registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract) {
+    public List<String> registerExtract(String customerSpace, String taskUniqueId, String tableName, Extract extract) {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
         DataFeed dataFeed = dataFeedTask.getDataFeed();
         if (dataFeed.getStatus() == DataFeed.Status.Initing) {
             // log.info("Skip registering extract for feed in initing state");
-            return;
+            return Collections.emptyList();
         }
-        dataFeedTaskEntityMgr.registerExtract(dataFeedTask, tableName, extract);
+        return dataFeedTaskEntityMgr.registerExtract(dataFeedTask, tableName, extract);
     }
 
     @Override
-    public void registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts) {
+    public List<String> registerExtracts(String customerSpace, String taskUniqueId, String tableName, List<Extract> extracts) {
         DataFeedTask dataFeedTask = getDataFeedTask(customerSpace, taskUniqueId);
         DataFeed dataFeed = dataFeedTask.getDataFeed();
         if (dataFeed.getStatus() == DataFeed.Status.Initing) {
             // log.info("Skip registering extract for feed in initing state");
-            return;
+            return Collections.emptyList();
         }
-        dataFeedTaskEntityMgr.registerExtracts(dataFeedTask, tableName, extracts);
+        return dataFeedTaskEntityMgr.registerExtracts(dataFeedTask, tableName, extracts);
+    }
+
+    @Override
+    public void addTableToQueue(String customerSpace, String taskUniqueId, String tableName) {
+        dataFeedTaskEntityMgr.addTableToQueue(taskUniqueId, tableName);
+    }
+
+    @Override
+    public void addTablesToQueue(String customerSpace, String taskUniqueId, List<String> tableNames) {
+        dataFeedTaskEntityMgr.addTablesToQueue(taskUniqueId, tableNames);
     }
 
     @Override
