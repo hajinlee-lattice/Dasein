@@ -70,7 +70,9 @@ angular.module('lp.import.wizard.latticefields', [])
                 var fieldItem = vm.fieldMappings.find(function(item) {
                     return item.userField === fieldMapping.userField;
                 });
-                fieldItem.mappedField = fieldMapping.mappedField;
+                if(fieldMapping && fieldMapping.mappedField) {
+                    fieldItem.mappedField = fieldMapping.mappedField;
+                }
             });
         } else {
             vm.fieldMappings.forEach(function(fieldMapping) {
