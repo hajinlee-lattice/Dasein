@@ -105,7 +105,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         String filePath = "";
         String tableName = "";
         String fileName = generateFakeFileName(maintenanceOperationConfiguration);
-        String fileDisplayName = "";
+        String fileDisplayName = generateFakeFileName(maintenanceOperationConfiguration);
         boolean isUseDLData = false;
         if (maintenanceOperationConfiguration instanceof CleanupByUploadConfiguration) {
             log.info("Configuratin is CleanupByUpload");
