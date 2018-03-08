@@ -166,7 +166,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
             if (idx == 0) {
                 lastUpdatedTimeForFirstIteration = lastUpdatedTime;
             }
-            log.info("\n@@@@@@@@@@@@@@@@2\nidx=" + idx + ", idsList=" + idsList);
+            log.info("idx=" + idx + ", idsList=" + idsList);
         }
 
         lastUpdatedTimeForFirstIteration++;
