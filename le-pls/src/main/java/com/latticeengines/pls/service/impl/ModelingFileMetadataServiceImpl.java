@@ -201,6 +201,10 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 if (!fieldMapping.getMappedField().toUpperCase().endsWith("ID")) {
                     fieldMapping.setMappedField(fieldMapping.getMappedField() + "ID");
                 }
+                if (!fieldMapping.getMappedField().equals(InterfaceName.SalesforceAccountID.name())) {
+                    fieldMapping.setMappedField(fieldMapping.getMappedField().toLowerCase());
+                    fieldMapping.setMappedToLatticeField(false);
+                }
                 switch (fieldMapping.getCdlExternalSystemType()) {
                     case CRM:
                         crmIds.add(fieldMapping.getMappedField());

@@ -146,8 +146,9 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         FieldMapping crmID = new FieldMapping();
         crmID.setUserField("ID");
-        crmID.setMappedField("SFDC_ID");
+        crmID.setMappedField("SFDC ID");
         crmID.setFieldType(UserDefinedType.TEXT);
+        crmID.setMappedToLatticeField(true);
         crmID.setCdlExternalSystemType(CDLExternalSystemType.CRM);
 
         FieldMapping mapID = new FieldMapping();
@@ -171,10 +172,10 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         validateJobsPage();
 
         DataFeedTask extrenalAccount = dataFeedProxy.getDataFeedTask(customerSpace, SOURCE, feedType, ENTITY_ACCOUNT);
-        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("SFDC_ID"));
+        Assert.assertNotNull(extrenalAccount.getImportTemplate().getAttribute("sfdc_id"));
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
         Assert.assertNotNull(system);
-        Assert.assertTrue(system.getCRMIdList().contains("SFDC_ID"));
+        Assert.assertTrue(system.getCRMIdList().contains("sfdc_id"));
     }
 
     private void validateImportAction(List<Action> actions) {
