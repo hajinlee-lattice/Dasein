@@ -42,5 +42,5 @@ echo "Expanding aliases."
 shopt -s expand_aliases
 echo "Sourcing aliases file"
 source $WSHOME/le-dev/aliases
-runtest metadata -g registertable -t RegisterLocalTestBucketedAccountTableTestNG
+runtest serviceapps/cdl -g registertable -t RegisterLocalTestBucketedAccountTableTestNG
 
