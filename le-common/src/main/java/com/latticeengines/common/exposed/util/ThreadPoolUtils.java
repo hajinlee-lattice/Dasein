@@ -9,12 +9,7 @@ import java.util.concurrent.ThreadFactory;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-
 public class ThreadPoolUtils {
-
-    private static Scheduler mdsScheduler;
 
     public static ExecutorService getFixedSizeThreadPool(String name, int size) {
         ThreadFactory threadFac = new ThreadFactoryBuilder().setNameFormat(name + "-%d").build();
@@ -36,19 +31,6 @@ public class ThreadPoolUtils {
                     return thread;
                 };
         return new ForkJoinPool(size, workerThreadFactory, null, false);
-    }
-
-    public static Scheduler getMdsScheduler() {
-        if (mdsScheduler == null) {
-            initializeMdsScheduler();
-        }
-        return mdsScheduler;
-    }
-
-    private synchronized static void initializeMdsScheduler() {
-        if (mdsScheduler == null) {
-            mdsScheduler = Schedulers.newParallel("metadata-store");
-        }
     }
 
 }

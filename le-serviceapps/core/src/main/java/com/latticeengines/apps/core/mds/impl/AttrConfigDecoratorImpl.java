@@ -12,11 +12,11 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.mds.AttrConfigDecorator;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.MapDecorator;
-import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
+import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
@@ -31,9 +31,9 @@ public class AttrConfigDecoratorImpl implements AttrConfigDecorator {
     }
 
     @Override
-    public Decorator getDecorator(Namespace1<BusinessEntity> namespace) {
-        final String tenantId = MultiTenantContext.getTenantId();
-        final BusinessEntity entity = namespace.getCoord1();
+    public Decorator getDecorator(Namespace2<String, BusinessEntity> namespace) {
+        final String tenantId = CustomerSpace.shortenCustomerSpace(namespace.getCoord1());
+        final BusinessEntity entity = namespace.getCoord2();
         return new MapDecorator("AttrConfig") {
             @Override
             protected Collection<ColumnMetadata> loadInternal() {

@@ -7,7 +7,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorChain;
@@ -20,6 +19,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 public class DecoratorChainUnitTestNG {
@@ -179,7 +179,7 @@ public class DecoratorChainUnitTestNG {
     @Test(groups = "unit")
     public  void testRenderDC2Parallel() {
         ParallelFlux<ColumnMetadata> pflux = feedMds.getMetadata(K1) //
-                .parallel().runOn(ThreadPoolUtils.getMdsScheduler());
+                .parallel().runOn(Schedulers.parallel());
         Flux<ColumnMetadata> flux = DC2.render(pflux)
                 .sorted(Comparator.comparing(ColumnMetadata::getAttrName));
         verifyRenderDC2(flux);

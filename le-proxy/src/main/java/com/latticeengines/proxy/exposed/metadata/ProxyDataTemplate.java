@@ -3,7 +3,6 @@ package com.latticeengines.proxy.exposed.metadata;
 import java.io.Serializable;
 import java.util.List;
 
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
@@ -13,11 +12,14 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 public class ProxyDataTemplate<N extends Namespace> implements DataTemplate<N> {
 
     private final DataTemplateProxy dataTemplateProxy;
     private final String dtName;
+    private static final Scheduler scheduler = Schedulers.newParallel("proxy-data-template");
 
     private ProxyDataTemplate(DataTemplateProxy dataTemplateProxy, String dtName) {
         this.dataTemplateProxy = dataTemplateProxy;
@@ -47,7 +49,7 @@ public class ProxyDataTemplate<N extends Namespace> implements DataTemplate<N> {
     @Override
     public ParallelFlux<ColumnMetadata> getUnorderedSchema(N namespace) {
         return dataTemplateProxy.getUnorderedSchema(dtName, convertNamespace(namespace)) //
-                .parallel().runOn(ThreadPoolUtils.getMdsScheduler());
+                .parallel().runOn(scheduler);
     }
 
     private String[] convertNamespace(N namespace) {

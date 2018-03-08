@@ -40,11 +40,11 @@ public class ServingStoreResource {
         return servingStoreService.getFullyDecoratedMetadata(entity).sequential()
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
-                    log.info("Start serving decorated metadata for " + customerSpace);
+                    log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
                 })
                 .doOnComplete(() -> {
                     long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving decorated metadata for " + customerSpace + " TimeElapsed=" + duration + " msec");
+                    log.info("Finished serving decorated metadata for " + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
                 });
     }
 }

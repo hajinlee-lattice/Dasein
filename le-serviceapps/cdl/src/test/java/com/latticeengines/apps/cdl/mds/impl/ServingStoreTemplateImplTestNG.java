@@ -45,7 +45,7 @@ public class ServingStoreTemplateImplTestNG extends CDLFunctionalTestNGBase {
     public void testDecorator() {
         Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse("LocalTest").toString());
         MultiTenantContext.setTenant(tenant);
-        Decorator decorator = attrConfigDecorator.getDecorator(BusinessEntity.Account);
+        Decorator decorator = attrConfigDecorator.getDecorator(tenant.getId(), BusinessEntity.Account);
         MapDecorator mapDecorator = (MapDecorator) decorator;
         mapDecorator.load().block();
     }

@@ -27,6 +27,12 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 
+    @Override
+    public <T extends Serializable> Namespace2<String, T> prependTenantId(Namespace1<T> namespace1) {
+        String tenantId = MultiTenantContext.getTenantId();
+        return Namespace.as(tenantId, namespace1.getCoord1());
+    }
+
     // -> tenantId, tableName
     @Override
     public Namespace2<String, String> resolveTableRole(TableRoleInCollection role, DataCollection.Version version) {

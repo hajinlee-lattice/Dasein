@@ -16,7 +16,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @Component
 public class CustomizedServingStoreTemplateImpl extends
-        DecoratedDataTemplate<Namespace1<BusinessEntity>, Namespace2<BusinessEntity, DataCollection.Version>, Namespace1<BusinessEntity>>
+        DecoratedDataTemplate<Namespace1<BusinessEntity>, Namespace2<BusinessEntity, DataCollection.Version>, Namespace2<String, BusinessEntity>>
         implements CustomizedServingStoreTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
@@ -30,10 +30,10 @@ public class CustomizedServingStoreTemplateImpl extends
         this.cdlNamespaceService = cdlNamespaceService;
     }
 
-    // (entity) -> (entity)
+    // (entity) -> (tenantId, entity)
     @Override
-    protected Namespace1<BusinessEntity> projectDecoratorNamespace(Namespace1<BusinessEntity> namespace) {
-        return namespace;
+    protected Namespace2<String, BusinessEntity> projectDecoratorNamespace(Namespace1<BusinessEntity> namespace) {
+        return cdlNamespaceService.prependTenantId(namespace);
     }
 
     // (entity) -> (entity, version)

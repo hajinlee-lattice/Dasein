@@ -194,7 +194,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
                         }
                         return requestLatestVersion(key);
                     }, 10);
-                    log.info("Initialized local cache DataCloudCMCache.");
+                    log.info("Initialized local cache DataCloudVersionCache.");
                 }
             }
         }

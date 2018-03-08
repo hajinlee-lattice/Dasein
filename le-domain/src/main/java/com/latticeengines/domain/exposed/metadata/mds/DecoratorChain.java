@@ -3,17 +3,19 @@ package com.latticeengines.domain.exposed.metadata.mds;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.common.collect.ImmutableList;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 public class DecoratorChain implements Decorator, NeedsLoad {
 
     private String name;
     private final Iterable<Decorator> decorators;
+    private final static Scheduler scheduler = Schedulers.newParallel("decorator-chain");
 
     private AtomicBoolean loaded = new AtomicBoolean();
 
@@ -36,7 +38,7 @@ public class DecoratorChain implements Decorator, NeedsLoad {
     public Mono<Boolean> load() {
         return Flux.fromIterable(decorators) //
                 .doOnSubscribe(s -> loaded.set(true)) //
-                .parallel().runOn(ThreadPoolUtils.getMdsScheduler()) //
+                .parallel().runOn(scheduler) //
                 .filter(d -> d instanceof NeedsLoad) //
                 .map(d -> (NeedsLoad) d) //
                 .flatMap(d -> {

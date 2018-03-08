@@ -14,7 +14,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -37,6 +36,15 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
 
     private final RatingEngineService ratingEngineService;
 
+    private static final List<String> SUFFIXES = new ArrayList<>();
+
+    static {
+        SUFFIXES.clear();
+        SUFFIXES.add("");
+        SUFFIXES.addAll(
+                RatingEngine.SCORE_ATTR_SUFFIX.values().stream().map(s -> "_" + s).collect(Collectors.toList()));
+    }
+
     @Inject
     public RatingDisplayMetadataStoreImpl(TenantEntityMgr tenantEntityMgr, RatingEngineService ratingEngineService) {
         this.tenantEntityMgr = tenantEntityMgr;
@@ -45,46 +53,49 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
 
     @Override
     public Flux<ColumnMetadata> getMetadata(Namespace1<String> namespace) {
-        List<RatingEngineSummary> ratingEngineSummaries = getRatingSummaries(namespace.getCoord1());
         Flux<ColumnMetadata> cms = Flux.empty();
-        if (CollectionUtils.isNotEmpty(ratingEngineSummaries)) {
-            List<String> suffixes = new ArrayList<>();
-            suffixes.add("");
-            suffixes.addAll(RatingEngine.SCORE_ATTR_SUFFIX.values().stream().map(s -> "_" + s)
-                    .collect(Collectors.toList()));
-            cms = Flux.fromIterable(ratingEngineSummaries).parallel().runOn(ThreadPoolUtils.getMdsScheduler())
-                    .flatMap(summary -> {
-                        String segmentDisplayName = summary.getSegmentDisplayName();
-                        String reDisplayName = summary.getDisplayName();
-                        String engineNameStem = RatingEngine.toRatingAttrName(summary.getId());
-                        List<ColumnMetadata> reAttrs = suffixes.stream().map(suffix -> {
-                            String attrName = engineNameStem + suffix;
-                            ColumnMetadata reAttr = new ColumnMetadata();
-                            reAttr.setAttrName(attrName);
-                            reAttr.setDisplayName(reDisplayName);
-                            reAttr.setSecondaryDisplayName(getSecondaryDisplayName(suffix));
-                            reAttr.setSubcategory(segmentDisplayName);
-                            reAttr.setCategory(Category.RATING);
-                            if (isSegmentable(suffix)) {
-                                reAttr.enableGroup(ColumnSelection.Predefined.Segment);
-                            } else {
-                                reAttr.disableGroup(ColumnSelection.Predefined.Segment);
-                            }
-                            return reAttr;
-                        }).collect(Collectors.toList());
-                        return Flux.fromIterable(reAttrs);
-                    }).sequential();
+        String tenantId = CustomerSpace.shortenCustomerSpace(namespace.getCoord1());
+        if (StringUtils.isNotBlank(tenantId)) {
+            List<RatingEngineSummary> ratingEngineSummaries = getRatingSummaries(tenantId);
+            if (CollectionUtils.isNotEmpty(ratingEngineSummaries)) {
+                log.info("Loading rating display metadata from " + ratingEngineSummaries.size()
+                        + " rating engines for tenant " + tenantId);
+                cms = Flux.fromIterable(ratingEngineSummaries).concatMap(this::expandEngine);
+            }
         }
         return cms;
+    }
+
+    private Flux<ColumnMetadata> expandEngine(RatingEngineSummary summary) {
+        String segmentDisplayName = summary.getSegmentDisplayName();
+        String reDisplayName = summary.getDisplayName();
+        String engineNameStem = RatingEngine.toRatingAttrName(summary.getId());
+        return Flux.fromIterable(SUFFIXES).map(suffix -> {
+            String attrName = engineNameStem + suffix;
+            ColumnMetadata reAttr = new ColumnMetadata();
+            reAttr.setAttrName(attrName);
+            reAttr.setDisplayName(reDisplayName);
+            reAttr.setSecondaryDisplayName(getSecondaryDisplayName(suffix));
+            reAttr.setSubcategory(segmentDisplayName);
+            reAttr.setCategory(Category.RATING);
+            if (isSegmentable(suffix)) {
+                reAttr.enableGroup(ColumnSelection.Predefined.Segment);
+            } else {
+                reAttr.disableGroup(ColumnSelection.Predefined.Segment);
+            }
+            return reAttr;
+        });
     }
 
     private String getSecondaryDisplayName(String suffix) {
         String secondaryDisplayName = null;
         if (StringUtils.isBlank(suffix)) {
             secondaryDisplayName = "Rating";
-        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue).equalsIgnoreCase(suffix.substring(1))) {
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue)
+                .equalsIgnoreCase(suffix.substring(1))) {
             secondaryDisplayName = "Weighted Revenue";
-        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.NormalizedScore).equalsIgnoreCase(suffix.substring(1))) {
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.NormalizedScore)
+                .equalsIgnoreCase(suffix.substring(1))) {
             secondaryDisplayName = "Score";
         }
         return secondaryDisplayName;
@@ -94,9 +105,11 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
         boolean segmentable = false;
         if (StringUtils.isBlank(suffix)) {
             segmentable = true;
-        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue).equalsIgnoreCase(suffix.substring(1))) {
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.ExpectedRevenue)
+                .equalsIgnoreCase(suffix.substring(1))) {
             segmentable = true;
-        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.NormalizedScore).equalsIgnoreCase(suffix.substring(1))) {
+        } else if (RatingEngine.SCORE_ATTR_SUFFIX.get(RatingEngine.ScoreType.NormalizedScore)
+                .equalsIgnoreCase(suffix.substring(1))) {
             segmentable = true;
         }
         return segmentable;
@@ -105,7 +118,8 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
     private List<RatingEngineSummary> getRatingSummaries(String tenantId) {
         String fullId = CustomerSpace.parse(tenantId).toString();
         String tenantIdInContext = MultiTenantContext.getTenantId();
-        if (!CustomerSpace.parse(tenantIdInContext).toString().equals(fullId)) {
+        if (StringUtils.isBlank(tenantIdInContext)
+                || !CustomerSpace.parse(tenantIdInContext).toString().equals(fullId)) {
             Tenant tenant = tenantEntityMgr.findByTenantId(fullId);
             if (tenant == null) {
                 throw new IllegalArgumentException("Cannot find tenant with id " + tenantId);
