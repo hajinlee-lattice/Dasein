@@ -43,7 +43,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
+public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
@@ -84,6 +84,11 @@ public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
     @Column(name = "DEPRECATED")
     @JsonProperty("deprecated")
     private Date deprecated;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "TYPE", nullable = false, length = 100)
+    @JsonProperty("type")
+    private ActivityType type;
 
     @Override
     public Long getPid() {
@@ -163,6 +168,18 @@ public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
 
     public void setDeprecated(Date deprecated) {
         this.deprecated = deprecated;
+    }
+
+    public ActivityType getType() {
+        return type;
+    }
+
+    public void setType(ActivityType type) {
+        this.type = type;
+    }
+
+    public enum ActivityType {
+        SpendAnalytics
     }
 
 }

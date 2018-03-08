@@ -12,7 +12,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.apps.cdl.entitymgr.PurchaseMetricsEntityMgr;
+import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -20,11 +20,12 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceapps.cdl.PurchaseMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
-public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
+public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @Inject
-    private PurchaseMetricsEntityMgr entityMgr;
+    private ActivityMetricsEntityMgr entityMgr;
 
     @BeforeClass(groups = "functional")
     public void setup() {
@@ -35,9 +36,9 @@ public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
     public void testMultiTenantFilter() {
         Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAll()));
 
-        List<PurchaseMetrics> metricsList = constructMetricsList();
+        List<ActivityMetrics> metricsList = constructMetricsList();
 
-        List<PurchaseMetrics> saved = entityMgr.save(metricsList);
+        List<ActivityMetrics> saved = entityMgr.save(metricsList);
         Assert.assertFalse(CollectionUtils.isEmpty(saved));
         saved.forEach(metrics -> {
             Assert.assertNotNull(metrics.getPid());
@@ -46,7 +47,7 @@ public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
             Assert.assertNotNull(metrics.getTenant());
         });
 
-        List<PurchaseMetrics> active = entityMgr.findAllActive();
+        List<ActivityMetrics> active = entityMgr.findAllActive();
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
         active.forEach(item -> {
@@ -62,7 +63,7 @@ public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
 
-        List<PurchaseMetrics> all = entityMgr.findAll();
+        List<ActivityMetrics> all = entityMgr.findAll();
         Assert.assertFalse(CollectionUtils.isEmpty(all));
         Assert.assertEquals(all.size(), 3);
 
@@ -73,32 +74,36 @@ public class PurchaseMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAll()));
     }
 
-    private List<PurchaseMetrics> constructMetricsList() {
-        List<PurchaseMetrics> metricsList = new ArrayList<>();
-        PurchaseMetrics metrics = new PurchaseMetrics();
+    private List<ActivityMetrics> constructMetricsList() {
+        List<ActivityMetrics> metricsList = new ArrayList<>();
+        ActivityMetrics metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.SpendChange);
         TimeFilter filter = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
         metrics.setPeriodsConfig(filter);
+        metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
-        metrics = new PurchaseMetrics();
+        metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.SpendOvertime);
         filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
         metrics.setPeriodsConfig(filter);
+        metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
         return metricsList;
     }
 
-    private List<PurchaseMetrics> constructUpdatedMetricsList() {
-        List<PurchaseMetrics> metricsList = new ArrayList<>();
-        PurchaseMetrics metrics = new PurchaseMetrics();
+    private List<ActivityMetrics> constructUpdatedMetricsList() {
+        List<ActivityMetrics> metricsList = new ArrayList<>();
+        ActivityMetrics metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.Margin);
         TimeFilter filter = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
         metrics.setPeriodsConfig(filter);
+        metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
-        metrics = new PurchaseMetrics();
+        metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.SpendOvertime);
         filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
         metrics.setPeriodsConfig(filter);
+        metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
         return metricsList;
     }

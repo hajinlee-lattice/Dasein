@@ -14,51 +14,51 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.apps.cdl.dao.PurchaseMetricsDao;
-import com.latticeengines.apps.cdl.entitymgr.PurchaseMetricsEntityMgr;
-import com.latticeengines.apps.cdl.repository.PurchaseMetricsRepository;
+import com.latticeengines.apps.cdl.dao.ActivityMetricsDao;
+import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
+import com.latticeengines.apps.cdl.repository.ActivityMetricsRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceapps.cdl.PurchaseMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
-@Component("purchaseMetricsEntityMgrImpl")
-public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<PurchaseMetrics, Long>
-        implements PurchaseMetricsEntityMgr {
+@Component("activityMetricsEntityMgrImpl")
+public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<ActivityMetrics, Long>
+        implements ActivityMetricsEntityMgr {
     @Inject
-    private PurchaseMetricsRepository repository;
+    private ActivityMetricsRepository repository;
 
     @Inject
-    private PurchaseMetricsDao dao;
+    private ActivityMetricsDao dao;
 
     @Override
-    public BaseJpaRepository<PurchaseMetrics, Long> getRepository() {
+    public BaseJpaRepository<ActivityMetrics, Long> getRepository() {
         return repository;
     }
 
     @Override
-    public BaseDao<PurchaseMetrics> getDao() {
+    public BaseDao<ActivityMetrics> getDao() {
         return dao;
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<PurchaseMetrics> findAll() { // filter by TenantID
+    public List<ActivityMetrics> findAll() { // filter by TenantID
         return repository.findAll();
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<PurchaseMetrics> findAllActive() { // filter by TenantID
+    public List<ActivityMetrics> findAllActive() { // filter by TenantID
         return repository.findAllByIsEOL(false);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager")
-    public List<PurchaseMetrics> save(List<PurchaseMetrics> metricsList) {
+    public List<ActivityMetrics> save(List<ActivityMetrics> metricsList) {
         if (metricsList == null) {
             metricsList = new ArrayList<>();
         }
@@ -70,7 +70,7 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             metrics.setDeprecated(null);
         });
 
-        List<PurchaseMetrics> existingList = repository.findAllByTenant(tenant);
+        List<ActivityMetrics> existingList = repository.findAllByTenant(tenant);
         if (CollectionUtils.isEmpty(existingList)) {
             metricsList.forEach(metrics -> {
                 super.createOrUpdate(metrics);
@@ -78,7 +78,7 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             return metricsList;
         }
 
-        Map<InterfaceName, PurchaseMetrics> existingMetrics = new HashMap<>();
+        Map<InterfaceName, ActivityMetrics> existingMetrics = new HashMap<>();
         existingList.forEach(existing -> {
             existingMetrics.put(existing.getMetrics(), existing);
         });
@@ -86,7 +86,7 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
         metricsList.forEach(metrics -> {
             selectedMetrics.add(metrics.getMetrics());
         });
-        for (PurchaseMetrics existing : existingList) {
+        for (ActivityMetrics existing : existingList) {
             if (!selectedMetrics.contains(existing.getMetrics())) {
                 existing.setEOL(true);
                 existing.setDeprecated(new Date());
