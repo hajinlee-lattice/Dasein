@@ -24,6 +24,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
 @Component("activityMetricsEntityMgrImpl")
 public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<ActivityMetrics, Long>
@@ -46,14 +47,14 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
 
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<ActivityMetrics> findAll() { // filter by TenantID
-        return repository.findAll();
+    public List<ActivityMetrics> findWithType(ActivityType type) { // filter by TenantID
+        return repository.findAllByType(type);
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
-    public List<ActivityMetrics> findAllActive() { // filter by TenantID
-        return repository.findAllByIsEOL(false);
+    public List<ActivityMetrics> findActiveWithType(ActivityType type) { // filter by TenantID
+        return repository.findAllByIsEOLAndType(false, type);
     }
 
     @Override

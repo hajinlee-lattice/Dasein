@@ -37,7 +37,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "CDL_PURCHASE_METRICS", uniqueConstraints = {
+@Table(name = "CDL_ACTIVITY_METRICS", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "FK_TENANT_ID", "METRICS" }) })
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)

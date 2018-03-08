@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
 @Service("activityMetricsService")
 public class ActivityMetricsServiceImpl implements ActivityMetricsService {
@@ -16,12 +17,15 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
     private ActivityMetricsEntityMgr entityMgr;
 
     @Override
-    public List<ActivityMetrics> findAllActive() {
-        return entityMgr.findAllActive();
+    public List<ActivityMetrics> findActiveWithType(ActivityType type) {
+        return entityMgr.findActiveWithType(type);
     }
 
     @Override
-    public List<ActivityMetrics> save(List<ActivityMetrics> metricsList) {
+    public List<ActivityMetrics> save(ActivityType type, List<ActivityMetrics> metricsList) {
+        metricsList.forEach(metrics -> {
+            metrics.setType(type);
+        });
         return entityMgr.save(metricsList);
     }
 }

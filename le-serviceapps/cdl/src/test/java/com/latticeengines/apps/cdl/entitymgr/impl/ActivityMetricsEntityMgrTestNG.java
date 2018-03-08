@@ -34,7 +34,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testMultiTenantFilter() {
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAll()));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.SpendAnalytics)));
 
         List<ActivityMetrics> metricsList = constructMetricsList();
 
@@ -47,7 +47,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
             Assert.assertNotNull(metrics.getTenant());
         });
 
-        List<ActivityMetrics> active = entityMgr.findAllActive();
+        List<ActivityMetrics> active = entityMgr.findActiveWithType(ActivityType.SpendAnalytics);
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
         active.forEach(item -> {
@@ -59,19 +59,19 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertFalse(CollectionUtils.isEmpty(saved));
         Assert.assertEquals(saved.size(), 3);
 
-        active = entityMgr.findAllActive();
+        active = entityMgr.findActiveWithType(ActivityType.SpendAnalytics);
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
 
-        List<ActivityMetrics> all = entityMgr.findAll();
+        List<ActivityMetrics> all = entityMgr.findWithType(ActivityType.SpendAnalytics);
         Assert.assertFalse(CollectionUtils.isEmpty(all));
         Assert.assertEquals(all.size(), 3);
 
         Tenant tenant = new Tenant("dummy");
         tenant.setPid(-1L);
         MultiTenantContext.setTenant(tenant);
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAllActive()));
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findAll()));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findActiveWithType(ActivityType.SpendAnalytics)));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.SpendAnalytics)));
     }
 
     private List<ActivityMetrics> constructMetricsList() {

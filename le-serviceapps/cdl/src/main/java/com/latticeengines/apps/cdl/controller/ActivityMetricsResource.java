@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,16 +25,17 @@ public class ActivityMetricsResource {
     @Inject
     private ActivityMetricsService metricsService;
 
-    @GetMapping(value = "")
-    @ApiOperation(value = "Get active activity metrics")
-    public List<ActivityMetrics> getActivityMetrics(@PathVariable String customerSpace) {
-        return metricsService.findAllActive();
+    @GetMapping(value = "/{type}")
+    @ApiOperation(value = "Get all the active metrics for specific activity type")
+    public List<ActivityMetrics> getPurchaseMetrics(@PathVariable String customerSpace,
+            @PathVariable ActivityType type) {
+        return metricsService.findActiveWithType(type);
     }
 
-    @PostMapping(value = "")
+    @PostMapping(value = "/{type}")
     @ApiOperation(value = "Save purchase metrics")
     public List<ActivityMetrics> savePurchaseMetrics(@PathVariable String customerSpace,
-            @RequestBody List<ActivityMetrics> metrics) {
-        return metricsService.save(metrics);
+            @PathVariable ActivityType type, @RequestBody List<ActivityMetrics> metrics) {
+        return metricsService.save(type, metrics);
     }
 }
