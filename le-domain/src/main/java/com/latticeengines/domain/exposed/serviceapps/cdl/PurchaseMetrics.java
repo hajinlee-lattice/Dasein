@@ -77,7 +77,7 @@ public class PurchaseMetrics implements HasPid, HasTenant, HasAuditingFields {
     @Transient
     private TimeFilter periodsConfig;
 
-    @Column(name = "IsEOL")
+    @Column(name = "IS_EOL")
     @JsonProperty("IsEOL")
     private boolean isEOL;
 

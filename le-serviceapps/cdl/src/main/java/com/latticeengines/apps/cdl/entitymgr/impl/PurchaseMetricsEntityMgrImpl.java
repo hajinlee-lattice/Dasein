@@ -9,13 +9,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,22 +44,16 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
         return dao;
     }
 
-    @SuppressWarnings("serial")
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<PurchaseMetrics> findAll() { // filter by TenantID
-        return repository.findAll(new Specification<PurchaseMetrics>() {
-            @Override
-            public Predicate toPredicate(Root<PurchaseMetrics> metrics, CriteriaQuery<?> q, CriteriaBuilder cb) {
-                return cb.equal(metrics.get("isEOL"), false);
-            }
-        });
+        return repository.findAll();
     }
 
     @Override
-    @Transactional(transactionManager = "transactionManager")
-    public void deleteAll() { // filter by TenantID
-        repository.deleteAll();
+    @Transactional(transactionManager = "transactionManager", readOnly = true)
+    public List<PurchaseMetrics> findAllActive() { // filter by TenantID
+        return repository.findAllByIsEOL(false);
     }
 
     @Override
@@ -81,7 +70,7 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             metrics.setDeprecated(null);
         });
 
-        List<PurchaseMetrics> existingList = findAll();
+        List<PurchaseMetrics> existingList = repository.findAllByTenant(tenant);
         if (CollectionUtils.isEmpty(existingList)) {
             metricsList.forEach(metrics -> {
                 super.createOrUpdate(metrics);
@@ -89,9 +78,9 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             return metricsList;
         }
 
-        Map<InterfaceName, Long> existingIds = new HashMap<>();
+        Map<InterfaceName, PurchaseMetrics> existingMetrics = new HashMap<>();
         existingList.forEach(existing -> {
-            existingIds.put(existing.getMetrics(), existing.getPid());
+            existingMetrics.put(existing.getMetrics(), existing);
         });
         Set<InterfaceName> selectedMetrics = new HashSet<>();
         metricsList.forEach(metrics -> {
@@ -105,8 +94,9 @@ public class PurchaseMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Pu
             }
         }
         metricsList.forEach(metrics -> {
-            if (existingIds.containsKey(metrics.getMetrics())) {
-                metrics.setPid(existingIds.get(metrics.getMetrics()));
+            if (existingMetrics.containsKey(metrics.getMetrics())) {
+                metrics.setPid(existingMetrics.get(metrics.getMetrics()).getPid());
+                metrics.setCreated(existingMetrics.get(metrics.getMetrics()).getCreated());
             }
             super.createOrUpdate(metrics);
         });

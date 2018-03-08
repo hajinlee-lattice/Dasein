@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.PurchaseMetrics;
 public interface PurchaseMetricsEntityMgr extends BaseEntityMgrRepository<PurchaseMetrics, Long> {
     List<PurchaseMetrics> findAll();
 
-    List<PurchaseMetrics> save(List<PurchaseMetrics> metricsList);
+    List<PurchaseMetrics> findAllActive();
 
-    void deleteAll();
+    List<PurchaseMetrics> save(List<PurchaseMetrics> metricsList);
 }
