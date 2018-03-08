@@ -1,5 +1,6 @@
 package com.latticeengines.proxy.exposed;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -8,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriTemplate;
 
 import com.google.common.collect.ImmutableSet;
@@ -32,11 +35,13 @@ import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
+import com.latticeengines.proxy.framework.ErrorUtils;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.security.exposed.serviceruntime.exception.GetResponseErrorHandler;
 
+import reactor.core.Exceptions;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -400,8 +405,9 @@ public abstract class BaseRestApiProxy {
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
-        Mono<T> flux = request.retrieve().bodyToMono(clz);
-        return appendLogInterceptors(flux, channel, url);
+        Mono<T> mono = request.retrieve().bodyToMono(clz);
+        mono = appendMonoHandler(mono, channel);
+        return appendLogInterceptors(mono, channel, url);
     }
 
     protected <T> Flux<T> getFlux(String channel, String url, Class<T> clz) {
@@ -418,8 +424,9 @@ public abstract class BaseRestApiProxy {
 
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,false);
-        Mono<T> flux = request.retrieve().bodyToMono(clz);
-        return appendLogInterceptors(flux, channel, url);
+        Mono<T> mono = request.retrieve().bodyToMono(clz);
+        mono = appendMonoHandler(mono, channel);
+        return appendLogInterceptors(mono, channel, url);
     }
 
     protected <K, V, P> Flux<Map<K, V>> postMapFlux(String channel, String url, P payload) {
@@ -431,7 +438,41 @@ public abstract class BaseRestApiProxy {
     protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {});
+        mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
+    }
+
+    private <T> Mono<T> appendMonoHandler(Mono<T> mono, String channel) {
+        AtomicLong backoff = new AtomicLong(initialWaitMsec);
+        return mono.onErrorResume((Throwable throwable) -> {
+            if (throwable instanceof WebClientResponseException) {
+                WebClientResponseException webException = (WebClientResponseException) throwable;
+                return Mono.error(ErrorUtils.handleError(webException));
+            } else {
+                return Mono.error(throwable);
+            }
+        }).retryWhen(companion -> companion
+                .zipWith(Flux.range(1, maxAttempts), (error, attempt) -> {
+                    if (attempt < maxAttempts) {
+                        String reason = ErrorUtils.shouldRetryFor(error, retryExceptions, retryMessages);
+                        if (StringUtils.isNotBlank(reason)) {
+                            log.warn(String.format("%s (Attempt=%d): Remote call failure, will retry: %s", channel, //
+                                    attempt, reason));
+                        } else {
+                            attempt = maxAttempts;
+                        }
+                    }
+                    if (attempt >= maxAttempts) {
+                        throw Exceptions.propagate(error);
+                    }
+                    return attempt;
+                })
+                .flatMap(attempt -> {
+                    Mono delay = Mono.delay(Duration.ofMillis(backoff.get()));
+                    backoff.set((long) (backoff.get() * multiplier));
+                    return delay;
+                })
+        );
     }
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {

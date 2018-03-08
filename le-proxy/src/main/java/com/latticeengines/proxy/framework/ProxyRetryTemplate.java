@@ -13,8 +13,6 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
-import com.latticeengines.domain.exposed.exception.RemoteLedpException;
-
 public class ProxyRetryTemplate extends RetryTemplate {
 
     private static final Logger log = LoggerFactory.getLogger(ProxyRetryTemplate.class);
@@ -97,41 +95,7 @@ public class ProxyRetryTemplate extends RetryTemplate {
     }
 
     private String shouldRetryFor(Throwable e) {
-        String reason = null;
-        Throwable cause = findRetryCause(e);
-        if (cause != null) {
-            reason = cause.getClass().getCanonicalName();
-        } else if (e instanceof RemoteLedpException) {
-            RemoteLedpException remoteLedpException = (RemoteLedpException) e;
-            String stackTrace = remoteLedpException.getRemoteStackTrace();
-            if (StringUtils.isNotBlank(stackTrace)) {
-                for (Class<? extends Throwable> c : retryExceptions) {
-                    if (stackTrace.contains(c.getCanonicalName())) {
-                        reason = c.getCanonicalName();
-                        break;
-                    }
-                }
-                for (String msg : retryMessages) {
-                    if (((RemoteLedpException) e).getRemoteStackTrace().contains(msg)) {
-                        reason = msg;
-                        break;
-                    }
-                }
-            }
-        }
-        return reason;
-    }
-
-    private Throwable findRetryCause(Throwable e) {
-        Throwable reason = null;
-        if (e != null) {
-            if (retryExceptions.contains(e.getClass())) {
-                reason = e;
-            } else {
-                reason = findRetryCause(e.getCause());
-            }
-        }
-        return reason;
+        return ErrorUtils.shouldRetryFor(e, retryExceptions, retryMessages);
     }
 
     private void logWarn(String reason, String method, int attempt) {

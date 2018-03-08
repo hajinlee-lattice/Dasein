@@ -9,6 +9,8 @@ import org.testng.Assert;
 
 import com.latticeengines.common.exposed.util.PropertyUtils;
 
+import reactor.core.publisher.Mono;
+
 @Component("testProxy")
 public class TestProxy extends BaseRestApiProxy {
 
@@ -21,8 +23,17 @@ public class TestProxy extends BaseRestApiProxy {
         Assert.assertEquals(url, getHostport() + "/foo/baz/value?customer=test");
     }
 
-    public String testRetry() {
-        return get("testRetry", constructUrl("/retry"), String.class);
+    public String getRetry() {
+        return get("get retry", constructUrl("/retry"), String.class);
+    }
+
+    public Mono<String> getRetryMono() {
+        return getMono("get retry", constructUrl("/retry"), String.class);
+    }
+
+    public Mono<String> getMonoAtEndpoint(String endpoint) {
+        String url = constructUrl("/" + endpoint);
+        return getMono("get " + endpoint,  url, String.class);
     }
 
     public String getWithCounter(String endpoint, AtomicInteger counter) {

@@ -68,7 +68,13 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "functional")
     public void testSuccessRetry() {
-        Assert.assertEquals(testProxy.testRetry(), "Hello World");
+        Assert.assertEquals(testProxy.getRetry(), "Hello World");
+    }
+
+    @Test(groups = "functional")
+    public void testSuccessRetryMono() {
+        String content = testProxy.getRetryMono().block();
+        Assert.assertEquals(content, "Hello World");
     }
 
     @Test(groups = "functional", dataProvider = "endpointProvider")
@@ -82,6 +88,18 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         }
         assertTrue(thrown);
         Assert.assertEquals(counter.get(), expectedAttempts);
+    }
+
+    @Test(groups = "functional", dataProvider = "endpointProvider")
+    public void testRetryMonoAndFail(String endPoint, int expectedAttempts) {
+        boolean thrown = false;
+        try {
+            testProxy.getMonoAtEndpoint(endPoint).block();
+        } catch (Exception e) {
+            log.info(e.getMessage());
+            thrown = true;
+        }
+        assertTrue(thrown);
     }
 
     @DataProvider(name = "endpointProvider")
