@@ -102,6 +102,8 @@ public class TestPlayCreationHelper {
         segment = playResourceDeploymentTestNG.createSegment(accountRestriction, contactRestriction);
         log.info("Tenant = " + tenant.getId());
         ratingEngine = playResourceDeploymentTestNG.createRatingEngine(segment, ratingRule);
+
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), ratingEngine.getId(), null);
     }
 
     public void createPlay() {
