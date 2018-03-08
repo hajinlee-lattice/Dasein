@@ -54,6 +54,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Integer importanceOrdering;
     @JsonProperty("LogicalDataType")
     private LogicalDataType logicalDataType;
+    @JsonProperty(ColumnMetadataKey.IsDeprecated)
+    private Boolean isDeprecated;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
@@ -219,6 +221,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setEntity(BusinessEntity entity) {
         this.entity = entity;
+    }
+
+    public Boolean getDeprecated() {
+        return isDeprecated;
+    }
+
+    public void setDeprecated(Boolean deprecated) {
+        isDeprecated = deprecated;
     }
 
     @JsonIgnore

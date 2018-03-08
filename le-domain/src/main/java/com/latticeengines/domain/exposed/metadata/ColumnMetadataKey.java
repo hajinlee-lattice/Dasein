@@ -7,9 +7,9 @@ public final class ColumnMetadataKey {
     public static final String SecondaryDisplayName = "SecondaryDisplayName";
     public static final String Description = "Description";
 
-    public static final String State = "State";
-
     public static final String Category = "Category";
     public static final String Subcategory = "Subcategory";
+
+    public static final String IsDeprecated = "IsDeprecated";
 
 }
