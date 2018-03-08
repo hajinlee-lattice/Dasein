@@ -153,13 +153,13 @@ public class WorkflowJobServiceImplUnitTestNG {
         List<Job> expandedJobs = workflowJobService.expandActions(generateActions());
         Assert.assertEquals(expandedJobs.size(), 4);
         Job firstJob = expandedJobs.get(0);
-        Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
+        Assert.assertEquals(firstJob.getName(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName());
         Assert.assertEquals(firstJob.getJobType(), ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getName());
         Assert.assertEquals(firstJob.getUser(), INITIATOR);
         Assert.assertEquals(firstJob.getJobStatus(), JobStatus.RUNNING);
 
         Job secondJob = expandedJobs.get(1);
-        Assert.assertEquals(secondJob.getName(), ActionType.METADATA_CHANGE.getName());
+        Assert.assertEquals(secondJob.getName(), ActionType.METADATA_CHANGE.getDisplayName());
         Assert.assertEquals(secondJob.getJobType(), ActionType.METADATA_CHANGE.getName());
         Assert.assertEquals(secondJob.getUser(), INITIATOR);
         Assert.assertEquals(secondJob.getJobStatus(), JobStatus.COMPLETED);

@@ -225,7 +225,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 workflowJobIds.add(action.getTrackingId().toString());
             } else {
                 Job job = new Job();
-                job.setName(action.getType().getName());
+                job.setName(action.getType().getDisplayName());
                 job.setJobType(action.getType().getName());
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
