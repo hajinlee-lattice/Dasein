@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -16,7 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Filters;
@@ -38,8 +39,7 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "CDL_ACTIVITY_METRICS", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "FK_TENANT_ID", "METRICS" }) })
+@Table(name = "CDL_ACTIVITY_METRICS")
 @Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId") })
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -76,7 +76,7 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
     private String periods;
 
     @Transient
-    private TimeFilter periodsConfig;
+    private List<TimeFilter> periodsConfig;
 
     @Column(name = "IS_EOL")
     @JsonProperty("IsEOL")
@@ -143,14 +143,15 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
         this.periods = periods;
     }
 
-    public TimeFilter getPeriodsConfig() {
+    public List<TimeFilter> getPeriodsConfig() {
         if (this.periodsConfig == null) {
-            this.periodsConfig = JsonUtils.deserialize(periods, TimeFilter.class);
+            List<?> list = JsonUtils.deserialize(periods, List.class);
+            this.periodsConfig = JsonUtils.convertList(list, TimeFilter.class);
         }
         return periodsConfig;
     }
 
-    public void setPeriodsConfig(TimeFilter periodsConfig) {
+    public void setPeriodsConfig(List<TimeFilter> periodsConfig) {
         this.periodsConfig = periodsConfig;
         this.periods = JsonUtils.serialize(periodsConfig);
     }
@@ -179,4 +180,19 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
         this.type = type;
     }
 
+    public String getFullProductMetricsName(String productId) {
+        List<String> periodNames = new ArrayList<>();
+        getPeriodsConfig().forEach(config -> {
+            periodNames.add(config.getPeriod() + config.getPeriodRangeName());
+        });
+        return "PH_" + productId + "_" + String.join("_", periodNames) + "_" + metrics;
+    }
+
+    public String getFullMetricsName() {
+        List<String> periodNames = new ArrayList<>();
+        getPeriodsConfig().forEach(config -> {
+            periodNames.add(config.getPeriod() + config.getPeriodRangeName());
+        });
+        return String.join("_", periodNames) + "_" + metrics;
+    }
 }

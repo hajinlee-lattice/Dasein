@@ -1,8 +1,10 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -98,6 +100,16 @@ public class TimeFilter {
 
     public void setPeriod(String period) {
         this.period = period;
+    }
+
+    public String getPeriodRangeName() {
+        List<String> strs = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(values)) {
+            values.forEach(value -> {
+                strs.add(String.valueOf(value));
+            });
+        }
+        return String.join("-", strs);
     }
 
     public static class Period {

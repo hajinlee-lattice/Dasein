@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -34,7 +33,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testMultiTenantFilter() {
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.SpendAnalytics)));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.PurchaseHistory)));
 
         List<ActivityMetrics> metricsList = constructMetricsList();
 
@@ -47,7 +46,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
             Assert.assertNotNull(metrics.getTenant());
         });
 
-        List<ActivityMetrics> active = entityMgr.findActiveWithType(ActivityType.SpendAnalytics);
+        List<ActivityMetrics> active = entityMgr.findActiveWithType(ActivityType.PurchaseHistory);
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
         active.forEach(item -> {
@@ -59,34 +58,41 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertFalse(CollectionUtils.isEmpty(saved));
         Assert.assertEquals(saved.size(), 3);
 
-        active = entityMgr.findActiveWithType(ActivityType.SpendAnalytics);
+        active = entityMgr.findActiveWithType(ActivityType.PurchaseHistory);
         Assert.assertFalse(CollectionUtils.isEmpty(active));
         Assert.assertEquals(active.size(), 2);
 
-        List<ActivityMetrics> all = entityMgr.findWithType(ActivityType.SpendAnalytics);
+        List<ActivityMetrics> all = entityMgr.findWithType(ActivityType.PurchaseHistory);
         Assert.assertFalse(CollectionUtils.isEmpty(all));
         Assert.assertEquals(all.size(), 3);
 
         Tenant tenant = new Tenant("dummy");
         tenant.setPid(-1L);
         MultiTenantContext.setTenant(tenant);
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findActiveWithType(ActivityType.SpendAnalytics)));
-        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.SpendAnalytics)));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findActiveWithType(ActivityType.PurchaseHistory)));
+        Assert.assertTrue(CollectionUtils.isEmpty(entityMgr.findWithType(ActivityType.PurchaseHistory)));
     }
 
     private List<ActivityMetrics> constructMetricsList() {
         List<ActivityMetrics> metricsList = new ArrayList<>();
         ActivityMetrics metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.SpendChange);
-        TimeFilter filter = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
-        metrics.setPeriodsConfig(filter);
-        metrics.setType(ActivityType.SpendAnalytics);
+        TimeFilter filter1 = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
+        TimeFilter filter2 = new TimeFilter(ComparisonType.PRIOR_ONLY, Period.Month.name(),
+                Collections.singletonList(2));
+        List<TimeFilter> filters = new ArrayList<>();
+        filters.add(filter1);
+        filters.add(filter2);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);
         metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.TotalSpendOvertime);
-        filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
-        metrics.setPeriodsConfig(filter);
-        metrics.setType(ActivityType.SpendAnalytics);
+        TimeFilter filter3 = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
+        filters = new ArrayList<>();
+        filters.add(filter3);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);
         return metricsList;
     }
@@ -95,15 +101,19 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         List<ActivityMetrics> metricsList = new ArrayList<>();
         ActivityMetrics metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.Margin);
-        TimeFilter filter = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
-        metrics.setPeriodsConfig(filter);
-        metrics.setType(ActivityType.SpendAnalytics);
+        TimeFilter filter1 = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
+        List<TimeFilter> filters = new ArrayList<>();
+        filters.add(filter1);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);
         metrics = new ActivityMetrics();
         metrics.setMetrics(InterfaceName.TotalSpendOvertime);
-        filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
-        metrics.setPeriodsConfig(filter);
-        metrics.setType(ActivityType.SpendAnalytics);
+        TimeFilter filter2 = new TimeFilter(ComparisonType.WITHIN, Period.Month.name(), Collections.singletonList(1));
+        filters = new ArrayList<>();
+        filters.add(filter2);
+        metrics.setPeriodsConfig(filters);
+        metrics.setType(ActivityType.PurchaseHistory);
         metricsList.add(metrics);
         return metricsList;
     }
