@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.mds.MetadataStoreName;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
-import com.latticeengines.metadata.jpa.AttributeRepository;
+import com.latticeengines.metadata.repository.db.AttributeRepository;
 import com.latticeengines.metadata.mds.NamedMetadataStore;
 
 import reactor.core.publisher.Flux;

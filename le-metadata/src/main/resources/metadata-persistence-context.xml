@@ -8,15 +8,16 @@
 
     <import resource="classpath:db-persistence-context.xml" />
     <import resource="classpath:documentdb-persistence-context.xml" />
+    <import resource="classpath:db-replicated-persistence-context.xml" />
 
-    <jpa:repositories base-package="com.latticeengines.metadata.jpa"
+    <jpa:repositories base-package="com.latticeengines.metadata.repository.db"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="entityManagerFactory"
-                      transaction-manager-ref="transactionManager"  />
+                      entity-manager-factory-ref="entityManagerFactoryReplicated"
+                      transaction-manager-ref="transactionManagerReplicated"  />
 
 
-    <jpa:repositories base-package="com.latticeengines.metadata.repository"
-                      base-class="com.latticeengines.metadata.repository.impl.MetadataStoreRepositoryImpl"
+    <jpa:repositories base-package="com.latticeengines.metadata.repository.document"
+                      base-class="com.latticeengines.metadata.repository.document.impl.MetadataStoreRepositoryImpl"
                       entity-manager-factory-ref="documentEntityManagerFactory"
                       transaction-manager-ref="documentTransactionManager"  />
 

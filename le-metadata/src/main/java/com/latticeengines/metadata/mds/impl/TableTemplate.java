@@ -17,8 +17,8 @@ import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
-import com.latticeengines.metadata.jpa.AttributeRepository;
-import com.latticeengines.metadata.jpa.TableRepository;
+import com.latticeengines.metadata.repository.db.AttributeRepository;
+import com.latticeengines.metadata.repository.db.TableRepository;
 import com.latticeengines.metadata.mds.NamedDataTemplate;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 

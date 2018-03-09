@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.repository;
+package com.latticeengines.metadata.repository.document;
 
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
 

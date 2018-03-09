@@ -154,7 +154,9 @@ angular.module('common.datacloud')
              *  Most browsers support 6 concurrent connections, older IE supports two
              *  Setting this to 5 to make room for topn call -lazarus
              */
-            connections = 5,
+            // concurrent does not help here, because backend cannot really paginate,
+            // as it needs to gather all metadata anyway
+            connections = 1,
             item_count = Math.ceil(total_count / connections),
             iterations = Math.ceil(total_count / item_count);
         

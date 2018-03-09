@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.jpa;
+package com.latticeengines.metadata.repository.db;
 
 import java.util.List;
 

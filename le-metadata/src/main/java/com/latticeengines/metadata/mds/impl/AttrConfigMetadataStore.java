@@ -13,8 +13,8 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.metadata.mds.NamedMetadataStore;
-import com.latticeengines.metadata.repository.AttrConfigRepository;
-import com.latticeengines.metadata.repository.MetadataStoreRepository;
+import com.latticeengines.metadata.repository.document.AttrConfigRepository;
+import com.latticeengines.metadata.repository.document.MetadataStoreRepository;
 
 import reactor.core.publisher.Flux;
 
