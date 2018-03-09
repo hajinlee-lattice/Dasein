@@ -2,10 +2,11 @@ package com.latticeengines.serviceflows.workflow.importdata;
 
 import java.util.Arrays;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -19,12 +20,14 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("importData")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportData.class);
@@ -86,8 +89,8 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
 
     private Table retrieveMetadata(SourceFile sourceFile) {
         if (sourceFile.getTableName() == null) {
-            throw new RuntimeException(String.format("No metadata has been associated with source file %s",
-                    sourceFile.getName()));
+            throw new RuntimeException(
+                    String.format("No metadata has been associated with source file %s", sourceFile.getName()));
         }
 
         Table table = metadataProxy.getTable(getConfiguration().getCustomerSpace().toString(),

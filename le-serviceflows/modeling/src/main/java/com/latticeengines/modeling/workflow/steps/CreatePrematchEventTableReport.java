@@ -2,6 +2,8 @@ package com.latticeengines.modeling.workflow.steps;
 
 import java.util.Collections;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.FilterReportColumn;
@@ -13,6 +15,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseDataFlowReportStep;
 
 @Component("createPrematchEventTableReport")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreatePrematchEventTableReport
         extends BaseDataFlowReportStep<CreatePrematchEventTableReportConfiguration> {
 
@@ -30,4 +33,5 @@ public class CreatePrematchEventTableReport
         parameters.sourceTableName = configuration.getSourceTableName();
         return parameters;
     }
+
 }

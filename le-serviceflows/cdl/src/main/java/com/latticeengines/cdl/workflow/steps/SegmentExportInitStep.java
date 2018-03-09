@@ -6,6 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +26,7 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("segmentExportInitStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SegmentExportInitStep.class);
@@ -56,9 +59,10 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
 
             log.info(String.format("For tenant: %s", customerSpace.toString()));
             log.info(String.format("For exportId: %s", exportId));
-
-            MetadataSegmentExport metadataSegmentExport = internalResourceRestApiProxy
-                    .getMetadataSegmentExport(customerSpace, exportId);
+            MetadataSegmentExport metadataSegmentExport = configuration.getMetadataSegmentExport();
+            if (metadataSegmentExport == null) {
+                metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
+            }
 
             log.info(String.format("Processing MetadataSegmentExport: %s", JsonUtils.serialize(metadataSegmentExport)));
 

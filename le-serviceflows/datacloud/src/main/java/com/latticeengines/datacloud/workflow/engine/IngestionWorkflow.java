@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.workflow.engine;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.workflow.engine.steps.IngestionStep;
@@ -10,13 +12,14 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("ingestionWorkflow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IngestionWorkflow extends AbstractWorkflow<IngestionWorkflowConfiguration> {
     @Autowired
     private IngestionStep ingestionStep;
 
     @Override
     public Workflow defineWorkflow(IngestionWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(ingestionStep) //
                 .build();
     }

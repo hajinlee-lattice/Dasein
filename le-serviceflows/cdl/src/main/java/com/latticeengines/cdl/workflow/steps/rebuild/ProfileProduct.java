@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 
 import java.util.Collections;
@@ -8,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessP
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(ProfileProduct.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductStepConfiguration> {
 
     static final String BEAN_NAME = "profileProduct";

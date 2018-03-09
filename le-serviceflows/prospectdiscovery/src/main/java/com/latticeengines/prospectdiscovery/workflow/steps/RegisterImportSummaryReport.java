@@ -3,18 +3,21 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import org.apache.avro.generic.GenericRecord;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.MathUtils;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.prospectdiscovery.dataflow.CreateImportSummary;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("registerImportSummaryReport")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RegisterImportSummaryReport extends BaseWorkflowStep<TargetMarketStepConfiguration> {
 
     private RegisterImportSummary registerImportSummary = new RegisterImportSummary();

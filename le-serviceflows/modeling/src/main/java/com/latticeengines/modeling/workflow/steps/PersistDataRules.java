@@ -8,9 +8,12 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.BaseRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
@@ -20,9 +23,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("persistDataRules")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PersistDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PersistDataRules.class);

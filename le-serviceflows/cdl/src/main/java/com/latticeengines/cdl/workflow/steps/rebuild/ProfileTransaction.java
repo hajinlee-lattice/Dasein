@@ -16,6 +16,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -52,6 +54,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component(ProfileTransaction.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ProfileTransaction.class);
@@ -104,10 +107,10 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     }
 
     private String getRawTableName() {
-        String rawTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+        String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (StringUtils.isBlank(rawTableName)) {
-            rawTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+            rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedRawTransaction, active);
             if (StringUtils.isNotBlank(rawTableName)) {
                 log.info("Found raw transaction table in active version " + active);
@@ -121,14 +124,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private void buildPeriodStore(TableRoleInCollection role) {
         SchemaInterpretation schema;
         switch (role) {
-            case ConsolidatedDailyTransaction:
-                schema = SchemaInterpretation.TransactionDailyAggregation;
-                break;
-            case ConsolidatedPeriodTransaction:
-                schema = SchemaInterpretation.TransactionPeriodAggregation;
-                break;
-            default:
-                throw new UnsupportedOperationException(role + " is not a supported period store.");
+        case ConsolidatedDailyTransaction:
+            schema = SchemaInterpretation.TransactionDailyAggregation;
+            break;
+        case ConsolidatedPeriodTransaction:
+            schema = SchemaInterpretation.TransactionPeriodAggregation;
+            break;
+        default:
+            throw new UnsupportedOperationException(role + " is not a supported period store.");
         }
 
         Table table = SchemaRepository.instance().getSchema(schema);
@@ -159,9 +162,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     protected void onPostTransformationCompleted() {
         String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
         String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName,
+                String.class);
         updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName,
+                String.class);
         updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
     }
 
@@ -263,13 +268,13 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setSumFields(Collections.singletonList("Amount"));
-        // todo: add this to daily configuration to derive TransactionCount attribute
-//        config.setCountField(Collections.singletonList("Amount"));
+        // todo: add this to daily configuration to derive TransactionCount
+        // attribute
+        // config.setCountField(Collections.singletonList("Amount"));
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("Quantity"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGroupByFields(Arrays.asList(
-                InterfaceName.AccountId.name(), //
+        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //
@@ -322,11 +327,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
 
-        // todo: add this to period configuration to derive TransactionCount attributes
-//        config.setSumFields(Collections.singletonList("TotalAmount"));
+        // todo: add this to period configuration to derive TransactionCount
+        // attributes
+        // config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
-        config.setGroupByFields(Arrays.asList(
-                InterfaceName.AccountId.name(), //
+        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //

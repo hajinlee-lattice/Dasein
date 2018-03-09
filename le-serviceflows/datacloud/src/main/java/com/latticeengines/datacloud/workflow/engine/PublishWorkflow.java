@@ -1,6 +1,9 @@
 package com.latticeengines.datacloud.workflow.engine;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.workflow.engine.steps.Publish;
@@ -10,6 +13,8 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("publishWorkflow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+@Lazy
 public class PublishWorkflow extends AbstractWorkflow<PublishWorkflowConfiguration> {
 
     @Autowired
@@ -17,7 +22,7 @@ public class PublishWorkflow extends AbstractWorkflow<PublishWorkflowConfigurati
 
     @Override
     public Workflow defineWorkflow(PublishWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(publish) //
                 .build();
     }

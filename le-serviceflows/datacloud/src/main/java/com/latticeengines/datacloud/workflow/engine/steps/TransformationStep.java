@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Scope;
@@ -25,7 +26,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @SuppressWarnings("rawtypes")
 @Component("transformationStep")
-@Scope("prototype")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class TransformationStep extends BaseWorkflowStep<PrepareTransformationStepInputConfiguration>
         implements ApplicationContextAware {
     private static Logger log = LoggerFactory.getLogger(TransformationStep.class);
@@ -43,7 +44,8 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
             log.info("Inside TransformationStepExecution execute()");
             PrepareTransformationStepInputConfiguration prepareTransformationConfiguration = getConfiguration();
             String serviceBeanName = prepareTransformationConfiguration.getServiceBeanName();
-            TransformationService transformationService = (TransformationService) applicationContext.getBean(serviceBeanName);
+            TransformationService transformationService = (TransformationService) applicationContext
+                    .getBean(serviceBeanName);
             Class<? extends TransformationConfiguration> configurationClass = transformationService
                     .getConfigurationClass();
 
@@ -73,7 +75,8 @@ public class TransformationStep extends BaseWorkflowStep<PrepareTransformationSt
             throw new LedpException(LedpCode.LEDP_25013, e.getMessage(), e);
         } finally {
             if (progress != null) {
-                progress = transformationProgressEntityMgr.findProgressByRootOperationUid(progress.getRootOperationUID());
+                progress = transformationProgressEntityMgr
+                        .findProgressByRootOperationUid(progress.getRootOperationUID());
                 progress.setEndDate(new Date());
                 transformationProgressEntityMgr.updateProgress(progress);
             }

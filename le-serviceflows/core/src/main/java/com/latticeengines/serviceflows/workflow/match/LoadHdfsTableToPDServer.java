@@ -5,10 +5,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.util.AbstractMap;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.CipherUtils;
@@ -19,12 +20,14 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.ExportConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.util.ExtractUtils;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("loadHdfsTableToPDServer")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LoadHdfsTableToPDServer extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(LoadHdfsTableToPDServer.class);

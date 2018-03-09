@@ -1,14 +1,17 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineMatchDebugWithScoreDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CombineMatchDebugWithScoreDataFlow extends RunDataFlow<CombineMatchDebugWithScoreDataFlowConfiguration> {
 
     @Override

@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
+package com.latticeengines.domain.exposed.serviceflows.datacloud;
 
 import java.util.Collection;
 
@@ -6,14 +6,15 @@ import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
-public class MatchDataCloudWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
 
     @Override
     public Collection<String> getSwpkgNames() {
@@ -39,6 +40,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder customer(CustomerSpace customerSpace) {
+            configuration.setContainerConfiguration("matchDataCloudWorkflow", customerSpace,
+                    configuration.getClass().getSimpleName());
             match.setCustomerSpace(customerSpace);
             bulkMatchWorkflowConfigurationBuilder.customer(customerSpace);
             matchResult.setCustomerSpace(customerSpace);
@@ -124,8 +127,24 @@ public class MatchDataCloudWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder skipMatchingStep(boolean skipMatchingStep) {
+            match.setSkipStep(skipMatchingStep);
+            matchResult.setSkipStep(skipMatchingStep);
+            return this;
+        }
+
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder matchJoinType(MatchJoinType matchJoinType) {
+            match.setMatchJoinType(matchJoinType);
+            return this;
+        }
+
+        public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
+            match.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
     }

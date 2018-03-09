@@ -10,6 +10,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInput
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInputTableWithScoreDataFlowConfiguration> {
 
     @SuppressWarnings("unused")

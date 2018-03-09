@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.MaintenanceOperationListener;
@@ -16,6 +18,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("cdlOperationWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowConfiguration> {
 
     @Inject
@@ -35,7 +38,7 @@ public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowC
 
     @Override
     public Workflow defineWorkflow(CDLOperationWorkflowConfiguration config) {
-        return new WorkflowBuilder()//
+        return new WorkflowBuilder(name())//
                 .next(deleteFileUploadStep)//
                 .next(startMaintenanceStep)//
                 .next(cleanupByUploadWrapper, null)//

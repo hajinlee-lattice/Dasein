@@ -25,7 +25,8 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component("cleanupAllService")
 @Lazy(value = false)
-public class CleanupAllService  extends MaintenanceOperationService<CleanupAllConfiguration> {
+public class CleanupAllService extends MaintenanceOperationService<CleanupAllConfiguration> {
+
     private static final Logger log = LoggerFactory.getLogger(CleanupAllService.class);
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
@@ -107,15 +108,21 @@ public class CleanupAllService  extends MaintenanceOperationService<CleanupAllCo
             result.put(BusinessEntity.Contact.name(), getTableDataLines(contact));
             Table product = dataCollectionProxy.getTable(customerSpace, BusinessEntity.Product.getBatchStore());
             result.put(BusinessEntity.Product.name(), getTableDataLines(product));
-            Table rawTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
-            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedDailyTransaction);
-            Table periodTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction);
+            Table rawTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedRawTransaction);
+            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedDailyTransaction);
+            Table periodTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedPeriodTransaction);
             result.put(BusinessEntity.Transaction.name(), getTableDataLines(rawTransaction)
                     + getTableDataLines(dailyTransaction) + getTableDataLines(periodTransaction));
         } else if (entity == BusinessEntity.Transaction) {
-            Table rawTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);
-            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedDailyTransaction);
-            Table periodTransaction = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedPeriodTransaction);
+            Table rawTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedRawTransaction);
+            Table dailyTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedDailyTransaction);
+            Table periodTransaction = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedPeriodTransaction);
             result.put(BusinessEntity.Transaction.name(), getTableDataLines(rawTransaction)
                     + getTableDataLines(dailyTransaction) + getTableDataLines(periodTransaction));
         } else {

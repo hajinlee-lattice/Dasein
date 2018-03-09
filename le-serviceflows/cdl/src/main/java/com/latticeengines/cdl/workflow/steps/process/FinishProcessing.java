@@ -9,6 +9,8 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
@@ -17,14 +19,15 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("finishProcessing")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration> {
 
     @Inject
@@ -115,20 +118,20 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
         BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
-                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+        role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
                 .findFirst().orElse(null);
         if (owner == null) {
             switch (role) {
-                case Profile:
-                    return BusinessEntity.Account;
-                case ContactProfile:
-                    return BusinessEntity.Contact;
-                case PurchaseHistoryProfile:
-                    return BusinessEntity.PurchaseHistory;
-                case ConsolidatedRawTransaction:
-                    return BusinessEntity.Transaction;
-                default:
-                    return null;
+            case Profile:
+                return BusinessEntity.Account;
+            case ContactProfile:
+                return BusinessEntity.Contact;
+            case PurchaseHistoryProfile:
+                return BusinessEntity.PurchaseHistory;
+            case ConsolidatedRawTransaction:
+                return BusinessEntity.Transaction;
+            default:
+                return null;
             }
         }
         return owner;

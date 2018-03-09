@@ -10,6 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -37,6 +39,7 @@ import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
 @Component(MergeTransaction.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(MergeTransaction.class);
@@ -75,8 +78,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
         TransformationStepConfig inputMerge = mergeInputs(true, false, true);
         TransformationStepConfig daily = addTrxDate();
-        TransformationStepConfig dayPeriods  = collectDays();
-        TransformationStepConfig dailyPartition  = partitionDaily();
+        TransformationStepConfig dayPeriods = collectDays();
+        TransformationStepConfig dailyPartition = partitionDaily();
         TransformationStepConfig report = reportDiff(dayPeriodStep);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
@@ -101,7 +104,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return step;
     }
 
-
     private TransformationStepConfig collectDays() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_COLLECTOR);
@@ -117,7 +119,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
     }
-
 
     private TransformationStepConfig partitionDaily() {
         TransformationStepConfig step = new TransformationStepConfig();

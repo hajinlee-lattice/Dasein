@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -14,6 +16,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("processProductDiff")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessProductDiff extends BaseWorkflowStep<ProcessProductStepConfiguration> {
 
     @Inject
@@ -24,8 +27,8 @@ public class ProcessProductDiff extends BaseWorkflowStep<ProcessProductStepConfi
         BusinessEntity entity = BusinessEntity.Product;
         String customerSpace = configuration.getCustomerSpace().toString();
 
-        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES,
-                BusinessEntity.class, String.class);
+        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class,
+                String.class);
         String diffTableName = diffTableNames.get(entity);
 
         Table redshiftTable = metadataProxy.getTable(customerSpace, diffTableName);

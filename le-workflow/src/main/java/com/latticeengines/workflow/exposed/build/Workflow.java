@@ -14,12 +14,18 @@ public class Workflow {
     private List<LEJobListener> listeners = new ArrayList<>();
     private Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
 
+    // private List<Workflow> subWorkflows = new ArrayList<>();
+
     public List<AbstractStep<? extends BaseStepConfiguration>> getSteps() {
         return steps;
     }
 
-    public void step(AbstractStep<? extends BaseStepConfiguration> step, String stepPath) {
+    public void step(AbstractStep<? extends BaseStepConfiguration> step, String namespace) {
         steps.add(step);
+        step.setNamespace(namespace);
+        int begin = namespace.indexOf('.') + 1;
+        int end = namespace.lastIndexOf('.');
+        String stepPath = namespace.substring(begin, begin >= end ? begin : end);
         stepNamespaces.add(stepPath);
     }
 
@@ -54,4 +60,16 @@ public class Workflow {
     public void setChoreographer(Choreographer choreographer) {
         this.choreographer = choreographer;
     }
+
+    // public List<Workflow> getSubWorkflows() {
+    // return subWorkflows;
+    // }
+    //
+    // public void setSubWorkflows(List<Workflow> subWorkflows) {
+    // this.subWorkflows = subWorkflows;
+    // }
+    //
+    // public void subWorkflow(Workflow subWorkflow) {
+    // subWorkflows.add(subWorkflow);
+    // }
 }

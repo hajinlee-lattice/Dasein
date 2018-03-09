@@ -52,7 +52,6 @@ public enum SoftwareLibrary {
         LeadPrioritization.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
         CDL.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));
-        CDL.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
         ProspectDiscovery.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
         ProspectDiscovery.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));

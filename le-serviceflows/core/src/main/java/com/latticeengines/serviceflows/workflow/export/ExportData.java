@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -22,6 +24,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("exportData")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportData extends BaseWorkflowStep<ExportStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportData.class);

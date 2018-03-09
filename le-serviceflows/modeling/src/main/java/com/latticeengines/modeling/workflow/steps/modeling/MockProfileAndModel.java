@@ -5,11 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -17,9 +19,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 
 @Component("mockProfileAndModel")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MockProfileAndModel extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(MockProfileAndModel.class);
@@ -89,8 +91,8 @@ public class MockProfileAndModel extends BaseModelStep<ModelStepConfiguration> {
         Path modelBaseDir = new Path(String.format(MODEL_HDFS_BASEDIR, configuration.getCustomerSpace().toString()));
         for (FileStatus fileStatus : fileStatuses) {
             Path fullEventColumnPath = fileStatus.getPath();
-            String eventColumnName = fullEventColumnPath.toString().substring(
-                    fullEventColumnPath.toString().lastIndexOf("/") + 1);
+            String eventColumnName = fullEventColumnPath.toString()
+                    .substring(fullEventColumnPath.toString().lastIndexOf("/") + 1);
 
             Path fullModelPath = fs.listStatus(fullEventColumnPath)[0].getPath();
             String modelName = fullModelPath.toString().substring(fullModelPath.toString().lastIndexOf("/"));

@@ -1,7 +1,10 @@
 package com.latticeengines.cdl.workflow;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
@@ -10,7 +13,7 @@ import com.latticeengines.cdl.workflow.steps.SetCdlConfigurationForScoring;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
+import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -18,39 +21,40 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("ratingEngineImportMatchAndModelWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RatingEngineImportMatchAndModelWorkflow
         extends AbstractWorkflow<RatingEngineImportMatchAndModelWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private CreateCdlEventTableFilterStep createCdlEventTableFilterStep;
 
-    @Autowired
+    @Inject
     private CreateCdlEventTableStep createCdlEventTableStep;
 
-    @Autowired
+    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
-    @Autowired
+    @Inject
     private CdlModelWorkflow modelWorkflow;
 
-    @Autowired
+    @Inject
     private SetCdlConfigurationForScoring setCdlConfigurationForScoring;
 
-    @Autowired
+    @Inject
     private RatingEngineScoreWorkflow scoreWorkflow;
 
-    @Autowired
+    @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
-    @Autowired
-    private ExportData exportData;
+    @Inject
+    private ExportWorkflow exportWorkflow;
 
-    @Autowired
+    @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
     public Workflow defineWorkflow(RatingEngineImportMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow, null) //
@@ -58,7 +62,7 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(setCdlConfigurationForScoring) //
                 .next(scoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
-                .next(exportData) //
+                .next(exportWorkflow, null) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

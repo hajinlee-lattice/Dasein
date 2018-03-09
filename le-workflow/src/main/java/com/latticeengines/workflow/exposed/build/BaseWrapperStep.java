@@ -33,13 +33,12 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
         if (PRE_PROCESSING.equals(configuration.getPhase())) {
             if (workflowConf == null) {
                 log.info("Skip the wrapped workflow steps.");
-                skipEmbeddedWorkflow(getWrappedWorkflowConfClass());
+                skipEmbeddedWorkflow(getParentNamespace(), getWrappedWorkflowConfClass());
             } else {
-                putObjectInContext(getWrappedWorkflowConfClass().getName(), workflowConf);
+                putObjectInContext(getParentNamespace(), workflowConf);
             }
-            String configClassName = configuration.getClass().getName();
             configuration.setPhase(POST_PROCESSING);
-            putObjectInContext(configClassName, configuration);
+            putObjectInContext(namespace, configuration);
             log.info("In pre processing phase, skip on execution complete.");
         } else {
             log.info("In post processing phase.");
@@ -54,18 +53,17 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
     @Override
     public void skipStep() {
         log.info("Skip the wrapper step and the wrapped workflow steps.");
-        skipEmbeddedWorkflow(getWrappedWorkflowConfClass());
+        skipEmbeddedWorkflow(getParentNamespace(), getWrappedWorkflowConfClass());
         configuration.setSkipStep(true);
         resetConfigurationPhase();
     }
 
     private void resetConfigurationPhase() {
-        BaseWrapperStepConfiguration stepConfig = getObjectFromContext(configuration.getClass().getName(),
-                configuration.getClass());
+        BaseWrapperStepConfiguration stepConfig = getObjectFromContext(namespace, configuration.getClass());
         if (stepConfig != null) {
             log.info("Switch " + configuration.getClass().getName() + " to " + PRE_PROCESSING);
             stepConfig.setPhase(PRE_PROCESSING);
-            putObjectInContext(configuration.getClass().getName(), stepConfig);
+            putObjectInContext(namespace, stepConfig);
         }
     }
 

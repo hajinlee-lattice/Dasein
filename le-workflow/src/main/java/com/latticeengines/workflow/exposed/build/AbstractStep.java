@@ -8,7 +8,6 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
@@ -16,8 +15,10 @@ import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @StepScope
 public abstract class AbstractStep<T> extends AbstractNameAwareBean {
@@ -27,6 +28,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     protected ExecutionContext executionContext;
     protected T configuration;
     protected Long jobId;
+    protected String namespace = "";
 
     private boolean dryRun = false;
     private boolean runAgainWhenComplete = true;
@@ -42,30 +44,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public boolean setup() {
-        T configuration = getObjectFromContext(configurationClass.getName(), configurationClass);
+        T configuration = getObjectFromContext(namespace, configurationClass);
         if (configuration != null) {
             setConfiguration(configuration);
             return true;
         }
-        String stepStringConfig = jobParameters.getString(configurationClass.getName());
+        String stepStringConfig = jobParameters.getString(namespace);
         if (stepStringConfig != null) {
             setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
             return true;
         }
-        for (String key : jobParameters.getParameters().keySet()) {
-            try {
-                if (key.startsWith("com.") && configurationClass.isAssignableFrom(Class.forName(key))) {
-                    stepStringConfig = jobParameters.getString(key);
-                    if (stepStringConfig != null) {
-                        setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
-                        return true;
-                    }
-                }
-            } catch (ClassNotFoundException e) {
-                log.error(ExceptionUtils.getStackTrace((e)));
-                return false;
-            }
-        }
+
         return false;
     }
 
@@ -116,9 +105,9 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         this.runAgainWhenComplete = runAgainWhenComplete;
     }
 
-    public <V> V getConfigurationFromJobParameters(Class<V> configurationClass) {
-        String stepStringConfig = jobParameters.getString(configurationClass.getName());
-        return JsonUtils.deserialize(stepStringConfig, configurationClass);
+    public BaseStepConfiguration getConfigurationFromJobParameters(String namespace) {
+        String stepStringConfig = jobParameters.getString(namespace);
+        return JsonUtils.deserialize(stepStringConfig, BaseStepConfiguration.class);
     }
 
     public void setJobParameters(JobParameters jobParameters) {
@@ -179,17 +168,13 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
         // expand to its steps
         if (val instanceof WorkflowConfiguration) {
             log.info(val.getClass().getSimpleName() + " is a workflow configuration. Try to expand its steps.");
-            WorkflowConfiguration workflowConfiguration = (WorkflowConfiguration) val;
-            Map<String, Class<?>> stepConfigClasses = workflowConfiguration.getStepConfigClasses();
-            if (!stepConfigClasses.isEmpty()) {
-                Map<String, String> configRegistry = workflowConfiguration.getStepConfigRegistry();
-                configRegistry.forEach((name, config) -> {
-                    Class<?> stepConfigClass = stepConfigClasses.get(name);
-                    putObjectInContext(name, JsonUtils.deserialize(config, stepConfigClass));
-                });
-            } else {
-                log.warn("Trying to update workflow config for " + key + ". But cannot find its step config classes.");
-            }
+            WorkflowConfiguration workflowConfig = (WorkflowConfiguration) val;
+            Map<String, String> configRegistry = WorkflowUtils.getFlattenedConfig(workflowConfig);
+            String parentNamespace = key;
+            configRegistry.forEach((name, config) -> {
+                putObjectInContext(String.format("%s.%s", parentNamespace, name),
+                        JsonUtils.deserialize(config, BaseStepConfiguration.class));
+            });
         }
     }
 
@@ -236,5 +221,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     public boolean shouldSkipStep() {
         return false;
+    }
+
+    public String getNamespace() {
+        return namespace;
+    }
+
+    public void setNamespace(String namespace) {
+        this.namespace = namespace;
+    }
+
+    public String getParentNamespace() {
+        return namespace.substring(0, namespace.lastIndexOf('.'));
     }
 }

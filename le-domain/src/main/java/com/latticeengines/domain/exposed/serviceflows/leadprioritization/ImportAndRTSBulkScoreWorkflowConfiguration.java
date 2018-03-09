@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
@@ -106,11 +105,6 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
-        public Builder internalResourcePort(String internalResourceHostPort) {
-            rtsBulkScoreWorkflowConfigurationBuilder.internalResourcePort(internalResourceHostPort);
-            return this;
-        }
-
         public Builder enableLeadEnrichment(boolean enableLeadEnrichment) {
             rtsBulkScoreWorkflowConfigurationBuilder.enableLeadEnrichment(enableLeadEnrichment);
             return this;
@@ -141,13 +135,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
-        public Builder columnSelection(ColumnSelection customizedColumnSelection) {
-            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(customizedColumnSelection);
-            return this;
-        }
-
-        public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            rtsBulkScoreWorkflowConfigurationBuilder.columnSelection(predefinedColumnSelection, selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            rtsBulkScoreWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 

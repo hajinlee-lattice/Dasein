@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
@@ -14,6 +16,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("createCdlEventTableFilterStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateCdlEventTableFilterStep extends RunDataFlow<CreateCdlEventTableFilterConfiguration> {
 
     @SuppressWarnings("unused")

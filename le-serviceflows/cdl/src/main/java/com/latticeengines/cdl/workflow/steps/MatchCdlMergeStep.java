@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -14,6 +16,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeCon
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("matchCdlMergeStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchCdlMergeStep extends RunDataFlow<MatchCdlMergeConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(MatchCdlMergeStep.class);
@@ -45,8 +48,8 @@ public class MatchCdlMergeStep extends RunDataFlow<MatchCdlMergeConfiguration> {
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, targetTable);
 
-        enableEmbeddedWorkflow(MatchCdlWithAccountIdWorkflowConfiguration.class);
-        enableEmbeddedWorkflow(MatchCdlWithoutAccountIdWorkflowConfiguration.class);
+        enableEmbeddedWorkflow(getParentNamespace(), MatchCdlWithAccountIdWorkflowConfiguration.class);
+        enableEmbeddedWorkflow(getParentNamespace(), MatchCdlWithoutAccountIdWorkflowConfiguration.class);
 
         if (tableWithAccountId != null) {
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), tableWithAccountId.getName());

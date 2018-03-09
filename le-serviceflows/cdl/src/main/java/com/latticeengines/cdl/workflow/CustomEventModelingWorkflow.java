@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
@@ -11,9 +13,10 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.scoring.workflow.PrepareScoringAfterModelingWorkflow;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
+import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -24,6 +27,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("customEventModelingWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventModelingWorkflowConfiguration> {
 
     @Inject
@@ -51,6 +55,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
+    private PrepareScoringAfterModelingWorkflow prepareScoringAfterModelingWorkflow;
+
+    @Inject
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
 
     @Inject
@@ -64,7 +71,8 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(importData) //
+        return new WorkflowBuilder(name()) //
+                .next(importData) //
                 .next(createTableImportReport) //
                 .next(customEventMatchWorkflow,
                         (CustomEventMatchWorkflowConfiguration) config.getSubWorkflowConfigRegistry()

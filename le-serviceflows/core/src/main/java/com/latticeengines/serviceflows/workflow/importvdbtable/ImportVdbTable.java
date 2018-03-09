@@ -3,6 +3,13 @@ package com.latticeengines.serviceflows.workflow.importvdbtable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.eai.EaiJobConfiguration;
@@ -14,12 +21,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableS
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 @Component("importVdbTable")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportVdbTable extends BaseWorkflowStep<ImportVdbTableStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ImportVdbTable.class);
@@ -51,7 +54,7 @@ public class ImportVdbTable extends BaseWorkflowStep<ImportVdbTableStepConfigura
 
         SourceImportConfiguration sourceImportConfig = new SourceImportConfiguration();
         sourceImportConfig.setSourceType(SourceType.VISIDB);
-        //sourceImportConfig.setTables(configuration.getTables());
+        // sourceImportConfig.setTables(configuration.getTables());
         importConfig.addSourceConfiguration(sourceImportConfig);
         return importConfig;
     }

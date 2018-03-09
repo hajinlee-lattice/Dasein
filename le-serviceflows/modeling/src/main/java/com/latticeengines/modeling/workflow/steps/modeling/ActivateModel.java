@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -17,6 +19,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("activateModel")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
 
     @Autowired
@@ -36,7 +39,8 @@ public class ActivateModel extends BaseWorkflowStep<ModelStepConfiguration> {
             if (modelApplicationIdToEventColumn == null || modelApplicationIdToEventColumn.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_28012);
             }
-            Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration, modelApplicationIdToEventColumn);
+            Map<String, ModelSummary> eventToModelSummary = waitForDownloadedModelSummaries.wait(configuration,
+                    modelApplicationIdToEventColumn);
             modelIds = retrieveModelIds(eventToModelSummary).values();
         } else {
             modelIds = getObjectFromContext(ACTIVATE_MODEL_IDS, List.class);

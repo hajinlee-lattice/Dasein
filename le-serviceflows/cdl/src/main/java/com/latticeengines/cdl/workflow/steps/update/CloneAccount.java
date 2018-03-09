@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -11,6 +13,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 
 @Component("cloneAccount")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CloneAccount extends BaseCloneEntityStep<ProcessAccountStepConfiguration> {
 
     @Override

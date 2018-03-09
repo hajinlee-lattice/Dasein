@@ -9,6 +9,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -23,6 +25,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("processMatchResult")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessMatchResult.class);
@@ -72,13 +75,13 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
 
     private List<String> sourceCols(Table preMatchTable) {
         List<String> cols = Arrays.asList(preMatchTable.getAttributeNames());
-//        String idCol = getIdColumn(preMatchTable);
-//        cols.add(idCol);
-//        for (Attribute attr : preMatchTable.getAttributes()) {
-//            if (!idCol.equalsIgnoreCase(attr.getName())) {
-//                cols.add(attr.getName());
-//            }
-//        }
+        // String idCol = getIdColumn(preMatchTable);
+        // cols.add(idCol);
+        // for (Attribute attr : preMatchTable.getAttributes()) {
+        // if (!idCol.equalsIgnoreCase(attr.getName())) {
+        // cols.add(attr.getName());
+        // }
+        // }
         log.info("Found source columns: " + StringUtils.join(cols, ", "));
         return cols;
     }
@@ -91,12 +94,14 @@ public class ProcessMatchResult extends RunDataFlow<ProcessMatchResultConfigurat
                 if (table.getAttribute("Id") == null) {
                     throw new RuntimeException("No Id columns found in prematch table");
                 } else {
-                    log.warn("No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
+                    log.warn(
+                            "No column with LogicalDataType InternalId in prematch table.  Choosing column called \"Id\"");
                     idColumns.add(table.getAttribute("Id"));
                 }
             }
             if (idColumns.size() != 1) {
-                log.warn(String.format("Multiple id columns in prematch table.  Choosing %s", idColumns.get(0).getName()));
+                log.warn(String.format("Multiple id columns in prematch table.  Choosing %s",
+                        idColumns.get(0).getName()));
             }
             return idColumns.get(0).getName();
         } else {

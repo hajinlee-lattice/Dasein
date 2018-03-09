@@ -1,6 +1,5 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
-
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.CEAttr;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_BUCKETER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_MATCH;
@@ -22,6 +21,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessA
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component(ProfileAccount.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountStepConfiguration> {
 
     static final String BEAN_NAME = "profileAccount";
@@ -229,10 +231,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     @Override
     protected void enrichTableSchema(Table table) {
         String dataCloudVersion = configuration.getDataCloudVersion();
-        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment, dataCloudVersion);
+        List<ColumnMetadata> amCols = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.Segment,
+                dataCloudVersion);
         Map<String, ColumnMetadata> amColMap = new HashMap<>();
         amCols.forEach(cm -> amColMap.put(cm.getColumnId(), cm));
-        ColumnMetadata latticeIdCm = columnMetadataProxy.columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
+        ColumnMetadata latticeIdCm = columnMetadataProxy
+                .columnSelection(ColumnSelection.Predefined.ID, dataCloudVersion).get(0);
         Map<String, Attribute> masterAttrs = new HashMap<>();
         masterTable.getAttributes().forEach(attr -> {
             masterAttrs.put(attr.getName(), attr);

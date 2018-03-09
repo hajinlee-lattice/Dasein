@@ -10,6 +10,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFl
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("scoreAggregateFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(ScoreAggregateFlow.class);
 

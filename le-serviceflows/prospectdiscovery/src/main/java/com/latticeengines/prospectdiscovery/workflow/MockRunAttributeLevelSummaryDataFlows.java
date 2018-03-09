@@ -1,9 +1,12 @@
-package com.latticeengines.prospectdiscovery.workflow.steps;
+package com.latticeengines.prospectdiscovery.workflow;
 
 import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.RegisterAttributeLevelSummaryReport;
+import com.latticeengines.prospectdiscovery.workflow.steps.RunAttributeLevelSummaryDataFlow;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

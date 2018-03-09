@@ -4,10 +4,11 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.CommandParameter;
@@ -18,10 +19,12 @@ import com.latticeengines.domain.exposed.datacloud.MatchStatusResponse;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("match")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Match extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(Match.class);

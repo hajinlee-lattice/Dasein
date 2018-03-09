@@ -1,9 +1,5 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud.etl;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
@@ -12,21 +8,6 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.Prepar
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.TransformationStepExecutionConfiguration;
 
 public class TransformationWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
-
-    private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
-
-    static {
-        stepConfigClasses.put(PrepareTransformationStepInputConfiguration.class.getCanonicalName(),
-                PrepareTransformationStepInputConfiguration.class);
-        stepConfigClasses.put(TransformationStepExecutionConfiguration.class.getCanonicalName(),
-                TransformationStepExecutionConfiguration.class);
-    }
-
-    @JsonIgnore
-    @Override
-    public Map<String, Class<?>> getStepConfigClasses() {
-        return stepConfigClasses;
-    }
 
     public static class Builder {
         private TransformationWorkflowConfiguration configuration = new TransformationWorkflowConfiguration();

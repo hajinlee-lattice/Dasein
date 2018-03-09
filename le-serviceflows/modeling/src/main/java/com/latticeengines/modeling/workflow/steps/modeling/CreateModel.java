@@ -6,6 +6,8 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -14,10 +16,10 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("createModel")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateModel extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CreateModel.class);

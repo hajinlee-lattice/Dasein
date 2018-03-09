@@ -13,6 +13,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -46,6 +48,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 @Component("cleanupByUploadStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploadWrapperConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(CleanupByUploadStep.class);
@@ -98,7 +101,8 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
     }
 
     private void createDeleteReport(Long currentRows) {
-        Report existReport = retrieveReport(configuration.getCustomerSpace(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY);
+        Report existReport = retrieveReport(configuration.getCustomerSpace(),
+                ReportPurpose.MAINTENANCE_OPERATION_SUMMARY);
         ObjectNode json;
         if (existReport == null) {
             json = JsonUtils.createObjectNode();
@@ -111,7 +115,8 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
             }
         }
         json.put(cleanupByUploadConfiguration.getEntity().name() + "_Deleted", totalRecords - currentRows);
-        Report report = createReport(json.toString(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY, UUID.randomUUID().toString());
+        Report report = createReport(json.toString(), ReportPurpose.MAINTENANCE_OPERATION_SUMMARY,
+                UUID.randomUUID().toString());
         registerReport(configuration.getCustomerSpace(), report);
     }
 
@@ -126,11 +131,10 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
             throw new RuntimeException("Cleanup by upload configuration is not expected!");
         }
         customerSpace = configuration.getCustomerSpace();
-        batchStore = cleanupByUploadConfiguration.getEntity().equals(BusinessEntity.Transaction) ?
-                        ConsolidatedRawTransaction : cleanupByUploadConfiguration.getEntity().getBatchStore();
+        batchStore = cleanupByUploadConfiguration.getEntity().equals(BusinessEntity.Transaction)
+                ? ConsolidatedRawTransaction : cleanupByUploadConfiguration.getEntity().getBatchStore();
         if (cleanupByUploadConfiguration.getEntity().equals(BusinessEntity.Transaction)) {
-            masterTable = dataCollectionProxy.getTable(customerSpace.toString(),
-                    ConsolidatedRawTransaction);
+            masterTable = dataCollectionProxy.getTable(customerSpace.toString(), ConsolidatedRawTransaction);
         } else {
             masterTable = dataCollectionProxy.getTable(customerSpace.toString(), batchStore);
         }
@@ -156,8 +160,6 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
             collectMasterStep = 2;
             cleanupMasterStep = 3;
             collectStep = 4;
-
-
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             if (cleanupTrx) {
@@ -263,7 +265,6 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
         return step;
     }
 
-
     private TransformationStepConfig partitionDaily() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
@@ -333,48 +334,42 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
     }
 
     private CleanupConfig.JoinedColumns getJoinedColumns(BusinessEntity entity, CleanupOperationType type,
-                                                         Table masterTable) {
+            Table masterTable) {
         CleanupConfig.JoinedColumns joinedColumns = new CleanupConfig.JoinedColumns();
         switch (entity) {
-            case Account:
-                joinedColumns.setAccountId(
-                        masterTable == null ? InterfaceName.AccountId.name() :
-                                masterTable.getAttribute(InterfaceName.AccountId).getName());
+        case Account:
+            joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
+                    : masterTable.getAttribute(InterfaceName.AccountId).getName());
+            break;
+        case Contact:
+            joinedColumns.setContactId(masterTable == null ? InterfaceName.ContactId.name()
+                    : masterTable.getAttribute(InterfaceName.ContactId).getName());
+            break;
+        case Transaction:
+            switch (type) {
+            case BYUPLOAD_MINDATE:
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
-            case Contact:
-                joinedColumns.setContactId(
-                        masterTable == null ? InterfaceName.ContactId.name() :
-                                masterTable.getAttribute(InterfaceName.ContactId).getName());
+            case BYUPLOAD_MINDATEANDACCOUNT:
+                joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
+                        : masterTable.getAttribute(InterfaceName.AccountId).getName());
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
-            case Transaction:
-                switch (type) {
-                    case BYUPLOAD_MINDATE:
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    case BYUPLOAD_MINDATEANDACCOUNT:
-                        joinedColumns.setAccountId(
-                                masterTable == null ? InterfaceName.AccountId.name() :
-                                        masterTable.getAttribute(InterfaceName.AccountId).getName());
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    case BYUPLOAD_ACPD:
-                        joinedColumns.setAccountId(
-                                masterTable == null ? InterfaceName.AccountId.name() :
-                                        masterTable.getAttribute(InterfaceName.AccountId).getName());
-                        joinedColumns.setContactId(
-                                masterTable == null ? InterfaceName.ContactId.name() :
-                                        masterTable.getAttribute(InterfaceName.ContactId).getName());
-                        joinedColumns.setProductId(
-                                masterTable == null ? InterfaceName.ProductId.name() :
-                                        masterTable.getAttribute(InterfaceName.ProductId).getName());
-                        joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
-                        break;
-                    default:
-                        break;
-                }
+            case BYUPLOAD_ACPD:
+                joinedColumns.setAccountId(masterTable == null ? InterfaceName.AccountId.name()
+                        : masterTable.getAttribute(InterfaceName.AccountId).getName());
+                joinedColumns.setContactId(masterTable == null ? InterfaceName.ContactId.name()
+                        : masterTable.getAttribute(InterfaceName.ContactId).getName());
+                joinedColumns.setProductId(masterTable == null ? InterfaceName.ProductId.name()
+                        : masterTable.getAttribute(InterfaceName.ProductId).getName());
+                joinedColumns.setTransactionTime(InterfaceName.TransactionDayPeriod.name());
                 break;
             default:
                 break;
+            }
+            break;
+        default:
+            break;
         }
         return joinedColumns;
     }

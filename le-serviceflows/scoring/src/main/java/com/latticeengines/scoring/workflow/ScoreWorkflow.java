@@ -2,7 +2,9 @@ package com.latticeengines.scoring.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfiguration;
@@ -19,6 +21,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("scoreWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> {
 
     @Inject
@@ -44,7 +47,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
 
     @Override
     public Workflow defineWorkflow(ScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder()//
+        return new WorkflowBuilder(name())//
                 .next(matchDataCloudWorkflow, null) //
                 .next(addStandardAttributesDataFlow) //
                 .next(score) //

@@ -3,7 +3,9 @@ package com.latticeengines.cdl.workflow;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CdlMatchAndModelWorkflowConfiguration;
@@ -22,6 +24,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("cdlModelWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowConfiguration> {
 
     @Inject
@@ -53,7 +56,8 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
 
     @Override
     public Workflow defineWorkflow(CdlMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(sample) //
+        return new WorkflowBuilder(name()) //
+                .next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //

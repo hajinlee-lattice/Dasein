@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -30,7 +31,6 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -100,7 +100,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
         return new RTSBulkScoreWorkflowConfiguration.Builder() //
                 .customer(MultiTenantContext.getCustomerSpace()) //
                 .microServiceHostPort(microserviceHostPort) //
-                .internalResourcePort(internalResourceHostPort) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .modelId(modelId) //
                 .modelType(modelType) //
                 .sourceSchemaInterpretation(modelSummary.getSourceSchemaInterpretation()) //
@@ -116,7 +116,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("AccountMasterColumn") //
-                .columnSelection(Predefined.ID, "1.0.0") //
+                .matchColumnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //

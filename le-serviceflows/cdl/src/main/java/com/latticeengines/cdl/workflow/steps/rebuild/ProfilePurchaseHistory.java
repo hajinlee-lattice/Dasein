@@ -20,6 +20,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -46,6 +48,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessT
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 
 @Component(ProfilePurchaseHistory.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessTransactionStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ProfilePurchaseHistory.class);
@@ -120,10 +123,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     private String getDailyTableName() {
-        String dailyTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+        String dailyTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
         if (StringUtils.isBlank(dailyTableName)) {
-            dailyTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+            dailyTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedDailyTransaction, active);
             if (StringUtils.isNotBlank(dailyTableName)) {
                 log.info("Found daily table in active version " + active);
@@ -135,10 +138,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     private String getAccountTableName() {
-        String accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedAccount, inactive);
         if (StringUtils.isBlank(accountTableName)) {
-            accountTableName =  dataCollectionProxy.getTableName(customerSpace.toString(),
+            accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedAccount, active);
             if (StringUtils.isNotBlank(accountTableName)) {
                 log.info("Found account batch store in active version " + active);
@@ -166,7 +169,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     private TransformationStepConfig aggregate(CustomerSpace customerSpace, String transactionTableName, //
-                                               String accountTableName, Map<String, List<Product>> productMap) {
+            String accountTableName, Map<String, List<Product>> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
 

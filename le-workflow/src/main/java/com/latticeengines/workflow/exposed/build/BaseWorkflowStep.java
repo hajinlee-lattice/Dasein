@@ -37,6 +37,7 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.security.exposed.MagicAuthenticationHeaderHttpRequestInterceptor;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends AbstractStep<T> {
 
@@ -261,8 +262,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return eventToModelId;
     }
 
-    protected void skipEmbeddedWorkflow(Class<? extends WorkflowConfiguration> workflowClass) {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(workflowClass);
+    protected void skipEmbeddedWorkflow(String parentNamespace, Class<? extends WorkflowConfiguration> workflowClass) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowClass);
         stepConfigMap.forEach((name, step) -> {
             step.setSkipStep(true);
             putObjectInContext(name, step);
@@ -270,8 +271,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
-    protected void enableEmbeddedWorkflow(Class<? extends WorkflowConfiguration> workflowClass) {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(workflowClass);
+    protected void enableEmbeddedWorkflow(String parentNamespace,
+            Class<? extends WorkflowConfiguration> workflowClass) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowClass);
         stepConfigMap.forEach((name, step) -> {
             if (step.isSkipStep()) {
                 step.setSkipStep(false);
@@ -281,47 +283,38 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
-    protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(
+    protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace,
             Class<? extends WorkflowConfiguration> workflowClass) {
-        WorkflowConfiguration workflow = getObjectFromContext(workflowClass.getName(), workflowClass);
-        if (workflow == null) {
+        WorkflowConfiguration workflowConfig = getObjectFromContext(workflowClass.getSimpleName(), workflowClass);
+        if (workflowConfig == null) {
             log.warn("There is no workflow configuration of class " + workflowClass.getSimpleName() + " in context.");
             try {
                 Class<?> builderClass = Arrays.stream(workflowClass.getDeclaredClasses())
                         .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
                 Object builder = builderClass.newInstance();
                 Method build = builderClass.getMethod("build", new Class<?>[] {});
-                workflow = (WorkflowConfiguration) build.invoke(builder);
+                workflowConfig = (WorkflowConfiguration) build.invoke(builder);
             } catch (Exception e) {
                 throw new RuntimeException(
                         String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
             }
         }
-        Map<String, String> registry = workflow.getStepConfigRegistry();
+        Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
         Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
-                .collect(Collectors.toMap(e -> e.getKey(), e -> {
-                    Class<?> configClass = null;
-                    try {
-                        configClass = Class.forName(e.getKey());
-                    } catch (ClassNotFoundException e1) {
-                        throw new RuntimeException(String.format("unable to find class %s", e.getKey()), e1);
+                .collect(Collectors.toMap(e -> parentNamespace + "." + e.getKey(), e -> {
+                    String namespace = e.getKey();
+                    if (!StringUtils.isEmpty(parentNamespace)) {
+                        namespace = parentNamespace + "." + namespace;
                     }
-                    BaseStepConfiguration step = (BaseStepConfiguration) getObjectFromContext(e.getKey(), configClass);
+                    BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
                     if (step == null) {
-                        step = (BaseStepConfiguration) getConfigurationFromJobParameters(configClass);
+                        step = getConfigurationFromJobParameters(namespace);
                         if (step == null) {
-                            step = (BaseStepConfiguration) JsonUtils.deserialize(e.getValue(), configClass);
+                            step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
                         }
                     }
                     return step;
                 }));
-
-        Map<String, WorkflowConfiguration> subWorkflowRegistry = workflow.getSubWorkflowConfigRegistry();
-        subWorkflowRegistry.forEach((k, v) -> {
-            Map<String, BaseStepConfiguration> currentResult = getStepConfigMapInWorkflow(v.getClass());
-            result.putAll(currentResult);
-        });
-
         return result;
 
     }

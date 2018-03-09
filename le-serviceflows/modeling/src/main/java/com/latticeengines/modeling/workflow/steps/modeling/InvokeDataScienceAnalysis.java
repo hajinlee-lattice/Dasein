@@ -5,6 +5,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.JobPublisher;
@@ -24,6 +26,7 @@ import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("invokeDataScienceAnalysis")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class InvokeDataScienceAnalysis extends BaseModelStep<ModelStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(InvokeDataScienceAnalysis.class);
 

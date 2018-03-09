@@ -138,12 +138,12 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType)
                         && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //
-                .internalResourcePort(internalResourceHostPort) //
+                .internalResourceHostPort(internalResourceHostPort) //
                 .matchJoinType(MatchJoinType.OUTER_JOIN) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("AccountMasterColumn") //
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
-                .columnSelection(Predefined.ID, "1.0.0") //
+                .matchColumnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //

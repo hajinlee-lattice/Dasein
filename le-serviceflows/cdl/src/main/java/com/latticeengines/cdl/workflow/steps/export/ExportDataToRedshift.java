@@ -15,6 +15,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -32,13 +34,14 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("exportDataToRedshift")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ExportDataToRedshift.class);
@@ -56,14 +59,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
     private Map<BusinessEntity, Boolean> appendFlagMap;
 
     private String customerSpace;
-    private boolean upsertToInactiveVersion = false;
 
     @Override
     public void execute() {
         log.info("Inside ExportData execute()");
         customerSpace = configuration.getCustomerSpace().toString();
 
-        log.info("upsertToInactiveVersion=" + upsertToInactiveVersion);
+        log.info("upsertToInactiveVersion=" + configuration.shouldUpsertToInactiveVersion());
 
         Map<BusinessEntity, String> entityTableNames = getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
                 BusinessEntity.class, String.class);
@@ -176,12 +178,11 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                 targetVersion = inactiveVersion;
             } else {
                 DataCollection.Version upsertVersion = inactiveVersion.complement();
-                if (upsertToInactiveVersion) {
+                if (configuration.shouldUpsertToInactiveVersion()) {
                     upsertVersion = inactiveVersion;
                 }
                 log.info("Trying to upsert to version " + upsertVersion);
-                Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore(),
-                        upsertVersion);
+                Table oldTable = dataCollectionProxy.getTable(customerSpace, entity.getServingStore(), upsertVersion);
                 if (oldTable == null) {
                     log.warn("Table for " + entity.getServingStore() + " at version " + targetVersion
                             + " does not exists. Switch to not append.");
@@ -242,10 +243,6 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
                     String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
             return exportConfig;
         }
-    }
-
-    public void upsertToInactiveVersion() {
-        upsertToInactiveVersion = true;
     }
 
 }

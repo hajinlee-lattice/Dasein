@@ -15,6 +15,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -35,6 +37,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("combineStatistics")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CombineStatistics.class);

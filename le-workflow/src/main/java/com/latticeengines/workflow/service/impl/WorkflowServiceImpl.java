@@ -40,20 +40,19 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowInstanceId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
-import com.latticeengines.workflow.core.WorkflowExecutionCache;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
+import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
@@ -79,9 +78,6 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Autowired
     private JobOperator jobOperator;
-
-    @Autowired
-    private WorkflowExecutionCache workflowExecutionCache;
 
     @Autowired
     private WorkflowTenantService workflowTenantService;
@@ -148,13 +144,16 @@ public class WorkflowServiceImpl implements WorkflowService {
             } else {
                 parmsBuilder.addString(USER_ID, WorkflowUser.DEFAULT_USER.name());
             }
-            addConfigParams(workflowConfiguration, parmsBuilder);
+            Map<String, String> flatteredConfig = WorkflowUtils.getFlattenedConfig(workflowConfiguration);
+            flatteredConfig.entrySet().forEach(e -> parmsBuilder.addString(e.getKey(), e.getValue()));
+            // addConfigParams(workflowConfiguration, parmsBuilder);
         }
 
         return parmsBuilder.toJobParameters();
     }
 
     // make sure let's don't have a cycle in workflow config graph
+    @SuppressWarnings("unused")
     private void addConfigParams(WorkflowConfiguration workflowConfiguration, JobParametersBuilder parmsBuilder) {
         if (workflowConfiguration == null) {
             return;
@@ -289,69 +288,6 @@ public class WorkflowServiceImpl implements WorkflowService {
         return workflowStatus;
     }
 
-    @Deprecated
-    @Override
-    public WorkflowStatus getStatus(JobExecution jobExecution) {
-        WorkflowStatus workflowStatus = new WorkflowStatus();
-        workflowStatus.setStatus(jobExecution.getStatus());
-        workflowStatus.setStartTime(jobExecution.getStartTime());
-        workflowStatus.setEndTime(jobExecution.getEndTime());
-        workflowStatus.setLastUpdated(jobExecution.getLastUpdated());
-        workflowStatus.setWorkflowName(getWorkflowName(jobExecution));
-
-        String customerSpace = jobExecution.getJobParameters().getString(CUSTOMER_SPACE);
-        if (!Strings.isNullOrEmpty(customerSpace)) {
-            workflowStatus.setCustomerSpace(CustomerSpace.parse(customerSpace));
-        }
-
-        return workflowStatus;
-    }
-
-    @Override
-    public com.latticeengines.domain.exposed.workflow.Job getJob(WorkflowExecutionId workflowId) {
-        com.latticeengines.domain.exposed.workflow.Job job = workflowExecutionCache.getJob(workflowId);
-        if (job == null) {
-            return null;
-        }
-        if (job.getOutputs() != null && job.getApplicationId() != null) {
-            job.getOutputs().put(WorkflowContextConstants.Outputs.YARN_LOG_LINK_PATH,
-                    String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
-        }
-        return job;
-    }
-
-    @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds) {
-        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
-
-        try {
-            jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
-        } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
-                    e.getMessage()));
-        }
-
-        return jobs;
-    }
-
-    @Override
-    public List<com.latticeengines.domain.exposed.workflow.Job> getJobs(List<WorkflowExecutionId> workflowIds,
-            String type) {
-        List<com.latticeengines.domain.exposed.workflow.Job> jobs = new ArrayList<>();
-
-        try {
-            jobs.addAll(workflowExecutionCache.getJobs(workflowIds));
-            if (type != null) {
-                jobs.removeIf(job -> !job.getJobType().equals(type));
-            }
-        } catch (Exception e) {
-            log.warn(String.format("Error while getting jobs for ids %s, with error %s", workflowIds.toString(),
-                    e.getMessage()));
-        }
-
-        return jobs;
-    }
-
     private String getWorkflowName(WorkflowExecutionId workflowId) {
         return getWorkflowName(leJobExecutionRetriever.getJobExecution(workflowId.getId()));
     }
@@ -436,8 +372,4 @@ public class WorkflowServiceImpl implements WorkflowService {
         return inputs;
     }
 
-    @Override
-    public WorkflowJob getJob(long workflowId) {
-        return workflowJobEntityMgr.findByWorkflowId(workflowId);
-    }
 }

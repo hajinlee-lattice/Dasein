@@ -2,7 +2,9 @@ package com.latticeengines.leadprioritization.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndScoreWorkflowConfiguration;
@@ -16,6 +18,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("importMatchAndScoreWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAndScoreWorkflowConfiguration> {
 
     @Inject
@@ -32,7 +35,7 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
 
     @Override
     public Workflow defineWorkflow(ImportMatchAndScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(importData) //
                 .next(createTableImportReport) //
                 .next(scoreWorkflow, null)//

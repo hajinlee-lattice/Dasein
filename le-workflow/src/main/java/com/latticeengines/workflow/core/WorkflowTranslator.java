@@ -4,6 +4,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -38,6 +40,8 @@ import com.latticeengines.workflow.listener.LogJobListener;
 @Configuration
 public class WorkflowTranslator {
 
+    private static final Logger log = LoggerFactory.getLogger(WorkflowTranslator.class);
+
     private JobBuilderFactory jobBuilderFactory;
 
     @Autowired
@@ -66,7 +70,8 @@ public class WorkflowTranslator {
 
         Choreographer choreographer = workflow.getChoreographer();
         choreographer.linkStepNamespaces(workflow.getStepNamespaces());
-        SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name).start(step(workflow.getSteps().get(0), choreographer, 0));
+        SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name)
+                .start(step(workflow.getSteps().get(0), choreographer, 0));
         if (workflow.getSteps().size() > 1) {
             for (int i = 1; i < workflow.getSteps().size(); i++) {
                 simpleJobBuilder = simpleJobBuilder.next(step(workflow.getSteps().get(i), choreographer, i));
@@ -88,11 +93,12 @@ public class WorkflowTranslator {
     }
 
     protected Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
-                              Choreographer choreographer, int seq) {
+            Choreographer choreographer, int seq) {
         return new Tasklet() {
+
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
-
+                log.info("step {} has namespace {}", step.name(), step.getNamespace());
                 StepExecution stepExecution = context.getStepContext().getStepExecution();
                 JobParameters jobParameters = stepExecution.getJobParameters();
                 step.setJobParameters(jobParameters);

@@ -3,8 +3,10 @@ package com.latticeengines.domain.exposed.serviceflows.modeling.steps;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -13,7 +15,8 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonSubTypes({ @Type(value = CreatePMMLModelConfiguration.class, name = "CreatePMMLModelConfiguration"), })
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull
@@ -275,15 +278,23 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     }
 
     @JsonProperty
-    public String getAiModelId() { return aiModelId; }
+    public String getAiModelId() {
+        return aiModelId;
+    }
 
     @JsonProperty
-    public void setAiModelId(String aiModelId) { this.aiModelId = aiModelId; }
+    public void setAiModelId(String aiModelId) {
+        this.aiModelId = aiModelId;
+    }
 
     @JsonProperty
-    public String getRatingEngineId() { return ratingEngineId; }
+    public String getRatingEngineId() {
+        return ratingEngineId;
+    }
 
     @JsonProperty
-    public void setRatingEngineId(String ratingEngineId) { this.ratingEngineId = ratingEngineId; }
+    public void setRatingEngineId(String ratingEngineId) {
+        this.ratingEngineId = ratingEngineId;
+    }
 
 }

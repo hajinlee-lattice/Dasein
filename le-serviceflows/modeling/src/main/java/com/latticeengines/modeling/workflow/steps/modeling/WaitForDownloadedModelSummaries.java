@@ -39,8 +39,8 @@ public class WaitForDownloadedModelSummaries {
         do {
             for (String modelApplicationId : modelApplicationIdToEventColumn.keySet()) {
                 if (!foundModels.contains(modelApplicationId)) {
-                    ModelSummary model = proxy.getModelSummaryFromApplicationId(modelApplicationId, configuration
-                            .getCustomerSpace().toString());
+                    ModelSummary model = proxy.getModelSummaryFromApplicationId(modelApplicationId,
+                            configuration.getCustomerSpace().toString());
                     if (model != null) {
                         eventToModelSummary.put(modelApplicationIdToEventColumn.get(modelApplicationId), model);
                         foundModels.add(modelApplicationId);
@@ -64,8 +64,8 @@ public class WaitForDownloadedModelSummaries {
 
         if (eventToModelSummary.size() < modelApplicationIdToEventColumn.size()) {
             Joiner joiner = Joiner.on(",").skipNulls();
-            throw new LedpException(LedpCode.LEDP_28013, new String[] {
-                    joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels) });
+            throw new LedpException(LedpCode.LEDP_28013,
+                    new String[] { joiner.join(modelApplicationIdToEventColumn.keySet()), joiner.join(foundModels) });
         }
 
         return eventToModelSummary;

@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -7,6 +9,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountC
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("matchCdlWithoutAccountIdFinishStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchCdlWithoutAccountIdFinishStep extends BaseWorkflowStep<MatchCdlAccountConfiguration> {
 
     @Override

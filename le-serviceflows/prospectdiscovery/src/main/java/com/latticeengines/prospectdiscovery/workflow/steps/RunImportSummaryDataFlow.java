@@ -3,16 +3,19 @@ package com.latticeengines.prospectdiscovery.workflow.steps;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunImportSummaryDataFlowConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunImportSummaryDataFlowConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("runImportSummaryDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RunImportSummaryDataFlow extends RunDataFlow<RunImportSummaryDataFlowConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(RunImportSummaryDataFlow.class);

@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.avro.generic.GenericRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Splitter;
@@ -23,9 +25,9 @@ import com.latticeengines.domain.exposed.modelreview.BaseRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 
 @Component("reviewModel")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ReviewModel extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ReviewModel.class);

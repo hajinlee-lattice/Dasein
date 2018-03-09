@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -45,7 +46,7 @@ import com.latticeengines.proxy.exposed.matchapi.MatchInternalProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("parallelBlockExecution")
-@Scope("prototype")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ParallelBlockExecution extends BaseWorkflowStep<ParallelBlockExecutionConfiguration> {
 
     private static Logger log = LoggerFactory.getLogger(ParallelBlockExecution.class);

@@ -8,12 +8,15 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
+import javax.inject.Inject;
+
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.StepRunner;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -24,7 +27,9 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
+import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.core.WorkflowTranslator;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -45,10 +50,18 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
     @Autowired
     private WorkflowTranslator workflowTranslator;
 
+    @Inject
+    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
+
+    @Inject
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
+
     @Test(groups = "workflow")
     public void test() throws Exception {
         SetConfigurationForScoring setConfigurationForScoring = new SetConfigurationForScoring();
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
+        ReflectionTestUtils.setField(setConfigurationForScoring, "rtsBulkScoreWorkflow", rtsBulkScoreWorkflow);
+        ReflectionTestUtils.setField(setConfigurationForScoring, "matchDataCloudWorkflow", matchDataCloudWorkflow);
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
 
         ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder();
@@ -59,6 +72,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         ImportMatchAndModelWorkflowConfiguration config = builder.build();
 
         JobParameters params = workflowService.createJobParams(config);
+        System.out.print(params);
         ExecutionContext executionContext = new ExecutionContext();
 
         Table t = new Table();
@@ -71,14 +85,20 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         when(workflowJobEntityMgr.findByWorkflowId(anyLong())).thenReturn(job);
         doNothing().when(workflowJobEntityMgr).updateWorkflowJob(any(WorkflowJob.class));
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
-
+        setConfigurationForScoring.setNamespace("importMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
         runner.launchStep(workflowTranslator.step(setConfigurationForScoring, choreographer, 0), params,
                 executionContext);
         Thread.sleep(10000);
+
+        String parentNamespace = setConfigurationForScoring.getNamespace().substring(0,
+                setConfigurationForScoring.getNamespace().lastIndexOf('.'));
+
+        String exportStepStepNamespace = String.join(".", parentNamespace, rtsBulkScoreWorkflow.name(),
+                ExportStepConfiguration.class.getSimpleName());
+
         assertTrue(setConfigurationForScoring
-                .getObjectFromContext(ExportStepConfiguration.class.getName(), ExportStepConfiguration.class)
-                .getUsingDisplayName());
+                .getObjectFromContext(exportStepStepNamespace, ExportStepConfiguration.class).getUsingDisplayName());
 
         assertEquals(setConfigurationForScoring.getStringValueFromContext("EXPORT_INPUT_PATH"), "");
         assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_OUTPUT_PATH")

@@ -4,10 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchProcessor;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -16,9 +19,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.PlayLaunchInitStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 
 @Component("playLaunchInitStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PlayLaunchInitStep extends BaseWorkflowStep<PlayLaunchInitStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PlayLaunchInitStep.class);

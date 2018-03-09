@@ -2,6 +2,8 @@ package com.latticeengines.modeling.workflow.steps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -11,6 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventT
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("dedupEventTableDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DedupEventTable extends RunDataFlow<DedupEventTableConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(DedupEventTable.class);

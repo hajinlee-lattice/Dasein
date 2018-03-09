@@ -1,6 +1,8 @@
 package com.latticeengines.datacloud.workflow.match;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.workflow.match.listeners.UpdateFailedMatchListener;
@@ -13,6 +15,7 @@ import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("bulkMatchWorkflow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowConfiguration>
         implements BulkMatchWorkflow {
 
@@ -27,7 +30,7 @@ public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowCon
 
     @Override
     public Workflow defineWorkflow(BulkMatchWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(prepareBulkMatchInput) //
                 .next(parallelBlockExecution) //
                 .listener(updateFailedMatchListener) //

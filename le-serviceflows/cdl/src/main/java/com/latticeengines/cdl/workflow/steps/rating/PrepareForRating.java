@@ -9,6 +9,8 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -29,6 +31,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.scheduler.Schedulers;
 
 @Component("prepareForRating")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PrepareForRating.class);
@@ -103,7 +106,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             valid = false;
         } else if (StringUtils.isNotBlank(model.getModelSummaryId())) {
             valid = true;
-        } else if (model.getModelSummary() == null  || StringUtils.isBlank(model.getModelSummary().getId())) {
+        } else if (model.getModelSummary() == null || StringUtils.isBlank(model.getModelSummary().getId())) {
             log.warn("AI model " + model.getId() + " has blank model guid.");
             valid = false;
         }

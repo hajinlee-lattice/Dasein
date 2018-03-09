@@ -10,6 +10,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -23,6 +25,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("remediateDataRules")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(RemediateDataRules.class);

@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
@@ -15,8 +17,8 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
-
 @Component("cloneInactiveServingStores")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CloneInactiveServingStores extends BaseWorkflowStep<GenerateRatingStepConfiguration> {
 
     @Inject

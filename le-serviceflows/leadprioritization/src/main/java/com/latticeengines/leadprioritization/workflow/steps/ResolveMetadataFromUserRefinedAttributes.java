@@ -2,22 +2,26 @@ package com.latticeengines.leadprioritization.workflow.steps;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.Tag;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.ResolveMetadataFromUserRefinedAttributesConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("resolveMetadataFromUserRefinedAttributes")
-public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<ResolveMetadataFromUserRefinedAttributesConfiguration> {
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class ResolveMetadataFromUserRefinedAttributes
+        extends BaseWorkflowStep<ResolveMetadataFromUserRefinedAttributesConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ResolveMetadataFromUserRefinedAttributes.class);
 
@@ -35,7 +39,7 @@ public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<R
         putObjectInContext(EVENT_TABLE, eventTable);
     }
 
-    public Table mergeUserRefinedAttributes(List<Attribute> userRefinedAttributes, Table eventTable){
+    public Table mergeUserRefinedAttributes(List<Attribute> userRefinedAttributes, Table eventTable) {
         for (Attribute userRefinedAttribute : userRefinedAttributes) {
             boolean found = false;
             for (Attribute attr : eventTable.getAttributes()) {
@@ -50,7 +54,8 @@ public class ResolveMetadataFromUserRefinedAttributes extends BaseWorkflowStep<R
                             AttributeUtils.copyPropertiesFromAttribute(userRefinedAttribute, attr, false);
                         }
                     } else {
-                        log.error(String.format("Ignore unknow attribute %s with unknown tags", userRefinedAttribute.getName()));
+                        log.error(String.format("Ignore unknow attribute %s with unknown tags",
+                                userRefinedAttribute.getName()));
                     }
                     found = true;
                     break;

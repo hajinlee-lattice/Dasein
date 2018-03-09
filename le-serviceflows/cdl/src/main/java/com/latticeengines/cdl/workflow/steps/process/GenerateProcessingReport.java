@@ -12,6 +12,8 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +37,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("generateProcessingReport")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfiguration> {
 
     @Inject

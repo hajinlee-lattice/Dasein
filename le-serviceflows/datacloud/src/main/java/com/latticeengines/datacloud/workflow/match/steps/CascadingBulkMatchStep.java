@@ -1,20 +1,21 @@
 package com.latticeengines.datacloud.workflow.match.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CascadingBulkMatchStepConfiguration;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.datacloud.match.exposed.service.MatchCommandService;
 import com.latticeengines.domain.exposed.datacloud.match.MatchStatus;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CascadingBulkMatchStepConfiguration;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("cascadingBulkMatchStep")
-@Scope("prototype")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CascadingBulkMatchStep extends RunDataFlow<CascadingBulkMatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CascadingBulkMatchStep.class);

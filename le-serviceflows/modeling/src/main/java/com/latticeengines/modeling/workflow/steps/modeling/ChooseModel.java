@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +26,7 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 
 @Component("chooseModel")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> {
 
     public static final long MINIMUM_POSITIVE_EVENTS = 300;
@@ -49,13 +52,12 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
         if (proxy == null) {
             proxy = new InternalResourceRestApiProxy(configuration.getInternalResourceHostPort());
         }
-        Collection<ModelSummary> modelSummaries = waitForDownloadedModelSummaries.wait(configuration,
-                modelApplicationIdToEventColumn).values();
+        Collection<ModelSummary> modelSummaries = waitForDownloadedModelSummaries
+                .wait(configuration, modelApplicationIdToEventColumn).values();
         Entry<String, String> bestModelIdAndEventColumn = chooseBestModelIdAndEventColumn(modelSummaries,
                 modelApplicationIdToEventColumn);
         String modelId = bestModelIdAndEventColumn.getKey();
-        putObjectInContext(ACTIVATE_MODEL_IDS,
-                Arrays.<String> asList(new String[] { modelId }));
+        putObjectInContext(ACTIVATE_MODEL_IDS, Arrays.<String> asList(new String[] { modelId }));
         putStringValueInContext(SCORING_MODEL_ID, modelId);
         putStringValueInContext(EVENT_COLUMN, bestModelIdAndEventColumn.getValue());
 
@@ -79,9 +81,9 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
 
             if (model.getTotalConversionCount() < MINIMUM_POSITIVE_EVENTS) {
                 isValid = false;
-                log.info(String.format(
-                        "Model %s discarded; contains %s positive events which is fewer than minimum %d.",
-                        model.getId(), model.getTotalConversionCount(), MINIMUM_POSITIVE_EVENTS));
+                log.info(
+                        String.format("Model %s discarded; contains %s positive events which is fewer than minimum %d.",
+                                model.getId(), model.getTotalConversionCount(), MINIMUM_POSITIVE_EVENTS));
             }
             if (model.getRocScore() < MINIMUM_ROC) {
                 isValid = false;
@@ -101,7 +103,8 @@ public class ChooseModel extends BaseWorkflowStep<ChooseModelStepConfiguration> 
                 TargetMarket defaultTargetMarket = proxy.findTargetMarketByName(TargetMarket.DEFAULT_NAME,
                         configuration.getCustomerSpace().toString());
                 if (Strings.isNullOrEmpty(defaultTargetMarket.getModelId())) {
-                    log.warn("No existing global model available so falling back to choosing the model with highest lift");
+                    log.warn(
+                            "No existing global model available so falling back to choosing the model with highest lift");
                     chosenModel = chooseModelWithHighestLift(models);
                 } else {
                     log.info("Using the global model from the default target market");

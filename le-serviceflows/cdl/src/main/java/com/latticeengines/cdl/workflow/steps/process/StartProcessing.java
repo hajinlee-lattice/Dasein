@@ -18,12 +18,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
+import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -35,6 +37,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -50,6 +53,7 @@ import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("startProcessing")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(StartProcessing.class);
@@ -64,7 +68,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private MetadataProxy metadataProxy;
 
     @Inject
-    private ExportDataToRedshift exportDataToRedshift;
+    private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -120,13 +124,18 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         updateActions();
         setRebuildEntities();
         setupInactiveVersion();
-        exportDataToRedshift.upsertToInactiveVersion();
+        String namespace = String.format("%s.%s.%s", getParentNamespace(), redshiftPublishWorkflow.name(),
+                ExportDataToRedshiftConfiguration.class.getSimpleName());
+        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = (ExportDataToRedshiftConfiguration) getConfigurationFromJobParameters(
+                namespace);
+        exportDataToRedshiftConfig.upsertToInactiveVersion();
+        putObjectInContext(namespace, exportDataToRedshiftConfig);
         // clearPhaseForRetry();
     }
 
     @SuppressWarnings("unused")
     private void clearPhaseForRetry() {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(null,
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
             log.info("stepConfigMap is Empty!!!");
@@ -142,7 +151,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setRebuildEntities() {
         Set<BusinessEntity> rebuildEntities = RebuildEntitiesProvider.getRebuildEntities(this);
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(null,
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
             log.info("stepConfigMap is Empty!!!");

@@ -8,10 +8,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.DbCreds;
 import com.latticeengines.domain.exposed.modeling.LoadConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.util.AttributeUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.dataplatform.ModelProxy;
@@ -32,6 +34,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("createEventTableFromMatchResult")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateEventTableFromMatchResult extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CreateEventTableFromMatchResult.class);

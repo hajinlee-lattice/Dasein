@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.modeling.steps;
+package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -15,6 +17,7 @@ import com.latticeengines.domain.exposed.scoring.ScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 
 @Component("scoreEventTable")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ScoreEventTable extends BaseScoreStep<ScoreStepConfiguration> {
 
     @Override

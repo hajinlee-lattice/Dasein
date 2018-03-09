@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
@@ -43,7 +44,6 @@ import com.latticeengines.pls.util.PivotMappingFileUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
@@ -138,7 +138,6 @@ public class ImportMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmi
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .sourceFileName(sourceFile.getName()) //
-                .matchInputTableName(sourceFile.getTableName()) //
                 .sourceType(SourceType.FILE) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .importReportNamePrefix(sourceFile.getName() + "_Report") //

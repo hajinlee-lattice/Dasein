@@ -23,6 +23,8 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
     @JsonProperty("append_flag_map")
     private Map<BusinessEntity, Boolean> appendFlagMap = Collections.emptyMap();
 
+    private boolean upsertToInactiveVersion;
+
     public HdfsToRedshiftConfiguration getHdfsToRedshiftConfiguration() {
         return hdfsToRedshiftConfiguration;
     }
@@ -53,5 +55,13 @@ public class ExportDataToRedshiftConfiguration extends MicroserviceStepConfigura
 
     public void setTargetTableName(String targetTableName) {
         this.targetTableName = targetTableName;
+    }
+
+    public void upsertToInactiveVersion() {
+        this.upsertToInactiveVersion = true;
+    }
+
+    public boolean shouldUpsertToInactiveVersion() {
+        return upsertToInactiveVersion;
     }
 }

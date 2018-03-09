@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.steps.export;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -11,6 +13,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("exportDataToRedshiftReportStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportDataToRedshiftReportStep extends BaseReportStep<BaseReportStepConfiguration> {
 
     @Override

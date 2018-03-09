@@ -3,6 +3,7 @@ package com.latticeengines.datacloud.workflow.engine.steps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.Publis
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("publish")
-@Scope("prototype")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Publish extends BaseWorkflowStep<PublishConfiguration> {
 
     public static final Logger log = LoggerFactory.getLogger(Publish.class);
@@ -51,7 +52,8 @@ public class Publish extends BaseWorkflowStep<PublishConfiguration> {
             if (pubConfig.getDestination() == null) {
                 throw new IllegalArgumentException("Publication destination is missing.");
             }
-            PublishService publishService = PublishServiceFactory.getPublishServiceBean(publication.getPublicationType());
+            PublishService publishService = PublishServiceFactory
+                    .getPublishServiceBean(publication.getPublicationType());
             progress = publishService.publish(progress, pubConfig);
         } catch (Exception e) {
             failByException(e);

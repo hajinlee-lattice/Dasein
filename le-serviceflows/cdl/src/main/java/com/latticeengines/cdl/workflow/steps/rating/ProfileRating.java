@@ -12,6 +12,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileStepBase;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 @Component(ProfileRating.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguration> {
 
     public static final Logger log = LoggerFactory.getLogger(ProfileRating.class);
@@ -65,7 +68,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         ratingTablePrefix = TableRoleInCollection.PivotedRating.name();
         statsTablePrefix = entity.name() + "Stats";
 
-        Table ruleRawTable =null;
+        Table ruleRawTable = null;
         Table aiRawTable = null;
 
         ruleBaseRawRating = getStringValueFromContext(RULE_RAW_RATING_TABLE_NAME);
@@ -207,7 +210,7 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
             if (RatingEngineType.CROSS_SELL.equals(modelContainer.getEngineSummary().getType())) {
                 aiModelIds.add(modelId);
                 AIModel aiModel = (AIModel) modelContainer.getModel();
-                if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())){
+                if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())) {
                     evModelIds.add(modelId);
                 }
             }

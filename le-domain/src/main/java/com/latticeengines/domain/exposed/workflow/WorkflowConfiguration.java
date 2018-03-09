@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.workflow;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -68,11 +66,11 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
     }
 
     public void add(BaseStepConfiguration configuration) {
-        stepConfigRegistry.put(configuration.getClass().getName(), configuration.toString());
+        stepConfigRegistry.put(configuration.getClass().getSimpleName(), configuration.toString());
     }
 
     protected void add(WorkflowConfiguration configuration) {
-        subWorkflowConfigRegistry.put(configuration.getName(), configuration);
+        subWorkflowConfigRegistry.put(configuration.getWorkflowName(), configuration);
     }
 
     public Map<String, String> getStepConfigRegistry() {
@@ -151,11 +149,6 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setContainerMemoryMB(Integer containerMemoryMB) {
         this.containerMemoryMB = containerMemoryMB;
-    }
-
-    @JsonIgnore
-    public Map<String, Class<?>> getStepConfigClasses() {
-        return Collections.emptyMap();
     }
 
 }

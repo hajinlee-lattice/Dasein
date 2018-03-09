@@ -12,12 +12,10 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineMatchDebugWithScoreDataFlowConfiguration;
@@ -37,15 +35,13 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private CombineMatchDebugWithScoreDataFlowConfiguration combineMatchDebugWithScores = new CombineMatchDebugWithScoreDataFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
-        private MatchStepConfiguration match = new MatchStepConfiguration();
-        private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
+        private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
-            match.setCustomerSpace(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
+            matchDataCloudWorkflowBuilder.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             combineMatchDebugWithScores.setCustomerSpace(customerSpace);
@@ -53,8 +49,14 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
-        public Builder internalResourcePort(String internalResourceHostPort) {
-            match.setInternalResourceHostPort(internalResourceHostPort);
+        public Builder microServiceHostPort(String microServiceHostPort) {
+            microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            return this;
+        }
+
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            matchDataCloudWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
             combineMatchDebugWithScores.setInternalResourceHostPort(internalResourceHostPort);
@@ -63,21 +65,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
-        public Builder microServiceHostPort(String microServiceHostPort) {
-            microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            matchResult.setMicroServiceHostPort(microServiceHostPort);
-            return this;
-        }
-
-        public Builder internalResourceHostPort(String internalResourceHostPort) {
-            score.setInternalResourceHostPort(internalResourceHostPort);
-            configuration.setInternalResourceHostPort(internalResourceHostPort);
-            match.setInternalResourceHostPort(internalResourceHostPort);
-            return this;
-        }
-
         public Builder inputTableName(String tableName) {
-            match.setInputTableName(tableName);
+            matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
             score.setInputTableName(tableName);
             // result table name is set during execution
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
@@ -111,39 +100,32 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
-            match.setMatchCommandType(matchCommandType);
+            matchDataCloudWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
-            match.setDestTables(destTables);
+            matchDataCloudWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
         public Builder matchJoinType(MatchJoinType matchJoinType) {
-            match.setMatchJoinType(matchJoinType);
+            matchDataCloudWorkflowBuilder.matchJoinType(matchJoinType);
             return this;
         }
 
-        public Builder columnSelection(ColumnSelection customizedColumnSelection) {
-            match.setCustomizedColumnSelection(customizedColumnSelection);
-            return this;
-        }
-
-        public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            match.setPredefinedColumnSelection(predefinedColumnSelection);
-            match.setPredefinedSelectionVersion(selectionVersion);
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
-            matchResult.setExcludeDataCloudAttrs(exclude);
+            matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder skipMatchingStep(boolean skipMatchingStep) {
-            match.setSkipStep(skipMatchingStep);
-            matchResult.setSkipStep(skipMatchingStep);
+            matchDataCloudWorkflowBuilder.skipMatchingStep(skipMatchingStep);
             return this;
         }
 
@@ -153,38 +135,36 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
-            match.setMatchRequestSource(matchRequestSource);
+            matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
-            match.setDataCloudVersion(dataCloudVersion);
-            matchResult.setDataCloudVersion(dataCloudVersion);
+            matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
-            match.setDbUrl(matchClientDocument.getUrl());
-            match.setDbUser(matchClientDocument.getUsername());
-            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
-            match.setMatchClient(matchClientDocument.getMatchClient().name());
+            matchDataCloudWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchQueue(String queue) {
-            match.setMatchQueue(queue);
+            matchDataCloudWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
         public RTSBulkScoreWorkflowConfiguration build() {
-            match.microserviceStepConfiguration(microserviceStepConfiguration);
+            export.setUsingDisplayName(Boolean.FALSE);
+            export.setExportDestination(ExportDestination.FILE);
+            export.setExportFormat(ExportFormat.CSV);
+
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             export.microserviceStepConfiguration(microserviceStepConfiguration);
 
-            configuration.add(match);
-            configuration.add(matchResult);
+            configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(score);
             configuration.add(combineInputWithScores);
             configuration.add(combineMatchDebugWithScores);
@@ -210,12 +190,22 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
             combineInputWithScores.setBucketMetadata(bucketMetadataList);
+            return this;
+        }
+
+        public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
+            matchDataCloudWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            return this;
+        }
+
+        public Builder treatPublicDomainAsNormalDomain(boolean publicDomainAsNormalDomain) {
+            matchDataCloudWorkflowBuilder.treatPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
 

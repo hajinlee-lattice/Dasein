@@ -1,17 +1,16 @@
 package com.latticeengines.workflow.exposed.build;
 
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.TransformationConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public abstract class WorkflowWrapper<S extends BaseWrapperStepConfiguration, W extends WorkflowConfiguration, R extends BaseWrapperStep<S, W>, I extends WorkflowInterface<W>>
-        extends AbstractWorkflow<TransformationConfiguration> {
+        extends AbstractWorkflow<W> {
 
     @Override
-    public Workflow defineWorkflow(TransformationConfiguration config) {
-        return new WorkflowBuilder() //
+    public Workflow defineWorkflow(W config) {
+        return new WorkflowBuilder(name()) //
                 .next(getWrapperStep()) //
-                .next(getWrappedWorkflow(), null) //
+                .next(getWrappedWorkflow(), config) //
                 .next(getWrapperStep()) //
                 .build();
     }

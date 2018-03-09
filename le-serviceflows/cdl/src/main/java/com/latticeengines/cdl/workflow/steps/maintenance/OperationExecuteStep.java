@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
@@ -12,18 +14,20 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("operationExecuteStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class OperationExecuteStep extends BaseReportStep<OperationExecuteConfiguration> {
 
     @SuppressWarnings({ "rawtypes", "unchecked" })
     @Override
     public void execute() {
         //
-        MaintenanceOperationConfiguration maintenanceOperationConfiguration = configuration.getMaintenanceOperationConfiguration();
-        MaintenanceOperationService maintenanceOperationService = MaintenanceOperationService.getMaintenanceService
-                (maintenanceOperationConfiguration.getClass());
+        MaintenanceOperationConfiguration maintenanceOperationConfiguration = configuration
+                .getMaintenanceOperationConfiguration();
+        MaintenanceOperationService maintenanceOperationService = MaintenanceOperationService
+                .getMaintenanceService(maintenanceOperationConfiguration.getClass());
         if (maintenanceOperationService == null) {
-            throw new RuntimeException(
-                    String.format("Cannot find maintenance service for class: %s", maintenanceOperationConfiguration.getClass()));
+            throw new RuntimeException(String.format("Cannot find maintenance service for class: %s",
+                    maintenanceOperationConfiguration.getClass()));
         }
         Map<String, Long> report = maintenanceOperationService.invoke(maintenanceOperationConfiguration);
         Optional.ofNullable(report).ifPresent(map -> map.forEach((entity, rows) -> {
@@ -31,7 +35,6 @@ public class OperationExecuteStep extends BaseReportStep<OperationExecuteConfigu
         }));
         super.execute();
     }
-
 
     @Override
     protected ReportPurpose getPurpose() {

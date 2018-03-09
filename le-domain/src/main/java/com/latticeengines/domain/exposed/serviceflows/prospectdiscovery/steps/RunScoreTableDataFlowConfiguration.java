@@ -1,13 +1,11 @@
 package com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps;
 
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DataFlowStepConfiguration;
-
 public class RunScoreTableDataFlowConfiguration extends BasePDDataFlowStepConfiguration {
-    
+
     private String[] accountMasterAndPath;
     private String scoreResult;
     private String uniqueKeyColumn;
-    
+
     public RunScoreTableDataFlowConfiguration() {
         setBeanName("createScoreTable");
         setTargetTableName("CreateScoreTable");
@@ -36,6 +34,5 @@ public class RunScoreTableDataFlowConfiguration extends BasePDDataFlowStepConfig
     public void setUniqueKeyColumn(String uniqueKeyColumn) {
         this.uniqueKeyColumn = uniqueKeyColumn;
     }
-    
-    
+
 }

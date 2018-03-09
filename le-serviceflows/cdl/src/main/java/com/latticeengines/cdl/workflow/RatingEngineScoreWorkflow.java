@@ -1,7 +1,9 @@
 package com.latticeengines.cdl.workflow;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
@@ -19,6 +21,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("ratingEngineScoreWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScoreWorkflowConfiguration> {
 
     @Autowired
@@ -47,7 +50,8 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
 
     @Override
     public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(createCdlScoringTableFilterStep) //
+        return new WorkflowBuilder(name())//
+                .next(createCdlScoringTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow, null) //
                 .next(score) //

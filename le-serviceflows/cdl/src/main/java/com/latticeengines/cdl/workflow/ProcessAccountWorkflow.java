@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeAccountWrapper;
@@ -14,6 +16,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("processAccountWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
 
     @Inject
@@ -30,7 +33,7 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
 
     @Override
     public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
-        return new WorkflowBuilder() //
+        return new WorkflowBuilder(name()) //
                 .next(mergeAccountWrapper, null) //
                 .next(updateAccountWorkflow, null) //
                 .next(rebuildAccountWorkflow, null) //

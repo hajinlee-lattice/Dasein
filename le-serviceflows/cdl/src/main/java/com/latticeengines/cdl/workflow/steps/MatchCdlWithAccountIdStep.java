@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -19,6 +21,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("matchCdlWithAccountIdStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfiguration> {
 
     @Inject

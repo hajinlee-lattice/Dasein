@@ -12,8 +12,13 @@ public abstract class AbstractWorkflow<T> extends AbstractNameAwareBean {
     @Autowired
     private WorkflowTranslator workflowTranslator;
 
-    public Job buildWorkflow(T workflowConfig) throws Exception {
-        return workflowTranslator.buildWorkflow(name(), defineWorkflow(workflowConfig));
+    public Job buildWorkflow(T config) throws Exception {
+        Workflow workflow = defineWorkflow(config);
+        return workflowTranslator.buildWorkflow(name(), workflow);
     }
+
+    // public Map<String, String> getStepNamespace() {
+    //
+    // }
 
 }

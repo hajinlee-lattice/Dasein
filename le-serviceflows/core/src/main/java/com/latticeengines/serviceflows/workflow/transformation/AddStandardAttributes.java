@@ -1,6 +1,8 @@
 package com.latticeengines.serviceflows.workflow.transformation;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -10,6 +12,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("addStandardAttributesDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AddStandardAttributes extends RunDataFlow<AddStandardAttributesConfiguration> {
 
     @Autowired

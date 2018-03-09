@@ -2,7 +2,9 @@ package com.latticeengines.modeling.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.modeling.PMMLModelWorkflowConfiguration;
@@ -15,6 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("pmmlModelWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfiguration> {
 
     @Inject
@@ -28,7 +31,8 @@ public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfigu
 
     @Override
     public Workflow defineWorkflow(PMMLModelWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(createPMMLModel) //
+        return new WorkflowBuilder(name()) //
+                .next(createPMMLModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();

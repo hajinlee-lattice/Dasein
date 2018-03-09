@@ -4,6 +4,8 @@ import org.apache.hadoop.mapreduce.v2.api.records.CounterGroup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +18,7 @@ import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 
 @Component("createEventTableReport")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfiguration> {
     private static final Logger log = LoggerFactory.getLogger(CreateTableImportReport.class);
 
@@ -49,8 +52,8 @@ public class CreateTableImportReport extends BaseReportStep<BaseReportStepConfig
             ObjectNode json = new ObjectMapper().createObjectNode();
             json.put("imported_records", group.getCounter(RecordImportCounter.IMPORTED_RECORDS.toString()).getValue());
             json.put("ignored_records", group.getCounter(RecordImportCounter.IGNORED_RECORDS.toString()).getValue());
-            json.put("required_field_missing", group.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING.toString())
-                    .getValue());
+            json.put("required_field_missing",
+                    group.getCounter(RecordImportCounter.REQUIRED_FIELD_MISSING.toString()).getValue());
             json.put("field_malformed", group.getCounter(RecordImportCounter.FIELD_MALFORMED.toString()).getValue());
             json.put("row_error", group.getCounter(RecordImportCounter.ROW_ERROR.toString()).getValue());
             return json;

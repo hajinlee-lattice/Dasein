@@ -14,6 +14,8 @@ import javax.inject.Inject;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -44,6 +46,7 @@ import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 @Component(ProcessTransactionDiff.BEAN_NAME)
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransactionStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessTransactionDiff.class);
@@ -80,8 +83,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         periodTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
 
-        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES,
-                BusinessEntity.class, String.class);
+        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class,
+                String.class);
         diffTableName = diffTableNames.get(BusinessEntity.Transaction);
 
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
@@ -100,9 +103,11 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         if (metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName) == null) {
             throw new IllegalStateException("Cannot find result sorted period table");
         }
-        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName,
+                String.class);
         updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName,
+                String.class);
         updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
 
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
@@ -128,18 +133,20 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         periodAgrStep = 9;
 
         TransformationStepConfig dailyRaw = collectDailyData();
-        TransformationStepConfig productAgr  = rollupProduct(productMap);
+        TransformationStepConfig productAgr = rollupProduct(productMap);
         TransformationStepConfig periodAdded = addPeriod();
-        TransformationStepConfig dailyAgr  = aggregateDaily();
-        TransformationStepConfig dailyRetained = retainFields(dailyAgrStep, TableRoleInCollection.AggregatedTransaction);
-        TransformationStepConfig cleanDaily  = cleanupDailyHistory();
-        TransformationStepConfig updateDaily  = updateDailyStore();
-        TransformationStepConfig periods  = collectPeriods();
+        TransformationStepConfig dailyAgr = aggregateDaily();
+        TransformationStepConfig dailyRetained = retainFields(dailyAgrStep,
+                TableRoleInCollection.AggregatedTransaction);
+        TransformationStepConfig cleanDaily = cleanupDailyHistory();
+        TransformationStepConfig updateDaily = updateDailyStore();
+        TransformationStepConfig periods = collectPeriods();
         TransformationStepConfig periodData = collectPeriodData();
-        TransformationStepConfig periodAgr  = aggregatePeriods();
-        TransformationStepConfig periodRetained  = retainFields(periodAgrStep, TableRoleInCollection.AggregatedPeriodTransaction);
-        TransformationStepConfig cleanPeriod  = cleanupPeriodHistory();
-        TransformationStepConfig updatePeriod  = updatePeriodStore();
+        TransformationStepConfig periodAgr = aggregatePeriods();
+        TransformationStepConfig periodRetained = retainFields(periodAgrStep,
+                TableRoleInCollection.AggregatedPeriodTransaction);
+        TransformationStepConfig cleanPeriod = cleanupPeriodHistory();
+        TransformationStepConfig updatePeriod = updatePeriodStore();
 
         steps.add(dailyRaw);
         steps.add(productAgr);
@@ -314,7 +321,6 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
         return step;
     }
-
 
     private TransformationStepConfig collectPeriods() {
         TransformationStepConfig step = new TransformationStepConfig();

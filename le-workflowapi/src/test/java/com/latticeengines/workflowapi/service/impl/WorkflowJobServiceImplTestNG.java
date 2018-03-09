@@ -46,9 +46,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
-import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
 public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBase {
@@ -59,9 +57,6 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
 
     @Autowired
     private WorkflowJobService workflowJobService;
-
-    @Autowired
-    private WorkflowTenantService workflowTenantService;
 
     private Map<Long, Long> workflowIds = new HashMap<>();
 
@@ -630,23 +625,8 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
         ((WorkflowJobServiceImpl) workflowJobService).setLeJobExecutionRetriever(leJobExecutionRetriever);
     }
 
-    @SuppressWarnings("unchecked")
     private void mockWorkflowService() {
         WorkflowService workflowService = Mockito.mock(WorkflowService.class);
-        Mockito.when(workflowService.getJobs(Mockito.anyList())).thenAnswer(invocation -> {
-            List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
-            List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId).collect(Collectors.toList());
-            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
-            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-        });
-        Mockito.when(workflowService.getJobs(Mockito.anyList(), Mockito.anyString())).thenAnswer(invocation -> {
-            List<WorkflowExecutionId> executionIds = (List<WorkflowExecutionId>) invocation.getArguments()[0];
-            String type = (String) invocation.getArguments()[1];
-            List<Long> workflowIds = executionIds.stream().map(WorkflowExecutionId::getId).collect(Collectors.toList());
-            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
-            workflowJobs.removeIf(workflowJob -> !workflowJob.getType().equals(type));
-            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-        });
         Mockito.when(workflowService.getStepNames(Mockito.any(WorkflowExecutionId.class))).thenAnswer(invocation -> {
             Long workflowId = ((WorkflowExecutionId) invocation.getArguments()[0]).getId();
             Job job = workflowJobToJobMapper.apply(workflowJobEntityMgr.findByWorkflowId(workflowId));
@@ -658,18 +638,5 @@ public class WorkflowJobServiceImplTestNG extends WorkflowApiFunctionalTestNGBas
             }
         });
         ((WorkflowJobServiceImpl) workflowJobService).setWorkflowService(workflowService);
-    }
-
-    @SuppressWarnings("unused")
-    private void mockWorkflowContainerService() {
-        WorkflowContainerService workflowContainerService = Mockito.mock(WorkflowContainerService.class);
-        Mockito.when(workflowContainerService.getJobsByTenant(Mockito.anyLong())).thenAnswer(invocation -> {
-            Long tenantPid = (Long) invocation.getArguments()[0];
-            Tenant tenant = workflowTenantService.getTenantByTenantPid(tenantPid);
-            MultiTenantContext.setTenant(tenant);
-            List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
-            return workflowJobs.stream().map(workflowJobToJobMapper).collect(Collectors.toList());
-        });
-        ((WorkflowJobServiceImpl) workflowJobService).setWorkflowContainerService(workflowContainerService);
     }
 }

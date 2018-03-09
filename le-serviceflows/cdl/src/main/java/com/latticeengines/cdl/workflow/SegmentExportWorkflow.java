@@ -1,7 +1,9 @@
 package com.latticeengines.cdl.workflow;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.listeners.SegmentExportListener;
@@ -14,6 +16,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("segmentExportWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SegmentExportWorkflow extends AbstractWorkflow<SegmentExportWorkflowConfiguration> {
 
     @Autowired
@@ -27,7 +30,8 @@ public class SegmentExportWorkflow extends AbstractWorkflow<SegmentExportWorkflo
 
     @Override
     public Workflow defineWorkflow(SegmentExportWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(segmentExportInitStep) //
+        return new WorkflowBuilder(name())//
+                .next(segmentExportInitStep) //
                 .next(exportData) //
                 .listener(segmentExportListener) //
                 .build();

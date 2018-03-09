@@ -13,6 +13,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -39,6 +41,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("preMatchStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(PrepareMatchConfig.class);
@@ -69,7 +72,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         MatchInput input = prepareMatchInput(preMatchEventTable);
         BulkMatchWorkflowConfiguration configuration = matchProxy.getBulkConfig(input,
                 getConfiguration().getMatchHdfsPod());
-        putObjectInContext(BulkMatchWorkflowConfiguration.class.getName(), configuration);
+        putObjectInContext(getParentNamespace(), configuration);
     }
 
     @Override
@@ -83,7 +86,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             putObjectInContext(MATCH_RESULT_TABLE, table);
         }
         log.info("Skip embedded bulk match workflow.");
-        skipEmbeddedWorkflow(BulkMatchWorkflowConfiguration.class);
+        skipEmbeddedWorkflow(getParentNamespace(), BulkMatchWorkflowConfiguration.class);
     }
 
     private Table preMatchEventTable() {

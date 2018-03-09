@@ -1,8 +1,10 @@
-package com.latticeengines.prospectdiscovery.workflow.steps;
+package com.latticeengines.prospectdiscovery.workflow;
 
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.RunAttributeLevelSummaryDataFlowsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.TargetMarketStepConfiguration;
+import com.latticeengines.prospectdiscovery.workflow.steps.RegisterAttributeLevelSummaryReport;
+import com.latticeengines.prospectdiscovery.workflow.steps.RunAttributeLevelSummaryDataFlow;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 import org.springframework.beans.factory.annotation.Autowired;

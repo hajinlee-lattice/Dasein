@@ -8,6 +8,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -16,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 
 @Component("ingestRuleBasedRating")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
 
     protected void postIngestion() {

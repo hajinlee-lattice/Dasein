@@ -1,36 +1,51 @@
 
 package com.latticeengines.cdl.workflow.steps;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.RatingEngineScoreWorkflow;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setCdlConfigurationForScoring")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class SetCdlConfigurationForScoring extends BaseWorkflowStep<SetCdlConfigurationForScoringConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SetCdlConfigurationForScoring.class);
 
-    @Autowired
+    @Inject
     protected ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private RatingEngineScoreWorkflow ratingEngineScoreWorkflow;
+
+    @Inject
+    private ExportWorkflow exportWorkflow;
 
     @Override
     public void execute() {
         log.info("Setting the configuration for Cdl scoring.");
-        
-        ExportStepConfiguration exportStepConfiguration = getConfigurationFromJobParameters(
-                ExportStepConfiguration.class);
+
+        String parentNamespace = namespace.substring(0, namespace.lastIndexOf('.'));
+        String exportStepStepNamespace = String.join(".", parentNamespace, ratingEngineScoreWorkflow.name(),
+                exportWorkflow.name(), ExportStepConfiguration.class.getSimpleName());
+        ExportStepConfiguration exportStepConfiguration = (ExportStepConfiguration) getConfigurationFromJobParameters(
+                exportStepStepNamespace);
         exportStepConfiguration.setUsingDisplayName(Boolean.TRUE);
-        putObjectInContext(ExportStepConfiguration.class.getName(), exportStepConfiguration);
+        putObjectInContext(exportStepStepNamespace, exportStepConfiguration);
 
         putStringValueInContext(EXPORT_INPUT_PATH, "");
         String sourceFileName = configuration.getInputProperties()

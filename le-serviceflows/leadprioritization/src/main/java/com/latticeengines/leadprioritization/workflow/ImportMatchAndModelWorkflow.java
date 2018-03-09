@@ -2,7 +2,9 @@ package com.latticeengines.leadprioritization.workflow;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
@@ -10,10 +12,10 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.modeling.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
+import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
+import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -24,6 +26,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("importMatchAndModelWorkflow")
 @Lazy
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAndModelWorkflowConfiguration> {
     @Inject
     private ImportData importData;
@@ -56,14 +59,15 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Inject
-    private ExportData exportData;
+    private ExportWorkflow exportWorkflow;
 
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
     public Workflow defineWorkflow(ImportMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder().next(importData) //
+        return new WorkflowBuilder(name()) //
+                .next(importData) //
                 .next(createTableImportReport) //
                 .next(modelValidationWorkflow, null) //
                 .next(matchDataCloudWorkflow, null) //
@@ -73,7 +77,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(setConfigurationForScoring) //
                 .next(rtsBulkScoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
-                .next(exportData) //
+                .next(exportWorkflow, null) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

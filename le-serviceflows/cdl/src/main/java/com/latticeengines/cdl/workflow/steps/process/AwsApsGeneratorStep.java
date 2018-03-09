@@ -11,6 +11,8 @@ import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -31,6 +33,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.core.BaseAwsPythonBatchStep;
 
 @Component("awsApsGeneratorStep")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(AwsApsGeneratorStep.class);
@@ -135,11 +138,14 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     protected void localizePythonScripts() {
         try {
             String scriptDir = getScriptDirInHdfs();
-            InputStream is = HdfsUtils.getInputStream(yarnConfiguration,scriptDir + "/leframework.tar.gz");
+            InputStream is = HdfsUtils.getInputStream(yarnConfiguration, scriptDir + "/leframework.tar.gz");
             CompressionUtils.untarInputStream(is, getPythonWorkspace().getPath());
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/pythonlauncher.sh", getPythonWorkspace().getPath() + "/pythonlauncher.sh");
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsdataloader.py", getPythonWorkspace().getPath() + "/apsdataloader.py");
-            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsgenerator.py", getPythonWorkspace().getPath() + "/apsgenerator.py");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/pythonlauncher.sh",
+                    getPythonWorkspace().getPath() + "/pythonlauncher.sh");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsdataloader.py",
+                    getPythonWorkspace().getPath() + "/apsdataloader.py");
+            HdfsUtils.copyHdfsToLocal(yarnConfiguration, scriptDir + "/apsgenerator.py",
+                    getPythonWorkspace().getPath() + "/apsgenerator.py");
         } catch (IOException e) {
             throw new RuntimeException("Failed to localize python scripts", e);
         }

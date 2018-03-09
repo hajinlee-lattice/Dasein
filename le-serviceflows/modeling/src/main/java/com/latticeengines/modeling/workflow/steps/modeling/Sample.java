@@ -2,6 +2,8 @@ package com.latticeengines.modeling.workflow.steps.modeling;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
@@ -9,9 +11,9 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.modeling.workflow.steps.modeling.ModelingServiceExecutor;
 
 @Component("sample")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class Sample extends BaseModelStep<ModelStepConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(Sample.class);

@@ -1,12 +1,13 @@
 package com.latticeengines.scoring.workflow.steps;
 
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -22,6 +23,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftD
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("computeLiftDataFlow")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfiguration> {
 
     private static final String modelGuidField = "Model_GUID";
@@ -71,7 +73,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
         params.setLiftField(InterfaceName.Lift.name());
         params.setRatingField(ratingField);
         params.setModelGuidField(modelGuidField);
-        params.setScoreFieldMap(getMapObjectFromContext(SCORING_SCORE_FIELDS, String.class, String .class));
+        params.setScoreFieldMap(getMapObjectFromContext(SCORING_SCORE_FIELDS, String.class, String.class));
         configuration.setDataFlowParams(params);
     }
 

@@ -5,10 +5,27 @@ import java.util.Map;
 import java.util.Properties;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.BaseCDLDataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.CascadingBulkMatchStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.BaseLPDataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.modeling.steps.BaseModelingDataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.steps.BasePDDataFlowStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.BaseScoringDataFlowStepConfiguration;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
+@JsonSubTypes({ @Type(value = BaseCDLDataFlowStepConfiguration.class, name = "BaseCDLDataFlowStepConfiguration"),
+        @Type(value = BaseCoreDataFlowStepConfiguration.class, name = "BaseCoreDataFlowStepConfiguration"),
+        @Type(value = BaseLPDataFlowStepConfiguration.class, name = "BaseLPDataFlowStepConfiguration"),
+        @Type(value = BaseModelingDataFlowStepConfiguration.class, name = "BaseModelingDataFlowStepConfiguration"),
+        @Type(value = BasePDDataFlowStepConfiguration.class, name = "BasePDDataFlowStepConfiguration"),
+        @Type(value = BaseScoringDataFlowStepConfiguration.class, name = "BaseScoringDataFlowStepConfiguration"),
+        @Type(value = CascadingBulkMatchStepConfiguration.class, name = "CascadingBulkMatchStepConfiguration"), })
 public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
 
     @JsonProperty("extra_sources")

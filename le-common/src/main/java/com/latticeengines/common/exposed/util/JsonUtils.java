@@ -66,13 +66,13 @@ public class JsonUtils {
     public static <T> T deserialize(String jsonStr, Class<T> clazz) {
         return deserialize(getObjectMapper(), jsonStr, clazz);
     }
-    
+
     public static <T> T deserialize(ObjectMapper objectMapper, String jsonStr, Class<T> clazz) {
         if (jsonStr == null) {
             return null;
         }
         if (objectMapper == null) {
-        		objectMapper = getObjectMapper();
+            objectMapper = getObjectMapper();
         }
         T deserializedSchema;
         try {
@@ -165,7 +165,7 @@ public class JsonUtils {
     public static ObjectMapper getObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(Feature.ALLOW_NON_NUMERIC_NUMBERS, true);
-        
+
         return mapper;
     }
 

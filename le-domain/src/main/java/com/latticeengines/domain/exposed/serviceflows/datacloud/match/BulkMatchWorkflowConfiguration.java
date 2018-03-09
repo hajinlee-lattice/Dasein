@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.datacloud.match;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.AvroInputBuffer;
@@ -15,21 +13,6 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.match.steps.Prep
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BulkMatchWorkflowConfiguration extends BaseDataCloudWorkflowConfiguration {
-
-    private static Map<String, Class<?>> stepConfigClasses = new HashMap<>();
-
-    static {
-        stepConfigClasses.put(PrepareBulkMatchInputConfiguration.class.getCanonicalName(),
-                PrepareBulkMatchInputConfiguration.class);
-        stepConfigClasses.put(ParallelBlockExecutionConfiguration.class.getCanonicalName(),
-                ParallelBlockExecutionConfiguration.class);
-    }
-
-    @JsonIgnore
-    @Override
-    public Map<String, Class<?>> getStepConfigClasses() {
-        return stepConfigClasses;
-    }
 
     public static class Builder {
 

@@ -11,6 +11,8 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
@@ -21,6 +23,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 
 @Component("createScoringTargetTable")
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRatingStepConfiguration> {
 
     private static final String MODEL_GUID = "Model_GUID";
@@ -36,9 +39,10 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
             AIModel aiModel = (AIModel) container.getModel();
             String modelSummaryId = aiModel.getModelSummaryId();
             if (StringUtils.isBlank(modelSummaryId)) {
-                throw new RuntimeException("Found an empty model summary id in AI model: " + JsonUtils.serialize(aiModel));
+                throw new RuntimeException(
+                        "Found an empty model summary id in AI model: " + JsonUtils.serialize(aiModel));
             } else {
-               return modelSummaryId;
+                return modelSummaryId;
             }
         }).collect(Collectors.toList()), "|");
         putStringValueInContext(SCORING_MODEL_ID, modelIds);

@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.datacloud.match.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 
 public class MatchCdlWithoutAccountIdWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
