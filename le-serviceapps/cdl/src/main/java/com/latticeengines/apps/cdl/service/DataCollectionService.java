@@ -43,4 +43,6 @@ public interface DataCollectionService {
 
     String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber);
 
+    void clearCache(String customerSpace);
+
 }

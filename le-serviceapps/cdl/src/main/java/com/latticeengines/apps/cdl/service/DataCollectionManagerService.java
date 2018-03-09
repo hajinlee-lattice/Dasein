@@ -9,6 +9,4 @@ public interface DataCollectionManagerService {
     boolean resetEntity(String customerSpaceStr, BusinessEntity entity);
 
     void refreshCounts(String customerSpace);
-
-    void clearCache(String customerSpace);
 }

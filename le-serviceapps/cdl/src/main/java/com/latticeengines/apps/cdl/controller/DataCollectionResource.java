@@ -225,7 +225,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Clear cache for data collection")
     public ResponseDocument<String> clearCache(@PathVariable String customerSpace) {
-        collectionMgrSvc.clearCache(customerSpace);
+        dataCollectionService.clearCache(customerSpace);
         return ResponseDocument.successResponse("Success");
     }
 

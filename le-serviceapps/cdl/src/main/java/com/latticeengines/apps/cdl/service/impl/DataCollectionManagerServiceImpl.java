@@ -15,10 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.service.DataCollectionManagerService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.cache.exposed.service.CacheService;
-import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cache.CacheName;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -175,13 +172,5 @@ public class DataCollectionManagerServiceImpl implements DataCollectionManagerSe
                 }
             });
         }
-    }
-
-    @Override
-    public void clearCache(String customerSpace) {
-        String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
-        CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
-        localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
     }
 }
