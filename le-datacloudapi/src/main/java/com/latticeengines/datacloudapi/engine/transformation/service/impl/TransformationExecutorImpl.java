@@ -128,8 +128,7 @@ public class TransformationExecutorImpl implements TransformationExecutor {
 
     private TransformationWorkflowConfiguration getTransformationWorkflowConf(
             TransformationConfiguration transformationConfiguration, TransformationProgress progress) {
-        builder = builder.workflowName("transformationWorkflow") //
-                .customerSpace(customerSpace) //
+        builder = builder.customerSpace(customerSpace) //
                 .hdfsPodId(HdfsPodContext.getHdfsPodId()) //
                 .transformationConfiguration(transformationConfiguration) //
                 .rootOperationUid(progress.getRootOperationUID()) //
