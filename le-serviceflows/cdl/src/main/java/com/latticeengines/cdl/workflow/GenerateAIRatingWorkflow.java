@@ -19,7 +19,7 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("generateAIRatingsWorkflow")
+@Component("generateAIRatingWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {

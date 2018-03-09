@@ -147,5 +147,10 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setPublicDomainAsNormalDomain(publicDomainAsNormalDomain);
             return this;
         }
+
+        public Builder matchHdfsPod(String matchHdfsPod) {
+            match.setMatchHdfsPod(matchHdfsPod);
+            return this;
+        }
     }
 }
