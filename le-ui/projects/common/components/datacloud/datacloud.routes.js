@@ -68,18 +68,49 @@ angular
                     });
 
                     return deferred.promise;
-                }],
-                EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                }], 
+                EnrichmentTopAttributes: ['$q', '$state', '$stateParams', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'QueryStore', function($q, $state, $stateParams, DataCloudStore, ApiHost, EnrichmentCount, QueryStore) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
+                    var query = {
+                       "free_form_text_search":"",
+                       "account_restriction":{
+                          "restriction":{
+                             "logicalRestriction":{
+                                "operator":"AND",
+                                "restrictions":[]
+                             }
+                          }
+                       },
+                       "contact_restriction":{
+                          "restriction":{
+                             "logicalRestriction":{
+                                "operator":"AND",
+                                "restrictions":[]
+                             }
+                          }
+                       },
+                       "restrict_without_sfdcid":false,
+                       "page_filter":{
+                          "num_rows":10,
+                          "row_offset":0
+                       }
+                    };
 
-                    if (EnrichmentCount !== 0) { //PLS-5894
-                        DataCloudStore.getAllTopAttributes().then(function(result) {
-                            deferred.resolve(result['Categories'] || result || {});
-                        });
-                    }
-
+                    QueryStore.getEntitiesCounts(query).then(function(result) {
+                        if (result && (result.Account != 0 || result.Contact != 0)) {
+                            DataCloudStore.getAllTopAttributes().then(function(result) {
+                                deferred.resolve(result['Categories'] || result || {});
+                            });
+                        } else {
+                            $state.go('home.nodata', { 
+                                tenantName: $stateParams.tenantName,
+                                segment: $stateParams.segment
+                            });
+                        }
+                    });
+                    
                     return deferred.promise;
                 }], 
                 EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function($q, DataCloudStore, ApiHost) {
@@ -709,11 +740,19 @@ angular
                 LookupResponse: [ function() {
                     return { attributes: null };
                 }],
-                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', function($state, $stateParams, EnrichmentCount) {
-                    if (EnrichmentCount == 0) {
-                        $state.go('home.nodata', { 
-                            tenantName: $stateParams.tenantName,
-                            segment: $stateParams.segment
+                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', 'QueryService', 'QueryStore', function($state, $stateParams, EnrichmentCount, QueryService, QueryStore) {
+                    var query = {};
+                    if (EnrichmentCount == 0 && QueryStore.counts.accounts.value == 0 && QueryStore.counts.contacts.value == 0) {
+                        QueryService.GetEntitiesCounts(query).then(function(result) {
+                            if ((!result || (result.Account == 0 && result.Contact == 0))) {
+                                $state.go('home.nodata', { 
+                                    tenantName: $stateParams.tenantName,
+                                    segment: $stateParams.segment
+                                });
+                            } else {
+                                QueryStore.counts.accounts.value = result.Account;
+                                QueryStore.counts.contacts.value = result.Contact;
+                            }
                         });
                     }
                 }]
