@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
 import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
-import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
@@ -22,7 +22,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("generateAIRatingsWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWorkflowConfiguration> {
+public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
 
     @Inject
     private CreateScoringTargetTable createScoringTargetTable;
@@ -46,7 +46,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateRatingWor
     private ComputeLiftDataFlow computeLift;
 
     @Override
-    public Workflow defineWorkflow(GenerateRatingWorkflowConfiguration config) {
+    public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(createScoringTargetTable) //
                 .next(createCdlEventTable) //

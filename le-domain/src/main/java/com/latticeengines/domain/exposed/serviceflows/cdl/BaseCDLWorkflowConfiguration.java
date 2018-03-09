@@ -6,6 +6,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = CustomEventMatchWorkflowConfiguration.class, name = "CustomEventMatchWorkflowConfiguration"),
         @Type(value = CustomEventModelingWorkflowConfiguration.class, name = "CustomEventModelingWorkflowConfiguration"),
         @Type(value = GenerateRatingWorkflowConfiguration.class, name = "GenerateRatingWorkflowConfiguration"),
+        @Type(value = GenerateAIRatingWorkflowConfiguration.class, name = "GenerateAIRatingWorkflowConfiguration"),
         @Type(value = PlayLaunchWorkflowConfiguration.class, name = "PlayLaunchWorkflowConfiguration"),
         @Type(value = ProcessAnalyzeWorkflowConfiguration.class, name = "ProcessAnalyzeWorkflowConfiguration"),
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
