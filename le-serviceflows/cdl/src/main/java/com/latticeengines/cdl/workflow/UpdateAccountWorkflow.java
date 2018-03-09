@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.CloneAccount;
 import com.latticeengines.cdl.workflow.steps.update.ProcessAccountDiffWrapper;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateAccountWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("updateAccountWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class UpdateAccountWorkflow extends AbstractWorkflow<UpdateAccountWorkflowConfiguration> {
 
     @Inject
     private CloneAccount cloneAccount;
@@ -26,7 +26,7 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProcessAccountDiffWrapper processAccountDiffWrapper;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(UpdateAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(cloneAccount) //
                 .next(processAccountDiffWrapper, null) //

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeContactWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetContact;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("processContactWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkflowConfiguration> {
 
     @Inject
     private MergeContactWrapper mergeContactWrapper;
@@ -32,7 +32,7 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ResetContact resetContact;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(ProcessContactWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(mergeContactWrapper, null) //
                 .next(updateContactWorkflow, null) //

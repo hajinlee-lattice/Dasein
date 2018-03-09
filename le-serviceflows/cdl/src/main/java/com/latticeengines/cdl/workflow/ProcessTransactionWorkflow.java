@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransactionWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessTransactionWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("processTransactionWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessTransactionWorkflowConfiguration> {
 
     @Inject
     private MergeTransactionWrapper mergeTransactionWrapper;
@@ -32,7 +32,7 @@ public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeW
     private ResetTransaction resetTransaction;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(ProcessTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(mergeTransactionWrapper, null) //
                 .next(updateTransactionWorkflow, null) //

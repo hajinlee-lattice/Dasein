@@ -177,6 +177,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
     }
 
     private void processRatingCube(StatsCube statsCube) {
+        @SuppressWarnings("rawtypes")
         Map<String, Map> liftMap = getMapObjectFromContext(RATING_LIFTS, String.class, Map.class);
         if (MapUtils.isNotEmpty(liftMap)) {
             statsCube.getStatistics().forEach((attrName, attrStats) -> {

@@ -12,7 +12,7 @@ import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.cdl.workflow.steps.rating.ProfileRatingWrapper;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -20,7 +20,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("processRatingWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflowConfiguration> {
 
     @Inject
     private PrepareForRating prepareForRating;
@@ -41,7 +41,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ExportDataToRedshift exportDataToRedshift;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //

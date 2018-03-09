@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.CloneProduct;
 import com.latticeengines.cdl.workflow.steps.update.ProcessProductDiff;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("updateProductWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class UpdateProductWorkflow extends AbstractWorkflow<UpdateProductWorkflowConfiguration> {
 
     @Inject
     private CloneProduct cloneProduct;
@@ -26,7 +26,7 @@ public class UpdateProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProcessProductDiff processProductDiff;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(UpdateProductWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(cloneProduct) //
                 .next(processProductDiff) //

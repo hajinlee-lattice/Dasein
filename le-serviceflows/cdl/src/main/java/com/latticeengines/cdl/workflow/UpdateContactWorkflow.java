@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.update.CloneContact;
 import com.latticeengines.cdl.workflow.steps.update.ProcessContactDiffWrapper;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateContactWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("updateContactWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class UpdateContactWorkflow extends AbstractWorkflow<UpdateContactWorkflowConfiguration> {
 
     @Inject
     private CloneContact cloneContact;
@@ -26,7 +26,7 @@ public class UpdateContactWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkfl
     private ProcessContactDiffWrapper processContactDiffWrapper;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(UpdateContactWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(cloneContact) //
                 .next(processContactDiffWrapper, null) //

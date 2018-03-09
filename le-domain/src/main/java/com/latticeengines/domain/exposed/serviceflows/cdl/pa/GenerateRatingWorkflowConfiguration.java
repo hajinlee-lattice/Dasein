@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.serviceflows.cdl;
+package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
 
@@ -8,6 +8,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
@@ -46,8 +47,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
@@ -85,6 +85,8 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             setCdlEventTableConfig();
             setMatchConfig();
             setScoreConfig();
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(cdlEventTable);
             configuration.add(match);

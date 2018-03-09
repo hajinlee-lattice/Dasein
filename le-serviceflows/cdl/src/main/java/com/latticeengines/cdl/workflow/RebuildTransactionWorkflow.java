@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileTransactionWrapper;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildTransactionWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("rebuildTransactionWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class RebuildTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class RebuildTransactionWorkflow extends AbstractWorkflow<RebuildTransactionWorkflowConfiguration> {
 
     @Inject
     private ProfileTransactionWrapper profileTransactionWrapper;
@@ -26,7 +26,7 @@ public class RebuildTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeW
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(RebuildTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(profileTransactionWrapper, null) //
                 .next(profilePurchaseHistoryWrapper, null) //

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.update.ClonePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.cdl.workflow.steps.update.ProcessTransactionDiffWrapper;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -18,7 +18,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("updateTransactionWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactionWorkflowConfiguration> {
 
     @Inject
     private CloneTransaction cloneTransaction;
@@ -30,7 +30,7 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<ProcessAnalyzeWo
     private ProcessTransactionDiffWrapper processTransactionDiffWrapper;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(UpdateTransactionWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(cloneTransaction) //
                 .next(clonePurchaseHistory) //

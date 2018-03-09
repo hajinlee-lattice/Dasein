@@ -1,11 +1,9 @@
-package com.latticeengines.domain.exposed.serviceflows.cdl;
+package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.collections4.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -13,13 +11,10 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessContactStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
@@ -35,15 +30,15 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
     public static class Builder {
 
-        public ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
-
+        private ProcessAnalyzeWorkflowConfiguration configuration = new ProcessAnalyzeWorkflowConfiguration();
         private ProcessStepConfiguration processStepConfiguration = new ProcessStepConfiguration();
-        private ProcessAccountStepConfiguration processAccountStepConfiguration = new ProcessAccountStepConfiguration();
-        private ProcessContactStepConfiguration processContactStepConfiguration = new ProcessContactStepConfiguration();
-        private ProcessProductStepConfiguration processProductStepConfiguration = new ProcessProductStepConfiguration();
-        private ProcessTransactionStepConfiguration processTransactionStepConfiguration = new ProcessTransactionStepConfiguration();
-        private ProcessRatingStepConfiguration processRatingStepConfiguration = new ProcessRatingStepConfiguration();
-        private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklowConfigurationBuilder = new GenerateRatingWorkflowConfiguration.Builder();
+
+        private ProcessAccountWorkflowConfiguration.Builder processAccountWorkflowBuilder = new ProcessAccountWorkflowConfiguration.Builder();
+        private ProcessContactWorkflowConfiguration.Builder processContactWorkflowBuilder = new ProcessContactWorkflowConfiguration.Builder();
+        private ProcessProductWorkflowConfiguration.Builder processProductWorkflowBuilder = new ProcessProductWorkflowConfiguration.Builder();
+        private ProcessTransactionWorkflowConfiguration.Builder processTransactionWorkflowBuilder = new ProcessTransactionWorkflowConfiguration.Builder();
+        private ProcessRatingWorkflowConfiguration.Builder processRatingWorkflowBuilder = new ProcessRatingWorkflowConfiguration.Builder();
+
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private RedshiftPublishWorkflowConfiguration.Builder redshiftPublishWorkflowConfigurationBuilder = new RedshiftPublishWorkflowConfiguration.Builder();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
@@ -54,16 +49,14 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             processStepConfiguration.setCustomerSpace(customerSpace);
-            processAccountStepConfiguration.setCustomerSpace(customerSpace);
-            processContactStepConfiguration.setCustomerSpace(customerSpace);
-            processProductStepConfiguration.setCustomerSpace(customerSpace);
-            processTransactionStepConfiguration.setCustomerSpace(customerSpace);
-            processRatingStepConfiguration.setCustomerSpace(customerSpace);
+            processAccountWorkflowBuilder.customer(customerSpace);
+            processContactWorkflowBuilder.customer(customerSpace);
+            processProductWorkflowBuilder.customer(customerSpace);
+            processTransactionWorkflowBuilder.customer(customerSpace);
+            processRatingWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
-            generateRatingWorfklowConfigurationBuilder.customer(customerSpace);
             redshiftPublishWorkflowConfigurationBuilder.customer(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
@@ -72,18 +65,18 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder microServiceHostPort(String microServiceHostPort) {
             processStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
-            generateRatingWorfklowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             processStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            processAccountStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            processContactStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            processProductStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            processTransactionStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
-            processRatingStepConfiguration.setInternalResourceHostPort(internalResourceHostPort);
+            processAccountWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processContactWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processProductWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             redshiftPublishWorkflowConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
@@ -92,6 +85,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder hdfsToRedshiftConfiguration(HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration) {
             redshiftPublishWorkflowConfigurationBuilder.hdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
+            processRatingWorkflowBuilder.hdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
             return this;
         }
 
@@ -121,34 +115,22 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
-            generateRatingWorfklowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
-            processAccountStepConfiguration.setDataCloudVersion(dataCloudVersion.getVersion());
+            processRatingWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            processAccountWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchYarnQueue(String matchYarnQueue) {
-            generateRatingWorfklowConfigurationBuilder.matchYarnQueue(matchYarnQueue);
+            processRatingWorkflowBuilder.matchYarnQueue(matchYarnQueue);
             return this;
         }
 
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
-            if (CollectionUtils.isNotEmpty(entities)) {
-                if (entities.contains(BusinessEntity.Account)) {
-                    processAccountStepConfiguration.setRebuild(true);
-                }
-                if (entities.contains(BusinessEntity.Contact)) {
-                    processContactStepConfiguration.setRebuild(true);
-                }
-                if (entities.contains(BusinessEntity.Product)) {
-                    processProductStepConfiguration.setRebuild(true);
-                }
-                if (entities.contains(BusinessEntity.Transaction)) {
-                    processTransactionStepConfiguration.setRebuild(true);
-                }
-                if (entities.contains(BusinessEntity.Rating)) {
-                    processRatingStepConfiguration.setRebuild(true);
-                }
-            }
+            processAccountWorkflowBuilder.rebuildEntities(entities);
+            processContactWorkflowBuilder.rebuildEntities(entities);
+            processProductWorkflowBuilder.rebuildEntities(entities);
+            processTransactionWorkflowBuilder.rebuildEntities(entities);
+            processRatingWorkflowBuilder.rebuildEntities(entities);
             return this;
         }
 
@@ -158,14 +140,15 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public ProcessAnalyzeWorkflowConfiguration build() {
+            configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(processStepConfiguration);
-            configuration.add(processAccountStepConfiguration);
-            configuration.add(processContactStepConfiguration);
-            configuration.add(processProductStepConfiguration);
-            configuration.add(processTransactionStepConfiguration);
-            configuration.add(processRatingStepConfiguration);
+            configuration.add(processAccountWorkflowBuilder.build());
+            configuration.add(processContactWorkflowBuilder.build());
+            configuration.add(processProductWorkflowBuilder.build());
+            configuration.add(processTransactionWorkflowBuilder.build());
+            configuration.add(processRatingWorkflowBuilder.build());
             configuration.add(combineStatisticsConfiguration);
-            configuration.add(generateRatingWorfklowConfigurationBuilder.build());
             configuration.add(redshiftPublishWorkflowConfigurationBuilder.build());
             configuration.add(awsPythonDataConfiguration);
             return configuration;

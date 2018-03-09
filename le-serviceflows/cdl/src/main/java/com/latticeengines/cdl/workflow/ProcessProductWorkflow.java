@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.merge.MergeProductWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
-import com.latticeengines.domain.exposed.serviceflows.cdl.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessProductWorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -17,7 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("processProductWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProcessProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkflowConfiguration> {
+public class ProcessProductWorkflow extends AbstractWorkflow<ProcessProductWorkflowConfiguration> {
 
     @Inject
     private MergeProductWrapper mergeProductWrapper;
@@ -32,7 +32,7 @@ public class ProcessProductWorkflow extends AbstractWorkflow<ProcessAnalyzeWorkf
     private ResetProduct resetProduct;
 
     @Override
-    public Workflow defineWorkflow(ProcessAnalyzeWorkflowConfiguration config) {
+    public Workflow defineWorkflow(ProcessProductWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(mergeProductWrapper, null) //
                 .next(updateProductWorkflow, null) //
