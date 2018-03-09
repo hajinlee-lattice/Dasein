@@ -3,8 +3,10 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -17,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
@@ -32,8 +36,11 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -47,6 +54,8 @@ import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+
+import reactor.core.publisher.ParallelFlux;
 
 @Component("ratingEngineService")
 public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
@@ -77,6 +86,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
+
+    @Inject
+    private TableRoleTemplate tableRoleTemplate;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -277,6 +292,22 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
     }
 
+    private Set<String> engineIdsAvailableInRedshift() {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
+        ParallelFlux<ColumnMetadata> cms = tableRoleTemplate.getUnorderedSchema(TableRoleInCollection.PivotedRating,
+                version);
+        Set<String> engineIds = new HashSet<>();
+        if (cms != null) {
+            List<String> idList = cms.filter(cm -> cm.getAttrName().startsWith("engine_")) //
+                    .map(ColumnMetadata::getAttrName).sequential().collectList().block();
+            if (CollectionUtils.isNotEmpty(idList)) {
+                engineIds = new HashSet<>(idList);
+            }
+        }
+        return engineIds;
+    }
+
     private Map<String, Long> updateRatingCount(RatingEngine ratingEngine) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
@@ -284,8 +315,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             return Collections.emptyMap();
         } else {
             MetadataSegment segment = ratingEngine.getSegment();
-            RatingEngineFrontEndQuery frontEndQuery = segment != null ? segment.toRatingEngineFrontEndQuery(BusinessEntity.Account)
-                    : new RatingEngineFrontEndQuery();
+            RatingEngineFrontEndQuery frontEndQuery = segment != null
+                    ? segment.toRatingEngineFrontEndQuery(BusinessEntity.Account) : new RatingEngineFrontEndQuery();
             frontEndQuery.setRatingEngineId(ratingEngine.getId());
             frontEndQuery.setMainEntity(BusinessEntity.Account);
             Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);

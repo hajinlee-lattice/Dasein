@@ -67,6 +67,12 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     }
 
     @Override
+    public DataCollection.Version getActiveVersion(String customerSpace) {
+        DataCollection dataCollection = getDataCollection(customerSpace, "");
+        return dataCollection.getVersion();
+    }
+
+    @Override
     public DataCollection.Version switchDataCollectionVersion(String customerSpace, String collectionName,
             DataCollection.Version version) {
         DataCollection collection = getDataCollection(customerSpace, collectionName);

@@ -12,6 +12,8 @@ public interface DataCollectionService {
 
     DataCollection getDataCollection(String customerSpace, String collectionName);
 
+    DataCollection.Version getActiveVersion(String customerSpace);
+
     DataCollection.Version switchDataCollectionVersion(String customerSpace, String collectionName,
                                                        DataCollection.Version version);
 
