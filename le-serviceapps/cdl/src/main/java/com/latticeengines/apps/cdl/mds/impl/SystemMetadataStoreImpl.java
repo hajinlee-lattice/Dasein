@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -23,9 +23,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.mds.ChainedDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratedMetadataStore;
-import com.latticeengines.domain.exposed.metadata.mds.Decorator;
 import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory;
-import com.latticeengines.domain.exposed.metadata.mds.DecoratorFactory1;
 import com.latticeengines.domain.exposed.metadata.mds.MdsDecoratorFactory;
 import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
@@ -66,10 +64,37 @@ public class SystemMetadataStoreImpl extends
             public ParallelFlux<ColumnMetadata> getMetadataInParallel(
                     Namespace2<BusinessEntity, DataCollection.Version> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
+                Category category = getEntityCategory(entity);
                 Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(entity.getServingStore(),
                         namespace.getCoord2());
-                ParallelFlux<ColumnMetadata> servingStore = tableRoleTemplate.getUnorderedSchema(trNs);
                 ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
+                ParallelFlux<ColumnMetadata> servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
+                        .map(cm -> {
+                            if (cm.getCategory() == null) {
+                                cm.setCategory(category);
+                            }
+                            cm.setEntity(entity);
+                            cm.enableGroup(ColumnSelection.Predefined.Segment);
+                            if (BusinessEntity.Account.equals(entity)) {
+                                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+                                cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+                            }
+                            return cm;
+                        }) //
+                        .doOnNext(cm -> {
+                            if (counter.get() == null) {
+                                counter.set(new AtomicLong(0));
+                            }
+                            counter.get().getAndIncrement();
+                        }) //
+                        .doOnComplete(() -> {
+                            long count = 0;
+                            if (counter.get() != null) {
+                                count = counter.get().get();
+                            }
+                            log.info("Retrieved " + count + " " + entity + " attributes.");
+                        });
+                ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
                 if (BusinessEntity.Account.equals(entity)) {
                     // merge serving store and AM, for Account
                     Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion();
@@ -77,15 +102,15 @@ public class SystemMetadataStoreImpl extends
                             .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
                             .filter(cm -> !cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
                             .doOnNext(cm -> {
-                                if (counter.get() == null) {
-                                    counter.set(new AtomicLong(0));
+                                if (amCounter.get() == null) {
+                                    amCounter.set(new AtomicLong(0));
                                 }
-                                counter.get().getAndIncrement();
+                                amCounter.get().getAndIncrement();
                             }) //
                             .doOnComplete(() -> {
                                 long count = 0;
-                                if (counter.get() != null) {
-                                    count = counter.get().get();
+                                if (amCounter.get() != null) {
+                                    count = amCounter.get().get();
                                 }
                                 log.info("Inserted " + count + " AM attributes.");
                             });
@@ -99,10 +124,8 @@ public class SystemMetadataStoreImpl extends
 
     private static ChainedDecoratorFactory<Namespace1<BusinessEntity>> getDecoratorChain(
             RatingDisplayMetadataStore ratingDisplayMetadataStore) {
-        DecoratorFactory<Namespace1<BusinessEntity>> staticDecorator = getStaticDecorator();
         DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = getRatingDecorator(ratingDisplayMetadataStore);
-        List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList( //
-                staticDecorator, //
+        List<DecoratorFactory<? extends Namespace>> factories = Collections.singletonList( //
                 ratingDisplayDecorator //
         );
 
@@ -111,9 +134,8 @@ public class SystemMetadataStoreImpl extends
             protected List<Namespace> project(Namespace1<BusinessEntity> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
                 String tenantId = MultiTenantContext.getTenantId();
-                Namespace staticNs = Namespace.as(entity);
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
-                return Arrays.asList(staticNs, ratingNs);
+                return Collections.singletonList(ratingNs);
             }
         };
     }
@@ -121,10 +143,6 @@ public class SystemMetadataStoreImpl extends
     private static DecoratorFactory<Namespace1<String>> getRatingDecorator(
             RatingDisplayMetadataStore ratingDisplayMetadataStore) {
         return MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
-    }
-
-    private static DecoratorFactory<Namespace1<BusinessEntity>> getStaticDecorator() {
-        return (DecoratorFactory1<BusinessEntity>) namespace -> new StaticDecorator(namespace.getCoord1());
     }
 
     @Override
@@ -139,64 +157,25 @@ public class SystemMetadataStoreImpl extends
         return Namespace.as(namespace.getCoord1());
     }
 
-    private static class StaticDecorator implements Decorator {
-
-        private final BusinessEntity entity;
-        private final Category category;
-
-        private StaticDecorator(BusinessEntity entity) {
-            this.entity = entity;
-            this.category = getEntityCategory(entity);
+    private static Category getEntityCategory(BusinessEntity entity) {
+        Category category;
+        switch (entity) {
+        case Account:
+            category = Category.ACCOUNT_ATTRIBUTES;
+            break;
+        case Contact:
+            category = Category.CONTACT_ATTRIBUTES;
+            break;
+        case PurchaseHistory:
+            category = Category.PRODUCT_SPEND;
+            break;
+        case Rating:
+            category = Category.RATING;
+            break;
+        default:
+            category = Category.DEFAULT;
         }
-
-        @Override
-        public Flux<ColumnMetadata> render(Flux<ColumnMetadata> metadata) {
-            return metadata.map(this::columnModifier);
-        }
-
-        @Override
-        public ParallelFlux<ColumnMetadata> render(ParallelFlux<ColumnMetadata> metadata) {
-            return metadata.map(this::columnModifier);
-        }
-
-        @Override
-        public String getName() {
-            return "ServingStoreStatic";
-        }
-
-        private ColumnMetadata columnModifier(ColumnMetadata cm) {
-            if (cm.getCategory() == null) {
-                cm.setCategory(category);
-            }
-            cm.setEntity(entity);
-            cm.enableGroup(ColumnSelection.Predefined.Segment);
-            if (BusinessEntity.Account.equals(entity)) {
-                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-                cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
-            }
-            return cm;
-        }
-
-        private static Category getEntityCategory(BusinessEntity entity) {
-            Category category;
-            switch (entity) {
-            case Account:
-                category = Category.ACCOUNT_ATTRIBUTES;
-                break;
-            case Contact:
-                category = Category.CONTACT_ATTRIBUTES;
-                break;
-            case PurchaseHistory:
-                category = Category.PRODUCT_SPEND;
-                break;
-            case Rating:
-                category = Category.RATING;
-                break;
-            default:
-                category = Category.DEFAULT;
-            }
-            return category;
-        }
+        return category;
     }
 
 }
