@@ -137,8 +137,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             var service = getService(entity);
             if (service) {
                 return service.showType(bucketRestriction, type, typeToShow);
-            }
-            else {
+            } else {
                 console.warn('Service not implemented');
                 return false;
             }

@@ -281,28 +281,96 @@ angular.module('common.datacloud.query.service',[
         this.removeRestriction('contact', attribute);
     }
 
-    this.addRestriction = function(type, attribute) {
+    this.addRestriction = function(type, attribute, forceTreeRoot) {
+        console.log(type, attribute, forceTreeRoot);
         attribute = this.setAttributeAttr(type, attribute);
 
-        var treeRoot = this.getAddBucketTreeRoot();
+        var treeRoot = this.getAddBucketTreeRoot(),
+            restrictions = [],
+            bucketRestriction = new BucketRestriction(
+                attribute.columnName, 
+                attribute.resourceType, 
+                attribute.bkt.Vals, 
+                attribute.attr, 
+                attribute.bkt
+            );
 
-        if (treeRoot && type == this.addBucketTreeType) {
-            var restrictions = treeRoot.logicalRestriction.restrictions;
+        if (forceTreeRoot || (treeRoot && type == this.addBucketTreeType)) {
+            restrictions = forceTreeRoot ? forceTreeRoot : treeRoot.logicalRestriction.restrictions;
         } else if (QueryStore.mode == 'rules') {
-            var restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
+            restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
         } else {
-            var restrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
+            restrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
+            console.log(':add:', type, attribute, bucketRestriction, restrictions);
+
+            var sameAttributes = restrictions.filter(function(restriction) {
+                var br = restriction.bucketRestriction;
+                return br && br.attr == bucketRestriction.attr;
+            });
+            
+            var logicalRestrictions = restrictions.filter(function(restriction) {
+                return restriction.logicalRestriction;
+            });
+
+            console.log(':buh:', sameAttributes, '\n', logicalRestrictions);
+
+            var newHome = null;
+
+            logicalRestrictions.forEach(function(logical) {
+                var rs = logical.logicalRestriction.restrictions;
+
+                var buckets = rs.filter(function(restriction) {
+                    var br = restriction.bucketRestriction;
+                    return br && br.attr == bucketRestriction.attr;
+                });
+
+                if (buckets.length > 0 && buckets.length == rs.length) {
+                    newHome = rs;
+                }
+            });
+
+            console.log(':newHome:', newHome);
+
+            if (newHome) {
+                restrictions = newHome;
+            } 
+
+            if (sameAttributes.length > 0) {
+                if (!newHome) {
+                    var newLogicalRestriction = {
+                        logicalRestriction: {
+                            operator: 'OR',
+                            restrictions: []
+                        }
+                    };
+
+                    restrictions.push(newLogicalRestriction);
+
+                    restrictions = newLogicalRestriction.logicalRestriction.restrictions;
+                }
+
+                sameAttributes.forEach(function(restriction) {
+                    restriction.bucketRestriction.columnName = attribute.columnName;
+                    restriction.bucketRestriction.resourceType = attribute.resourceType;
+
+                    QueryStore.addRestriction(type, restriction.bucketRestriction, restrictions);
+                    QueryStore.removeRestriction(type, restriction.bucketRestriction);
+                });
+            }
         }
 
         restrictions.push({
-            bucketRestriction: new BucketRestriction(attribute.columnName, attribute.resourceType, attribute.bkt.Rng, attribute.attr, attribute.bkt)
+            bucketRestriction: bucketRestriction
         });
 
         this.setRestrictions(type);
     }
 
     this.removeRestriction = function(type, attribute) {
+        console.log(':remove:', type, attribute);
+        
         attribute = this.setAttributeAttr(type, attribute);
+        console.log(':remove attr:', type, attribute);
 
         var searchTerm = attribute.attr,
             index = -1,
