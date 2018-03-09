@@ -9,8 +9,18 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAccountWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessContactWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessProductWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessRatingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildAccountWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildContactWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildProductWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.RebuildTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateAccountWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateContactWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateProductWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.UpdateTransactionWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
@@ -28,6 +38,21 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ProcessAccountWorkflowConfiguration.class, name = "ProcessAccountWorkflowConfiguration"),
         @Type(value = UpdateAccountWorkflowConfiguration.class, name = "UpdateAccountWorkflowConfiguration"),
         @Type(value = RebuildAccountWorkflowConfiguration.class, name = "RebuildAccountWorkflowConfiguration"),
+
+        @Type(value = ProcessContactWorkflowConfiguration.class, name = "ProcessContactWorkflowConfiguration"),
+        @Type(value = UpdateContactWorkflowConfiguration.class, name = "UpdateContactWorkflowConfiguration"),
+        @Type(value = RebuildContactWorkflowConfiguration.class, name = "RebuildContactWorkflowConfiguration"),
+
+        @Type(value = ProcessProductWorkflowConfiguration.class, name = "ProcessProductWorkflowConfiguration"),
+        @Type(value = UpdateProductWorkflowConfiguration.class, name = "UpdateProductWorkflowConfiguration"),
+        @Type(value = RebuildProductWorkflowConfiguration.class, name = "RebuildProductWorkflowConfiguration"),
+
+        @Type(value = ProcessTransactionWorkflowConfiguration.class, name = "ProcessTransactionWorkflowConfiguration"),
+        @Type(value = UpdateTransactionWorkflowConfiguration.class, name = "UpdateTransactionWorkflowConfiguration"),
+        @Type(value = RebuildTransactionWorkflowConfiguration.class, name = "RebuildTransactionWorkflowConfiguration"),
+
+        @Type(value = ProcessRatingWorkflowConfiguration.class, name = "ProcessRatingWorkflowConfiguration"),
+
         @Type(value = RatingEngineScoreWorkflowConfiguration.class, name = "RatingEngineScoreWorkflowConfiguration"),
         @Type(value = RedshiftPublishWorkflowConfiguration.class, name = "RedshiftPublishWorkflowConfiguration"),
         @Type(value = RatingEngineImportMatchAndModelWorkflowConfiguration.class, name = "RatingEngineImportMatchAndModelWorkflowConfiguration"),
