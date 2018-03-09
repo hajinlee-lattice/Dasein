@@ -18,24 +18,17 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.service.MetadataSegmentService;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentServiceImpl.class);
 
     private final SegmentProxy segmentProxy;
-    private final EntityProxy entityProxy;
-    private final RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, EntityProxy entityProxy,
-            RatingEngineProxy ratingEngineProxy) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy) {
         this.segmentProxy = segmentProxy;
-        this.entityProxy = entityProxy;
-        this.ratingEngineProxy = ratingEngineProxy;
     }
 
     @Override
@@ -86,7 +79,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
-        translateForBackend(segment);
+        segment = translateForBackend(segment);
         MetadataSegment updatedSegment = translateForFrontend(
                 segmentProxy.createOrUpdateSegment(customerSpace, segment));
         try {
