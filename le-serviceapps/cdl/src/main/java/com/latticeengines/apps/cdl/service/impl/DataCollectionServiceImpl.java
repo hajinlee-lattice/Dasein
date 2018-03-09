@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -323,6 +324,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
 
 
     @Override
+    @NoCustomerSpace
     public void clearCache(String customerSpace) {
         String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
