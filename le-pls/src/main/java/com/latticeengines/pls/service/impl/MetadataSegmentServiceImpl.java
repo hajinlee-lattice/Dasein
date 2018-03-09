@@ -86,12 +86,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         if (Boolean.TRUE.equals(segment.getMasterSegment())) {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
+        translateForBackend(segment);
         MetadataSegment updatedSegment = translateForFrontend(
                 segmentProxy.createOrUpdateSegment(customerSpace, segment));
         try {
             Thread.sleep(500);
             log.info("Updating entity counts for segment " + segment.getName());
-            translateForBackend(segment);
             Map<BusinessEntity, Long> counts = segmentProxy.updateSegmentCounts(customerSpace, segment.getName());
             counts.forEach(updatedSegment::setEntityCount);
         } catch (Exception e) {
