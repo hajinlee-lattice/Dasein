@@ -15,7 +15,7 @@ import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
-import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -59,7 +59,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Inject
-    private ExportWorkflow exportWorkflow;
+    private ExportData exportData;
 
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -77,7 +77,7 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
                 .next(setConfigurationForScoring) //
                 .next(rtsBulkScoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
-                .next(exportWorkflow, null) //
+                .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }
