@@ -300,9 +300,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         String hdfsUri = String.format("%s%s/%s", defaultFS, targetPath, "*.avro");
         Extract e = createExtract(hdfsUri, (long) limit);
         dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query", entity.name());
-        dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(), importTemplate.getName(),
-                e);
+        List<String> tables = dataFeedProxy.registerExtract(customerSpace.toString(), dataFeedTask.getUniqueId(),
+                importTemplate.getName(), e);
         registerImportAction(dataFeedTask);
+        dataFeedProxy.addTablesToQueue(customerSpace.toString(), dataFeedTask.getUniqueId(), tables);
     }
 
     private Action registerImportAction(DataFeedTask dataFeedTask) {
