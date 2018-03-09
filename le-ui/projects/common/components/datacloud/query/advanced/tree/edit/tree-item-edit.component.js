@@ -63,8 +63,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         }, 0);
                     }
                 }
-
-                vm.init = function () {
+                
+                vm.initVariables = function(){
                     vm.numericalConfiguration = {
                         from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
                         to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
@@ -86,9 +86,26 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                     }
                 }
+                vm.init = function () {
+
+                    vm.initVariables();
+                }
                 
                 vm.init();
 
+
+
+                vm.clickEditMode = function(value) {
+                    vm.editMode = value;
+                    if(value !== 'Custom'){
+                        console.log('Preset');
+                        var bucket = vm.getCubeBktList()[0]
+                        vm.changePreset(bucket);
+                    }else{
+                        QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
+                        vm.initVariables();
+                    }
+                }
 
                 vm.showNumericalFrom = function () {
                     return vm.showFromNumerical;

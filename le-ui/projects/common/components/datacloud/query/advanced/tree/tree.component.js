@@ -88,10 +88,12 @@ angular
                 }
             }
 
-            vm.changePreset = function() {
+            vm.changePreset = function(bucket) {
                 var label = vm.presetOperation;
                 var buckets = vm.item.cube.Bkts.List;
-                var bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
+                // var bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
+                if(bucket == undefined)
+                    bucket = buckets.filter(function(item) { return item.Lbl == label; })[0];
                 var restriction = vm.tree.bucketRestriction.bkt;
                 var bkt = angular.copy(bucket);
 
@@ -290,9 +292,16 @@ angular
                 }, 50);
             }
 
-            vm.clickEditMode = function(value) {
-                vm.editMode = value;
-            }
+            // vm.clickEditMode = function(value) {
+            //     vm.editMode = value;
+            //     if(value !== 'Custom'){
+            //         console.log('Preset');
+            //         var bucket = vm.getCubeBktList()[0]
+            //         vm.changePreset(bucket);
+            //     }else{
+            //         QueryTreeService.resetBktValues();
+            //     }
+            // }
 
             vm.clickCollapsed = function() {
                 // FIXME - collapsed property is weeded out of equivalency check
