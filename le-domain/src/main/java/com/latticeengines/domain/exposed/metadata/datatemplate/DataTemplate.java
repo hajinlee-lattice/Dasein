@@ -3,12 +3,13 @@ package com.latticeengines.domain.exposed.metadata.datatemplate;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
 
-public interface DataTemplate<N extends Namespace> {
+public interface DataTemplate<N extends Namespace> extends MetadataStore<N> {
 
     List<DataUnit> getData(N namespace);
 
@@ -16,5 +17,14 @@ public interface DataTemplate<N extends Namespace> {
 
     ParallelFlux<ColumnMetadata> getUnorderedSchema(N namespace);
 
+    @Override
+    default Flux<ColumnMetadata> getMetadata(N namespace) {
+        return getSchema(namespace);
+    }
+
+    @Override
+    default ParallelFlux<ColumnMetadata> getMetadataInParallel(N namespace) {
+        return getUnorderedSchema(namespace);
+    }
 }
 

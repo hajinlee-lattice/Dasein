@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.controller;
 
-
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
@@ -34,17 +33,20 @@ public class ServingStoreResource {
     @GetMapping(value = "/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
-    public Flux<ColumnMetadata> reset(@PathVariable String customerSpace,
-                                      @PathVariable BusinessEntity entity) {
+    public Flux<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace,
+            @PathVariable BusinessEntity entity) {
         AtomicLong timer = new AtomicLong();
-        return servingStoreService.getFullyDecoratedMetadata(entity).sequential()
+        AtomicLong counter = new AtomicLong();
+        return servingStoreService.getFullyDecoratedMetadata(entity).sequential() //
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
                     log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
-                })
+                }) //
+                .doOnNext(cm -> counter.getAndIncrement()) //
                 .doOnComplete(() -> {
                     long duration = System.currentTimeMillis() - timer.get();
-                    log.info("Finished serving decorated metadata for " + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
+                    log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
+                            + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
                 });
     }
 }

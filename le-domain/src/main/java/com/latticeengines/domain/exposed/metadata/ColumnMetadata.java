@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
@@ -529,5 +532,12 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setImportanceOrdering(Integer importanceOrdering) {
         this.importanceOrdering = importanceOrdering;
+    }
+
+    public ColumnMetadata clone() {
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        KryoUtils.write(bos, this);
+        ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+        return KryoUtils.read(bis, ColumnMetadata.class);
     }
 }
