@@ -16,12 +16,12 @@ import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
 public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @Inject
@@ -83,7 +83,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
         metrics = new ActivityMetrics();
-        metrics.setMetrics(InterfaceName.SpendOvertime);
+        metrics.setMetrics(InterfaceName.TotalSpendOvertime);
         filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
         metrics.setPeriodsConfig(filter);
         metrics.setType(ActivityType.SpendAnalytics);
@@ -100,7 +100,7 @@ public class ActivityMetricsEntityMgrTestNG extends CDLFunctionalTestNGBase {
         metrics.setType(ActivityType.SpendAnalytics);
         metricsList.add(metrics);
         metrics = new ActivityMetrics();
-        metrics.setMetrics(InterfaceName.SpendOvertime);
+        metrics.setMetrics(InterfaceName.TotalSpendOvertime);
         filter = new TimeFilter(ComparisonType.BETWEEN, Period.Month.name(), Arrays.asList(1, 2));
         metrics.setPeriodsConfig(filter);
         metrics.setType(ActivityType.SpendAnalytics);

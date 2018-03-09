@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics.ActivityType;
 
 @Service("activityMetricsService")
 public class ActivityMetricsServiceImpl implements ActivityMetricsService {

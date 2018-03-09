@@ -32,6 +32,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -176,10 +177,6 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
 
     public void setType(ActivityType type) {
         this.type = type;
-    }
-
-    public enum ActivityType {
-        SpendAnalytics
     }
 
 }

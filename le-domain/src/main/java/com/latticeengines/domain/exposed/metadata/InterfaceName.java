@@ -75,7 +75,8 @@ public enum InterfaceName {
     HasPurchased, //
     ShareOfWallet, //
     SpendChange, //
-    SpendOvertime, //
+    TotalSpendOvertime, //
+    AvgSpendOvertime, //
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb
