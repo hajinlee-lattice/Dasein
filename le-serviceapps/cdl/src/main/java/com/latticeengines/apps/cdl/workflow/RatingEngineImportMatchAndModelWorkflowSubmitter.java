@@ -100,8 +100,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .moduleName(moduleName) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
-                // TODO: legacy SQL based match engine configurations
-                .matchClientDocument(null) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //

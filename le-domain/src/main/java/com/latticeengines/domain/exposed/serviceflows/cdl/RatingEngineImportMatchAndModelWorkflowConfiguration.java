@@ -6,7 +6,6 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -234,14 +233,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder pivotArtifactPath(String pivotArtifactPath) {
             model.setPivotArtifactPath(pivotArtifactPath);
-            return this;
-        }
-
-        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
-            match.setDbUrl(matchClientDocument.getUrl());
-            match.setDbUser(matchClientDocument.getUsername());
-            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
-            match.setMatchClient(matchClientDocument.getMatchClient().name());
             return this;
         }
 
