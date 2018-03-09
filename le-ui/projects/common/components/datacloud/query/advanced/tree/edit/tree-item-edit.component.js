@@ -12,7 +12,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
             controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
 
-                vm.init();
+                
 
                 function showNumericalRange() {
                     switch (vm.numericalCmpModel) {
@@ -64,14 +64,6 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     }
                 }
 
-                function initNumerical() {
-                    if (vm.showItem('Numerical')) {
-                        vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                        initNumericalRange();
-
-                    }
-                }
-
                 vm.init = function () {
                     vm.numericalConfiguration = {
                         from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
@@ -88,10 +80,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
     
                     vm.showFromNumerical = false;
                     vm.showToNumerical = false;
-                    initNumerical();
+                    if (QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, 'Numerical')) {
+                        vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+                        initNumericalRange();
+
+                    }
                 }
                 
-
+                vm.init();
 
 
                 vm.showNumericalFrom = function () {
