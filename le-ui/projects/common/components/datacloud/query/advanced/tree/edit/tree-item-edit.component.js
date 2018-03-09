@@ -12,21 +12,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
             controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
 
-                vm.numericalConfiguration = {
-                    from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
-                    to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
-                };
-
-                vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
-                vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
-                // vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
-                vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
-                vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
-                vm.vals = vm.tree.bucketRestriction.bkt.Vals;
-
-
-                vm.showFromNumerical = false;
-                vm.showToNumerical = false;
+                vm.init();
 
                 function showNumericalRange() {
                     switch (vm.numericalCmpModel) {
@@ -61,16 +47,16 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                     if (!reset) {
                         showNumericalRange();
-                        var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration['from'].position);
-                        vm.numericalConfiguration['from'].value = (fromNumerical != null && fromNumerical != 0) ? Number(fromNumerical) : undefined;
+                        var fromNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.from.position);
+                        vm.numericalConfiguration.from.value = (fromNumerical != null && fromNumerical != 0) ? Number(fromNumerical) : undefined;
 
-                        var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration['to'].position);
-                        vm.numericalConfiguration['to'].value = (toNumerical != null && toNumerical != 0) ? Number(toNumerical) : undefined;
+                        var toNumerical = QueryTreeService.getValue(vm.tree.bucketRestriction, vm.type, vm.numericalConfiguration.to.position);
+                        vm.numericalConfiguration.to.value = (toNumerical != null && toNumerical != 0) ? Number(toNumerical) : undefined;
                     } else {
                         vm.showFromNumerical = false;
                         vm.showToNumerical = false;
-                        vm.numericalConfiguration['from'].value = undefined;
-                        vm.numericalConfiguration['to'].value = undefined;
+                        vm.numericalConfiguration.from.value = undefined;
+                        vm.numericalConfiguration.to.value = undefined;
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);
                         setTimeout(function () {
                             showNumericalRange();
@@ -87,9 +73,24 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.init = function () {
+                    vm.numericalConfiguration = {
+                        from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
+                        to: { name: 'to-numerical', value: undefined, position: 1, type: 'Numerical' }
+                    };
+    
+                    vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
+                    vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
+                    // vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+                    vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
+                    vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
+                    vm.vals = vm.tree.bucketRestriction.bkt.Vals;
+    
+    
+                    vm.showFromNumerical = false;
+                    vm.showToNumerical = false;
                     initNumerical();
                 }
-                vm.init();
+                
 
 
 
