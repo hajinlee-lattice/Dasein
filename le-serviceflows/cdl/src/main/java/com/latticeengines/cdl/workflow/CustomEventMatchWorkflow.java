@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.MatchCdlLdcStartStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlMergeStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlSplitWithAccountIdStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlSplitWithoutAccountIdStep;
@@ -24,6 +25,8 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchWorkflowConfiguration> {
 
+    @Inject
+    private MatchCdlLdcStartStep matchCdlLdcStartStep;
     @Inject
     private MatchCdlWithAccountIdStep matchAccountIdStep;
 
@@ -56,6 +59,7 @@ public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchW
         switch (config.getModelingType()) {
         case LPI:
             return new WorkflowBuilder(name()) //
+                    .next(matchCdlLdcStartStep) //
                     .next(matchDataCloudWorkflow, null) //
                     .build();
         default:

@@ -1,11 +1,14 @@
 package com.latticeengines.cdl.dataflow;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlMergeParameters;
 
 @Component("matchCdlMergeFlow")
@@ -24,7 +27,8 @@ public class MatchCdlMergeFlow extends TypesafeDataFlowBuilder<MatchCdlMergePara
             return inputTableWithoutAccountId;
         if (inputTableWithoutAccountId == null)
             return inputTableWithAccountId;
-
+        List<String> inputFieldList = inputTableWithAccountId.getFieldNames();
+        inputTableWithoutAccountId = inputTableWithoutAccountId.retain(new FieldList(inputFieldList));
         log.info("Merging tables: table with account Id=" + parameters.tableWithAccountId + " table without account Id="
                 + parameters.tableWithoutAccountId);
         return inputTableWithAccountId.merge(inputTableWithoutAccountId);

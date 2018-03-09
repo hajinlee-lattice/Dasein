@@ -34,6 +34,7 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         params.setInputMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         params.setAccountMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         params.setDedupe(true);
+        params.setRightJoin(true);
         return params;
     }
 
@@ -76,17 +77,17 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
 
         for (GenericRecord record : outputRecords) {
             Object accountId = record.get("AccountId");
-            if (accountId != null && accountId.toString().equals("1-12U7V")) {
+            if (accountId != null && accountId.toString().equals("1-10Q63")) {
                 record0 = record;
                 continue;
             }
-            if (accountId != null && accountId.toString().equals("1-13895")) {
+            if (accountId != null && accountId.toString().equals("1-12UDF")) {
                 record1 = record;
                 continue;
             }
         }
-        Assert.assertEquals(record0.get("PeriodId").toString(), "4");
-        Assert.assertEquals(record1.get("PeriodId").toString(), "4");
+        Assert.assertEquals(record0.get("PeriodId").toString(), "0");
+        Assert.assertEquals(record1.get("PeriodId").toString(), "0");
     }
 
 }

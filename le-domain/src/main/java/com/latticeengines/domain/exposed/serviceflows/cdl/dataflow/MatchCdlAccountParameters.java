@@ -67,5 +67,4 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
     public void setRightJoin(boolean rightJoin) {
         this.rightJoin = rightJoin;
     }
-
 }

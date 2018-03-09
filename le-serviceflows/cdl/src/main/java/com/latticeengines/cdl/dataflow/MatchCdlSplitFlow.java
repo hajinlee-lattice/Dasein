@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlSplitParameters;
 
 @Component("matchCdlSplitFlow")
@@ -18,6 +19,9 @@ public class MatchCdlSplitFlow extends TypesafeDataFlowBuilder<MatchCdlSplitPara
     public Node construct(MatchCdlSplitParameters parameters) {
         Node inputTable = addSource(parameters.inputTable);
         Node result = inputTable.filter(parameters.expression, new FieldList(parameters.filterField));
+        if (parameters.dropFields) {
+            result = result.discard(new FieldList(InterfaceName.LatticeAccountId.name()));
+        }
         return result;
     }
 

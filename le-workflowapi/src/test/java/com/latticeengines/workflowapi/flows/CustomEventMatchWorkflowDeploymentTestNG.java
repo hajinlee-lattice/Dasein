@@ -30,6 +30,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkfl
 import com.latticeengines.domain.exposed.util.MetaDataTableUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -56,8 +57,13 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
     @Value("${common.test.microservice.url}")
     protected String microserviceHostPort;
 
+    @Autowired
+    private ColumnMetadataProxy columnMetadataProxy;
+
     private Table accountTable;
     private Table inputTable;
+    private Table inputTableWithAccountId;
+    private Table inputTableWithoutAccountId;
 
     private CustomerSpace customerSpace;
 
@@ -77,6 +83,9 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
         customerSpace = MultiTenantContext.getCustomerSpace();
         accountTable = setupTable(customerSpace, "accountTable.avro", "AccountTable");
         inputTable = setupTable(customerSpace, "inputTable.avro", "InputTable");
+        inputTableWithAccountId = setupTable(customerSpace, "inputTableWithAccountId.avro", "InputTableWithAccountId");
+        inputTableWithoutAccountId = setupTable(customerSpace, "inputTableWithoutAccountId.avro",
+                "InputTableWithoutAccountId");
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(customerSpace.toString());
         dataCollectionProxy.upsertTable(customerSpace.toString(), accountTable.getName(), //
                 TableRoleInCollection.ConsolidatedAccount, version);
@@ -84,18 +93,31 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
     }
 
     @Test(groups = "workflow", enabled = true)
-    public void customEventMatch() throws Exception {
+    public void customEventMatchAll() throws Exception {
+        customEventMatch(inputTable);
+    }
 
+    @Test(groups = "workflow", enabled = false)
+    public void customEventMatchWithAccountId() throws Exception {
+        customEventMatch(inputTableWithAccountId);
+    }
+
+    @Test(groups = "workflow", enabled = false)
+    public void customEventMatchWithoutAccountId() throws Exception {
+        customEventMatch(inputTableWithoutAccountId);
+    }
+
+    private void customEventMatch(Table table) throws Exception {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         CustomEventMatchWorkflowConfiguration workflowConfig = new CustomEventMatchWorkflowConfiguration.Builder()
                 .customer(customerSpace) //
                 .microServiceHostPort(microserviceHostPort) //
-                .matchInputTableName(inputTable.getName()) //
+                .matchInputTableName(table.getName()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), "1.0") //
-                .dataCloudVersion(null) //
+                .dataCloudVersion(getDataCloudVersion()) //
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
@@ -110,7 +132,10 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
         workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);
+    }
 
+    private String getDataCloudVersion() {
+        return columnMetadataProxy.latestVersion(null).getVersion();
     }
 
     private Table setupTable(CustomerSpace customerSpace, String fileName, String tableName) throws IOException {

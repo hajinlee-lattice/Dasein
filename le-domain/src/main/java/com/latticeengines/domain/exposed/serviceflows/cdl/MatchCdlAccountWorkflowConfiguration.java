@@ -8,15 +8,15 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 
-public class MatchCdlWithAccountIdWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
+public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public static class Builder {
-        private MatchCdlWithAccountIdWorkflowConfiguration configuration = new MatchCdlWithAccountIdWorkflowConfiguration();
+        private MatchCdlAccountWorkflowConfiguration configuration = new MatchCdlAccountWorkflowConfiguration();
 
         MatchCdlAccountConfiguration matchCdlAccount = new MatchCdlAccountConfiguration();
         MatchDataCloudWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
-        public MatchCdlWithAccountIdWorkflowConfiguration build() {
+        public MatchCdlAccountWorkflowConfiguration build() {
             configuration.add(matchCdlAccount);
             configuration.add(ldcConfigurationBuilder.build());
             return configuration;

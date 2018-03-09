@@ -33,12 +33,23 @@ public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccount
         if (!parameters.isRightJoin()) {
             result = inputTable.join(inputMatchFields, accountTable, accountMatchFields, JoinType.LEFT);
         } else {
-            result = accountTable.join(accountMatchFields, inputTable, inputMatchFields, JoinType.RIGHT);
+            List<String> inputFields = inputTable.getFieldNames();
+            String lidFieldName = parameters.getAccountMatchFields().get(0);
+            FieldList LidField = new FieldList(lidFieldName);
+            Node nullLidNode = inputTable.filter(lidFieldName + " == null", LidField);
+            Node notNullLidNode = inputTable.filter(lidFieldName + " != null", LidField);
+            
+            String newLidField = lidFieldName + "_NEW_";
+            accountTable = accountTable.rename(LidField, new FieldList(newLidField));
+            accountTable = accountTable.retain(new FieldList(accountTable.getFieldNames()));
+            result = accountTable.join(new FieldList(newLidField), notNullLidNode, inputMatchFields, JoinType.RIGHT);
+            result = result.retain(new FieldList(inputFields));
+            result = result.merge(nullLidNode);
+            if (parameters.isDedupe()) {
+                result = result.groupByAndLimit(accountMatchFields, 1);
+            }
         }
-        if (parameters.isDedupe()) {
-            result = result.groupByAndLimit(inputMatchFields, new FieldList(InterfaceName.CDLUpdatedTime.name()), 1,
-                    true, true);
-        }
+
         result = result.retain(new FieldList(retainFields));
         log.info("Match Cdl Account table's columns=" + StringUtils.join(retainFields, ","));
         return result;

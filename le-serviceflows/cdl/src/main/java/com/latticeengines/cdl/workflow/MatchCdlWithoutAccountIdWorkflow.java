@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithoutAccountIdFinishStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithoutAccountIdStep;
-import com.latticeengines.domain.exposed.serviceflows.cdl.MatchCdlWithoutAccountIdWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.MatchCdlAccountWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -17,8 +17,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("matchCdlWithoutAccountIdWorkflow")
 @Lazy
-@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class MatchCdlWithoutAccountIdWorkflow extends AbstractWorkflow<MatchCdlWithoutAccountIdWorkflowConfiguration> {
+public class MatchCdlWithoutAccountIdWorkflow extends AbstractWorkflow<MatchCdlAccountWorkflowConfiguration> {
 
     @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
@@ -30,7 +29,7 @@ public class MatchCdlWithoutAccountIdWorkflow extends AbstractWorkflow<MatchCdlW
     private MatchCdlWithoutAccountIdFinishStep matchAccountIdFinishedStep;
 
     @Override
-    public Workflow defineWorkflow(MatchCdlWithoutAccountIdWorkflowConfiguration config) {
+    public Workflow defineWorkflow(MatchCdlAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name()) //
                 .next(matchDataCloudWorkflow, null) //
                 .next(matchWithoutAccountIdStep) //

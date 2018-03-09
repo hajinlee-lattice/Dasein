@@ -16,6 +16,9 @@ public class MatchCdlSplitParameters extends DataFlowParameters {
     @JsonProperty("filter_field")
     public String filterField;
 
+    @JsonProperty("drop_fields")
+    public boolean dropFields;
+
     public MatchCdlSplitParameters() {
     }
 
