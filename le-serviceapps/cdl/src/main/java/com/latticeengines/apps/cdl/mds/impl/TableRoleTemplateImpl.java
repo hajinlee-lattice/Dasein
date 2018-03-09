@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-
 import java.util.List;
 
 import javax.inject.Inject;
@@ -21,10 +20,12 @@ import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
-import com.latticeengines.proxy.exposed.metadata.DataTemplateProxy;
+import com.latticeengines.metadata.service.DataTemplateService;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 
 @Component("tableRoleTemplate")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -32,19 +33,40 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
 
     private final CDLNamespaceService cdlNamespaceService;
     private final TableRoleTemplate _tableRoleTemplate;
+    private final DataTemplate<Namespace2<String, String>> proxyTemplate;
 
-    private DataTemplate<Namespace2<String, String>> proxyTemplate;
+    private static final Scheduler scheduler = Schedulers.newParallel("tablerole-template");
 
     @Inject
-    public TableRoleTemplateImpl(DataTemplateProxy dataTemplateProxy, CDLNamespaceService cdlNamespaceService, TableRoleTemplate tableRoleTemplate) {
+    public TableRoleTemplateImpl(DataTemplateService dataTemplateService, CDLNamespaceService cdlNamespaceService,
+            TableRoleTemplate tableRoleTemplate) {
         this.cdlNamespaceService = cdlNamespaceService;
-        this.proxyTemplate = dataTemplateProxy.toDataTemplate(DataTemplateName.Table, String.class, String.class);
+        this.proxyTemplate = new DataTemplate<Namespace2<String, String>>() {
+            @Override
+            public List<DataUnit> getData(Namespace2<String, String> namespace2) {
+                return dataTemplateService.getData(DataTemplateName.Table, namespace2.getCoord1(),
+                        namespace2.getCoord2());
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getSchema(Namespace2<String, String> namespace2) {
+                return dataTemplateService.getSchema(DataTemplateName.Table, namespace2.getCoord1(),
+                        namespace2.getCoord2());
+            }
+
+            @Override
+            public ParallelFlux<ColumnMetadata> getUnorderedSchema(Namespace2<String, String> namespace2) {
+                return dataTemplateService.getUnorderedSchema(DataTemplateName.Table, namespace2.getCoord1(),
+                        namespace2.getCoord2());
+            }
+        };
         this._tableRoleTemplate = tableRoleTemplate;
     }
 
     @Override
     public List<DataUnit> getData(Namespace2<TableRoleInCollection, DataCollection.Version> namespace) {
-        Namespace2<String, String> servingStoreNs = cdlNamespaceService.resolveTableRole(namespace.getCoord1(), namespace.getCoord2());
+        Namespace2<String, String> servingStoreNs = cdlNamespaceService.resolveTableRole(namespace.getCoord1(),
+                namespace.getCoord2());
         return proxyTemplate.getData(servingStoreNs);
     }
 
@@ -57,12 +79,14 @@ public class TableRoleTemplateImpl implements TableRoleTemplate {
     }
 
     @Override
-    public ParallelFlux<ColumnMetadata> getUnorderedSchema(Namespace2<TableRoleInCollection, DataCollection.Version> namespace) {
-        return ParallelFlux.from(getSchema(namespace));
+    public ParallelFlux<ColumnMetadata> getUnorderedSchema(
+            Namespace2<TableRoleInCollection, DataCollection.Version> namespace) {
+        return getSchema(namespace).parallel().runOn(scheduler);
     }
 
     @Cacheable(cacheNames = CacheName.Constants.TableRoleMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|%s|tablerole\", #tenantId, #tableRole, #version)")
-    public List<ColumnMetadata> getCachedSchema(String tenantId, TableRoleInCollection tableRole, DataCollection.Version version) {
+    public List<ColumnMetadata> getCachedSchema(String tenantId, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
         cdlNamespaceService.setMultiTenantContext(tenantId);
         Namespace2<String, String> servingStoreNs = cdlNamespaceService.resolveTableRole(tableRole, version);
         return proxyTemplate.getUnorderedSchema(servingStoreNs).sequential().collectList().block();
