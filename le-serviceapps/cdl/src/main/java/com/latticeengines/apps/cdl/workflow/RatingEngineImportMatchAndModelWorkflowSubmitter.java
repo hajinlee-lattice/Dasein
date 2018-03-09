@@ -16,7 +16,6 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
-import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
@@ -31,16 +30,12 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatc
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
 public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(RatingEngineImportMatchAndModelWorkflowSubmitter.class);
-
-    @Autowired
-    private MatchCommandProxy matchCommandProxy;
 
     @Autowired
     private ColumnMetadataProxy columnMetadataProxy;
@@ -61,9 +56,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "RatingEngineImportMatchAndModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, parameters.getName());
-
-        MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-
         ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {
@@ -105,11 +97,11 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
                 // TODO: plsFeatureFlagService.isFuzzyMatchEnabled()) //
-                .moduleName(moduleName != null ? moduleName : null) //
+                .moduleName(moduleName) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
                 // TODO: legacy SQL based match engine configurations
-                .matchClientDocument(matchClientDocument) //
+                .matchClientDocument(null) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
