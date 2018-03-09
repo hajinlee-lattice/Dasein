@@ -45,7 +45,6 @@ import io.lettuce.core.RedisURI;
 
 @Configuration
 @EnableCaching
-@Lazy
 public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceCacheBeansConfiguration.class);
