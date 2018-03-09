@@ -130,7 +130,7 @@ public class RatingProxyImpl extends MicroserviceRestApiProxy implements RatingP
         } else {
             url = constructUrl("/{customerSpace}/rating/data", tenantId);
         }
-        return postMono("getData", url, frontEndQuery, DataPage.class);
+        return postMonoKryo("getData", url, frontEndQuery, DataPage.class);
     }
 
     private Map<String, Long> getCoverageFromApi(String serializedKey) {

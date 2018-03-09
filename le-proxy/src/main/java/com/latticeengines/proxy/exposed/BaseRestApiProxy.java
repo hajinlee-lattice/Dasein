@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.exposed;
 
+import java.io.ByteArrayInputStream;
+import java.nio.ByteBuffer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,6 +35,7 @@ import org.springframework.web.util.UriTemplate;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.proxy.framework.ErrorUtils;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
@@ -56,8 +59,7 @@ public abstract class BaseRestApiProxy {
             com.mchange.v2.resourcepool.TimeoutException.class, //
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
             io.netty.handler.timeout.TimeoutException.class, //
-            org.apache.http.NoHttpResponseException.class
-    );
+            org.apache.http.NoHttpResponseException.class);
 
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset by peer");
 
@@ -112,7 +114,8 @@ public abstract class BaseRestApiProxy {
         }
     }
 
-    <B> RetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url, final boolean logBody, final B body) {
+    <B> RetryTemplate getRetryTemplate(final String method, HttpMethod verb, final String url, final boolean logBody,
+            final B body) {
         ProxyRetryTemplate retryTemplate = new ProxyRetryTemplate(maxAttempts, initialWaitMsec, multiplier);
         retryTemplate.setRetryExceptions(retryExceptions);
         retryTemplate.setRetryMessages(retryMessages);
@@ -301,7 +304,8 @@ public abstract class BaseRestApiProxy {
         return put(method, url, body, returnClz, false, false);
     }
 
-    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody, boolean kryo) {
+    protected <B, T> T put(final String method, final String url, final B body, Class<T> returnClz, boolean logBody,
+            boolean kryo) {
         HttpMethod verb = HttpMethod.PUT;
         RetryTemplate retry = getRetryTemplate(method, verb, url, logBody, body);
         return retry.execute(context -> {
@@ -342,7 +346,7 @@ public abstract class BaseRestApiProxy {
         return get(method, url, returnValueClazz, true);
     }
 
-    private  <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo) {
+    private <T> T get(final String method, final String url, final Class<T> returnValueClazz, boolean useKryo) {
         final HttpMethod verb = HttpMethod.GET;
         RetryTemplate retry = getRetryTemplate(method, verb, url, false, null);
         return retry.execute(context -> {
@@ -361,7 +365,7 @@ public abstract class BaseRestApiProxy {
     }
 
     <T, P> ResponseEntity<T> exchange(String url, HttpMethod method, P payload, Class<T> clz, //
-                                              boolean kryoContent, boolean kryoResponse) {
+            boolean kryoContent, boolean kryoResponse) {
         HttpHeaders headers = new HttpHeaders();
 
         if (clz != null) {
@@ -399,47 +403,61 @@ public abstract class BaseRestApiProxy {
     }
 
     /**
-     * Reactive api won't start fetching right away.
-     * Data transmission starts when the flux is first time subscribed.
-     * Retry should handle retry in callers, because it may be an infinite stream
+     * Reactive api won't start fetching right away. Data transmission starts
+     * when the flux is first time subscribed. Retry should handle retry in
+     * callers, because it may be an infinite stream
      */
     protected <T> Mono<T> getMono(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
         Mono<T> mono = request.retrieve().bodyToMono(clz);
+        mono = appendMonoHandler(mono, channel);
+        return appendLogInterceptors(mono, channel, url);
+    }
+
+    protected <T> Mono<T> getMonoKryo(String channel, String url, Class<T> clz) {
+        WebClient.RequestHeadersSpec<?> request = prepareKryoReactiveRequest(url, HttpMethod.GET, null);
+        Mono<T> mono = extractKryoMono(request, clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
     }
 
     protected <T> Flux<T> getFlux(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,false);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, false);
         Flux<T> flux = request.retrieve().bodyToFlux(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
     protected <T> Flux<T> getStream(String channel, String url, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null,true);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.GET, null, true);
         Flux<T> flux = request.retrieve().bodyToFlux(clz);
         return appendLogInterceptors(flux, channel, url);
     }
 
     protected <T, P> Mono<T> postMono(String channel, String url, P payload, Class<T> clz) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload,false);
+        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
         Mono<T> mono = request.retrieve().bodyToMono(clz);
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
     }
 
-    protected <K, V, P> Flux<Map<K, V>> postMapFlux(String channel, String url, P payload) {
-        WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
-        Flux<Map<K, V>> flux = request.retrieve().bodyToFlux(new ParameterizedTypeReference<Map<K, V>>() {});
-        return appendLogInterceptors(flux, channel, url);
+    protected <T, P> Mono<T> postMonoKryo(String channel, String url, P payload, Class<T> clz) {
+        WebClient.RequestHeadersSpec request = prepareKryoReactiveRequest(url, HttpMethod.POST, payload);
+        Mono<T> mono = extractKryoMono(request, clz);
+        mono = appendMonoHandler(mono, channel);
+        return appendLogInterceptors(mono, channel, url);
     }
 
     protected <K, V, P> Mono<Map<K, V>> postMapMono(String channel, String url, P payload) {
         WebClient.RequestHeadersSpec request = prepareReactiveRequest(url, HttpMethod.POST, payload, false);
-        Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {});
+        Mono<Map<K, V>> mono = request.retrieve().bodyToMono(new ParameterizedTypeReference<Map<K, V>>() {
+        });
         mono = appendMonoHandler(mono, channel);
         return appendLogInterceptors(mono, channel, url);
+    }
+
+    private <T> Mono<T> extractKryoMono(WebClient.RequestHeadersSpec<?> request, Class<T> clz) {
+        return request.retrieve().bodyToMono(ByteBuffer.class) //
+                .map(byteBuffer -> KryoUtils.read(new ByteArrayInputStream(byteBuffer.array()), clz));
     }
 
     private <T> Mono<T> appendMonoHandler(Mono<T> mono, String channel) {
@@ -451,49 +469,43 @@ public abstract class BaseRestApiProxy {
             } else {
                 return Mono.error(throwable);
             }
-        }).retryWhen(companion -> companion
-                .zipWith(Flux.range(1, maxAttempts), (error, attempt) -> {
-                    if (attempt < maxAttempts) {
-                        String reason = ErrorUtils.shouldRetryFor(error, retryExceptions, retryMessages);
-                        if (StringUtils.isNotBlank(reason)) {
-                            log.warn(String.format("%s (Attempt=%d): Remote call failure, will retry: %s", channel, //
-                                    attempt, reason));
-                        } else {
-                            attempt = maxAttempts;
-                        }
-                    }
-                    if (attempt >= maxAttempts) {
-                        throw Exceptions.propagate(error);
-                    }
-                    return attempt;
-                })
-                .flatMap(attempt -> {
-                    Mono<Long> delay = Mono.delay(Duration.ofMillis(backoff.get()));
-                    backoff.set((long) (backoff.get() * multiplier));
-                    return delay;
-                })
-        );
+        }).retryWhen(companion -> companion.zipWith(Flux.range(1, maxAttempts), (error, attempt) -> {
+            if (attempt < maxAttempts) {
+                String reason = ErrorUtils.shouldRetryFor(error, retryExceptions, retryMessages);
+                if (StringUtils.isNotBlank(reason)) {
+                    log.warn(String.format("%s (Attempt=%d): Remote call failure, will retry: %s", channel, //
+                            attempt, reason));
+                } else {
+                    attempt = maxAttempts;
+                }
+            }
+            if (attempt >= maxAttempts) {
+                throw Exceptions.propagate(error);
+            }
+            return attempt;
+        }).flatMap(attempt -> {
+            Mono<Long> delay = Mono.delay(Duration.ofMillis(backoff.get()));
+            backoff.set((long) (backoff.get() * multiplier));
+            return delay;
+        }));
     }
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
-        //TODO: need to enhance error handling
+        // TODO: need to enhance error handling
         return flux //
-                .doOnCancel(() ->
-                        log.info(String.format("Cancel reading %s flux from %s", channel, url)))
-                .onErrorResume(throwable ->
-                        Flux.error(new RuntimeException(String.format("Failed to read %s mono from %s", channel, url), throwable)));
+                .doOnCancel(() -> log.info(String.format("Cancel reading %s flux from %s", channel, url)))
+                .onErrorResume(throwable -> Flux.error(new RuntimeException(
+                        String.format("Failed to read %s flux from %s", channel, url), throwable)));
     }
 
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
         return mono //
-                .doOnCancel(() ->
-                        log.info(String.format("Cancel reading %s mono from %s", channel, url)))
-                .onErrorResume(throwable ->
-                        Mono.error(new RuntimeException(String.format("Failed to read %s mono from %s", channel, url), throwable)));
+                .doOnCancel(() -> log.info(String.format("Cancel reading %s mono from %s", channel, url)))
+                .onErrorResume(throwable -> Mono.error(new RuntimeException(
+                        String.format("Failed to read %s mono from %s", channel, url), throwable)));
     }
 
-    private <P> WebClient.RequestHeadersSpec prepareReactiveRequest(String url, HttpMethod method, P payload,
-                                                                    boolean streaming) {
+    private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url, HttpMethod method, P payload) {
         WebClient.RequestHeadersSpec request;
 
         if (payload != null) {
@@ -502,7 +514,23 @@ public abstract class BaseRestApiProxy {
             request = webClient.method(method).uri(url);
         }
 
-        for(Map.Entry<String, String> header: headers.entrySet()) {
+        for (Map.Entry<String, String> header : headers.entrySet()) {
+            request = request.header(header.getKey(), header.getValue());
+        }
+        return request.accept(KryoHttpMessageConverter.KRYO);
+    }
+
+    private <P> WebClient.RequestHeadersSpec<?> prepareReactiveRequest(String url, HttpMethod method, P payload,
+            boolean streaming) {
+        WebClient.RequestHeadersSpec request;
+
+        if (payload != null) {
+            request = webClient.method(method).uri(url).syncBody(payload);
+        } else {
+            request = webClient.method(method).uri(url);
+        }
+
+        for (Map.Entry<String, String> header : headers.entrySet()) {
             request = request.header(header.getKey(), header.getValue());
         }
 
@@ -518,7 +546,7 @@ public abstract class BaseRestApiProxy {
     }
 
     private <P> void logInvocation(String method, String url, HttpMethod verb, Integer attempt, P payload,
-                                   boolean logPlayload) {
+            boolean logPlayload) {
         if (log.isDebugEnabled()) {
             String msg = String.format("Invoking %s by %s url %s", method, verb, url);
             if (logPlayload) {

@@ -90,21 +90,21 @@ public class EventProxy extends MicroserviceRestApiProxy implements ProxyInterfa
         String url = constructUrl("/{customerSpace}/event/data/scoring", shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
-        return postMono("getScoringTuples", url, frontEndQuery, DataPage.class);
+        return postMonoKryo("getScoringTuples", url, frontEndQuery, DataPage.class);
     }
 
     private Mono<DataPage> getTrainingTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url = constructUrl("/{customerSpace}/event/data/training", shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
-        return postMono("getTrainingTuples", url, frontEndQuery, DataPage.class);
+        return postMonoKryo("getTrainingTuples", url, frontEndQuery, DataPage.class);
     }
 
     private Mono<DataPage> getEventTuplesNonBlocking(String customerSpace, EventFrontEndQuery frontEndQuery, DataCollection.Version version) {
         String url = constructUrl("/{customerSpace}/event/data/event", shortenCustomerSpace(customerSpace));
         url = appendDataCollectionVersion(url, version);
         RestrictionOptimizer.optimize(frontEndQuery);
-        return postMono("getEventTuples", url, frontEndQuery, DataPage.class);
+        return postMonoKryo("getEventTuples", url, frontEndQuery, DataPage.class);
     }
 
     private String appendDataCollectionVersion(String url, DataCollection.Version version) {
