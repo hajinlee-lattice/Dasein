@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
@@ -13,22 +14,15 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.modeling.steps.ModelStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -43,32 +37,28 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
     public static class Builder {
         private RatingEngineImportMatchAndModelWorkflowConfiguration configuration = new RatingEngineImportMatchAndModelWorkflowConfiguration();
-        private ModelStepConfiguration model = new ModelStepConfiguration();
-        private MatchStepConfiguration match = new MatchStepConfiguration();
+
+        private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
+        private CdlMatchAndModelWorkflowConfiguration.Builder cdlMatchAndModelWorkflowBuilder = new CdlMatchAndModelWorkflowConfiguration.Builder();
+        private RatingEngineScoreWorkflowConfiguration.Builder ratingEngineScoreWorkflowBuilder = new RatingEngineScoreWorkflowConfiguration.Builder();
+
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
         private CreateCdlEventTableFilterConfiguration cdlEventTableTupleFilter = new CreateCdlEventTableFilterConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
-        private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         private SetCdlConfigurationForScoringConfiguration setConfigForScoring = new SetCdlConfigurationForScoringConfiguration();
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
-        private ScoreStepConfiguration score = new ScoreStepConfiguration();
-        private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
-        private ScoreAggregateFlowConfiguration scoreAggregate = new ScoreAggregateFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            model.setMicroServiceHostPort(microServiceHostPort);
-            match.setMicroServiceHostPort(microServiceHostPort);
+            cdlMatchAndModelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
-            matchResult.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
-            score.setMicroServiceHostPort(microServiceHostPort);
-            combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
-            scoreAggregate.setMicroServiceHostPort(microServiceHostPort);
+            ratingEngineScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -76,24 +66,15 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow", customerSpace,
                     "ratingEngineImportMatchAndModelWorkflow");
-            model.setCustomerSpace(customerSpace);
-            match.setCustomerSpace(customerSpace);
+            cdlMatchAndModelWorkflowBuilder.customer(customerSpace);
+            matchDataCloudWorkflowBuilder.customer(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             cdlEventTableTupleFilter.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
-            score.setCustomerSpace(customerSpace);
-            combineInputWithScores.setCustomerSpace(customerSpace);
-            scoreAggregate.setCustomerSpace(customerSpace);
+            ratingEngineScoreWorkflowBuilder.customer(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
-            return this;
-        }
-
-        public Builder matchInputTableName(String tableName) {
-            match.setInputTableName(tableName);
-            cdlEventTable.setTargetTableName(tableName);
             return this;
         }
 
@@ -114,99 +95,99 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            model.setInternalResourceHostPort(internalResourceHostPort);
-            match.setInternalResourceHostPort(internalResourceHostPort);
+            cdlMatchAndModelWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            matchDataCloudWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             cdlEventTable.setInternalResourceHostPort(internalResourceHostPort);
             cdlEventTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
-            score.setInternalResourceHostPort(internalResourceHostPort);
-            combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
-            scoreAggregate.setInternalResourceHostPort(internalResourceHostPort);
+            ratingEngineScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder userId(String userId) {
-            model.setUserName(userId);
+            cdlMatchAndModelWorkflowBuilder.userId(userId);
             pivotScoreAndEvent.setUserId(userId);
             return this;
         }
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
-            model.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            cdlMatchAndModelWorkflowBuilder.modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
-            match.setExcludePublicDomain(excludePublicDomains);
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePublicDomains, excludePublicDomains);
+            matchDataCloudWorkflowBuilder.excludePublicDomains(excludePublicDomains);
+            cdlMatchAndModelWorkflowBuilder.excludePublicDomain(excludePublicDomains);
             return this;
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
-            match.setRetainLatticeAccountId(retainLatticeAccountId);
+            matchDataCloudWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            cdlMatchAndModelWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
-            matchResult.setExcludeDataCloudAttrs(exclude);
-            model.addProvenanceProperty(ProvenancePropertyName.ExcludePropdataColumns, exclude);
+            matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
+            cdlMatchAndModelWorkflowBuilder.excludeDataCloudAttrs(exclude);
+            ratingEngineScoreWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder skipDedupStep(boolean skipDedupStep) {
-            match.setSkipDedupe(skipDedupStep);
-            matchResult.setSkipDedupe(skipDedupStep);
-            model.addProvenanceProperty(ProvenancePropertyName.IsOneLeadPerDomain, !skipDedupStep);
+            matchDataCloudWorkflowBuilder.skipDedupStep(skipDedupStep);
+            cdlMatchAndModelWorkflowBuilder.skipDedupStep(skipDedupStep);
             return this;
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
-            match.setMatchRequestSource(matchRequestSource);
-            return this;
-        }
-
-        public Builder matchColumnSelection(ColumnSelection customizedColumnSelection) {
-            match.setCustomizedColumnSelection(customizedColumnSelection);
+            matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
+            cdlMatchAndModelWorkflowBuilder.matchRequestSource(matchRequestSource);
+            ratingEngineScoreWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            match.setPredefinedColumnSelection(predefinedColumnSelection);
-            match.setPredefinedSelectionVersion(selectionVersion);
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            cdlMatchAndModelWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            ratingEngineScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
-            match.setDataCloudVersion(dataCloudVersion);
-            matchResult.setDataCloudVersion(dataCloudVersion);
-            model.setDataCloudVersion(dataCloudVersion);
+            matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            cdlMatchAndModelWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            ratingEngineScoreWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            model.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            cdlMatchAndModelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             cdlEventTable.setSourceSchemaInterpretation(sourceSchemaInterpretation);
-            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            ratingEngineScoreWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
         public Builder trainingTableName(String trainingTableName) {
-            model.setTrainingTableName(trainingTableName);
-            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, trainingTableName));
+            cdlEventTable.setTargetTableName(trainingTableName);
+            matchDataCloudWorkflowBuilder.matchInputTableName(trainingTableName);
+            cdlMatchAndModelWorkflowBuilder.trainingTableName(trainingTableName);
+            ratingEngineScoreWorkflowBuilder.inputTableName(trainingTableName);
             return this;
         }
 
         public Builder modelName(String modelName) {
-            model.setModelName(modelName);
+            cdlMatchAndModelWorkflowBuilder.modelName(modelName);
             return this;
         }
 
         public Builder displayName(String displayName) {
-            model.setDisplayName(displayName);
+            cdlMatchAndModelWorkflowBuilder.displayName(displayName);
             return this;
         }
 
@@ -217,100 +198,112 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder dataRules(List<DataRule> dataRules) {
-            model.setDataRules(dataRules);
+            cdlMatchAndModelWorkflowBuilder.dataRules(dataRules);
             return this;
         }
 
         public Builder isDefaultDataRules(boolean isDefaultDataRules) {
-            model.setDefaultDataRuleConfiguration(isDefaultDataRules);
+            cdlMatchAndModelWorkflowBuilder.isDefaultDataRules(isDefaultDataRules);
             return this;
         }
 
         public Builder addProvenanceProperty(ProvenancePropertyName propertyName, Object value) {
-            model.addProvenanceProperty(propertyName, value);
+            cdlMatchAndModelWorkflowBuilder.addProvenanceProperty(propertyName, value);
             return this;
         }
 
         public Builder pivotArtifactPath(String pivotArtifactPath) {
-            model.setPivotArtifactPath(pivotArtifactPath);
+            cdlMatchAndModelWorkflowBuilder.pivotArtifactPath(pivotArtifactPath);
+            return this;
+        }
+
+        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
+            matchDataCloudWorkflowBuilder.matchClientDocument(matchClientDocument);
+            cdlMatchAndModelWorkflowBuilder.matchClientDocument(matchClientDocument);
+            ratingEngineScoreWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
-            match.setMatchCommandType(matchCommandType);
+            matchDataCloudWorkflowBuilder.matchType(matchCommandType);
+            cdlMatchAndModelWorkflowBuilder.matchType(matchCommandType);
+            ratingEngineScoreWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
-            match.setDestTables(destTables);
+            matchDataCloudWorkflowBuilder.matchDestTables(destTables);
+            cdlMatchAndModelWorkflowBuilder.matchDestTables(destTables);
+            ratingEngineScoreWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
         public Builder moduleName(String moduleName) {
-            model.setModuleName(moduleName);
+            cdlMatchAndModelWorkflowBuilder.moduleName(moduleName);
             return this;
         }
 
         public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
-            model.setV2ProfilingEnabled(v2ProfilingEnabled);
-            model.addProvenanceProperty(ProvenancePropertyName.IsV2ProfilingEnabled, v2ProfilingEnabled);
+            cdlMatchAndModelWorkflowBuilder.enableV2Profiling(v2ProfilingEnabled);
             return this;
         }
 
         public Builder cdlModel(boolean isCdlModel) {
-            model.setCdlModel(isCdlModel);
-            combineInputWithScores.setCdlModel(isCdlModel);
+            cdlMatchAndModelWorkflowBuilder.cdlModel(isCdlModel);
+            ratingEngineScoreWorkflowBuilder.cdlModel(isCdlModel);
             return this;
         }
 
         public Builder notesContent(String notesContent) {
-            model.setNotesContent(notesContent);
+            cdlMatchAndModelWorkflowBuilder.notesContent(notesContent);
             return this;
         }
 
         public Builder matchQueue(String queue) {
-            match.setMatchQueue(queue);
+            matchDataCloudWorkflowBuilder.matchQueue(queue);
+            cdlMatchAndModelWorkflowBuilder.matchQueue(queue);
+            ratingEngineScoreWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
         public Builder setActivateModelSummaryByDefault(boolean value) {
-            model.setActivateModelSummaryByDefault(value);
+            cdlMatchAndModelWorkflowBuilder.setActivateModelSummaryByDefault(value);
             return this;
         }
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
-            combineInputWithScores.setBucketMetadata(bucketMetadata);
+            ratingEngineScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
             return this;
         }
 
         public Builder liftChart(boolean liftChart) {
-            combineInputWithScores.setLiftChart(liftChart);
+            ratingEngineScoreWorkflowBuilder.liftChart(liftChart);
             pivotScoreAndEvent.setLiftChart(liftChart);
             return this;
         }
 
         public Builder aiModelId(String aiModelId) {
-            model.setAiModelId(aiModelId);
+            cdlMatchAndModelWorkflowBuilder.aiModelId(aiModelId);
             return this;
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
-            model.setRatingEngineId(ratingEngineId);
+            cdlMatchAndModelWorkflowBuilder.ratingEngineId(ratingEngineId);
             return this;
         }
 
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
-            score.setUniqueKeyColumn(uniqueKeyColumn);
+            ratingEngineScoreWorkflowBuilder.setUniqueKeyColumn(uniqueKeyColumn);
             return this;
         }
 
         public Builder setUseScorederivation(boolean useScorederivation) {
-            score.setUseScorederivation(useScorederivation);
+            ratingEngineScoreWorkflowBuilder.setUseScorederivation(useScorederivation);
             return this;
         }
 
         public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
-            score.setModelIdFromRecord(setModelIdFromRecord);
+            ratingEngineScoreWorkflowBuilder.setModelIdFromRecord(setModelIdFromRecord);
             return this;
         }
 
@@ -321,11 +314,10 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder setExpectedValue(boolean expectedValue) {
-            model.setExpectedValue(expectedValue);
+            cdlMatchAndModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
-            combineInputWithScores.setExpectedValue(expectedValue);
+            ratingEngineScoreWorkflowBuilder.setExpectedValue(expectedValue);
             pivotScoreAndEvent.setExpectedValue(expectedValue);
-            scoreAggregate.setExpectedValue(expectedValue);
             return this;
         }
 
@@ -336,15 +328,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
             configuration.add(cdlEventTableTupleFilter);
             configuration.add(cdlEventTable);
-            configuration.add(match);
-            configuration.add(model);
-            configuration.add(matchResult);
+            configuration.add(matchDataCloudWorkflowBuilder.build());
+            configuration.add(cdlMatchAndModelWorkflowBuilder.build());
             configuration.add(export);
             configuration.add(setConfigForScoring);
             configuration.add(cdlTargetTableTupleFilter);
-            configuration.add(score);
-            configuration.add(combineInputWithScores);
-            configuration.add(scoreAggregate);
+            configuration.add(ratingEngineScoreWorkflowBuilder.build());
             configuration.add(pivotScoreAndEvent);
 
             return configuration;

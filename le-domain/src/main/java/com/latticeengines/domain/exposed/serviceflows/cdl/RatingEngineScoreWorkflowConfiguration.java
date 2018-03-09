@@ -14,16 +14,14 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ProcessMatchResultConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
@@ -46,12 +44,12 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         private RatingEngineScoreWorkflowConfiguration configuration = new RatingEngineScoreWorkflowConfiguration();
         private MicroserviceStepConfiguration microserviceStepConfiguration = new MicroserviceStepConfiguration();
-        private MatchStepConfiguration match = new MatchStepConfiguration();
+        private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
+
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ScoreAggregateFlowConfiguration scoreAggregate = new ScoreAggregateFlowConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
-        private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
@@ -60,12 +58,11 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.setContainerConfiguration("ratingEngineScoreWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
-            match.setCustomerSpace(customerSpace);
+            matchDataCloudWorkflowBuilder.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             scoreAggregate.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            matchResult.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             return this;
@@ -73,14 +70,14 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             microserviceStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
-            matchResult.setMicroServiceHostPort(microServiceHostPort);
+            matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            match.setInternalResourceHostPort(internalResourceHostPort);
+            matchDataCloudWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             score.setInternalResourceHostPort(internalResourceHostPort);
             combineInputWithScores.setInternalResourceHostPort(internalResourceHostPort);
             scoreAggregate.setInternalResourceHostPort(internalResourceHostPort);
@@ -92,7 +89,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         public Builder inputTableName(String tableName) {
-            match.setInputTableName(tableName);
+            matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
             cdlEventTable.setTargetTableName(tableName);
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
@@ -114,30 +111,27 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            match.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
-            matchResult.setExcludeDataCloudAttrs(exclude);
+            matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
-            match.setDbUrl(matchClientDocument.getUrl());
-            match.setDbUser(matchClientDocument.getUsername());
-            match.setDbPasswordEncrypted(matchClientDocument.getEncryptedPassword());
-            match.setMatchClient(matchClientDocument.getMatchClient().name());
+            matchDataCloudWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
-            match.setMatchCommandType(matchCommandType);
+            matchDataCloudWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
-            match.setDestTables(destTables);
+            matchDataCloudWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
@@ -158,29 +152,22 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         public Builder matchJoinType(MatchJoinType matchJoinType) {
-            match.setMatchJoinType(matchJoinType);
-            return this;
-        }
-
-        public Builder columnSelection(ColumnSelection customizedColumnSelection) {
-            match.setCustomizedColumnSelection(customizedColumnSelection);
+            matchDataCloudWorkflowBuilder.matchJoinType(matchJoinType);
             return this;
         }
 
         public Builder columnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            match.setPredefinedColumnSelection(predefinedColumnSelection);
-            match.setPredefinedSelectionVersion(selectionVersion);
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
-            match.setDataCloudVersion(dataCloudVersion);
-            matchResult.setDataCloudVersion(dataCloudVersion);
+            matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
-            match.setMatchRequestSource(matchRequestSource);
+            matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
@@ -190,7 +177,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         }
 
         public Builder matchQueue(String queue) {
-            match.setMatchQueue(queue);
+            matchDataCloudWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
@@ -230,8 +217,12 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            return this;
+        }
+
         public RatingEngineScoreWorkflowConfiguration build() {
-            match.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             scoreAggregate.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -241,8 +232,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(cdlEventTable);
-            configuration.add(match);
-            configuration.add(matchResult);
+            configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(score);
             configuration.add(combineInputWithScores);
             configuration.add(scoreAggregate);

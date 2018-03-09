@@ -245,6 +245,21 @@ public class CdlMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder aiModelId(String aiModelId) {
+            model.setAiModelId(aiModelId);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            model.setRatingEngineId(ratingEngineId);
+            return this;
+        }
+
+        public Builder setExpectedValue(boolean expectedValue) {
+            model.setExpectedValue(expectedValue);
+            return this;
+        }
+
         public CdlMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);

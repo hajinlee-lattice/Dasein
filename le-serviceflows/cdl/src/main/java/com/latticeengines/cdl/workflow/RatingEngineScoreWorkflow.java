@@ -13,7 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineScoreWorkf
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
-import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
+import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -43,7 +43,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     private ScoreAggregateFlow scoreAggregateFlow;
 
     @Autowired
-    private ExportWorkflow exportWorkflow;
+    private ExportData exportData;
 
     @Autowired
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
@@ -57,7 +57,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //
-                .next(exportWorkflow, null) //
+                .next(exportData) //
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
 

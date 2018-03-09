@@ -72,7 +72,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
-                .matchInputTableName(tableName) //
                 .filterTableNames(parameters.getTrainFilterTableName(), parameters.getEventFilterTableName(),
                         parameters.getTargetFilterTableName()) //
                 .filterQueries(parameters.getTrainFilterQuery(), parameters.getEventFilterQuery(),
