@@ -22,6 +22,7 @@ import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
@@ -44,6 +45,7 @@ import io.lettuce.core.RedisURI;
 
 @Configuration
 @EnableCaching
+@Lazy
 public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(LettuceCacheBeansConfiguration.class);
@@ -55,6 +57,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
     private String cacheType;
 
     @Bean
+    @Lazy
     @Override
     public CacheManager cacheManager() {
         switch (cacheType) {
@@ -206,7 +209,8 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
                 elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder().readFrom(ReadFrom.SLAVE_PREFERRED)//
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                .readFrom(ReadFrom.SLAVE_PREFERRED)//
                 .commandTimeout(Duration.ofSeconds(2))//
                 .shutdownTimeout(Duration.ZERO) //
                 .useSsl() //

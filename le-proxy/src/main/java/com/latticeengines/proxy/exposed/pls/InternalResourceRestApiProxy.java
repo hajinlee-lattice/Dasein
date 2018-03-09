@@ -511,6 +511,10 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
 
     public MetadataSegmentExport updateMetadataSegmentExport(CustomerSpace customerSpace, //
             String exportId, Status state) {
+        if (exportId == null) {
+            log.info("Skipping updating Metadata Segment Export as exportId is null");
+            return null;
+        }
         try {
             String url = constructUrl("pls/internal/segment/export/" + exportId + "/" + customerSpace.toString());
             url += "?" + "state=" + state;

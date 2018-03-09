@@ -9,16 +9,12 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.leadprioritization.workflow.ImportAndRTSBulkScoreWorkflow;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalTestNGBase;
 
-public class ImportAndRTSBulkScoreWorkflowTestNG extends WorkflowApiFunctionalTestNGBase {
-
-    @Inject
-    private ImportAndRTSBulkScoreWorkflow importAndRTSBulkScoreWorkflow;
+public class ImportMatchAndModelWorkflowTestNG extends WorkflowApiFunctionalTestNGBase {
 
     @Inject
     private ImportMatchAndModelWorkflow importMatchAndModelWorkflow;
@@ -31,7 +27,6 @@ public class ImportAndRTSBulkScoreWorkflowTestNG extends WorkflowApiFunctionalTe
         Workflow workflow = importMatchAndModelWorkflow.defineWorkflow(workflowConfig);
 
         System.out.println(workflow.getSteps().stream().map(AbstractStep::getNamespace).collect(Collectors.toList()));
-        // System.out.println(importMatchAndModelWorkflow.buildWorkflow(workflowConfig));
 
     }
 }
