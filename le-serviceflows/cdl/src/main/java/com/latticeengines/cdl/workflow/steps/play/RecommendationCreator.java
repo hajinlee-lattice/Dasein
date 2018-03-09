@@ -105,7 +105,7 @@ public class RecommendationCreator {
     }
 
     private RatingBucketName getBucketInfo(PlayLaunchContext playLaunchContext, Map<String, Object> account) {
-        String bucketName = checkAndGet(account, playLaunchContext.getModelId());
+        String bucketName = checkAndGet(account, playLaunchContext.getRatingId());
         return RatingBucketName.valueOf(bucketName);
     }
 

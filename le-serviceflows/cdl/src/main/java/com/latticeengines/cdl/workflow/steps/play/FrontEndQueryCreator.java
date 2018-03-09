@@ -126,7 +126,7 @@ public class FrontEndQueryCreator {
         FrontEndQuery contactFrontEndQuery = playLaunchContext.getContactFrontEndQuery();
         List<Object> modifiableAccountIdCollectionForContacts = playLaunchContext
                 .getModifiableAccountIdCollectionForContacts();
-        String modelId = playLaunchContext.getModelId();
+        String ratingId = playLaunchContext.getRatingId();
         RatingEngine ratingEngine = play.getRatingEngine();
 
         if (ratingEngine.getSegment() != null) {
@@ -147,8 +147,10 @@ public class FrontEndQueryCreator {
         List<RatingModel> ratingModels = Collections.singletonList(playLaunchContext.getActiveModel());
         accountFrontEndQuery.setRatingModels(ratingModels);
 
+        // TODO add filtering based on list of selected buckets and update
+        // selected vs skipped count accordingly
         List<Lookup> lookups = accountFrontEndQuery.getLookups();
-        Lookup lookup = new AttributeLookup(BusinessEntity.Rating, modelId);
+        Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
         lookups.add(lookup);
     }
 

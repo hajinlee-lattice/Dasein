@@ -40,6 +40,8 @@ public class PlayLaunchContext {
 
     private String modelId;
 
+    private String ratingId;
+
     private RatingModel activeModel;
 
     private FrontEndQuery accountFrontEndQuery;
@@ -56,7 +58,7 @@ public class PlayLaunchContext {
 
     public PlayLaunchContext(CustomerSpace customerSpace, Tenant tenant, String playName, String playLaunchId,
             PlayLaunch playLaunch, Play play, long launchTimestampMillis, RatingEngine ratingEngine,
-            MetadataSegment segment, String segmentName, String modelId, RatingModel activeModel,
+            MetadataSegment segment, String segmentName, String modelId, String ratingId, RatingModel activeModel,
             FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery,
             List<Object> modifiableAccountIdCollectionForContacts, Counter counter, Table recommendationTable,
             Schema schema) {
@@ -72,6 +74,7 @@ public class PlayLaunchContext {
         this.segment = segment;
         this.segmentName = segmentName;
         this.modelId = modelId;
+        this.ratingId = ratingId;
         this.activeModel = activeModel;
         this.accountFrontEndQuery = accountFrontEndQuery;
         this.contactFrontEndQuery = contactFrontEndQuery;
@@ -129,6 +132,10 @@ public class PlayLaunchContext {
         return modelId;
     }
 
+    public String getRatingId() {
+        return ratingId;
+    }
+
     public FrontEndQuery getAccountFrontEndQuery() {
         return accountFrontEndQuery;
     }
@@ -183,6 +190,8 @@ public class PlayLaunchContext {
         private String segmentName;
 
         private String modelId;
+
+        private String ratingId;
 
         private RatingModel activeModel;
 
@@ -256,6 +265,11 @@ public class PlayLaunchContext {
             return this;
         }
 
+        public PlayLaunchContextBuilder ratingId(String ratingId) {
+            this.ratingId = ratingId;
+            return this;
+        }
+
         public PlayLaunchContextBuilder activeModel(RatingModel activeModel) {
             this.activeModel = activeModel;
             return this;
@@ -294,7 +308,7 @@ public class PlayLaunchContext {
 
         public PlayLaunchContext build() {
             return new PlayLaunchContext(customerSpace, tenant, playName, playLaunchId, playLaunch, play,
-                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, activeModel,
+                    launchTimestampMillis, ratingEngine, segment, segmentName, modelId, ratingId, activeModel,
                     accountFrontEndQuery, contactFrontEndQuery, modifiableAccountIdCollectionForContacts, counter,
                     recommendationTable, schema);
         }

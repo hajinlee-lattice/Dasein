@@ -123,7 +123,8 @@ public class PlayLaunchProcessor {
         frontEndQueryCreator.prepareFrontEndQueries(playLaunchContext);
 
         long segmentAccountsCount = accountFetcher.getCount(playLaunchContext);
-        log.info(String.format("Total records in segment: %d", segmentAccountsCount));
+        log.info(String.format("Effective records count for launch: %d", segmentAccountsCount));
+
         playLaunchContext.getPlayLaunch().setAccountsSelected(segmentAccountsCount);
 
         // do initial handling of SFDC id based suppression
@@ -299,6 +300,7 @@ public class PlayLaunchProcessor {
         ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace.getTenantId(), ratingEngine.getId());
         RatingModel activeModel = ratingEngine.getActiveModel();
         String modelId = activeModel.getId();
+        String ratingId = ratingEngine.getId();
         String segmentName = segment.getName();
         log.info(String.format("Processing segment: %s", segmentName));
 
@@ -316,6 +318,7 @@ public class PlayLaunchProcessor {
                 .accountFrontEndQuery(new FrontEndQuery()) //
                 .contactFrontEndQuery(new FrontEndQuery()) //
                 .modelId(modelId) //
+                .ratingId(ratingId) //
                 .activeModel(activeModel) //
                 .modifiableAccountIdCollectionForContacts(new ArrayList<>()) //
                 .counter(new Counter()) //
