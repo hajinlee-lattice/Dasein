@@ -211,7 +211,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
         LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                 .readFrom(ReadFrom.SLAVE_PREFERRED)//
-                .commandTimeout(Duration.ofSeconds(2))//
+                .commandTimeout(Duration.ofMinutes(1))//
                 .shutdownTimeout(Duration.ZERO) //
                 .useSsl() //
                 .and() //
