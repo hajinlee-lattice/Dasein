@@ -8,8 +8,11 @@ Page Summary / Sub-Nav Headers
   overflow: hidden;
   width: 100%;
   position: relative;
-  &.SalesforceAccount, &.SalesforceLead, &.jobsreport {
+  &.SalesforceAccount, &.SalesforceLead, &.blue-fire {
     background-image: url("/assets/images/bkg-blue-fire.jpg");
+    .headers {
+      text-align:center;
+    }
     .stats {
       background: rgba(0,0,0,0.6);
     }
