@@ -1,5 +1,8 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -21,9 +24,14 @@ public class WorkflowBuilder {
 
     public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow, T config) {
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
+        Set<String> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
             String namespace = step.getNamespace();
-            namespace = root + "." + namespace;
+            // in case we need to repeatedly use exactly the same steps under
+            // one namespace
+            if (set.add(step.getParentNamespace() + "." + step.name())) {
+                namespace = root + "." + namespace;
+            }
             workflow.step(step, namespace);
         }
         return this;
