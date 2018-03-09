@@ -85,7 +85,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             setCdlEventTableConfig();
             setMatchConfig();
             setScoreConfig();
-            configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
+            configuration.setContainerConfiguration("generateRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(cdlEventTable);
