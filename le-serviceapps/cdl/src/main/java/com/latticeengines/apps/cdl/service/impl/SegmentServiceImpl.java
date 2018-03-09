@@ -17,8 +17,11 @@ import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
+import com.latticeengines.cache.exposed.service.CacheService;
+import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -46,12 +49,16 @@ public class SegmentServiceImpl implements SegmentService {
 
     @Override
     public MetadataSegment createOrUpdateSegment(String customerSpace, MetadataSegment segment) {
-        return segmentEntityMgr.createOrUpdateSegment(segment);
+        MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
+        evictRatingMetadataCache();
+        return segment1;
     }
 
     @NoCustomerSpace
     private MetadataSegment createOrUpdateSegment(MetadataSegment segment) {
-        return segmentEntityMgr.createOrUpdateSegment(segment);
+        MetadataSegment segment1 = segmentEntityMgr.createOrUpdateSegment(segment);
+        evictRatingMetadataCache();
+        return segment1;
     }
 
     @Override
@@ -179,6 +186,13 @@ public class SegmentServiceImpl implements SegmentService {
         }
         frontEndQuery.setMainEntity(entity);
         return entityProxy.getCount(customerSpace, frontEndQuery);
+    }
+
+    private void evictRatingMetadataCache() {
+        String tenantId = MultiTenantContext.getTenantId();
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
     }
 
 }

@@ -130,7 +130,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (ratingEngine != null) {
             counts = updateRatingCount(ratingEngine);
             log.info("Updated counts for rating engine " + engineId + " to " + JsonUtils.serialize(counts));
-            evictRatingEngineCaches();
         }
         return counts;
     }
@@ -172,7 +171,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
-        evictRatingEngineCaches();
+        evictRatingMetadataCache();
         return ratingEngine;
     }
 
@@ -180,7 +179,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     public void deleteById(String id) {
         RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
         ratingEngineEntityMgr.deleteRatingEngine(ratingEngine);
-        evictRatingEngineCaches();
+        evictRatingMetadataCache();
     }
 
     @SuppressWarnings("unchecked")
@@ -209,7 +208,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
                 .getRatingModelService(ratingEngine.getType());
         ratingModel.setId(ratingModelId);
-        return ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
+        RatingModel model = ratingModelService.createOrUpdate(ratingModel, ratingEngineId);
+        evictRatingMetadataCache();
+        return model;
     }
 
     @Override
@@ -354,9 +355,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         return ratingEngine;
     }
 
-    private void evictRatingEngineCaches() {
-        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+    private void evictRatingMetadataCache() {
+        String tenantId = MultiTenantContext.getTenantId();
         CacheService cacheService = CacheServiceBase.getCacheService();
-        cacheService.refreshKeysByPattern(customerSpace.getTenantId(), CacheName.getRatingEnginesCacheGroup());
+        String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
     }
 }

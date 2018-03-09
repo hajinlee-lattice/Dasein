@@ -54,10 +54,6 @@ public enum CacheName {
         return new CacheName[] { TimeTranslatorCache };
     }
 
-    public static CacheName[] getRatingEnginesCacheGroup() {
-        return new CacheName[] { RatingSummariesCache };
-    }
-
     public static class Constants {
         public static final String PLSCacheName = "PLSCache";
         public static final String DataLakeTopNTreeCache = "DataLakeTopNTreeCache";
