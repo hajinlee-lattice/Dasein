@@ -33,7 +33,7 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
         if (PRE_PROCESSING.equals(configuration.getPhase())) {
             if (workflowConf == null) {
                 log.info("Skip the wrapped workflow steps.");
-                skipEmbeddedWorkflow(getParentNamespace(), getWrappedWorkflowConfClass());
+                skipEmbeddedWorkflow(getParentNamespace(), "", getWrappedWorkflowConfClass());
             } else {
                 putObjectInContext(getParentNamespace(), workflowConf);
             }
@@ -53,7 +53,7 @@ public abstract class BaseWrapperStep<T extends BaseWrapperStepConfiguration, C 
     @Override
     public void skipStep() {
         log.info("Skip the wrapper step and the wrapped workflow steps.");
-        skipEmbeddedWorkflow(getParentNamespace(), getWrappedWorkflowConfClass());
+        skipEmbeddedWorkflow(getParentNamespace(), "", getWrappedWorkflowConfClass());
         configuration.setSkipStep(true);
         resetConfigurationPhase();
     }

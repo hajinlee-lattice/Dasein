@@ -30,7 +30,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
     public static class Builder {
 
-        public GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
+        private GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();

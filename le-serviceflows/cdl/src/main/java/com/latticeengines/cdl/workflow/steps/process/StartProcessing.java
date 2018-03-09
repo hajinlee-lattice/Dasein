@@ -135,7 +135,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @SuppressWarnings("unused")
     private void clearPhaseForRetry() {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(null,
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow("", "",
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
             log.info("stepConfigMap is Empty!!!");
@@ -151,7 +151,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setRebuildEntities() {
         Set<BusinessEntity> rebuildEntities = RebuildEntitiesProvider.getRebuildEntities(this);
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(null,
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow("", "",
                 ProcessAnalyzeWorkflowConfiguration.class);
         if (stepConfigMap.isEmpty()) {
             log.info("stepConfigMap is Empty!!!");

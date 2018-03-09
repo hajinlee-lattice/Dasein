@@ -262,8 +262,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         return eventToModelId;
     }
 
-    protected void skipEmbeddedWorkflow(String parentNamespace, Class<? extends WorkflowConfiguration> workflowClass) {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowClass);
+    protected void skipEmbeddedWorkflow(String parentNamespace, String workflowName,
+            Class<? extends WorkflowConfiguration> workflowClass) {
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
+                workflowClass);
         stepConfigMap.forEach((name, step) -> {
             step.setSkipStep(true);
             putObjectInContext(name, step);
@@ -271,9 +273,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
-    protected void enableEmbeddedWorkflow(String parentNamespace,
+    protected void enableEmbeddedWorkflow(String parentNamespace, String workflowName,
             Class<? extends WorkflowConfiguration> workflowClass) {
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowClass);
+        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow(parentNamespace, workflowName,
+                workflowClass);
         stepConfigMap.forEach((name, step) -> {
             if (step.isSkipStep()) {
                 step.setSkipStep(false);
@@ -283,9 +286,11 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
-    protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace,
+    protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace, String workflowName,
             Class<? extends WorkflowConfiguration> workflowClass) {
-        WorkflowConfiguration workflowConfig = getObjectFromContext(workflowClass.getSimpleName(), workflowClass);
+        String ns = StringUtils.isEmpty(parentNamespace) ? workflowClass.getSimpleName()
+                : parentNamespace + "." + workflowClass.getSimpleName();
+        WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowClass);
         if (workflowConfig == null) {
             log.warn("There is no workflow configuration of class " + workflowClass.getSimpleName() + " in context.");
             try {
@@ -294,6 +299,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                 Object builder = builderClass.newInstance();
                 Method build = builderClass.getMethod("build", new Class<?>[] {});
                 workflowConfig = (WorkflowConfiguration) build.invoke(builder);
+                if (StringUtils.isNotEmpty(workflowName)) {
+                    workflowConfig.setWorkflowName(workflowName);
+                }
             } catch (Exception e) {
                 throw new RuntimeException(
                         String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);

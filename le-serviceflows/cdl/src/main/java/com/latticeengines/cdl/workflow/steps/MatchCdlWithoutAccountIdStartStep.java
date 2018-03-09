@@ -25,7 +25,7 @@ public class MatchCdlWithoutAccountIdStartStep extends BaseWorkflowStep<MatchCdl
         Table inputTable = getObjectFromContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID, Table.class);
         if (inputTable == null) {
             log.info("There's no table without account Id, skip the workflow.");
-            skipEmbeddedWorkflow(getParentNamespace(), MatchCdlAccountWorkflowConfiguration.class);
+            skipEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
             return;
         }
         String path = inputTable.getExtracts().get(0).getPath();
@@ -34,11 +34,11 @@ public class MatchCdlWithoutAccountIdStartStep extends BaseWorkflowStep<MatchCdl
             log.info("There's no data without account Id, skip the workflow.");
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), inputTable.getName());
             removeObjectFromContext(CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID);
-            skipEmbeddedWorkflow(getParentNamespace(), MatchCdlAccountWorkflowConfiguration.class);
+            skipEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
             return;
         }
 
-        enableEmbeddedWorkflow(getParentNamespace(), MatchCdlAccountWorkflowConfiguration.class);
+        enableEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
         putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, inputTable);
 
     }

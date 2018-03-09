@@ -86,7 +86,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             putObjectInContext(MATCH_RESULT_TABLE, table);
         }
         log.info("Skip embedded bulk match workflow.");
-        skipEmbeddedWorkflow(getParentNamespace(), BulkMatchWorkflowConfiguration.class);
+        skipEmbeddedWorkflow(getParentNamespace(), "", BulkMatchWorkflowConfiguration.class);
     }
 
     private Table preMatchEventTable() {
