@@ -550,6 +550,22 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
+        table.addAttribute(attr("FirstName") //
+                .allowedDisplayNames(Sets.newHashSet("FIRSTNAME", "FIRST NAME", "FIRST_NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.FirstName) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
+        table.addAttribute(attr("LastName") //
+                .allowedDisplayNames(Sets.newHashSet("LASTNAME", "LAST NAME", "LAST_NAME")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.LastName) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .subcategory(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
+                .build());
         table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(
                         Sets.newHashSet("ACCOUNT_ID", "ACCOUNTID", "ACCOUNT_EXTERNAL_ID", "ACCOUNT ID", "ACCOUNT")) //
