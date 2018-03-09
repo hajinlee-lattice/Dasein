@@ -24,12 +24,12 @@ public class WorkflowBuilder {
 
     public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow, T config) {
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
-        Set<String> set = new HashSet<>();
+        Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
             String namespace = step.getNamespace();
             // in case we need to repeatedly use exactly the same steps under
             // one namespace
-            if (set.add(step.getParentNamespace() + "." + step.name())) {
+            if (set.add(step)) {
                 namespace = root + "." + namespace;
             }
             workflow.step(step, namespace);
