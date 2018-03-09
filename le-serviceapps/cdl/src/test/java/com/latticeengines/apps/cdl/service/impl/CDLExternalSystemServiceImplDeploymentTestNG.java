@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,13 +16,27 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
+
+    @Autowired
+    private DataCollectionProxy dataCollectionProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
@@ -53,7 +69,50 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(system.getErpIds().contains("TestERPId"));
     }
 
+    private void prepareTable() {
+        Table table = new Table();
+        table.setName("TestExternalSystemTable");
+        table.setDisplayName("TestExternalSystemTable");
+        Attribute attr1 = new Attribute("accountId");
+        attr1.setDisplayName("TestAccountID");
+        attr1.setPhysicalDataType("String");
+        Attribute attr2 = new Attribute("testId");
+        attr2.setDisplayName("TestDummyID");
+        attr2.setPhysicalDataType("String");
+        Attribute attr3 = new Attribute(InterfaceName.MarketoAccountID.name());
+        attr3.setDisplayName("TestMarketoID");
+        attr3.setPhysicalDataType("String");
+        table.setAttributes(Arrays.asList(attr1, attr2, attr3));
+        metadataProxy.createTable(mainCustomerSpace, table.getName(), table);
+        dataCollectionProxy.upsertTable(mainCustomerSpace, table.getName(), TableRoleInCollection.BucketedAccount, DataCollection.Version.Blue);
+    }
+
     @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
+    public void testGetMapping() {
+        prepareTable();
+        List<CDLExternalSystemMapping> crmList = cdlExternalSystemProxy.getExternalSystemByType(mainCustomerSpace,
+                CDLExternalSystemType.CRM);
+        Assert.assertEquals(crmList.size(), 2);
+        for (CDLExternalSystemMapping cesm : crmList) {
+            if (cesm.getFieldName().equals("accountId")) {
+                Assert.assertEquals(cesm.getDisplayName(), "TestAccountID");
+            } else if (cesm.getFieldName().equals("testId")) {
+                Assert.assertEquals(cesm.getDisplayName(), "TestDummyID");
+            } else {
+                Assert.assertTrue("External system not the same as input", false);
+            }
+        }
+        Map<String, List<CDLExternalSystemMapping>> mapping =
+                cdlExternalSystemProxy.getExternalSystemMap(mainCustomerSpace);
+        Assert.assertEquals(mapping.size(), 2);
+        List<CDLExternalSystemMapping> mapList = mapping.get(CDLExternalSystemType.MAP.name());
+        Assert.assertEquals(mapList.size(), 1);
+        Assert.assertEquals(mapList.get(0).getFieldName(), InterfaceName.MarketoAccountID.name());
+        Assert.assertEquals(mapList.get(0).getDisplayName(), "TestMarketoID");
+    }
+
+
+    @Test(groups = "deployment", dependsOnMethods = "testGetMapping")
     public void testUpdate() {
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();

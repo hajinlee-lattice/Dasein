@@ -1,5 +1,8 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.apps.cdl.service.CDLExternalSystemService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -38,6 +43,23 @@ public class CDLExternalSystemResource {
     public CDLExternalSystem getExternalSystem(@PathVariable String customerSpace) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return cdlExternalSystemService.getExternalSystem(customerSpace);
+    }
+
+    @RequestMapping(value = "/map", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all CDL external system for a tenant")
+    public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(@PathVariable String customerSpace) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return cdlExternalSystemService.getExternalSystemMap(customerSpace);
+    }
+
+    @RequestMapping(value = "/type/{type}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get all CDL external system for a tenant")
+    public List<CDLExternalSystemMapping> getExternalSystemByType(@PathVariable String customerSpace,
+                                                                  @PathVariable CDLExternalSystemType type) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        return cdlExternalSystemService.getExternalSystemByType(customerSpace, type);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")

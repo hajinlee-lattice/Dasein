@@ -2,8 +2,12 @@ package com.latticeengines.ulysses.service.impl;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +16,13 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.FieldInterpretationCollections;
 import com.latticeengines.domain.exposed.attribute.PrimaryField;
 import com.latticeengines.domain.exposed.ulysses.PrimaryFieldValidationExpression;
+import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.ulysses.service.AttributeService;
 
 @Component("attributeService")
@@ -25,6 +32,9 @@ public class AttributeServiceImpl implements AttributeService {
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private CDLExternalSystemProxy cdlExternalSystemProxy;
 
     @Override
     public List<PrimaryField> getPrimaryFields() {
@@ -45,6 +55,36 @@ public class AttributeServiceImpl implements AttributeService {
         PrimaryFieldValidationExpression validationExp = new PrimaryFieldValidationExpression();
         validationExp.setExpression(expression);
         return validationExp;
+    }
+
+    @Override
+    public List<PrimaryField> getPrimaryFieldsFromExternalSystem(CustomerSpace customerSpace, String type) {
+        List<CDLExternalSystemMapping> externalSystemMappings =
+                cdlExternalSystemProxy.getExternalSystemByType(customerSpace.toString(),
+                        CDLExternalSystemType.valueOf(type));
+        List<PrimaryField> primaryFields = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(externalSystemMappings)) {
+            externalSystemMappings.forEach(externalSystemMapping ->
+                    primaryFields.add(new PrimaryField(externalSystemMapping.getFieldName(),
+                            externalSystemMapping.getFieldType(), externalSystemMapping.getDisplayName())));
+        }
+        return primaryFields;
+    }
+
+    @Override
+    public Map<String, List<PrimaryField>> getPrimaryFieldsFromExternalSystem(CustomerSpace customerSpace) {
+        Map<String, List<CDLExternalSystemMapping>> externalSystemMappings =
+                cdlExternalSystemProxy.getExternalSystemMap(customerSpace.toString());
+        Map<String, List<PrimaryField>> primaryFieldsMap = new HashMap<>();
+        if (!MapUtils.isEmpty(externalSystemMappings)) {
+            for (Map.Entry<String, List<CDLExternalSystemMapping>> systemEntry : externalSystemMappings.entrySet()) {
+                List<PrimaryField> primaryFields= new ArrayList<>();
+                systemEntry.getValue().forEach(system -> primaryFields.add(new PrimaryField(system.getFieldName(),
+                        system.getFieldType(), system.getDisplayName())));
+                primaryFieldsMap.put(systemEntry.getKey(), primaryFields);
+            }
+        }
+        return primaryFieldsMap;
     }
 
 }
