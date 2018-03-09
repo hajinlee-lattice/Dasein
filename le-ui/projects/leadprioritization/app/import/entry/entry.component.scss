@@ -39,6 +39,9 @@
             &.purchases {
                 background-image: url('/assets/images/ico-purchases-dark.png');
             }
+            &.product_hierarchy {
+                background-image: url('/assets/images/ico-product_hierarchy-dark.png');
+            }
             &.blue-button {
                 color: #fff;
                 &.account {
@@ -55,6 +58,9 @@
                 }
                 &.purchases {
                     background-image: url('/assets/images/ico-purchases-white.png');
+                }
+                &.product_hierarchy {
+                    background-image: url('/assets/images/ico-product_hierarchy-white.png');
                 }
             }
         }

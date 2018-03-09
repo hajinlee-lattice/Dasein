@@ -180,10 +180,11 @@ angular.module('common.datacloud')
         return deferred.promise;
     }
 
-    this.getEnrichments = function(opts, concatEnrichments){
-        var deferred = $q.defer();
+    this.getEnrichments = function(opts, concatEnrichments, nocache){
+        var deferred = $q.defer(),
+            nocahce = nocache || false;
 
-        if (this.enrichments) {
+        if (this.enrichments && !nocache) {
             deferred.resolve(this.enrichments);
         } else {
             DataCloudService.getEnrichments(opts).then(function(response){

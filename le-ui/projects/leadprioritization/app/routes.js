@@ -823,7 +823,7 @@ angular
                         EnrichmentData: function($q, DataCloudStore) {
                             var deferred = $q.defer();
 
-                            DataCloudStore.getEnrichments({onlySelectedAttributes: true}).then(function(result) {
+                            DataCloudStore.getEnrichments({onlySelectedAttributes: true}, null, true).then(function(result) {
                                 deferred.resolve(result);
                             });
 

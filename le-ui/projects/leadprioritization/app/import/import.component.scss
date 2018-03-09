@@ -1,12 +1,16 @@
 @import "entry/entry.component.scss";
+@import "content/calendar/calendar.component.scss";
 @import "entry/accounts/accounts.component.scss";
 @import "entry/contacts/contacts.component.scss";
 @import "entry/productpurchases/productpurchases.component.scss";
 @import "entry/productbundles/productbundles.component.scss";
+@import "entry/producthierarchy/producthierarchy.component.scss";
 @import "content/accountids/accountids.component.scss";
 @import "content/contactids/contactids.component.scss";
 @import "content/transactionids/transactionids.component.scss";
 @import "content/productids/productids.component.scss";
+@import "content/producthierarchyids/producthierarchyids.component.scss";
+@import "content/producthierarchy/producthierarchy.component.scss";
 @import "content/thirdpartyids/thirdpartyids.component.scss";
 @import "content/latticefields/latticefields.component.scss";
 @import "content/customfields/customfields.component.scss";

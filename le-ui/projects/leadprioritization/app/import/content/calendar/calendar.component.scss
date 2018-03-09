@@ -1,0 +1,147 @@
+.import-calendar {
+    .calander-container {
+        width: 90%;
+        margin: 0 auto;
+    }
+    h5 {
+        font-size: inherit;
+
+    }
+    .nth-day-picker {
+        @include flex-container;
+        display: inline-flex;
+        position: relative;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 20px 0;
+        & > li {
+            @include flex-item(0 1 auto);
+            margin-right: 5px;
+        }
+    }
+    .fancy-or {
+        position: relative;
+        margin: 10px 0;
+        margin-top: 10px;
+        border-top: 1px solid #d0d0d0;
+        &:before {
+            content: attr(data-content);
+            background: white;
+            padding: 0 10px;
+            position: relative;
+            top: -.8em;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+    }
+    .month-picker {
+        @include flex-container;
+        margin-bottom: 20px;
+        & > li {
+            @include flex-item(1 1 auto);
+            & > div {
+                text-align: center;
+                width: 40px;
+                height: 40px;
+                line-height: 40px;
+                border-radius: 50%;
+                cursor: pointer;
+                &:hover {
+                    background-color: #f5f5f5;
+                    color: #666;
+                }
+                &.active {
+                    color: white;
+                    background-color: #447db9;
+                    font-weight: bold;
+                }
+            }
+        }
+    }
+    .file-import-datepicker {
+        border: 0;
+        z-index: auto;
+        table {
+            thead {
+                border: none;
+                abbr {
+                    text-decoration: none;
+                }
+            }
+            tbody {
+                border: none;
+                tr {
+                    border: 0;
+                    &:nth-child(odd) {
+                        background: none;
+                    }
+                    td {
+                        text-align: center;
+                        padding: 10px;
+                    }
+                }
+            }
+        }
+        .pika-lendar {
+            float: none;
+            width: 100%;
+            margin: 0;
+            .pika-title {
+                display: none;
+            }
+        }
+        .pika-button {
+            width: auto;
+            margin: 0 auto;
+            border-radius: 50%;
+            line-height: normal;
+            text-align: center;
+            width: 40px;
+            height: 40px;
+            background: none;
+            &:hover {
+                background-color: #f5f5f5;
+                color: #666;
+            }
+        }
+        .is-selected {
+            .pika-button {
+                background-color: #447db9
+            }
+        }
+    }
+    .quarter-picker-container {
+        margin-bottom: 20px;
+        h5 {
+            text-align: center;
+        }
+        .quarter-picker {
+            @include flex-container;
+            display: inline-flex;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+            & > li {
+                @include flex-item(0 1 auto);
+                margin-right: 5px;
+                & > div {
+                    text-align: center;
+                    width: 40px;
+                    height: 40px;
+                    line-height: 40px;
+                    border-radius: 50%;
+                    cursor: pointer;
+                    &:hover {
+                        background-color: #f5f5f5;
+                        color: #666;
+                    }
+                    &.active {
+                        color: white;
+                        background-color: #447db9;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+    }
+}

@@ -2,6 +2,7 @@ angular
 .module('lp.import', [
     'common.wizard',
     'lp.import.entry',
+    'lp.import.calendar',
     'lp.import.wizard.thirdpartyids',
     'lp.import.wizard.latticefields',
     'lp.import.wizard.jobstatus',
@@ -9,13 +10,45 @@ angular
     'lp.import.wizard.accountids',
     'lp.import.wizard.contactids',
     'lp.import.wizard.transactionids',
-    'lp.import.wizard.productids'
+    'lp.import.wizard.productids',
+    'lp.import.wizard.producthierarchyids',
+    'lp.import.wizard.producthierarchy'
 ])
 .config(function($stateProvider) {
     $stateProvider
         .state('home.import', {
             url: '/import',
             redirectTo: 'home.import.entry.accounts'
+        })
+        .state('home.import.calendar', {
+            url: '/calendar',
+            views: {
+                'main@': {
+                    controller: 'ImportWizardCalendar',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/calendar/calendar.component.html'
+                }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                Calendar: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardStore.getCalendar().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            }
         })
         .state('home.import.entry', {
             url: '/entry',
@@ -59,6 +92,14 @@ angular
             views: {
                 'entry_content@home.import.entry': {
                     templateUrl: 'app/import/entry/productbundles/productbundles.component.html'
+                }
+            }
+        })
+        .state('home.import.entry.product_hierarchy', {
+            url: '/product_hierarchy',
+            views: {
+                'entry_content@home.import.entry': {
+                    templateUrl: 'app/import/entry/producthierarchy/producthierarchy.component.html'
                 }
             }
         })
@@ -571,6 +612,112 @@ angular
             }
         })
         .state('home.import.data.product_bundles.ids.latticefields.jobstatus', {
+            url: '/jobstatus',
+            views: {
+                'wizard_content@home.import.data': {
+                    templateUrl: 'app/import/content/jobstatus/jobstatus.component.html'
+                }
+            }
+        })
+        .state('home.import.data.product_hierarchy', {
+            url: '/product_hierarchy',
+            params: {
+                wizard_steps: 'product_hierarchy'  // use this to override entity type as default for wizard step key
+            },
+            resolve: {
+                WizardValidationStore: function(ImportWizardStore) {
+                    return ImportWizardStore;
+                },
+                WizardProgressContext: function() {
+                    return 'import.data';
+                },
+                WizardProgressItems: function($stateParams, ImportWizardStore) {
+                    var entityType = ImportWizardStore.getEntityType(),
+                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+
+                    return ImportWizardStore.getWizardProgressItems(wizard_steps || 'product_hierarchy');
+                }
+            },
+            views: {
+                'wizard_progress': {
+                    controller: 'ImportWizardProgress',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/progress/progress.component.html'
+                },
+                'wizard_controls': {
+                    resolve: {
+                        WizardControlsOptions: function() {
+                            return { backState: 'home.import.entry.product_hierarchy', nextState: 'home.jobs.data' };
+                        }
+                    },
+                    controller: 'ImportWizardControls',
+                    controllerAs: 'vm',
+                    templateUrl: '/components/wizard/controls/controls.component.html'
+                }
+            },
+            redirectTo: 'home.import.data.product_hierarchy.ids'
+        })
+        .state('home.import.data.product_hierarchy.ids', {
+            url: '/producthierarchyids',
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardProductHierarchyIDs',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/producthierarchyids/producthierarchyids.component.html'
+                }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                },
+                UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardService.GetSchemaToLatticeFields(null, ImportWizardStore.getEntityType()).then(function(result) {
+                        deferred.resolve(result['Account']);
+                    });
+
+                    return deferred.promise;
+                },
+                Calendar: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardStore.getCalendar().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            }
+        })
+        .state('home.import.data.product_hierarchy.ids.product_hierarchy', {
+            url: '/producthierarchy',
+            views: {
+                'wizard_content@home.import.data': {
+                    controller: 'ImportWizardProductHierarchy',
+                    controllerAs: 'vm',
+                    templateUrl: 'app/import/content/producthierarchy/producthierarchy.component.html'
+                }
+            },
+            resolve: {
+                FieldDocument: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+                    ImportWizardService.GetFieldDocument(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(result) {
+                        ImportWizardStore.setFieldDocument(result.Result);
+                        deferred.resolve(result.Result);
+                    });
+
+                    return deferred.promise;
+                }
+            }
+        })
+        .state('home.import.data.product_hierarchy.ids.product_hierarchy.jobstatus', {
             url: '/jobstatus',
             views: {
                 'wizard_content@home.import.data': {

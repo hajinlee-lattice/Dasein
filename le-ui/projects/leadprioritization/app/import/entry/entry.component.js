@@ -2,7 +2,8 @@ angular.module('lp.import.entry', [
     'lp.import.entry.accounts',
     'lp.import.entry.contacts',
     'lp.import.entry.productpurchases',
-    'lp.import.entry.productbundles'
+    'lp.import.entry.productbundles',
+    'lp.import.entry.producthierarchy'
 ])
 .controller('ImportEntry', function(
     $state, $stateParams, $scope, FeatureFlagService, ResourceUtility, ImportWizardStore, ImportStore
@@ -31,6 +32,7 @@ angular.module('lp.import.entry', [
             case 'home.import.entry.contacts': vm.changeEntityType('Contact', 'contacts'); break;
             case 'home.import.entry.product_purchases': vm.changeEntityType('Transaction', 'product_purchases'); break;
             case 'home.import.entry.product_bundles': vm.changeEntityType('Product', 'product_bundles'); break;
+            case 'home.import.entry.product_hierarchy': vm.changeEntityType('Product', 'product_hierarchy'); break;
         }
     }
 

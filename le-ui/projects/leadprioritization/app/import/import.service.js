@@ -18,7 +18,8 @@ angular.module('lp.import')
             thirdpartyids: true,
             latticefields: false,
             customfields: true,
-            jobstatus: false
+            jobstatus: false,
+            product_hierarchy: false
         }
 
         this.saveObjects = {};
@@ -31,6 +32,8 @@ angular.module('lp.import')
         this.entityType = null;
 
         this.nonCustomIds = [];
+
+        this.calendar = null;
     }
 
     this.init();
@@ -171,6 +174,36 @@ angular.module('lp.import')
             },{ 
                 label: 'Import Data', 
                 state: 'product_bundles.ids.latticefields.jobstatus', 
+                nextLabel: 'Done', 
+                hideBack: true,
+                nextFn: function(nextState) {
+                    ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
+                        $state.go(nextState); 
+                    });
+                }
+            }
+        ],
+        "product_hierarchy": [
+            { 
+                label: 'Product Hierarchy ID', 
+                state: 'product_hierarchy.ids', 
+                nextLabel: 'Next', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                } 
+            },{ 
+                label: 'Product Hierarchy', 
+                state: 'product_hierarchy.ids.product_hierarchy', 
+                nextLabel: 'Import File', 
+                nextFn: function(nextState) {
+                    ImportWizardStore.nextSaveMapping(nextState);
+                    ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
+                        ImportWizardStore.setValidation('jobstatus', true);                
+                    });
+                }
+            },{ 
+                label: 'Import File', 
+                state: 'product_hierarchy.ids.product_hierarchy.jobstatus', 
                 nextLabel: 'Done', 
                 hideBack: true,
                 nextFn: function(nextState) {
@@ -458,6 +491,24 @@ angular.module('lp.import')
     this.getNonCustomIds = function() {
         return this.nonCustomIds;
     }
+
+    this.getCalendar = function() {
+        var deferred = $q.defer();
+
+        if(this.calendar) {
+            deferred.resolve(this.calendar);
+        } else {
+            ImportWizardService.getCalendar().then(function(result) {
+                deferred.resolve(result);
+            });
+        }
+        
+        return deferred.promise;
+    };
+
+    this.setCalendar = function(calendar) {
+        this.calendar = calendar;
+    };
 })
 .service('ImportWizardService', function($q, $http, $state, ResourceUtility) {
 
@@ -585,4 +636,10 @@ angular.module('lp.import')
 
 	        return deferred.promise;
 	    };
-});
+
+        this.getCalendar = function() {
+            var deferred = $q.defer();
+            deferred.resolve(null);
+            return deferred.promise;
+        };
+    });
