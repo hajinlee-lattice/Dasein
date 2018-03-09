@@ -2,6 +2,14 @@
     <div class="le-grid editing-container">
         <div class="le-row">
             <div class="le-col-span-10">
+                <span ng-if="vm.showItem('String')" class="query-section-item-operation">
+                    <select ng-model="vm.stringCmpModel" ng-options="k as v for (k, v) in vm.string_operations" ng-change="vm.changeStringCmpValue()">
+                    </select>
+
+                    <input type="text" name="input" ng-model="vm.stringValue" ng-change="vm.changeStringValue()" required ng-trim="false"
+                             ng-if="vm.showInput(vm.stringCmpModel)">
+                </span>
+
                 <span ng-if="vm.showItem('Boolean')" class="query-section-item-operation">
                     <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
                         <strong>is</strong>

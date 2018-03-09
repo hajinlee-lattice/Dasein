@@ -29,6 +29,7 @@
             </div>
         </span>
 
+
         <attribute-feedback-button 
             button-type="'menu'" 
             attribute="enrichment" 
@@ -134,6 +135,19 @@
                 See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
             </div>
         </div>
+        <div ng-if="vm.cube && (!vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List || 
+                                  !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length) && 
+                                  (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)" class="stats"> 
+                Free Text Attribute
+                <div>
+                    <button class="button gray-button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
+                        <i ng-if="totalcount.length == 0" class="fa fa-plus"></i>
+                        <i ng-if="totalcount.length == 1" class="{{vm.categoryClass(enrichment.Category)}} color fa fa-check"></i>
+                        <span ng-if="totalcount.length > 1" class="{{vm.categoryClass(enrichment.Category)}} color" style="margin-right: 5px"> {{totalcount.length}} </span>
+                        Add To Query
+                    </button>
+                </div>
+        </div> 
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
         <li class="control enrich" ng-if="vm.section == 'edit'">

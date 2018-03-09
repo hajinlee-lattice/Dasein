@@ -238,6 +238,10 @@ angular.module('lp.segments.segments', [
                             attrs.push(enrichment.DisplayName + ': ' + value); 
                             break;
                     }
+                } else {
+                    // for pure string attributes
+                    attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction) + " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'");
+
                 }
 
             }

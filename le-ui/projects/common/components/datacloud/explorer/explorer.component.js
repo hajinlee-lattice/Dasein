@@ -1498,7 +1498,11 @@ angular.module('common.datacloud.explorer', [
             return alert('Cube data not yet loaded. \nOne moment please.');
         }
         attribute.SegmentChecked = true;
-
+        if (!attribute.TopBkt) {
+            console.log(attribute);
+            vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
+            return;
+        }
         var attribute = angular.copy(attribute),
             attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},
@@ -1567,6 +1571,19 @@ angular.module('common.datacloud.explorer', [
 
         vm.checkSaveButtonState();
 
+    }
+
+    vm.addFreeTextAttribute = function(enrichment, cube) {
+        var bkt = { //default bucket for free-text attributes added in My Data or Add step of rules-based rating engine
+            'Cmp': 'IS_NOT_NULL',
+            'Cnt': cube.Cnt,
+            'Id': -1,
+            'Lbl': '*',
+            'Vals': [
+                ''
+            ]
+        };
+        vm.selectSegmentAttributeRange(enrichment, bkt, (vm.section != 'segment.analysis'));
     }
 
     var getSegmentBucketInputs = function() {
@@ -1695,7 +1712,7 @@ angular.module('common.datacloud.explorer', [
 
             return item.Lbl == label;
         });
-
+        
         //console.log(attribute.Entity+'.'+attribute.Attribute, rules.length, filtered.length, matches.length, cubeMatches.length, label, cube, { 'rules':rules, 'filtered':filtered, 'matches':matches, 'cubeLabels':cubeLabels, 'cubeMatches':cubeMatches, 'attribute':attribute });
 
         if (filtered.length != rules.length && rules.length > 1) {

@@ -3,6 +3,10 @@
         <span>{{vm.getOperationLabel()}}</span>
     </span>
 
+    <span class="query-section-item-value" ng-if="vm.showItem('String')">
+        <strong>{{vm.getOperationValue('String')}}</strong>
+    </span>
+
     <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
         <strong>{{vm.getOperationValue('Boolean')}}</strong>
     </span>

@@ -65,6 +65,7 @@ angular
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
+                                vm.type = 'String';
                             }
                         }
                         // var tmp = vm.enrichmentsMap;
@@ -176,6 +177,28 @@ angular
                         vm.range = vm.tree.bucketRestriction.bkt.Vals;
                     }
 
+                    vm.root.saveState(true);
+                    vm.editing = true;
+                } else if (!vm.editing && !vm.root.draggedItem && vm.type == 'String') {
+                    console.log(vm.type);
+                    if (vm.unused) {
+                        vm.unused = false;
+
+                        vm.tree.bucketRestriction.bkt = {
+                            "Lbl": " ",
+                            "Cmp": "IS_NOT_NULL",
+                            "Id": -1,
+                            "Cnt": vm.item.cube.Cnt,
+                            "Vals": [
+                                ""
+                            ]
+                        };
+
+                        vm.label = vm.tree.bucketRestriction.bkt.Lbl;
+                        vm.range = vm.tree.bucketRestriction.bkt.Vals;
+
+
+                    }
                     vm.root.saveState(true);
                     vm.editing = true;
                 }

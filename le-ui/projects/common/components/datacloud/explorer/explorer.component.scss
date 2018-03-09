@@ -2206,6 +2206,15 @@
     }
 }
 
+i {
+    &.fa {
+        margin-right: 5px;
+        &.fa-check.white {
+            color: white;
+        }
+    }
+}
+
 .success-message {
     background: #71bc51;
     margin: 20px 0;

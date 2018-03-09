@@ -72,10 +72,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
     
                     vm.booleanValue = QueryTreeService.getBooleanModel(vm.tree.bucketRestriction);
                     vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
+                    vm.stringValue = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
+                    vm.stringCmpModel = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
                     // vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
                     vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
                     vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
                     vm.vals = vm.tree.bucketRestriction.bkt.Vals;
+
+                    vm.string_operations = QueryTreeService.string_operations;
     
     
                     vm.showFromNumerical = false;
@@ -93,6 +97,9 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 
                 vm.init();
 
+                vm.showInput = function(cmpModel) {
+                    return QueryTreeService.no_inputs.indexOf(cmpModel) < 0;
+                }
 
 
                 vm.clickEditMode = function(value) {
@@ -166,6 +173,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.changeNumericalCmpValue = function () {
                     QueryTreeService.changeNumericalCmpValue(vm.tree.bucketRestriction, vm.numericalCmpModel);
                     initNumericalRange(true);
+                }
+
+                vm.changeStringValue = function () {
+                    QueryTreeService.changeStringValue(vm.tree.bucketRestriction, vm.stringValue);
+                }
+
+                vm.changeStringCmpValue = function () {
+                    QueryTreeService.changeStringCmpValue(vm.tree.bucketRestriction, vm.stringCmpModel);
                 }
 
                 vm.changeBktVal = function (position) {

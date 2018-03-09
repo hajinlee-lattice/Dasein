@@ -39,7 +39,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'AFTER': 'After',
             'BETWEEN_LT': 'Between Last',
             'PREVIOUS': 'Previous',
-            'PRIOR_OLY_LT': 'Only Prior to Last'
+            'PRIOR_OLY_LT': 'Only Prior to Last',
+            'ENDS_WITH': 'ends with'
         };
 
         this.numerical_operations = {
@@ -57,6 +58,17 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'NOT_EQUAL': 'is not',
             'IN_COLLECTION': 'is',
             'NOT_IN_COLLECTION': 'is not'
+        };
+
+        this.string_operations = {
+            'STARTS_WITH': 'starts with',
+            'ENDS_WITH': 'ends with',
+            'CONTAINS': 'contains',
+            'NOT_CONTAINS'  : 'does not contain',
+            'EQUAL' : 'equals',
+            'NOT_EQUAL': 'does not equal',
+            'IS_NULL': 'is empty',
+            'IS_NOT_NULL': 'is not empty'
         };
 
         this.no_inputs = [
@@ -186,7 +198,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 return service.getOperationValue(bucketRestriction, operatorType, position);
             } else {
                 console.warn('Service not implemented');
-                return 'Uknown';
+                return 'Unknown';
             }
         }
 
@@ -241,7 +253,17 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (service) {
                 return service.getBooleanModel(bucketRestriction);
             } else {
-                console.warn(' changeBooleanValue() Service not implemented');
+                console.warn(' getBooleanModel() Service not implemented');
+            }
+        }
+
+        this.getStringCmpModel = function (bucketRestriction) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.getStringCmpModel(bucketRestriction);
+            } else {
+                console.warn(' getStringCmpModel() Service not implemented');
             }
         }
 
@@ -251,7 +273,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (service) {
                 return service.getEnumCmpModel(bucketRestriction);
             } else {
-                console.warn(' changeBooleanValue() Service not implemented');
+                console.warn(' getEnumCmpModel() Service not implemented');
             }
         }
 
@@ -287,7 +309,24 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 console.warn(' changeEnumCmpValue() Service not implemented');
             }
         }
-
+        this.changeStringValue = function (bucketRestriction, stringValue) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                service.changeStringValue(bucketRestriction, stringValue);
+            } else {
+                console.warn(' changeStringValue() Service not implemented');
+            }
+        }
+        this.changeStringCmpValue = function (bucketRestriction, value) {
+            var entity = getEntity(bucketRestriction);
+            var service = getService(entity);
+            if (service) {
+                return service.changeStringCmpValue(bucketRestriction, value);
+            } else {
+                console.warn(' changeStringCmpValue() Service not implemented');
+            }
+        }
         this.changeNumericalCmpValue = function (bucketRestriction, value) {
             var entity = getEntity(bucketRestriction);
             var service = getService(entity);
@@ -539,6 +578,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 case 'Date': {
                     return false;
                 };
+                case 'String': {
+                    return type === typeToShow;
+                }
                 default: return false;
             }
 
@@ -583,6 +625,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
                     return ret;
 
+                case 'String':
+                    return cmpMap[cmp];
+
                 default:
                     return 'has a value of';
             }
@@ -605,6 +650,13 @@ angular.module('common.datacloud.query.builder.tree.service', [
             return bucketRestriction.bkt.Vals;
         }
 
+        function getStringValue(bucketRestriction) {
+            if (bucketRestriction.bkt.Cmp == 'IS_NULL' || bucketRestriction.bkt.Cmp == 'IS_NOT_NULL') {
+                return '';
+            }
+            return bucketRestriction.bkt.Vals[0] ? bucketRestriction.bkt.Vals[0] : 'any (*)';
+        }
+
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
             // console.log('Operation Value', operatorType, position);
             switch (operatorType) {
@@ -616,6 +668,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 };
                 case 'Enum': {
                     return getEnumValues(bucketRestriction);
+                };
+                case 'String': {
+                    return getStringValue(bucketRestriction);
                 };
                 default: return 'Unknown';
             }
@@ -647,6 +702,12 @@ angular.module('common.datacloud.query.builder.tree.service', [
         this.changeBooleanValue = function (bucketRestriction, booleanValue) {
             bucketRestriction.bkt.Vals[0] = booleanValue.length ? booleanValue : null;
         }
+        this.changeStringValue = function (bucketRestriction, stringValue) {
+            bucketRestriction.bkt.Vals[0] = stringValue ? stringValue : '';
+        }
+        this.changeStringCmpValue = function(bucketRestriction, value) {
+            bucketRestriction.bkt.Cmp = value;
+        }
         this.changeEnumCmpValue = function (bucketRestriction, value) {
             bucketRestriction.bkt.Cmp = value;
         }
@@ -673,6 +734,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
         this.getBooleanModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Vals[0];
+        }
+        this.getStringCmpModel = function (bucketRestriction) {
+            return bucketRestriction.bkt.Cmp;
         }
         this.getEnumCmpModel = function (bucketRestriction) {
 
