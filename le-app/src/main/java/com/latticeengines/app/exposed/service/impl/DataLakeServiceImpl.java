@@ -1,13 +1,11 @@
 package com.latticeengines.app.exposed.service.impl;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -24,7 +22,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.app.exposed.service.AttributeCustomizationService;
 import com.latticeengines.app.exposed.service.DataLakeService;
 import com.latticeengines.app.exposed.util.ImportanceOrderingUtils;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
@@ -41,7 +38,6 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
-import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
@@ -55,8 +51,6 @@ import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 
 @Component("dataLakeService")
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS)
@@ -64,13 +58,8 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     private static final Logger log = LoggerFactory.getLogger(DataLakeServiceImpl.class);
 
-    private static final Scheduler scheduler = Schedulers.newParallel("data-lake-service");
-
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private AttributeCustomizationService attributeCustomizationService;
 
     @Inject
     private CacheManager cacheManager;
@@ -98,7 +87,7 @@ public class DataLakeServiceImpl implements DataLakeService {
             String[] tokens = str.split("\\|");
             BusinessEntity entity = BusinessEntity.valueOf(tokens[1]);
             String customerSpace = tokens[0];
-            return getServingMetadataForEntity(customerSpace, entity);
+            return getServingMetadataForEntity(customerSpace, entity).collectList().block();
         }, 100); //
     }
 
@@ -112,48 +101,42 @@ public class DataLakeServiceImpl implements DataLakeService {
 
     @Override
     public long getAttributesCount() {
-        List<ColumnMetadata> cms = getAllSegmentAttributes();
-        return cms == null ? 0 :cms.size();
+        return getAllSegmentAttributes().count().blockOptional().orElse(0L);
     }
 
     @Override
     public List<ColumnMetadata> getAttributes(Integer offset, Integer max) {
-        List<ColumnMetadata> cms = getAllSegmentAttributes();
-        Stream<ColumnMetadata> stream = cms.stream().sorted(Comparator.comparing(ColumnMetadata::getColumnId));
+        Flux<ColumnMetadata> stream = getAllSegmentAttributes();
         try {
             if (offset != null) {
                 stream = stream.skip(offset);
             }
             if (max != null) {
-                stream = stream.limit(max);
+                stream = stream.take(max);
             }
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_18143);
         }
-        List<ColumnMetadata> list = stream.collect(Collectors.toList());
-        personalize(list);
-        return list;
+        return stream.collectList().block();
     }
 
-    private List<ColumnMetadata> getAllSegmentAttributes() {
+    private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getTenantId();
-        return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES)
-                .parallel().runOn(scheduler)
-                .flatMap(entity -> Flux.fromIterable(_dataLakeService.getServingMetadataForEntity(tenantId, entity)))
-                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment))
-                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm))
-                .sequential().collectList().block();
+        return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
+                .flatMap(entity -> Flux.fromIterable(_dataLakeService.getCachedServingMetadataForEntity(tenantId, entity))) //
+                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
+                .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm));
     }
 
     @Override
     public List<ColumnMetadata> getAttributesInPredefinedGroup(ColumnSelection.Predefined predefined) {
         // Only return attributes for account now
         String tenantId = MultiTenantContext.getTenantId();
-        List<ColumnMetadata> cms = _dataLakeService.getServingMetadataForEntity(tenantId, BusinessEntity.Account);
+        List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
         return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
-        // Hack to limit attributes for talking points temporarily PLS-7065
+                // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
-                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
+                || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
                 .collect(Collectors.toList());
     }
 
@@ -218,11 +201,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    private void personalize(List<ColumnMetadata> list) {
-        attributeCustomizationService
-                .addFlags(list.stream().map(c -> (HasAttributeCustomizations) c).collect(Collectors.toList()));
-    }
-
     @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)")
     public TopNTree getTopNTree(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
@@ -233,7 +211,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         cubes.keySet().forEach(key -> {
             BusinessEntity entity = BusinessEntity.valueOf(key);
             String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-            List<ColumnMetadata> cms = _dataLakeService.getServingMetadataForEntity(tenantId, entity);
+            List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
             if (CollectionUtils.isNotEmpty(cms)) {
                 cmMap.put(key, cms);
             }
@@ -257,19 +235,30 @@ public class DataLakeServiceImpl implements DataLakeService {
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|metadata\", #customerSpace, #entity)", sync = true)
-    public List<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
-        if (entity == null) {
-            return Collections.emptyList();
-        }
-        try(PerformanceTimer timer = new PerformanceTimer()) {
-            List<ColumnMetadata> cms = servingStoreProxy.getDecoratedMetadata(customerSpace, entity).collectList().block();
-            if (BusinessEntity.Account.equals(entity) && CollectionUtils.isNotEmpty(cms)) {
-                ImportanceOrderingUtils.addImportanceOrdering(cms);
+    public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
+        return getServingMetadataForEntity(customerSpace, entity).collectList().block();
+    }
+
+    private Flux<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
+        Flux<ColumnMetadata> cms = Flux.empty();
+        if (entity != null) {
+            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, entity);
+            if (cms != null) {
+                if (BusinessEntity.Account.equals(entity)) {
+                    cms = ImportanceOrderingUtils.addImportanceOrdering(cms);
+                }
+                AtomicLong counter = new AtomicLong();
+                AtomicLong timer = new AtomicLong();
+                cms = cms.doOnSubscribe(s -> timer.set(System.currentTimeMillis())) //
+                        .doOnNext(cm -> counter.getAndIncrement()).doOnComplete(() -> {
+                            long duration = System.currentTimeMillis() - timer.get();
+                            long count = counter.get();
+                            String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity
+                                    + " in " + customerSpace + " TimeElapsed=" + duration + " msec.";
+                            log.info(msg);
+                        });
             }
-            int count = CollectionUtils.isEmpty(cms) ? 0 : cms.size();
-            String msg = "Retrieved " + count + " attributes from serving store proxy for " + entity + " in " + customerSpace;
-            timer.setTimerMessage(msg);
-            return cms;
         }
+        return cms;
     }
 }

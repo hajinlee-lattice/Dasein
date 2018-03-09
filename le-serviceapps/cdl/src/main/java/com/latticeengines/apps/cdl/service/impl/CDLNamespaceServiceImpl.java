@@ -13,13 +13,16 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 
 @Service("cdlNamespaceService")
 public class CDLNamespaceServiceImpl implements CDLNamespaceService {
@@ -28,6 +31,23 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
+
+    @Override
+    public void setMultiTenantContext(String tenantId) {
+        String fullId = CustomerSpace.parse(tenantId).toString();
+        String tenantIdInContext = MultiTenantContext.getTenantId();
+        if (StringUtils.isBlank(tenantIdInContext)
+                || !CustomerSpace.parse(tenantIdInContext).toString().equals(fullId)) {
+            Tenant tenant = tenantEntityMgr.findByTenantId(fullId);
+            if (tenant == null) {
+                throw new IllegalArgumentException("Cannot find tenant with id " + tenantId);
+            }
+            MultiTenantContext.setTenant(tenant);
+        }
+    }
 
     @Override
     public <T extends Serializable> Namespace2<String, T> prependTenantId(Namespace1<T> namespace1) {
@@ -56,13 +76,6 @@ public class CDLNamespaceServiceImpl implements CDLNamespaceService {
             throw new IllegalArgumentException("Business Entity " + businessEntity + " does not have a serving store role.");
         }
         return resolveTableRole(role, version);
-    }
-
-    @Override
-    public Namespace2<String, String> resolveServingStore(Namespace2<BusinessEntity, DataCollection.Version> namespace) {
-        BusinessEntity entity = namespace.getCoord1();
-        DataCollection.Version version = namespace.getCoord2();
-        return resolveServingStore(entity, version);
     }
 
     @Override

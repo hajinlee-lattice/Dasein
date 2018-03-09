@@ -27,7 +27,7 @@ public interface DataLakeService {
 
     AttributeStats getAttributeStats(BusinessEntity entity, String attribute);
 
-    List<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity);
+    List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity);
 
     List<ColumnMetadata> getAttributesInPredefinedGroup(Predefined predefined);
 

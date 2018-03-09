@@ -1,24 +1,31 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Api(value = "serving store", description = "REST resource for serving stores")
 @RestController
@@ -30,14 +37,47 @@ public class ServingStoreResource {
     @Inject
     private ServingStoreService servingStoreService;
 
+    @GetMapping(value = "/decoratedmetadata/count")
+    @ResponseBody
+    @ApiOperation(value = "Get decorated serving store metadata")
+    public Mono<Long> getDecoratedMetadataCount( //
+            @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
+            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups) {
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, groups, false);
+        return flux.count();
+    }
+
     @GetMapping(value = "/decoratedmetadata")
     @ResponseBody
     @ApiOperation(value = "Get decorated serving store metadata")
-    public Flux<ColumnMetadata> getDecoratedMetadata(@PathVariable String customerSpace,
-            @PathVariable BusinessEntity entity) {
+    public Flux<ColumnMetadata> getDecoratedMetadata( //
+            @PathVariable String customerSpace, @PathVariable BusinessEntity entity, //
+            @RequestParam(name = "groups", required = false) List<ColumnSelection.Predefined> groups, //
+            @RequestParam(name = "offset", required = false) Integer offset, //
+            @RequestParam(name = "limit", required = false) Integer limit //
+    ) {
+        boolean ordered = (offset != null || limit != null);
+        Flux<ColumnMetadata> flux = getFlux(customerSpace, entity, groups, ordered);
+        if (offset != null && offset > 0) {
+            flux = flux.skip(offset);
+        }
+        if (limit != null && limit > 0) {
+            flux = flux.take(limit);
+        }
+        return flux;
+    }
+
+    private Flux<ColumnMetadata> getFlux(String customerSpace, BusinessEntity entity,
+            List<ColumnSelection.Predefined> groups, boolean ordered) {
         AtomicLong timer = new AtomicLong();
         AtomicLong counter = new AtomicLong();
-        return servingStoreService.getFullyDecoratedMetadata(entity).sequential() //
+        Flux<ColumnMetadata> flux;
+        if (ordered) {
+            flux = servingStoreService.getFullyDecoratedMetadataInOrder(entity);
+        } else {
+            flux = servingStoreService.getFullyDecoratedMetadata(entity).sequential();
+        }
+        flux = flux //
                 .doOnSubscribe(s -> {
                     timer.set(System.currentTimeMillis());
                     log.info("Start serving decorated metadata for " + customerSpace + ":" + entity);
@@ -48,5 +88,14 @@ public class ServingStoreResource {
                     log.info("Finished serving decorated metadata for " + counter.get() + " attributes from "
                             + customerSpace + ":" + entity + " TimeElapsed=" + duration + " msec");
                 });
+        Set<ColumnSelection.Predefined> filterGroups = new HashSet<>();
+        if (CollectionUtils.isNotEmpty(groups)) {
+            filterGroups.addAll(groups);
+        }
+        if (CollectionUtils.isNotEmpty(filterGroups)) {
+            flux = flux.filter(cm -> filterGroups.stream().anyMatch(cm::isEnabledFor));
+        }
+        return flux;
     }
+
 }

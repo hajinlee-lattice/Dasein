@@ -13,9 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
+import com.latticeengines.apps.cdl.service.CDLNamespaceService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -23,7 +22,6 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 import reactor.core.publisher.Flux;
 
@@ -32,8 +30,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
 
     private static final Logger log = LoggerFactory.getLogger(RatingDisplayMetadataStoreImpl.class);
 
-    private final TenantEntityMgr tenantEntityMgr;
-
+    private final CDLNamespaceService cdlNamespaceService;
     private final RatingEngineService ratingEngineService;
 
     private static final List<String> SUFFIXES = new ArrayList<>();
@@ -46,8 +43,8 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
     }
 
     @Inject
-    public RatingDisplayMetadataStoreImpl(TenantEntityMgr tenantEntityMgr, RatingEngineService ratingEngineService) {
-        this.tenantEntityMgr = tenantEntityMgr;
+    public RatingDisplayMetadataStoreImpl(CDLNamespaceService cdlNamespaceService, RatingEngineService ratingEngineService) {
+        this.cdlNamespaceService = cdlNamespaceService;
         this.ratingEngineService = ratingEngineService;
     }
 
@@ -116,16 +113,7 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
     }
 
     private List<RatingEngineSummary> getRatingSummaries(String tenantId) {
-        String fullId = CustomerSpace.parse(tenantId).toString();
-        String tenantIdInContext = MultiTenantContext.getTenantId();
-        if (StringUtils.isBlank(tenantIdInContext)
-                || !CustomerSpace.parse(tenantIdInContext).toString().equals(fullId)) {
-            Tenant tenant = tenantEntityMgr.findByTenantId(fullId);
-            if (tenant == null) {
-                throw new IllegalArgumentException("Cannot find tenant with id " + tenantId);
-            }
-            MultiTenantContext.setTenant(tenant);
-        }
+        cdlNamespaceService.setMultiTenantContext(tenantId);
         List<RatingEngineSummary> engineSummaries = new ArrayList<>();
         try {
             engineSummaries = ratingEngineService.getAllRatingEngineSummaries();

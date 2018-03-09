@@ -2,7 +2,6 @@ package com.latticeengines.security.exposed.serviceruntime.exception;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.ModelAndView;
@@ -41,8 +40,12 @@ public abstract class InternalServiceExceptionHandler extends BaseExceptionHandl
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ModelAndView handleException(Exception e) {
         String stackTrace = ExceptionUtils.getStackTrace(e);
-        logError(e);
-        triggerCriticalAlert(e);
+        if (stackTrace.contains("org.apache.catalina.connector.ClientAbortException")) {
+            logWarning(e.getMessage());
+        } else {
+            logError(e);
+            triggerCriticalAlert(e);
+        }
         return getModelAndView(e, stackTrace);
     }
 

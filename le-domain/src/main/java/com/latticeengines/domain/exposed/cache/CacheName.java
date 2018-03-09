@@ -11,11 +11,11 @@ public enum CacheName {
     EntityRatingCountCache(Constants.EntityRatingCountCacheName), //
     RatingDataCache(Constants.RatingDataCacheName), //
     RatingCoverageCache(Constants.RatingCoverageCacheName), //
-    RatingSummariesCache(Constants.RatingSummariesCacheName), //
     AttrRepoCache(Constants.AttrRepoCacheName), //
     TimeTranslatorCache(Constants.TimeTranslatorCacheName), //
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
+    TableRoleMetadataCache(Constants.TableRoleMetadataCacheName), //
 
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
     DataCloudStatsCache(Constants.DataCloudStatsCacheName), //
@@ -46,7 +46,7 @@ public enum CacheName {
                 EntityDataCache, //
                 EntityRatingCountCache, //
                 RatingCoverageCache, //
-                RatingSummariesCache //
+                TableRoleMetadataCache
         };
     }
 
@@ -64,14 +64,14 @@ public enum CacheName {
         public static final String EntityRatingCountCacheName = "EntityRatingCountCache";
         public static final String RatingDataCacheName = "RatingDataCache";
         public static final String RatingCoverageCacheName = "RatingCoverageCache";
-        public static final String RatingSummariesCacheName = "RatingSummariesCache";
         public static final String JobsCacheName = "JobsCache";
         public static final String MetadataCacheName = "MetadataCache";
         public static final String SessionCacheName = "SessionCache";
         public static final String AttrRepoCacheName = "AttrRepoCache";
         public static final String TimeTranslatorCacheName = "TimeTranslatorCache";
         public static final String DataCloudCMCacheName = "DataCloudCMCacheM19";
-        public static final String DataCloudStatsCacheName = "DataCloudStatsCacheName";
+        public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
+        public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
     }
 }

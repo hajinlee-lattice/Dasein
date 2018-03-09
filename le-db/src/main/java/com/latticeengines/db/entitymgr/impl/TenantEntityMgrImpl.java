@@ -78,4 +78,5 @@ public class TenantEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Tenant, Lon
     public void update(Tenant tenant) {
         super.update(tenant);
     }
+
 }

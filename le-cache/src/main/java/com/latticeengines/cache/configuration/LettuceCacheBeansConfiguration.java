@@ -88,6 +88,9 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.SessionCacheName));
 
+        // =========================
+        // BEGIN: datalake service
+        // =========================
         RedisCacheConfiguration dataLakeCMCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
@@ -106,14 +109,20 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.DataLakeStatsCubesCache));
+        // =========================
+        // END: datalake service
+        // =========================
 
+
+        // =========================
+        // BEGIN: objectapi proxy
+        // =========================
         RedisCacheConfiguration entityCountCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityCountCacheName));
-
         RedisCacheConfiguration entityDataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
@@ -126,23 +135,25 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.EntityRatingCountCacheName));
-
         RedisCacheConfiguration ratingCoverageCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
                 .prefixKeysWith(getPrefix(CacheName.Constants.RatingCoverageCacheName));
+        // =====================
+        // END: objectapi proxy
+        // =====================
 
-        RedisCacheConfiguration ratingSummariesCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
+        RedisCacheConfiguration tableRoleMetadataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
-                .prefixKeysWith(getPrefix(CacheName.Constants.RatingSummariesCacheName));
+                .prefixKeysWith(getPrefix(CacheName.Constants.TableRoleMetadataCacheName));
 
         RedisCacheConfiguration dataCloudVersionCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
-                .entryTtl(Duration.ofDays(ttl)) //
+                .entryTtl(Duration.ofHours(1)) //
                 .disableCachingNullValues() //
                 .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
                 .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
@@ -158,7 +169,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.EntityDataCacheName, entityDataCacheConfig);
         cacheConfigs.put(CacheName.Constants.EntityRatingCountCacheName, entityRatingCountCacheConfig);
         cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
-        cacheConfigs.put(CacheName.Constants.RatingSummariesCacheName, ratingSummariesCacheConfig);
+        cacheConfigs.put(CacheName.Constants.TableRoleMetadataCacheName, tableRoleMetadataCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
 

@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Comparator;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,6 +57,11 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             }
         }
         return pFlux;
+    }
+
+    @Override
+    public Flux<ColumnMetadata> getFullyDecoratedMetadataInOrder(BusinessEntity entity) {
+        return getFullyDecoratedMetadata(entity).sorted(Comparator.comparing(ColumnMetadata::getAttrName));
     }
 
 }
