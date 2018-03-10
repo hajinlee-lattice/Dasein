@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlSplitConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
@@ -39,16 +40,18 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
     public static class Builder {
         private CustomEventMatchWorkflowConfiguration configuration = new CustomEventMatchWorkflowConfiguration();
 
-        private MatchCdlAccountWorkflowConfiguration.Builder matchAccountBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
+        private MatchCdlAccountWorkflowConfiguration.Builder matchAccountWithIdBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
+        private MatchCdlAccountWorkflowConfiguration.Builder matchAccountWithoutIdBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
+        private MatchCdlAccountConfiguration matchCdlAccount = new MatchCdlAccountConfiguration();
         private MatchCdlStepConfiguration matchCdlStep = new MatchCdlStepConfiguration();
         private MatchCdlSplitConfiguration split = new MatchCdlSplitConfiguration();
         private MatchCdlMergeConfiguration merge = new MatchCdlMergeConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("customEventMatchWorkflow", customerSpace,
-                    "customEventMatchWorkflow");
-
-            matchAccountBuilder.customer(customerSpace);
+            configuration.setCustomerSpace(customerSpace);
+            matchAccountWithIdBuilder.customer(customerSpace);
+            matchAccountWithoutIdBuilder.customer(customerSpace);
+            matchCdlAccount.setCustomerSpace(customerSpace);
             matchCdlStep.setCustomerSpace(customerSpace);
             split.setCustomerSpace(customerSpace);
             merge.setCustomerSpace(customerSpace);
@@ -56,7 +59,9 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            matchAccountBuilder.microServiceHostPort(microServiceHostPort);
+            matchAccountWithIdBuilder.microServiceHostPort(microServiceHostPort);
+            matchAccountWithoutIdBuilder.microServiceHostPort(microServiceHostPort);
+            matchCdlAccount.setMicroServiceHostPort(microServiceHostPort);
             matchCdlStep.setMicroServiceHostPort(microServiceHostPort);
             split.setMicroServiceHostPort(microServiceHostPort);
             merge.setMicroServiceHostPort(microServiceHostPort);
@@ -64,7 +69,9 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
-            matchAccountBuilder.internalResourceHostPort(internalResourceHostPort);
+            matchAccountWithIdBuilder.internalResourceHostPort(internalResourceHostPort);
+            matchAccountWithoutIdBuilder.internalResourceHostPort(internalResourceHostPort);
+            matchCdlAccount.setInternalResourceHostPort(internalResourceHostPort);
             matchCdlStep.setInternalResourceHostPort(internalResourceHostPort);
             split.setInternalResourceHostPort(internalResourceHostPort);
             merge.setInternalResourceHostPort(internalResourceHostPort);
@@ -72,7 +79,9 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder matchInputTableName(String tableName) {
-            matchAccountBuilder.matchInputTableName(tableName);
+            matchAccountWithIdBuilder.matchInputTableName(tableName);
+            matchAccountWithoutIdBuilder.matchInputTableName(tableName);
+            matchCdlAccount.setMatchInputTableName(tableName);
             matchCdlStep.setMatchInputTableName(tableName);
             return this;
         }
@@ -83,67 +92,83 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
-            matchAccountBuilder.matchRequestSource(matchRequestSource);
+            matchAccountWithIdBuilder.matchRequestSource(matchRequestSource);
+            matchAccountWithoutIdBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder matchQueue(String queue) {
-            matchAccountBuilder.matchQueue(queue);
+            matchAccountWithIdBuilder.matchQueue(queue);
+            matchAccountWithoutIdBuilder.matchQueue(queue);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            matchAccountBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            matchAccountWithIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            matchAccountWithoutIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
-            matchAccountBuilder.dataCloudVersion(dataCloudVersion);
+            matchAccountWithIdBuilder.dataCloudVersion(dataCloudVersion);
+            matchAccountWithoutIdBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
-            matchAccountBuilder.matchClientDocument(matchClientDocument);
+            matchAccountWithIdBuilder.matchClientDocument(matchClientDocument);
+            matchAccountWithoutIdBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
-            matchAccountBuilder.matchType(matchCommandType);
+            matchAccountWithIdBuilder.matchType(matchCommandType);
+            matchAccountWithoutIdBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
-            matchAccountBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            matchAccountWithIdBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            matchAccountWithoutIdBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
-            matchAccountBuilder.matchDestTables(destTables);
+            matchAccountWithIdBuilder.matchDestTables(destTables);
+            matchAccountWithoutIdBuilder.matchDestTables(destTables);
             return this;
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
-            matchAccountBuilder.excludePublicDomains(excludePublicDomains);
+            matchAccountWithIdBuilder.excludePublicDomains(excludePublicDomains);
+            matchAccountWithoutIdBuilder.excludePublicDomains(excludePublicDomains);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
-            matchAccountBuilder.excludeDataCloudAttrs(exclude);
+            matchAccountWithIdBuilder.excludeDataCloudAttrs(exclude);
+            matchAccountWithoutIdBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder skipDedupStep(boolean skipDedupStep) {
-            matchAccountBuilder.skipDedupStep(skipDedupStep);
+            matchAccountWithIdBuilder.skipDedupStep(skipDedupStep);
+            matchAccountWithoutIdBuilder.skipDedupStep(skipDedupStep);
             return this;
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
-            matchAccountBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            matchAccountWithIdBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            matchAccountWithoutIdBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
         public CustomEventMatchWorkflowConfiguration build() {
-            configuration.add(matchAccountBuilder.build());
+            configuration.setContainerConfiguration("customEventMatchWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
+            configuration.add(matchAccountWithIdBuilder.build("matchCdlWithAccountIdWorkflow"));
+            configuration.add(matchAccountWithoutIdBuilder.build("matchCdlWithoutAccountIdWorkflow"));
+            configuration.add(matchCdlAccount);
             configuration.add(matchCdlStep);
             configuration.add(split);
             configuration.add(merge);

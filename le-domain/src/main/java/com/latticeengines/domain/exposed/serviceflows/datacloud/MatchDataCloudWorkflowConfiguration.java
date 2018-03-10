@@ -32,6 +32,8 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public MatchDataCloudWorkflowConfiguration build() {
+            configuration.setContainerConfiguration("matchDataCloudWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(match);
             configuration.add(bulkMatchWorkflowConfigurationBuilder.build());
             configuration.add(matchResult);
@@ -40,8 +42,7 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("matchDataCloudWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
             bulkMatchWorkflowConfigurationBuilder.customer(customerSpace);
             matchResult.setCustomerSpace(customerSpace);

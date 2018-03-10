@@ -1,10 +1,13 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.MatchCdlWithAccountIdWorkflow;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.MatchCdlAccountWorkflowConfiguration;
@@ -20,12 +23,16 @@ public class MatchCdlWithAccountIdStartStep extends BaseWorkflowStep<MatchCdlSte
     @Autowired
     protected MetadataProxy metadataProxy;
 
+    @Inject
+    private MatchCdlWithAccountIdWorkflow accountIdWorkflow;
+
     @Override
     public void execute() {
         Table inputTable = getObjectFromContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID, Table.class);
         if (inputTable == null) {
             log.info("There's no table with account Id, skip the workflow.");
-            skipEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
+            skipEmbeddedWorkflow(getParentNamespace(), accountIdWorkflow.name(),
+                    MatchCdlAccountWorkflowConfiguration.class);
             return;
         }
         String path = inputTable.getExtracts().get(0).getPath();
@@ -34,13 +41,15 @@ public class MatchCdlWithAccountIdStartStep extends BaseWorkflowStep<MatchCdlSte
             log.info("There's no data with account Id, skip the workflow.");
             metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), inputTable.getName());
             removeObjectFromContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID);
-            skipEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
+            skipEmbeddedWorkflow(getParentNamespace(), accountIdWorkflow.name(),
+                    MatchCdlAccountWorkflowConfiguration.class);
             return;
         }
 
         putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, inputTable);
         putStringValueInContext(MATCH_FETCH_ONLY, "true");
-        enableEmbeddedWorkflow(getParentNamespace(), "", MatchCdlAccountWorkflowConfiguration.class);
+        enableEmbeddedWorkflow(getParentNamespace(), accountIdWorkflow.name(),
+                MatchCdlAccountWorkflowConfiguration.class);
 
     }
 

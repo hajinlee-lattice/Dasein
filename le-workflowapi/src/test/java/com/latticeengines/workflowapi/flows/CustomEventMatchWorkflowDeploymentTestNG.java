@@ -76,6 +76,8 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
     @AfterClass(groups = "workflow")
     public void after() throws Exception {
         metadataProxy.deleteTable(customerSpace.toString(), inputTable.getName());
+        metadataProxy.deleteTable(customerSpace.toString(), inputTableWithAccountId.getName());
+        metadataProxy.deleteTable(customerSpace.toString(), inputTableWithoutAccountId.getName());
         metadataProxy.deleteTable(customerSpace.toString(), accountTable.getName());
     }
 
@@ -93,21 +95,21 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
     }
 
     @Test(groups = "workflow", enabled = true)
-    public void customEventMatchAll() throws Exception {
-        customEventMatch(inputTable);
+    public void customEventMatchAllCdl() throws Exception {
+        customEventMatch(inputTable, ModelingType.CDL);
     }
 
     @Test(groups = "workflow", enabled = false)
     public void customEventMatchWithAccountId() throws Exception {
-        customEventMatch(inputTableWithAccountId);
+        customEventMatch(inputTableWithAccountId, ModelingType.CDL);
     }
 
     @Test(groups = "workflow", enabled = false)
     public void customEventMatchWithoutAccountId() throws Exception {
-        customEventMatch(inputTableWithoutAccountId);
+        customEventMatch(inputTableWithoutAccountId, ModelingType.CDL);
     }
 
-    private void customEventMatch(Table table) throws Exception {
+    private void customEventMatch(Table table, ModelingType modelingType) throws Exception {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         CustomEventMatchWorkflowConfiguration workflowConfig = new CustomEventMatchWorkflowConfiguration.Builder()
@@ -127,7 +129,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .skipDedupStep(true) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString()) //
                 .build();
-        workflowConfig.setModelingType(ModelingType.CDL);
+        workflowConfig.setModelingType(modelingType);
 
         workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);

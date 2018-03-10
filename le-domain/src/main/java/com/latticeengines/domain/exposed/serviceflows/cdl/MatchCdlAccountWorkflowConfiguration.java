@@ -17,6 +17,12 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
         MatchDataCloudWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public MatchCdlAccountWorkflowConfiguration build() {
+            return build("matchCdlAccountWorkflow");
+        }
+
+        public MatchCdlAccountWorkflowConfiguration build(String workflowName) {
+            configuration.setContainerConfiguration(workflowName, configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(matchCdlAccount);
             configuration.add(ldcConfigurationBuilder.build());
             return configuration;
