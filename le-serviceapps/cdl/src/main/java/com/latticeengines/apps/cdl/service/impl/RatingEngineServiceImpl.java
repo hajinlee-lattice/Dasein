@@ -3,10 +3,12 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
@@ -33,6 +36,7 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -74,6 +79,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
+
+    @Inject
+    private PlayEntityMgr playEntityMgr;
 
     @Inject
     private SegmentProxy segmentProxy;
@@ -214,6 +222,29 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
+    public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
+            String ratingEngineId) {
+        log.info(String.format("Attempting to find rating engine dependencies for Rating Engine %s", ratingEngineId));
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
+        if (ratingEngine == null) {
+            throw new LedpException(LedpCode.LEDP_40016, new String[] { ratingEngineId, customerSpace });
+        }
+
+        HashMap<RatingEngineDependencyType, List<String>> dependencyMap = new HashMap<>();
+
+        // Eventually should be something like this
+        // for (RatingEngineDependencyType type :
+        // RatingEngineDependencyType.values()) {
+        // dependencyMap.put(type, ratingEngine.getDependencies(type));
+        // }
+
+        dependencyMap.put(RatingEngineDependencyType.Play, playEntityMgr.findAllByRatingEnginePid(ratingEngine.getPid())
+                .stream().map(Play::getDisplayName).collect(Collectors.toList()));
+
+        return dependencyMap;
+    }
+
+    @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType) {
         if (ratingModel == null) {
@@ -249,7 +280,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel) {
+    public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+            String userEmail) {
         if (ratingModel instanceof AIModel) {
             AIModel aiModel = (AIModel) ratingModel;
             ApplicationId jobId = aiModel.getModelingJobId();
@@ -264,7 +296,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
                 parameters.setDescription(ratingEngine.getDisplayName());
                 parameters.setModuleName("Module");
-                parameters.setUserId(MultiTenantContext.getEmailAddress());
+                parameters.setUserId(userEmail);
                 parameters.setRatingEngineId(ratingEngine.getId());
                 parameters.setAiModelId(aiModel.getId());
                 parameters.setTargetFilterQuery(

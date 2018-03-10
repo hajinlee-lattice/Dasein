@@ -89,7 +89,7 @@ public class JsonUtils {
         }
         ObjectMapper objectMapper = getObjectMapper();
 
-        if (allowUnquotedFieldName == true)
+        if (allowUnquotedFieldName)
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
         objectMapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_CONTROL_CHARS, true);
         T deserializedSchema;
@@ -206,6 +206,20 @@ public class JsonUtils {
             output.put(convertValue(casted.getKey(), keyClazz), convertValue(casted.getValue(), valueClazz));
         }
 
+        return output;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <K, V> Map<K, List<V>> convertMapWithListValue(Map<?, List<?>> raw, Class<K> keyClazz,
+            Class<V> listValueClazz) {
+        if (raw == null) {
+            return null;
+        }
+        Map<K, List<V>> output = new HashMap<>();
+        for (Object entry : raw.entrySet()) {
+            Map.Entry<Object, List> casted = (Map.Entry<Object, List>) entry;
+            output.put(convertValue(casted.getKey(), keyClazz), convertList(casted.getValue(), listValueClazz));
+        }
         return output;
     }
 

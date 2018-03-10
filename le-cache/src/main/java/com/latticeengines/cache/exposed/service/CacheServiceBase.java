@@ -32,7 +32,7 @@ public abstract class CacheServiceBase implements CacheService {
         CacheType cacheType = CacheType.getByCacheType(cacheTypeStr);
 
         if (cacheType == null) {
-            throw new NullPointerException("Unknown cache type " + cacheType);
+            throw new NullPointerException("Unknown cache type " + cacheTypeStr);
         }
 
         return registry.get(cacheType);

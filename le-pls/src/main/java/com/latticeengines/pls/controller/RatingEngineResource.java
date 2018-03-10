@@ -2,6 +2,7 @@ package com.latticeengines.pls.controller;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -209,6 +211,16 @@ public class RatingEngineResource {
         return ratingEngineProxy.getAllNotes(tenant.getId(), ratingEngineId);
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/dependencies", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
+    public Map<RatingEngineDependencyType, List<String>> getRatingEngigneDependencies(
+            @PathVariable String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        log.info(String.format("get all ratingEngine dependencies for ratingEngineId=%s", ratingEngineId));
+        return ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngineId);
+    }
+
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Insert one note for a certain rating engine.")
@@ -267,6 +279,7 @@ public class RatingEngineResource {
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId);
+        return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId,
+                MultiTenantContext.getEmailAddress());
     }
 }

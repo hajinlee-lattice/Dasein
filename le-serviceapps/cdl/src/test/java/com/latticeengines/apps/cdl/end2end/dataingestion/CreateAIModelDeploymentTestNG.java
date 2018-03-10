@@ -39,7 +39,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(CreateAIModelDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1520452707820";
+    private static final String EXISTING_TENANT = "JLM1520552880910";
     private static final boolean EV_MODEL = false;
 
     private MetadataSegment testSegment;
@@ -87,7 +87,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     public void runTest() {
         log.info("Start modeling ...");
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
-                testRatingEngine.getId(), testAIModel.getId());
+                testRatingEngine.getId(), testAIModel.getId(), "bnguyen@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);

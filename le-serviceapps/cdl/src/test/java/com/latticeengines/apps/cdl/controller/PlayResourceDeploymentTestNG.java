@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -19,6 +20,7 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -133,6 +135,13 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         name = createdPlay1.getName();
         play = createdPlay1;
         assertPlay(createdPlay1);
+        Map<RatingEngineDependencyType, List<String>> dependencies = ratingEngineProxy
+                .getRatingEngineDependencies(tenant.getId(), ratingEngine1.getId());
+        Assert.assertNotNull(dependencies);
+        Assert.assertEquals(dependencies.size(), 1);
+        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
+        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 1);
+        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).get(0), play.getDisplayName());
 
         List<TalkingPointDTO> tps = getTestTalkingPoints(name);
         List<TalkingPointDTO> createTPResponse = talkingPointProxy.createOrUpdate(tps,
@@ -141,6 +150,12 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         Play createdPlay2 = playProxy.createOrUpdatePlay(tenant.getId(), createDefaultPlay());
         Assert.assertNotNull(createdPlay2);
+
+        dependencies = ratingEngineProxy.getRatingEngineDependencies(tenant.getId(), ratingEngine1.getId());
+        Assert.assertNotNull(dependencies);
+        Assert.assertEquals(dependencies.size(), 1);
+        Assert.assertNotNull(dependencies.get(RatingEngineDependencyType.Play));
+        Assert.assertEquals(dependencies.get(RatingEngineDependencyType.Play).size(), 2);
 
         playList = playProxy.getPlays(tenant.getId(), null, null);
         Assert.assertNotNull(playList);

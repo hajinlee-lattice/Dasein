@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -135,6 +136,16 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertList(list, RatingEngineNote.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
+            String ratingEngineId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/dependencies", shortenCustomerSpace(customerSpace),
+                ratingEngineId);
+        Map raw = get("Get all dependencies of the rating engine ", url, Map.class);
+
+        return JsonUtils.convertMapWithListValue(raw, RatingEngineDependencyType.class, String.class);
+    }
+
     public Boolean createNote(String customerSpace, String ratingEngineId, NoteParams noteParams) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/notes", shortenCustomerSpace(customerSpace),
                 ratingEngineId);
@@ -181,9 +192,11 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("getModelingQueryCount", url, ratingEngine, Long.class);
     }
 
-    public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId) {
-        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model",
-                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId);
+    public String modelRatingEngine(String customerSpace, String ratingEngineId, String ratingModelId,
+            String userEmail) {
+        String url = constructUrl(
+                URL_PREFIX + "/{ratingEngineId}/ratingmodels/{ratingModelId}/model?useremail={userEmail}",
+                shortenCustomerSpace(customerSpace), ratingEngineId, ratingModelId, userEmail);
         return post("modelRatingEngine", url, null, String.class);
     }
 

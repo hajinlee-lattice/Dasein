@@ -6,9 +6,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import com.latticeengines.apps.cdl.annotation.Action;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,12 +21,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.annotation.Action;
 import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.NoteParams;
@@ -40,7 +43,6 @@ import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
 import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
-import com.latticeengines.domain.exposed.security.Tenant;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -102,15 +104,13 @@ public class RatingEngineResource {
     @ApiOperation(value = "Register or update a Rating Engine")
     public RatingEngine createOrUpdateRatingEngine(@PathVariable String customerSpace,
             @RequestBody RatingEngine ratingEngine) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        if (tenant == null) {
-            log.warn("Tenant is null for the request.");
-            return null;
+        if (StringUtils.isEmpty(customerSpace)) {
+            throw new LedpException(LedpCode.LEDP_39002);
         }
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
-        return ratingEngineService.createOrUpdate(ratingEngine, tenant.getId());
+        return ratingEngineService.createOrUpdate(ratingEngine, CustomerSpace.parse(customerSpace).toString());
     }
 
     @PostMapping(value = "/with-action")
@@ -120,9 +120,7 @@ public class RatingEngineResource {
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
             @RequestBody RatingEngine ratingEngine) {
         RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine);
-        RatingEngineAndActionDTO ratingEngineAndActionDTO = new RatingEngineAndActionDTO(updatedRatingEngine,
-                ActionContext.getAction());
-        return ratingEngineAndActionDTO;
+        return new RatingEngineAndActionDTO(updatedRatingEngine, ActionContext.getAction());
     }
 
     @DeleteMapping(value = "/{ratingEngineId}")
@@ -164,9 +162,7 @@ public class RatingEngineResource {
             @RequestBody RatingModel ratingModel, @PathVariable String ratingEngineId,
             @PathVariable String ratingModelId) {
         RatingModel updatedRatingModel = updateRatingModel(customerSpace, ratingModel, ratingEngineId, ratingModelId);
-        RatingModelAndActionDTO ratingModelAndAction = new RatingModelAndActionDTO(updatedRatingModel,
-                ActionContext.getAction());
-        return ratingModelAndAction;
+        return new RatingModelAndActionDTO(updatedRatingModel, ActionContext.getAction());
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -183,6 +179,15 @@ public class RatingEngineResource {
     public List<RatingEngineNote> getAllNotes(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
         log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
         return ratingEngineNoteService.getAllByRatingEngineId(ratingEngineId);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/dependencies", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "Get all the dependencies for single rating engine via rating engine id.")
+    public Map<RatingEngineDependencyType, List<String>> getRatingEngigneDependencies(
+            @PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+        log.info(String.format("get all ratingEngineNotes by ratingEngineId=%s", ratingEngineId));
+        return ratingEngineService.getRatingEngineDependencies(customerSpace, ratingEngineId);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/notes", method = RequestMethod.POST)
@@ -273,11 +278,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String modelRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId,
-            @PathVariable String ratingModelId) {
+            @PathVariable String ratingModelId, @RequestParam(value = "useremail", required = true) String userEmail) {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 
-        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, ratingModel);
+        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, ratingModel, userEmail);
     }
 
     @PostMapping(value = "/coverage")
