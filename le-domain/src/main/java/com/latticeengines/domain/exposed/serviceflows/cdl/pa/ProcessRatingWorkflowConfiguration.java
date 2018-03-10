@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 
@@ -20,6 +21,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
 
         private ProcessRatingStepConfiguration processRatingStepConfiguration = new ProcessRatingStepConfiguration();
         private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklowConfigurationBuilder = new GenerateRatingWorkflowConfiguration.Builder();
+        private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportDataToRedshiftConfiguration exportDataToRedshiftConfiguration = new ExportDataToRedshiftConfiguration();
 
@@ -29,12 +31,14 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             generateRatingWorfklowConfigurationBuilder.customer(customerSpace);
             exportDataToRedshiftConfiguration.setCustomerSpace(customerSpace);
+            generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             generateRatingWorfklowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             exportDataToRedshiftConfiguration.setMicroServiceHostPort(microServiceHostPort);
+            generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -76,6 +80,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             configuration.add(processRatingStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
             configuration.add(generateRatingWorfklowConfigurationBuilder.build());
+            configuration.add(generateRatingStepConfiguration);
             configuration.add(exportDataToRedshiftConfiguration);
             return configuration;
         }
