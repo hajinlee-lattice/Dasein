@@ -154,7 +154,6 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
                 .podId(CamilleEnvironment.getPodId()) //
                 .microServiceHostPort(microServiceHostPort) //
                 .customer(mainTestCustomerSpace) //
-                .workflow("pmmlModelWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName("PMMLModel-" + System.currentTimeMillis()) //
                 .pmmlArtifactPath(pmmlHdfsPath) //

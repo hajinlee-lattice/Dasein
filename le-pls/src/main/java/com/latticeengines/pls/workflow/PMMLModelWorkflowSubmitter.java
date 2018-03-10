@@ -59,7 +59,6 @@ public class PMMLModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .podId(CamilleEnvironment.getPodId()) //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
-                .workflow("pmmlModelWorkflow") //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .modelName(modelName) //
                 .displayName(modelDisplayName) //

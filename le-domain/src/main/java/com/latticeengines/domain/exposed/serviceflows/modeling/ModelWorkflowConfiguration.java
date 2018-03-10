@@ -37,16 +37,9 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("modelWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             model.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
-            return this;
-        }
-
-        public Builder workflow(String workflowName) {
-            configuration.setWorkflowName(workflowName);
-            configuration.setName(configuration.getClass().getSimpleName());
             return this;
         }
 
@@ -174,6 +167,8 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
+            configuration.setContainerConfiguration("modelWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(model);
             configuration.add(export);
             return configuration;
