@@ -64,8 +64,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow", customerSpace,
-                    "ratingEngineImportMatchAndModelWorkflow");
+            configuration.setCustomerSpace(customerSpace);
             cdlMatchAndModelWorkflowBuilder.customer(customerSpace);
             matchDataCloudWorkflowBuilder.customer(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
@@ -326,6 +325,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
+            configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(cdlEventTableTupleFilter);
             configuration.add(cdlEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());
