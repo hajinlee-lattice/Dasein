@@ -265,6 +265,8 @@ public class CdlMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfig
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
 
+            configuration.setContainerConfiguration("cdlModelWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(match);
             configuration.add(model);
             configuration.add(export);
