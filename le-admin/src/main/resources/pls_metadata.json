@@ -8,7 +8,6 @@
         { "Node": "HG", "Data": {"Type": "number", "Required": false}},
         { "Node": "Bombora", "Data": {"Type": "number", "Required": false}}
       ]
-    },
-    { "Node": "InvokeTime", "Data": {"Type": "number", "Required": false}}
+    }
   ]
 }
