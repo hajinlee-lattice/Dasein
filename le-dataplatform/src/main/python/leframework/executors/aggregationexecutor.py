@@ -21,7 +21,6 @@ from leframework.model.states.percentilebucketgenerator import PercentileBucketG
 from leframework.model.states.pmmlmodelgenerator import PMMLModelGenerator
 from leframework.model.states.predictorgenerator import PredictorGenerator
 from leframework.model.states.provenancegenerator import ProvenanceGenerator
-from leframework.model.states.revenuemodelimportancesortinggenerator import RevenueModelImportanceSortingGenerator
 from leframework.model.states.revenuemodelqualitygenerator import RevenueModelQualityGenerator
 from leframework.model.states.revenuestatistics import RevenueStatistics
 from leframework.model.states.rocgenerator import ROCGenerator
@@ -38,7 +37,6 @@ logger = logging.getLogger(name='aggregationexecutor')
 
 
 class AggregationExecutor(Executor):
-
     def __init__(self, runtimeProperties=None):
         self.__runtimeProps = runtimeProperties
         if runtimeProperties is None:
@@ -74,9 +72,9 @@ class AggregationExecutor(Executor):
         stateMachine.addState(ScoreDerivationGenerator(), 19)
         stateMachine.addState(CrossValidationGenerator(), 20)
         stateMachine.addState(RevenueModelQualityGenerator(), 21)
-        stateMachine.addState(RevenueModelImportanceSortingGenerator(), 22)
-        stateMachine.addState(EnhancedSummaryGenerator(), 23)
-        stateMachine.addState(ModelPredictorGenerator(), 24)
+        # stateMachine.addState(RevenueModelImportanceSortingGenerator(), 22)
+        stateMachine.addState(EnhancedSummaryGenerator(), 22)
+        stateMachine.addState(ModelPredictorGenerator(), 23)
         stateMachine.addState(Finalize(), 100)
         return stateMachine
 
@@ -93,7 +91,6 @@ class AggregationExecutor(Executor):
     def writeToHdfs(self, hdfs, params):
         super(AggregationExecutor, self).writeToHdfs(hdfs, params)
 
-    
     @overrides(Executor)
     def preTransformData(self, training, test, params):
         schema = params["schema"]
