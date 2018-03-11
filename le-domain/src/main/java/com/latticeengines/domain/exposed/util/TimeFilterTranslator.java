@@ -73,7 +73,6 @@ public class TimeFilterTranslator {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private Pair<String, String> translateDateFilter(TimeFilter timeFilter) {
         ComparisonType operator = timeFilter.getRelation();
         List<Object> vals = timeFilter.getValues();
