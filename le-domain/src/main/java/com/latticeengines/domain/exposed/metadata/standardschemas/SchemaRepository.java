@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.metadata.standardschemas;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -1297,6 +1298,55 @@ public class SchemaRepository {
             return getMatchingAttributes(SchemaInterpretation.Account);
         return Collections.emptyList();
     }
+
+    public Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
+        Set<InterfaceName> sysAttrs = new HashSet<>();
+        // common
+        sysAttrs.add(InterfaceName.AccountId);
+        sysAttrs.add(InterfaceName.InternalId);
+        sysAttrs.add(InterfaceName.CDLCreatedTime);
+        sysAttrs.add(InterfaceName.CDLUpdatedTime);
+        // special
+        switch (entity) {
+            case Account:
+                sysAttrs.add(InterfaceName.LatticeAccountId);
+                sysAttrs.add(InterfaceName.CustomerParentAccountID);
+                break;
+            case Contact:
+                sysAttrs.add(InterfaceName.ContactId);
+                break;
+        }
+        return sysAttrs;
+    }
+
+
+    public Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
+        Set<InterfaceName> stdAttrs = new HashSet<>();
+        // only account and contact has standard attrs
+        if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {
+            // common
+            stdAttrs.add(InterfaceName.City);
+            stdAttrs.add(InterfaceName.State);
+            stdAttrs.add(InterfaceName.Country);
+            stdAttrs.add(InterfaceName.PostalCode);
+            stdAttrs.add(InterfaceName.PhoneNumber);
+            stdAttrs.add(InterfaceName.CompanyName);
+            stdAttrs.add(InterfaceName.DUNS);
+            stdAttrs.add(InterfaceName.Address_Street_1);
+            stdAttrs.add(InterfaceName.Address_Street_2);
+            // special
+            switch (entity) {
+                case Account:
+                    stdAttrs.add(InterfaceName.Website);
+                    break;
+                case Contact:
+                    stdAttrs.add(InterfaceName.Email);
+                    break;
+            }
+        }
+        return stdAttrs;
+    }
+
 
     private static class AttributeBuilder {
         private Attribute attribute = new Attribute();
