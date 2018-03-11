@@ -10,100 +10,107 @@
                 <h5>
                     Please enter your business calendar so we can build accurate time based analytics.
                 </h5>
-
-                <ul class="nth-day-picker" ng-init="nthMapping = nthMapping || {}">
-                    <li class="nth">
-                        <select
-                        class="form-control"
-                        name="nth"
-                        ng-model="nthMapping.nth"
-                        ng-change="vm.changeNth(nthMapping)"
-                        value="">
-                            <option value="" hidden disabled>nth</option>
-                            <option value="1st">1st</option>
-                            <option value="2nd">2nd</option>
-                            <option value="3rd">3rd</option>
-                            <option value="4th">4th</option>
-                        </select>
-                    </li>
-                    <li class="day">
-                        <select
-                        class="form-control"
-                        name="day"
-                        ng-model="nthMapping.day"
-                        ng-change="vm.changeNth(nthMapping)"
-                        value="">
-                            <option value="" hidden disabled>Day</option>
-                            <option value="Sunday">Sunday</option>
-                            <option value="Monday">Monday</option>
-                            <option value="Tuesday">Tuesday</option>
-                            <option value="Wednesday">Wednesday</option>
-                            <option value="Thursday">Thursday</option>
-                            <option value="Friday">Friday</option>
-                            <option value="Saturday">Saturday</option>
-                        </select>
-                    </li>
-                    <li>of</li>
-                    <li class="month">
-                        <select
-                        class="form-control"
-                        name="month"
-                        ng-model="nthMapping.month"
-                        ng-change="vm.changeNth(nthMapping)"
-                        value="">
-                            <option value="" hidden disabled>Month</option>
-                            <option value="January">January</option>
-                            <option value="February">February</option>
-                            <option value="March">March</option>
-                            <option value="April">April</option>
-                            <option value="May">May</option>
-                            <option value="June">June</option>
-                            <option value="July">July</option>
-                            <option value="August">August</option>
-                            <option value="September">September</option>
-                            <option value="October">October</option>
-                            <option value="November">November</option>
-                            <option value="December">December</option>
-                        </select>
-                    </li>
-                </ul>
+                
+                <div class="mode starting-day" ng-click="vm.changeMode('STARTING_DAY');" ng-class="{active: vm.mode == 'STARTING_DAY'}">
+                    <ul class="nth-day-picker" ng-init="vm.nthMapping = vm.nthMapping || {}">
+                        <li class="nth">
+                            <select
+                            class="form-control"
+                            name="nth"
+                            ng-model="vm.nthMapping.nth"
+                            ng-change="vm.changeNth(vm.nthMapping)"
+                            value="">
+                                <option value="" hidden disabled>nth</option>
+                                <option value="1st">1st</option>
+                                <option value="2nd">2nd</option>
+                                <option value="3rd">3rd</option>
+                                <option value="4th">4th</option>
+                            </select>
+                        </li>
+                        <li class="day">
+                            <select
+                            class="form-control"
+                            name="day"
+                            ng-model="vm.nthMapping.day"
+                            ng-change="vm.changeNth(vm.nthMapping)"
+                            value="">
+                                <option value="" hidden disabled>Day</option>
+                                <option value="SUN">Sunday</option>
+                                <option value="MON">Monday</option>
+                                <option value="TUE">Tuesday</option>
+                                <option value="WED">Wednesday</option>
+                                <option value="THU">Thursday</option>
+                                <option value="FRI">Friday</option>
+                                <option value="SAT">Saturday</option>
+                            </select>
+                        </li>
+                        <li>of</li>
+                        <li class="month">
+                            <select
+                            class="form-control"
+                            name="month"
+                            ng-model="vm.nthMapping.month"
+                            ng-change="vm.changeNth(vm.nthMapping)"
+                            value="">
+                                <option value="" hidden disabled>Month</option>
+                                <option value="JAN">January</option>
+                                <option value="FEB">February</option>
+                                <option value="MAR">March</option>
+                                <option value="APR">April</option>
+                                <option value="MAY">May</option>
+                                <option value="JUN">June</option>
+                                <option value="JUL">July</option>
+                                <option value="AUG">August</option>
+                                <option value="SEP">September</option>
+                                <option value="OCT">October</option>
+                                <option value="NOV">November</option>
+                                <option value="DEC">December</option>
+                            </select>
+                        </li>
+                    </ul>
+                </div>
 
                 <div class="fancy-or" data-content="or"></div>
 
-                <ul class="month-picker">
-                    <li><div ng-click="vm.selectDate('01-01')" ng-class="{active: vm.selectedDate == '01-01'}">Jan</div></li>
-                    <li><div ng-click="vm.selectDate('02-01')" ng-class="{active: vm.selectedDate == '02-01'}">Feb</div></li>
-                    <li><div ng-click="vm.selectDate('03-01')" ng-class="{active: vm.selectedDate == '03-01'}">Mar</div></li>
-                    <li><div ng-click="vm.selectDate('04-01')" ng-class="{active: vm.selectedDate == '04-01'}">Apr</div></li>
-                    <li><div ng-click="vm.selectDate('05-01')" ng-class="{active: vm.selectedDate == '05-01'}">May</div></li>
-                    <li><div ng-click="vm.selectDate('06-01')" ng-class="{active: vm.selectedDate == '06-01'}">Jun</div></li>
-                    <li><div ng-click="vm.selectDate('07-01')" ng-class="{active: vm.selectedDate == '07-01'}">Jul</div></li>
-                    <li><div ng-click="vm.selectDate('08-01')" ng-class="{active: vm.selectedDate == '08-01'}">Aug</div></li>
-                    <li><div ng-click="vm.selectDate('09-01')" ng-class="{active: vm.selectedDate == '09-01'}">Sep</div></li>
-                    <li><div ng-click="vm.selectDate('10-01')" ng-class="{active: vm.selectedDate == '10-01'}">Oct</div></li>
-                    <li><div ng-click="vm.selectDate('11-01')" ng-class="{active: vm.selectedDate == '11-01'}">Nov</div></li>
-                    <li><div ng-click="vm.selectDate('12-01')" ng-class="{active: vm.selectedDate == '12-01'}">Dec</div></li>
-                </ul>
+                <div class="mode starting-date" ng-click="vm.changeMode('STARTING_DATE'); " ng-class="{active: vm.mode == 'STARTING_DATE'}">
+                    <ul class="month-picker">
+                        <li><div ng-click="vm.selectDate('01-01')" ng-class="{active: vm.selectedDate == '01-01'}">Jan</div></li>
+                        <li><div ng-click="vm.selectDate('02-01')" ng-class="{active: vm.selectedDate == '02-01'}">Feb</div></li>
+                        <li><div ng-click="vm.selectDate('03-01')" ng-class="{active: vm.selectedDate == '03-01'}">Mar</div></li>
+                        <li><div ng-click="vm.selectDate('04-01')" ng-class="{active: vm.selectedDate == '04-01'}">Apr</div></li>
+                        <li><div ng-click="vm.selectDate('05-01')" ng-class="{active: vm.selectedDate == '05-01'}">May</div></li>
+                        <li><div ng-click="vm.selectDate('06-01')" ng-class="{active: vm.selectedDate == '06-01'}">Jun</div></li>
+                        <li><div ng-click="vm.selectDate('07-01')" ng-class="{active: vm.selectedDate == '07-01'}">Jul</div></li>
+                        <li><div ng-click="vm.selectDate('08-01')" ng-class="{active: vm.selectedDate == '08-01'}">Aug</div></li>
+                        <li><div ng-click="vm.selectDate('09-01')" ng-class="{active: vm.selectedDate == '09-01'}">Sep</div></li>
+                        <li><div ng-click="vm.selectDate('10-01')" ng-class="{active: vm.selectedDate == '10-01'}">Oct</div></li>
+                        <li><div ng-click="vm.selectDate('11-01')" ng-class="{active: vm.selectedDate == '11-01'}">Nov</div></li>
+                        <li><div ng-click="vm.selectDate('12-01')" ng-class="{active: vm.selectedDate == '12-01'}">Dec</div></li>
+                    </ul>
 
-                <div id="datepicker"></div>
+                    <div id="datepicker"></div>
+                </div>
 
-                <div class="quarter-picker-container">
+                <div class="quarter-picker-container" ng-class="{disabled: !vm.calendar}">
                     <h5>Which month per quarter has 5 weeks?</h5>
                     <ul class="quarter-picker">
-                        <li><div ng-click="vm.selectQuarter('1st')" ng-class="{active: vm.selectedQuarter == '1st'}">1st</div></li>
-                        <li><div ng-click="vm.selectQuarter('2nd')" ng-class="{active: vm.selectedQuarter == '2nd'}">2nd</div></li>
-                        <li><div ng-click="vm.selectQuarter('3rd')" ng-class="{active: vm.selectedQuarter == '3rd'}">3rd</div></li>
+                        <li><div ng-click="vm.selectQuarter('1')" ng-class="{active: vm.selectedQuarter == '1'}">1st</div></li>
+                        <li><div ng-click="vm.selectQuarter('2')" ng-class="{active: vm.selectedQuarter == '2'}">2nd</div></li>
+                        <li><div ng-click="vm.selectQuarter('3')" ng-class="{active: vm.selectedQuarter == '3'}">3rd</div></li>
                     </ul>
                 </div>
-            </div>
 
+                <div class="note">
+                    Note: {{vm.note}}
+                </div>
+            </div>
             <hr />
             <div class="container section-actions row form-actions">
                 <div class="pull-left">
                     <button class="button white-button block-button" ui-sref="home.import.entry.product_hierarchy">Back</button>
                 </div>
                 <div class="pull-right">
-                    <button class="button white-button" ng-disabled="!vm.calendar" ui-sref="home.import.data.product_hierarchy.ids">Next</button>
+                    <button class="button blue-button" ng-disabled="!vm.calendar || (vm.calendar && vm.calendar.mode !== vm.mode)" ng-click="vm.saveCalendar()">Next</button>
                 </div>
             </div>
         </div>

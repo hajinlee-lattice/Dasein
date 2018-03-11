@@ -639,7 +639,48 @@ angular.module('lp.import')
 
         this.getCalendar = function() {
             var deferred = $q.defer();
-            deferred.resolve(null);
+            $http({
+                method: 'GET',
+                url: '/pls/datacollection/periods/calendar',
+                headers: { 'Content-Type': 'application/json' }
+            }).then(function(result) {
+                deferred.resolve(result.data);
+            });
+
+            return deferred.promise;
+        };
+
+        this.validateCalendar = function(data) {
+            var deferred = $q.defer();
+            $http({
+                method: 'POST',
+                url: '/pls/datacollection/periods/calendar/validate',
+                data: data,
+                headers: { 'Content-Type': 'application/json' }
+            }).success(function(result, status) {
+                deferred.resolve(result);
+            }).error(function(error, status) {
+                console.log(error);
+                deferred.resolve(error);
+            });
+
+            return deferred.promise;
+        };
+
+        this.saveCalendar = function(data) {
+            var deferred = $q.defer();
+            $http({
+                method: 'POST',
+                url: '/pls/datacollection/periods/calendar',
+                data: data,
+                headers: { 'Content-Type': 'application/json' }
+            }).success(function(result, status) {
+                deferred.resolve(result);
+            }).error(function(error, status) {
+                console.log(error);
+                deferred.resolve(error);
+            });
+
             return deferred.promise;
         };
     });

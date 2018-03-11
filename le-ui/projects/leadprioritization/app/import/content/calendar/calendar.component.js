@@ -1,10 +1,12 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, Calendar, FieldDocument
+    $state, $stateParams, $scope, $timeout, NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument
 ) {
     var vm = this,
-        preventUnload = false,
+        preventUnload = true,
         year = new Date().getFullYear(),
+        months = ['January','February','March','April','May','June','July','August','September','October','November','December'],
+        weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
         picker;
 
     if(preventUnload) {
@@ -22,7 +24,9 @@ angular.module('lp.import.calendar', [])
     angular.extend(vm, {
         calendar: Calendar,
         selectedDate: '01-01',
-        selectedQuarter: '1st'
+        selectedQuarter: '1',
+        mode: '',
+        calendarStore: {}
     });
 
     function initDatePicker() {
@@ -38,17 +42,18 @@ angular.module('lp.import.calendar', [])
             i18n: { // if you have any of these you have to have them all or it will error out
                 previousMonth: 'Previous Month',
                 nextMonth: 'Next Month',
-                months: ['January','February','March','April','May','June','July','August','September','October','November','December'],
-                weekdays: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
+                months: months,
+                weekdays: weekdays,
                 weekdaysShort : ['S','M','T','W','T','F','S']
             },
             onSelect: function(date) {
                 selectedDateObj = {
-                        day: date.getDate(),
-                        month: date.getMonth() + 1,
-                        year: date.getFullYear()
+                        mode: "STARTING_DATE",
+                        startingDate: months[(date.getMonth() + 1)].substring(0,3).toUpperCase() + "-" + NumberUtility.PadNumber(date.getDate(),2),
+                        evaluationYear: date.getFullYear(), 
+                        longerMonth: vm.selectedQuarter,
+                        
                     };
-                console.log(selectedDateObj);
                 vm.setCalendar(selectedDateObj);
             }
         });
@@ -56,7 +61,7 @@ angular.module('lp.import.calendar', [])
         picker.setDate('01-01-'+year, true); // second param prevents onSelect callback
     }
 
-    vm.init = function() {  
+    vm.init = function() {
         if(preventUnload && !FieldDocument) {
             $state.go('home.import.entry.product_hierarchy');
             return false;
@@ -71,16 +76,59 @@ angular.module('lp.import.calendar', [])
 
     vm.selectQuarter = function(quarter) {
         vm.selectedQuarter = quarter;
+        if(vm.calendar && vm.calendar.longerMonth) {
+            vm.calendar.longerMonth = vm.selectedQuarter;
+            ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
+                vm.note = result.note;
+            });
+        }
+    }
+
+    vm.changeMode = function(mode) {
+        if(vm.mode !== mode) {
+            vm.mode = mode;
+            vm.note = '';
+            if(vm.calendarStore[mode]) {
+                vm.setCalendar(vm.calendarStore[mode]);
+            }
+        }
     }
 
     vm.changeNth = function(nthMapping) {
-        console.log(nthMapping);
+        var nth = nthMapping.nth || '',
+            day = nthMapping.day || '',
+            month = nthMapping.month || '',
+            selectedNthObj = {
+                mode: "STARTING_DAY",
+                startingDay: nth + "-" + day + "-" + month,
+                longerMonth: vm.selectedQuarter
+            }
+
+        if(nth && day && month) {
+            vm.setCalendar(selectedNthObj)
+        }
     }
 
     vm.setCalendar = function(obj) {
         ImportWizardStore.setCalendar(obj);
         ImportWizardStore.getCalendar().then(function(result) {
             vm.calendar = result;
+            vm.calendarStore[vm.mode] = result;
+            ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
+                vm.note = (result && result.note ? result.note : '');
+            });
+        });
+    }
+
+    vm.saveCalendar = function() {
+        vm.calendar.longerMonth = vm.selectedQuarter;
+        ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
+            if(!result.errorCode) {
+                //console.log('valid calendar, 10/10 would save');
+                ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
+                    $state.go("home.import.data.product_hierarchy.ids");
+                });
+            }
         });
     }
 

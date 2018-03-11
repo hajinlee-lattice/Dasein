@@ -59,5 +59,11 @@ angular.module('mainApp.appCommon.utilities.NumberUtility', [])
 
         return 0;
     };
-    
+
+    this.PadNumber = function(number, width, charcter) {
+        var charcter = charcter || '0',
+            number = number + '';
+
+        return number.length >= width ? number : new Array(width - number.length + 1).join(charcter) + number;
+    }
 });
