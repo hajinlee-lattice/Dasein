@@ -52,7 +52,12 @@ public class PagerDutyServiceImpl implements PagerDutyService {
 
     @PostConstruct
     public void postConstruct() {
-        this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
+        if (alertServiceEnabled) {
+            this.serviceApiKey = PLS_MODELINGPLATFORM_SCORING_SERVICEAPI_KEY;
+        } else {
+            this.serviceApiKey = TEST_SERVICEAPI_KEY;
+        }
+
         List<ClientHttpRequestInterceptor> interceptors = new ArrayList<>();
         List<BasicNameValuePair> headers = this.getHeaders();
         for (BasicNameValuePair header : headers) {
