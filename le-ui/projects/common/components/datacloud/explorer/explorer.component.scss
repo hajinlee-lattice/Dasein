@@ -1808,6 +1808,37 @@
             }
         }
     }
+
+    .category-lattice-rating {
+        &.color {
+            color: #2E6099;
+        }
+        &.border {
+            border-color: #2E6099;
+        }
+        &.border-top {
+            border-top-color: #2E6099;
+        }
+        &.background:not(.active):hover,
+        &.active.active-glow {
+            @include box-shadow(54,126,208);
+        }
+        &.background:not(.active):hover > span,
+        &.active.active-glow > span {
+            border-color: #2E6099;
+        }
+        .background-color {
+            background-color: #2E6099;
+        }
+        &.box-inner {
+            li.attribute .column.checkspace i {
+                color: #2E6099;
+            }
+            li.attribute:hover {
+                background-color: #2E6099 !important;
+            }
+        }
+    }
     .disabled-grayout {
         .color {
             color: gray;

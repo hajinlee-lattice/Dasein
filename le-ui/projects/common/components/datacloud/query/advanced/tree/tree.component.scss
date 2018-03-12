@@ -565,6 +565,16 @@ div.advanced-query-builder {
                 }
             }
 
+            &.category-lattice_rating {
+                &,
+                &.editing .query-section-type-dotline,
+                &.editing .query-section-item-label,
+                &.editing .query-section-item-content,
+                &.editing .query-section-item-records {
+                    border-color: #26649b;
+                }
+            }
+
         }
 
         .query-section-item-box {
