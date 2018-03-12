@@ -27,43 +27,43 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findAll() {
         return super.findAll();
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(WorkflowJob workflowJob) {
         super.create(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob findByApplicationId(String applicationId) {
         return workflowJobDao.findByApplicationId(applicationId);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob findByWorkflowId(long workflowId) {
         return workflowJobDao.findByWorkflowId(workflowId);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds) {
         return workflowJobDao.findByWorkflowIds(workflowIds);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
         return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
                                                                    Long parentJobId) {
         if (workflowIds != null && types != null && parentJobId != null) {
@@ -84,19 +84,19 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds) {
         return workflowJobDao.findByTenantAndWorkflowIds(tenant, workflowIds);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW)
     public void updateWorkflowJob(WorkflowJob workflowJob) {
         workflowJobDao.update(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
                                             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus) {
         workflowJob.setStatus(JobStatus.fromString(yarnJobStatus.getStatus().name(), yarnJobStatus.getState()).name());
@@ -106,37 +106,37 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateWorkflowJobStatus(WorkflowJob workflowJob) {
         workflowJobDao.updateStatus(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateParentJobId(WorkflowJob workflowJob) {
         workflowJobDao.updateParentJobId(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void registerWorkflowId(WorkflowJob workflowJob) {
         workflowJobDao.registerWorkflowId(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateReport(WorkflowJob workflowJob) {
         workflowJobDao.updateReport(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateOutput(WorkflowJob workflowJob) {
         workflowJobDao.updateOutput(workflowJob);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateErrorDetails(WorkflowJob workflowJob) {
         workflowJobDao.updateErrorDetails(workflowJob);
     }

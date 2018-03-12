@@ -1,20 +1,22 @@
 package com.latticeengines.workflow.entitymanager.impl;
 
+import javax.annotation.Resource;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.hibernate.SessionFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 
 @Aspect
 public class WorkflowMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
-    @Autowired
+    @Resource(name = "sessionFactory")
     private SessionFactory sessionFactory;
 
     @Autowired

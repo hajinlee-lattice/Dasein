@@ -30,6 +30,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private int minPoolSize = -1;
     private int maxPoolSize = -1;
     private int acquireIncrement = -1;
+    private int maxIdleTime = -1;
 
     @Override
     public DataSource getObject() throws Exception {
@@ -79,8 +80,10 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setAcquireIncrement(acquireIncrement);
 
         cpds.setCheckoutTimeout(60000);
-        cpds.setMaxIdleTime(30);
-        cpds.setMaxIdleTimeExcessConnections(10);
+        int maxIdleTime = this.maxIdleTime >= 0 ? this.maxIdleTime : 30;
+        cpds.setMaxIdleTime(maxIdleTime);
+        int maxIdleTimeExcessConnections = this.maxIdleTime >= 0 ? this.maxIdleTime : 10;
+        cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
 
         Boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
         if (enableDebugSlowSql) {
@@ -172,5 +175,13 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setEnableDebugSlowSql(Boolean enableDebugSlowSql) {
         this.enableDebugSlowSql = enableDebugSlowSql;
+    }
+
+    public int getMaxIdleTime() {
+        return maxIdleTime;
+    }
+
+    public void setMaxIdleTime(int maxIdleTime) {
+        this.maxIdleTime = maxIdleTime;
     }
 }

@@ -16,12 +16,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.dataplatform.JobStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -117,8 +117,9 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
         workflowJob2.setType("type2");
         workflowJobEntityMgr.create(workflowJob2);
 
+        MultiTenantContext.setTenant(tenant2);
         List<WorkflowJob> jobs = workflowJobEntityMgr.findAll();
-        assertEquals(jobs.size(), 4);
+        assertEquals(jobs.size(), 1);
 
         MultiTenantContext.setTenant(tenant1);
         jobs = workflowJobEntityMgr.findAll();
@@ -136,7 +137,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
 
         MultiTenantContext.setTenant(null);
         jobs = workflowJobEntityMgr.findAll();
-        assertEquals(jobs.size(), 4);
+        assertTrue(jobs.size() >= 4);
         applicationIds = jobs.stream().map(WorkflowJob::getApplicationId).collect(Collectors.toList());
         assertTrue(applicationIds.contains("application_10000"));
         assertTrue(applicationIds.contains("application_10001"));

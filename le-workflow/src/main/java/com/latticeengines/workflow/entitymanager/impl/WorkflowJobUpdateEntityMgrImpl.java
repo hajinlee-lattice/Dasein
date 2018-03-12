@@ -2,10 +2,10 @@ package com.latticeengines.workflow.entitymanager.impl;
 
 import java.util.List;
 
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -26,25 +26,25 @@ public class WorkflowJobUpdateEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJo
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void create(WorkflowJobUpdate workflowJobUpdate) {
         super.create(workflowJobUpdate);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJobUpdate findByWorkflowPid(Long workflowPid) {
         return workflowJobUpdateDao.findByWorkflowPid(workflowPid);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<WorkflowJobUpdate> findByLastUpdateTime(Long lastUpdateTime) {
         return workflowJobUpdateDao.findByLastUpdateTime(lastUpdateTime);
     }
 
     @Override
-    @Transactional(propagation = Propagation.REQUIRED)
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateLastUpdateTime(WorkflowJobUpdate workflowJobUpdate) {
         workflowJobUpdateDao.updateLastUpdateTime(workflowJobUpdate);
     }
