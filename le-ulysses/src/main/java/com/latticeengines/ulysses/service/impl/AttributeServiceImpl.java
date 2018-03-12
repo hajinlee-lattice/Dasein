@@ -63,7 +63,7 @@ public class AttributeServiceImpl implements AttributeService {
                 cdlExternalSystemProxy.getExternalSystemByType(customerSpace.toString(),
                         CDLExternalSystemType.valueOf(type));
         List<PrimaryField> primaryFields = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(externalSystemMappings)) {
+        if (CollectionUtils.isNotEmpty(externalSystemMappings)) {
             externalSystemMappings.forEach(externalSystemMapping ->
                     primaryFields.add(new PrimaryField(externalSystemMapping.getFieldName(),
                             externalSystemMapping.getFieldType(), externalSystemMapping.getDisplayName())));
@@ -76,7 +76,7 @@ public class AttributeServiceImpl implements AttributeService {
         Map<String, List<CDLExternalSystemMapping>> externalSystemMappings =
                 cdlExternalSystemProxy.getExternalSystemMap(customerSpace.toString());
         Map<String, List<PrimaryField>> primaryFieldsMap = new HashMap<>();
-        if (!MapUtils.isEmpty(externalSystemMappings)) {
+        if (MapUtils.isNotEmpty(externalSystemMappings)) {
             for (Map.Entry<String, List<CDLExternalSystemMapping>> systemEntry : externalSystemMappings.entrySet()) {
                 List<PrimaryField> primaryFields= new ArrayList<>();
                 systemEntry.getValue().forEach(system -> primaryFields.add(new PrimaryField(system.getFieldName(),
