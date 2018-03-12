@@ -50,7 +50,7 @@ public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTran
         if (CollectionUtils.isNotEmpty(config.getCompositeKeys())) {
             groupByKey = buildNewIdColumn(config, sources);
         }
-        //ConsolidateDataHelper consolidateHelper = new ConsolidateDataHelper();
+
         dedupeSource(config, sources, groupByKey);
         if (config.isMergeOnly()) {
             addIdColumn(sources, UUID);

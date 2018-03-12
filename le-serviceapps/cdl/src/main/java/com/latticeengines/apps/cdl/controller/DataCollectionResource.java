@@ -100,6 +100,21 @@ public class DataCollectionResource {
         }
     }
 
+    @GetMapping(value = "/alltables")
+    @ResponseBody
+    @ApiOperation(value = "Get the default data collection")
+    public List<Table> getTables(@PathVariable String customerSpace,
+            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        List<Table> tables = dataCollectionService.getTables(customerSpace, null, role, version);
+        if (tables == null || tables.isEmpty()) {
+            return null;
+        } else {
+            return tables;
+        }
+    }
+
     @GetMapping(value = "/tablenames")
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
@@ -147,6 +162,18 @@ public class DataCollectionResource {
             @RequestParam(value = "version") DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         dataCollectionService.upsertTable(customerSpace, null, tableName, role, version);
+        return SimpleBooleanResponse.successResponse();
+    }
+
+    @PostMapping(value = "/tables/multi/{tableNames}")
+    @ResponseBody
+    @ApiOperation(value = "Create or insert tables into the collection")
+    public SimpleBooleanResponse upsertTables(@PathVariable String customerSpace, //
+            @PathVariable String[] tableNames, //
+            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "version") DataCollection.Version version) {
+        customerSpace = CustomerSpace.parse(customerSpace).toString();
+        dataCollectionService.upsertTables(customerSpace, null, tableNames, role, version);
         return SimpleBooleanResponse.successResponse();
     }
 

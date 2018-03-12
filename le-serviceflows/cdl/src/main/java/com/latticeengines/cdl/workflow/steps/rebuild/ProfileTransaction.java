@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -52,6 +53,7 @@ import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.Transformati
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 @Component(ProfileTransaction.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -64,8 +66,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private CustomerSpace customerSpace;
     private DataCollection.Version inactive;
     private DataCollection.Version active;
-    private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep;
-    private Table rawTable, dailyTable, periodTable;
+    private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep, mergePeriodStep;
+    private Table rawTable, dailyTable;
+    private List<Table> periodTables;
     private Map<String, List<Product>> productMap;
 
     private String sortedDailyTablePrefix;
@@ -75,7 +78,12 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     private DataCollectionProxy dataCollectionProxy;
 
     @Inject
+    private PeriodProxy periodProxy;
+
+    @Inject
     private Configuration yarnConfiguration;
+
+    private List<PeriodStrategy> periodStrategies;
 
     @Override
     protected BusinessEntity getEntity() {
@@ -92,12 +100,16 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         if (rawTable == null) {
             throw new RuntimeException("Cannot find raw transaction table.");
         }
+        
+        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
+
 
         buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
         buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
+
         dailyTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedDailyTransaction, inactive);
-        periodTable = dataCollectionProxy.getTable(customerSpace.toString(),
+        periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
 
         sortedDailyTablePrefix = TableRoleInCollection.AggregatedTransaction.name();
@@ -123,40 +135,53 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     private void buildPeriodStore(TableRoleInCollection role) {
         SchemaInterpretation schema;
+        List<String> tablePrefixes = new ArrayList<>();
         switch (role) {
         case ConsolidatedDailyTransaction:
             schema = SchemaInterpretation.TransactionDailyAggregation;
+            tablePrefixes.add("");
             break;
         case ConsolidatedPeriodTransaction:
             schema = SchemaInterpretation.TransactionPeriodAggregation;
+            periodStrategies.forEach(strategy -> {
+                tablePrefixes.add(PeriodStrategyUtils.getTablePrefixFromPeriodStrategy(strategy));
+            });
             break;
         default:
             throw new UnsupportedOperationException(role + " is not a supported period store.");
         }
 
-        Table table = SchemaRepository.instance().getSchema(schema);
-        String tableName = NamingUtils.timestamp(role.name());
-        table.setName(tableName);
-        String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "").toString();
+        List<String> tableNames = new ArrayList<>();
+        for (String tablePrefix : tablePrefixes) {
+            Table table = SchemaRepository.instance().getSchema(schema);
+            String tableName = tablePrefix + NamingUtils.timestamp(role.name());
+            table.setName(tableName);
+            String hdfsPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")
+                    .toString();
 
-        try {
-            log.info("Initialize period store " + hdfsPath + "/" + tableName);
-            HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + tableName);
-        } catch (Exception e) {
-            log.error("Failed to initialize period store " + hdfsPath + "/" + tableName);
-            throw new RuntimeException("Failed to create period store " + role);
+            try {
+                log.info("Initialize period store " + hdfsPath + "/" + tableName);
+                HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + tableName);
+            } catch (Exception e) {
+                log.error("Failed to initialize period store " + hdfsPath + "/" + tableName);
+                throw new RuntimeException("Failed to create period store " + role);
+            }
+
+            Extract extract = new Extract();
+            extract.setName("extract_target");
+            extract.setExtractionTimestamp(DateTime.now().getMillis());
+            extract.setProcessedRecords(1L);
+            extract.setPath(hdfsPath + "/" + tableName + "/");
+            table.setExtracts(Collections.singletonList(extract));
+            metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+            tableNames.add(table.getName());
         }
 
-        Extract extract = new Extract();
-        extract.setName("extract_target");
-        extract.setExtractionTimestamp(DateTime.now().getMillis());
-        extract.setProcessedRecords(1L);
-        extract.setPath(hdfsPath + "/" + tableName + "/");
-        table.setExtracts(Collections.singletonList(extract));
-        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
-        dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), role, inactive);
-        log.info("Upsert table " + table.getName() + " to role " + role + "version" + inactive);
+
+        dataCollectionProxy.upsertTables(customerSpace.toString(), tableNames, role, inactive);
+        log.info("Upsert tables " + String.join(",", tableNames) + " to role " + role + "version" + inactive);
     }
+
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -185,27 +210,44 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         periodedStep = 1;
         dailyAgrStep = 2;
         dayPeriodStep = 3;
-        periodAgrStep = 5;
-        periodsStep = 6;
 
-        TransformationStepConfig productAgr = rollupProduct(productMap);
-        TransformationStepConfig perioded = addPeriod();
-        TransformationStepConfig dailyAgr = aggregateDaily();
-        TransformationStepConfig dayPeriods = collectDays();
+        TransformationStepConfig productAgr = rollupProduct(productMap); // productAgrStep
+        TransformationStepConfig perioded = addPeriod(productAgrStep, null); // periodedStep
+        TransformationStepConfig dailyAgr = aggregateDaily(); // dailyAgrStep
+        TransformationStepConfig dayPeriods = collectDays(); // dayPeriodStep
         TransformationStepConfig updateDaily = updateDailyStore();
-        TransformationStepConfig periodAgr = aggregatePeriods();
-        TransformationStepConfig periods = collectPeriods();
-        TransformationStepConfig updatePeriod = updatePeriodStore();
-        TransformationStepConfig sortDaily = sort(customerSpace, dailyTable, sortedDailyTablePrefix);
-        TransformationStepConfig sortPeriod = sort(customerSpace, periodTable, sortedPeriodTablePrefix);
         steps.add(productAgr);
         steps.add(perioded);
         steps.add(dailyAgr);
         steps.add(dayPeriods);
         steps.add(updateDaily);
-        steps.add(periodAgr);
-        steps.add(periods);
-        steps.add(updatePeriod);
+
+        periodedStep = 5;
+        periodAgrStep = 6;
+        periodsStep = 6;
+        mergePeriodStep = 5; // will be updated in strategy loop
+        for (PeriodStrategy strategy : periodStrategies) {
+            perioded = addPeriod(dailyAgrStep, strategy); // periodedStep
+            TransformationStepConfig periodAgr = aggregatePeriods(strategy); // periodAgrStep
+            TransformationStepConfig periods = collectPeriods(); // periodsStep
+            TransformationStepConfig updatePeriod = updatePeriodStore(
+                    PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, strategy));
+
+            steps.add(perioded);
+            steps.add(periodAgr);
+            steps.add(periods);
+            steps.add(updatePeriod);
+
+            periodedStep += 4;
+            periodAgrStep += 4;
+            periodsStep += 4;
+            mergePeriodStep += 4;
+        }
+
+        TransformationStepConfig mergePeriod = mergePeriodStore(); // mergePeriodStep
+        TransformationStepConfig sortDaily = sort(dailyTable.getName(), null, sortedDailyTablePrefix);
+        TransformationStepConfig sortPeriod = sort(null, mergePeriodStep, sortedPeriodTablePrefix);
+        steps.add(mergePeriod);
         steps.add(sortDaily);
         steps.add(sortPeriod);
 
@@ -250,13 +292,13 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         return step;
     }
 
-    private TransformationStepConfig addPeriod() {
+    private TransformationStepConfig addPeriod(int inputStep, PeriodStrategy strategy) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_CONVERTOR);
-        step.setInputSteps(Collections.singletonList(productAgrStep));
+        step.setInputSteps(Collections.singletonList(inputStep));
         PeriodConvertorConfig config = new PeriodConvertorConfig();
         config.setTrxDateField(InterfaceName.TransactionDate.name());
-        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
+        config.setPeriodStrategy(strategy);
         config.setPeriodField(InterfaceName.PeriodId.name());
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
@@ -279,7 +321,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.TransactionDate.name(), //
-                InterfaceName.PeriodId.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
         step.setConfiguration(JsonUtils.serialize(config));
         return step;
@@ -318,11 +359,12 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         return step;
     }
 
-    private TransformationStepConfig aggregatePeriods() {
+    private TransformationStepConfig aggregatePeriods(PeriodStrategy strategy) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
-        step.setInputSteps(Collections.singletonList(dailyAgrStep));
+        step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
+        config.setPeriodStrategy(strategy);
         config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumOutputFields(Collections.singletonList("TotalAmount"));
         config.setSumLongFields(Collections.singletonList("TotalQuantity"));
@@ -350,7 +392,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         return step;
     }
 
-    private TransformationStepConfig updatePeriodStore() {
+    private TransformationStepConfig updatePeriodStore(Table periodTable) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
         List<Integer> inputSteps = new ArrayList<>();
@@ -373,15 +415,44 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         return step;
     }
 
-    private TransformationStepConfig sort(CustomerSpace customerSpace, Table table, String prefix) {
+    private TransformationStepConfig mergePeriodStore() {
         TransformationStepConfig step = new TransformationStepConfig();
-        String tableSourceName = "CustomerUniverse";
-        SourceTable sourceTable = new SourceTable(table.getName(), customerSpace);
-        List<String> baseSources = Collections.singletonList(tableSourceName);
-        step.setBaseSources(baseSources);
+        step.setTransformer(DataCloudConstants.TRANSFORMER_MERGE);
+
+        List<String> baseSources = new ArrayList<>();
         Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(tableSourceName, sourceTable);
+        for (Table periodTable : periodTables) {
+            String tableSourceName = periodTable.getName();
+            String sourceTableName = periodTable.getName();
+            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            baseSources.add(tableSourceName);
+            baseTables.put(tableSourceName, sourceTable);
+        }
+        step.setBaseSources(baseSources);
         step.setBaseTables(baseTables);
+
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig sort(String sourceTableName, Integer inputStep, String prefix) {
+        if (sourceTableName != null && inputStep != null) {
+            throw new RuntimeException(TRANSFORMER_SORTER + " can only sort one base table");
+        }
+        TransformationStepConfig step = new TransformationStepConfig();
+        if (sourceTableName != null) {
+            String tableSourceName = "CustomerUniverse";
+            SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+            List<String> baseSources = Collections.singletonList(tableSourceName);
+            step.setBaseSources(baseSources);
+            Map<String, SourceTable> baseTables = new HashMap<>();
+            baseTables.put(tableSourceName, sourceTable);
+            step.setBaseTables(baseTables);
+        }
+        if (inputStep != null) {
+            List<Integer> inputSteps = Collections.singletonList(inputStep);
+            step.setInputSteps(inputSteps);
+        }
         step.setTransformer(TRANSFORMER_SORTER);
 
         SorterConfig config = new SorterConfig();
@@ -399,5 +470,4 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
         return step;
     }
-
 }

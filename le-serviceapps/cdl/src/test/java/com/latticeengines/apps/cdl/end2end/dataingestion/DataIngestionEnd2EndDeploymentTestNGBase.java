@@ -88,10 +88,10 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
@@ -122,8 +122,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
     static final long SEGMENT_2_ACCOUNT_1 = 11;
     static final long SEGMENT_2_CONTACT_1 = 11;
-    static final long SEGMENT_2_ACCOUNT_2 = 47;
-    static final long SEGMENT_2_CONTACT_2 = 51;
+    static final long SEGMENT_2_ACCOUNT_2 = 45;
+    static final long SEGMENT_2_CONTACT_2 = 49;
 
     protected static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
 
@@ -132,7 +132,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_F_COUNT_1 = 1;
 
     static final long RATING_A_COUNT_2 = 20;
-    static final long RATING_D_COUNT_2 = 27;
+    static final long RATING_D_COUNT_2 = 22;
     static final long RATING_F_COUNT_2 = 0;
 
     static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";

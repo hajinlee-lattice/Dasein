@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -122,6 +124,46 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
+    }
+
+    @Override
+    public void upsertTables(String customerSpace, String collectionName, String[] tableNames,
+            TableRoleInCollection role, DataCollection.Version version) {
+        if (StringUtils.isBlank(collectionName)) {
+            DataCollection collection = getOrCreateDefaultCollection(customerSpace);
+            collectionName = collection.getName();
+        }
+        if (version == null) {
+            throw new IllegalArgumentException("Must specify data collection version.");
+        }
+
+        Set<String> tableNameSet = new HashSet<>(Arrays.asList(tableNames));
+        List<String> existingTableNames = dataCollectionEntityMgr.findTableNamesOfRole(collectionName, role, version);
+        for (String existingTableName : existingTableNames) {
+            log.info("There are already table(s) of role " + role + " in data collection " + collectionName);
+            if (!tableNameSet.contains(existingTableName)) {
+                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName)
+                        .size();
+                removeTable(customerSpace, collectionName, existingTableName, role, version);
+                if (numLinks == 1) {
+                    new Thread(() -> {
+                        log.info(existingTableName + " is an orphan table, delete it completely.");
+                        tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
+                    }).start();
+                }
+            }
+        }
+
+        for (String tableName : tableNames) {
+            Table table = tableEntityMgr.findByName(tableName);
+            if (table == null) {
+                throw new IllegalArgumentException(
+                        "Cannot find table named " + tableName + " for customer " + customerSpace);
+            }
+
+            log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
+            dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
+        }
     }
 
     @Override

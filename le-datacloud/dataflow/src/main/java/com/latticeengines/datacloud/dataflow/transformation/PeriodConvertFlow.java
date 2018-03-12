@@ -6,8 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
-import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
-import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddCompositeColumnFuction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateAddPeriodColumnFunction;
@@ -20,8 +18,6 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component("periodConvertFlow")
 public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig> {
-
-    private static final String MIN_COLUMN = "__MIN__";
 
     public static final String DATAFLOW_BEAN_NAME = "periodConvertFlow";
 
@@ -40,13 +36,18 @@ public class PeriodConvertFlow extends ConsolidateBaseFlow<PeriodConvertorConfig
     }
 
     private Node addPeriodIdColumn(PeriodConvertorConfig config, Node result) {
-        result = result.aggregate(new Aggregation(config.getTrxDateField(), MIN_COLUMN, AggregationType.MIN_STR));
-        result = result.apply(
-                new ConsolidateAddPeriodColumnFunction(config.getPeriodStrategy(), config.getTrxDateField(), MIN_COLUMN,
-                        config.getPeriodField()),
-                new FieldList(config.getTrxDateField(), MIN_COLUMN),
-                new FieldMetadata(InterfaceName.PeriodId.name(), Integer.class));
-        result = result.discard(new FieldList(MIN_COLUMN));
+        if (result.getSchema(InterfaceName.PeriodId.name()) != null) {
+            result = result.discard(InterfaceName.PeriodId.name());
+        }
+        if (config.getPeriodStrategy() == null) {
+            result = result.addColumnWithFixedValue(InterfaceName.PeriodId.name(), null, Integer.class);
+        } else {
+            result = result.apply(
+                    new ConsolidateAddPeriodColumnFunction(config.getPeriodStrategy(), config.getTrxDateField(),
+                            config.getPeriodField()),
+                    new FieldList(config.getTrxDateField()),
+                    new FieldMetadata(InterfaceName.PeriodId.name(), Integer.class));
+        }
         return result;
     }
 

@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.period.NaturalMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
+import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 import cascading.flow.FlowProcess;
@@ -21,32 +21,29 @@ import cascading.tuple.TupleEntry;
 public class ConsolidateAddPeriodColumnFunction extends BaseOperation implements Function {
     private Map<String, Integer> namePositionMap;
     private String trxDateColumn;
-    private String minColumn;
 
     private PeriodBuilder periodBuilder;
+    private PeriodStrategy periodStrategy;
 
-    public ConsolidateAddPeriodColumnFunction(PeriodStrategy periodStrategy, String trxDateColumn, String minColumn,
-                                              String targetField) {
+    public ConsolidateAddPeriodColumnFunction(PeriodStrategy periodStrategy, String trxDateColumn, String targetField) {
         super(new Fields(targetField));
         this.trxDateColumn = trxDateColumn;
-        this.minColumn = minColumn;
-        this.namePositionMap = getPositionMap(Arrays.asList(trxDateColumn, minColumn));
+        this.periodStrategy = periodStrategy;
+        this.namePositionMap = getPositionMap(Arrays.asList(trxDateColumn));
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
-        String minDateStr = arguments.getString(namePositionMap.get(minColumn));
         String trxDateStr = arguments.getString(namePositionMap.get(trxDateColumn));
 
-        Integer result = getPeriodBuilder(minDateStr).toPeriodId(trxDateStr);
+        Integer result = getPeriodBuilder().toPeriodId(trxDateStr);
         functionCall.getOutputCollector().add(new Tuple(result));
     }
 
-    private PeriodBuilder getPeriodBuilder(String minDateStr) {
-        // TODO: getting period builder by strategy and factory
+    private PeriodBuilder getPeriodBuilder() {
         if (periodBuilder == null) {
-            periodBuilder = new NaturalMonthPeriodBuilder();
+            periodBuilder = PeriodBuilderFactory.build(periodStrategy);
         }
         return periodBuilder;
     }

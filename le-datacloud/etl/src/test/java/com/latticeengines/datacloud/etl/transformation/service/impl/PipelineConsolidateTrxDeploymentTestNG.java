@@ -168,6 +168,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         return currentConfig;
     }
 
+    private Boolean rebuild;
     private PipelineTransformationConfiguration getTransformationConfig() {
         try {
             PipelineTransformationConfiguration configuration = new PipelineTransformationConfiguration();
@@ -176,10 +177,12 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             configuration.setKeepTemp(true);
 
             String earliestDate = DateTimeUtils.toDateOnlyFromMillis("1502755200000");
-            createConsolidateSteps(steps, tableName1, tableName2, Boolean.TRUE, earliestDate);
-            createProfileSteps(steps, Boolean.TRUE, earliestDate);
-            createConsolidateSteps(steps, tableName1, tableName2, Boolean.FALSE, earliestDate);
-            createProfileSteps(steps, Boolean.FALSE, earliestDate);
+            rebuild = Boolean.TRUE;
+            createConsolidateSteps(steps, tableName1, tableName2, rebuild, earliestDate);
+            createProfileSteps(steps, rebuild, earliestDate);
+            rebuild = Boolean.FALSE;
+            createConsolidateSteps(steps, tableName1, tableName2, rebuild, earliestDate);
+            createProfileSteps(steps, rebuild, earliestDate);
 
             configuration.setSteps(steps);
 
@@ -528,6 +531,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ContactId.name(),
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(), InterfaceName.PeriodId.name()));
+        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }
@@ -589,6 +593,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
                 InterfaceName.ProductId.name(), InterfaceName.TransactionType.name(),
                 InterfaceName.TransactionDate.name(), InterfaceName.PeriodId.name(),
                 InterfaceName.TransactionDayPeriod.name()));
+        config.setPeriodStrategy(PeriodStrategy.CalendarMonth);
         step2.setConfiguration(JsonUtils.serialize(config));
         return step2;
     }

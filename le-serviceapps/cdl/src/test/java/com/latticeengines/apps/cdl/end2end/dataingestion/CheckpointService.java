@@ -38,6 +38,7 @@ import org.testng.Assert;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -78,7 +79,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "11";
+    private static final String S3_CHECKPOINTS_VERSION = "12";
     static final String CHECKPOINT_DATASET_VDB = "vdb";
     static final String CHECKPOINT_DATASET_CSV = "csv";
 
@@ -151,19 +152,35 @@ public class CheckpointService {
         Set<String> uploadedTables = new HashSet<>();
         for (DataCollection.Version version : DataCollection.Version.values()) {
             for (TableRoleInCollection role : TableRoleInCollection.values()) {
-                Table table = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
-                if (table != null) {
-                    logger.info("Creating table " + table.getName() + " for " + role + " in version " + version);
-                    if (!uploadedTables.contains(table.getName())) {
-                        metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
-                        uploadedTables.add(table.getName());
-                    }
-                    dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
-                    if (activeVersion.equals(version)) {
-                        String redshiftTable = checkpointRedshiftTableName(checkpoint, role, S3_CHECKPOINTS_VERSION);
-                        if (redshiftService.hasTable(redshiftTable)) {
-                            redshiftTablesToClone.put(redshiftTable, table.getName());
+                List<Table> tables = parseCheckpointTable(checkpoint, role.name(), version, tenantNames);
+                List<String> tableNames = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(tables)) {
+                    for (Table table : tables) {
+                        if (table != null) {
+                            logger.info(
+                                    "Creating table " + table.getName() + " for " + role + " in version " + version);
+                            if (!uploadedTables.contains(table.getName())) {
+                                metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
+                                uploadedTables.add(table.getName());
+                                tableNames.add(table.getName());
+                            }
+                            // dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
+                            if (activeVersion.equals(version)) {
+                                String redshiftTable = checkpointRedshiftTableName(checkpoint, role,
+                                        S3_CHECKPOINTS_VERSION);
+                                if (redshiftService.hasTable(redshiftTable)) {
+                                    redshiftTablesToClone.put(redshiftTable, table.getName());
+                                }
+                            }
                         }
+                    }
+                }
+
+                if (CollectionUtils.isNotEmpty(tableNames)) {
+                    if (tableNames.size() == 1) {
+                        dataCollectionProxy.upsertTable(mainTestTenant.getId(), tableNames.get(0), role, version);
+                    } else {
+                        dataCollectionProxy.upsertTables(mainTestTenant.getId(), tableNames, role, version);
                     }
                 }
             }
@@ -306,7 +323,7 @@ public class CheckpointService {
         return DataCollection.Version.valueOf(version);
     }
 
-    private Table parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
+    private List<Table> parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
             String[] tenantNames) throws IOException {
         String jsonFilePath = String.format("%s/%s/%s/tables/%s.json", checkpointDir, checkpoint, version.name(),
                 roleName);
@@ -317,43 +334,49 @@ public class CheckpointService {
         }
 
         logger.info("Parse check point " + checkpoint + " table " + roleName + " of version " + version.name());
-        JsonNode json = om.readTree(jsonFile);
-        String hdfsPath = json.get("extracts_directory").asText();
-        if (StringUtils.isBlank(hdfsPath)) {
-            hdfsPath = json.get("extracts").get(0).get("path").asText();
-            if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
-                hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+        List<Table> tables = new ArrayList<>();
+        ArrayNode arrNode = (ArrayNode) om.readTree(jsonFile);
+        Iterator<JsonNode> iter = arrNode.elements();
+        while (iter.hasNext()) {
+            JsonNode json = iter.next();
+            String hdfsPath = json.get("extracts_directory").asText();
+            if (StringUtils.isBlank(hdfsPath)) {
+                hdfsPath = json.get("extracts").get(0).get("path").asText();
+                if (hdfsPath.endsWith(".avro") || hdfsPath.endsWith("/")) {
+                    hdfsPath = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+                }
             }
-        }
-        logger.info("Parse extract path " + hdfsPath);
-        Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
-        Matcher matcher = pattern.matcher(hdfsPath);
-        String str = JsonUtils.serialize(json);
-        str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
-        if (matcher.find()) {
-            tenantNames[0] = matcher.group(1);
-            logger.info("Found tenant name " + tenantNames[0] + " in json.");
-        } else {
-            logger.info("Cannot find tenant for " + tenantNames[0]);
-        }
-
-        if (tenantNames[0] != null) {
-            String testTenant = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
-            String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
-            String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
-            if (hdfsPathSegment2.contains(tenantNames[0])) {
-                String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
-                        + "/$$TABLE_DATA_DIR$$";
-                String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
-                str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
-                str = str.replaceAll(tenantNames[0], testTenant);
-                str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
+            logger.info("Parse extract path " + hdfsPath);
+            Pattern pattern = Pattern.compile("/Contracts/(.*)/Tenants/");
+            Matcher matcher = pattern.matcher(hdfsPath);
+            String str = JsonUtils.serialize(json);
+            str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
+            if (matcher.find()) {
+                tenantNames[0] = matcher.group(1);
+                logger.info("Found tenant name " + tenantNames[0] + " in json.");
             } else {
-                str = str.replaceAll(tenantNames[0], testTenant);
+                logger.info("Cannot find tenant for " + tenantNames[0]);
             }
+
+            if (tenantNames[0] != null) {
+                String testTenant = CustomerSpace.parse(mainTestTenant.getId()).getTenantId();
+                String hdfsPathSegment1 = hdfsPath.substring(0, hdfsPath.lastIndexOf("/"));
+                String hdfsPathSegment2 = hdfsPath.substring(hdfsPath.lastIndexOf("/"));
+                if (hdfsPathSegment2.contains(tenantNames[0])) {
+                    String hdfsPathIntermediatePattern = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) //
+                            + "/$$TABLE_DATA_DIR$$";
+                    String hdfsPathFinal = hdfsPathSegment1.replaceAll(tenantNames[0], testTenant) + hdfsPathSegment2;
+                    str = str.replaceAll(hdfsPath, hdfsPathIntermediatePattern);
+                    str = str.replaceAll(tenantNames[0], testTenant);
+                    str = str.replaceAll(hdfsPathIntermediatePattern, hdfsPathFinal);
+                } else {
+                    str = str.replaceAll(tenantNames[0], testTenant);
+                }
+            }
+            tables.add(JsonUtils.deserialize(str, Table.class));
         }
 
-        return JsonUtils.deserialize(str, Table.class);
+        return tables;
     }
 
     private StatisticsContainer parseCheckpointStatistics(String checkpoint, DataCollection.Version version)
@@ -483,11 +506,17 @@ public class CheckpointService {
 
     private void saveTableIfExists(TableRoleInCollection role, DataCollection.Version version, String checkpoint)
             throws IOException {
-        Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
-        if (table != null) {
+        List<Table> tables = new ArrayList<>();
+        if (role == TableRoleInCollection.ConsolidatedPeriodTransaction) {
+            tables = dataCollectionProxy.getTables(mainTestTenant.getId(), role, version);
+        } else {
+            tables.add(dataCollectionProxy.getTable(mainTestTenant.getId(), role, version));
+        }
+        //Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
+        if (CollectionUtils.isNotEmpty(tables) && tables.get(0) != null) {
             String jsonFile = String.format("checkpoints/%s/%s/tables/%s.json", checkpoint, version.name(),
                     role.name());
-            om.writeValue(new File(jsonFile), table);
+            om.writeValue(new File(jsonFile), tables);
             logger.info("Save " + role + " at version " + version + " to " + jsonFile);
         } else {
             logger.info("There is no " + role + " table at version " + version);

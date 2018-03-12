@@ -42,8 +42,8 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
         result = result.apply(new ConsolidateAddCompositeColumnFuction(config.getGroupByFields(), COMPOSITE_KEY),
                 new FieldList(config.getGroupByFields()), new FieldMetadata(COMPOSITE_KEY, String.class));
 
-        // TODO: a temp way of adding period name
-        result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(), "Month", String.class);
+        result = result.addColumnWithFixedValue(InterfaceName.PeriodName.name(),
+                config.getPeriodStrategy() == null ? null : config.getPeriodStrategy().getName(), String.class);
 
         return result;
     }

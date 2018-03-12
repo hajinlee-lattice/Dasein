@@ -30,6 +30,9 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     static final String CHECK_POINT = "update3";
     private RatingEngine ratingEngine;
 
+    private static final long AGGREGATE_TRANSACTION_SIZE = 22747L;
+    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeVdbCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
@@ -94,8 +97,8 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, 30000L);
-        expectedCnts.put(TableRoleInCollection.AggregatedTransaction, 30000L);
+        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
+        expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.SortedProduct, (long) PRODUCT_IMPORT_SIZE_2);
         return expectedCnts;
     }

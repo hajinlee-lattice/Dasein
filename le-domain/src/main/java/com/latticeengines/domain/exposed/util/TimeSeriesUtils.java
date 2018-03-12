@@ -1,6 +1,14 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -13,12 +21,12 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.period.NaturalMonthPeriodBuilder;
 import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
+import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -338,8 +346,8 @@ public class TimeSeriesUtils {
     }
 
     private static PeriodBuilder getPeriodBuilder(PeriodStrategy strategy, String minDateStr) {
-        // TODO: getting period builder by strategy and factory
-        PeriodBuilder periodBuilder = new NaturalMonthPeriodBuilder();
+        // strategy.setStartTimeStr(minDateStr);
+        PeriodBuilder periodBuilder = PeriodBuilderFactory.build(strategy);
         return periodBuilder;
     }
 

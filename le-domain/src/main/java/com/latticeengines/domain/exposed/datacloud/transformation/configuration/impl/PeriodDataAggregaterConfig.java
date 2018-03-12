@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.datacloud.transformation.configuration
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 public class PeriodDataAggregaterConfig extends TransformerConfig {
 
@@ -20,6 +21,8 @@ public class PeriodDataAggregaterConfig extends TransformerConfig {
     private List<String> countOutputFields;
     @JsonProperty("GroupByFields")
     private List<String> groupByFields;
+    @JsonProperty("PeriodStrategy")
+    private PeriodStrategy periodStrategy;
 
     public List<String> getSumFields() {
         return this.sumFields;
@@ -76,4 +79,13 @@ public class PeriodDataAggregaterConfig extends TransformerConfig {
     public void setGroupByFields(List<String> groupByFields) {
         this.groupByFields = groupByFields;
     }
+
+    public PeriodStrategy getPeriodStrategy() {
+        return periodStrategy;
+    }
+
+    public void setPeriodStrategy(PeriodStrategy periodStrategy) {
+        this.periodStrategy = periodStrategy;
+    }
+
 }
