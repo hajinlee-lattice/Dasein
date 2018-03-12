@@ -227,6 +227,20 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testAccountEndsWith() {
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction1 = new FrontEndRestriction();
+        Bucket bucket = Bucket.valueBkt(ComparisonType.ENDS_WITH, Collections.singletonList("Acufocus, Inc."));
+        BucketRestriction endsWithRestriction = new BucketRestriction(BusinessEntity.Account, InterfaceName.LDC_Name.name(), bucket);
+        frontEndRestriction1.setRestriction(endsWithRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction1);
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        Long count = entityQueryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+        Assert.assertEquals(count, new Long(1L));
+    }
+
+    @Test(groups = "functional")
     public void testContactAccountWithTxn() {
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
         FrontEndQuery frontEndQuery = new FrontEndQuery();

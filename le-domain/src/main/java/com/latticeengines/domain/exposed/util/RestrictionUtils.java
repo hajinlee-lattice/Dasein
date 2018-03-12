@@ -138,6 +138,9 @@ public class RestrictionUtils {
         case STARTS_WITH:
             restriction = Restriction.builder().let(attr).not().startsWith(values.get(0)).build();
             break;
+        case ENDS_WITH:
+            restriction = Restriction.builder().let(attr).not().endsWith(values.get(0)).build();
+            break;
         default:
             throw new UnsupportedOperationException("comparator " + comparisonType + " is not supported yet");
         }

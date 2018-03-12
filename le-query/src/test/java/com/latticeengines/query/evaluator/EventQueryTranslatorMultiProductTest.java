@@ -1,5 +1,6 @@
 package com.latticeengines.query.evaluator;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -7,6 +8,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.querydsl.sql.SQLQuery;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
@@ -757,6 +759,13 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query);
         Assert.assertEquals(count, 89763);
+    }
+
+    @Test(groups = "functional")
+    public void testComplexAndQuery() {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("fs101.json");
+        Restriction deserialized = JsonUtils.deserialize(is, Restriction.class);
+        System.out.println(deserialized.toString());
     }
 
 }

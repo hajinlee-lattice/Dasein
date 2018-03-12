@@ -29,20 +29,22 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     public static class EnhancedEventQueryTranslator extends EventQueryTranslator {
         @Override
         protected String getPeriodTransactionTableName(AttributeRepository repository) {
-            return "tftest_4_transaction_2017_10_31_19_44_08_utc";
+            return "tftest_10_periodtransaction_2018_01_22_10_59_03_utc";
+            //return "jlm1520552880910_periodtransaction_2018_02_07_08_13_51_utc";
         }
 
     }
 
-    /* prodid used by yuwen's test case
+    ///* prodid used by yuwen's test case
+    //private static final String PROD_ID1 = "72AE6CE51E03D547F327A9A6155F8B7B";
     private static final String PROD_ID1 = "3872223C9BA06C649D68E415E23A9446";
     private static final String PROD_ID2 = "A78DF03BAC196BE9A08508FFDB433A31";
-    */
-    private static final String PROD_ID1 = "A3B7BABBB51AD145639DD583D91826AD";
-    private static final String PROD_ID2 = "563750D5B351FA4439BF5FB2A1C26DD2";
+    //*/
+    //private static final String PROD_ID1 = "A3B7BABBB51AD145639DD583D91826AD";
+    //private static final String PROD_ID2 = "563750D5B351FA4439BF5FB2A1C26DD2";
 
     private EventQueryTranslator getEventQueryTranslator() {
-        return new EventQueryTranslator();
+        return new EnhancedEventQueryTranslator();
     }
 
     private TransactionRestriction getHasEngaged() {
@@ -50,6 +52,16 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         txRestriction.setProductId(PROD_ID1);
         txRestriction.setTargetProductId(PROD_ID1);
         txRestriction.setTimeFilter(TimeFilter.ever());
+        return txRestriction;
+    }
+
+    private TransactionRestriction getHasEngagedPriorToThree() {
+        TransactionRestriction txRestriction = new TransactionRestriction();
+        txRestriction.setProductId(PROD_ID1);
+        TimeFilter timeFilter = new TimeFilter(ComparisonType.PRIOR_ONLY, //
+                                               TimeFilter.Period.Month.name(),  //
+                                               Collections.singletonList(3));
+        txRestriction.setTimeFilter(timeFilter);
         return txRestriction;
     }
 
@@ -646,6 +658,20 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     }
 
     @Test(groups = "functional")
+    public void testHasEngagedPriorThree() {
+        // has engaged
+        TransactionRestriction txRestriction = getHasEngagedPriorToThree();
+        EventQueryTranslator eventTranslator = getEventQueryTranslator();
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, txRestriction,
+                                                        getDefaultEventFrontEndQuery(), Query.builder()).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        System.out.println("sqlQuery = " + sqlQuery);
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        //Assert.assertEquals(count, 5189);
+        Assert.assertEquals(count, 50);
+    }
+
+    @Test(groups = "functional")
     public void testHasEngagedPrior() {
         // has engaged
         TransactionRestriction txRestriction = getHasEngagedPriorToFive();
@@ -655,8 +681,8 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         System.out.println("sqlQuery = " + sqlQuery);
         long count = queryEvaluatorService.getCount(attrRepo, query);
-        //Assert.assertEquals(count, 5189);
-        Assert.assertEquals(count, 50);
+        Assert.assertEquals(count, 5189);
+        //Assert.assertEquals(count, 50);
     }
 
     @Test(groups = "functional")
