@@ -63,7 +63,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         }, 0);
                     }
                 }
-                
+
                 vm.initVariables = function(){
                     vm.numericalConfiguration = {
                         from: { name: 'from-numerical', value: undefined, position: 0, type: 'Numerical' },
@@ -203,6 +203,14 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
 
                 vm.isValid = function () {
                     return $scope.form.$valid;
+                }
+
+                vm.showUsetButton = function(){
+                    if(vm.root.mode === 'rules'){
+                        return true;
+                    } else {
+                        return false;
+                    }
                 }
 
                 //================= Numerical ==============================

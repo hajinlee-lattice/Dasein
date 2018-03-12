@@ -526,6 +526,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         this.getNumericalCmpModel = function (bucketRestriction) {
             return bucketRestriction.bkt.Cmp;
         }
+        this.getStringCmpModel = function (bucketRestriction) {
+            return bucketRestriction.bkt.Cmp;
+        }
 
         this.getBktValue = function (bucketRestriction, position) {
             var txn = bucketRestriction.bkt.Txn;

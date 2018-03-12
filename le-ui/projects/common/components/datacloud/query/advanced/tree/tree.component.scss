@@ -7,20 +7,46 @@
     @media only screen and (max-width: 1000px) {
         min-height: 80px;
     }
-    /**This is used when there are two buttons in the query builder edit item*/
-
-    .edit-controllers{
+    .edit-controller {
         display: flex;
-        justify-content: flex-end;//space-around; When two buttons are in the qb editing mode
+        justify-content: flex-end;
         height: 100%;
         align-items: center;
-        // @media only screen and (max-width: 1000px) {
-        //     flex-direction: column;
-        // }
+        
         .set,
         .unset {
             margin-top: -17px;
-            min-width: 70px;
+        }
+    }
+    .edit-controllers{
+        // border: 1px solid red;
+        min-width: 75px;
+        height: 100%;
+        width: 100%;
+        margin-right: 20px;
+        display: flex;
+        justify-content: space-around; 
+        align-items: center;
+        margin: 0;
+
+        @media only screen and (max-width: 1000px) {
+            flex-direction: column;
+            // width: 100%;
+            flex-wrap: wrap;
+            width: 100%;
+            // border: 1px solid green;
+            .set{
+                margin-top: -17px;
+                margin-bottom: 10px;
+            }
+            .unset {
+
+            }
+        }
+        .set,
+        .unset {
+            margin-top: -17px;
+            // min-width: 70px;
         }
     }
 }
