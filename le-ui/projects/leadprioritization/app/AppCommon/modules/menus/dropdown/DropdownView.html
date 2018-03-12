@@ -24,7 +24,7 @@
             class="{{ item.class }}"
             ng-repeat="item in items"
             ui-sref="{{ item.sref || '.' }}"
-            ng-click="item.click($event)"
+            ng-click="(item.disabledif == undefined ? false : item.disabledif) ? $event.preventDefault() : item.click($event) "
             ng-if="item.if == undefined ? true : item.if"
             ng-disabled="item.disabledif == undefined ? false : item.disabledif"
         >
