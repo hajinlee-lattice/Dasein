@@ -282,7 +282,8 @@ angular.module('common.datacloud.query.builder', [
         if(itemEntity == entity){
             return true;
         }
-        else if(itemEntity === 'PurchaseHistory' && entity === 'Account'){
+        else if((itemEntity === 'PurchaseHistory' && entity === 'Account') || 
+                (itemEntity === 'Rating' && entity === 'Account')){
             return true;
         } else{
             return false;
