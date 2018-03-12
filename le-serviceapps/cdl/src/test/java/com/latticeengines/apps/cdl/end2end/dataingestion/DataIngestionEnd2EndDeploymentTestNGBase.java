@@ -126,6 +126,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_2_CONTACT_2 = 49;
 
     protected static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
+    protected static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentModeling");
 
     static final long RATING_A_COUNT_1 = 6;
     static final long RATING_D_COUNT_1 = 4;
@@ -675,14 +676,25 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     protected MetadataSegment constructModelingSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("USA"));
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
         BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "LDC_Country"), stateBkt);
-
+                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        return segment;
+    }
+
+    protected MetadataSegment constructTrainingSegment() {
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_TRAINING);
+        segment.setDisplayName("End2End Segment Training");
+        segment.setDescription("A training segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
         return segment;
     }

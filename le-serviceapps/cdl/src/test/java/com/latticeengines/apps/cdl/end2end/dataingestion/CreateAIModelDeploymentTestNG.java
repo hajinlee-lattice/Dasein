@@ -15,7 +15,6 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
@@ -95,12 +94,12 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void setupTestSegment() {
-        testSegment = JsonUtils.deserialize(segmentJson, MetadataSegment.class);
+        testSegment = constructModelingSegment();
         testSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), testSegment);
     }
 
     private void setupTrainSegment() {
-        trainSegment = JsonUtils.deserialize(trainingSegmentJson, MetadataSegment.class);
+        trainSegment = constructTrainingSegment();
         trainSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), trainSegment);
     }
 
@@ -146,26 +145,4 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
         Assert.assertEquals(eventCount, 4);
     }
-
-    private String segmentJson = "{ \"name\": \"CreateAIModelDeploymentTestSegment\","
-            + "\"display_name\": \"CreateAIModelDeploymentTestSegment\","
-            + "\"created_by\": \"bnguyen@lattice-engines.com\", \"updated\": 1518748605000,"
-            + "\"created\": 1518748343000, \"is_master_segment\": false, \"accounts\": 462,"
-            + "\"contacts\": 547, \"products\": 100, \"account_raw_restriction\": {"
-            + "\"logicalRestriction\": { \"operator\": \"AND\", \"restrictions\": [{"
-            + "\"bucketRestriction\": { \"bkt\": { \"Lbl\": \"No\", \"Cnt\": 462, \"Id\": 2,"
-            + "\"Cmp\": \"EQUAL\", \"Vals\": [\"No\"] }, " + "\"attr\": \"Account.OUT_OF_BUSINESS_INDICATOR\" } } ] }"
-            + "}," + "\"contact_raw_restriction\": { \"logicalRestriction\": { \"operator\": \"AND\","
-            + "\"restrictions\": [] } } }";
-
-    private String trainingSegmentJson = "{ \"name\": \"AIModelDeploymentTestTrainingSegment\","
-            + "\"display_name\": \"AIModelDeploymentTestTrainingSegment\","
-            + "\"created_by\": \"bnguyen@lattice-engines.com\", \"updated\": 1518748605000,"
-            + "\"created\": 1518748343000, \"is_master_segment\": false, \"accounts\": 462,"
-            + "\"contacts\": 547, \"products\": 100, \"account_raw_restriction\": {"
-            + "\"logicalRestriction\": { \"operator\": \"AND\", \"restrictions\": [{"
-            + "\"bucketRestriction\": { \"bkt\": { \"Lbl\": \"No\", \"Cnt\": 462, \"Id\": 2,"
-            + "\"Cmp\": \"EQUAL\", \"Vals\": [\"No\"] }, " + "\"attr\": \"Account.OUT_OF_BUSINESS_INDICATOR\" } } ] }"
-            + "}," + "\"contact_raw_restriction\": { \"logicalRestriction\": { \"operator\": \"AND\","
-            + "\"restrictions\": [] } } }";
 }
