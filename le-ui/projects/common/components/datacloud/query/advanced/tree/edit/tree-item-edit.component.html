@@ -72,8 +72,7 @@
             <div class="le-col-span-2">
                 <div ng-class="vm.showUsetButton() ? 'edit-controllers' : 'edit-controller'">
                     <button class="button blue-button set" ng-click="vm.setBucket($event)" ng-disabled="!vm.isValid()">SET</button>
-                    <!-- <button class="button gray-button unset" ng-if="vm.showUsetButton()" ng-click="vm.setBucket($event, true)">UNSET</button> -->
-                    <button class="button gray-button unset" ng-if="vm.showUsetButton()">UNSET</button>
+                    <button class="button gray-button unset" ng-if="vm.showUsetButton()" ng-click="vm.setBucket($event, true)">UNSET</button>
                 </div>
             </div>
         </div>
