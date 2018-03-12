@@ -205,6 +205,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                     fieldMapping.setMappedField(fieldMapping.getMappedField().toLowerCase());
                     fieldMapping.setMappedToLatticeField(false);
                 }
+                fieldMapping.setMappedField(
+                        ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
                 switch (fieldMapping.getCdlExternalSystemType()) {
                     case CRM:
                         crmIds.add(fieldMapping.getMappedField());
