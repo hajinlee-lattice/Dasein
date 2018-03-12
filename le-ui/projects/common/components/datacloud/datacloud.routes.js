@@ -69,45 +69,59 @@ angular
 
                     return deferred.promise;
                 }], 
-                EnrichmentTopAttributes: ['$q', '$state', '$stateParams', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'QueryStore', function($q, $state, $stateParams, DataCloudStore, ApiHost, EnrichmentCount, QueryStore) {
+                EnrichmentTopAttributes: ['$q', '$state', '$stateParams', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', 'QueryStore', 'FeatureFlagService', function($q, $state, $stateParams, DataCloudStore, ApiHost, EnrichmentCount, QueryStore, FeatureFlagService) {
                     var deferred = $q.defer();
 
                     DataCloudStore.setHost(ApiHost);
-                    var query = {
-                       "free_form_text_search":"",
-                       "account_restriction":{
-                          "restriction":{
-                             "logicalRestriction":{
-                                "operator":"AND",
-                                "restrictions":[]
-                             }
-                          }
-                       },
-                       "contact_restriction":{
-                          "restriction":{
-                             "logicalRestriction":{
-                                "operator":"AND",
-                                "restrictions":[]
-                             }
-                          }
-                       },
-                       "restrict_without_sfdcid":false,
-                       "page_filter":{
-                          "num_rows":10,
-                          "row_offset":0
-                       }
-                    };
 
-                    QueryStore.getEntitiesCounts(query).then(function(result) {
-                        if (result && (result.Account != 0 || result.Contact != 0)) {
-                            DataCloudStore.getAllTopAttributes().then(function(result) {
-                                deferred.resolve(result['Categories'] || result || {});
+                    FeatureFlagService.GetAllFlags().then(function(result) {
+                        var flags = FeatureFlagService.Flags();
+
+                        if (FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)) {
+                            var query = {
+                               "free_form_text_search":"",
+                               "account_restriction":{
+                                  "restriction":{
+                                     "logicalRestriction":{
+                                        "operator":"AND",
+                                        "restrictions":[]
+                                     }
+                                  }
+                               },
+                               "contact_restriction":{
+                                  "restriction":{
+                                     "logicalRestriction":{
+                                        "operator":"AND",
+                                        "restrictions":[]
+                                     }
+                                  }
+                               },
+                               "restrict_without_sfdcid":false,
+                               "page_filter":{
+                                  "num_rows":10,
+                                  "row_offset":0
+                               }
+                            };
+
+                            QueryStore.getEntitiesCounts(query).then(function(result) {
+                                if (result && (result.Account != 0 || result.Contact != 0)) {
+                                    DataCloudStore.getAllTopAttributes().then(function(result) {
+                                        deferred.resolve(result['Categories'] || result || {});
+                                    });
+                                } else {
+                                    $state.go('home.nodata', { 
+                                        tenantName: $stateParams.tenantName,
+                                        segment: $stateParams.segment
+                                    });
+                                }
                             });
                         } else {
-                            $state.go('home.nodata', { 
-                                tenantName: $stateParams.tenantName,
-                                segment: $stateParams.segment
-                            });
+
+                            if (EnrichmentCount !== 0) { //PLS-5894
+                                DataCloudStore.getAllTopAttributes().then(function(result) {
+                                    deferred.resolve(result['Categories'] || result || {});
+                                });
+                            }
                         }
                     });
                     
