@@ -67,7 +67,7 @@ angular
 			vm.setFilteredActions = function() {
 				vm.filteredActions = [];
 				vm.actions.forEach(function(action) {
-					if (action.reports.length > 0 && vm.parsePayload(action, vm.entity) != undefined) {
+					if (action.reports && action.reports.length > 0 && vm.parsePayload(action, vm.entity) != undefined) {
 						vm.filteredActions.push(action)
 					}
 				});
