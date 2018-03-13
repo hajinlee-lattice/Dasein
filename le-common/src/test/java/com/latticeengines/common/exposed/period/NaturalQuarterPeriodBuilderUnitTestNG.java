@@ -1,29 +1,12 @@
 package com.latticeengines.common.exposed.period;
 
-import java.time.LocalDate;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
-import org.testng.Assert;
 import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
 
-public class NaturalQuarterPeriodBuilderUnitTestNG {
+public class NaturalQuarterPeriodBuilderUnitTestNG extends PeriodBuilderUnitTestNGBase {
 
-    @Test(groups = "unit", dataProvider = "dataProvider")
-    public void testPeriodCount(String startDate, String endDate, int period) {
-        PeriodBuilder builder;
-        if (StringUtils.isBlank(startDate)) {
-            builder = new NaturalQuarterPeriodBuilder();
-        } else {
-            builder = new NaturalQuarterPeriodBuilder(startDate);
-        }
-        int actualPeriod = builder.toPeriodId(endDate);
-        Assert.assertEquals(actualPeriod, period);
-    }
-
-    @DataProvider(name = "dataProvider")
-    public Object[][] dataProvider() {
+    @Override
+    @DataProvider(name = PERIOD_COUNT_DATA_PROVIDER)
+    protected Object[][] providePeriodCounts() {
         return new Object[][] { //
                 new Object[] { "2016-02-05", "2016-03-30", 0 }, //
                 new Object[] { "2016-02-05", "2016-09-30", 2 }, //
@@ -36,20 +19,7 @@ public class NaturalQuarterPeriodBuilderUnitTestNG {
         };
     }
 
-    @Test(groups = "unit", dataProvider = "periodRangeProvider")
-    public void testConvertToDateRange(int period1, int period2, String firstDate, String startDate, String endDate) {
-        PeriodBuilder builder;
-        if (StringUtils.isBlank(firstDate)) {
-            builder = new NaturalQuarterPeriodBuilder();
-        } else {
-            builder = new NaturalQuarterPeriodBuilder(firstDate);
-        }
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(period1, period2);
-        Assert.assertEquals(dateRange.getLeft(), LocalDate.parse(startDate));
-        Assert.assertEquals(dateRange.getRight(), LocalDate.parse(endDate));
-    }
-
-    @DataProvider(name = "periodRangeProvider")
+    @DataProvider(name = PERIOD_RANGE_DATA_PROVIDER)
     public Object[][] providePeriodRanges() {
         return new Object[][] { //
                 new Object[] { 0, 0, null, "2000-01-01", "2000-03-31" }, //
@@ -63,4 +33,16 @@ public class NaturalQuarterPeriodBuilderUnitTestNG {
                 new Object[] { -4, -1, null, "1999-01-01", "1999-12-31" }, //
         };
     }
+
+    @Override
+    protected PeriodBuilder getBuilder() {
+        return new NaturalQuarterPeriodBuilder();
+    }
+
+    @Override
+    protected PeriodBuilder getBuilder(String startDate) {
+        return new NaturalQuarterPeriodBuilder(startDate);
+    }
+
+
 }
