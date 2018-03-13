@@ -43,7 +43,7 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
-        parameters.setInputMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
+        parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
         parameters.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
         parameters.setDedupe(false);
         return parameters;

@@ -30,17 +30,21 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
         private SegmentExportStepConfiguration initStepConf = new SegmentExportStepConfiguration();
         private MicroserviceStepConfiguration prepareSegmentMatching = new MicroserviceStepConfiguration();
 
+        private MatchCdlAccountWorkflowConfiguration.Builder matchCdlWorkflowConfBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
+
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             initStepConf.setCustomerSpace(customerSpace);
             prepareSegmentMatching.setCustomerSpace(customerSpace);
+            matchCdlWorkflowConfBuilder.customer(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             prepareSegmentMatching.setMicroServiceHostPort(microServiceHostPort);
+            matchCdlWorkflowConfBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -48,6 +52,17 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             prepareSegmentMatching.setInternalResourceHostPort(internalResourceHostPort);
+            matchCdlWorkflowConfBuilder.internalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
+        public Builder matchInputTableName(String tableName) {
+            matchCdlWorkflowConfBuilder.matchInputTableName(tableName);
+            return this;
+        }
+
+        public Builder matchAccountIdColumn(String matchAccountIdColumn) {
+            matchCdlWorkflowConfBuilder.matchAccountIdColumn(matchAccountIdColumn);
             return this;
         }
 

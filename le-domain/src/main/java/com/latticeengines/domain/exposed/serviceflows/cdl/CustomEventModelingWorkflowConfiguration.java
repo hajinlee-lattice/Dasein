@@ -175,6 +175,13 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder matchInputTableName(String tableName) {
             customEventMatchWorkflowConfigurationBuilder.matchInputTableName(tableName);
+            prepareConfigForScoringBuilder.matchInputTableName(tableName);
+            return this;
+        }
+
+        public Builder matchAccountIdColumn(String matchAccountIdColumn) {
+            customEventMatchWorkflowConfigurationBuilder.matchAccountIdColumn(matchAccountIdColumn);
+            prepareConfigForScoringBuilder.matchAccountIdColumn(matchAccountIdColumn);
             return this;
         }
 

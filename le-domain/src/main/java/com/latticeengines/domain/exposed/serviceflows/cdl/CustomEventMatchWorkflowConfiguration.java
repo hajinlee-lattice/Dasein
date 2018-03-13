@@ -86,6 +86,11 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder matchAccountIdColumn(String matchAccountIdColumn) {
+            matchCdlAccount.setMatchAccountIdColumn(matchAccountIdColumn);
+            return this;
+        }
+
         public Builder modelingType(ModelingType modelingType) {
             configuration.setModelingType(modelingType);
             return this;

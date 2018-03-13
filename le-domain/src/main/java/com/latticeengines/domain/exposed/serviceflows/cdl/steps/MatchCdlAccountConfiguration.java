@@ -7,6 +7,7 @@ public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfigurati
     }
 
     private String matchInputTableName;
+    private String matchAccountIdColumn;
 
     public String getMatchInputTableName() {
         return matchInputTableName;
@@ -14,6 +15,14 @@ public class MatchCdlAccountConfiguration extends BaseCDLDataFlowStepConfigurati
 
     public void setMatchInputTableName(String matchInputTableName) {
         this.matchInputTableName = matchInputTableName;
+    }
+
+    public String getMatchAccountIdColumn() {
+        return this.matchAccountIdColumn;
+    }
+
+    public void setMatchAccountIdColumn(String matchAccountIdColumn) {
+        this.matchAccountIdColumn = matchAccountIdColumn;
     }
 
 }

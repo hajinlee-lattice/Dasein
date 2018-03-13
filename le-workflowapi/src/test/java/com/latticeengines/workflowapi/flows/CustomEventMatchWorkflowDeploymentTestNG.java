@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
@@ -116,6 +117,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .customer(customerSpace) //
                 .microServiceHostPort(microserviceHostPort) //
                 .matchInputTableName(table.getName()) //
+                .matchAccountIdColumn(InterfaceName.AccountId.name()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), "1.0") //

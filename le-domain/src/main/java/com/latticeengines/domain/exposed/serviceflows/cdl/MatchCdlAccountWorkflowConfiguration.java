@@ -6,6 +6,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 
 public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -14,6 +15,7 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
         private MatchCdlAccountWorkflowConfiguration configuration = new MatchCdlAccountWorkflowConfiguration();
 
         MatchCdlAccountConfiguration matchCdlAccount = new MatchCdlAccountConfiguration();
+        MatchCdlStepConfiguration matchCdlStep = new MatchCdlStepConfiguration();
         MatchDataCloudWorkflowConfiguration.Builder ldcConfigurationBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public MatchCdlAccountWorkflowConfiguration build() {
@@ -24,31 +26,41 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             configuration.setContainerConfiguration(workflowName, configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(matchCdlAccount);
+            configuration.add(matchCdlStep);
             configuration.add(ldcConfigurationBuilder.build());
             return configuration;
         }
 
         public Builder customer(CustomerSpace customerSpace) {
             matchCdlAccount.setCustomerSpace(customerSpace);
+            matchCdlStep.setCustomerSpace(customerSpace);
             ldcConfigurationBuilder.customer(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             matchCdlAccount.setMicroServiceHostPort(microServiceHostPort);
+            matchCdlStep.setMicroServiceHostPort(microServiceHostPort);
             ldcConfigurationBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             matchCdlAccount.setInternalResourceHostPort(internalResourceHostPort);
+            matchCdlStep.setInternalResourceHostPort(internalResourceHostPort);
             ldcConfigurationBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
         public Builder matchInputTableName(String tableName) {
             matchCdlAccount.setMatchInputTableName(tableName);
+            matchCdlStep.setMatchInputTableName(tableName);
             ldcConfigurationBuilder.matchInputTableName(tableName);
+            return this;
+        }
+
+        public Builder matchAccountIdColumn(String matchAccountIdColumn) {
+            matchCdlAccount.setMatchAccountIdColumn(matchAccountIdColumn);
             return this;
         }
 
