@@ -51,15 +51,17 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
 
     protected void removeTimeWindowRestrictions() {
         DepthFirstSearch dfs = new DepthFirstSearch();
-        dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
-            GraphNode node = (GraphNode) object;
-            if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
-                Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
-                if (transaction.getNegate() && transaction.getTimeFilter().getRelation() != ComparisonType.EVER) {
-                    ((BucketRestriction) node).setIgnored(true);
+        if (baseSegment.getAccountRestriction() != null) {
+            dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
+                GraphNode node = (GraphNode) object;
+                if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
+                    Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
+                    if (transaction.getNegate() && transaction.getTimeFilter().getRelation() != ComparisonType.EVER) {
+                        ((BucketRestriction) node).setIgnored(true);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     private void buildRatingFrontEndQuery() {
