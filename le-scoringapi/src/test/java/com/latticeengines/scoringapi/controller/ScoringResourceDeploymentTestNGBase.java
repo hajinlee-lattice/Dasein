@@ -155,7 +155,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
                     resultObjList = scorePercentileRecords(bulkScoreRequest, customerSpace.toString());
                 } else {
                     resultObjList = internalScoringApiProxy.scorePercentileRecords(bulkScoreRequest,
-                            customerSpace.toString(), enrichInternalAttributes, false);
+                            customerSpace.toString(), enrichInternalAttributes, false, true);
                 }
             } else {
                 response = oAuth2RestTemplate.postForEntity(url, bulkScoreRequest, List.class);

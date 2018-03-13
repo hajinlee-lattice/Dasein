@@ -9,8 +9,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -19,10 +17,10 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -46,7 +44,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         private CreateCdlEventTableFilterConfiguration cdlEventTableTupleFilter = new CreateCdlEventTableFilterConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
 
-        private SetCdlConfigurationForScoringConfiguration setConfigForScoring = new SetCdlConfigurationForScoringConfiguration();
+        private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
@@ -322,8 +320,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public RatingEngineImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
-            export.setExportDestination(ExportDestination.FILE);
-            export.setExportFormat(ExportFormat.CSV);
 
             configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

@@ -1,8 +1,6 @@
 
 package com.latticeengines.cdl.workflow.steps;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -11,13 +9,9 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.RatingEngineScoreWorkflow;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setCdlConfigurationForScoring")
@@ -26,28 +20,11 @@ public class SetCdlConfigurationForScoring extends BaseWorkflowStep<SetCdlConfig
 
     private static final Logger log = LoggerFactory.getLogger(SetCdlConfigurationForScoring.class);
 
-    @Inject
-    protected ColumnMetadataProxy columnMetadataProxy;
-
-    @Inject
-    private RatingEngineScoreWorkflow ratingEngineScoreWorkflow;
-
-    @Inject
-    private ExportWorkflow exportWorkflow;
-
     @Override
     public void execute() {
         log.info("Setting the configuration for Cdl scoring.");
 
-        String parentNamespace = namespace.substring(0, namespace.lastIndexOf('.'));
-        String exportStepStepNamespace = String.join(".", parentNamespace, ratingEngineScoreWorkflow.name(),
-                exportWorkflow.name(), ExportStepConfiguration.class.getSimpleName());
-        ExportStepConfiguration exportStepConfiguration = (ExportStepConfiguration) getConfigurationFromJobParameters(
-                exportStepStepNamespace);
-        exportStepConfiguration.setUsingDisplayName(Boolean.TRUE);
-        putObjectInContext(exportStepStepNamespace, exportStepConfiguration);
-
-        putStringValueInContext(EXPORT_INPUT_PATH, "");
+        removeObjectFromContext(EXPORT_INPUT_PATH);
         String sourceFileName = configuration.getInputProperties()
                 .get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
         String targetFileName = String.format("%s_scored_%s",

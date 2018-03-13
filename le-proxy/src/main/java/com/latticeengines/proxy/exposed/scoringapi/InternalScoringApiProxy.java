@@ -132,10 +132,11 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            boolean enableMatching) {
         String url = constructUrl(
-                "/records?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}&performFetchOnlyForMatching={performFetchOnlyForMatching}",
-                tenantIdentifier, enrichInternalAttributes, performFetchOnlyForMatching);
+                "/records?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}&performFetchOnlyForMatching={performFetchOnlyForMatching}&enableMatching={enableMatching}",
+                tenantIdentifier, enrichInternalAttributes, performFetchOnlyForMatching, enableMatching);
         List<?> resultList = post("scorePercentileRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {
@@ -151,10 +152,11 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
 
     @Override
     public List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching) {
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            boolean enableMatching) {
         String url = constructUrl(
-                "/records/debug?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}&performFetchOnlyForMatching={performFetchOnlyForMatching}",
-                tenantIdentifier, enrichInternalAttributes, performFetchOnlyForMatching);
+                "/records/debug?tenantIdentifier={tenantIdentifier}&enrichInternalAttributes={enrichInternalAttributes}&performFetchOnlyForMatching={performFetchOnlyForMatching}&enableMatching={enableMatching}",
+                tenantIdentifier, enrichInternalAttributes, performFetchOnlyForMatching, enableMatching);
         List<?> resultList = post("scorePercentileAndProbabilityRecords", url, scoreRequest, List.class);
         List<RecordScoreResponse> recordScoreResponseList = new ArrayList<>();
         if (resultList != null) {
@@ -181,8 +183,8 @@ public class InternalScoringApiProxy extends BaseRestApiProxy implements Interna
             boolean enrichInternalAttributes, boolean enforceFuzzyMatch, boolean skipDnBCache) {
         String url = constructUrl(
                 "/record/apiconsole/debug?tenantIdentifier={tenantIdentifier}"
-                + "&enrichInternalAttributes={enrichInternalAttributes}"
-                + "&enforceFuzzyMatch={enforceFuzzyMatch}&skipDnBCache={skipDnBCache}",
+                        + "&enrichInternalAttributes={enrichInternalAttributes}"
+                        + "&enforceFuzzyMatch={enforceFuzzyMatch}&skipDnBCache={skipDnBCache}",
                 tenantIdentifier, enrichInternalAttributes, enforceFuzzyMatch, skipDnBCache);
         return post("scoreProbabilityRecordApiConsole", url, scoreRequest, DebugScoreResponse.class);
     }

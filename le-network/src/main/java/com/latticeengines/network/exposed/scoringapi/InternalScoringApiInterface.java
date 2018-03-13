@@ -24,7 +24,7 @@ public interface InternalScoringApiInterface {
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
 
     List<RecordScoreResponse> scorePercentileRecords(BulkRecordScoreRequest scoreRequest, String tenantIdentifier,
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
+            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, boolean enableMatching);
 
     DebugScoreResponse scoreProbabilityRecord(ScoreRequest scoreRequest, String tenantIdentifier,
             boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
@@ -33,7 +33,8 @@ public interface InternalScoringApiInterface {
             String tenantIdentifier);
 
     List<RecordScoreResponse> scorePercentileAndProbabilityRecords(BulkRecordScoreRequest scoreRequest,
-            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching);
+            String tenantIdentifier, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
+            boolean enableMatching);
 
     DebugScoreResponse scoreAndEnrichRecordApiConsole(ScoreRequest scoreRequest, String tenantIdentifier,
             boolean enrichInternalAttributes, boolean enforceFuzzyMatch, boolean skipDnBCache);

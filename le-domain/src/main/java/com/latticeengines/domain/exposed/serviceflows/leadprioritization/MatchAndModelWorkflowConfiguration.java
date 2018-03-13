@@ -10,8 +10,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -342,8 +340,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
 
         public MatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
-            export.setExportDestination(ExportDestination.FILE);
-            export.setExportFormat(ExportFormat.CSV);
 
             configuration.add(dedupEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());

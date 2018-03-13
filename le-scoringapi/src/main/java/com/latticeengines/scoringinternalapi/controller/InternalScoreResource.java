@@ -6,7 +6,6 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +29,7 @@ import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import springfox.documentation.annotations.ApiIgnore;
 
 @Api(value = "scoreinternal/score", description = "Internal REST resource for interacting with score API")
@@ -112,7 +112,9 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
             boolean enrichInternalAttributes, //
             @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
-            boolean performFetchOnlyForMatching) {
+            boolean performFetchOnlyForMatching, //
+            @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
+            boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
 
@@ -130,7 +132,9 @@ public class InternalScoreResource extends BaseScoring {
             @RequestParam(value = "enrichInternalAttributes", required = false, defaultValue = "false") //
             boolean enrichInternalAttributes, //
             @RequestParam(value = "performFetchOnlyForMatching", required = false, defaultValue = "false") //
-            boolean performFetchOnlyForMatching) {
+            boolean performFetchOnlyForMatching, //
+            @RequestParam(value = "enableMatching", required = false, defaultValue = "true") //
+            boolean enableMatching) {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantIdentifier);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
 

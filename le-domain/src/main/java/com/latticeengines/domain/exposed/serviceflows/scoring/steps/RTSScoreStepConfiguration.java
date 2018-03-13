@@ -14,6 +14,8 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     private boolean enableDebug;
 
+    private boolean enableMatching = Boolean.TRUE;
+
     private boolean scoreTestFile;
 
     private String modelType;
@@ -56,6 +58,14 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
 
     public boolean getEnableDebug() {
         return this.enableDebug;
+    }
+
+    public void setEnableMatching(boolean enableMatching) {
+        this.enableMatching = enableMatching;
+    }
+
+    public boolean getEnableMatching() {
+        return this.enableMatching;
     }
 
     public void setModelType(String modelType) {

@@ -18,6 +18,8 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private boolean enableDebug;
 
+    private boolean enableMatching;
+
     private boolean scoreTestFile;
 
     private String internalResourceHostPort;
@@ -66,6 +68,16 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     @JsonProperty("enable_debug")
     public boolean isEnableDebug() {
         return this.enableDebug;
+    }
+
+    @JsonProperty("enable_matching")
+    public boolean isEnableMatching() {
+        return enableMatching;
+    }
+
+    @JsonProperty("enable_matching")
+    public void setEnableMatching(boolean enableMatching) {
+        this.enableMatching = enableDebug;
     }
 
     @JsonProperty("target_result_dir")

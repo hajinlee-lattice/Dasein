@@ -128,6 +128,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         scoringConfig.setMetadataTable(metadataTable);
         scoringConfig.setCustomerSpace(configuration.getCustomerSpace());
         scoringConfig.setInternalResourceHostPort(configuration.getInternalResourceHostPort());
+        scoringConfig.setEnableMatching(configuration.getEnableMatching());
 
         String sourceImportTable = getStringValueFromContext(SOURCE_IMPORT_TABLE);
         String importErrorPath = "";
