@@ -25,7 +25,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScoreWorkflowConfiguration> {
 
     @Autowired
-    private CreateCdlTargetTableFilterStep createCdlScoringTableFilterStep;
+    private CreateCdlTargetTableFilterStep createCdlTargetTableFilterStep;
 
     @Autowired
     private CreateCdlEventTableStep createCdlEventTableStep;
@@ -51,7 +51,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     @Override
     public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
         return new WorkflowBuilder(name())//
-                .next(createCdlScoringTableFilterStep) //
+                .next(createCdlTargetTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow, null) //
                 .next(score) //
