@@ -30,7 +30,7 @@ public class PrepareScoringAfterModelingWorkflow
     private PrepareSegmentMatchingStep prepareSegmentMatchingStep;
 
     @Inject
-    private CustomEventSimpleMatchWorkflow simpleMatchWorkflow;
+    private CustomEventSimpleMatchWorkflow customEventSimpleMatchWorkflow;
 
     @Override
     public Workflow defineWorkflow(PrepareScoringAfterModelingWorkflowConfiguration config) {
@@ -44,7 +44,7 @@ public class PrepareScoringAfterModelingWorkflow
             return new WorkflowBuilder(name()) //
                     .next(segmentExportInitStep) //
                     .next(prepareSegmentMatchingStep) //
-                    .next(simpleMatchWorkflow, null) //
+                    .next(customEventSimpleMatchWorkflow, null) //
                     .build();
         }
     }
