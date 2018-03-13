@@ -4,7 +4,6 @@ import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
 
-import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -18,6 +17,7 @@ import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 
@@ -51,7 +51,6 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
 
     @Override
     protected void buildProductTransactionRestrictions() {
-
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds);
         AggregationFilter unitsFilter = null;
         AggregationFilter spentFilter = null;
@@ -70,24 +69,33 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
         }
 
         Bucket.Transaction txn;
-        if (aiModel.getModelingStrategy() == ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE) {
+        switch (aiModel.getModelingStrategy()) {
+        case CROSS_SELL_REPEAT_PURCHASE:
             if (!aiModel.getModelingConfigFilters().containsKey(ModelingConfig.PURCHASED_BEFORE_PERIOD)) {
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
-            } else {
-                ModelingConfigFilter config = aiModel.getModelingConfigFilters()
-                        .get(ModelingConfig.PURCHASED_BEFORE_PERIOD);
-                BucketRestriction priorOnly = new BucketRestriction(attrLookup,
-                        Bucket.txnBkt(new Bucket.Transaction(productIds,
-                                TimeFilter.priorOnly(config.getValue(), TimeFilter.Period.Month), null, null, false)));
-
-                BucketRestriction notWithin = new BucketRestriction(attrLookup,
-                        Bucket.txnBkt(new Bucket.Transaction(productIds,
-                                TimeFilter.within(config.getValue(), TimeFilter.Period.Month), null, null, true)));
-                productTxnRestriction = Restriction.builder().and(priorOnly, notWithin).build();
             }
-        } else {
-            txn = new Bucket.Transaction(productIds, TimeFilter.ever(), spentFilter, unitsFilter, true);
-            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
+
+            ModelingConfigFilter config = aiModel.getModelingConfigFilters()
+                    .get(ModelingConfig.PURCHASED_BEFORE_PERIOD);
+            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(new Bucket.Transaction(productIds,
+                    TimeFilter.priorOnly(config.getValue() - 1, TimeFilter.Period.Month), null, null, false)));
+            break;
+        case CROSS_SELL_FIRST_PURCHASE:
+            if (unitsFilter == null && spentFilter == null) {
+                txn = new Bucket.Transaction(productIds, TimeFilter.ever(), null, null, true);
+                productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
+            } else {
+                Bucket txnBkt1 = Bucket.txnBkt(new Bucket.Transaction(productIds,
+                        TimeFilter.priorOnly(1, TimeFilter.Period.Month), null, null, true));
+                Bucket txnBkt2 = Bucket.txnBkt(new Bucket.Transaction(productIds,
+                        new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, null), spentFilter, unitsFilter, false));
+                productTxnRestriction = Restriction.builder()
+                        .and(new BucketRestriction(attrLookup, txnBkt1), new BucketRestriction(attrLookup, txnBkt2))
+                        .build();
+            }
+            break;
+        default:
+            throw new LedpException(LedpCode.LEDP_40017);
         }
 
     }

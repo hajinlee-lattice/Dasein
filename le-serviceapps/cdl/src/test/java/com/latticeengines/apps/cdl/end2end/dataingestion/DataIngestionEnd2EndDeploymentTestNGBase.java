@@ -185,7 +185,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     protected String processAnalyzeAppId;
     protected DataCollection.Version initialVersion;
 
-    protected RatingEngine ratingEngine;;
+    protected RatingEngine ratingEngine;
 
     @BeforeClass(groups = { "end2end", "precheckin", "deployment" })
     public void setup() throws Exception {
@@ -236,8 +236,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Uploaded file " + sourceFile.getName() + " to " + sourceFile.getPath());
     }
 
-    SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type, Resource
-            source) {
+    SourceFile uploadDeleteCSV(String fileName, SchemaInterpretation schema, CleanupOperationType type,
+            Resource source) {
         logger.info("Upload file " + fileName + ", operation type is " + type.name() + ", Schema is " + schema.name());
         return fileUploadProxy.uploadDeleteFile(false, fileName, schema.name(), type.name(), source);
     }
@@ -254,25 +254,23 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             importTemplate.setTableType(TableType.IMPORTTABLE);
             switch (entity) {
             case Account:
-                importTemplate.getAttributes()
-                        .forEach(attr -> {
-                            attr.setGroupsViaList(Arrays.asList( //
-                                ColumnSelection.Predefined.TalkingPoint, //
-                                ColumnSelection.Predefined.CompanyProfile));
-                            if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
-                                attr.setInterfaceName(InterfaceName.AccountId);
-                            }
-                        });
+                importTemplate.getAttributes().forEach(attr -> {
+                    attr.setGroupsViaList(Arrays.asList( //
+                            ColumnSelection.Predefined.TalkingPoint, //
+                            ColumnSelection.Predefined.CompanyProfile));
+                    if (attr.getName().equals("Id") || attr.getName().equals("AccountId")) {
+                        attr.setInterfaceName(InterfaceName.AccountId);
+                    }
+                });
                 importTemplate.setName(SchemaInterpretation.Account.name());
                 break;
             case Contact:
                 importTemplate.setName(SchemaInterpretation.Contact.name());
-                importTemplate.getAttributes()
-                        .forEach(attr -> {
-                            if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
-                                attr.setInterfaceName(InterfaceName.ContactId);
-                            }
-                        });
+                importTemplate.getAttributes().forEach(attr -> {
+                    if (attr.getName().equals("Id") || attr.getName().equals("ContactId")) {
+                        attr.setInterfaceName(InterfaceName.ContactId);
+                    }
+                });
                 break;
             case Product:
                 importTemplate.setName(SchemaInterpretation.Product.name());
@@ -510,8 +508,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 String.format("%s/pls/jobs/yarnapps/%s", deployedHostPort, appId), //
                 Job.class);
         assertNotNull(job);
-        List<Report> reports = job.getReports();
-        return reports;
+        return job.getReports();
     }
 
     void verifyStats(BusinessEntity... entities) {
@@ -582,7 +579,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         assertEquals(map.entrySet().size(), expectedCounts.size(),
                 "Should have " + expectedCounts.size() + " reports for redshift exporting.");
         expectedCounts.forEach((role, count) -> logger.info("Redshit report role " + role + " count "
-                + map.get(role.name()).longValue() + " should have " + count.longValue()));
+                + map.get(role.name()).longValue() + " should have " + count));
         expectedCounts.forEach((role, count) -> assertEquals(map.get(role.name()).longValue(), count.longValue(),
                 "The count of table " + role + " does not meet the expectation."));
     }
@@ -619,7 +616,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     void createModelingSegment() {
-        testMetadataSegmentProxy.createOrUpdate(constructModelingSegment());
+        testMetadataSegmentProxy.createOrUpdate(constructTargetSegment());
         MetadataSegment segment = testMetadataSegmentProxy.getSegment(SEGMENT_NAME_MODELING);
         Assert.assertNotNull(segment);
     }
@@ -675,7 +672,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return segment;
     }
 
-    protected MetadataSegment constructModelingSegment() {
+    protected MetadataSegment constructTargetSegment() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
@@ -684,6 +681,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setAccountRestriction(accountRestriction);
         return segment;
     }
 
@@ -696,6 +694,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         segment.setDisplayName("End2End Segment Training");
         segment.setDescription("A training segment for CDL end2end modeling test.");
         segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
+        segment.setAccountRestriction(accountRestriction);
         return segment;
     }
 
@@ -793,8 +792,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             if (count > 0) {
                 Assert.assertNotNull(counts.get(bkt.getName()),
                         "Cannot find count for bucket " + bkt.getName() + " in rating engine.");
-                Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName() + " expected "
-                        + counts.get(bkt.getName()) + " found " + count);
+                Assert.assertEquals(counts.get(bkt.getName()), count, "Rating engine count " + bkt.getName()
+                        + " expected " + counts.get(bkt.getName()) + " found " + count);
             }
         });
     }

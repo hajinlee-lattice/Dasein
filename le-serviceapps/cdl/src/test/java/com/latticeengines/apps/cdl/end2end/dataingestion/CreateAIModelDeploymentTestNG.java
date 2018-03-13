@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -35,7 +37,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CreateAIModelDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
+    private static final boolean USE_EXISTING_TENANT = true;
     private static final String EXISTING_TENANT = "JLM1520552880910";
     private static final boolean EV_MODEL = false;
 
@@ -92,7 +94,7 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void setupTestSegment() {
-        testSegment = constructModelingSegment();
+        testSegment = constructTargetSegment();
         testSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), testSegment);
     }
 
@@ -103,6 +105,9 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private void setupTestRatingEngine() {
         setupTestSegment();
+
+        MetadataSegment segment = constructTargetSegment();
+        Restriction accountRestriction = segment.getAccountRestriction();
 
         testRatingEngine = new RatingEngine();
         testRatingEngine.setDisplayName("CreateAIModelDeploymentTestRating");
@@ -121,8 +126,8 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 new ModelingConfigFilter(ModelingConfig.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
         testAIModel.setModelingConfigFilters(myMap);
         testAIModel.setPredictionType(PredictionType.EXPECTED_VALUE);
-        testAIModel.setTargetProducts(Collections.singletonList(targetProductId));
-        testAIModel.setTrainingProducts(Collections.singletonList(trainingProductId));
+        testAIModel.setTargetProducts(Arrays.asList(targetProductId));
+        testAIModel.setTrainingProducts(Arrays.asList(trainingProductId));
         testAIModel.setTrainingSegment(trainSegment);
 
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
@@ -130,16 +135,14 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
-        Assert.assertEquals(targetCount, 153);
+        Assert.assertEquals(targetCount, 82);
 
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TRAINING);
-        log.info("trainingCount=" + trainingCount);
-        Assert.assertEquals(trainingCount, 292);
+        Assert.assertEquals(trainingCount, 191);
 
         long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
-        log.info("eventCount=" + eventCount);
-        Assert.assertEquals(eventCount, 12);
+        Assert.assertEquals(eventCount, 5);
     }
 }
