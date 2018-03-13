@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 public abstract class PeriodBuilderUnitTestNGBase {
 
-    static final String PERIOD_COUNT_DATA_PROVIDER = "periodCountDtaProvider";
+    static final String PERIOD_ID_DATA_PROVIDER = "periodCountDtaProvider";
     static final String PERIOD_RANGE_DATA_PROVIDER = "periodRangeDtaProvider";
 
     @Test(groups = "unit")
@@ -50,14 +50,14 @@ public abstract class PeriodBuilderUnitTestNGBase {
         Assert.assertEquals(dateRange.getRight(), LocalDate.parse(endDate));
     }
 
-    @Test(groups = "unit", dataProvider = PERIOD_COUNT_DATA_PROVIDER)
-    public void testPeriodCount(String startDate, String endDate, int period) {
+    @Test(groups = "unit", dataProvider = PERIOD_ID_DATA_PROVIDER)
+    public void testConvertToPeriodId(String startDate, String endDate, int period) {
         PeriodBuilder builder = StringUtils.isBlank(startDate) ? getBuilder() : getBuilder(startDate);
         int actualPeriod = builder.toPeriodId(endDate);
         Assert.assertEquals(new Integer(actualPeriod), new Integer(period));
     }
 
-    protected abstract Object[][] providePeriodCounts();
+    protected abstract Object[][] providePeriodIds();
     protected abstract PeriodBuilder getBuilder();
     protected abstract PeriodBuilder getBuilder(String startDate);
 

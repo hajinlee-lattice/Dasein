@@ -6,8 +6,8 @@ import org.testng.annotations.DataProvider;
 public class NaturalYearPeriodBuilderUnitTestNG extends PeriodBuilderUnitTestNGBase {
 
     @Override
-    @DataProvider(name = PERIOD_COUNT_DATA_PROVIDER)
-    protected Object[][] providePeriodCounts() {
+    @DataProvider(name = PERIOD_ID_DATA_PROVIDER)
+    protected Object[][] providePeriodIds() {
         return new Object[][] { //
                 new Object[] { "2016-02-05", "2016-01-01", 0 }, //
                 new Object[] { "2016-02-05", "2015-12-31", -1 }, //
