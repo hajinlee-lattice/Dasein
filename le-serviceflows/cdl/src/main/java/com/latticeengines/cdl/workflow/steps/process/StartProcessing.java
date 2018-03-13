@@ -297,9 +297,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
             String currentBuildNumber = configuration.getDataCloudBuildNumber();
             DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-            if (dataCollection != null && dataCollection.getDataCloudBuildNumber() != null
-                    && !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber)) {
-
+            if (dataCollection != null && (dataCollection.getDataCloudBuildNumber() == null
+                    || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))) {
                 rebuildEntities.add(BusinessEntity.Account);
                 setEntityToRebuild();
             }
