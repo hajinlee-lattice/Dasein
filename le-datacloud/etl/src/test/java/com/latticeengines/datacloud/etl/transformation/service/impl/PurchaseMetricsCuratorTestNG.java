@@ -24,9 +24,12 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ActivityMetricsCuratorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ActivityMetricsPivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TimeFilter.Period;
@@ -46,8 +49,9 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private GeneralSource cleanedQuarterTable = new GeneralSource("CleanedQuarterTable");
     private GeneralSource cleanedYearTable = new GeneralSource("CleanedYearTable");
     private GeneralSource depivotedMetrics = new GeneralSource("DepivotedMetrics");
+    private GeneralSource pivotMetrics = new GeneralSource("PivotMetrics");
 
-    private GeneralSource source = depivotedMetrics;
+    private GeneralSource source = pivotMetrics;
 
     private String MAX_TXN_DATE = "2018-01-01";
 
@@ -57,6 +61,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private ActivityMetrics weekAvgSpendOvertimeMetrics;
     private ActivityMetrics weekTotalSpendOvertimeMetrics;
     private ActivityMetrics weekHasPurchased;
+
+    private List<ActivityMetrics> metricsList;
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
@@ -68,6 +74,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         finish(progress);
         confirmIntermediateSource(cleanedWeekTable, null);
         confirmIntermediateSource(depivotedMetrics, null);
+        confirmIntermediateSource(pivotMetrics, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -111,10 +118,19 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step10.setTargetSource(depivotedMetrics.getSourceName());
         step10.setConfiguration(getActivityMetricsCuratorConfig());
 
+        TransformationStepConfig step20 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(depivotedMetrics.getSourceName());
+        step20.setBaseSources(baseSources);
+        step20.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
+        step20.setTargetSource(pivotMetrics.getSourceName());
+        step20.setConfiguration(getActivityMetricsPivotConfig());
+
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step00);
         steps.add(step10);
+        steps.add(step20);
 
         // -----------
         configuration.setSteps(steps);
@@ -146,11 +162,38 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         weekHasPurchased = new ActivityMetrics();
         weekHasPurchased.setMetrics(InterfaceName.HasPurchased);
         weekHasPurchased.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
-        conf.setMetrics(Arrays.asList(weekMarginMetrics, weekShareOfWalletMetrics, weekAvgSpendOvertimeMetrics,
-                weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics));
+        metricsList = Arrays.asList(weekMarginMetrics, weekShareOfWalletMetrics, weekAvgSpendOvertimeMetrics,
+                weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics);
+        conf.setMetrics(metricsList);
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         return JsonUtils.serialize(conf);
     }
+
+    private String getActivityMetricsPivotConfig() {
+        ActivityMetricsPivotConfig config = new ActivityMetricsPivotConfig();
+        config.setActivityType(ActivityType.PurchaseHistory);
+        config.setGroupByField(InterfaceName.AccountId.name());
+        config.setPivotField(InterfaceName.ProductId.name());
+        Map<String, List<Product>> productMap = new HashMap<>();
+        productMap.put("PID1", null); // TODO: product object could be added
+                                      // later to test metadata generation
+        productMap.put("PID2", null);
+        productMap.put("PID3", null);
+        productMap.put("PID4", null);
+        config.setProductMap(productMap);
+        return JsonUtils.serialize(config);
+    }
+
+    private Object[][] accountData = new Object[][] { //
+            { "AID1", "SEG1" }, //
+            { "AID2", "SEG1" }, //
+            { "AID3", "SEG3" }, //
+            { "AID4", "SEG3" }, //
+            { "AID5", "SEG5" }, //
+            { "AID6", "SEG6" }, //
+            { "AID7", null }, //
+            { "AID8", "SEG8" }, //
+    };
 
     private void prepareAccount() {
         // Only put attrs which are needed in this test
@@ -158,18 +201,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
         schema.add(Pair.of(InterfaceName.SpendAnalyticsSegment.name(), String.class));
 
-        Object[][] data = new Object[][] { //
-                { "AID1", "SEG1" }, //
-                { "AID2", "SEG1" }, //
-                { "AID3", "SEG3" }, //
-                { "AID4", "SEG3" }, //
-                { "AID5", "SEG5" }, //
-                { "AID6", "SEG6" }, //
-                { "AID7", null }, //
-                { "AID8", "SEG8" }, //
-        };
-
-        uploadBaseSourceData(account.getSourceName(), baseSourceVersion, schema, data);
+        uploadBaseSourceData(account.getSourceName(), baseSourceVersion, schema, accountData);
         try {
             extractSchema(account, baseSourceVersion,
                     hdfsPathBuilder.constructSnapshotDir(account.getSourceName(), baseSourceVersion).toString());
@@ -339,6 +371,49 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID2", "PID2", 33, 169, 20.0, 20.0, 0 },//
     };
 
+    // Schema: AccountId
+    // PID1_Week1_Margin, PID1_Week1_ShareOfWallet, PID1_Week1_AvgSpendOvertime, PID1_Week1_TotalSpendOvertime, PID1_Week1_Week2_2_SpendChange
+    // PID2_Week1_Margin, PID2_Week1_ShareOfWallet, PID2_Week1_AvgSpendOvertime, PID2_Week1_TotalSpendOvertime, PID2_Week1_Week2_2_SpendChange  
+    // PID3_Week1_Margin, PID3_Week1_ShareOfWallet, PID3_Week1_AvgSpendOvertime, PID3_Week1_TotalSpendOvertime, PID3_Week1_Week2_2_SpendChange
+    // PID4_Week1_Margin, PID4_Week1_ShareOfWallet, PID4_Week1_AvgSpendOvertime, PID4_Week1_TotalSpendOvertime, PID4_Week1_Week2_2_SpendChange
+    private Object[][] pivotMetricsData = new Object[][] {
+            { "AID2", //
+                    33, 169, 20.0, 20.0, 100, //
+                    33, 169, 20.0, 20.0, 0, //
+                    null, null, null, null, -100, //
+                    null, null, null, null, null }, //
+            { "AID4", //
+                    300, 90, 20.0, 60.0, 100, //
+                    null, 120, 20.0, 20.0, 100, //
+                    null, 120, 20.0, 20.0, 100, //
+                    null, null, null, null, null }, //
+            { "AID5", //
+                    null, null, null, null, 0, //
+                    null, null, null, null, 0, //
+                    null, null, null, null, null, //
+                    null, null, null, null, null }, //
+            { "AID8", //
+                    null, null, null, null, -100, //
+                    null, null, null, null, null, //
+                    null, null, null, null, null, //
+                    null, null, null, null, null }, //
+            { "AID1", //
+                    50, 85, 22.5, 45.0, 13, //
+                    50, 85, 22.5, 45.0, 13, //
+                    50, 122, 22.5, 45.0, 13, //
+                    50, 122, 22.5, 45.0, 13 }, //
+            { "AID3", //
+                    -56, 150, 6.666666666666667, 20.0, 0, //
+                    null, null, null, null, 0, //
+                    null, null, null, null, 0, //
+                    null, null, null, null, null }, //
+            { "AID6", //
+                    100, 100, 10.0, 10.0, 100, //
+                    100, 100, 10.0, 10.0, 100, //
+                    null, null, null, null, null, //
+                    null, null, null, null, null },//
+    };
+
     private void prepareWeekTable() {
         // Only put attrs which are needed in this test. Faked period table
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
@@ -370,6 +445,9 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                 break;
             case "DepivotedMetrics":
                 verifyDepivotedMetrics(records);
+                break;
+            case "PivotMetrics":
+                verifyPivotMetrics(records);
                 break;
             default:
                 throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
@@ -412,6 +490,36 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             cnt++;
         }
         Assert.assertEquals(cnt, 18);
+    }
+
+    private void verifyPivotMetrics(Iterator<GenericRecord> records) {
+        log.info("Verifying pivot metrics table");
+        Map<String, Object[]> expectedMetrics = new HashMap<>();
+        for (Object[] ent : pivotMetricsData) {
+            expectedMetrics.put(ent[0].toString(), ent); // AccountId is unique
+        }
+
+        String[] expectedProductIds = new String[] { "PID1", "PID2", "PID3", "PID4" };
+        int cnt = 0;
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            log.info(record.toString());
+            String key = record.get(InterfaceName.AccountId.name()).toString();
+            Object expected = expectedMetrics.get(key);
+            Assert.assertNotNull(expected);
+            for (int i = 0; i < expectedProductIds.length; i++)
+                for (int j = 0; j < metricsList.size(); j++) {
+                    ActivityMetrics metrics = metricsList.get(j);
+                    String fullMetricsName = metrics.getFullActivityMetricsName(expectedProductIds[i]);
+                    log.info(String.format("Checking %s: actual = %s, expected = %s", fullMetricsName,
+                            String.valueOf(record.get(fullMetricsName)),
+                            String.valueOf(expectedMetrics.get(key)[i * metricsList.size() + j + 1])));
+                    Assert.assertTrue(isObjEquals(record.get(fullMetricsName),
+                            expectedMetrics.get(key)[i * metricsList.size() + j + 1]));
+                }
+            cnt++;
+        }
+        Assert.assertEquals(cnt, accountData.length - 1);
     }
 
     @Override

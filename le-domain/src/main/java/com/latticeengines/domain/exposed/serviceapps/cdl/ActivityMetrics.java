@@ -180,12 +180,12 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
         this.type = type;
     }
 
-    public String getFullProductMetricsName(String productId) {
-        List<String> periodNames = new ArrayList<>();
-        getPeriodsConfig().forEach(config -> {
-            periodNames.add(config.getPeriod() + config.getPeriodRangeName());
-        });
-        return "PH_" + productId + "_" + String.join("_", periodNames) + "_" + metrics;
+    public String getFullActivityMetricsName(String activityId) {
+        return activityId + "_" + getFullMetricsName();
+    }
+
+    public static String getFullActivityMetricsName(String fullMetricsName, String activityId) {
+        return activityId + "_" + fullMetricsName;
     }
 
     public String getFullMetricsName() {
