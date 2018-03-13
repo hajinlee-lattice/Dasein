@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -59,6 +60,14 @@ public class TimeFilter {
         return filter;
     }
 
+    public static TimeFilter between(int begin, int end, Period period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.BETWEEN;
+        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.values = Arrays.asList(begin, end);
+        return filter;
+    }
+
     public TimeFilter() {
     }
 
@@ -109,7 +118,7 @@ public class TimeFilter {
                 strs.add(String.valueOf(value));
             });
         }
-        return String.join("-", strs);
+        return String.join("_", strs);
     }
 
     public static class Period {
