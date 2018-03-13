@@ -56,6 +56,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private ActivityMetrics weekSpendChangeMetrics;
     private ActivityMetrics weekAvgSpendOvertimeMetrics;
     private ActivityMetrics weekTotalSpendOvertimeMetrics;
+    private ActivityMetrics weekHasPurchased;
 
     @Test(groups = "functional", enabled = true)
     public void testTransformation() {
@@ -142,6 +143,9 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         weekSpendChangeMetrics.setMetrics(InterfaceName.SpendChange);
         weekSpendChangeMetrics.setPeriodsConfig(
                 Arrays.asList(TimeFilter.within(1, Period.Week), TimeFilter.between(2, 2, Period.Week)));
+        weekHasPurchased = new ActivityMetrics();
+        weekHasPurchased.setMetrics(InterfaceName.HasPurchased);
+        weekHasPurchased.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
         conf.setMetrics(Arrays.asList(weekMarginMetrics, weekShareOfWalletMetrics, weekAvgSpendOvertimeMetrics,
                 weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics));
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));

@@ -21,6 +21,7 @@ import com.latticeengines.dataflow.exposed.builder.common.Aggregation;
 import com.latticeengines.dataflow.exposed.builder.common.AggregationType;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AttrHasPurchasedFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MetricsMarginAgg;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MetricsShareOfWalletFunc;
 import com.latticeengines.dataflow.runtime.cascading.propdata.MetricsSpendChangeFunc;
@@ -93,6 +94,9 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
                 case AvgSpendOvertime:
                     toJoin.add(avgSpendOvertime(periodTable, metrics));
                     break;
+                case HasPurchased:
+                    toJoin.add(hasPurchased(periodTable, metrics));
+                    break;
                 default:
                     throw new UnsupportedOperationException(metrics.getMetrics() + " metrics is not supported");
                 }
@@ -114,6 +118,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         metricsClasses.put(InterfaceName.SpendChange, Integer.class);
         metricsClasses.put(InterfaceName.TotalSpendOvertime, Double.class);
         metricsClasses.put(InterfaceName.AvgSpendOvertime, Double.class);
+        metricsClasses.put(InterfaceName.HasPurchased, Boolean.class);
     }
 
     private void validateMetrics() {
@@ -167,6 +172,11 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
                 if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.WITHIN) {
                     throw new UnsupportedOperationException(
                             "AvgSpendOvertime metrics only support WITHIN comparison type");
+                }
+                break;
+            case HasPurchased:
+                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.EVER) {
+                    throw new UnsupportedOperationException("HasPurchased metrics only support EVER comparison type");
                 }
                 break;
             default:
@@ -339,6 +349,18 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         return node.renamePipe("_avgspendovertime_node_");
     }
 
+    private Node hasPurchased(Node node, ActivityMetrics metrics) {
+        // Period range is ever, no need to filter by period
+        List<String> retainFields = new ArrayList<>();
+        retainFields.addAll(config.getGroupByFields());
+        retainFields.add(metrics.getFullMetricsName());
+
+        node = node.apply(new AttrHasPurchasedFunction(metrics.getFullMetricsName()),
+                new FieldList(InterfaceName.TotalAmount.name()), prepareFms(node, metrics, false).get(0))
+                .retain(new FieldList(retainFields));
+        return node.renamePipe("_haspurchased_node_");
+    }
+
     private Node join(Node base, List<Node> toJoin) {
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
@@ -349,7 +371,6 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         List<FieldList> joinFieldsList = new ArrayList<FieldList>(Collections.nCopies(toJoin.size(), joinFields));
         return base.coGroup(joinFields, toJoin, joinFieldsList, JoinType.OUTER).retain(new FieldList(retainFields));
     }
-
 
     private List<FieldMetadata> prepareFms(Node source, ActivityMetrics metrics, boolean includeGroupBy) {
         List<FieldMetadata> fms = new ArrayList<>();

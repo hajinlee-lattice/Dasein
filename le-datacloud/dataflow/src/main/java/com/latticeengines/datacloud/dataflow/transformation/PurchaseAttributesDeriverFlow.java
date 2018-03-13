@@ -2,20 +2,21 @@ package com.latticeengines.datacloud.dataflow.transformation;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.dataflow.runtime.cascading.propdata.AttrMarginFunction;
 import com.latticeengines.dataflow.runtime.cascading.propdata.AttrHasPurchasedFunction;
+import com.latticeengines.dataflow.runtime.cascading.propdata.AttrMarginFunction;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PurchaseAttributesDeriverConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 
 @Component(PurchaseAttributesDeriverFlow.FLOW_BEAN_NAME)
 public class PurchaseAttributesDeriverFlow extends ConfigurableFlowBase<PurchaseAttributesDeriverConfig> {
@@ -67,7 +68,7 @@ public class PurchaseAttributesDeriverFlow extends ConfigurableFlowBase<Purchase
                     break;
                 case HasPurchased:
                     node = node.apply(
-                            new AttrHasPurchasedFunction(field),
+                        new AttrHasPurchasedFunction(field.name()),
                             new FieldList(node.getFieldNames()),
                             new FieldMetadata(field.name(), fieldType));
                     break;

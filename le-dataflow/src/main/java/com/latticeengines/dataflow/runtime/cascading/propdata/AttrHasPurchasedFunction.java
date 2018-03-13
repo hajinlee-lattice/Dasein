@@ -1,5 +1,7 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
 import cascading.operation.Function;
@@ -8,11 +10,12 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-
 public class AttrHasPurchasedFunction extends BaseOperation implements Function {
-    public AttrHasPurchasedFunction(InterfaceName field) {
-        super(new Fields(field.name()));
+
+    private static final long serialVersionUID = 7617381531527543566L;
+
+    public AttrHasPurchasedFunction(String targetField) {
+        super(new Fields(targetField));
     }
 
     @Override
