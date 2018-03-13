@@ -32,6 +32,7 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
         }
 
         public Builder customer(CustomerSpace customerSpace) {
+            configuration.setCustomerSpace(customerSpace);
             matchCdlAccount.setCustomerSpace(customerSpace);
             matchCdlStep.setCustomerSpace(customerSpace);
             ldcConfigurationBuilder.customer(customerSpace);

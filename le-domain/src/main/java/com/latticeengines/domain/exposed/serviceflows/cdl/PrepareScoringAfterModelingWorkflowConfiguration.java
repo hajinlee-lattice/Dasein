@@ -91,6 +91,7 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             configuration.add(setConfigForScoring);
             configuration.add(initStepConf);
             configuration.add(prepareSegmentMatching);
+            configuration.add(matchCdlWorkflowConfBuilder.build("customEventSimpleMatchWorkflow"));
             return configuration;
         }
     }
