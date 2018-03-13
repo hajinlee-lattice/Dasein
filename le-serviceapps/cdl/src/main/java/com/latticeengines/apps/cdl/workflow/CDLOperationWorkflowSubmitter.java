@@ -154,7 +154,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
         } else if (maintenanceOperationConfiguration instanceof CleanupByDateRangeConfiguration) {
             CleanupByDateRangeConfiguration cleanupByDateRangeConfiguration =
                     ((CleanupByDateRangeConfiguration) maintenanceOperationConfiguration);
-            DateFormat dateFormat = new SimpleDateFormat("MM-dd-yyyy");
+            DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             String start = dateFormat.format(cleanupByDateRangeConfiguration.getStartTime());
             String end = dateFormat.format(cleanupByDateRangeConfiguration.getEndTime());
             fileName = String.format("Transactions, Data during %s - %s", start, end);
