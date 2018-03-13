@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import reactor.core.publisher.Mono;
@@ -68,7 +69,7 @@ public class CDLExternalSystemServiceImpl implements CDLExternalSystemService {
         if (CollectionUtils.isNotEmpty(ids)) {
             ParallelFlux<ColumnMetadata> cms = servingStoreService.getFullyDecoratedMetadata(BusinessEntity.Account);
             systems = cms.flatMap(cm -> {
-                if (ids.contains(cm.getAttrName())) {
+                if (cm.isEnabledFor(ColumnSelection.Predefined.LookupId) && ids.contains(cm.getAttrName())) {
                     String attrName = cm.getAttrName();
                     String displayName = cm.getDisplayName();
                     return Mono.just(new CDLExternalSystemMapping(attrName, CDLExternalSystemMapping.FIELD_TYPE_STRING, displayName));

@@ -1,6 +1,6 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
@@ -44,9 +45,10 @@ public class SystemMetadataStoreImpl extends
 
     @Inject
     public SystemMetadataStoreImpl(TableRoleTemplate tableRoleTemplate, AMMetadataStore amMetadataStore,
-            CDLNamespaceService cdlNamespaceService, RatingDisplayMetadataStore ratingDisplayMetadataStore) {
+            CDLNamespaceService cdlNamespaceService, RatingDisplayMetadataStore ratingDisplayMetadataStore,
+            ExternalSystemMetadataStore externalSystemMetadataStore) {
         super(getBaseMds(tableRoleTemplate, amMetadataStore, cdlNamespaceService),
-                getDecoratorChain(ratingDisplayMetadataStore));
+                getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
     }
 
     private static MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>> getBaseMds(
@@ -123,10 +125,15 @@ public class SystemMetadataStoreImpl extends
     }
 
     private static ChainedDecoratorFactory<Namespace1<BusinessEntity>> getDecoratorChain(
-            RatingDisplayMetadataStore ratingDisplayMetadataStore) {
+            RatingDisplayMetadataStore ratingDisplayMetadataStore,
+            ExternalSystemMetadataStore externalSystemMetadataStore) {
         DecoratorFactory<Namespace1<String>> ratingDisplayDecorator = getRatingDecorator(ratingDisplayMetadataStore);
-        List<DecoratorFactory<? extends Namespace>> factories = Collections.singletonList( //
+        DecoratorFactory<Namespace2<String, BusinessEntity>> lookupIdDecorator = getLookupIdDecorator(
+                externalSystemMetadataStore);
+        List<DecoratorFactory<? extends Namespace>> factories = Arrays.asList( //
+                lookupIdDecorator, //
                 ratingDisplayDecorator //
+
         );
 
         return new ChainedDecoratorFactory<Namespace1<BusinessEntity>>("ServingStoreChain", factories) {
@@ -135,7 +142,8 @@ public class SystemMetadataStoreImpl extends
                 BusinessEntity entity = namespace.getCoord1();
                 String tenantId = MultiTenantContext.getTenantId();
                 Namespace ratingNs = Namespace.as(BusinessEntity.Rating.equals(entity) ? tenantId : "");
-                return Collections.singletonList(ratingNs);
+                Namespace lookupIdNs = Namespace.as(tenantId, entity);
+                return Arrays.asList(lookupIdNs, ratingNs);
             }
         };
     }
@@ -143,6 +151,11 @@ public class SystemMetadataStoreImpl extends
     private static DecoratorFactory<Namespace1<String>> getRatingDecorator(
             RatingDisplayMetadataStore ratingDisplayMetadataStore) {
         return MdsDecoratorFactory.fromMds("RatingDisplay", ratingDisplayMetadataStore);
+    }
+
+    private static DecoratorFactory<Namespace2<String, BusinessEntity>> getLookupIdDecorator(
+            ExternalSystemMetadataStore externalSystemMetadataStore) {
+        return MdsDecoratorFactory.fromMds("LookupId", externalSystemMetadataStore);
     }
 
     @Override

@@ -8,24 +8,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -38,9 +46,16 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Autowired
     private MetadataProxy metadataProxy;
 
+    @Inject
+    private SystemMetadataStore systemMetadataStore;
+
+    @Inject
+    private CDLTestDataService cdlTestDataService;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
         super.setupTestEnvironment();
+        cdlTestDataService.populateData(mainTestTenant.getId());
     }
 
     @Test(groups = "deployment")
@@ -67,6 +82,13 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(system.getCrmIds().contains(InterfaceName.SalesforceSandboxAccountID.name()));
         Assert.assertTrue(system.getMapIds().contains(InterfaceName.MarketoAccountID.name()));
         Assert.assertTrue(system.getErpIds().contains("TestERPId"));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
+    public void testLookupIdAttrGroup() {
+        List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
+                .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.LookupId)).collectList().block();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
     private void prepareTable() {
