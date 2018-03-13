@@ -80,6 +80,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
             cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
             cdlTargetTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
+            ratingEngineScoreWorkflowBuilder.filterTableName(targetFilterTableName);
             return this;
         }
 
@@ -88,6 +89,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
             cdlTargetTableTupleFilter.setTargetQuery(targetQuery);
+            ratingEngineScoreWorkflowBuilder.filterQuery(targetQuery);
             return this;
         }
 
@@ -307,6 +309,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder setEventColumn(String eventColumn) {
             cdlEventTable.setEventColumn(eventColumn);
             cdlEventTableTupleFilter.setEventColumn(eventColumn);
+            ratingEngineScoreWorkflowBuilder.setEventColumn(eventColumn);
             return this;
         }
 
