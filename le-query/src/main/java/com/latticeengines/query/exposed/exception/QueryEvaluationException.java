@@ -11,4 +11,8 @@ public class QueryEvaluationException extends IllegalArgumentException {
         super(msg);
     }
 
+    public QueryEvaluationException(String msg, Throwable e) {
+        super(msg, e);
+    }
+
 }
