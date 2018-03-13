@@ -40,7 +40,7 @@ public class NaturalWeekPeriodBuilder extends StartTimeBasedPeriodBuilder implem
         if (days >= 0) {
             return (int) (days / 7);
         } else {
-            return - (int) ((days + 1) / 7) - 1;
+            return (int) ((days + 1) / 7) - 1;
         }
     }
 
