@@ -6,14 +6,13 @@ import java.util.Map;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class ExportStepConfiguration extends MicroserviceStepConfiguration {
     @NotNull
-    private ExportFormat exportFormat;
+    private ExportFormat exportFormat = ExportFormat.CSV;
 
     @NotNull
-    private ExportDestination exportDestination;
+    private ExportDestination exportDestination = ExportDestination.FILE;
 
     private String exportInputPath;
 

@@ -83,10 +83,11 @@ public abstract class SegmentExportProcessor {
     public void executeExportActivity(Tenant tenant, SegmentExportStepConfiguration config,
             Configuration yarnConfiguration) {
         CustomerSpace customerSpace = config.getCustomerSpace();
-        String exportId = config.getMetadataSegmentExportId();
-
-        MetadataSegmentExport metadataSegmentExport = internalResourceRestApiProxy
-                .getMetadataSegmentExport(customerSpace, exportId);
+        MetadataSegmentExport metadataSegmentExport = config.getMetadataSegmentExport();
+        if (metadataSegmentExport == null) {
+            String exportId = config.getMetadataSegmentExportId();
+            metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
+        }
         Table segmentExportTable = metadataProxy.getTable(tenant.getId(), metadataSegmentExport.getTableName());
         long currentTimeMillis = System.currentTimeMillis();
         log.info("segmentExportTable = : " + JsonUtils.serialize(segmentExportTable));

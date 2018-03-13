@@ -10,8 +10,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -367,12 +365,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
         public ImportMatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
-            export.setExportDestination(ExportDestination.FILE);
-            export.setExportFormat(ExportFormat.CSV);
 
             configuration.setContainerConfiguration("importMatchAndModelWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-
+            rtsBulkScoreWorkflowBuilder.skipMatchingStep(Boolean.TRUE);
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());

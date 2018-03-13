@@ -62,6 +62,7 @@ public class SegmentExportInitStep extends BaseWorkflowStep<SegmentExportStepCon
             MetadataSegmentExport metadataSegmentExport = configuration.getMetadataSegmentExport();
             if (metadataSegmentExport == null) {
                 metadataSegmentExport = internalResourceRestApiProxy.getMetadataSegmentExport(customerSpace, exportId);
+                config.setMetadataSegmentExport(metadataSegmentExport);
             }
 
             log.info(String.format("Processing MetadataSegmentExport: %s", JsonUtils.serialize(metadataSegmentExport)));

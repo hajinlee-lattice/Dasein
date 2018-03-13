@@ -38,8 +38,7 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             matchDataCloudWorkflowBuilder.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
@@ -67,8 +66,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
 
         public Builder inputTableName(String tableName) {
             matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
-            score.setInputTableName(tableName);
             // result table name is set during execution
+            score.setInputTableName(tableName);
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
@@ -155,10 +154,8 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
         }
 
         public RTSBulkScoreWorkflowConfiguration build() {
-            export.setUsingDisplayName(Boolean.FALSE);
-            export.setExportDestination(ExportDestination.FILE);
-            export.setExportFormat(ExportFormat.CSV);
-
+            configuration.setContainerConfiguration("rtsBulkScoreWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             combineMatchDebugWithScores.microserviceStepConfiguration(microserviceStepConfiguration);

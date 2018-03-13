@@ -70,7 +70,7 @@ public final class PathBuilder {
 
     public static Path buildDataTablePath(String podId, CustomerSpace space, String namespace) {
         Path path = buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.TABLES);
-        
+
         if (!StringUtils.isEmpty(namespace)) {
             String[] namespaceTokens = namespace.split("\\.");
             for (String namespaceToken : namespaceTokens) {
@@ -107,6 +107,12 @@ public final class PathBuilder {
     public static Path buildDataFileExportPath(String podId, CustomerSpace space) {
         return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES)
                 .append(PathConstants.EXPORTS);
+    }
+
+    public static Path buildDataFileUniqueExportPath(String podId, CustomerSpace space) {
+        long currentTimeMillis = System.currentTimeMillis();
+        return buildCustomerSpacePath(podId, space).append(PathConstants.DATA).append(PathConstants.FILES)
+                .append(PathConstants.EXPORTS).append(String.valueOf(currentTimeMillis));
     }
 
     public static Path buildMetadataPath(String podId, CustomerSpace space) {

@@ -42,8 +42,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowConfigurationBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importAndRTSBulkScoreWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             importDataConfiguration.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowConfigurationBuilder.customer(customerSpace);
@@ -161,7 +160,8 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         }
 
         public ImportAndRTSBulkScoreWorkflowConfiguration build() {
-
+            configuration.setContainerConfiguration("importAndRTSBulkScoreWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             configuration.add(importDataConfiguration);
             configuration.add(registerReport);
             configuration.add(rtsBulkScoreWorkflowConfigurationBuilder.build());

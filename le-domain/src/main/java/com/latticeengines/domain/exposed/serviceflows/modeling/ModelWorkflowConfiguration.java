@@ -5,8 +5,6 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -164,8 +162,6 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
 
         public ModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
-            export.setExportDestination(ExportDestination.FILE);
-            export.setExportFormat(ExportFormat.CSV);
 
             configuration.setContainerConfiguration("modelWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

@@ -44,8 +44,7 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         private ProcessMatchResultConfiguration matchResult = new ProcessMatchResultConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("scoreWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             microserviceStepConfiguration.setCustomerSpace(customerSpace);
             match.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
@@ -200,6 +199,8 @@ public class ScoreWorkflowConfiguration extends BaseScoringWorkflowConfiguration
         }
 
         public ScoreWorkflowConfiguration build() {
+            configuration.setContainerConfiguration("scoreWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
             match.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
             score.microserviceStepConfiguration(microserviceStepConfiguration);

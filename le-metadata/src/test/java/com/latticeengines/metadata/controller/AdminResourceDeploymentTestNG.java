@@ -6,8 +6,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 
 import org.joda.time.DateTime;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
@@ -27,7 +25,7 @@ public class AdminResourceDeploymentTestNG extends MetadataDeploymentTestNGBase 
     public void testProvisionImportTables() {
         String tenantName = TestFrameworkUtils.generateTenantName();
         String tenantId = CustomerSpace.parse(tenantName).toString();
-        Tenant tenant  = new Tenant();
+        Tenant tenant = new Tenant();
         tenant.setId(tenantId);
         tenant.setName(tenantName);
         tenantService.discardTenant(tenant);

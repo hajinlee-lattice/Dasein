@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,14 +76,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
     @Override
     public void skipStep() {
-        log.info("Skip matching step and register event table now.");
-        Table table = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
-        if (table == null && StringUtils.isNotBlank(configuration.getInputTableName())) {
-            table = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                    configuration.getInputTableName());
-            putObjectInContext(EVENT_TABLE, table);
-            putObjectInContext(MATCH_RESULT_TABLE, table);
-        }
+        log.info("Skip prepare matching config step.");
         log.info("Skip embedded bulk match workflow.");
         skipEmbeddedWorkflow(getParentNamespace(), "", BulkMatchWorkflowConfiguration.class);
     }

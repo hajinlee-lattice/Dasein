@@ -1,17 +1,11 @@
 package com.latticeengines.pls.service.impl;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -23,31 +17,27 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.app.exposed.download.CustomerSpaceHdfsFileDownloader;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.pls.entitymanager.MetadataSegmentExportEntityMgr;
 import com.latticeengines.pls.service.MetadataSegmentExportService;
 import com.latticeengines.pls.workflow.SegmentExportWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("metadataSegmentExportService")
 public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportService {
 
     private static final Logger log = LoggerFactory.getLogger(MetadataSegmentExportServiceImpl.class);
-
-    private static final String DEFAULT_EXPORT_FILE_PREFIX = "unknownsegment";
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -67,12 +57,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     @Value("${pls.segment.export.max}")
     private Long maxEntryLimitForExport;
 
-    private static final String DATE_FORMAT_STRING = "yyyy-MM-dd_HH-mm-ss";
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT_STRING);
-    static {
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-    }
-
     @Override
     public List<MetadataSegmentExport> getSegmentExports() {
         return metadataSegmentExportEntityMgr.findAll();
@@ -89,7 +73,12 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
 
         setCreatedBy(metadataSegmentExportJob);
 
-        String exportedFileName = createFileName(metadataSegmentExportJob);
+        String displayName = "";
+        if (metadataSegmentExportJob.getSegment() != null) {
+            displayName = metadataSegmentExportJob.getSegment().getDisplayName();
+        }
+        String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExportJob.getExportPrefix(),
+                displayName, metadataSegmentExportJob.getType());
         metadataSegmentExportJob.setFileName(exportedFileName);
 
         metadataSegmentExportJob = registerTableForExport(metadataSegmentExportJob);
@@ -134,24 +123,6 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         if (metadataSegmentExportJob.getCreatedBy() == null) {
             metadataSegmentExportJob.setCreatedBy("default@lattice-engines.com");
         }
-    }
-
-    private String createFileName(MetadataSegmentExport metadataSegmentExportJob) {
-        String exportedFileName = null;
-        if (StringUtils.isNotBlank(metadataSegmentExportJob.getExportPrefix())) {
-            exportedFileName = metadataSegmentExportJob.getExportPrefix();
-        } else if (metadataSegmentExportJob.getSegment() != null
-                && StringUtils.isNotBlank(metadataSegmentExportJob.getSegment().getDisplayName())) {
-            exportedFileName = metadataSegmentExportJob.getSegment().getDisplayName();
-        }
-
-        if (StringUtils.isBlank(exportedFileName)) {
-            exportedFileName = DEFAULT_EXPORT_FILE_PREFIX;
-        }
-        exportedFileName = exportedFileName.trim().replaceAll("[^a-zA-Z0-9]", "");
-
-        exportedFileName += "-" + metadataSegmentExportJob.getType() + "-" + dateFormat.format(new Date()) + "_UTC.csv";
-        return exportedFileName;
     }
 
     @Override
@@ -207,35 +178,10 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
     private MetadataSegmentExport registerTableForExport(MetadataSegmentExport metadataSegmentExportJob) {
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
 
-        MetadataSegmentExportType exportType = metadataSegmentExportJob.getType();
+        Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(MultiTenantContext.getTenant(),
+                metadataSegmentExportJob.getType(), metadataSegmentExportJob.getFileName());
 
-        List<Attribute> attributes = //
-                exportType.getFieldNamePairs().stream() //
-                        .map(fieldNamePair -> {
-                            Attribute attribute = new Attribute();
-                            attribute.setName(fieldNamePair.getKey());
-                            attribute.setDisplayName(fieldNamePair.getValue());
-                            attribute.setSourceLogicalDataType("");
-                            attribute.setPhysicalDataType(Type.STRING.name());
-                            return attribute;
-                        }) //
-                        .collect(Collectors.toList());
-
-        Table segmentExportTable = new Table();
-        segmentExportTable.addAttributes(attributes);
-
-        String tableName = "segment_export_" + UUID.randomUUID().toString().replaceAll("-", "_");
-        segmentExportTable.setName(tableName);
-        segmentExportTable.setTableType(TableType.DATATABLE);
-
-        segmentExportTable.setDisplayName(metadataSegmentExportJob.getFileName());
-        segmentExportTable.setInterpretation(SchemaInterpretation.SalesforceAccount.name());
-        segmentExportTable.setTenant(MultiTenantContext.getTenant());
-        segmentExportTable.setTenantId(MultiTenantContext.getTenant().getPid());
-        segmentExportTable.setMarkedForPurge(false);
-        metadataProxy.createTable(customerSpace.toString(), tableName, segmentExportTable);
-
-        segmentExportTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+        segmentExportTable = metadataProxy.getTable(customerSpace.toString(), segmentExportTable.getName());
 
         metadataSegmentExportJob.setTableName(segmentExportTable.getName());
 
