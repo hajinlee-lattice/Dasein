@@ -521,9 +521,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                 for (int j = 0; j < metricsList.size(); j++) {
                     ActivityMetrics metrics = metricsList.get(j);
                     String fullMetricsName = metrics.getFullActivityMetricsName(expectedProductIds[i]);
+                    /*
                     log.info(String.format("Checking %s: actual = %s, expected = %s", fullMetricsName,
                             String.valueOf(record.get(fullMetricsName)),
                             String.valueOf(expectedMetrics.get(key)[i * metricsList.size() + j + 1])));
+                            */
                     Assert.assertTrue(isObjEquals(record.get(fullMetricsName),
                             expectedMetrics.get(key)[i * metricsList.size() + j + 1]));
                 }
