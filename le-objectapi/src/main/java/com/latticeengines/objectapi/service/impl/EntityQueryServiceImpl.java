@@ -77,7 +77,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query);
         } catch (Exception e) {
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
@@ -106,7 +106,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             return queryEvaluatorService.getDataFlux(attrRepo, query) //
                     .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
         } catch (Exception e) {
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
@@ -132,7 +132,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 });
                 return counts;
             } catch (Exception e) {
-                throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+                throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
             }
         } else {
             throw new IllegalArgumentException("RatingEngineID cannot be empty for rating count query.");
