@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -52,7 +53,11 @@ public enum MetadataSegmentExportType {
                     MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.SalesforceAccountID.name() //
             ), //
             Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id", //
-                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id"));
+                    "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id")), //
+    ACCOUNT_ID("Account_ID", //
+            Collections.singletonList(//
+                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.AccountId.name()),
+            Collections.singletonList("Account Id")); // ;
 
     String displayName;
 

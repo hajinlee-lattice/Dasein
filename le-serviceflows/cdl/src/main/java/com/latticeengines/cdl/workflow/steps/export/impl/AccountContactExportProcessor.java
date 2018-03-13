@@ -135,7 +135,8 @@ public class AccountContactExportProcessor extends SegmentExportProcessor {
                         }
                     }
                 }
-            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT) {
+            } else if (segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT //
+                    || segmentExportContext.getMetadataSegmentExport().getType() == MetadataSegmentExportType.ACCOUNT_ID) {
                 for (Map<String, Object> account : accountList) {
                     GenericRecordBuilder builder = new GenericRecordBuilder(schema);
 

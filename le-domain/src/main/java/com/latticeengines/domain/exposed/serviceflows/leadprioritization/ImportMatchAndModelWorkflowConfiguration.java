@@ -79,8 +79,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         }
 
         public Builder customer(CustomerSpace customerSpace) {
-            configuration.setContainerConfiguration("importMatchAndModelWorkflow", customerSpace,
-                    configuration.getClass().getSimpleName());
+            configuration.setCustomerSpace(customerSpace);
             importData.setCustomerSpace(customerSpace);
             registerReport.setCustomerSpace(customerSpace);
             modelDataValidationWorkflow.customer(customerSpace);
@@ -370,6 +369,10 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             export.setUsingDisplayName(Boolean.FALSE);
             export.setExportDestination(ExportDestination.FILE);
             export.setExportFormat(ExportFormat.CSV);
+
+            configuration.setContainerConfiguration("importMatchAndModelWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
+
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());

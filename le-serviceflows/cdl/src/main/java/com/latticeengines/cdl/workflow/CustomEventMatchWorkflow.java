@@ -62,6 +62,7 @@ public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchW
                     .next(matchCdlLdcStartStep) //
                     .next(matchDataCloudWorkflow, null) //
                     .build();
+        case CDL:
         default:
             return new WorkflowBuilder(name()) //
                     .next(matchAccountIdStep) //

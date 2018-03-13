@@ -13,10 +13,8 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.scoring.workflow.PrepareScoringAfterModelingWorkflow;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
-import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -52,9 +50,6 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private ModelWorkflow modelWorkflow;
 
     @Inject
-    private SetConfigurationForScoring setConfigurationForScoring;
-
-    @Inject
     private PrepareScoringAfterModelingWorkflow prepareScoringAfterModelingWorkflow;
 
     @Inject
@@ -81,7 +76,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow, null) //
-                .next(setConfigurationForScoring) //
+                .next(prepareScoringAfterModelingWorkflow, null) //
                 .next(rtsBulkScoreWorkflow, null) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //

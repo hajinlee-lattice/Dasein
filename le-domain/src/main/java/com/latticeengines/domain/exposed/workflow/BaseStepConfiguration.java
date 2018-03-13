@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportVdbTableStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.IngestionStepConfiguration;
@@ -22,7 +21,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = CombineStatisticsConfiguration.class, name = "CombineStatisticsConfiguration"),
         @Type(value = ImportVdbTableStepConfiguration.class, name = "ImportVdbTableStepConfiguration"),
         @Type(value = IngestionStepConfiguration.class, name = "IngestionStepConfiguration"),
-        @Type(value = MatchCdlStepConfiguration.class, name = "MatchCdlStepConfiguration"),
         @Type(value = MicroserviceStepConfiguration.class, name = "MicroserviceStepConfiguration"),
         @Type(value = PrepareTransformationStepInputConfiguration.class, name = "PrepareTransformationStepInputConfiguration"),
         @Type(value = PlayLaunchInitStepConfiguration.class, name = "PlayLaunchInitStepConfiguration"),

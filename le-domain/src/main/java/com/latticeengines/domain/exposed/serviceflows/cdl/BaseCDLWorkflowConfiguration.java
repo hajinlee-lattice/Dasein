@@ -60,7 +60,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = RatingEngineImportMatchAndModelWorkflowConfiguration.class, name = "RatingEngineImportMatchAndModelWorkflowConfiguration"),
         @Type(value = RatingEngineScoreWorkflowConfiguration.class, name = "RatingEngineScoreWorkflowConfiguration"),
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlWithAccountIdWorkflowConfiguration"),
-        @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"), })
+        @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
+        @Type(value = PrepareScoringAfterModelingWorkflowConfiguration.class, name = "PrepareScoringAfterModelingWorkflowConfiguration"), })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {
 
     @Override
