@@ -355,8 +355,12 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         retainFields.addAll(config.getGroupByFields());
         retainFields.add(metrics.getFullMetricsName());
 
-        node = node.apply(new AttrHasPurchasedFunction(metrics.getFullMetricsName()),
-                new FieldList(InterfaceName.TotalAmount.name()), prepareFms(node, metrics, false).get(0))
+        List<Aggregation> totalSpendAgg = Collections.singletonList(
+                new Aggregation(InterfaceName.TotalAmount.name(), InterfaceName.TotalAmount.name(),
+                        AggregationType.SUM));
+        node = node.groupBy(new FieldList(config.getGroupByFields()), totalSpendAgg)
+                .apply(new AttrHasPurchasedFunction(metrics.getFullMetricsName()),
+                        new FieldList(InterfaceName.TotalAmount.name()), prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_haspurchased_node_");
     }

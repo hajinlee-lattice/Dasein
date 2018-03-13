@@ -60,7 +60,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private ActivityMetrics weekSpendChangeMetrics;
     private ActivityMetrics weekAvgSpendOvertimeMetrics;
     private ActivityMetrics weekTotalSpendOvertimeMetrics;
-    private ActivityMetrics weekHasPurchased;
+    private ActivityMetrics everHasPurchased;
 
     private List<ActivityMetrics> metricsList;
 
@@ -159,11 +159,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         weekSpendChangeMetrics.setMetrics(InterfaceName.SpendChange);
         weekSpendChangeMetrics.setPeriodsConfig(
                 Arrays.asList(TimeFilter.within(1, Period.Week), TimeFilter.between(2, 2, Period.Week)));
-        weekHasPurchased = new ActivityMetrics();
-        weekHasPurchased.setMetrics(InterfaceName.HasPurchased);
-        weekHasPurchased.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
+        everHasPurchased = new ActivityMetrics();
+        everHasPurchased.setMetrics(InterfaceName.HasPurchased);
+        everHasPurchased.setPeriodsConfig(Arrays.asList(TimeFilter.ever(Period.Week)));
         metricsList = Arrays.asList(weekMarginMetrics, weekShareOfWalletMetrics, weekAvgSpendOvertimeMetrics,
-                weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics);
+                weekTotalSpendOvertimeMetrics, weekSpendChangeMetrics, everHasPurchased);
         conf.setMetrics(metricsList);
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         return JsonUtils.serialize(conf);
@@ -349,69 +349,78 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     };
 
-    // Schema: AccountId, ProductId, Week1_Margin, Week1_ShareOfWallet, Week1_AvgSpendOvertime, Week1_TotalSpendOvertime, Week1_Week2_2_SpendChange
+    // Schema: AccountId, ProductId, Week1_Margin, Week1_ShareOfWallet, Week1_AvgSpendOvertime, Week1_TotalSpendOvertime, Week1_Week2_2_SpendChange, Ever_HasPurchased
+    // HasPurchased in depivoted metrics: true / false / null
+    // HasPurchased in pivote metrics: true / false
     private Object[][] depivotedMetricsData = new Object[][] {
-            { "AID5", "PID1", null, null, null, null, 0 }, //
-            { "AID3", "PID3", null, null, null, null, 0 }, //
-            { "AID4", "PID1", 300, 90, 20.0, 60.0, 100 }, //
-            { "AID3", "PID2", null, null, null, null, 0 }, //
-            { "AID2", "PID3", null, null, null, null, -100 }, //
-            { "AID3", "PID1", -56, 150, 6.666666666666667, 20.0, 0 }, //
-            { "AID5", "PID2", null, null, null, null, 0 }, //
-            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100 }, //
-            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100 }, //
-            { "AID8", "PID1", null, null, null, null, -100 }, //
-            { "AID1", "PID1", 50, 85, 22.5, 45.0, 13 }, //
-            { "AID1", "PID2", 50, 85, 22.5, 45.0, 13 }, //
-            { "AID1", "PID4", 50, 122, 22.5, 45.0, 13 }, //
-            { "AID4", "PID2", null, 120, 20.0, 20.0, 100 }, //
-            { "AID4", "PID3", null, 120, 20.0, 20.0, 100 }, //
-            { "AID1", "PID3", 50, 122, 22.5, 45.0, 13 }, //
-            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100 }, //
-            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0 },//
+            { "AID1", "PID1", 50, 85, 22.5, 45.0, 13, true }, //
+            { "AID1", "PID2", 50, 85, 22.5, 45.0, 13, true }, //
+            { "AID1", "PID3", 50, 122, 22.5, 45.0, 13, true }, //
+            { "AID1", "PID4", 50, 122, 22.5, 45.0, 13, true }, //
+
+            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true }, //
+            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true }, //
+            { "AID2", "PID3", null, null, null, null, -100, true }, //
+
+            { "AID3", "PID1", -56, 150, 6.666666666666667, 20.0, 0, true }, //
+            { "AID3", "PID2", null, null, null, null, 0, null }, //
+            { "AID3", "PID3", null, null, null, null, 0, false }, //
+
+            { "AID4", "PID1", 300, 90, 20.0, 60.0, 100, true }, //
+            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true }, //
+            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true }, //
+
+            { "AID5", "PID1", null, null, null, null, 0, null }, //
+            { "AID5", "PID2", null, null, null, null, 0, false }, //
+
+            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true }, //
+            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true }, //
+
+            { "AID8", "PID1", null, null, null, null, -100, true }, //
     };
 
     // Schema: AccountId
-    // PID1_Week1_Margin, PID1_Week1_ShareOfWallet, PID1_Week1_AvgSpendOvertime, PID1_Week1_TotalSpendOvertime, PID1_Week1_Week2_2_SpendChange
-    // PID2_Week1_Margin, PID2_Week1_ShareOfWallet, PID2_Week1_AvgSpendOvertime, PID2_Week1_TotalSpendOvertime, PID2_Week1_Week2_2_SpendChange  
-    // PID3_Week1_Margin, PID3_Week1_ShareOfWallet, PID3_Week1_AvgSpendOvertime, PID3_Week1_TotalSpendOvertime, PID3_Week1_Week2_2_SpendChange
-    // PID4_Week1_Margin, PID4_Week1_ShareOfWallet, PID4_Week1_AvgSpendOvertime, PID4_Week1_TotalSpendOvertime, PID4_Week1_Week2_2_SpendChange
+    // PID1_Week1_Margin, PID1_Week1_ShareOfWallet, PID1_Week1_AvgSpendOvertime, PID1_Week1_TotalSpendOvertime, PID1_Week1_Week2_2_SpendChange, PID1_Ever_HasPurchased
+    // PID2_Week1_Margin, PID2_Week1_ShareOfWallet, PID2_Week1_AvgSpendOvertime, PID2_Week1_TotalSpendOvertime, PID2_Week1_Week2_2_SpendChange, PID2_Ever_HasPurchased
+    // PID3_Week1_Margin, PID3_Week1_ShareOfWallet, PID3_Week1_AvgSpendOvertime, PID3_Week1_TotalSpendOvertime, PID3_Week1_Week2_2_SpendChange, PID3_Ever_HasPurchased
+    // PID4_Week1_Margin, PID4_Week1_ShareOfWallet, PID4_Week1_AvgSpendOvertime, PID4_Week1_TotalSpendOvertime, PID4_Week1_Week2_2_SpendChange, PID4_Ever_HasPurchased
     private Object[][] pivotMetricsData = new Object[][] {
-            { "AID2", //
-                    33, 169, 20.0, 20.0, 100, //
-                    33, 169, 20.0, 20.0, 0, //
-                    null, null, null, null, -100, //
-                    null, null, null, null, null }, //
-            { "AID4", //
-                    300, 90, 20.0, 60.0, 100, //
-                    null, 120, 20.0, 20.0, 100, //
-                    null, 120, 20.0, 20.0, 100, //
-                    null, null, null, null, null }, //
-            { "AID5", //
-                    null, null, null, null, 0, //
-                    null, null, null, null, 0, //
-                    null, null, null, null, null, //
-                    null, null, null, null, null }, //
-            { "AID8", //
-                    null, null, null, null, -100, //
-                    null, null, null, null, null, //
-                    null, null, null, null, null, //
-                    null, null, null, null, null }, //
             { "AID1", //
-                    50, 85, 22.5, 45.0, 13, //
-                    50, 85, 22.5, 45.0, 13, //
-                    50, 122, 22.5, 45.0, 13, //
-                    50, 122, 22.5, 45.0, 13 }, //
+                    50, 85, 22.5, 45.0, 13, true, //
+                    50, 85, 22.5, 45.0, 13, true, //
+                    50, 122, 22.5, 45.0, 13, true, //
+                    50, 122, 22.5, 45.0, 13, true }, //
+            { "AID2", //
+                    33, 169, 20.0, 20.0, 100, true, //
+                    33, 169, 20.0, 20.0, 0, true, //
+                    null, null, null, null, -100, true, //
+                    null, null, null, null, null, false }, //
             { "AID3", //
-                    -56, 150, 6.666666666666667, 20.0, 0, //
-                    null, null, null, null, 0, //
-                    null, null, null, null, 0, //
-                    null, null, null, null, null }, //
+                    -56, 150, 6.666666666666667, 20.0, 0, true, //
+                    null, null, null, null, 0, false, //
+                    null, null, null, null, 0, false, //
+                    null, null, null, null, null, false }, //
+            { "AID4", //
+                    300, 90, 20.0, 60.0, 100, true, //
+                    null, 120, 20.0, 20.0, 100, true, //
+                    null, 120, 20.0, 20.0, 100, true, //
+                    null, null, null, null, null, false }, //
+            { "AID5", //
+                    null, null, null, null, 0, false, //
+                    null, null, null, null, 0, false, //
+                    null, null, null, null, null, false, //
+                    null, null, null, null, null, false }, //
             { "AID6", //
-                    100, 100, 10.0, 10.0, 100, //
-                    100, 100, 10.0, 10.0, 100, //
-                    null, null, null, null, null, //
-                    null, null, null, null, null },//
+                    100, 100, 10.0, 10.0, 100, true, //
+                    100, 100, 10.0, 10.0, 100, true, //
+                    null, null, null, null, null, false, //
+                    null, null, null, null, null, false }, //
+            { "AID8", //
+                    null, null, null, null, -100, true, //
+                    null, null, null, null, null, false, //
+                    null, null, null, null, null, false, //
+                    null, null, null, null, null, false }, //
+
     };
 
     private void prepareWeekTable() {
@@ -487,6 +496,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             Assert.assertTrue(isObjEquals(record.get(weekAvgSpendOvertimeMetrics.getFullMetricsName()), expected[4]));
             Assert.assertTrue(isObjEquals(record.get(weekTotalSpendOvertimeMetrics.getFullMetricsName()), expected[5]));
             Assert.assertTrue(isObjEquals(record.get(weekSpendChangeMetrics.getFullMetricsName()), expected[6]));
+            Assert.assertTrue(isObjEquals(record.get(everHasPurchased.getFullMetricsName()), expected[7]));
             cnt++;
         }
         Assert.assertEquals(cnt, 18);

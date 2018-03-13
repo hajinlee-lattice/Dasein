@@ -112,13 +112,16 @@ public class TimeFilter {
     }
 
     public String getPeriodRangeName() {
+        if (relation == ComparisonType.EVER) {
+            return "Ever";
+        }
         List<String> strs = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(values)) {
             values.forEach(value -> {
                 strs.add(String.valueOf(value));
             });
         }
-        return String.join("_", strs);
+        return period + String.join("_", strs);
     }
 
     public static class Period {

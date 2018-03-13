@@ -191,7 +191,7 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
     public String getFullMetricsName() {
         List<String> periodNames = new ArrayList<>();
         getPeriodsConfig().forEach(config -> {
-            periodNames.add(config.getPeriod() + config.getPeriodRangeName());
+            periodNames.add(config.getPeriodRangeName());
         });
         return String.join("_", periodNames) + "_" + metrics;
     }

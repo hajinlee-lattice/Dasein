@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 import cascading.operation.Aggregator;
@@ -21,14 +23,16 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
     private String groupByField;
     private String pivotField;
     private List<String> metricsFields;
+    private ActivityType activityType;
 
     public ActivityMetricsPivotAgg(Fields fieldDeclaration, String groupByField, String pivotField,
-            List<String> metricsFields, List<Object> pivotValues) {
+            List<String> metricsFields, List<Object> pivotValues, ActivityType activityType) {
         super(fieldDeclaration);
         this.pivotValues = pivotValues;
         this.groupByField = groupByField;
         this.pivotField = pivotField;
         this.metricsFields = metricsFields;
+        this.activityType = activityType;
     }
 
     public static class Context extends BaseAggregator.Context {
@@ -66,7 +70,13 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         pivotValues.forEach(pivotVal -> {
             metricsFields.forEach(metrics -> {
                 String field = ActivityMetrics.getFullActivityMetricsName(metrics, String.valueOf(pivotVal));
-                result.set(namePositionMap.get(field), context.pivotData.get(field));
+                if (activityType == ActivityType.PurchaseHistory && context.pivotData.get(field) == null
+                        && field.endsWith(InterfaceName.HasPurchased.name())) {
+                    result.set(namePositionMap.get(field), false);
+                } else {
+                    result.set(namePositionMap.get(field), context.pivotData.get(field));
+                }
+
             });
         });
         return result;

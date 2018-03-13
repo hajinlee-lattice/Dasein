@@ -70,7 +70,7 @@ public class ActivityMetricsPivotFlow extends ConfigurableFlowBase<ActivityMetri
             }
 
         Aggregator agg = new ActivityMetricsPivotAgg(new Fields(fields.toArray(new String[fields.size()])),
-                config.getGroupByField(), config.getPivotField(), metricsFields, pivotValues);
+                config.getGroupByField(), config.getPivotField(), metricsFields, pivotValues, config.getActivityType());
         node = node.groupByAndAggregate(new FieldList(config.getGroupByField()), agg, fms);
         return node;
     }
