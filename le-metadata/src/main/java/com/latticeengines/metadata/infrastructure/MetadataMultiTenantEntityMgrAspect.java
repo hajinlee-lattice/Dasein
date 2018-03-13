@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.infrastructure;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.aspectj.lang.JoinPoint;
@@ -18,7 +19,7 @@ public class MetadataMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspe
 
     private static final Logger log = LoggerFactory.getLogger(MetadataMultiTenantEntityMgrAspect.class);
 
-    @Inject
+    @Resource(name = "sessionFactory")
     private SessionFactory sessionFactory;
 
     @Inject
