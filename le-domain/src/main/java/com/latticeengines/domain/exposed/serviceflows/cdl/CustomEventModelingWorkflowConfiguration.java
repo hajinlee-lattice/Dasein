@@ -244,6 +244,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder skipDedupStep(boolean skipDedupStep) {
             customEventMatchWorkflowConfigurationBuilder.skipDedupStep(skipDedupStep);
+            dedupEventTable.setSkipStep(skipDedupStep);
             return this;
         }
 
