@@ -9,7 +9,10 @@ angular
             scope: {
                 type: '=',
                 bucketrestriction: '=',
-                form: '='
+                form: '=',
+                purchased: '=',
+                booleanchanged: '='
+
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.html',
             controllerAs: 'vm',
@@ -17,6 +20,7 @@ angular
                 var vm = $scope.vm;
                 vm.type = $scope.type;
                 vm.form = $scope.form;
+                vm.purchased = $scope.purchased;
                 vm.moment = moment;
 
                 vm.bucketrestriction = $scope.bucketrestriction;
@@ -181,6 +185,26 @@ angular
                     initAmt();
                     initTime();
                     initTimePeriod();
+                }
+
+                vm.showSubTypeSelection = function(subType){
+                    if($scope.booleanchanged === true){
+                        QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, 'Qty');
+                        QueryTreeService.removeKey($scope.bucketrestriction, $scope.type, 'Amt');
+                        $scope.booleanchanged = false;
+                    }
+                    switch(subType){
+                        case 'Amt':
+                        case 'Qty': {
+                            if($scope.purchased == 'Yes'){
+                                return true;
+                            }else{
+                                return false;
+                            }
+                        }
+                        default:
+                            return true;
+                    }
                 }
 
                 vm.getQtyConfigString = function () {

@@ -65,7 +65,7 @@
 
 
                 <span ng-if="vm.showItem('Transaction')">
-                    <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()"></transaction-edit-directive>
+                    <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()" purchased="vm.booleanValue" booleanchanged='vm.booleanChanged'></transaction-edit-directive>
                 </span>
             </div>
 

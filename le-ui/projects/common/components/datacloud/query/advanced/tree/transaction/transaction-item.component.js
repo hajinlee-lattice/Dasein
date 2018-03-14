@@ -5,7 +5,8 @@ angular
             restrict: 'E',
             scope: {
                 type: '=',
-                bucketrestriction: '='
+                bucketrestriction: '=',
+                purchased: '='
             },
             templateUrl: '/components/datacloud/query/advanced/tree/transaction/transaction-item.component.html',
             controllerAs: 'vm',
@@ -21,6 +22,21 @@ angular
                     var period = QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time');
                     if(period != 'Date' && vm.getCmp('Time') !== 'Ever'){
                         return period;
+                    }
+                }
+
+                vm.showSubTypeSelection = function(subType){
+                    switch(subType){
+                        case 'Amt':
+                        case 'Qty': {
+                            if($scope.purchased == true){
+                                return true;
+                            }else{
+                                return false;
+                            }
+                        }
+                        default:
+                            return true;
                     }
                 }
 

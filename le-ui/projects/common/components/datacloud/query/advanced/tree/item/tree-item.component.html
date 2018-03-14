@@ -24,6 +24,6 @@
 
     <strong class="query-section-item-value" ng-if="vm.showItem('Enum')" ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
     <span class="query-section-item-value" ng-if="vm.showItem('Transaction')">
-        <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type"></transaction-directive>
+        <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" purchased="vm.getOperationValue('Boolean')"></transaction-directive>
     </span>
 </span>

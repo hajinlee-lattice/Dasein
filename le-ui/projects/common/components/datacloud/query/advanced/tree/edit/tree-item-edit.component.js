@@ -11,7 +11,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
             controllerAs: 'vm',
             controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
-
+                vm.booleanChanged = false;
                 
 
                 function showNumericalRange() {
@@ -147,6 +147,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.changeBooleanValue = function () {
+                    vm.booleanChanged = true;
                     QueryTreeService.changeBooleanValue(vm.tree.bucketRestriction, vm.booleanValue);
                 }
 

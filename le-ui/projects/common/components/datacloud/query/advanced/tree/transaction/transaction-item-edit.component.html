@@ -47,7 +47,7 @@
     </div>
 
     <!-- Units purchased  (Qty)-->
-    <div class="query-section-item-operation transaction-row">
+    <div class="query-section-item-operation transaction-row" ng-if="vm.showSubTypeSelection('Qty')">
         <div class="transaction-element-title">units purchased</div>
         <div class="transaction-element">
             <select ng-model="vm.unitPurchasedCmp" ng-change="vm.changeCmp(vm.unitPurchasedCmp, 'Qty')">
@@ -68,7 +68,7 @@
     </div>
 
     <!-- Amount Spent (Amt)-->
-    <div class="query-section-item-operation transaction-row">
+    <div class="query-section-item-operation transaction-row" ng-if="vm.showSubTypeSelection('Amt')">
         <div class="transaction-element-title">amount spent</div>
         <div class="transaction-element">
             <select ng-model="vm.amtCmp" ng-change="vm.changeCmp(vm.amtCmp, 'Amt')">
