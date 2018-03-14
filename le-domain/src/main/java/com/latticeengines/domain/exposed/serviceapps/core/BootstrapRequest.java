@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "ConfigurationType")
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "Application")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = CDLBootstrapRequest.class, name = CDL),
         @JsonSubTypes.Type(value = LPBootstrapRequest.class, name = LP)
