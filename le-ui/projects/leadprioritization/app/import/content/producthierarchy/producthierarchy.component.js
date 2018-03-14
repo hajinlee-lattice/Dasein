@@ -13,9 +13,9 @@ angular.module('lp.import.wizard.producthierarchy', [])
         unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            product_line: 'ProductLine',
-            product_family: 'ProductFamily',
             product_category: 'ProductCategory',
+            product_family: 'ProductFamily',
+            product_line: 'ProductLine'
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),

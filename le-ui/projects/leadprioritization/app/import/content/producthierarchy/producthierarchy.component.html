@@ -8,10 +8,10 @@
         <div class="id-options" ng-if="!vm.state.accountDedupeField"  ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
                 <div>
-                    <label for="dedupeField">Product Line</label>
+                    <label for="dedupeField">Product Level 1</label>
                     <select 
                         class="form-control"
-                        ng-model="vm.fieldMapping.product_line"
+                        ng-model="vm.fieldMapping.product_category"
                         ng-init="vm.checkValidDelay(form)"
                         ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                         ng-required="true"
@@ -27,7 +27,7 @@
         <div class="id-options" ng-if="!vm.state.accountDedupeField">
             <div class="id-options-item">
                 <div>
-                    <label for="dedupeField">Product Family</label>
+                    <label for="dedupeField">Product Level 2</label>
                     <select 
                         class="form-control"
                         ng-model="vm.fieldMapping.product_family"
@@ -45,10 +45,10 @@
         <div class="id-options" ng-if="!vm.state.accountDedupeField">
             <div class="id-options-item">
                 <div>
-                    <label for="dedupeField">Product Category</label>
+                    <label for="dedupeField">Product Level 3</label>
                     <select 
                         class="form-control"
-                        ng-model="vm.fieldMapping.product_category"
+                        ng-model="vm.fieldMapping.product_line"
                         ng-change="vm.changeLatticeField(vm.fieldMapping, form)"
                         ng-required="false"
                         ng-class="{'required': false}">

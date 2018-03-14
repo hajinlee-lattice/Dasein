@@ -30,9 +30,15 @@
             right: 50px;
             height: 45px;
             pointer-events: none;
+            @media (max-width: 925px) { 
+                left: 250px;
+            }
             & > li {
                 @include flex-item(0 1 auto);
                 margin: 0 10px;
+                &:last-child {
+                    margin-right: 0;
+                }
                 &.tp-entry-sort {
                     div {
                         height: 1em;
@@ -50,12 +56,17 @@
                     margin-top: 6px;
                 }
                 &.tp-created {
+                    @include flex-item(1 1 auto);
+                    position: relative;
                     time {
+                        @include text-ellipsis;
                         font-weight: bold;
                         font-size: .9em;
                         display: block;
-                        position: relative;
+                        position: absolute;
                         top: 50%;
+                        left: 0;
+                        right: 0;
                         transform: translateY(-50%);
                     }
                 }
@@ -180,6 +191,9 @@
     input {
         display: inline;
         width: 280px;
+        @media (max-width: 925px) { 
+            width: 205px;
+        }
         &.required {
             border-left-width: 5px;
             border-left-color: #EF6A30;

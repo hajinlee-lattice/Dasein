@@ -232,9 +232,11 @@ angular.module('lp.import')
     }
 
     this.nextSaveMapping = function(nextState) {
-        // this.saveObjects.forEach(function(item, index) {
+        // for(var i in this.saveObjects) {
+        //     var item = this.saveObjects[i];
+
         //     ImportWizardStore.remapMap(item.userField, item.mappedField, item.cdlExternalSystemType, item.unmap);
-        // });
+        // };
         $state.go(nextState);
     }
 

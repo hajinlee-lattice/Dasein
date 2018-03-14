@@ -70,7 +70,8 @@ angular.module('lp.import.wizard.latticefields', [])
                 var fieldItem = vm.fieldMappings.find(function(item) {
                     return item.userField === fieldMapping.userField;
                 });
-                if(fieldMapping && fieldMapping.mappedField) {
+
+                if(fieldMapping && (fieldItem && fieldItem.mappedField)) {
                     fieldItem.mappedField = fieldMapping.mappedField;
                 }
             });
@@ -91,7 +92,7 @@ angular.module('lp.import.wizard.latticefields', [])
 
         return {
             mappedField: pieces[0],
-            userField: (pieces[1] === "" ? fallbackUserField : pieces[1])// allows unmapping
+            userField: (pieces[1] === "" ? fallbackUserField : pieces[1]) // allows unmapping
         }
     }
 
@@ -103,22 +104,34 @@ angular.module('lp.import.wizard.latticefields', [])
         var _mapping = [];
         vm.unavailableFields = [];
         vm.ignoredFieldLabel = ignoredFieldLabel;
+
         for(var i in mapping) {
             var item = mapping[i],
                 map = makeObject(item.userField);
 
             if(!map.userField) {
-                map.userField = i;
-                map.mappedField = null;
-                map.unmap = true;
+                /**
+                 * to unmap find the userField using the original fieldMappings object
+                 */
+                var fieldItem = vm.fieldMappings.find(function(item) {
+                    return item.mappedField === i;
+                });
+                if(fieldItem && fieldItem.userField) {
+                    map.userField = fieldItem.userField;
+                    map.mappedField = null;
+                    map.unmap = true;
+                }
             }
+
             if(item.userField) {
                 vm.unavailableFields.push(map.userField);
             }
+
             if(map.userField) {
                 _mapping.push(map);
             }
         }
+
         if(vm.unavailableFields.length >= vm.availableFields.length) {
             vm.ignoredFieldLabel = noFieldLabel;
         }

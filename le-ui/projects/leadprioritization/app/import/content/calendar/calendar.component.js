@@ -1,24 +1,26 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
-    $state, $stateParams, $scope, $timeout, NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument
+    $state, $stateParams, $scope, $timeout, $sce, $window,
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument
 ) {
     var vm = this,
-        preventUnload = true,
+        debug = true,
+        preventUnload = !debug,
         year = new Date().getFullYear(),
         months = ['January','February','March','April','May','June','July','August','September','October','November','December'],
         weekdays = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
         picker;
 
     if(preventUnload) {
-        window.onbeforeunload = function(event) {
-            var warning = 'Changes you made may not be saved.  Are you sure?';
+        $window.onbeforeunload = function(event) {
+            var warning = 'Changes you made may not be saved. Are you sure?';
             event.returnValue = warning;
             return warning;
         };
     }
 
     $scope.$on("$destroy", function(){
-        window.onbeforeunload = null;
+        $window.onbeforeunload = null;
     });
 
     angular.extend(vm, {
@@ -26,7 +28,8 @@ angular.module('lp.import.calendar', [])
         selectedDate: '01-01',
         selectedQuarter: '1',
         mode: '',
-        calendarStore: {}
+        calendarStore: {},
+        dateParams: {}
     });
 
     function initDatePicker() {
@@ -47,10 +50,17 @@ angular.module('lp.import.calendar', [])
                 weekdaysShort : ['S','M','T','W','T','F','S']
             },
             onSelect: function(date) {
+                var dateParams = {
+                    monthNumber: date.getMonth() + 1,
+                    month: months[(date.getMonth() + 1)].substring(0,3).toUpperCase(),
+                    day: NumberUtility.PadNumber(date.getDate(),2),
+                    year: date.getFullYear()
+                }
+                vm.dateParams = dateParams;
                 selectedDateObj = {
                         mode: "STARTING_DATE",
-                        startingDate: months[(date.getMonth() + 1)].substring(0,3).toUpperCase() + "-" + NumberUtility.PadNumber(date.getDate(),2),
-                        evaluationYear: date.getFullYear(), 
+                        startingDate: dateParams.month + "-" + dateParams.day,
+                        evaluationYear: dateParams.year, 
                         longerMonth: vm.selectedQuarter,
                         
                     };
@@ -62,7 +72,7 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.init = function() {
-        if(preventUnload && !FieldDocument) {
+        if((preventUnload) && !FieldDocument) {
             $state.go('home.import.entry.product_hierarchy');
             return false;
         }
@@ -74,7 +84,7 @@ angular.module('lp.import.calendar', [])
         picker.gotoDate(new Date(date+'-'+year)); 
     }
 
-    vm.selectQuarter = function(quarter) {
+    vm.selectQuarter = function(quarter) { 
         vm.selectedQuarter = quarter;
         if(vm.calendar && vm.calendar.longerMonth) {
             vm.calendar.longerMonth = vm.selectedQuarter;
@@ -109,6 +119,15 @@ angular.module('lp.import.calendar', [])
         }
     }
 
+    vm.miniMarkdown = function(string) {
+        if(!string) {
+            return '';
+        }
+        var regex = /\*\*(\S(.*?\S)?)\*\*/gm;
+            ret = string.replace(regex, '<strong>$1</strong>')
+        return $sce.trustAsHtml(ret);
+    }
+
     vm.setCalendar = function(obj) {
         ImportWizardStore.setCalendar(obj);
         ImportWizardStore.getCalendar().then(function(result) {
@@ -124,10 +143,13 @@ angular.module('lp.import.calendar', [])
         vm.calendar.longerMonth = vm.selectedQuarter;
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {
-                //console.log('valid calendar, 10/10 would save');
-                ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                    $state.go("home.import.data.product_hierarchy.ids");
-                });
+                if(debug) {
+                    console.log('valid calendar, 10/10 would save:', vm.calendar);
+                } else {
+                    ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
+                        $state.go("home.import.data.product_hierarchy.ids");
+                    });
+                }
             }
         });
     }
