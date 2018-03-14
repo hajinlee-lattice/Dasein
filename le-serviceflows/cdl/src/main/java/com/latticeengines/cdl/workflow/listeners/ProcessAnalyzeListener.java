@@ -1,8 +1,12 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
@@ -91,6 +95,24 @@ public class ProcessAnalyzeListener extends LEJobListener {
         DataCollection.Version inactive = dataCollectionProxy.getInactiveVersion(customerSpace);
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
             if (!isServingStore(role)) {
+                List<String> tableNames = dataCollectionProxy.getTableNames(customerSpace, role, inactive);
+                if (CollectionUtils.isNotEmpty(tableNames)) {
+                    List<String> tablesInActive = dataCollectionProxy.getTableNames(customerSpace, role,
+                            inactive.complement());
+                    if (CollectionUtils.isNotEmpty(tablesInActive)) {
+                        Set<String> activeTableSet = new HashSet<>(tablesInActive);
+                        tableNames.forEach(tableName -> {
+                            if (!activeTableSet.contains(tableName)) {
+                                log.info("Removing table " + tableName + " as " + role + " in " + inactive);
+                                metadataProxy.deleteTable(customerSpace, tableName);
+                            } else {
+                                log.info("Unlinking table " + tableName + " as " + role + " from " + inactive);
+                                dataCollectionProxy.unlinkTable(customerSpace, tableName, role, inactive);
+                            }
+                        });
+                    }
+                }
+                /*
                 String tableName = dataCollectionProxy.getTableName(customerSpace, role, inactive);
                 if (StringUtils.isNotBlank(tableName)) {
                     String tableInActive = dataCollectionProxy.getTableName(customerSpace, role, inactive.complement());
@@ -102,6 +124,7 @@ public class ProcessAnalyzeListener extends LEJobListener {
                         dataCollectionProxy.unlinkTable(customerSpace, tableName, role, inactive);
                     }
                 }
+                */
             }
         }
     }

@@ -1,8 +1,10 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,15 +65,16 @@ public class CloneTableService {
     }
 
     private void linkOrCloneToInactiveTable(TableRoleInCollection role, boolean clone) {
-        String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, active);
-        String inactiveTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactive);
-        if (StringUtils.isBlank(activeTableName)) {
+        List<String> activeTableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role, active);
+        List<String> inactiveTableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role, inactive);
+        if (CollectionUtils.isEmpty(activeTableNames)) {
             log.info("There is no " + role + " table in active version, skip cloning.");
             return;
-        } else if (StringUtils.isNotBlank(inactiveTableName)) {
+        } else if (CollectionUtils.isNotEmpty(inactiveTableNames)) {
             log.info("There is already " + role + " table in inactive version, skip cloning.");
             return;
         }
+        // TODO: clone needs to change to support multi tables too.
         if (clone) {
             log.info("Cloning " + role + " from  " + active + " to " + inactive);
             Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
@@ -86,12 +89,16 @@ public class CloneTableService {
                 String prefix = String.join("_", customerSpace.getTenantId(), entity.name());
                 cloneName = NamingUtils.timestamp(prefix);
                 metadataProxy.updateTable(customerSpace.toString(), cloneName, inactiveTable);
-                copyRedshiftTable(activeTableName, cloneName);
+                copyRedshiftTable(activeTableNames.get(0), cloneName);
             }
             dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, role, inactive);
         } else {
             log.info("Linking " + role + " from " + active + " to " + inactive);
-            dataCollectionProxy.upsertTable(customerSpace.toString(), activeTableName, role, inactive);
+            if (role == TableRoleInCollection.ConsolidatedPeriodTransaction) {
+                dataCollectionProxy.upsertTables(customerSpace.toString(), activeTableNames, role, inactive);
+            } else {
+                dataCollectionProxy.upsertTable(customerSpace.toString(), activeTableNames.get(0), role, inactive);
+            }
         }
     }
 
