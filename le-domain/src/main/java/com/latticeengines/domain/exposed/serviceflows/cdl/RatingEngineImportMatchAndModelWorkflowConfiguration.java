@@ -176,7 +176,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTable.setTargetTableName(trainingTableName);
             matchDataCloudWorkflowBuilder.matchInputTableName(trainingTableName);
             cdlMatchAndModelWorkflowBuilder.trainingTableName(trainingTableName);
-            ratingEngineScoreWorkflowBuilder.inputTableName(trainingTableName);
+            return this;
+        }
+
+        public Builder targetTableName(String targetTableName) {
+            ratingEngineScoreWorkflowBuilder.inputTableName(targetTableName);
+            cdlMatchAndModelWorkflowBuilder.targetTableName(targetTableName);
             return this;
         }
 

@@ -190,6 +190,7 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
                 .eventTableName(getEventTable().getName()) //
                 .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
+                .targetTableName(getConfiguration().getTargetTableName()) //
                 .transformationGroupName(getTransformationGroupName()) //
                 .enableV2Profiling(configuration.isV2ProfilingEnabled()) //
                 .cdlModel(configuration.isCdlModel()) //

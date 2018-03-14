@@ -69,6 +69,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         log.info("Modeling parameters: " + parameters.toString());
 
         String tableName = getTableName(parameters);
+        String targetTableName = tableName + "_TargetTable";
         RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -90,6 +91,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString()) //
                 .trainingTableName(tableName) //
+                .targetTableName(targetTableName) //
                 .inputProperties(inputProperties) //
                 .enableV2Profiling(false) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //

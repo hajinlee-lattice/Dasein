@@ -80,6 +80,7 @@ public final class JobStepDisplayInfoMapping {
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
+            "create_global_target_market", //
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //

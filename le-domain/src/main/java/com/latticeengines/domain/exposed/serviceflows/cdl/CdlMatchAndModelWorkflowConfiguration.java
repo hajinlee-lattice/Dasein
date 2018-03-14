@@ -100,6 +100,11 @@ public class CdlMatchAndModelWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder targetTableName(String targetTableName) {
+            model.setTargetTableName(targetTableName);
+            return this;
+        }
+
         public Builder userId(String userId) {
             model.setUserName(userId);
             return this;

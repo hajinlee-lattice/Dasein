@@ -36,6 +36,8 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     private String trainingTableName;
 
+    private String targetTableName;
+
     private String transformationGroupName;
 
     private ModelSummary sourceModelSummary;
@@ -150,6 +152,14 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setTrainingTableName(String trainingTableName) {
         this.trainingTableName = trainingTableName;
+    }
+
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 
     public String getTransformationGroupName() {

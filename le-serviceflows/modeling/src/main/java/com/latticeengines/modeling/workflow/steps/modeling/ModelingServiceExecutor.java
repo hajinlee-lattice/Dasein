@@ -335,6 +335,9 @@ public class ModelingServiceExecutor {
         if (builder.getTrainingTableName() != null) {
             props.add("Training_Table_Name=" + builder.getTrainingTableName());
         }
+        if (builder.getTargetTableName() != null) {
+            props.add("Target_Table_Name=" + builder.getTargetTableName());
+        }
         if (builder.getPredefinedColumnSelection() != null) {
             props.add("Predefined_ColumnSelection_Name=" + builder.getPredefinedColumnSelection().getName());
             props.add("Predefined_ColumnSelection_Version=" + builder.getPredefinedSelectionVersion());
@@ -443,6 +446,7 @@ public class ModelingServiceExecutor {
         private String eventTableName;
         private String sourceSchemaInterpretation;
         private String trainingTableName;
+        private String targetTableName;
         private String productType;
         private String transformationGroupName;
         private boolean v2ProfilingEnabled;
@@ -656,6 +660,11 @@ public class ModelingServiceExecutor {
 
         public Builder trainingTableName(String trainingTableName) {
             this.setTrainingTableName(trainingTableName);
+            return this;
+        }
+
+        public Builder targetTableName(String targetTableName) {
+            this.setTargetTableName(targetTableName);
             return this;
         }
 
@@ -986,6 +995,14 @@ public class ModelingServiceExecutor {
 
         public String getTrainingTableName() {
             return trainingTableName;
+        }
+
+        public String getTargetTableName() {
+            return targetTableName;
+        }
+
+        public void setTargetTableName(String targetTableName) {
+            this.targetTableName = targetTableName;
         }
 
         public void setSourceSchemaInterpretation(String sourceSchemaInterpretation) {
