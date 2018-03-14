@@ -132,6 +132,7 @@ public class ColumnSelection {
         RTS("RTS"),
 
         // CDL
+        LookupId("LookupId"), //
         TalkingPoint("TalkingPoint"), //
         CompanyProfile("CompanyProfile");
 
