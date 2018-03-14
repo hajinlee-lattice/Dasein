@@ -140,17 +140,17 @@ angular
                                 fromPicker = new Pikaday({
                                 field: from,
                                 format: DATE_FORMAT,
-                                keyboardInput: false,
-                                setDate: function () {
-
-                                },
                                 onSelect: function (date) {
                                     var val = moment(date).format(DATE_FORMAT);
                                     var valid = isDateValid(val, 1);
                                     $scope.fromDate = val;
                                     validateDates();
+                                    // readDate(1);
                                     if (valid) {
                                         $scope.changed({ type: 'Time', position: 0, value: val });
+                                        if($scope.toDate !== undefined){
+                                            $scope.changed({ type: 'Time', position: 1, value: $scope.toDate });
+                                        }  
                                     }
                                 }
 
@@ -171,8 +171,12 @@ angular
                                     var valid = isDateValid(val, 0);
                                     $scope.toDate = val;
                                     validateDates();
+                                    // readDate(0);
                                     if (valid) {
                                         $scope.changed({ type: 'Time', position: 1, value: val });
+                                        if($scope.fromDate !== undefined){
+                                            $scope.changed({ type: 'Time', position: 0, value: $scope.fromDate });
+                                        }   
                                     }
                                 }
                             });
