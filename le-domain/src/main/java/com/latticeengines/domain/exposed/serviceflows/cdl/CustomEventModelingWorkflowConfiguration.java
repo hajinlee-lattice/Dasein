@@ -198,47 +198,59 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             customEventMatchWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
+            rtsBulkScoreWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder matchQueue(String queue) {
             customEventMatchWorkflowConfigurationBuilder.matchQueue(queue);
+            rtsBulkScoreWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
                     selectionVersion);
+            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
             customEventMatchWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            modelWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            rtsBulkScoreWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
             customEventMatchWorkflowConfigurationBuilder.matchType(matchCommandType);
+            rtsBulkScoreWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
             customEventMatchWorkflowConfigurationBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            rtsBulkScoreWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
             customEventMatchWorkflowConfigurationBuilder.matchDestTables(destTables);
+            rtsBulkScoreWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             customEventMatchWorkflowConfigurationBuilder.excludePublicDomains(excludePublicDomains);
+            modelWorkflowBuilder.excludePublicDomain(excludePublicDomains);
+            rtsBulkScoreWorkflowBuilder.excludeDataCloudAttrs(excludePublicDomains);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             customEventMatchWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
+            modelWorkflowBuilder.excludeDataCloudAttrs(exclude);
+            rtsBulkScoreWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
@@ -250,6 +262,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             customEventMatchWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            modelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            rtsBulkScoreWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
