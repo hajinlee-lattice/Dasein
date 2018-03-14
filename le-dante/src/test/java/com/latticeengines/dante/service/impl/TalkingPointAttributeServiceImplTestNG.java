@@ -3,7 +3,6 @@ package com.latticeengines.dante.service.impl;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,7 +22,11 @@ import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-dante-context.xml" })
@@ -32,7 +35,7 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
     @Autowired
     private TalkingPointAttributeService talkingPointAttributeService;
 
-    private InternalResourceRestApiProxy spiedInternalResourceRestApiProxy;
+    private ServingStoreProxy spiedServingStoreProxy;
 
     private final Path metadataDocumentPath = new Path("/MetadataDocument.json");
 
@@ -42,21 +45,45 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
     @BeforeClass(groups = "functional")
     public void setup() {
 
-        spiedInternalResourceRestApiProxy = spy(new InternalResourceRestApiProxy("doesn't matter"));
-        ((TalkingPointAttributeServiceImpl) talkingPointAttributeService)
-                .setInternalResourceRestApiProxy(spiedInternalResourceRestApiProxy);
+        spiedServingStoreProxy = spy(new ServingStoreProxy() {
+            @Override
+            public Mono<Long> getDecoratedMetadataCount(String customerSpace, BusinessEntity entity) {
+                return null;
+            }
 
-        List<ColumnMetadata> attrs = new ArrayList<>();
+            @Override
+            public Mono<Long> getDecoratedMetadataCount(String customerSpace, BusinessEntity entity,
+                    List<ColumnSelection.Predefined> groups) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
+                return null;
+            }
+
+            @Override
+            public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
+                    List<ColumnSelection.Predefined> groups) {
+                return null;
+            }
+        });
+        ((TalkingPointAttributeServiceImpl) talkingPointAttributeService).setServingStoreProxy(spiedServingStoreProxy);
+
         ColumnMetadata at = new ColumnMetadata();
         at.setColumnId("something");
+        at.setAttrName("something");
         at.setDisplayName("something more");
-        attrs.add(at);
+        Flux<ColumnMetadata> attrFlux = Flux.just(at);
+
         at = new ColumnMetadata();
         at.setColumnId("something1");
+        at.setAttrName("something1");
         at.setDisplayName("something more 1");
-        attrs.add(at);
-        doReturn(attrs).when(spiedInternalResourceRestApiProxy).getAttributesInPredefinedGroup(
-                ColumnSelection.Predefined.TalkingPoint, tenantName + "." + tenantName + "." + "Production");
+        attrFlux = Flux.concat(attrFlux, Flux.just(at));
+
+        doReturn(attrFlux).when(spiedServingStoreProxy).getDecoratedMetadata(tenantName, BusinessEntity.Account,
+                Arrays.asList(ColumnSelection.Predefined.TalkingPoint));
     }
 
     @Test(groups = "functional")

@@ -3,23 +3,22 @@ package com.latticeengines.dante.service.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dante.service.TalkingPointAttributeService;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttribute;
 import com.latticeengines.domain.exposed.dante.TalkingPointAttributeNotion;
 import com.latticeengines.domain.exposed.dante.TalkingPointNotionAttributes;
@@ -27,7 +26,8 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 
 @Component("talkingPointAttributesService")
 public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeService {
@@ -38,19 +38,12 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     private final ColumnSelection.Predefined TalkingPointAttributeGroup = ColumnSelection.Predefined.TalkingPoint;
     private final String accountAttributePrefix = "Account.";
 
-    private InternalResourceRestApiProxy internalResourceRestApiProxy;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceRestApiProxy = internalResourceRestApiProxy;
-    }
-
-    @PostConstruct
-    public void initialize() throws Exception {
-        internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    void setServingStoreProxy(ServingStoreProxy servingStoreProxy) {
+        this.servingStoreProxy = servingStoreProxy;
     }
 
     @SuppressWarnings("unchecked")
@@ -58,9 +51,9 @@ public class TalkingPointAttributeServiceImpl implements TalkingPointAttributeSe
     public List<TalkingPointAttribute> getAccountAttributes(String customerSpace) {
         log.info("Attempting to find Account attributes for customer space : " + customerSpace);
         try {
-            List<ColumnMetadata> rawAttrs = internalResourceRestApiProxy.getAttributesInPredefinedGroup(
-                    TalkingPointAttributeGroup, CustomerSpace.parse(customerSpace).toString());
-            if (rawAttrs == null) {
+            List<ColumnMetadata> rawAttrs = servingStoreProxy.getDecoratedMetadata(customerSpace,
+                    BusinessEntity.Account, Arrays.asList(TalkingPointAttributeGroup)).collectList().block();
+            if (rawAttrs == null || rawAttrs.isEmpty()) {
                 throw new LedpException(LedpCode.LEDP_38023, new String[] { customerSpace });
             }
             // The Prefix is added since Dante UI looks for it to identify
