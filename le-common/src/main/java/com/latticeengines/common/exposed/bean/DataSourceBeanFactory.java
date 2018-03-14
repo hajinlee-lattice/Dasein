@@ -33,7 +33,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private int maxIdleTime = -1;
 
     @Override
-    public DataSource getObject() throws Exception {
+    public DataSource getObject() {
         DataSource ds = null;
         BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
         if (currentEnv == null) {
@@ -59,7 +59,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         return true;
     }
 
-    private DataSource constructDataSource() {
+    protected DataSource constructDataSource() {
         log.info("Constructing c3p0 connection pool for " + jdbcUrl);
         ComboPooledDataSource cpds = new ComboPooledDataSource();
         try {

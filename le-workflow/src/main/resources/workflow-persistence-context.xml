@@ -4,13 +4,13 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="dataSourceWorkflow" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
+    <bean id="dataSourceWorkflow" class="com.latticeengines.workflow.core.SpringBatchDataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="driverClass" value="${workflow.datasource.driver}" />
         <property name="jdbcUrl" value="${workflow.datasource.url}"/>
         <property name="user" value="${workflow.datasource.user}" />
         <property name="password" value="${workflow.datasource.password.encrypted}" />
-        <property name="maxPoolSize" value="4"/>
-        <property name="maxIdleTime" value="0" />
+        <property name="webAppMaxPoolSize" value="32"/>
+        <property name="yarnContainerMaxPoolSize" value="4"/>
         <property name="enableDebugSlowSql" value="false" />
     </bean>
 
