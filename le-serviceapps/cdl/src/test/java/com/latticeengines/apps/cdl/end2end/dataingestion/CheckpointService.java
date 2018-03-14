@@ -162,9 +162,8 @@ public class CheckpointService {
                             if (!uploadedTables.contains(table.getName())) {
                                 metadataProxy.createTable(mainTestTenant.getId(), table.getName(), table);
                                 uploadedTables.add(table.getName());
-                                tableNames.add(table.getName());
                             }
-                            // dataCollectionProxy.upsertTable(mainTestTenant.getId(), table.getName(), role, version);
+                            tableNames.add(table.getName());
                             if (activeVersion.equals(version)) {
                                 String redshiftTable = checkpointRedshiftTableName(checkpoint, role,
                                         S3_CHECKPOINTS_VERSION);
