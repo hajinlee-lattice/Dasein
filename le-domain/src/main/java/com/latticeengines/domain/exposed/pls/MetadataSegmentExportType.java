@@ -63,7 +63,7 @@ public enum MetadataSegmentExportType {
 
     List<Pair<String, String>> fieldNamePairs;
 
-    private MetadataSegmentExportType(String displayName, List<String> fieldNames, List<String> fieldDisplayNames) {
+    MetadataSegmentExportType(String displayName, List<String> fieldNames, List<String> fieldDisplayNames) {
         this.displayName = displayName;
         this.fieldNamePairs = new ArrayList<>();
         for (int i = 0; i < fieldNames.size(); i++) {

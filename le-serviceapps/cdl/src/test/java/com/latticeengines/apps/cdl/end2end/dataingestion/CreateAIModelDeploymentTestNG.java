@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,7 +24,6 @@ import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -37,9 +35,9 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CreateAIModelDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
+    private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1520552880910";
-    private static final boolean EV_MODEL = false;
+    private static final boolean EV_MODEL = true;
 
     private MetadataSegment testSegment;
     private MetadataSegment trainSegment;
@@ -55,8 +53,8 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     @Inject
     private SegmentProxy segmentProxy;
 
-    private final String targetProductId = "A80D4770376C1226C47617C071324C0B";
-    private final String trainingProductId = "A74D1222394534E6B450CA006C20D48D";
+    private final String targetProductId = "A74D1222394534E6B450CA006C20D48D";
+    private final String trainingProductId = "A80D4770376C1226C47617C071324C0B";
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
@@ -106,9 +104,6 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private void setupTestRatingEngine() {
         setupTestSegment();
 
-        MetadataSegment segment = constructTargetSegment();
-        Restriction accountRestriction = segment.getAccountRestriction();
-
         testRatingEngine = new RatingEngine();
         testRatingEngine.setDisplayName("CreateAIModelDeploymentTestRating");
         testRatingEngine.setTenant(mainTestTenant);
@@ -126,8 +121,8 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 new ModelingConfigFilter(ModelingConfig.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
         testAIModel.setModelingConfigFilters(myMap);
         testAIModel.setPredictionType(PredictionType.EXPECTED_VALUE);
-        testAIModel.setTargetProducts(Arrays.asList(targetProductId));
-        testAIModel.setTrainingProducts(Arrays.asList(trainingProductId));
+        testAIModel.setTargetProducts(Collections.singletonList(targetProductId));
+        testAIModel.setTrainingProducts(Collections.singletonList(trainingProductId));
         testAIModel.setTrainingSegment(trainSegment);
 
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
@@ -135,14 +130,14 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
-        Assert.assertEquals(targetCount, 82);
+        Assert.assertEquals(targetCount, 22);
 
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TRAINING);
-        Assert.assertEquals(trainingCount, 191);
+        Assert.assertEquals(trainingCount, 1317);
 
         long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
-        Assert.assertEquals(eventCount, 5);
+        Assert.assertEquals(eventCount, 151);
     }
 }

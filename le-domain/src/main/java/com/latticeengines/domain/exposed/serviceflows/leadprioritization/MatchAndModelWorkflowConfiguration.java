@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -24,6 +25,7 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.R
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -50,6 +52,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         private ModelWorkflowConfiguration.Builder modelWorkflowBuilder = new ModelWorkflowConfiguration.Builder();
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
+        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
 
@@ -63,6 +66,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
+            computeLift.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -335,11 +339,13 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
+            computeLift.setBucketMetadata(bucketMetadata);
             return this;
         }
 
         public MatchAndModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
+            computeLift.setScoreField(InterfaceName.Event.name());
 
             configuration.add(dedupEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());

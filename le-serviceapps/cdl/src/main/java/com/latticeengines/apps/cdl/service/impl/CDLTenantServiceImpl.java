@@ -6,11 +6,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.ApplicationTenantService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceapps.core.BootstrapRequest;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 
 
 @Service("cdlTenantService")
@@ -19,7 +19,7 @@ public class CDLTenantServiceImpl implements ApplicationTenantService {
     private static final Logger log = LoggerFactory.getLogger(CDLTenantServiceImpl.class);
 
     @Inject
-    private DataFeedProxy dataFeedProxy;
+    private DataFeedService dataFeedService;
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
@@ -32,7 +32,7 @@ public class CDLTenantServiceImpl implements ApplicationTenantService {
         CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
 
         log.info("Initializing data feed for " + tenantId);
-        dataFeedProxy.getDataFeed(customerSpace.toString());
+        dataFeedService.getOrCreateDataFeed(customerSpace.toString());
 
         log.info("Cleanup all attr config for " + tenantId);
         attrConfigEntityMgr.cleanupTenant(tenantId);

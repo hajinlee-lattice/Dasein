@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.apache.avro.generic.GenericRecord;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -14,7 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLi
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
-public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class ComputeLiftForEventTableTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
@@ -30,7 +29,7 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
 
     @Override
     protected String getScenarioName() {
-        return "simple";
+        return "eventTable";
     }
 
     private ComputeLiftParameters prepareInput() {
@@ -40,8 +39,7 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         parameters.setLiftField(InterfaceName.Lift.name());
         parameters.setModelGuidField(ScoreResultField.ModelId.displayName);
         parameters.setScoreFieldMap(ImmutableMap.of( //
-                "ms__9c1338b0-7052-4665-8960-a5acf7bfed43-CDLEnd2E", "ExpectedRevenue", //
-                "ms__21dd9b0f-f5be-4818-9efd-4ac9be61d41c-CDLEnd2E", "Probability" //
+                "ms__ba5e4d8a-eead-4995-bf9f-efdc514aa66f-SelfServ", "Event" //
         ));
         return parameters;
     }
@@ -54,7 +52,6 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
             System.out.println(record);
             numRows++;
         }
-        Assert.assertEquals(numRows, 2);
     }
 
 }

@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
@@ -25,6 +26,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidati
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
@@ -56,6 +58,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
 
+        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
 
@@ -71,6 +74,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
+            computeLift.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -88,6 +92,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             modelWorkflowBuilder.customer(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowBuilder.customer(customerSpace);
+            computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
             return this;
         }
@@ -133,6 +138,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             rtsBulkScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            computeLift.setInternalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -324,6 +330,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
+            computeLift.setBucketMetadata(bucketMetadata);
             return this;
         }
 
@@ -369,6 +376,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             configuration.setContainerConfiguration("importMatchAndModelWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipMatchingStep(Boolean.TRUE);
+            computeLift.setScoreField(InterfaceName.Event.name());
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());
@@ -378,6 +386,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
             configuration.add(modelWorkflowBuilder.build());
             configuration.add(setConfigForScoring);
             configuration.add(rtsBulkScoreWorkflowBuilder.build());
+            configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
             return configuration;

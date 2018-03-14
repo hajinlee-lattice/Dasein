@@ -13,7 +13,7 @@ public class ExpectedRevenueScoreNormalizerUnitTestNG {
     private ExpectedRevenueScoreNormalizer normalizer = null;
 
     @BeforeClass(groups = "unit")
-    public void beforeClass() throws Exception {
+    public void beforeClass() {
 
         List<NormalizationBucket> buckets = new ArrayList<>();
         buckets.add(new NormalizationBucket(260.5446797729171, 282.1205494105959, 0.008319467554076539));

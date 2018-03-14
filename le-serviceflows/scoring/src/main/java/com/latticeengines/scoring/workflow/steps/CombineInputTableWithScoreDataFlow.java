@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.workflow.steps;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +17,6 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
@@ -109,7 +107,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
                 getScoreResultTableName(), getInputTableName());
         AIModel aiModel = (AIModel) container.getModel();
         PredictionType predictionType = aiModel.getPredictionType();
-        params.setBucketMetadata(getDefaultBucketMetadata(predictionType));
+        params.setBucketMetadata(container.getEngineSummary().getBucketMetadata());
         params.setScoreFieldName(getScoreFieldName(predictionType));
         params.setPredictionType(predictionType);
         // no multiplier, because always calculate lift chart
@@ -130,35 +128,6 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
             throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
         }
         return scoreField;
-    }
-
-    private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
-        List<BucketMetadata> buckets = new ArrayList<>();
-        switch (predictionType) {
-        case PROPENSITY:
-            buckets.add(addBucket(10, 4, BucketName.A));
-            buckets.add(addBucket(4, 2, BucketName.B));
-            buckets.add(addBucket(2, 1, BucketName.C));
-            buckets.add(addBucket(1, 0, BucketName.D));
-            break;
-        case EXPECTED_VALUE:
-            buckets.add(addBucket(10, 4, BucketName.A));
-            buckets.add(addBucket(4, 2, BucketName.B));
-            buckets.add(addBucket(2, 1, BucketName.C));
-            buckets.add(addBucket(1, 0, BucketName.D));
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
-        }
-        return buckets;
-    }
-
-    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
-        BucketMetadata bucket = new BucketMetadata();
-        bucket.setLeftBoundScore(leftBoundScore);
-        bucket.setRightBoundScore(rightBoundScore);
-        bucket.setBucket(bucketName);
-        return bucket;
     }
 
     private List<RatingModelContainer> getModelContainers() {

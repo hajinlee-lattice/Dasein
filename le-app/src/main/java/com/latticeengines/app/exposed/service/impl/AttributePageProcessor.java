@@ -234,7 +234,7 @@ public class AttributePageProcessor {
             return superimposedList;
         } else {
             if (offset != null && offset >= superimposedList.size()) {
-                return new ArrayList<LeadEnrichmentAttribute>();
+                return new ArrayList<>();
             }
 
             int effectiveStartIndex = offset == null ? 0 : offset;
@@ -250,9 +250,9 @@ public class AttributePageProcessor {
     private LeadEnrichmentAttribute constructAttribute(List<String> selectedAttributeNames, ColumnMetadata column) {
         LeadEnrichmentAttribute attr = new LeadEnrichmentAttribute();
         attr.setDisplayName(column.getDisplayName());
-        attr.setFieldName(column.getColumnId());
-        attr.setFieldNameInTarget(column.getColumnName());
-        attr.setColumnId(column.getColumnId());
+        attr.setFieldName(column.getAttrName());
+        attr.setFieldNameInTarget(column.getAttrName());
+        attr.setColumnId(column.getAttrName());
         attr.setJavaClass(column.getJavaClass());
         attr.setFieldType(column.getDataType());
         attr.setFieldJavaType(column.getJavaClass());
@@ -262,7 +262,7 @@ public class AttributePageProcessor {
         attr.setIsSelected(selectedAttributeNames.contains(column.getColumnId()));
         attr.setIsPremium(column.isPremium());
         attr.setCategory(column.getCategory().getName());
-        attr.setSubcategory(column.getSubcategory() == null ? null : column.getSubcategory());
+        attr.setSubcategory(column.getSubcategory());
         attr.setIsInternal(Boolean.TRUE.equals(column.isCanInternalEnrich()));
         attr.setDataLicense(column.getDataLicense());
         return attr;

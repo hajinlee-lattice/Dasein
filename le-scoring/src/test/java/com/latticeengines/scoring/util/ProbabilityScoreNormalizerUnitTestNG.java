@@ -13,7 +13,7 @@ public class ProbabilityScoreNormalizerUnitTestNG {
     private ProbabilityScoreNormalizer normalizer = null;
 
     @BeforeClass(groups = "unit")
-    public void beforeClass() throws Exception {
+    public void beforeClass() {
 
         List<NormalizationBucket> buckets = new ArrayList<>();
         buckets.add(new NormalizationBucket(0.43439529417124634, 0.47080762707065127, 0.009666666666666667));

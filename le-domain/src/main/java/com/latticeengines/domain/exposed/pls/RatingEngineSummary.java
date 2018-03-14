@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -57,6 +58,9 @@ public class RatingEngineSummary {
 
     @JsonProperty("activeModelId")
     private String activeModelId;
+
+    @JsonProperty("bucketMetadata")
+    private List<BucketMetadata> bucketMetadata;
 
     public String getId() {
         return this.id;
@@ -176,6 +180,14 @@ public class RatingEngineSummary {
 
     public void setActiveModelId(String activeModelId) {
         this.activeModelId = activeModelId;
+    }
+
+    public List<BucketMetadata> getBucketMetadata() {
+        return bucketMetadata;
+    }
+
+    public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
+        this.bucketMetadata = bucketMetadata;
     }
 
     @Override

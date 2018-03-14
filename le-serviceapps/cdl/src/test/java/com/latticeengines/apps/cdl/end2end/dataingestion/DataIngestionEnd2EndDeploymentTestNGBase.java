@@ -466,43 +466,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         checkpointService.saveCheckPoint(checkpoint);
     }
 
-    // Copied from ExportDataToRedshift
-    private ExportConfiguration setupExportConfig(Table sourceTable, String targetTableName,
-            TableRoleInCollection tableRole) {
-        HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
-        exportConfig.setExportFormat(ExportFormat.AVRO);
-        exportConfig.setCleanupS3(true);
-        exportConfig.setCreateNew(true);
-        exportConfig.setAppend(true);
-        exportConfig.setCustomerSpace(CustomerSpace.parse(mainTestTenant.getId()));
-        exportConfig.setExportInputPath(sourceTable.getExtractsDirectory() + "/*.avro");
-        exportConfig.setExportTargetPath(sourceTable.getName());
-        exportConfig.setNoSplit(true);
-        exportConfig.setExportDestination(ExportDestination.REDSHIFT);
-
-        // all distributed on account id
-        String distKey = tableRole.getPrimaryKey().name();
-        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
-        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
-            sortKeys.add(tableRole.getPrimaryKey().name());
-        }
-        RedshiftTableConfiguration.SortKeyType sortKeyType = sortKeys.size() == 1
-                ? RedshiftTableConfiguration.SortKeyType.Compound : RedshiftTableConfiguration.SortKeyType.Interleaved;
-
-        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
-        redshiftTableConfig.setS3Bucket(s3Bucket);
-        redshiftTableConfig.setDistStyle(RedshiftTableConfiguration.DistStyle.Key);
-        redshiftTableConfig.setDistKey(distKey);
-        redshiftTableConfig.setSortKeyType(sortKeyType);
-        redshiftTableConfig.setSortKeys(sortKeys);
-        redshiftTableConfig.setTableName(targetTableName);
-        redshiftTableConfig
-                .setJsonPathPrefix(String.format("%s/jsonpath/%s.jsonpath", RedshiftUtils.AVRO_STAGE, targetTableName));
-        exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
-
-        return exportConfig;
-    }
-
     private List<Report> retrieveReport(String appId) {
         Job job = testBed.getRestTemplate().getForObject( //
                 String.format("%s/pls/jobs/yarnapps/%s", deployedHostPort, appId), //

@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -14,7 +15,10 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -85,6 +89,10 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     ModelSummary modelSummary = aiModel.getModelSummary();
                     aiModel.setModelSummaryId(modelSummary.getId());
                     aiModel.setModelSummary(null);
+                    if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
+                        List<BucketMetadata> bucketMetadata = getDefaultBucketMetadata(aiModel.getPredictionType());
+                        summary.setBucketMetadata(bucketMetadata);
+                    }
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
@@ -128,6 +136,35 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             return false;
         }
         return true;
+    }
+
+    private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
+        List<BucketMetadata> buckets = new ArrayList<>();
+        switch (predictionType) {
+            case PROPENSITY:
+                buckets.add(addBucket(10, 4, BucketName.A));
+                buckets.add(addBucket(4, 2, BucketName.B));
+                buckets.add(addBucket(2, 1, BucketName.C));
+                buckets.add(addBucket(1, 0, BucketName.D));
+                break;
+            case EXPECTED_VALUE:
+                buckets.add(addBucket(10, 4, BucketName.A));
+                buckets.add(addBucket(4, 2, BucketName.B));
+                buckets.add(addBucket(2, 1, BucketName.C));
+                buckets.add(addBucket(1, 0, BucketName.D));
+                break;
+            default:
+                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        }
+        return buckets;
+    }
+
+    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+        BucketMetadata bucket = new BucketMetadata();
+        bucket.setLeftBoundScore(leftBoundScore);
+        bucket.setRightBoundScore(rightBoundScore);
+        bucket.setBucket(bucketName);
+        return bucket;
     }
 
 }

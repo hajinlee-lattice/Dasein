@@ -56,7 +56,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                 PredictionType.class);
         if (predictionTypes != null) {
             dataFlowParams.setExpectedValues(predictionTypes.entrySet().stream()
-                    .collect(Collectors.toMap(e -> e.getKey(), e -> PredictionType.EXPECTED_VALUE == e.getValue())));
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> PredictionType.EXPECTED_VALUE == e.getValue())));
         } else {
             dataFlowParams.setExpectedValues(
                     ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()));

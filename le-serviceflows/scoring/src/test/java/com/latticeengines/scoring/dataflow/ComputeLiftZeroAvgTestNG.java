@@ -14,7 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLi
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
 @ContextConfiguration(locations = { "classpath:serviceflows-scoring-dataflow-context.xml" })
-public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
+public class ComputeLiftZeroAvgTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void test() {
@@ -30,7 +30,7 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
 
     @Override
     protected String getScenarioName() {
-        return "simple";
+        return "zeroAvg";
     }
 
     private ComputeLiftParameters prepareInput() {
@@ -40,8 +40,8 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         parameters.setLiftField(InterfaceName.Lift.name());
         parameters.setModelGuidField(ScoreResultField.ModelId.displayName);
         parameters.setScoreFieldMap(ImmutableMap.of( //
-                "ms__9c1338b0-7052-4665-8960-a5acf7bfed43-CDLEnd2E", "ExpectedRevenue", //
-                "ms__21dd9b0f-f5be-4818-9efd-4ac9be61d41c-CDLEnd2E", "Probability" //
+                "ms__d794ef32-3d34-4391-95a9-9d9bd2621dcf-ai_lf__5", "ExpectedRevenue", //
+                "ms__1f9435e4-f824-4623-b110-61644dca8a70-ai_1g0mh", "Probability" //
         ));
         return parameters;
     }
@@ -51,8 +51,8 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         List<GenericRecord> records = readOutput();
         int numRows = 0;
         for (GenericRecord record : records) {
-            System.out.println(record);
             numRows++;
+            Assert.assertTrue(record.get(InterfaceName.Lift.name()) instanceof Double);
         }
         Assert.assertEquals(numRows, 2);
     }
