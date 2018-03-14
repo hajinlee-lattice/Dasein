@@ -1301,20 +1301,26 @@ public class SchemaRepository {
 
     public Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
         Set<InterfaceName> sysAttrs = new HashSet<>();
-        // common
-        sysAttrs.add(InterfaceName.AccountId);
-        sysAttrs.add(InterfaceName.InternalId);
-        sysAttrs.add(InterfaceName.CDLCreatedTime);
-        sysAttrs.add(InterfaceName.CDLUpdatedTime);
-        // special
-        switch (entity) {
-            case Account:
-                sysAttrs.add(InterfaceName.LatticeAccountId);
-                sysAttrs.add(InterfaceName.CustomerParentAccountID);
-                break;
-            case Contact:
-                sysAttrs.add(InterfaceName.ContactId);
-                break;
+        if (BusinessEntity.LatticeAccount.equals(entity)) {
+            sysAttrs.add(InterfaceName.LatticeAccountId);
+            sysAttrs.add(InterfaceName.IsMatched);
+        } else {
+            // common
+            sysAttrs.add(InterfaceName.AccountId);
+            sysAttrs.add(InterfaceName.InternalId);
+            sysAttrs.add(InterfaceName.CDLCreatedTime);
+            sysAttrs.add(InterfaceName.CDLUpdatedTime);
+            // special
+            switch (entity) {
+                case Account:
+                    sysAttrs.add(InterfaceName.LatticeAccountId);
+                    sysAttrs.add(InterfaceName.IsMatched);
+                    sysAttrs.add(InterfaceName.CustomerParentAccountID);
+                    break;
+                case Contact:
+                    sysAttrs.add(InterfaceName.ContactId);
+                    break;
+            }
         }
         return sysAttrs;
     }

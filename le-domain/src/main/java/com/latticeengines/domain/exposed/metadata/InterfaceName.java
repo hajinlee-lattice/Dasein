@@ -110,6 +110,7 @@ public enum InterfaceName {
 
     // Data Cloud
     LatticeAccountId, // Id in AccountMaster
+    IsMatched,
     LDC_Name,
 
     // Rating
