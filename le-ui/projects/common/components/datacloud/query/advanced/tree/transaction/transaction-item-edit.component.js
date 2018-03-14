@@ -347,7 +347,7 @@ angular
                 vm.showPeriodFrom = function () {
                     switch (vm.timeCmp) {
                         case 'EVER':
-                        case 'IN_CURRENT':
+                        case 'IN_CURRENT_PERIOD':
                         case 'BETWEEN':
                         case 'BEFORE':
                         case 'AFTER':

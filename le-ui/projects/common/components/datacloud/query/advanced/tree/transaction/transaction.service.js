@@ -35,7 +35,7 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
             return [
                 { 'name': 'EVER', 'displayName': 'Ever' },
-                { 'name': 'IN_CURRENT', 'displayName': 'Current' },
+                { 'name': 'IN_CURRENT_PERIOD', 'displayName': 'Current' },
                 { 'name': 'WITHIN', 'displayName': 'Previous' },
                 { 'name': 'PRIOR_ONLY', 'displayName': 'Only Prior to Last' },
                 { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },

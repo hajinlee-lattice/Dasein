@@ -31,7 +31,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'CONTAINS': 'contains',
             'NOT_CONTAINS': 'not contains',
             'STARTS_WITH': 'starts with',
-            'IN_CURRENT': 'Current',
+            'IN_CURRENT_PERIOD': 'Current',
             'EVER': 'Ever',
             'Any': 'Any',
             'BEFORE': 'Before',
