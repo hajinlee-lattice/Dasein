@@ -17,7 +17,7 @@ public class TestReportWorkflow extends AbstractWorkflow<TestReportWorkflowConfi
 
     @Override
     public Workflow defineWorkflow(TestReportWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(registerReport) //
                 .build();
     }

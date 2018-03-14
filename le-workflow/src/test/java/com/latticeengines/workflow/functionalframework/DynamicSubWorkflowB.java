@@ -23,7 +23,7 @@ public class DynamicSubWorkflowB extends AbstractWorkflow<WorkflowConfiguration>
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(stepC) //
                 .next(stepD) //
                 .build();

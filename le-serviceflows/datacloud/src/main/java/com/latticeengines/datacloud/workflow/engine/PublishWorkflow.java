@@ -22,7 +22,7 @@ public class PublishWorkflow extends AbstractWorkflow<PublishWorkflowConfigurati
 
     @Override
     public Workflow defineWorkflow(PublishWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(publish) //
                 .build();
     }

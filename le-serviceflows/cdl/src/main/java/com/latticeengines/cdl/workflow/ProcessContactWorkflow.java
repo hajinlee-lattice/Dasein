@@ -33,10 +33,10 @@ public class ProcessContactWorkflow extends AbstractWorkflow<ProcessContactWorkf
 
     @Override
     public Workflow defineWorkflow(ProcessContactWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(mergeContactWrapper, null) //
-                .next(updateContactWorkflow, null) //
-                .next(rebuildContactWorkflow, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(mergeContactWrapper) //
+                .next(updateContactWorkflow) //
+                .next(rebuildContactWorkflow) //
                 .next(resetContact) //
                 .build();
     }

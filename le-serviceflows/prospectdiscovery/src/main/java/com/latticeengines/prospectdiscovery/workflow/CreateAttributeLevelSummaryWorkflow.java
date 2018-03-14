@@ -23,7 +23,7 @@ public class CreateAttributeLevelSummaryWorkflow extends AbstractWorkflow<Workfl
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(runScoreTableDataFlow) //
                 .next(runAttributeLevelSummaryDataFlows) //
                 .next(runAttributeLevelSummaryDataFlows) //

@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportAndRTSBulkScoreWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
@@ -36,12 +35,10 @@ public class ImportAndRTSBulkScoreWorkflow extends AbstractWorkflow<ImportAndRTS
 
     @Override
     public Workflow defineWorkflow(ImportAndRTSBulkScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(rtsBulkScoreWorkflow, //
-                        (RTSBulkScoreWorkflowConfiguration) config.getSubWorkflowConfigRegistry()
-                                .get(RTSBulkScoreWorkflowConfiguration.class.getSimpleName()))//
+                .next(rtsBulkScoreWorkflow) //
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
     }

@@ -50,10 +50,10 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
 
     @Override
     public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
+        return new WorkflowBuilder(name(), config)//
                 .next(createCdlTargetTableFilterStep) //
                 .next(createCdlEventTableStep) //
-                .next(matchDataCloudWorkflow, null) //
+                .next(matchDataCloudWorkflow) //
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableSet;
@@ -11,8 +12,12 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modelreview.DataRule;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
@@ -23,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventT
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -173,12 +179,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder matchInputTableName(String tableName) {
-            customEventMatchWorkflowConfigurationBuilder.matchInputTableName(tableName);
-            prepareConfigForScoringBuilder.matchInputTableName(tableName);
-            return this;
-        }
-
         public Builder matchAccountIdColumn(String matchAccountIdColumn) {
             customEventMatchWorkflowConfigurationBuilder.matchAccountIdColumn(matchAccountIdColumn);
             prepareConfigForScoringBuilder.matchAccountIdColumn(matchAccountIdColumn);
@@ -252,10 +252,109 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder matchDebugEnabled(boolean matchDebugEnabled) {
+            rtsBulkScoreWorkflowBuilder.matchDebugEnabled(matchDebugEnabled);
+            return this;
+        }
+
+        public Builder skipStandardTransform(boolean skipTransform) {
+            addStandardAttributes.setSkipStep(skipTransform);
+            return this;
+        }
+
+        public Builder modelName(String modelName) {
+            modelWorkflowBuilder.modelName(modelName);
+            return this;
+        }
+
+        public Builder displayName(String displayName) {
+            modelWorkflowBuilder.displayName(displayName);
+            return this;
+        }
+
+        public Builder trainingTableName(String trainingTableName) {
+            modelDataValidationWorkflow.sourceTableName(trainingTableName);
+            customEventMatchWorkflowConfigurationBuilder.matchInputTableName(trainingTableName);
+            modelWorkflowBuilder.trainingTableName(trainingTableName);
+            rtsBulkScoreWorkflowBuilder.inputTableName(trainingTableName);
+            return this;
+        }
+
+        public Builder transformationGroup(TransformationGroup transformationGroup,
+                List<TransformDefinition> stdTransformDefns) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
+            addStandardAttributes.setTransforms(stdTransformDefns);
+            modelWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
+            return this;
+        }
+
+        public Builder enableV2Profiling(boolean v2ProfilingEnabled) {
+            modelWorkflowBuilder.enableV2Profiling(v2ProfilingEnabled);
+            return this;
+        }
+
+        public Builder addProvenanceProperty(ProvenancePropertyName propertyName, Object value) {
+            modelWorkflowBuilder.addProvenanceProperty(propertyName, value);
+            return this;
+        }
+
+        public Builder pivotArtifactPath(String pivotArtifactPath) {
+            modelWorkflowBuilder.pivotArtifactPath(pivotArtifactPath);
+            return this;
+        }
+
+        public Builder moduleName(String moduleName) {
+            modelWorkflowBuilder.moduleName(moduleName);
+            return this;
+        }
+
+        public Builder runTimeParams(Map<String, String> runTimeParams) {
+            modelWorkflowBuilder.runTimeParams(runTimeParams);
+            addStandardAttributes.setRuntimeParams(runTimeParams);
+            return this;
+        }
+
+        public Builder dataRules(List<DataRule> dataRules) {
+            modelWorkflowBuilder.dataRules(dataRules);
+            return this;
+        }
+
+        public Builder isDefaultDataRules(boolean isDefaultDataRules) {
+            modelWorkflowBuilder.isDefaultDataRules(isDefaultDataRules);
+            return this;
+        }
+
+        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
+            rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
+            return this;
+        }
+
+        public Builder setActivateModelSummaryByDefault(boolean value) {
+            modelWorkflowBuilder.setActivateModelSummaryByDefault(value);
+            return this;
+        }
+
+        public Builder notesContent(String notesContent) {
+            modelWorkflowBuilder.notesContent(notesContent);
+            return this;
+        }
+
         public CustomEventModelingWorkflowConfiguration build() {
-            configuration.setContainerConfiguration("customEventModelingWorkflowConfiguration",
-                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
+            configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
+                    configuration.getClass().getSimpleName());
+            configuration.add(importData);
+            configuration.add(registerReport);
+            configuration.add(modelDataValidationWorkflow.build());
             configuration.add(customEventMatchWorkflowConfigurationBuilder.build());
+
+            configuration.add(dedupEventTable);
+            configuration.add(addStandardAttributes);
+            configuration.add(modelWorkflowBuilder.build());
+            configuration.add(prepareConfigForScoringBuilder.build());
+            configuration.add(rtsBulkScoreWorkflowBuilder.build());
+            configuration.add(pivotScoreAndEvent);
+            configuration.add(export);
+
             return configuration;
         }
     }

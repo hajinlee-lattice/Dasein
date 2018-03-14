@@ -47,13 +47,13 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
 
     @Override
     public Workflow defineWorkflow(ScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
-                .next(matchDataCloudWorkflow, null) //
+        return new WorkflowBuilder(name(), config)//
+                .next(matchDataCloudWorkflow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(score) //
                 .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
-                .next(exportWorkflow, null) //
+                .next(exportWorkflow) //
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
 

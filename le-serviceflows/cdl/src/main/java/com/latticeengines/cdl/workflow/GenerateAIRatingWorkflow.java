@@ -47,10 +47,10 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
 
     @Override
     public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(createScoringTargetTable) //
                 .next(createCdlEventTable) //
-                .next(matchDataCloud, null) //
+                .next(matchDataCloud) //
                 .next(scoreEventTable) //
                 .next(scoreAggregate) //
                 .next(combineInputTableWithScore) //

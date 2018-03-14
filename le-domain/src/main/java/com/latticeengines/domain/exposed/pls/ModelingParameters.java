@@ -6,6 +6,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 /**
@@ -64,6 +65,12 @@ public class ModelingParameters {
 
     @JsonProperty
     private boolean activateModelSummaryByDefault = false;
+
+    @JsonProperty
+    private String segmentName;
+
+    @JsonProperty
+    private ModelingType modelingType = ModelingType.LPI;
 
     public String getFilename() {
         return filename;
@@ -193,12 +200,28 @@ public class ModelingParameters {
         this.notesContent = notesContent;
     }
 
+    public String getSegmentName() {
+        return segmentName;
+    }
+
+    public void setSegmentName(String segmentName) {
+        this.segmentName = segmentName;
+    }
+
     public boolean getActivateModelSummaryByDefault() {
         return this.activateModelSummaryByDefault;
     }
 
     public void setActivateModelSummaryByDefault(boolean value) {
         this.activateModelSummaryByDefault = value;
+    }
+
+    public ModelingType getModelingType() {
+        return this.modelingType;
+    }
+
+    public void setModelingType(ModelingType modelingType) {
+        this.modelingType = modelingType;
     }
 
     @Override

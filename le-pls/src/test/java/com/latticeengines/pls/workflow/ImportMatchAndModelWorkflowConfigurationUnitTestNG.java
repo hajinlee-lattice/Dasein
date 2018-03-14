@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationMetadata;
+import com.latticeengines.pls.util.UpdateTransformDefinitionsUtils;
 
 public class ImportMatchAndModelWorkflowConfigurationUnitTestNG {
 

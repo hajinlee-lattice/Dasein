@@ -1,11 +1,12 @@
 package com.latticeengines.cdl.workflow;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.inject.Inject;
 import com.latticeengines.cdl.workflow.steps.PrepareSegmentMatchingStep;
 import com.latticeengines.cdl.workflow.steps.SegmentExportInitStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PrepareScoringAfterModelingWorkflowConfiguration;
@@ -21,7 +22,7 @@ public class PrepareScoringAfterModelingWorkflow
         extends AbstractWorkflow<PrepareScoringAfterModelingWorkflowConfiguration> {
 
     @Inject
-    private SetConfigurationForScoring SetConfigurationForScoring;
+    private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
     private SegmentExportInitStep segmentExportInitStep;
@@ -34,17 +35,16 @@ public class PrepareScoringAfterModelingWorkflow
 
     @Override
     public Workflow defineWorkflow(PrepareScoringAfterModelingWorkflowConfiguration config) {
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config);
         switch (config.getModelingType()) {
         case LPI:
-            return new WorkflowBuilder(name()) //
-                    .next(SetConfigurationForScoring) //
+            return builder.next(setConfigurationForScoring) //
                     .build();
         case CDL:
         default:
-            return new WorkflowBuilder(name()) //
-                    .next(segmentExportInitStep) //
+            return builder.next(segmentExportInitStep) //
                     .next(prepareSegmentMatchingStep) //
-                    .next(customEventSimpleMatchWorkflow, null) //
+                    .next(customEventSimpleMatchWorkflow) //
                     .build();
         }
     }

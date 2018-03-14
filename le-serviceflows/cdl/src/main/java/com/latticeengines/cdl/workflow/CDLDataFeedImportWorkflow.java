@@ -26,7 +26,7 @@ public class CDLDataFeedImportWorkflow extends AbstractWorkflow<CDLDataFeedImpor
 
     @Override
     public Workflow defineWorkflow(CDLDataFeedImportWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
+        return new WorkflowBuilder(name(), config)//
                 .next(importDataFeedTask)//
                 .listener(dataFeedTaskImportListener)//
                 .build();

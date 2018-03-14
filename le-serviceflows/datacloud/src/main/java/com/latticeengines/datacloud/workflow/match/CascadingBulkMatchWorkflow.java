@@ -20,7 +20,7 @@ public class CascadingBulkMatchWorkflow extends AbstractWorkflow<CascadingBulkMa
 
     @Override
     public Workflow defineWorkflow(CascadingBulkMatchWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(cascadingBulkMatchStep) //
                 .build();
     }

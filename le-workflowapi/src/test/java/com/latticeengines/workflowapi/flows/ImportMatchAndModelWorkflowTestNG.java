@@ -7,9 +7,10 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.cdl.workflow.CustomEventModelingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessAnalyzeWorkflow;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.leadprioritization.workflow.ImportMatchAndModelWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -23,14 +24,18 @@ public class ImportMatchAndModelWorkflowTestNG extends WorkflowApiFunctionalTest
     @Inject
     private ProcessAnalyzeWorkflow processAnalyzeWorkflow;
 
+    @Inject
+    private CustomEventModelingWorkflow customEventModelingWorkflow;
+
     @Test(groups = { "functional" })
     public void test() throws Exception {
         InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/workflowapi/config/workflow.conf");
-        ProcessAnalyzeWorkflowConfiguration workflowConfig = JsonUtils.deserialize(is,
-                ProcessAnalyzeWorkflowConfiguration.class);
-        Workflow workflow = processAnalyzeWorkflow.defineWorkflow(workflowConfig);
-
-        System.out.println(workflow.getSteps().stream().map(AbstractStep::getNamespace).collect(Collectors.toList()));
+        CustomEventModelingWorkflowConfiguration workflowConfig = JsonUtils.deserialize(is,
+                CustomEventModelingWorkflowConfiguration.class);
+        Workflow workflow = customEventModelingWorkflow.defineWorkflow(workflowConfig);
+        System.out.println(workflow.getSteps());
+        System.out
+                .println(workflow.getSteps().stream().map(AbstractStep::getConfiguration).collect(Collectors.toList()));
 
     }
 }

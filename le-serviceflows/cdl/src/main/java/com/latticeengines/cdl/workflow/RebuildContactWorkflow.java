@@ -23,8 +23,8 @@ public class RebuildContactWorkflow extends AbstractWorkflow<RebuildContactWorkf
 
     @Override
     public Workflow defineWorkflow(RebuildContactWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(profileContactWrapper, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(profileContactWrapper) //
                 .build();
     }
 }

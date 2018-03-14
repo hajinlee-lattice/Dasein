@@ -42,11 +42,11 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
 
     @Override
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(prepareForRating) //
                 .next(cloneInactiveServingStores) //
-                .next(generateRatingWorkflow, null) //
-                .next(profileRatingWrapper, null) //
+                .next(generateRatingWorkflow) //
+                .next(profileRatingWrapper) //
                 .next(combineStatistics) //
                 .next(exportDataToRedshift) //
                 .build();

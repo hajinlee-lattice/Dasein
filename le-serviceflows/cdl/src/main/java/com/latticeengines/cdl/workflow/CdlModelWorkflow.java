@@ -56,7 +56,7 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
 
     @Override
     public Workflow defineWorkflow(CdlMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //

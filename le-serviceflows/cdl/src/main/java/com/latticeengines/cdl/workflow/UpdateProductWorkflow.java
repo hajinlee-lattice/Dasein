@@ -27,7 +27,7 @@ public class UpdateProductWorkflow extends AbstractWorkflow<UpdateProductWorkflo
 
     @Override
     public Workflow defineWorkflow(UpdateProductWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(cloneProduct) //
                 .next(processProductDiff) //
                 .build();

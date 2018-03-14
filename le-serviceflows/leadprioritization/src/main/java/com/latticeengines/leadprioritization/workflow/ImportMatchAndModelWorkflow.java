@@ -66,16 +66,16 @@ public class ImportMatchAndModelWorkflow extends AbstractWorkflow<ImportMatchAnd
 
     @Override
     public Workflow defineWorkflow(ImportMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(modelValidationWorkflow, null) //
-                .next(matchDataCloudWorkflow, null) //
+                .next(modelValidationWorkflow) //
+                .next(matchDataCloudWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
-                .next(modelWorkflow, null) //
+                .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(rtsBulkScoreWorkflow, null) //
+                .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

@@ -35,10 +35,10 @@ public class ImportMatchAndScoreWorkflow extends AbstractWorkflow<ImportMatchAnd
 
     @Override
     public Workflow defineWorkflow(ImportMatchAndScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(scoreWorkflow, null)//
+                .next(scoreWorkflow)//
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
     }

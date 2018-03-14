@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -149,6 +150,11 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setContainerMemoryMB(Integer containerMemoryMB) {
         this.containerMemoryMB = containerMemoryMB;
+    }
+
+    @JsonIgnore
+    public WorkflowConfiguration getSubWorkflowConfiguration(String workflowName) {
+        return this.getSubWorkflowConfigRegistry().get(workflowName);
     }
 
 }

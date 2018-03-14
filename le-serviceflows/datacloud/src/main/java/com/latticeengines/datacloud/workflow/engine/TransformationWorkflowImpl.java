@@ -24,7 +24,7 @@ public class TransformationWorkflowImpl extends AbstractWorkflow<TransformationW
 
     @Override
     public Workflow defineWorkflow(TransformationWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(transformationStep) //
                 .build();
     }

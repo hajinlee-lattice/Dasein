@@ -23,8 +23,8 @@ public class RebuildAccountWorkflow extends AbstractWorkflow<RebuildAccountWorkf
 
     @Override
     public Workflow defineWorkflow(RebuildAccountWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(profileAccountWrapper, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(profileAccountWrapper) //
                 .build();
     }
 }

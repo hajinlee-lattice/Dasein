@@ -33,10 +33,10 @@ public class ProcessTransactionWorkflow extends AbstractWorkflow<ProcessTransact
 
     @Override
     public Workflow defineWorkflow(ProcessTransactionWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(mergeTransactionWrapper, null) //
-                .next(updateTransactionWorkflow, null) //
-                .next(rebuildTransactionWorkflow, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(mergeTransactionWrapper) //
+                .next(updateTransactionWorkflow) //
+                .next(rebuildTransactionWorkflow) //
                 .next(resetTransaction) //
                 .build();
     }

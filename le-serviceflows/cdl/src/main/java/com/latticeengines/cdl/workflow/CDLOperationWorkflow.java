@@ -38,10 +38,10 @@ public class CDLOperationWorkflow extends AbstractWorkflow<CDLOperationWorkflowC
 
     @Override
     public Workflow defineWorkflow(CDLOperationWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
+        return new WorkflowBuilder(name(), config)//
                 .next(deleteFileUploadStep)//
                 .next(startMaintenanceStep)//
-                .next(cleanupByUploadWrapper, null)//
+                .next(cleanupByUploadWrapper)//
                 .next(operationExecuteStep)//
                 .listener(maintenanceOperationListener)//
                 .build();

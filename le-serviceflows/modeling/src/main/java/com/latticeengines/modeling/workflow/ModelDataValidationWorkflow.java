@@ -27,7 +27,7 @@ public class ModelDataValidationWorkflow extends AbstractWorkflow<ModelDataValid
 
     @Override
     public Workflow defineWorkflow(ModelDataValidationWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(createPrematchEventTableReport) //
                 .next(validatePrematchEventTable) //
                 .build();

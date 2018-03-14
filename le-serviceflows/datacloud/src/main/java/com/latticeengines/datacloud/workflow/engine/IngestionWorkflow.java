@@ -19,7 +19,7 @@ public class IngestionWorkflow extends AbstractWorkflow<IngestionWorkflowConfigu
 
     @Override
     public Workflow defineWorkflow(IngestionWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(ingestionStep) //
                 .build();
     }

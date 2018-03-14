@@ -33,10 +33,10 @@ public class ProcessAccountWorkflow extends AbstractWorkflow<ProcessAccountWorkf
 
     @Override
     public Workflow defineWorkflow(ProcessAccountWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(mergeAccountWrapper, null) //
-                .next(updateAccountWorkflow, null) //
-                .next(rebuildAccountWorkflow, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(mergeAccountWrapper) //
+                .next(updateAccountWorkflow) //
+                .next(rebuildAccountWorkflow) //
                 .next(resetAccount) //
                 .build();
     }

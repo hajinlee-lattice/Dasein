@@ -23,7 +23,7 @@ public class CreateImportSummaryWorkflow extends AbstractWorkflow<WorkflowConfig
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(runImportSummaryDataFlow) //
                 .next(registerImportSummaryReport) //
                 .build();

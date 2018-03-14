@@ -27,9 +27,9 @@ public class UpdateAccountWorkflow extends AbstractWorkflow<UpdateAccountWorkflo
 
     @Override
     public Workflow defineWorkflow(UpdateAccountWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(cloneAccount) //
-                .next(processAccountDiffWrapper, null) //
+                .next(processAccountDiffWrapper) //
                 .build();
     }
 }

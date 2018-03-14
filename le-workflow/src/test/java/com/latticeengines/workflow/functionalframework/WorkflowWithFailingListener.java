@@ -25,7 +25,7 @@ public class WorkflowWithFailingListener extends AbstractWorkflow<WorkflowConfig
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(successfulStep) //
                 .listener(failingListener) //
                 .listener(successfulListener).build();

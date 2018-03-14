@@ -54,17 +54,17 @@ public class MockFitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(markReportOutOfDate) //
                 .next(importData) //
                 .next(createPreMatchEventTable) //
-                .next(mockMatchWorkflow, null) //
-                .next(createImportSummaryWorkflow, null) //
+                .next(mockMatchWorkflow) //
+                .next(createImportSummaryWorkflow) //
                 .next(sample) //
                 .next(mockProfileAndModel) //
                 .next(chooseModel) //
                 .next(score) //
-                .next(mockCreateAttributeLevelSummaryWorkflow, null) //
+                .next(mockCreateAttributeLevelSummaryWorkflow) //
                 .build();
     }
 

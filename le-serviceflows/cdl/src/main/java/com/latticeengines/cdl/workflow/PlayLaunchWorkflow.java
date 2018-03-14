@@ -23,7 +23,7 @@ public class PlayLaunchWorkflow extends AbstractWorkflow<PlayLaunchWorkflowConfi
 
     @Override
     public Workflow defineWorkflow(PlayLaunchWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(playLaunchInitStep) //
                 .build();
     }

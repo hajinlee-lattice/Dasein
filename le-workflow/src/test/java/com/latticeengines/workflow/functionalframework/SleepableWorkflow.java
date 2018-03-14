@@ -25,7 +25,7 @@ public class SleepableWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(successfulStep) //
                 .next(sleepableStep) //
                 .next(anotherSuccessfulStep) //

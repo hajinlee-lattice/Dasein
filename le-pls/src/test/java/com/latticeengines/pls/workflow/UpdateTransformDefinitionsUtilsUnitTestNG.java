@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.transform.TransformationPipeline;
+import com.latticeengines.pls.util.UpdateTransformDefinitionsUtils;
 
 public class UpdateTransformDefinitionsUtilsUnitTestNG {
 

@@ -106,16 +106,9 @@ public class ModelResource {
     @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
     public ResponseDocument<String> model(@PathVariable String modelName, //
             @RequestBody ModelingParameters parameters) {
-        if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
-            log.error(message);
-            throw new RuntimeException(message);
-        }
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         parameters.setUserId(MultiTenantContext.getEmailAddress());
-        log.info(String.format("model called with parameters %s", parameters.toString()));
-        return ResponseDocument.successResponse( //
-                importMatchAndModelWorkflowSubmitter.submit(parameters).toString());
+        return ResponseDocument
+                .successResponse(cdlModelProxy.model(MultiTenantContext.getTenant().getId(), modelName, parameters));
     }
 
     @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)

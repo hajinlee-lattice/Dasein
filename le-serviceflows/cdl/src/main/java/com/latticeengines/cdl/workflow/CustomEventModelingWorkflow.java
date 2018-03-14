@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
@@ -66,18 +65,16 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(customEventMatchWorkflow,
-                        (CustomEventMatchWorkflowConfiguration) config.getSubWorkflowConfigRegistry()
-                                .get(CustomEventMatchWorkflowConfiguration.class.getSimpleName())) //
-                .next(modelValidationWorkflow, null) //
+                .next(customEventMatchWorkflow) //
+                .next(modelValidationWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
-                .next(modelWorkflow, null) //
-                .next(prepareScoringAfterModelingWorkflow, null) //
-                .next(rtsBulkScoreWorkflow, null) //
+                .next(modelWorkflow) //
+                .next(prepareScoringAfterModelingWorkflow) //
+                .next(rtsBulkScoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

@@ -2,9 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdFinishStep;
@@ -26,8 +24,8 @@ public class MatchCdlWithAccountIdWorkflow extends AbstractWorkflow<MatchCdlAcco
 
     @Override
     public Workflow defineWorkflow(MatchCdlAccountWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(matchDataCloudWorkflow, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(matchDataCloudWorkflow) //
                 .next(matchAccountIdFinishedStep) //
                 .build();
     }

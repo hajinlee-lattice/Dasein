@@ -30,7 +30,7 @@ public class BulkMatchWorkflowImpl extends AbstractWorkflow<BulkMatchWorkflowCon
 
     @Override
     public Workflow defineWorkflow(BulkMatchWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(prepareBulkMatchInput) //
                 .next(parallelBlockExecution) //
                 .listener(updateFailedMatchListener) //

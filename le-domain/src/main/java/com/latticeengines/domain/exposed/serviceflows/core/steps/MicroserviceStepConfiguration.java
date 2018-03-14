@@ -10,7 +10,6 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.SetCdlConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
@@ -51,7 +50,6 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = RTSScoreStepConfiguration.class, name = "RTSScoreStepConfiguration"),
         @Type(value = RunAttributeLevelSummaryDataFlowsConfiguration.class, name = "RunAttributeLevelSummaryDataFlowsConfiguration"),
         @Type(value = ScoreStepConfiguration.class, name = "ScoreStepConfiguration"),
-        @Type(value = SetCdlConfigurationForScoringConfiguration.class, name = "SetCdlConfigurationForScoringConfiguration"),
         @Type(value = StartMaintenanceConfiguration.class, name = "StartMaintenanceConfiguration"),
         @Type(value = TargetMarketStepConfiguration.class, name = "TargetMarketStepConfiguration"),
         @Type(value = SetConfigurationForScoringConfiguration.class, name = "SetConfigurationForScoringConfiguration"),

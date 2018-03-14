@@ -59,7 +59,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = RedshiftPublishWorkflowConfiguration.class, name = "RedshiftPublishWorkflowConfiguration"),
         @Type(value = RatingEngineImportMatchAndModelWorkflowConfiguration.class, name = "RatingEngineImportMatchAndModelWorkflowConfiguration"),
         @Type(value = RatingEngineScoreWorkflowConfiguration.class, name = "RatingEngineScoreWorkflowConfiguration"),
-        @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlWithAccountIdWorkflowConfiguration"),
+        @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
         @Type(value = SegmentExportWorkflowConfiguration.class, name = "SegmentExportWorkflowConfiguration"),
         @Type(value = PrepareScoringAfterModelingWorkflowConfiguration.class, name = "PrepareScoringAfterModelingWorkflowConfiguration"), })
 public class BaseCDLWorkflowConfiguration extends WorkflowConfiguration {

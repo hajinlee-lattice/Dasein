@@ -27,9 +27,9 @@ public class UpdateContactWorkflow extends AbstractWorkflow<UpdateContactWorkflo
 
     @Override
     public Workflow defineWorkflow(UpdateContactWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(cloneContact) //
-                .next(processContactDiffWrapper, null) //
+                .next(processContactDiffWrapper) //
                 .build();
     }
 }

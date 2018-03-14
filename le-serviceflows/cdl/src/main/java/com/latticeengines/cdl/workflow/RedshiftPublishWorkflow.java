@@ -26,7 +26,7 @@ public class RedshiftPublishWorkflow extends AbstractWorkflow<RedshiftPublishWor
 
     @Override
     public Workflow defineWorkflow(RedshiftPublishWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(exportDataToRedshift) //
                 .next(exportDataToRedshiftReportStep) //
                 .build();

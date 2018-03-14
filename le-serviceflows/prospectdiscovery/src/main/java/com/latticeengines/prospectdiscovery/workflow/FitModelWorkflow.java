@@ -78,12 +78,12 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(markReportOutOfDate) //
                 .next(importData) //
                 .next(createPreMatchEventTable) //
-                .next(matchWorkflow, null) //
-                .next(createImportSummaryWorkflow, null) //
+                .next(matchWorkflow) //
+                .next(createImportSummaryWorkflow) //
                 .next(sample) //
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //
@@ -94,7 +94,7 @@ public class FitModelWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
                 .next(activateModel)//
                 .next(invokeDataScienceAnalysis)//
                 .next(score) //
-                .next(createAttributeLevelSummaryWorkflow, null) //
+                .next(createAttributeLevelSummaryWorkflow) //
                 .build();
     }
 

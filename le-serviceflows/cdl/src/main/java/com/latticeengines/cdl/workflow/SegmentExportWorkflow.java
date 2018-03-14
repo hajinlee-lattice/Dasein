@@ -30,7 +30,7 @@ public class SegmentExportWorkflow extends AbstractWorkflow<SegmentExportWorkflo
 
     @Override
     public Workflow defineWorkflow(SegmentExportWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
+        return new WorkflowBuilder(name(), config)//
                 .next(segmentExportInitStep) //
                 .next(exportData) //
                 .listener(segmentExportListener) //

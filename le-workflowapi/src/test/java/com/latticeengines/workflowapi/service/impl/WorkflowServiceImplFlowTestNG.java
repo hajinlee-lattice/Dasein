@@ -164,7 +164,7 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
         future.cancel(true);
     }
 
-    @Test(groups = "functional", enabled = false)
+    @Test(groups = "functional", enabled = true)
     public void testGetJobs() throws Exception {
         failableStep.setFail(false);
         WorkflowExecutionId workflowId = workflowService.start(failableWorkflowConfig);

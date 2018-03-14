@@ -31,7 +31,8 @@ public class QueryEvaluatorService {
     private static final Logger log = LoggerFactory.getLogger(QueryEvaluatorService.class);
 
     @Inject
-    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this proxy
+    private DataCollectionProxy dataCollectionProxy; // attr repo cached in this
+                                                     // proxy
 
     @Inject
     private QueryEvaluator queryEvaluator;
@@ -48,17 +49,10 @@ public class QueryEvaluatorService {
     }
 
     public long getCount(AttributeRepository attrRepo, Query query) {
-        long count;
-        if (query != null && query.getMainEntity() != null && query.getMainEntity().getServingStore() != null
-                && attrRepo.getTableName(query.getMainEntity().getServingStore()) == null) {
-            count = 0;
-        } else {
-            SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
-            try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
-                count = sqlQuery.fetchCount();
-            }
+        SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        try (PerformanceTimer timer = new PerformanceTimer(timerMessage("fetchCount", attrRepo, sqlQuery))) {
+            return sqlQuery.fetchCount();
         }
-        return count;
     }
 
     public DataPage getData(String customerSpace, DataCollection.Version version, Query query) {

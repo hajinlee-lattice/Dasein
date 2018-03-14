@@ -31,10 +31,10 @@ public class UpdateTransactionWorkflow extends AbstractWorkflow<UpdateTransactio
 
     @Override
     public Workflow defineWorkflow(UpdateTransactionWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(cloneTransaction) //
                 .next(clonePurchaseHistory) //
-                .next(processTransactionDiffWrapper, null) //
+                .next(processTransactionDiffWrapper) //
                 .build();
     }
 }

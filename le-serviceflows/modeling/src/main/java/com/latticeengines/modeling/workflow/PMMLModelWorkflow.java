@@ -31,7 +31,7 @@ public class PMMLModelWorkflow extends AbstractWorkflow<PMMLModelWorkflowConfigu
 
     @Override
     public Workflow defineWorkflow(PMMLModelWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(createPMMLModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .listener(sendEmailAfterModelCompletionListener) //

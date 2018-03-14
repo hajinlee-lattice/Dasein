@@ -54,13 +54,13 @@ public class RatingEngineImportMatchAndModelWorkflow
 
     @Override
     public Workflow defineWorkflow(RatingEngineImportMatchAndModelWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
-                .next(matchDataCloudWorkflow, null) //
-                .next(modelWorkflow, null) //
+                .next(matchDataCloudWorkflow) //
+                .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(scoreWorkflow, null) //
+                .next(scoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

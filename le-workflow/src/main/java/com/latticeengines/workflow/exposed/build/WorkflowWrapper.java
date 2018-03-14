@@ -8,9 +8,9 @@ public abstract class WorkflowWrapper<S extends BaseWrapperStepConfiguration, W 
 
     @Override
     public Workflow defineWorkflow(W config) {
-        return new WorkflowBuilder(null) //
+        return new WorkflowBuilder(null, config) //
                 .next(getWrapperStep()) //
-                .next(getWrappedWorkflow(), config) //
+                .next(getWrappedWorkflow()) //
                 .next(getWrapperStep()) //
                 .build();
     }

@@ -35,10 +35,10 @@ public class CustomEventSimpleMatchWorkflow extends AbstractWorkflow<MatchCdlAcc
 
     @Override
     public Workflow defineWorkflow(MatchCdlAccountWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(matchAccountIdStep) //
                 .next(matchStartStep) //
-                .next(matchDataCloudWorkflow, null) //
+                .next(matchDataCloudWorkflow) //
                 .next(matchFinishStep) //
                 .build();
     }

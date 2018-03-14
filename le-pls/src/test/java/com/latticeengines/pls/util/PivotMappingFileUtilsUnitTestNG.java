@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.modeling.PivotValuesLookup;
 import com.latticeengines.domain.exposed.util.ModelingUtils;
+import com.latticeengines.domain.exposed.util.PivotMappingFileUtils;
 
 public class PivotMappingFileUtilsUnitTestNG {
 

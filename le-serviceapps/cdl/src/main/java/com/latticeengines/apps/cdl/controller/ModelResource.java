@@ -13,9 +13,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.common.exposed.util.NameValidationUtils;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import io.swagger.annotations.Api;
@@ -36,12 +38,31 @@ public class ModelResource {
     @Inject
     private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
+    @Inject
+    private CustomEventModelingWorkflowSubmitter customEventModelingWorkflowSubmitter;
+
     @PostConstruct
     public void init() {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @RequestMapping(value = "/{modelName}", method = RequestMethod.POST)
+    @ResponseBody
+    @ApiOperation(value = "Generate a model from the supplied file and parameters. Returns the job id.")
+    public String model(@PathVariable String customerSpace, //
+            @PathVariable String modelName, //
+            @RequestBody ModelingParameters parameters) {
+        if (!NameValidationUtils.validateModelName(modelName)) {
+            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
+            log.error(message);
+            throw new RuntimeException(message);
+        }
+        internalResourceProxy.setModelSummaryDownloadFlag(customerSpace);
+        log.info(String.format("model called with parameters %s", parameters.toString()));
+        return customEventModelingWorkflowSubmitter.submit(customerSpace, parameters).toString();
+    }
+
+    @RequestMapping(value = "/rating/{modelName}", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Kick off a modeling job given the RatingEngineModelingParameters")
     public String modelByParameters(@PathVariable String customerSpace, @PathVariable String modelName,

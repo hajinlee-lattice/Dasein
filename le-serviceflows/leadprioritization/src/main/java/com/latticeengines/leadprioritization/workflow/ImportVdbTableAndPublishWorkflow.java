@@ -23,6 +23,6 @@ public class ImportVdbTableAndPublishWorkflow extends AbstractWorkflow<ImportVdb
 
     @Override
     public Workflow defineWorkflow(ImportVdbTableAndPublishWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()).next(importVdbTable).build();
+        return new WorkflowBuilder(name(), config).next(importVdbTable).build();
     }
 }

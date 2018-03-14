@@ -1,4 +1,4 @@
-package com.latticeengines.pls.workflow;
+package com.latticeengines.pls.util;
 
 import java.util.List;
 
@@ -19,18 +19,18 @@ public class UpdateTransformDefinitionsUtils {
 
     private static final Logger log = LoggerFactory.getLogger(UpdateTransformDefinitionsUtils.class);
 
-    static List<TransformDefinition> getTransformDefinitions(String schemaInterpretationStr, TransformationGroup transformationGroup) {
+    public static List<TransformDefinition> getTransformDefinitions(String schemaInterpretationStr,
+            TransformationGroup transformationGroup) {
         log.info(String.format("Current model's schema is %s.", schemaInterpretationStr));
         SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationStr);
         if (schemaInterpretation == SchemaInterpretation.SalesforceAccount) {
-            return UpdateTransformDefinitionsUtils.updateTransformDefinitions(transformationGroup,
-                    TransformationPipeline.PACKAGE_NAME);
+            return updateTransformDefinitions(transformationGroup, TransformationPipeline.PACKAGE_NAME);
         } else {
             return TransformationPipeline.getTransforms(transformationGroup);
         }
     }
 
-    static List<TransformDefinition> updateTransformDefinitions(TransformationGroup transformationGroup,
+    public static List<TransformDefinition> updateTransformDefinitions(TransformationGroup transformationGroup,
             String packageName) {
         List<TransformDefinition> transformDefinitions = TransformationPipeline.getTransforms(transformationGroup);
         transformDefinitions.stream().forEach(def -> {

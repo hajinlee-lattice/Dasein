@@ -15,8 +15,11 @@ public class WorkflowBuilder {
 
     private String root;
 
-    public WorkflowBuilder(String root) {
+    private WorkflowConfiguration workflowConfig;
+
+    public WorkflowBuilder(String root, WorkflowConfiguration workflowConfig) {
         this.root = root;
+        this.workflowConfig = workflowConfig;
     }
 
     public WorkflowBuilder next(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -25,7 +28,13 @@ public class WorkflowBuilder {
         return this;
     }
 
-    public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow, T config) {
+    @SuppressWarnings("unchecked")
+    public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow) {
+        WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
+        T config = null;
+        if (obj != null) {
+            config = (T) obj;
+        }
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
@@ -40,7 +49,13 @@ public class WorkflowBuilder {
         return this;
     }
 
-    public <T> WorkflowBuilder next(WorkflowInterface<T> nextWorkflow, T config) {
+    @SuppressWarnings("unchecked")
+    public <T extends WorkflowConfiguration> WorkflowBuilder next(WorkflowInterface<T> nextWorkflow) {
+        WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
+        T config = null;
+        if (obj != null) {
+            config = (T) obj;
+        }
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {

@@ -70,7 +70,7 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
 
     @Override
     public Workflow defineWorkflow(ModelWorkflowConfiguration config) {
-        return new WorkflowBuilder(name())//
+        return new WorkflowBuilder(name(), config)//
                 .next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //

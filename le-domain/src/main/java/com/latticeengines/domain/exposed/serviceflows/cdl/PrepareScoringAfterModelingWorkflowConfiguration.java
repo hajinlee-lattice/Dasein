@@ -1,14 +1,17 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -21,6 +24,14 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
 
     public void setModelingType(ModelingType modelingType) {
         this.modelingType = modelingType;
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.Scoring.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {
@@ -87,7 +98,9 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             return this;
         }
 
-        public PrepareScoringAfterModelingWorkflowConfiguration Build() {
+        public PrepareScoringAfterModelingWorkflowConfiguration build() {
+            configuration.setContainerConfiguration("prepareScoringAfterModelingWorkflow",
+                    configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(setConfigForScoring);
             configuration.add(initStepConf);
             configuration.add(prepareSegmentMatching);

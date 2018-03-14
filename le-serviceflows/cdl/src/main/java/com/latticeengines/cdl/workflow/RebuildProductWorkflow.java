@@ -23,8 +23,8 @@ public class RebuildProductWorkflow extends AbstractWorkflow<RebuildProductWorkf
 
     @Override
     public Workflow defineWorkflow(RebuildProductWorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
-                .next(profileProductWrapper, null) //
+        return new WorkflowBuilder(name(), config) //
+                .next(profileProductWrapper) //
                 .build();
     }
 }

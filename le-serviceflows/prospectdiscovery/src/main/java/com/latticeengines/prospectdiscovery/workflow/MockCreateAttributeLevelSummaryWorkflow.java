@@ -23,7 +23,7 @@ public class MockCreateAttributeLevelSummaryWorkflow extends AbstractWorkflow<Wo
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(runScoreTableDataFlow) //
                 .next(mockRunAttributeLevelSummaryDataFlows) //
                 .next(mockRunAttributeLevelSummaryDataFlows) //

@@ -22,7 +22,7 @@ public class DummyWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
 
     @Override
     public Workflow defineWorkflow(WorkflowConfiguration config) {
-        return new WorkflowBuilder(name()) //
+        return new WorkflowBuilder(name(), config) //
                 .next(dummyStep) //
                 .next(dummyAwsStep) //
                 .build();
