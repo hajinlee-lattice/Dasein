@@ -40,6 +40,19 @@ angular
                         }
                     }
                 }
+                vm.showLabel = function(subType){
+                    var cmp = vm.getCmp(subType);
+                    switch(subType){
+                        case 'Amt': {
+                            if('Any' === cmp){
+                                return false;
+                            }
+                            return true;
+                        }
+                        default:
+                        return fasle;
+                    }
+                }
 
                 vm.getValues = function (subType) {
                     var ret = QueryTreeService.getValues($scope.bucketrestriction, $scope.type, subType);

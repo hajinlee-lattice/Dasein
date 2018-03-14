@@ -14,5 +14,5 @@
     <!-- Amount Spent (Amt)-->
     <span class="query-section-item-value">
         <span>amount spent</span>
-        <strong>{{vm.getCmp('Amt')}} {{vm.getValues('Amt')}}</strong>
+        <strong>{{vm.getCmp('Amt')}} <span ng-if="vm.showLabel('Amt')"> $ </span> {{vm.getValues('Amt')}}</strong>
     </span>

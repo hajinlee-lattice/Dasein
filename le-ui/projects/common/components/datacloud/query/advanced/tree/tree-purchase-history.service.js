@@ -301,18 +301,21 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         if (tsTime && tsTime.Vals) {
                             return tsTime.Vals;
                         }
+                        return [];
                     }
                     case 'Qty': {
                         var qty = txn.Qty;
                         if (qty && qty.Vals) {
                             return qty.Vals;
                         }
+                        return [];
                     }
                     case 'Amt': {
                         var amt = txn.Amt;
                         if (amt && amt.Vals) {
                             return amt.Vals;
                         }
+                        return [];
                     }
                     default: {
                         return [];
