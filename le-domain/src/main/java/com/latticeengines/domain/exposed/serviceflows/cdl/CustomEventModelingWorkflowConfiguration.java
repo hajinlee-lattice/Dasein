@@ -11,6 +11,7 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -26,6 +27,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidati
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -57,6 +59,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private PrepareScoringAfterModelingWorkflowConfiguration.Builder prepareConfigForScoringBuilder = new PrepareScoringAfterModelingWorkflowConfiguration.Builder();
         private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
 
+        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
 
@@ -72,6 +75,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelWorkflowBuilder.customer(customerSpace);
             prepareConfigForScoringBuilder.customer(customerSpace);
             rtsBulkScoreWorkflowBuilder.customer(customerSpace);
+            computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
 
             return this;
@@ -89,6 +93,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             prepareConfigForScoringBuilder.microServiceHostPort(microServiceHostPort);
+            computeLift.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
 
@@ -342,6 +347,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
+            computeLift.setBucketMetadata(bucketMetadata);
             return this;
         }
 
@@ -360,6 +366,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
             rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
+            computeLift.setScoreField(InterfaceName.Event.name());
+
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());
@@ -370,6 +378,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(modelWorkflowBuilder.build());
             configuration.add(prepareConfigForScoringBuilder.build());
             configuration.add(rtsBulkScoreWorkflowBuilder.build());
+            configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
 

@@ -354,6 +354,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             configuration.add(addStandardAttributes);
             configuration.add(resolveAttributes);
             configuration.add(setConfigForScoring);
+            configuration.add(computeLift);
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
             return configuration;
