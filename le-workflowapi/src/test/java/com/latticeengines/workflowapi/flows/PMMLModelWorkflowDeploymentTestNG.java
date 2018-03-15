@@ -19,10 +19,10 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -76,16 +76,13 @@ public class PMMLModelWorkflowDeploymentTestNG extends WorkflowApiDeploymentTest
         workflowService.unRegisterJob(workflowConfig.getWorkflowName());
         workflowService.registerJob(workflowConfig, applicationContext);
 
-        for (String key : workflowConfig.getStepConfigRegistry().keySet()) {
-            if (key.equals(CreatePMMLModelConfiguration.class.getCanonicalName())) {
-                ObjectMapper om = new ObjectMapper();
-                CreatePMMLModelConfiguration modelConfig = om.readValue(workflowConfig.getStepConfigRegistry().get(key),
-                        CreatePMMLModelConfiguration.class);
-                modelName = modelConfig.getModelName();
-                System.out.println(workflowConfig.getStepConfigRegistry().get(key));
-                System.out.println("Model name = " + modelName);
-            }
-        }
+        String key = CreatePMMLModelConfiguration.class.getSimpleName();
+        CreatePMMLModelConfiguration modelConfig = JsonUtils
+                .deserialize(workflowConfig.getStepConfigRegistry().get(key), CreatePMMLModelConfiguration.class);
+        modelName = modelConfig.getModelName();
+        System.out.println(workflowConfig.getStepConfigRegistry());
+        System.out.println("Model name = " + modelName);
+
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
 
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
