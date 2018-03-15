@@ -4,15 +4,15 @@ angular.module('lp.ratingsengine.ratingslist', [
     'mainApp.core.utilities.NavUtility'
 ])
 .controller('RatingsEngineListController', function (
-    $scope, $timeout, $element, $state, $stateParams, $filter, $interval, 
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility
+    $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory
 ) {
     var vm = this;
 
     angular.extend(vm, {
         current: RatingsEngineStore.current,
         inEditing: {},
-        isRatingsSet: RatingsEngineStore.ratingsSet,
+        isRatingsSet: true,
         query: '',
         ceil: window.Math.ceil,
         createRatingState: 'home.ratingsengine.ratingsenginetype',
@@ -47,7 +47,6 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-
         console.log(vm.current.ratings);
 
         RatingsEngineStore.clear();
@@ -56,20 +55,29 @@ angular.module('lp.ratingsengine.ratingslist', [
         vm.activeCount = vm.count('ACTIVE');
         vm.inactiveCount = vm.count('INACTIVE');
 
-        // angular.forEach(vm.current.ratings, function(rating) {
-        //     console.log(vm.current.bucketCountMap[rating.id].bucketCoverageCounts);
-        //     // if(vm.current.bucketCountMap[rating.id].bucketCoverageCounts.length === 0) {
-        //     //     rating.hasBuckets = false;
-        //     // } else {
-        //     //     rating.hasBuckets = true;
-        //     // }
-        // });
+        var referringRoute = StateHistory.lastFrom().name,
+            lastRouteContainsSegmentOrAttributes = (referringRoute.split('.').indexOf("products") > -1 || referringRoute.split('.').indexOf("attributes") > -1);
         
         $scope.$watch('vm.current.ratings', function() {
-            vm.isRatingsSet = RatingsEngineStore.ratingsSet;
+            if(lastRouteContainsSegmentOrAttributes){
+                vm.isRatingsSet = RatingsEngineStore.ratingsSet;
+            };
             vm.header.filter.unfiltered = vm.current.ratings;
         });
     }
+
+    vm.checkState = function(type) {
+        var map = {
+            'home.segment.explorer.attributes':'attributes',
+            'home.segment.explorer.enumpicker':'attributes',
+            'home.segment.explorer.builder':'builder',
+            'home.segment.accounts':'accounts',
+            'home.segment.contacts':'contacts'
+        };
+        
+        return map[StateHistory.lastTo().name] == type;
+    }
+
     /**
      * if they decide they want to add sorting by account or contact counts uncomment this and add
      * { label: 'Accounts', icon: 'numeric', property: 'accountCount' },
@@ -127,8 +135,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.tileClick = function ($event, rating) {
         $event.preventDefault();
         
-        var tileState = vm.current.tileStates[rating.id],
-            url = 'home.ratingsengine.dashboard';
+        var tileState = vm.current.tileStates[rating.id];
 
         if(tileState.editRating !== true){
             if (rating.type === 'CROSS_SELL') {
@@ -136,18 +143,20 @@ angular.module('lp.ratingsengine.ratingslist', [
                     RatingsEngineStore.setRating(engine);
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
                         
-                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null;
+                        // console.log(model);
 
-                        $state.go('home.ratingsengine.dashboard', { 
-                            rating_id: rating.id, 
-                            modelId: modelId
-                        });
+                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
+                            modelingJobId = model.AI.modelingJobId;
 
-                        // if(modelId != null){
-                        //     $state.go('home.model.attributes', { rating_id: rating.id, modelId: modelId });
-                        // } else {
-                        //     console.log("model not ready");
-                        // }
+                        if(modelId !== null && modelingJobId !== null){
+                            $state.go('home.ratingsengine.dashboard', { 
+                                rating_id: rating.id, 
+                                modelId: modelId
+                            });
+                        } else {
+                            // console.log("model not ready");
+                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: model.AI.modelingStrategy});
+                        }
                     });
                 });                
             } else {

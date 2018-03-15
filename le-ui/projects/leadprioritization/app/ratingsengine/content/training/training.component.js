@@ -30,6 +30,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.modelId = vm.ratingEngine.activeModel.AI.id;
         vm.modelingStrategy = vm.ratingEngine.activeModel.AI.modelingStrategy;
 
+        console.log(vm.modelingConfigFilters);
+
         vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -59,6 +61,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.trainingSegment = selectedSegment[0];
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
         vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
+
+        console.log(vm.ratingEngine);
 
         vm.autcompleteChange();
     }
@@ -124,7 +128,15 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
         }
 
+        console.log(vm.modelingConfigFilters);
+
     };
+
+    $scope.$on('$destroy', function() {
+        delete vm.modelingConfigFilters.SPEND_IN_PERIOD;
+        delete vm.modelingConfigFilters.QUANTITY_IN_PERIOD;
+        delete vm.modelingConfigFilters.TRAINING_SET_PERIOD;
+    });
 
     vm.init();
 });

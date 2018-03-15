@@ -9,10 +9,10 @@
     </li>
     <li role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard'}" ng-disabled="menuDisabled || dashboardDisabled">
         <a ui-sref="home.ratingsengine.dashboard">
-            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}">
                 <span class="ico ico-attributes ico-light-gray"></span>
             </span>
-            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_PLAYBOOK_DASHBOARD')}}</span>
+            <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
     </li>
 
@@ -53,7 +53,7 @@
     </li>
     <li ng-if="isRuleBased" role="presentation" ng-class="{active: stateName() == 'home.ratingsengine.dashboard.rules'}" ng-disabled="menuDisabled || dashboardDisabled">
         <a ui-sref="home.ratingsengine.dashboard.rules({rating_id: rating_id})">
-            <span class="ico-container" data-stooltip="{{::ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}">
+            <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}">
                 <span class="ico ico-performance ico-light-gray"></span>
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATING_ENGINE_RULES')}}</span>

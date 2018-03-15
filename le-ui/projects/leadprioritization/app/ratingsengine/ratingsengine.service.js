@@ -217,6 +217,9 @@ angular.module('lp.ratingsengine')
         var currentRating = RatingsEngineStore.getCurrentRating();
         var currentSegment = RatingsEngineStore.getSegment();
 
+        console.log(currentRating);
+        console.log(currentSegment);
+
         // console.log("save engine", currentRating);
         if (currentRating.segment != null && currentSegment != null && currentRating.segment.name != currentSegment.name) {
             RatingsEngineStore.setRating({});

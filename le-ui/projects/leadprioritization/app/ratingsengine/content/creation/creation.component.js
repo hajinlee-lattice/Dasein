@@ -37,9 +37,9 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         }
 
     	if (vm.predictionType === 'PROPENSITY') {
-    		vm.prioritizeBy = 'Likely to buy';
+    		vm.prioritizeBy = 'Likely to Buy';
     	} else if (vm.predictionType === 'EXPECTED_VALUE') {
-    		vm.prioritizeBy = 'Likely to spend';
+    		vm.prioritizeBy = 'Likely Amount of Spend';
     	}
 
     	if (vm.modelingConfigFilters['SPEND_IN_PERIOD']) {

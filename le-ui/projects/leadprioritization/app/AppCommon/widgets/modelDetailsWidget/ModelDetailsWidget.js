@@ -55,7 +55,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             $scope.RatingEngine = ratingEngine;
 
-            // console.log(ratingEngine);
+            console.log(engineId);
+            console.log(ratingEngine);
 
             $scope.displayName = ratingEngine.displayName;
             $scope.createdBy = ratingEngine.createdBy;

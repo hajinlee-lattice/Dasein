@@ -135,6 +135,9 @@ angular.module('lp.ratingsengine.wizard.segment', [])
     }
 
     vm.setSegment = function(segment) {
+
+        console.log(segment);
+
         RatingsEngineStore.setValidation('segment', true);
     	RatingsEngineStore.setSegment(segment);
     }

@@ -121,7 +121,11 @@ angular
                         var deferred = $q.defer(),
                             id = $stateParams.modelId;
 
-                        if (RatingEngine.type === 'RULE_BASED') {
+                        console.log(id);
+                        console.log(ModelStore.data);
+                        console.log(RatingEngine);
+
+                        if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
                         } else if (ModelStore.data != undefined)  {
                             deferred.resolve(ModelStore.data);
@@ -139,6 +143,18 @@ angular
                     IsPmml: function(Model) {
                         return false;
                     },
+                    Products: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        var params = {
+                            max: 1000,
+                            offset: 0
+                        };
+                        RatingsEngineStore.getProducts(params).then(function (result) {
+                            deferred.resolve(result);
+                        });
+                        return deferred.promise;
+                    }
                 },
                 views: {
                     "summary@": {
@@ -776,6 +792,17 @@ angular
             })
             .state('home.ratingsengine.productpurchase.segment.products.prioritization', {
                 url: '/prioritization',
+                resolve: {
+                    PredictionType: function ($q, CurrentRatingEngine) {
+                        var deferred = $q.defer(),
+                            engine = CurrentRatingEngine,
+                            predictionType = engine.activeModel.AI.predictionType;
+
+                        deferred.resolve(predictionType);
+
+                        return deferred.promise;
+                    }
+                },
                 views: {
                     'wizard_content@home.ratingsengine.productpurchase': {
                         controller: 'RatingsEngineAIPrioritization',

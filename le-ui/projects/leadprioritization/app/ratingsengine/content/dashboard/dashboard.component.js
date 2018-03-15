@@ -4,17 +4,18 @@ angular.module('lp.ratingsengine.dashboard', [
 .controller('RatingsEngineDashboard', function(
     $q, $stateParams, $state, $rootScope, $scope, 
     RatingsEngineStore, RatingsEngineService, 
-    Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml
+    Dashboard, RatingEngine, Model, IsRatingEngine, IsPmml, Products
 ) {
     var vm = this;
 
     angular.extend(vm, {
         dashboard: Dashboard,
-        ratingEngine: RatingEngine
+        ratingEngine: RatingEngine,
+        products: Products
     });
 
     vm.init = function() {
-        console.log(vm.dashboard);
+        // console.log(vm.dashboard);
         console.log(vm.ratingEngine);
 
         vm.relatedItems = vm.dashboard.plays;
@@ -72,6 +73,13 @@ angular.module('lp.ratingsengine.dashboard', [
         }
 
     }
+
+    vm.returnProductNameFromId = function(productId) {
+        var products = vm.products,
+            product = products.find(function(obj) { return obj.ProductId === productId.toString() });
+
+        return product.ProductName;
+    };
 
     vm.init();
 });
