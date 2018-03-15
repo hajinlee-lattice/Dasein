@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl;
 
+import java.util.Collection;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -9,10 +11,19 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.Clea
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.DeleteFileUploadStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.OperationExecuteConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
+import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CDLOperationWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
     public CDLOperationWorkflowConfiguration() {
+    }
+
+    @Override
+    public Collection<String> getSwpkgNames() {
+        return ImmutableSet.<String> builder() //
+                .add(SoftwareLibrary.DataCloud.getName())//
+                .addAll(super.getSwpkgNames()) //
+                .build();
     }
 
     public static class Builder {
