@@ -184,7 +184,7 @@ angular.module('common.datacloud')
 
     this.getEnrichments = function(opts, concatEnrichments, nocache){
         var deferred = $q.defer(),
-            nocahce = nocache || false;
+            nocache = nocache || false;
 
         if (this.enrichments && !nocache) {
             deferred.resolve(this.enrichments);

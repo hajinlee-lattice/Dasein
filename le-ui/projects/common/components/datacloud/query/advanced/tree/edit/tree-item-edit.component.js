@@ -152,14 +152,35 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 }
 
                 vm.changeEnumCmpValue = function () {
-                    if (vm.enumCmpModel == 'is empty') {
-                        vm.enumCmpModel = 'IS_EMPTY';
-                        vm.vals.length = 0;
-                    } else if (vm.enumCmpModel == 'is') {
-                        vm.enumCmpModel = vm.vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
-                    } else if (vm.enumCmpModel == 'is not') {
-                        vm.enumCmpModel = vm.vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
+                    switch (vm.enumCmpModel) {
+                        case 'is empty': 
+                            vm.enumCmpModel = 'IS_NULL'; 
+                            vm.vals.length = 0; 
+                            break;
+                        case 'is present': 
+                            vm.enumCmpModel = 'IS_NOT_NULL'; 
+                            vm.vals.length = 0; 
+                            break;
+                        case 'is': 
+                            vm.enumCmpModel = vm.vals.length == 1 
+                                ? 'EQUAL' 
+                                : 'IN_COLLECTION'; 
+                            break;
+                        case 'is not': 
+                            vm.enumCmpModel = vm.vals.length == 1 
+                                ? 'NOT_EQUAL' 
+                                : 'NOT_IN_COLLECTION';
+                            break;
                     }
+
+                    // if (vm.enumCmpModel == 'is empty') {
+                    //     vm.enumCmpModel = 'IS_NULL';
+                    //     vm.vals.length = 0;
+                    // } else if (vm.enumCmpModel == 'is') {
+                    //     vm.enumCmpModel = vm.vals.length == 1 ? 'EQUAL' : 'IN_COLLECTION';
+                    // } else if (vm.enumCmpModel == 'is not') {
+                    //     vm.enumCmpModel = vm.vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
+                    // }
 
                     QueryTreeService.changeEnumCmpValue(vm.tree.bucketRestriction, vm.enumCmpModel);
                 }

@@ -44,12 +44,12 @@ angular.module('common.datacloud.query.builder.tree.service', [
         };
 
         this.numerical_operations = {
-            'EQUAL': 'Equal',
-            'NOT_EQUAL': 'Not Equal',
+            'EQUAL': 'Equal to',
+            'NOT_EQUAL': 'Not Equal to',
             'GREATER_THAN': 'Greater Than',
-            'GREATER_OR_EQUAL': 'Greater or Equal',
+            'GREATER_OR_EQUAL': 'Greater than or Equal to',
             'LESS_THAN': 'Less Than',
-            'LESS_OR_EQUAL': 'Lesser or Equal',
+            'LESS_OR_EQUAL': 'Less than or Equal to',
             'GTE_AND_LT': 'Between'
         };
 
@@ -620,7 +620,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
                         case 'IN_COLLECTION': ret = 'is'; break;
                         case 'NOT_EQUAL': ret = 'is not'; break;
                         case 'NOT_IN_COLLECTION': ret = 'is not'; break;
-                        case 'IS_EMPTY': ret = 'is empty'; break;
+                        case 'IS_NULL': ret = 'is empty'; break;
+                        case 'IS_NOT_NULL': ret = 'is present'; break;
                     }
 
                     return ret;
