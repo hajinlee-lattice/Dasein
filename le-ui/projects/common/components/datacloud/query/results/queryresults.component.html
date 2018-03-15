@@ -235,7 +235,7 @@
     <div class="loading" ng-if="vm.loading">
          Loading {{vm.page}}...
     </div>
-    <div ng-if="vm.accounts.length === 0 || vm.contacts.length === 0">
+    <div ng-if="(vm.accounts.length === 0 || vm.contacts.length === 0) && !vm.loading">
         <p>No {{vm.page}} Found<p>
     </div>
 
