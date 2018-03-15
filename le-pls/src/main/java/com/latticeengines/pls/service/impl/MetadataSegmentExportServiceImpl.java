@@ -181,6 +181,7 @@ public class MetadataSegmentExportServiceImpl implements MetadataSegmentExportSe
         Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(MultiTenantContext.getTenant(),
                 metadataSegmentExportJob.getType(), metadataSegmentExportJob.getFileName());
 
+        metadataProxy.createTable(customerSpace.toString(), segmentExportTable.getName(), segmentExportTable);
         segmentExportTable = metadataProxy.getTable(customerSpace.toString(), segmentExportTable.getName());
 
         metadataSegmentExportJob.setTableName(segmentExportTable.getName());
