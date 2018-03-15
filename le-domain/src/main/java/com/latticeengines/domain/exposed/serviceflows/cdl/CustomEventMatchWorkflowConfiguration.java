@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountC
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlSplitConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
@@ -40,6 +41,8 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
     public static class Builder {
         private CustomEventMatchWorkflowConfiguration configuration = new CustomEventMatchWorkflowConfiguration();
 
+        private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
+
         private MatchCdlAccountWorkflowConfiguration.Builder matchAccountWithIdBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
         private MatchCdlAccountWorkflowConfiguration.Builder matchAccountWithoutIdBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
         private MatchCdlAccountConfiguration matchCdlAccount = new MatchCdlAccountConfiguration();
@@ -55,6 +58,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchCdlStep.setCustomerSpace(customerSpace);
             split.setCustomerSpace(customerSpace);
             merge.setCustomerSpace(customerSpace);
+            matchDataCloudWorkflowBuilder.customer(customerSpace);
             return this;
         }
 
@@ -65,6 +69,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchCdlStep.setMicroServiceHostPort(microServiceHostPort);
             split.setMicroServiceHostPort(microServiceHostPort);
             merge.setMicroServiceHostPort(microServiceHostPort);
+            matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -75,6 +80,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchCdlStep.setInternalResourceHostPort(internalResourceHostPort);
             split.setInternalResourceHostPort(internalResourceHostPort);
             merge.setInternalResourceHostPort(internalResourceHostPort);
+            matchDataCloudWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -83,6 +89,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             matchAccountWithoutIdBuilder.matchInputTableName(tableName);
             matchCdlAccount.setMatchInputTableName(tableName);
             matchCdlStep.setMatchInputTableName(tableName);
+            matchDataCloudWorkflowBuilder.matchInputTableName(tableName);
             return this;
         }
 
@@ -99,22 +106,26 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             matchAccountWithIdBuilder.matchRequestSource(matchRequestSource);
             matchAccountWithoutIdBuilder.matchRequestSource(matchRequestSource);
+            matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder matchQueue(String queue) {
             matchAccountWithIdBuilder.matchQueue(queue);
             matchAccountWithoutIdBuilder.matchQueue(queue);
+            matchDataCloudWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             matchAccountWithIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             matchAccountWithoutIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
+            matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             matchAccountWithIdBuilder.dataCloudVersion(dataCloudVersion);
             matchAccountWithoutIdBuilder.dataCloudVersion(dataCloudVersion);
             return this;
@@ -123,22 +134,26 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             matchAccountWithIdBuilder.matchClientDocument(matchClientDocument);
             matchAccountWithoutIdBuilder.matchClientDocument(matchClientDocument);
+            matchDataCloudWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
             matchAccountWithIdBuilder.matchType(matchCommandType);
             matchAccountWithoutIdBuilder.matchType(matchCommandType);
+            matchDataCloudWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
             matchAccountWithIdBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             matchAccountWithoutIdBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            matchDataCloudWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
+            matchDataCloudWorkflowBuilder.matchDestTables(destTables);
             matchAccountWithIdBuilder.matchDestTables(destTables);
             matchAccountWithoutIdBuilder.matchDestTables(destTables);
             return this;
@@ -147,22 +162,26 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             matchAccountWithIdBuilder.excludePublicDomains(excludePublicDomains);
             matchAccountWithoutIdBuilder.excludePublicDomains(excludePublicDomains);
+            matchDataCloudWorkflowBuilder.excludePublicDomains(excludePublicDomains);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchAccountWithIdBuilder.excludeDataCloudAttrs(exclude);
             matchAccountWithoutIdBuilder.excludeDataCloudAttrs(exclude);
+            matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
         public Builder skipDedupStep(boolean skipDedupStep) {
             matchAccountWithIdBuilder.skipDedupStep(skipDedupStep);
             matchAccountWithoutIdBuilder.skipDedupStep(skipDedupStep);
+            matchDataCloudWorkflowBuilder.skipDedupStep(skipDedupStep);
             return this;
         }
 
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             matchAccountWithIdBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             matchAccountWithoutIdBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
@@ -171,6 +190,7 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         public CustomEventMatchWorkflowConfiguration build() {
             configuration.setContainerConfiguration("customEventMatchWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
+            configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(matchAccountWithIdBuilder.build("matchCdlWithAccountIdWorkflow"));
             configuration.add(matchAccountWithoutIdBuilder.build("matchCdlWithoutAccountIdWorkflow"));
             configuration.add(matchCdlAccount);
