@@ -173,7 +173,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
 
     @Override
     public ModelSummary getModelSummaryEnrichedByDetails(String modelId) {
-        ModelSummary summary = modelSummaryEntityMgr.findByModelId(modelId, false, true, true);
+        ModelSummary summary = modelSummaryEntityMgr.findValidByModelId(modelId);
         if (summary != null) {
             summary.setPredictors(new ArrayList<Predictor>());
             summary.setDetails(null);
@@ -372,13 +372,11 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
         modelSummaryEntityMgr.updateLastUpdateTime(modelSummary);
     }
 
-    private void getModelSummaryHasRating(ModelSummary summary)
-    {
+    private void getModelSummaryHasRating(ModelSummary summary) {
         List<BucketMetadata> data = bucketedScoreService.getUpToDateModelBucketMetadata(summary.getId());
         if (data != null && data.size() != 0) {
             summary.setHasBucketMetadata(true);
-        }
-        else {
+        } else {
             summary.setHasBucketMetadata(false);
         }
     }

@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.workflow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -68,6 +71,9 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         String moduleName = parameters.getModuleName();
         log.info("Modeling parameters: " + parameters.toString());
 
+        TransformationGroup transformationGroup = parameters.getTransformationGroup();
+        List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
+                .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
         String tableName = getTableName(parameters);
         String targetTableName = tableName + "_TargetTable";
         RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder()
@@ -79,11 +85,14 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                         parameters.getTargetFilterQuery()) //
                 .internalResourceHostPort(internalResourceHostPort) //
                 .userId(parameters.getUserId()) //
+                .dedupDataFlowBeanName("dedupEventTable") //
+                .dedupType(parameters.getDeduplicationType()) //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
+                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters)) //
@@ -93,14 +102,19 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .trainingTableName(tableName) //
                 .targetTableName(targetTableName) //
                 .inputProperties(inputProperties) //
+                .transformationGroup(transformationGroup, stdTransformDefns) //
                 .enableV2Profiling(false) //
                 .excludePublicDomains(parameters.isExcludePublicDomains()) //
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
                 // TODO: plsFeatureFlagService.isFuzzyMatchEnabled()) //
+                // .pivotArtifactPath(pivotArtifact != null ?
+                // pivotArtifact.getPath() : null) //
                 .moduleName(moduleName) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
+                .bucketMetadata(
+                        new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
@@ -111,8 +125,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
                 .setModelIdFromRecord(false) //
-                .bucketMetadata(
-                        new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .liftChart(parameters.isLiftChart()) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //

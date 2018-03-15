@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow;
+package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
@@ -8,12 +8,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
-import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
@@ -23,10 +22,11 @@ import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
-@Component("modelAndEmailWorkflow")
+@Component("ratingEngineModelAndEmailWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
+public class RatingEngineMatchAndModelAndEmailWorkflow
+        extends AbstractWorkflow<RatingEngineMatchAndModelWorkflowConfiguration> {
 
     @Inject
     private DedupEventTable dedupEventTableDataFlow;
@@ -47,7 +47,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
-    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
+    private RatingEngineScoreWorkflow scoreWorkflow;
 
     @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
@@ -59,7 +59,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
     @Override
-    public Workflow defineWorkflow(MatchAndModelWorkflowConfiguration config) {
+    public Workflow defineWorkflow(RatingEngineMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchDataCloudWorkflow) //
                 .next(dedupEventTableDataFlow) //
@@ -67,7 +67,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-                .next(rtsBulkScoreWorkflow) //
+                .next(scoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

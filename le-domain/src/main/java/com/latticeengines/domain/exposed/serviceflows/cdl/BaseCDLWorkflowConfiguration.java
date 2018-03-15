@@ -29,7 +29,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 @JsonSubTypes({
         @Type(value = CDLDataFeedImportWorkflowConfiguration.class, name = "CDLDataFeedImportWorkflowConfiguration"),
         @Type(value = CDLImportWorkflowConfiguration.class, name = "CDLImportWorkflowConfiguration"),
-        @Type(value = CdlMatchAndModelWorkflowConfiguration.class, name = "CdlMatchAndModelWorkflowConfiguration"),
+        @Type(value = CdlModelWorkflowConfiguration.class, name = "CdlMatchAndModelWorkflowConfiguration"),
         @Type(value = CDLOperationWorkflowConfiguration.class, name = "CDLOperationWorkflowConfiguration"),
         @Type(value = CustomEventMatchWorkflowConfiguration.class, name = "CustomEventMatchWorkflowConfiguration"),
         @Type(value = CustomEventModelingWorkflowConfiguration.class, name = "CustomEventModelingWorkflowConfiguration"),

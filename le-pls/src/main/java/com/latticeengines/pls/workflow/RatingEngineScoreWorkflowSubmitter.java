@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -31,7 +32,6 @@ import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -115,6 +115,9 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                                 parameters.getSourceDisplayName().replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                         + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
+                // .transformationGroup(transformationGroup) //
+                // .transformDefinitions(getTransformDefinitions(modelingEventTable,
+                // transformationGroup))//
                 // .bucketMetadata(bucketMetadataList) //
                 .bucketMetadata(
                         new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //

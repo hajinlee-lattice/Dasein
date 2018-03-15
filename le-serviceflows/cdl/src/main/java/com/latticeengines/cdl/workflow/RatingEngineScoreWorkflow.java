@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
@@ -15,6 +17,7 @@ import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataF
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
+import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -33,6 +36,9 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     @Autowired
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
+    @Inject
+    private AddStandardAttributes addStandardAttributesDataFlow;
+
     @Autowired
     private ScoreEventTable score;
 
@@ -50,16 +56,18 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
 
     @Override
     public Workflow defineWorkflow(RatingEngineScoreWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config)//
-                .next(createCdlTargetTableFilterStep) //
-                .next(createCdlEventTableStep) //
-                .next(matchDataCloudWorkflow) //
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config);
+        if (!config.isSkipImport()) {
+            builder.next(createCdlTargetTableFilterStep) //
+                    .next(createCdlEventTableStep);
+        }
+        builder.next(matchDataCloudWorkflow) //
+                // .next(addStandardAttributesDataFlow) //
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //
                 .next(exportData) //
-                .listener(sendEmailAfterScoringCompletionListener) //
-                .build();
-
+                .listener(sendEmailAfterScoringCompletionListener);
+        return builder.build();
     }
 }

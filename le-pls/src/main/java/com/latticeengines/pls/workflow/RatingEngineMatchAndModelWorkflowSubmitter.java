@@ -23,14 +23,12 @@ import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
-import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.MatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
-import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -38,16 +36,13 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
-public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
+public class RatingEngineMatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private SourceFileService sourceFileService;
 
     @Autowired
     private PlsFeatureFlagService plsFeatureFlagService;
@@ -58,7 +53,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
 
-    public ApplicationId submit(String cloneTableName, CloneModelingParameters parameters,
+    public ApplicationId submit(List<String> cloneTableNames, CloneModelingParameters parameters,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
         TransformationGroup transformationGroup;
         String originalTransformationGroup = getTransformationGroupNameForModelSummary(modelSummary);
@@ -70,23 +65,22 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             transformationGroup = TransformationGroup.NONE;
         }
 
-        MatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableName, parameters,
-                transformationGroup, userRefinedAttributes, modelSummary);
+        RatingEngineMatchAndModelWorkflowConfiguration configuration = generateConfiguration(cloneTableNames,
+                parameters, transformationGroup, userRefinedAttributes, modelSummary);
         return workflowJobService.submit(configuration);
     }
 
-    public MatchAndModelWorkflowConfiguration generateConfiguration(String cloneTableName,
+    public RatingEngineMatchAndModelWorkflowConfiguration generateConfiguration(List<String> cloneTableNames,
             CloneModelingParameters parameters, TransformationGroup transformationGroup,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {
+
         String sourceSchemaInterpretation = modelSummary.getSourceSchemaInterpretation();
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
-        SourceFile sourceFile = sourceFileService.findByTableName(cloneTableName);
 
         Map<String, String> inputProperties = new HashMap<>();
-        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "modelAndEmailWorkflow");
+        inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "ratingEngineModelAndEmailWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
-        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME,
-                sourceFile != null ? sourceFile.getDisplayName() : cloneTableName);
+        inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, cloneTableNames.get(0));
 
         List<DataRule> dataRules = parameters.getDataRules();
         if (parameters.getDataRules() == null || parameters.getDataRules().isEmpty()) {
@@ -101,7 +95,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(sourceSchemaInterpretation, transformationGroup);
 
-        MatchAndModelWorkflowConfiguration.Builder builder = new MatchAndModelWorkflowConfiguration.Builder()
+        RatingEngineMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineMatchAndModelWorkflowConfiguration.Builder()
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
@@ -110,7 +104,8 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .internalResourceHostPort(internalResourceHostPort) //
                 .sourceSchemaInterpretation(sourceSchemaInterpretation) //
                 .inputProperties(inputProperties) //
-                .trainingTableName(cloneTableName) //
+                .trainingTableName(cloneTableNames.get(0)) //
+                .targetTableName(cloneTableNames.get(1)) //
                 .userId(parameters.getUserId()) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
                 .enableV2Profiling(plsFeatureFlagService.isV2ProfilingEnabled() || modelSummary
@@ -133,17 +128,12 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
                 .dataCloudVersion(getDataCloudVersion(modelSummary.getDataCloudVersion()))//
                 .matchColumnSelection(Predefined.getDefaultSelection(), null) //
                 .moduleName(modelSummary.getModuleName()) //
-                .matchDebugEnabled(
-                        !parameters.isExcludePropDataAttributes() && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .pivotArtifactPath(modelSummary.getPivotArtifactPath()) //
                 .isDefaultDataRules(false) //
                 .dataRules(dataRules) //
                 .userRefinedAttributes(userRefinedAttributes) //
-                .enableDebug(false) //
-                .enableLeadEnrichment(false) //
-                .setScoreTestFile(false) //
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
                 .notesContent(parameters.getNotesContent());

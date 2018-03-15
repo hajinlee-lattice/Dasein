@@ -1,4 +1,4 @@
-package com.latticeengines.leadprioritization.workflow.steps;
+package com.latticeengines.modeling.workflow.steps;
 
 import java.util.List;
 

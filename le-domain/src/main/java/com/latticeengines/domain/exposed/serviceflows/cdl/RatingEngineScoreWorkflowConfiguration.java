@@ -16,9 +16,11 @@ import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
@@ -26,6 +28,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineIn
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -38,6 +41,16 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
                 .add(SoftwareLibrary.Scoring.getName())//
                 .addAll(super.getSwpkgNames()) //
                 .build();
+    }
+
+    private boolean skipImport;
+
+    public boolean isSkipImport() {
+        return skipImport;
+    }
+
+    public boolean setSkipImport(boolean skipImport) {
+        return this.skipImport = skipImport;
     }
 
     public static class Builder {
@@ -54,6 +67,8 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
 
+        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
+
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("ratingEngineScoreWorkflow", customerSpace,
                     configuration.getClass().getSimpleName());
@@ -65,6 +80,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             export.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
+            addStandardAttributes.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -73,6 +89,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
+            addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -85,6 +102,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             cdlEventTable.setInternalResourceHostPort(internalResourceHostPort);
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -110,8 +128,19 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder transformationGroup(TransformationGroup transformationGroup) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
+            return this;
+        }
+
+        public Builder transformDefinitions(List<TransformDefinition> transforms) {
+            addStandardAttributes.setTransforms(transforms);
+            return this;
+        }
+
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
@@ -226,6 +255,8 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             score.microserviceStepConfiguration(microserviceStepConfiguration);
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             scoreAggregate.microserviceStepConfiguration(microserviceStepConfiguration);
+            addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
+            
             export.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlTargetTableTupleFilter.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlEventTable.microserviceStepConfiguration(microserviceStepConfiguration);
@@ -234,6 +265,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             configuration.add(cdlEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(score);
+            configuration.add(addStandardAttributes);
             configuration.add(combineInputWithScores);
             configuration.add(scoreAggregate);
             configuration.add(export);

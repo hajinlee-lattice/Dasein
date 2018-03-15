@@ -11,10 +11,12 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
+import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
+import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
@@ -33,6 +35,12 @@ public class RatingEngineImportMatchAndModelWorkflow
 
     @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
+
+    @Inject
+    private DedupEventTable dedupEventTableDataFlow;
+
+    @Inject
+    private AddStandardAttributes addStandardAttributesDataFlow;
 
     @Inject
     private CdlModelWorkflow modelWorkflow;
@@ -58,6 +66,8 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
+                // .next(dedupEventTableDataFlow) //
+                // .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(scoreWorkflow) //

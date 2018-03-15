@@ -8,12 +8,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.serviceflows.cdl.CdlMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.CdlModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateModel;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateNote;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
 import com.latticeengines.modeling.workflow.steps.modeling.InvokeDataScienceAnalysis;
 import com.latticeengines.modeling.workflow.steps.modeling.Profile;
+import com.latticeengines.modeling.workflow.steps.modeling.ReviewModel;
 import com.latticeengines.modeling.workflow.steps.modeling.Sample;
 import com.latticeengines.modeling.workflow.steps.modeling.SetMatchSelection;
 import com.latticeengines.modeling.workflow.steps.modeling.WriteMetadataFiles;
@@ -25,7 +26,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Component("cdlModelWorkflow")
 @Lazy
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowConfiguration> {
+public class CdlModelWorkflow extends AbstractWorkflow<CdlModelWorkflowConfiguration> {
 
     @Inject
     private Sample sample;
@@ -38,6 +39,9 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
 
     @Inject
     private Profile profile;
+
+    @Inject
+    private ReviewModel reviewModel;
 
     @Inject
     private CreateModel createModel;
@@ -55,16 +59,19 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlMatchAndModelWorkflowC
     private ExportData exportData;
 
     @Override
-    public Workflow defineWorkflow(CdlMatchAndModelWorkflowConfiguration config) {
+    public Workflow defineWorkflow(CdlModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(sample) //
                 .next(exportData) //
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //
                 .next(profile) //
+//                .next(reviewModel) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
-                .next(createNote).next(invokeDataScienceAnalysis).build();
+                .next(createNote) //
+                .next(invokeDataScienceAnalysis) //
+                .build();
     }
 
 }

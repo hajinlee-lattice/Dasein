@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 
 public interface ModelMetadataService {
@@ -12,7 +13,11 @@ public interface ModelMetadataService {
 
     Table cloneTrainingTable(String modelSummaryId);
 
+    List<Table> cloneTrainingTargetTable(ModelSummary modelSummary);
+
     Table getTrainingTableFromModelId(String modelId);
+
+    List<Table> getTrainingTargetTableFromModelId(ModelSummary modelSummary);
 
     List<Attribute> getAttributesFromFields(List<Attribute> attributes, List<VdbMetadataField> fields);
 
@@ -23,4 +28,5 @@ public interface ModelMetadataService {
     List<Attribute> getRequiredColumns(String modelId);
 
     Set<String> getLatticeAttributeNames(String modelId);
+
 }

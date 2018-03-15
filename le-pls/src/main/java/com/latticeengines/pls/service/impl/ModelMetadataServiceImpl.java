@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -26,7 +28,6 @@ import com.latticeengines.pls.service.ModelMetadataService;
 import com.latticeengines.pls.service.VdbMetadataConstants;
 import com.latticeengines.pls.util.MetadataUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelMetadataService")
 public class ModelMetadataServiceImpl implements ModelMetadataService {
@@ -64,6 +65,15 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
         Table trainingTable = getTrainingTableFromModelId(modelId);
         Table clone = metadataProxy.cloneTable(customerSpace, trainingTable.getName());
         return clone;
+    }
+
+    @Override
+    public List<Table> cloneTrainingTargetTable(ModelSummary modelSummary) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        List<Table> tables = getTrainingTargetTableFromModelId(modelSummary);
+        Table trainingClone = metadataProxy.cloneTable(customerSpace, tables.get(0).getName());
+        Table targetClone = metadataProxy.cloneTable(customerSpace, tables.get(1).getName());
+        return Arrays.asList(trainingClone, targetClone);
     }
 
     @Override
@@ -285,14 +295,32 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
             throw new RuntimeException(String.format("No such model summary with id %s", modelId));
         }
         String trainingTableName = modelSummary.getTrainingTableName();
-        if (trainingTableName == null) {
-            throw new RuntimeException(String.format("Model %s does not have an training table name", modelId));
+        return getTableFromModelId(modelId, customerSpace, trainingTableName, "training");
+    }
+
+    @Override
+    public List<Table> getTrainingTargetTableFromModelId(ModelSummary modelSummary) {
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+        if (modelSummary == null) {
+            throw new RuntimeException(String.format("No such model summary!"));
+        }
+        String modelId = modelSummary.getId();
+        String trainingTableName = modelSummary.getTrainingTableName();
+        Table trainingTable = getTableFromModelId(modelId, customerSpace, trainingTableName, "training");
+        String targetTableName = modelSummary.getTargetTableName();
+        Table targetTable = getTableFromModelId(modelId, customerSpace, targetTableName, "target");
+        return Arrays.asList(trainingTable, targetTable);
+    }
+
+    private Table getTableFromModelId(String modelId, String customerSpace, String tableName, String tableType) {
+        if (tableName == null) {
+            throw new RuntimeException(String.format("Model %s does not have an %s table name", modelId, tableType));
         }
 
-        Table table = metadataProxy.getTable(customerSpace, trainingTableName);
+        Table table = metadataProxy.getTable(customerSpace, tableName);
         if (table == null) {
             throw new RuntimeException(
-                    String.format("No training table with name %s for model %s", trainingTableName, modelId));
+                    String.format("No %s table with name %s for model %s", tableType, tableName, modelId));
         }
         return table;
     }

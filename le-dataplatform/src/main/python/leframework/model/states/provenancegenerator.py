@@ -28,6 +28,8 @@ class ProvenanceGenerator(State):
                 self.result["SourceSchemaInterpretation"] = properties["Source_Schema_Interpretation"]
             if "Training_Table_Name" in properties.keys():
                 self.result["TrainingTableName"] = properties["Training_Table_Name"]
+            if "Target_Table_Name" in properties.keys():
+                self.result["TargetTableName"] = properties["Target_Table_Name"]
             if "Predefined_ColumnSelection_Name" in properties.keys():
                 self.result["Predefined_ColumnSelection_Name"] = properties["Predefined_ColumnSelection_Name"]
                 self.result["Predefined_ColumnSelection_Version"] = properties["Predefined_ColumnSelection_Version"]

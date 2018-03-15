@@ -87,6 +87,7 @@ public class ModelSummary
     private String eventTableName;
     private String sourceSchemaInterpretation;
     private String trainingTableName;
+    private String targetTableName;
     private Boolean trainingFileExist = false;
     private String transformationGroupName;
     private String predefinedSelectionName;
@@ -480,6 +481,16 @@ public class ModelSummary
 
     public void setTrainingTableName(String trainingTableName) {
         this.trainingTableName = trainingTableName;
+    }
+
+    @JsonProperty("TargetTableName")
+    @Column(name = "TARGET_TABLE_NAME", nullable = true)
+    public String getTargetTableName() {
+        return targetTableName;
+    }
+
+    public void setTargetTableName(String targetTableName) {
+        this.targetTableName = targetTableName;
     }
 
     @Transient

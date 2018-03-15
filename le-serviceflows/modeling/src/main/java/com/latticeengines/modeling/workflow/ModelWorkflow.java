@@ -81,7 +81,9 @@ public class ModelWorkflow extends AbstractWorkflow<ModelWorkflowConfiguration> 
                 .next(writeModelingMetadataFiles) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
-                .next(createNote).next(persistDataRules).next(invokeDataScienceAnalysis)//
+                .next(createNote) //
+                .next(persistDataRules) //
+                .next(invokeDataScienceAnalysis)//
                 .build();
     }
 }

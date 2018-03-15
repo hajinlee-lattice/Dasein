@@ -135,9 +135,6 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     @Override
     public void onExecutionCompleted() {
-        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
-                configuration.getTargetTableName());
-        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
         putStringValueInContext(MATCH_FETCH_ONLY, "true");
     }
 
