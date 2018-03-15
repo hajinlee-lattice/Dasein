@@ -112,7 +112,7 @@ public class ProxyRetryTemplate extends RetryTemplate {
         if (attempt != null) {
             msg += String.format(".  (Attempt=%d)", attempt);
         }
-        log.info(msg);
+        log.warn(msg);
     }
 
 }
