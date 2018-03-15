@@ -20,6 +20,8 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiExecutionLog>
         implements DellEbiExecutionLogEntityMgr {
 
+    static final int MAXIMUM_FAILURES_ALLOWED = 3;
+
     @Autowired
     DellEbiExecutionLogDao dellEbiExecutionLogDao;
 
@@ -65,7 +67,11 @@ public class DellEbiExecutionLogEntityMgrImpl extends BaseEntityMgrImpl<DellEbiE
             throw new LedpException(LedpCode.LEDP_29001);
         }
 
-        dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Failed.getStatus());
+        if (retryCount >= MAXIMUM_FAILURES_ALLOWED) {
+            dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.TriedFailed.getStatus());
+        } else {
+            dellEbiExecutionLog.setStatus(DellEbiExecutionLogStatus.Failed.getStatus());
+        }
         dellEbiExecutionLog.setEndDate(new Date());
         dellEbiExecutionLog.setError(err);
         dellEbiExecutionLog.setRetryCount(retryCount);
