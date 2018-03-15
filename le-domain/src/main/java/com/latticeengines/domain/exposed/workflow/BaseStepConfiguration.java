@@ -1,5 +1,7 @@
 package com.latticeengines.domain.exposed.workflow;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -28,6 +30,8 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = PublishConfiguration.class, name = "PublishConfiguration"),
         @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"),
         @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"), })
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BaseStepConfiguration {
 
     @JsonProperty("internal_resource_host_port")

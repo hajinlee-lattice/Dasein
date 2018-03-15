@@ -7,14 +7,13 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
 @Component("dynamicWorkflow")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class DynamicWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
+public class DynamicWorkflow extends AbstractWorkflow<DynamicWorkflowConfiguration> {
 
     @Resource(name = "stepA")
     private NamedStep stepA;
@@ -38,7 +37,7 @@ public class DynamicWorkflow extends AbstractWorkflow<WorkflowConfiguration> {
     private DynamicWorkflowChoreographer choreographer;
 
     @Override
-    public Workflow defineWorkflow(WorkflowConfiguration config) {
+    public Workflow defineWorkflow(DynamicWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(stepA) //
                 .next(stepB) //

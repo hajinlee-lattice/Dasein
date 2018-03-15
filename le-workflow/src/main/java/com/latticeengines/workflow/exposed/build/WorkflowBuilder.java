@@ -12,14 +12,15 @@ import com.latticeengines.workflow.listener.LEJobListener;
 public class WorkflowBuilder {
 
     private Workflow workflow = new Workflow();
-
     private String root;
-
     private WorkflowConfiguration workflowConfig;
 
     public WorkflowBuilder(String root, WorkflowConfiguration workflowConfig) {
         this.root = root;
         this.workflowConfig = workflowConfig;
+        if (workflowConfig != null && workflowConfig.getFailingStep() != null) {
+            workflow.setFailingStep(workflowConfig.getFailingStep());
+        }
     }
 
     public WorkflowBuilder next(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -41,8 +42,7 @@ public class WorkflowBuilder {
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
         for (AbstractStep<? extends BaseStepConfiguration> step : subWorkflow.getSteps()) {
             String namespace = step.getNamespace();
-            // in case we need to repeatedly use exactly the same steps under
-            // one namespace
+            // in case we need to repeatedly use exactly the same steps under one namespace
             if (set.add(step) && StringUtils.isNotEmpty(root)) {
                 namespace = root + "." + namespace;
             }

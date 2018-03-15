@@ -16,8 +16,10 @@ import org.springframework.batch.item.ExecutionContext;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.InjectableFailure;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.workflow.exposed.exception.InjectedWorkflowException;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
 
 @StepScope
@@ -34,6 +36,8 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     private boolean runAgainWhenComplete = true;
     private Class<T> configurationClass;
     private JobParameters jobParameters;
+    private int seq;
+    private InjectableFailure injectedFailure;
 
     public abstract void execute();
 
@@ -234,4 +238,27 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public String getParentNamespace() {
         return namespace.substring(0, namespace.lastIndexOf('.'));
     }
+
+    public int getSeq() {
+        return seq;
+    }
+
+    public void setSeq(int seq) {
+        this.seq = seq;
+    }
+
+    public InjectableFailure getInjectedFailure() {
+        return injectedFailure;
+    }
+
+    public void setInjectedFailure(InjectableFailure injectedFailure) {
+        this.injectedFailure = injectedFailure;
+    }
+
+    public void throwFailureIfInjected(InjectableFailure failure) {
+        if (failure != null && failure.equals(injectedFailure)) {
+            throw new InjectedWorkflowException(String.format("Throw injected failure %s at [%d] %s", failure.name(), getSeq(), name()));
+        }
+    }
+
 }

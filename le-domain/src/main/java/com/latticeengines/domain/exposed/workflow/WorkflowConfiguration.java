@@ -2,9 +2,12 @@ package com.latticeengines.domain.exposed.workflow;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
@@ -25,6 +28,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.BaseScoringWorkflo
         @Type(value = BaseModelingWorkflowConfiguration.class, name = "BaseModelingWorkflowConfiguration"),
         @Type(value = BaseScoringWorkflowConfiguration.class, name = "BaseScoringWorkflowConfiguration"),
         @Type(value = BasePDWorkflowConfiguration.class, name = "BasePDWorkflowConfiguration"), })
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty("stepConfigRegistry")
@@ -55,6 +60,9 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     @JsonProperty
     private Map<String, String> inputProperties = new HashMap<>();
+
+    @JsonProperty("falingStep")
+    private FailingStep failingStep;
 
     @JsonProperty("swpkgNames")
     public Collection<String> getSwpkgNames() {
@@ -150,6 +158,14 @@ public class WorkflowConfiguration extends BasePayloadConfiguration {
 
     public void setContainerMemoryMB(Integer containerMemoryMB) {
         this.containerMemoryMB = containerMemoryMB;
+    }
+
+    public FailingStep getFailingStep() {
+        return failingStep;
+    }
+
+    public void setFailingStep(FailingStep failingStep) {
+        this.failingStep = failingStep;
     }
 
     @JsonIgnore

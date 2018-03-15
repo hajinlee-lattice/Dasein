@@ -32,6 +32,7 @@ import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.functionalframework.DynamicWorkflow;
 import com.latticeengines.workflow.functionalframework.DynamicWorkflowChoreographer;
+import com.latticeengines.workflow.functionalframework.DynamicWorkflowConfiguration;
 import com.latticeengines.workflow.functionalframework.NamedStep;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
 
@@ -72,9 +73,8 @@ public class DynamicWorkflowTestNG extends WorkflowTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() {
         customerSpace = bootstrapWorkFlowTenant().toString();
-        workflowConfig = new WorkflowConfiguration();
+        workflowConfig = new DynamicWorkflowConfiguration.Builder().build();
         workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
-        workflowConfig.setWorkflowName(dynamicWorkflow.name());
         workflowService.registerJob(workflowConfig, applicationContext);
     }
 

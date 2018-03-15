@@ -115,6 +115,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
                     actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
 
+            configuration.setFailingStep(request.getFailingStep());
+
             return workflowJobService.submit(configuration);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));

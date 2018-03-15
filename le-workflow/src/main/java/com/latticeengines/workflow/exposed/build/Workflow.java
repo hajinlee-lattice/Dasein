@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.FailingStep;
 import com.latticeengines.workflow.listener.LEJobListener;
 
 public class Workflow {
@@ -13,6 +14,7 @@ public class Workflow {
     private List<String> stepNamespaces = new ArrayList<>();
     private List<LEJobListener> listeners = new ArrayList<>();
     private Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
+    private FailingStep failingStep;
 
     // private List<Workflow> subWorkflows = new ArrayList<>();
 
@@ -59,6 +61,14 @@ public class Workflow {
 
     public void setChoreographer(Choreographer choreographer) {
         this.choreographer = choreographer;
+    }
+
+    public FailingStep getFailingStep() {
+        return failingStep;
+    }
+
+    public void setFailingStep(FailingStep failingStep) {
+        this.failingStep = failingStep;
     }
 
     // public List<Workflow> getSubWorkflows() {

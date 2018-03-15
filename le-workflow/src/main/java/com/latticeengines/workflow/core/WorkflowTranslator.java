@@ -1,9 +1,12 @@
 package com.latticeengines.workflow.core;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.ExitStatus;
@@ -29,6 +32,8 @@ import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImp
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.domain.exposed.workflow.FailingStep;
+import com.latticeengines.domain.exposed.workflow.InjectableFailure;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -61,7 +66,7 @@ public class WorkflowTranslator {
                 new FailureReportingListener(workflowJobEntityMgr));
     }
 
-    public Job buildWorkflow(String name, Workflow workflow) throws Exception {
+    public Job buildWorkflow(String name, Workflow workflow) {
         if (workflow.isDryRun()) {
             for (AbstractStep<?> step : workflow.getSteps()) {
                 step.setDryRun(true);
@@ -70,32 +75,54 @@ public class WorkflowTranslator {
 
         Choreographer choreographer = workflow.getChoreographer();
         choreographer.linkStepNamespaces(workflow.getStepNamespaces());
-        SimpleJobBuilder simpleJobBuilder = jobBuilderFactory.get(name)
-                .start(step(workflow.getSteps().get(0), choreographer, 0));
-        if (workflow.getSteps().size() > 1) {
-            for (int i = 1; i < workflow.getSteps().size(); i++) {
-                simpleJobBuilder = simpleJobBuilder.next(step(workflow.getSteps().get(i), choreographer, i));
+        FailingStep failingStep = workflow.getFailingStep();
+        Map<String, Integer> stepOccurrences = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(workflow.getSteps())) {
+            SimpleJobBuilder simpleJobBuilder = null;
+            for (int i = 0; i < workflow.getSteps().size(); i++) {
+                AbstractStep<? extends BaseStepConfiguration> abstractStep = workflow.getSteps().get(i);
+                InjectableFailure failure = null;
+                if (failingStep != null) {
+                    String stepName = abstractStep.name();
+                    if (!stepOccurrences.containsKey(stepName)) {
+                        stepOccurrences.put(stepName, 0);
+                    }
+                    stepOccurrences.put(stepName, stepOccurrences.get(stepName) + 1);
+                    boolean shouldFail = shouldFailTheStep(stepName, i, failingStep, stepOccurrences);
+                    if (shouldFail) {
+                        failure = failingStep.getFailure();
+                        if (failure == null) {
+                            failure = InjectableFailure.BeforeExecute;
+                        }
+                        log.info(String.format("Inject %s to [%02d] %s", failure, i, stepName));
+                    }
+                }
+                Step step = step(abstractStep, choreographer, i, failure);
+                if (simpleJobBuilder == null) {
+                    simpleJobBuilder = jobBuilderFactory.get(name).start(step);
+                } else {
+                    simpleJobBuilder = simpleJobBuilder.next(step);
+                }
             }
+            for (LEJobListener listener : workflow.getListeners()) {
+                simpleJobBuilder = simpleJobBuilder.listener(listener);
+            }
+            return simpleJobBuilder.build();
+        } else {
+            throw new IllegalArgumentException("Cannot translate empty workflow");
         }
-
-        for (LEJobListener listener : workflow.getListeners()) {
-            simpleJobBuilder = simpleJobBuilder.listener(listener);
-        }
-        return simpleJobBuilder.build();
     }
 
-    public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq) //
-            throws Exception {
+    public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq, InjectableFailure injectableFailure) {
         return stepBuilderFactory.get(step.name()) //
-                .tasklet(tasklet(step, choreographer, seq)) //
+                .tasklet(tasklet(step, choreographer, seq, injectableFailure)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //
                 .build();
     }
 
-    protected Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
-            Choreographer choreographer, int seq) {
+    private Tasklet tasklet(final AbstractStep<? extends BaseStepConfiguration> step, //
+            Choreographer choreographer, int seq, InjectableFailure injectableFailure) {
         return new Tasklet() {
-
             @Override
             public RepeatStatus execute(StepContribution contribution, ChunkContext context) {
                 log.info("step {} has namespace {}", step.name(), step.getNamespace());
@@ -105,6 +132,9 @@ public class WorkflowTranslator {
 
                 ExecutionContext executionContext = stepExecution.getJobExecution().getExecutionContext();
                 step.setExecutionContext(executionContext);
+
+                step.setSeq(seq);
+                step.setInjectedFailure(injectableFailure);
 
                 if (!step.isDryRun()) {
                     boolean configurationWasSet = step.setup();
@@ -118,6 +148,7 @@ public class WorkflowTranslator {
                             validateConfiguration(step);
                         }
                         step.setJobId(context.getStepContext().getStepExecution().getJobExecution().getId());
+                        step.throwFailureIfInjected(InjectableFailure.BeforeExecute);
                         step.execute();
                         step.onExecutionCompleted();
                     }
@@ -141,6 +172,28 @@ public class WorkflowTranslator {
                 }
             }
         };
+    }
+
+    private boolean shouldFailTheStep(String stepName, int seq, FailingStep failingStep,
+            Map<String, Integer> stepOccurrences) {
+        boolean shouldFail = false;
+        Integer failingSeq = failingStep.getSeq();
+        if (Integer.valueOf(seq).equals(failingSeq)) {
+            shouldFail = true;
+        } else {
+            String failingStepName = failingStep.getName();
+            if (stepName.equals(failingStepName)) {
+                Integer failingOccurrence = failingStep.getOccurrence();
+                if (failingOccurrence == null) {
+                    failingOccurrence = 1;
+                }
+                int currentOccurrence = stepOccurrences.getOrDefault(failingStepName, 1);
+                if (failingOccurrence.equals(currentOccurrence)) {
+                    shouldFail = true;
+                }
+            }
+        }
+        return shouldFail;
     }
 
 }
