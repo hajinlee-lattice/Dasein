@@ -8,12 +8,9 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 
 public interface WorkflowJobService {
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
-
-    WorkflowStatus getWorkflowStatus(String customerSpace, Long workflowId);
 
     JobStatus getJobStatus(String customerSpace, Long workflowId);
 
@@ -26,7 +23,7 @@ public interface WorkflowJobService {
     List<Job> getJobs(String customerSpace, Boolean includeDetails);
 
     List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types, Boolean includeDetails,
-                      Boolean hasParentId, Long parentJobId);
+            Boolean hasParentId, Long parentJobId);
 
     List<String> getStepNames(String customerSpace, Long workflowId);
 

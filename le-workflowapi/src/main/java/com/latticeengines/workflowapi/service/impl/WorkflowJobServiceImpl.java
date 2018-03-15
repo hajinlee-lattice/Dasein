@@ -1,6 +1,13 @@
 package com.latticeengines.workflowapi.service.impl;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -14,17 +21,26 @@ import org.springframework.batch.core.StepExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import com.google.common.annotations.VisibleForTesting;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.workflow.*;
 import com.latticeengines.common.exposed.workflow.annotation.WithCustomerSpace;
+import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.ErrorDetails;
+import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
+import com.latticeengines.domain.exposed.workflow.JobStep;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
+import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflow.core.LEJobExecutionRetriever;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
-import com.latticeengines.db.exposed.service.ReportService;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflowapi.service.WorkflowContainerService;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
@@ -66,13 +82,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public WorkflowStatus getWorkflowStatus(String customerSpace, Long workflowId) {
-        log.info(String.format("customerSpace=%s, workflowId=%s", customerSpace, Long.toString(workflowId)));
-        return workflowService.getStatus(new WorkflowExecutionId(workflowId));
-    }
-
-    @Override
-    @WithCustomerSpace
     public JobStatus getJobStatus(String customerSpace, Long workflowId) {
         log.info(String.format("customerSpace=%s, workflowId=%s", customerSpace, Long.toString(workflowId)));
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
@@ -87,8 +96,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @WithCustomerSpace
     public List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds) {
         log.info(String.format("customerSpace=%s, workflowIds=%s", customerSpace, JsonUtils.serialize(workflowIds)));
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
-                workflowIds, null, null);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds, null,
+                null);
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         return workflowJobs.stream().map(job -> JobStatus.fromString(job.getStatus())).collect(Collectors.toList());
@@ -97,8 +106,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public Job getJob(String customerSpace, Long workflowId, Boolean includeDetails) {
-        log.info(String.format("customerSpace=%s, workflowId=%s, includeDetails=%s",
-                customerSpace, Long.toString(workflowId), Boolean.toString(includeDetails)));
+        log.info(String.format("customerSpace=%s, workflowId=%s, includeDetails=%s", customerSpace,
+                Long.toString(workflowId), Boolean.toString(includeDetails)));
         WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId);
         if (workflowJob == null) {
             return null;
@@ -133,21 +142,25 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     @WithCustomerSpace
-    public List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types,
-                             Boolean includeDetails, Boolean hasParentId, Long parentJobId) {
-        log.info(String.format("customerSpace=%s, workflowIds=%s, types=%s, includeDetails=%s, hasParentId=%s, " +
-                        "parentJobId=%s", customerSpace, JsonUtils.serialize(workflowIds), JsonUtils.serialize(types),
-                JsonUtils.serialize(includeDetails), JsonUtils.serialize(hasParentId), JsonUtils.serialize(parentJobId)));
+    public List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types, Boolean includeDetails,
+            Boolean hasParentId, Long parentJobId) {
+        log.info(
+                String.format(
+                        "customerSpace=%s, workflowIds=%s, types=%s, includeDetails=%s, hasParentId=%s, "
+                                + "parentJobId=%s",
+                        customerSpace, JsonUtils.serialize(workflowIds), JsonUtils.serialize(types),
+                        JsonUtils.serialize(includeDetails), JsonUtils.serialize(hasParentId),
+                        JsonUtils.serialize(parentJobId)));
         Optional<List<Long>> optionalWorkflowIds = Optional.ofNullable(workflowIds);
         Optional<List<String>> optionalTypes = Optional.ofNullable(types);
         List<WorkflowJob> workflowJobs;
 
         if (hasParentId != null && hasParentId) {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
-                    optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), parentJobId);
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(optionalWorkflowIds.orElse(null),
+                    optionalTypes.orElse(null), parentJobId);
         } else {
-            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(
-                    optionalWorkflowIds.orElse(null), optionalTypes.orElse(null), null);
+            workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(optionalWorkflowIds.orElse(null),
+                    optionalTypes.orElse(null), null);
         }
 
         workflowJobs.removeIf(Objects::isNull);
@@ -174,8 +187,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId) {
         log.info(String.format("customerSpace=%s, workflowIds=%s, parentJobId=%s", customerSpace,
                 JsonUtils.serialize(workflowIds), Long.toString(parentJobId)));
-        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds,
-                null, null);
+        List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findByWorkflowIdsOrTypesOrParentJobId(workflowIds, null,
+                null);
         workflowJobs.removeIf(Objects::isNull);
         workflowJobs = checkLastUpdateTime(workflowJobs);
         workflowJobs.forEach(job -> {
@@ -187,16 +200,16 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     @Override
     @WithCustomerSpace
     public ApplicationId submitWorkFlow(String customerSpace, WorkflowConfiguration workflowConfiguration) {
-        log.info(String.format("customerSpace=%s, workflowConfiguration=%s",
-                customerSpace, JsonUtils.serialize(workflowConfiguration)));
+        log.info(String.format("customerSpace=%s, workflowConfiguration=%s", customerSpace,
+                JsonUtils.serialize(workflowConfiguration)));
         return workflowContainerService.submitWorkFlow(workflowConfiguration);
     }
 
     @Override
     @WithCustomerSpace
     public String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration) {
-        log.info(String.format("customerSpace=%s, workflowConfiguration=%s",
-                customerSpace, JsonUtils.serialize(workflowConfiguration)));
+        log.info(String.format("customerSpace=%s, workflowConfiguration=%s", customerSpace,
+                JsonUtils.serialize(workflowConfiguration)));
         return workflowContainerService.submitAwsWorkFlow(workflowConfiguration);
     }
 
@@ -223,8 +236,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             }
 
             WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowJob.getPid());
-            if (jobUpdate != null &&
-                    (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
+            if (jobUpdate != null
+                    && (System.currentTimeMillis() - jobUpdate.getLastUpdateTime()) > HEARTBEAT_FAILURE_THRESHOLD) {
                 workflowJob.setStatus(JobStatus.FAILED.name());
                 workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
             }
@@ -255,7 +268,8 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                     String.format("%s/app/%s", timelineServiceUrl, job.getApplicationId()));
         }
 
-        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(), includeDetails);
+        JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowJob.getWorkflowId(),
+                includeDetails);
 
         if (StringUtils.isNotEmpty(workflowJob.getType())) {
             job.setJobType(workflowJob.getType());

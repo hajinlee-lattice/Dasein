@@ -10,8 +10,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import com.google.common.annotations.VisibleForTesting;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component
@@ -42,7 +41,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return post("submitWorkflowExecution", url, workflowConfig, AppSubmission.class);
     }
 
-    public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
+    public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String... params) {
         String baseUrl = "/jobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url);
@@ -57,7 +56,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
     }
 
-    public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String ... params) {
+    public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String... params) {
         String baseUrl = "/awsJobs";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url);
@@ -72,13 +71,6 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return post("restartWorkflowExecution", url, null, AppSubmission.class);
     }
 
-    public AppSubmission restartWorkflowExecution(String workflowId, String ... params) {
-        String baseUrl = "/job/{workflowId}/restart";
-        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        url = constructUrl(url, workflowId);
-        return post("restartWorkflowExecution", url, null, AppSubmission.class);
-    }
-
     public void stopWorkflowExecution(String workflowId, String customerSpace) {
         checkCustomerSpace(customerSpace);
         String baseUrl = "/job/{workflowId}/stop";
@@ -87,7 +79,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         post("stopWorkflowExecution", url, null, Void.class);
     }
 
-    public void stopWorkflowExecution(String workflowId, String ... params) {
+    public void stopWorkflowExecution(String workflowId, String... params) {
         String baseUrl = "/job/{workflowId}/stop";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url, workflowId);
@@ -102,26 +94,11 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return get("getWorkflowId", url, WorkflowExecutionId.class);
     }
 
-    public WorkflowExecutionId getWorkflowId(String applicationId, String ... params) {
+    public WorkflowExecutionId getWorkflowId(String applicationId, String... params) {
         String baseUrl = "/yarnapps/id/{applicationId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url, applicationId);
         return get("getWorkflowId", url, WorkflowExecutionId.class);
-    }
-
-    public WorkflowStatus getWorkflowStatus(String workflowId, String customerSpace) {
-        checkCustomerSpace(customerSpace);
-        String baseUrl = "/status/{workflowId}";
-        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
-        url = constructUrl(url, workflowId);
-        return get("getWorkflowStatus", url, WorkflowStatus.class);
-    }
-
-    public WorkflowStatus getWorkflowStatus(String workflowId, String ... params) {
-        String baseUrl = "/status/{workflowId}";
-        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
-        url = constructUrl(url, workflowId);
-        return get("getWorkflowStatus", url, WorkflowStatus.class);
     }
 
     public Job getWorkflowJobFromApplicationId(String applicationId, String customerSpace) {
@@ -147,7 +124,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return get("getJobFromWorkflowId", url, Job.class);
     }
 
-    public Job getWorkflowExecution(String workflowId, String ... params) {
+    public Job getWorkflowExecution(String workflowId, String... params) {
         String baseUrl = "/job/{workflowId}";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url, workflowId);
@@ -168,7 +145,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
-    public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String ... params) {
+    public List<Job> getWorkflowExecutionsByJobIds(List<String> jobIds, String... params) {
         if (CollectionUtils.isEmpty(jobIds)) {
             return Collections.emptyList();
         }
@@ -181,7 +158,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
-    public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String ... params) {
+    public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String... params) {
         String customerSpace = shortenCustomerSpace(CustomerSpace.parse(tenant.getId()).toString());
         checkCustomerSpace(customerSpace);
         String baseUrl = "/jobs";
@@ -201,14 +178,14 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
-    public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String ... params) {
+    public List<Job> getJobs(List<String> jobIds, List<String> types, Boolean includeDetails, String... params) {
         String baseUrl = "/jobs";
         if (params != null && params.length > 0) {
             String customerSpace = params[0];
             String url = generateGetWorkflowUrls(baseUrl, customerSpace, jobIds, types, includeDetails, false);
             return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
         } else {
-            String url = generateGetWorkflowUrls(baseUrl,null, jobIds, types, includeDetails, false);
+            String url = generateGetWorkflowUrls(baseUrl, null, jobIds, types, includeDetails, false);
             return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
         }
     }
@@ -228,7 +205,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         put("updateParentJobId", url);
     }
 
-    public void updateParentJobId(List<String> jobIds, String parentJobId, String ... params) {
+    public void updateParentJobId(List<String> jobIds, String parentJobId, String... params) {
         if (CollectionUtils.isEmpty(jobIds)) {
             throw new LedpException(LedpCode.LEDP_18165);
         }
@@ -255,7 +232,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
     }
 
     @VisibleForTesting
-    String parseOptionalParameter(String baseUrl, String parameterName, String ... parameterValues) {
+    String parseOptionalParameter(String baseUrl, String parameterName, String... parameterValues) {
         if (parameterValues != null && parameterValues.length > 0) {
             String var = parameterValues[0];
             if (parameterName.equals("customerSpace")) {
@@ -282,7 +259,7 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
 
     @VisibleForTesting
     String generateGetWorkflowUrls(String baseUrl, String customerSpace, List<String> jobIds, List<String> types,
-                                   Boolean includeDetails, Boolean hasParentId) {
+            Boolean includeDetails, Boolean hasParentId) {
         StringBuilder urlStr = new StringBuilder();
         urlStr.append(baseUrl);
         if (StringUtils.isNotEmpty(customerSpace)) {

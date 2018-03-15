@@ -15,12 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 
 import io.swagger.annotations.Api;
@@ -46,23 +46,22 @@ public class WorkflowResource {
 
     @RequestMapping(value = "/job/{workflowId}/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Restart a previous workflow execution")
-    public AppSubmission restartWorkflowExecution(@PathVariable String workflowId,
-            @RequestParam(required = false) String customerSpace) {
+    public AppSubmission restartWorkflowExecution(@PathVariable String workflowId, @RequestParam String customerSpace) {
         Long wfId = Long.valueOf(workflowId);
-        WorkflowStatus status = workflowJobService.getWorkflowStatus(customerSpace, wfId);
-
-        if (status == null) {
-            throw new LedpException(LedpCode.LEDP_28017, new String[] { workflowId });
-        } else if (!WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
-            throw new LedpException(LedpCode.LEDP_28018, new String[] { workflowId, status.getStatus().name() });
-        }
 
         Job job = workflowJobService.getJob(customerSpace, wfId, false);
+        if (job == null) {
+            throw new LedpException(LedpCode.LEDP_28017, new String[] { workflowId });
+        } else if (job.getJobStatus() == null || !job.getJobStatus().isTerminated()) {
+            throw new LedpException(LedpCode.LEDP_28018,
+                    new String[] { workflowId, job.getJobStatus() == null ? null : job.getJobStatus().name() });
+
+        }
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
-        workflowConfig.setWorkflowName(status.getWorkflowName());
+        workflowConfig.setWorkflowName(job.getName());
         workflowConfig.setRestart(true);
         workflowConfig.setWorkflowIdToRestart(new WorkflowExecutionId(wfId));
-        workflowConfig.setCustomerSpace(status.getCustomerSpace());
+        workflowConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
         workflowConfig.setInputProperties(job.getInputs());
         workflowConfig.setUserId(job.getUser());
 
@@ -126,13 +125,6 @@ public class WorkflowResource {
     public WorkflowExecutionId getWorkflowId(@PathVariable String applicationId,
             @RequestParam(required = false) String customerSpace) {
         return workflowJobService.getWorkflowExecutionIdByApplicationId(customerSpace, applicationId);
-    }
-
-    @RequestMapping(value = "/status/{workflowId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ApiOperation(value = "Get status about a submitted workflow")
-    public WorkflowStatus getWorkflowStatus(@PathVariable String workflowId,
-            @RequestParam(required = false) String customerSpace) {
-        return workflowJobService.getWorkflowStatus(customerSpace, Long.valueOf(workflowId));
     }
 
     @RequestMapping(value = "/yarnapps/job/{applicationId}", method = RequestMethod.GET, headers = "Accept=application/json")

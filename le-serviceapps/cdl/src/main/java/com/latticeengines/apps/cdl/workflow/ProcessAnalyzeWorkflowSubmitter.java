@@ -41,9 +41,9 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkf
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
@@ -225,7 +225,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         try {
             log.info(String.format("restarted execution with pid: %s", workflowId));
-            return workflowJobService.restart(workflowId);
+            return workflowJobService.restart(workflowId, customerSpace);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());

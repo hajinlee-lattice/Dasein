@@ -11,6 +11,6 @@ public interface WorkflowJobService {
 
     ApplicationId submit(WorkflowConfiguration configuration);
 
-    ApplicationId restart(Long jobId);
+    ApplicationId restart(Long jobId, String customerSpace);
 
 }
