@@ -17,6 +17,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -112,7 +113,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             if (StringUtils.isBlank(scoreField)) {
                 throw new IllegalArgumentException("Must specify score field for computing lift.");
             }
-            scoreFieldsMap.put(modelGuid, scoreField);
+            scoreFieldsMap = ImmutableMap.of(modelGuid, scoreField);
         }
         return scoreFieldsMap;
     }
