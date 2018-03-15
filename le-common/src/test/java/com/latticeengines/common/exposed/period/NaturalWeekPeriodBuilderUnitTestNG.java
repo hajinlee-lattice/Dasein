@@ -4,7 +4,6 @@ import org.testng.annotations.DataProvider;
 
 public class NaturalWeekPeriodBuilderUnitTestNG extends PeriodBuilderUnitTestNGBase {
 
-    @Override
     @DataProvider(name = PERIOD_ID_DATA_PROVIDER)
     protected Object[][] providePeriodIds() {
         return new Object[][] { //

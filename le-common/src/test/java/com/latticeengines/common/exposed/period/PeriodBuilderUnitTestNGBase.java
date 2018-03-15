@@ -57,7 +57,6 @@ public abstract class PeriodBuilderUnitTestNGBase {
         Assert.assertEquals(new Integer(actualPeriod), new Integer(period));
     }
 
-    protected abstract Object[][] providePeriodIds();
     protected abstract PeriodBuilder getBuilder();
     protected abstract PeriodBuilder getBuilder(String startDate);
 
