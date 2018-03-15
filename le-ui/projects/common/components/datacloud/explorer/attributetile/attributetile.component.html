@@ -140,9 +140,9 @@
                 Free Text Attribute
                 <div>
                     <button class="button gray-button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
-                        <i ng-if="totalcount.length == 0" class="fa fa-plus"></i>
-                        <i ng-if="totalcount.length == 1" class="{{vm.categoryClass(enrichment.Category)}} color fa fa-check"></i>
-                        <span ng-if="totalcount.length > 1" class="string-count {{vm.categoryClass(enrichment.Category)}} color"> {{totalcount.length}} </span>
+                        <span ng-if="totalcount.length == 0" class="free-text-icon fa fa-plus"></span>
+                        <span ng-if="totalcount.length == 1" class="free-text-icon {{vm.categoryClass(enrichment.Category)}} color fa fa-check"></span>
+                        <span ng-if="totalcount.length > 1" class="free-text-icon {{vm.categoryClass(enrichment.Category)}} color"> {{totalcount.length}} </span>
                         Add To Query
                     </button>
                 </div>

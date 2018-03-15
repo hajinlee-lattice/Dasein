@@ -1049,7 +1049,7 @@
             color: #ffffff;
             border-radius: 3px;
         }
-        span.string-count {
+        span.free-text-icon {
             margin-right: 5px;
             font-weight: bold;
         }
@@ -2241,15 +2241,6 @@
     }
 }
 
-i {
-    &.fa {
-        margin-right: 5px;
-        font-weight: bold;
-        &.fa-check.white {
-            color: white;
-        }
-    }
-}
 
 .success-message {
     background: #71bc51;
