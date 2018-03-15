@@ -7,6 +7,7 @@
     <bean id="dataSourceWorkflow" class="com.latticeengines.workflow.core.SpringBatchDataSourceBeanFactory" depends-on="beanEnvironment">
         <property name="driverClass" value="${workflow.datasource.driver}" />
         <property name="jdbcUrl" value="${workflow.datasource.url}"/>
+        <property name="jdbcUrlReadOnly" value="${workflow.datasource.readonly.url}"/>
         <property name="user" value="${workflow.datasource.user}" />
         <property name="password" value="${workflow.datasource.password.encrypted}" />
         <property name="webAppMaxPoolSize" value="32"/>
