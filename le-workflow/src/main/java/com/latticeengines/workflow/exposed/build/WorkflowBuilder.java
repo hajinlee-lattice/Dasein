@@ -30,10 +30,12 @@ public class WorkflowBuilder {
 
     @SuppressWarnings("unchecked")
     public <T extends WorkflowConfiguration> WorkflowBuilder next(AbstractWorkflow<T> nextWorkflow) {
-        WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
         T config = null;
-        if (obj != null) {
-            config = (T) obj;
+        if (workflowConfig != null) {
+            WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
+            if (obj != null) {
+                config = (T) obj;
+            }
         }
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
@@ -51,10 +53,12 @@ public class WorkflowBuilder {
 
     @SuppressWarnings("unchecked")
     public <T extends WorkflowConfiguration> WorkflowBuilder next(WorkflowInterface<T> nextWorkflow) {
-        WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
         T config = null;
-        if (obj != null) {
-            config = (T) obj;
+        if (workflowConfig != null) {
+            WorkflowConfiguration obj = workflowConfig.getSubWorkflowConfiguration(nextWorkflow.name());
+            if (obj != null) {
+                config = (T) obj;
+            }
         }
         Workflow subWorkflow = nextWorkflow.defineWorkflow(config);
         Set<AbstractStep<? extends BaseStepConfiguration>> set = new HashSet<>();
