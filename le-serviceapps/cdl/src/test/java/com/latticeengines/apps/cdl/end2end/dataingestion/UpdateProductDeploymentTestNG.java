@@ -30,7 +30,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     static final String CHECK_POINT = "update3";
     private RatingEngine ratingEngine;
 
-    private static final long AGGREGATE_TRANSACTION_SIZE = 22747L;
+    private static final long AGGREGATE_TRANSACTION_SIZE = 30000L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
 
     @Test(groups = "end2end")
