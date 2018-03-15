@@ -4,19 +4,18 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="dataSourceReplicated" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
-        <property name="driverClass" value="${db.datasource.replicated.driver}" />
-        <property name="jdbcUrl" value="${db.datasource.replicated.url}"/>
+    <bean id="dataSourceReadOnly" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
+        <property name="driverClass" value="${db.datasource.readonly.driver}" />
+        <property name="jdbcUrl" value="${db.datasource.readonly.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
         <property name="maxPoolSize" value="32"/>
-        <property name="enableDebugSlowSql" value="false" />
     </bean>
 
     <!-- Entity manager factory -->
-    <bean id="entityManagerFactoryReplicated"
+    <bean id="entityManagerFactoryReadOnly"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="dataSourceReplicated" />
+        <property name="dataSource" ref="dataSourceReadOnly" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -38,8 +37,8 @@
         </property>
     </bean>
 
-    <bean id="transactionManagerReplicated" class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="entityManagerFactoryReplicated"/>
+    <bean id="transactionManagerReadOnly" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactoryReadOnly"/>
     </bean>
 
 </beans>

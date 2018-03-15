@@ -23,7 +23,6 @@ public class SpringBatchDataSourceBeanFactory extends DataSourceBeanFactory {
             setMaxPoolSize(webAppMaxPoolSize);
         } else {
             setWebAppMaxPoolSize(yarnContainerMaxPoolSize);
-            setMaxIdleTime(0);
         }
         return constructDataSource();
     }
