@@ -1,8 +1,9 @@
-package com.latticeengines.apps.core.controller;
+package com.latticeengines.apps.cdl.controller;
 
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +29,7 @@ public class ApplicationTenantResource {
     @PostMapping(value = "/")
     @ApiOperation(value = "Bootstrap a tenant for a service app")
     @NoCustomerSpace
-    public SimpleBooleanResponse bootstrap(BootstrapRequest bootstrapRequest) {
+    public SimpleBooleanResponse bootstrap(CDLBootstrapRequest bootstrapRequest) {
         applicationTenantService.bootstrap(bootstrapRequest);
         return SimpleBooleanResponse.successResponse();
     }
