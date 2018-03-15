@@ -48,10 +48,6 @@ import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.eai.ExportConfiguration;
-import com.latticeengines.domain.exposed.eai.ExportDestination;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -82,7 +78,6 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -92,7 +87,6 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
-import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
@@ -120,8 +114,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_CONTACT_4 = 68;
 
     static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
-    static final long SEGMENT_2_ACCOUNT_1 = 11;
-    static final long SEGMENT_2_CONTACT_1 = 11;
+    static final long SEGMENT_2_ACCOUNT_1 = 14;
+    static final long SEGMENT_2_CONTACT_1 = 14;
     static final long SEGMENT_2_ACCOUNT_2 = 45;
     static final long SEGMENT_2_CONTACT_2 = 49;
 
