@@ -75,7 +75,6 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             appContext = softwareLibraryService.loadSoftwarePackages(SoftwareLibrary.Module.workflowapi.name(),
                     swpkgNames, appContext, versionManager);
         }
-        workflowService.registerJob(workflowConfig, appContext);
 
         WorkflowExecutionId workflowId;
         WorkflowJob workflowJob = workflowJobEntityMgr.findByApplicationId(appId.toString());
@@ -87,6 +86,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
             if (workflowConfig.isRestart()) {
                 workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
             } else {
+                workflowService.registerJob(workflowConfig, appContext);
                 workflowId = workflowService.start(workflowConfig, workflowJob);
             }
 
