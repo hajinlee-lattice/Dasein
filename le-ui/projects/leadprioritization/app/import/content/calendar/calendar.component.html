@@ -110,7 +110,7 @@
                     <button class="button white-button block-button" ui-sref="home.import.entry.product_hierarchy">Back</button>
                 </div>
                 <div class="pull-right">
-                    <button class="button blue-button" ng-disabled="!vm.calendar || (vm.calendar && vm.calendar.mode !== vm.mode)" ng-click="vm.saveCalendar()">Next</button>
+                    <button class="button blue-button" ng-disabled="!vm.calendar || (vm.calendar && vm.calendar.mode !== vm.mode) || vm.saving" ng-click="vm.saveCalendar()"><i ng-if="vm.saving" class="fa fa-spinner fa-spin fa-fw"></i> Next</button>
                 </div>
             </div>
         </div>

@@ -10,6 +10,7 @@ angular.module('lp.import.wizard.productids', [])
         fieldMappings: FieldDocument.fieldMappings,
         fieldMappingsMap: {},
         AvailableFields: [],
+        unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
             product: 'Id',
@@ -53,6 +54,7 @@ angular.module('lp.import.wizard.productids', [])
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
+        vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,
                 userField = mapping[key],
@@ -64,6 +66,9 @@ angular.module('lp.import.wizard.productids', [])
                     append: true
                 };
             mapped.push(map);
+            if(userField) {
+                vm.unavailableFields.push(userField);
+            }
         }
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form);
@@ -78,6 +83,9 @@ angular.module('lp.import.wizard.productids', [])
 
                 vm.keyMap[vm.mappedFieldMap[key]] = userField;
                 vm.initialMapping[key] = userField;
+                if(userField) {
+                    vm.unavailableFields.push(userField);
+                }
             }
         }, 1);
     }

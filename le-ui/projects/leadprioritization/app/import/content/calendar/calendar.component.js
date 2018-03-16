@@ -4,7 +4,7 @@ angular.module('lp.import.calendar', [])
     NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument
 ) {
     var vm = this,
-        debug = true,
+        debug = false, // goto /import/calendar
         preventUnload = !debug,
         year = new Date().getFullYear(),
         months = ['January','February','March','April','May','June','July','August','September','October','November','December'],
@@ -24,6 +24,7 @@ angular.module('lp.import.calendar', [])
     });
 
     angular.extend(vm, {
+        saving: false,
         calendar: Calendar,
         selectedDate: '01-01',
         selectedQuarter: '1',
@@ -140,6 +141,7 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.saveCalendar = function() {
+        vm.saving = true;
         vm.calendar.longerMonth = vm.selectedQuarter;
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {

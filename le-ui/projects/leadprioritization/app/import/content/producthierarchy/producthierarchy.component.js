@@ -56,6 +56,7 @@ angular.module('lp.import.wizard.producthierarchy', [])
 
     vm.changeLatticeField = function(mapping, form) {
         var mapped = [];
+        vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,
                 userField = mapping[key],
@@ -67,6 +68,9 @@ angular.module('lp.import.wizard.producthierarchy', [])
                     append: true
                 };
             mapped.push(map);
+            if(userField) {
+                vm.unavailableFields.push(userField);
+            }
         }
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form);
