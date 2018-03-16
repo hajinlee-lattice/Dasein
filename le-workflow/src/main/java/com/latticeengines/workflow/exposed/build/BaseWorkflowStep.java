@@ -1,6 +1,5 @@
 package com.latticeengines.workflow.exposed.build;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -26,6 +25,7 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.util.WorkflowConfigurationUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.domain.exposed.workflow.Report;
@@ -295,11 +295,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             log.warn("There is no workflow configuration of class " + workflowConfigClass.getSimpleName()
                     + " in context.");
             try {
-                Class<?> builderClass = Arrays.stream(workflowConfigClass.getDeclaredClasses())
-                        .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
-                Object builder = builderClass.newInstance();
-                Method build = builderClass.getMethod("build", new Class<?>[] {});
-                workflowConfig = (WorkflowConfiguration) build.invoke(builder);
+                workflowConfig = WorkflowConfigurationUtils.getDefaultWorkflowConfiguration(workflowConfigClass);
                 if (StringUtils.isNotEmpty(workflowName)) {
                     workflowConfig.setWorkflowName(workflowName);
                 }
