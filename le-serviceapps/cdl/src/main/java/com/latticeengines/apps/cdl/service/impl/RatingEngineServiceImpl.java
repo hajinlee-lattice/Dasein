@@ -326,16 +326,20 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     private Set<String> engineIdsAvailableInRedshift() {
+        Set<String> engineIds = new HashSet<>();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);
-        ParallelFlux<ColumnMetadata> cms = tableRoleTemplate.getUnorderedSchema(TableRoleInCollection.PivotedRating,
-                version);
-        Set<String> engineIds = new HashSet<>();
-        if (cms != null) {
-            List<String> idList = cms.filter(cm -> cm.getAttrName().startsWith("engine_")) //
-                    .map(ColumnMetadata::getAttrName).sequential().collectList().block();
-            if (CollectionUtils.isNotEmpty(idList)) {
-                engineIds = new HashSet<>(idList);
+        List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "",
+                TableRoleInCollection.PivotedRating, version);
+        if (CollectionUtils.isNotEmpty(tableNames)) {
+            ParallelFlux<ColumnMetadata> cms = tableRoleTemplate.getUnorderedSchema(TableRoleInCollection.PivotedRating,
+                    version);
+            if (cms != null) {
+                List<String> idList = cms.filter(cm -> cm.getAttrName().startsWith("engine_")) //
+                        .map(ColumnMetadata::getAttrName).sequential().collectList().block();
+                if (CollectionUtils.isNotEmpty(idList)) {
+                    engineIds = new HashSet<>(idList);
+                }
             }
         }
         return engineIds;
