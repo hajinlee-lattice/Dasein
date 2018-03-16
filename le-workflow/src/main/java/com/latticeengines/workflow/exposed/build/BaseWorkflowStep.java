@@ -287,14 +287,15 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     }
 
     protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace, String workflowName,
-            Class<? extends WorkflowConfiguration> workflowClass) {
-        String ns = StringUtils.isEmpty(parentNamespace) ? workflowClass.getSimpleName()
-                : parentNamespace + "." + workflowClass.getSimpleName();
-        WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowClass);
+            Class<? extends WorkflowConfiguration> workflowConfigClass) {
+        String ns = StringUtils.isEmpty(parentNamespace) ? workflowConfigClass.getSimpleName()
+                : parentNamespace + "." + workflowConfigClass.getSimpleName();
+        WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowConfigClass);
         if (workflowConfig == null) {
-            log.warn("There is no workflow configuration of class " + workflowClass.getSimpleName() + " in context.");
+            log.warn("There is no workflow configuration of class " + workflowConfigClass.getSimpleName()
+                    + " in context.");
             try {
-                Class<?> builderClass = Arrays.stream(workflowClass.getDeclaredClasses())
+                Class<?> builderClass = Arrays.stream(workflowConfigClass.getDeclaredClasses())
                         .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
                 Object builder = builderClass.newInstance();
                 Method build = builderClass.getMethod("build", new Class<?>[] {});
@@ -303,8 +304,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
                     workflowConfig.setWorkflowName(workflowName);
                 }
             } catch (Exception e) {
-                throw new RuntimeException(
-                        String.format("Can't instantiate workflow configuration %s", workflowClass.getSimpleName()), e);
+                throw new RuntimeException(String.format("Can't instantiate workflow configuration %s",
+                        workflowConfigClass.getSimpleName()), e);
             }
         }
         Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);

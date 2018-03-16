@@ -1,5 +1,7 @@
 package com.latticeengines.workflowapi.yarn.runtime;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -20,6 +22,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
+import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobUpdateEntityMgr;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
@@ -84,7 +87,19 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
 
         try {
             if (workflowConfig.isRestart()) {
-                workflowId = workflowService.restart(workflowConfig.getWorkflowIdToRestart(), workflowJob);
+                @SuppressWarnings("unchecked")
+                AbstractWorkflow<? extends WorkflowConfiguration> workflow = appContext
+                        .getBean(workflowConfig.getWorkflowName(), AbstractWorkflow.class);
+                Class<? extends WorkflowConfiguration> configClass = workflow.getWorkflowConfigurationType();
+                Class<?> builderClass = Arrays.stream(configClass.getDeclaredClasses())
+                        .filter(c -> c.getSimpleName().equals("Builder")).distinct().findFirst().orElse(null);
+                Object builder = builderClass.newInstance();
+                Method build = builderClass.getMethod("build", new Class<?>[] {});
+                WorkflowConfiguration restartWorkflowConfig = (WorkflowConfiguration) build.invoke(builder);
+                restartWorkflowConfig.setWorkflowName(workflowConfig.getWorkflowName());
+                restartWorkflowConfig.setWorkflowIdToRestart(workflowConfig.getWorkflowIdToRestart());
+                workflowService.registerJob(restartWorkflowConfig, appContext);
+                workflowId = workflowService.restart(restartWorkflowConfig.getWorkflowIdToRestart(), workflowJob);
             } else {
                 workflowService.registerJob(workflowConfig, appContext);
                 workflowId = workflowService.start(workflowConfig, workflowJob);
