@@ -92,21 +92,21 @@ angular.module('lp.import')
                 label: 'Contact IDs', 
                 state: 'contacts.ids',
                 backState: 'home.segment.explorer.attributes',
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'contacts.ids.latticefields', 
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Add Custom Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Custom Fields', 
                 state: 'contacts.ids.latticefields.customfields', 
-                nextLabel: 'Import File', 
+                nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true);                
@@ -128,14 +128,14 @@ angular.module('lp.import')
             { 
                 label: 'Transaction IDs', 
                 state: 'product_purchases.ids', 
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'product_purchases.ids.latticefields', 
-                nextLabel: 'Import File', 
+                nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -158,14 +158,14 @@ angular.module('lp.import')
             { 
                 label: 'Product ID', 
                 state: 'product_bundles.ids', 
-                nextLabel: 'Next', 
+                nextLabel: 'Next, Map to Lattice Fields', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                 } 
             },{ 
                 label: 'Lattice Fields', 
                 state: 'product_bundles.ids.latticefields', 
-                nextLabel: 'Import File', 
+                nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
                         ImportWizardStore.setValidation('jobstatus', true);
