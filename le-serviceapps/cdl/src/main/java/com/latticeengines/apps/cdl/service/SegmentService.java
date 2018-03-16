@@ -6,6 +6,7 @@ import java.util.Map;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public interface SegmentService {
@@ -31,4 +32,8 @@ public interface SegmentService {
     void deleteAllSegments(String customerSpace);
 
     Map<BusinessEntity, Long> updateSegmentCounts(String segmentName);
+
+    List<AttributeLookup> findDependingAttributes (List<MetadataSegment> metadataSegments);
+
+    List<MetadataSegment> findDependingSegments (String customerSpace, List<String> attributes);
 }

@@ -67,7 +67,7 @@ public class CDLFunctionalTestNGBase extends AbstractTestNGSpringContextTests {
     protected GlobalAuthFunctionalTestBed testBed;
 
     @Inject
-    private SegmentService segmentService;
+    public SegmentService segmentService;
 
     @Inject
     protected TenantEntityMgr tenantEntityMgr;

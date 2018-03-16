@@ -1,13 +1,17 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -19,13 +23,20 @@ import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.apps.core.annotation.NoCustomerSpace;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.Lookup;
+import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -195,4 +206,105 @@ public class SegmentServiceImpl implements SegmentService {
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
     }
 
+    @Override
+    @NoCustomerSpace
+    public List<AttributeLookup> findDependingAttributes (List<MetadataSegment> metadataSegments) {
+        Set<AttributeLookup> dependingAttributes = new HashSet<>();
+        if (metadataSegments != null) {
+            for (MetadataSegment metadataSegment : metadataSegments) {
+                findSegmentDependingAttributes(metadataSegment);
+                dependingAttributes.addAll(metadataSegment.getSegmentAttributes());
+            }
+        }
+
+        return new ArrayList<>(dependingAttributes);
+    }
+
+    @Override
+    public List<MetadataSegment> findDependingSegments (String customerSpace, List<String> attributes) {
+        List<MetadataSegment> dependingMetadataSegments = new ArrayList<>();
+        if (attributes != null) {
+            List<MetadataSegment> metadataSegments = getSegments(customerSpace);
+            if (metadataSegments != null) {
+                for (MetadataSegment metadataSegment : metadataSegments) {
+                    findSegmentDependingAttributes(metadataSegment);
+                    Set<AttributeLookup> segmentAttributes = metadataSegment.getSegmentAttributes();
+                    for (AttributeLookup attributeLookup : segmentAttributes) {
+                        if (attributes.contains(sanitize(attributeLookup.toString()))) {
+                            dependingMetadataSegments.add(metadataSegment);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return dependingMetadataSegments;
+    }
+
+    @NoCustomerSpace
+    private void findSegmentDependingAttributes(MetadataSegment metadataSegment) {
+        Set<AttributeLookup> segmentAttributes = new HashSet<>();
+        Set<Restriction> restrictions = getSegmentRestrictions(metadataSegment);
+        for (Restriction restriction : restrictions) {
+            segmentAttributes.addAll(getRestrictionDependingAttributes(restriction));
+        }
+
+        metadataSegment.setSegmentAttributes(segmentAttributes);
+    }
+
+    @NoCustomerSpace
+    private Set<Restriction> getSegmentRestrictions (MetadataSegment metadataSegment) {
+        Set<Restriction> restrictionSet = new HashSet<>();
+
+        Restriction accountRestriction = metadataSegment.getAccountRestriction();
+        if (accountRestriction != null) {
+            restrictionSet.add(accountRestriction);
+        }
+
+        Restriction contactRestriction = metadataSegment.getContactRestriction();
+        if (contactRestriction != null) {
+            restrictionSet.add(contactRestriction);
+        }
+
+        FrontEndRestriction accountFrontEndRestriction = metadataSegment.getAccountFrontEndRestriction();
+        if (accountFrontEndRestriction != null) {
+            Restriction accountRestriction1 = accountFrontEndRestriction.getRestriction();
+            if (accountRestriction1 != null) {
+                restrictionSet.add(accountRestriction1);
+            }
+        }
+
+        FrontEndRestriction contactFrontEndRestriction = metadataSegment.getContactFrontEndRestriction();
+        if (contactFrontEndRestriction != null) {
+            Restriction contactRestriction1 = contactFrontEndRestriction.getRestriction();
+            if (contactRestriction1 != null) {
+                restrictionSet.add(contactRestriction1);
+            }
+        }
+
+        return restrictionSet;
+    }
+
+    @NoCustomerSpace
+    private Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        DepthFirstSearch search = new DepthFirstSearch();
+        search.run(restriction, (object, ctx) -> {
+            GraphNode node = (GraphNode) object;
+            if (node instanceof AttributeLookup) {
+                attributes.add(((AttributeLookup) node));
+            }
+        });
+
+        return attributes;
+    }
+
+    @NoCustomerSpace
+    private String sanitize(String attribute) {
+        if (StringUtils.isNotBlank(attribute)) {
+            attribute = attribute.trim();
+        }
+        return attribute;
+    }
 }

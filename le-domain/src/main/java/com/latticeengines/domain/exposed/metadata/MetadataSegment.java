@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.metadata;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -32,6 +33,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasName;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
@@ -128,6 +130,11 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("products")
     private Long products;
 
+    @JsonProperty("segment_attributes")
+    @Transient
+    @ApiModelProperty("segment attributes")
+    private Set<AttributeLookup> segmentAttributes;
+
     @Override
     public Long getPid() {
         return pid;
@@ -198,6 +205,12 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
 
     public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
         this.contactFrontEndRestriction = contactFrontEndRestriction;
+    }
+
+    public Set<AttributeLookup> getSegmentAttributes() { return segmentAttributes; }
+
+    public void setSegmentAttributes(Set<AttributeLookup> segmentAttributes) {
+        this.segmentAttributes = segmentAttributes;
     }
 
     public DataCollection getDataCollection() {
