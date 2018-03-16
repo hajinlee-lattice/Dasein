@@ -41,16 +41,27 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
     }
 
     public BusinessCalendar saveBusinessCalendar(@PathVariable String customerSpace,
-                                                 @RequestBody BusinessCalendar businessCalendar) {
+            @RequestBody BusinessCalendar businessCalendar) {
         String url = constructUrl(URL_PREFIX + "/calendar", shortenCustomerSpace(customerSpace));
         return post("validate business calendar", url, businessCalendar, BusinessCalendar.class);
     }
 
     public String validateBusinessCalendar(@PathVariable String customerSpace,
-                                           @RequestBody BusinessCalendar businessCalendar) {
+            @RequestBody BusinessCalendar businessCalendar) {
         String url = constructUrl(URL_PREFIX + "/calendar/validate", shortenCustomerSpace(customerSpace));
         return post("validate business calendar", url, businessCalendar, String.class);
     }
 
+    public int getMaxPeriodId(@PathVariable String customerSpace, @PathVariable String periodname) {
+        String url = constructUrl(URL_PREFIX + "/names/{periodname}/maxid", shortenCustomerSpace(customerSpace),
+                periodname);
+        return get("get max periodid for the given period name", url, Integer.class);
+    }
+
+    public int getEvaluationPeriodId(@PathVariable String customerSpace, @PathVariable String periodname) {
+        String url = constructUrl(URL_PREFIX + "/names/{periodname}/evaluationid", shortenCustomerSpace(customerSpace),
+                periodname);
+        return get("get evaluation periodid for the given period name", url, Integer.class);
+    }
 
 }

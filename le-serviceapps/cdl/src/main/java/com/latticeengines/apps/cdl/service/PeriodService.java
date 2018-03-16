@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 
 public interface PeriodService {
 
@@ -10,4 +11,7 @@ public interface PeriodService {
 
     List<PeriodStrategy> getPeriodStrategies();
 
+    int getEvaluationPeriod(String customerSpace, DataCollection.Version version, PeriodStrategy periodStrategy);
+
+    int getMaxPeriod(String customerSpace, DataCollection.Version version, PeriodStrategy periodStrategy);
 }

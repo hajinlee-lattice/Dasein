@@ -347,6 +347,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(bkt.getTransaction().getSpentFilter());
         Assert.assertNull(bkt.getTransaction().getUnitFilter());
         Assert.assertEquals(targetQuery.getPeriodCount(), -1);
+        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
 
         Assert.assertNotNull(trainingQuery);
         Assert.assertNotNull(trainingQuery.getAccountRestriction());
@@ -361,6 +362,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNull(bkt.getTransaction().getSpentFilter());
         Assert.assertNull(bkt.getTransaction().getUnitFilter());
         Assert.assertEquals(trainingQuery.getPeriodCount(), 4);
+        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
 
         Assert.assertNotNull(eventQuery);
         Assert.assertNotNull(eventQuery.getAccountRestriction());
@@ -369,12 +371,14 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         lr = (LogicalRestriction) eventQuery.getAccountRestriction().getRestriction();
         Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
         Assert.assertEquals(lr.getChildren().size(), 2);
-        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
-        bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
+        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof LogicalRestriction);
+        bkt = ((BucketRestriction) ((LogicalRestriction) lr.getChildren().toArray()[1]).getChildren().toArray()[1])
+                .getBkt();
         Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID3);
         Assert.assertNotNull(bkt.getTransaction().getSpentFilter());
         Assert.assertNotNull(bkt.getTransaction().getUnitFilter());
         Assert.assertEquals(eventQuery.getPeriodCount(), 4);
+        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
 
     }
 

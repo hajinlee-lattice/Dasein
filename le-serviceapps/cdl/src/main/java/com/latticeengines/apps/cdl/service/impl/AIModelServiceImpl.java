@@ -6,37 +6,40 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
-import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
-import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
+import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
+import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
 import com.latticeengines.apps.cdl.service.AIModelService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
+import com.latticeengines.apps.cdl.service.PeriodService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("aiModelService")
 public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implements AIModelService {
 
-    @Inject
-    private SegmentProxy segmentProxy;
+    private static Logger log = LoggerFactory.getLogger(AIModelServiceImpl.class);
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -48,8 +51,17 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    @Autowired
+    @Inject
+    private SegmentProxy segmentProxy;
+
+    @Inject
     private AIModelEntityMgr aiModelEntityMgr;
+
+    @Inject
+    private PeriodService periodService;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     protected AIModelServiceImpl() {
         super(RatingEngineType.CROSS_SELL);
@@ -99,8 +111,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             ModelingQueryType modelingQueryType) {
 
         if (Arrays.asList(ModelingStrategy.values()).contains(aiModel.getModelingStrategy())) {
+            int evaluationPeriod = periodService.getEvaluationPeriod(customerSpace,
+                    dataCollectionService.getActiveVersion(customerSpace), PeriodStrategy.CalendarMonth);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType);
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, evaluationPeriod);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,

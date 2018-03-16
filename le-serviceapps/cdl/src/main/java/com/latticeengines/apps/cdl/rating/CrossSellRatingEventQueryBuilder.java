@@ -23,8 +23,8 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel) {
-        super(ratingEngine, aiModel);
+    protected CrossSellRatingEventQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
+        super(ratingEngine, aiModel, evaluationPeriod);
     }
 
     @Override

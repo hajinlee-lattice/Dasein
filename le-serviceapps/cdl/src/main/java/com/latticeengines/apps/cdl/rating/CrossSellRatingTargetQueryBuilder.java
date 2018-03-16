@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel) {
-        super(ratingEngine, aiModel);
+    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
+        super(ratingEngine, aiModel, evaluationPeriod);
     }
 
     @Override

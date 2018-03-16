@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder {
 
@@ -30,6 +33,10 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected String productIds;
     protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
+    private int evaluationPeriod;
+
+    @Inject
+    protected PeriodProxy periodProxy;
 
     protected abstract void handleCustomSegment();
 
@@ -77,6 +84,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
         ratingFrontEndQuery.setPeriodName(TimeFilter.Period.Month.name());
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
+        ratingFrontEndQuery.setEvaluationPeriodId(evaluationPeriod);
     }
 
     private List<String> getProductsAsList() {
@@ -87,21 +95,22 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         return productList;
     }
 
-    protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel) {
+    protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
         this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
         this.aiModel = aiModel;
         this.productIds = String.join(",", aiModel.getTargetProducts());
+        this.evaluationPeriod = evaluationPeriod;
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType) {
+            ModelingQueryType modelingQueryType, int evaluationPeriod) {
         switch (modelingQueryType) {
         case TARGET:
-            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel);
+            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
         case TRAINING:
-            return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel);
+            return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
         case EVENT:
-            return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel);
+            return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
         default:
             throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
         }

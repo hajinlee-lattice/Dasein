@@ -31,42 +31,41 @@ public class SetTenantAspect {
         setMultiTenantContext(CustomerSpace.parse(customerSpace).toString());
     }
 
-
     // ===================================
     // BEGIN: legacy aspects to be removed
     // ===================================
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.SegmentServiceImpl.*(..)) " +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.SegmentServiceImpl.*(..)) "
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsSegmentService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace.toString());
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataCollectionServiceImpl.*(..))" +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataCollectionServiceImpl.*(..))"
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataCollectionService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.StatisticsContainerServiceImpl.*(..))" +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.StatisticsContainerServiceImpl.*(..))"
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsStatisticsContainerService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.*(..)) " +
-            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllDataFeeds(..)) " +
-            "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..)) " +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.*(..)) "
+            + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllDataFeeds(..)) "
+            + "&& !execution(* com.latticeengines.apps.cdl.service.impl.DataFeedServiceImpl.getAllSimpleDataFeeds(..)) "
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataFeedService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
     }
 
-    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedTaskServiceImpl.*(..)) " +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.cdl.service.impl.DataFeedTaskServiceImpl.*(..)) "
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allMethodsDataFeedTaskService(JoinPoint joinPoint) {
         String customerSpace = (String) joinPoint.getArgs()[0];
         setMultiTenantContext(customerSpace);
@@ -76,7 +75,7 @@ public class SetTenantAspect {
     // ===================================
 
     private void setMultiTenantContext(String customerSpace) {
-        Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace);
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse(customerSpace).toString());
         if (tenant == null) {
             throw new RuntimeException(String.format("No tenant found with id %s", customerSpace));
         }
