@@ -225,13 +225,17 @@ public class CDLJobServiceImpl implements CDLJobService {
             if (processAnalyzeJobDetail.isRunning()) {
                 log.info(String.format("process analyze job is running"));
                 return false;
-            } else if (processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL &&
-                        processAnalyzeJobDetail.getRetryCount() < processAnalyzeJobRetryCount) {
-                log.info(String.format("verify retry count, return true"));
-                return true;
+            } else if (processAnalyzeJobDetail.getCdlJobStatus() == CDLJobStatus.FAIL) {
+                if (processAnalyzeJobDetail.getRetryCount() < processAnalyzeJobRetryCount) {
+                    log.info(String.format("verify retry count, return true"));
+                    return true;
+                } else {
+                    log.info(String.format("verify retry count, return false"));
+                    return false;
+                }
             } else {
-                log.info(String.format("verify retry count, return false"));
-                return false;
+                log.info(String.format("process analyze job is complete"));
+                return true;
             }
         }
     }
