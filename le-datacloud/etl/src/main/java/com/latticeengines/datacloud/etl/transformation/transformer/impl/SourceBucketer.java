@@ -141,10 +141,10 @@ public class SourceBucketer extends AbstractDataflowTransformer<BucketEncodeConf
             ObjectNode field = (ObjectNode) jNode;
             String fieldName = field.get("name").asText();
             if (bktAttrMap.containsKey(fieldName)) {
-                field.put("bucketed_attrs", om.valueToTree(bktAttrMap.get(fieldName)));
+                field.set("bucketed_attrs", om.valueToTree(bktAttrMap.get(fieldName)));
             }
         }
-        objectNode.put("fields", fields);
+        objectNode.set("fields", fields);
         Schema.Parser parser = new Schema.Parser();
         try {
             return parser.parse(om.writeValueAsString(objectNode));

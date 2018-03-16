@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -68,6 +69,7 @@ public class BucketEncode extends TypesafeDataFlowBuilder<BucketEncodeParameters
 
         //TODO: remove accountmasterseed__hgdatapivoted__featurepivoted__builtwithtechindicators__bomborasurgepivoted__hpanewpivoted__hgdatatechindica
         List<String> longFields = result.getFieldNames().stream().filter(f -> f.length() > 64).collect(Collectors.toList());
+        log.warn("Removing fields due to long column name: " + StringUtils.join(longFields, ","));
         return result.discard(new FieldList(longFields));
     }
 

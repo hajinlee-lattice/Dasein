@@ -1,6 +1,7 @@
 package com.latticeengines.datacloud.etl.testframework;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -14,9 +15,13 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -36,6 +41,8 @@ import com.latticeengines.datacloud.core.util.HdfsPodContext;
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
 @ContextConfiguration(locations = { "classpath:test-datacloud-etl-context.xml" })
 public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSpringContextTests {
+
+    private static final Logger log = LoggerFactory.getLogger(DataCloutEtlAbstractTestNGBase.class);
 
     protected static final String SUCCESS_FLAG = "/_SUCCESS";
 
@@ -119,6 +126,30 @@ public abstract class DataCloutEtlAbstractTestNGBase extends AbstractTestNGSprin
         successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
                 .toString();
         uploadToHdfs(targetPath, successPath, baseSourceStream);
+        hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
+    }
+
+    protected void uploadBaseSourceDir(String baseSource, String baseSourceDir, String baseSourceVersion) throws IOException {
+        String rootDir = "sources/" + baseSourceDir;
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+        Resource[] sourceResources = resolver.getResources(rootDir + "/*.avro");
+        log.info("Resolved resources for " +rootDir);
+
+        int fileIdx = 0;
+        for (Resource resource : sourceResources) {
+            if (resource.getURI().toString().endsWith(".avro")) {
+                InputStream is = resource.getInputStream();
+                String targetPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion)
+                        .append(String.format("part-%04d.avro", fileIdx)).toString();
+                log.info("Upload " + resource.getURI().toString() + " to " + targetPath);
+                HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, is, targetPath);
+            }
+        }
+        String successPath = hdfsPathBuilder.constructSnapshotDir(baseSource, baseSourceVersion).append("_SUCCESS")
+                .toString();
+        InputStream stream = new ByteArrayInputStream("".getBytes(StandardCharsets.UTF_8));
+        HdfsUtils.copyInputStreamToHdfs(yarnConfiguration, stream, successPath);
         hdfsSourceEntityMgr.setCurrentVersion(baseSource, baseSourceVersion);
     }
 

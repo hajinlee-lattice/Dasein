@@ -47,6 +47,10 @@ public abstract class PipelineTransformationTestNGBase
         }
     }
 
+    protected String getPathToUploadBaseData() {
+        return "";
+    }
+
     protected abstract String getTargetSourceName();
 
     protected TableSource getTargetTableSource() {
