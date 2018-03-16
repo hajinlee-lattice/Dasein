@@ -639,6 +639,8 @@ angular.module('common.datacloud.query.service',[
             case 'GTE_AND_LT':      bkt.Lbl = a+' - '+b;break;
             case 'between':         bkt.Lbl = a+' - '+b;break;
             case 'BETWEEN':         bkt.Lbl = a+' - '+b;break;
+            case 'IN_COLLECTION':   bkt.Lbl = bkt.Vals.join(', ') ; break;
+            case 'NOT_IN_COLLECTION':   bkt.Lbl = 'not ' + bkt.Vals.join(', ')  ; break;
             default:
                 if (bkt.Cmp) {
                     bkt.Lbl = (bkt.Vals && bkt.Vals.length>0) ? a : 'empty';

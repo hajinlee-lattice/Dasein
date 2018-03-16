@@ -167,12 +167,34 @@ angular
                     return;
                 }
 
-                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries')) {
+                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String')) {
                     if (vm.unused) {
                         vm.unused = false;
 
-                        vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
-                        vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
+                        if (vm.type != 'String') {
+                            vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
+                            vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);
+                        } else {
+                            vm.item.topbkt = {
+                                "Lbl": " ",
+                                "Cmp": "IS_NOT_NULL",
+                                "Id": -1,
+                                "Cnt": vm.item.cube.Cnt,
+                                "Vals": [
+                                    ""
+                                ]
+                            };
+
+                            vm.tree.bucketRestriction.bkt = {
+                                "Lbl": " ",
+                                "Cmp": "IS_NOT_NULL",
+                                "Id": -1,
+                                "Cnt": vm.item.cube.Cnt,
+                                "Vals": [
+                                    ""
+                                ]
+                            };
+                        }
 
                         vm.label = vm.tree.bucketRestriction.bkt.Lbl;
                         vm.range = vm.tree.bucketRestriction.bkt.Vals;
@@ -180,29 +202,7 @@ angular
 
                     vm.root.saveState(true);
                     vm.editing = true;
-                } else if (!vm.editing && !vm.root.draggedItem && vm.type == 'String') {
-                    console.log(vm.type);
-                    if (vm.unused) {
-                        vm.unused = false;
-
-                        vm.tree.bucketRestriction.bkt = {
-                            "Lbl": " ",
-                            "Cmp": "IS_NOT_NULL",
-                            "Id": -1,
-                            "Cnt": vm.item.cube.Cnt,
-                            "Vals": [
-                                ""
-                            ]
-                        };
-
-                        vm.label = vm.tree.bucketRestriction.bkt.Lbl;
-                        vm.range = vm.tree.bucketRestriction.bkt.Vals;
-
-
-                    }
-                    vm.root.saveState(true);
-                    vm.editing = true;
-                }
+                } 
             }
 
             vm.updateBucketCount = function() {

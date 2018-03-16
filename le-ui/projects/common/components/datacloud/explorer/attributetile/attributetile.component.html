@@ -5,12 +5,14 @@
         <span class="attribute-count background-color show-tooltip delay bottom left" ng-if="(totalcount = vm.getAttributeRules(enrichment)).length > 0">
             <strong>{{ totalcount.length }}</strong>
             <div class="tooltip_">
-                <div class="cover" ng-if="totalcount.length == 1">
+                <div class="cover" ng-if="totalcount.length == 1" ng-init="type = vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type">
                     <h3>Attribute Selected</h3>
                     <p>This attribute has been used already and can be used again in another query condition. Go to Refine Query to make changes.</p>
                     <em>Query Snippet:</em>
                     <ul>
-                        <li ng-repeat="rule in totalcount">{{enrichment.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
+                        <li ng-repeat="rule in totalcount" >
+                            {{vm.getQuerySnippet(enrichment, rule, type)}}
+                        </li> 
                     </ul>
                 </div>
                 <div class="cover" ng-if="totalcount.length >= 2">
@@ -18,8 +20,8 @@
                     <p>This attribute has been used more than once.<br>Go to Refine Query to make changes.</p>
                     <em>Query Snippets:</em>
                     <ul>
-                        <li ng-repeat="rule in totalcount | limitTo: 3">{{enrichment.DisplayName}} is {{rule.bucketRestriction.bkt.Lbl}}</li>
-                        <li ng-if="totalcount.length == 4">{{enrichment.DisplayName}} is {{totalcount[3].bucketRestriction.bkt.Lbl}}</li>
+                        <li ng-repeat="rule in totalcount | limitTo: 3">{{vm.getQuerySnippet(enrichment, rule, type)}}</li>
+                        <li ng-if="totalcount.length == 4">{{vm.getQuerySnippet(enrichment, totalcount[3], type)}}</li>
                         <li ng-if="totalcount.length > 4">
                             And {{totalcount.length - 3}} other instances
                         </li>

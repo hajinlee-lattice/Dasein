@@ -68,7 +68,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'EQUAL' : 'equals',
             'NOT_EQUAL': 'does not equal',
             'IS_NULL': 'is empty',
-            'IS_NOT_NULL': 'is not empty'
+            'IS_NOT_NULL': 'is present'
         };
 
         this.no_inputs = [
