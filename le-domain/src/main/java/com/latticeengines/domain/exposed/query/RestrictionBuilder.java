@@ -187,6 +187,17 @@ public class RestrictionBuilder {
         return this;
     }
 
+    public RestrictionBuilder notInSubquery(SubQuery subQuery) {
+        if (subQuery == null) {
+            throw new IllegalArgumentException("subquery cannot be null");
+        }
+        operator = ComparisonType.NOT_IN_COLLECTION;
+        negate = false;
+        rhsLookup = new SubQueryAttrLookup(subQuery);
+        completeConcrete();
+        return this;
+    }
+
     public RestrictionBuilder inCollection(Collection<Object> collection) {
         if (collection == null) {
             throw new IllegalArgumentException("collection cannot be null");
