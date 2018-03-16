@@ -377,8 +377,8 @@ angular
                         { name: 'LeadType', displayName: 'Lead Type' },
                         { name: 'CreatedDate', displayName: 'Created Date' },
                         { name: 'LastModifiedDate', displayName: 'Last Modified Date' },
-                        { name: 'DoNotMail', displayName: 'Do Not Mail' },
-                        { name: 'DoNotCall', displayName: 'Do Not Call' }
+                        { name: 'DoNotMail', displayName: 'Has Opted Out of Email' },
+                        { name: 'DoNotCall', displayName: 'Has Opted Out of Phone Calls' }
                     ];
                 }
             },
