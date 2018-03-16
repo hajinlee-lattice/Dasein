@@ -43,11 +43,14 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private static final String DATA_FEED_NAME = "datafeed";
 
+    private String uniqueDataFeedName;
+
     private DataFeed datafeed = new DataFeed();
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironmentWithDataCollection();
+        uniqueDataFeedName = NamingUtils.timestamp(DATA_FEED_NAME);
     }
 
     @AfterClass(groups = "functional")
@@ -63,7 +66,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void create() {
         datafeed.setDataCollection(dataCollection);
-        datafeed.setName(DATA_FEED_NAME);
+        datafeed.setName(uniqueDataFeedName);
 
         Table importTable = new Table();
         importTable.setName("importTable");
@@ -91,7 +94,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         datafeed.addTask(task);
 
         datafeedEntityMgr.create(datafeed);
-        DataFeed dataFeed = datafeedEntityMgr.findByName(DATA_FEED_NAME);
+        DataFeed dataFeed = datafeedEntityMgr.findByName(uniqueDataFeedName);
         dataFeed.setStatus(DataFeed.Status.Active);
         datafeedEntityMgr.update(dataFeed);
 
@@ -127,7 +130,7 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "create")
     public void retrieve() {
-        DataFeed retrieved = datafeedEntityMgr.findByNameInflated(DATA_FEED_NAME);
+        DataFeed retrieved = datafeedEntityMgr.findByNameInflated(uniqueDataFeedName);
         assertEquals(retrieved.getName(), datafeed.getName());
         assertNotNull(retrieved.getActiveExecutionId());
         assertNotNull(retrieved.getActiveExecution());
@@ -139,11 +142,11 @@ public class DataFeedEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "retrieve")
     public void finishExecution() {
-        DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(DATA_FEED_NAME,
+        DataFeedExecution exec1 = datafeedEntityMgr.updateExecutionWithTerminalStatus(uniqueDataFeedName,
                 DataFeedExecution.Status.Completed, DataFeed.Status.Active);
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Completed);
 
-        DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(DATA_FEED_NAME);
+        DataFeed df = datafeedEntityMgr.findByNameInflatedWithAllExecutions(uniqueDataFeedName);
         assertEquals(df.getActiveExecution().getPid(), df.getActiveExecutionId());
         assertEquals(df.getExecutions().size(), 1);
         assertEquals(df.getStatus(), DataFeed.Status.Active);

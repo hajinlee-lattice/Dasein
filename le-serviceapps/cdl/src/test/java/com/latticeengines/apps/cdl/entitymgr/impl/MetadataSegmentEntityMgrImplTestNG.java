@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -47,8 +48,9 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
+    private String segmentName;
+
     private static final String TABLE_NAME = "Account1";
-    private static final String SEGMENT_NAME = "SEGMENT_NAME";
     private static final String OTHER_SEGMENT_NAME = "OTHER_SEGMENT_NAME";
 
     private static final String SEGMENT_DISPLAY_NAME = "SEGMENT_DISPLAY_NAME";
@@ -59,6 +61,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
     @BeforeClass(groups = "functional")
     public void setup() {
+        segmentName = NamingUtils.uuid("SEGMENT_NAME");
         setupTestEnvironmentWithDataCollection();
         createSegmentInOtherTenant();
 
@@ -77,6 +80,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         otherSegment.setName(OTHER_SEGMENT_NAME);
         otherSegment.setDisplayName("Other");
         MultiTenantContext.setTenant(tenantEntityMgr.findByTenantId(CustomerSpace.parse(tenantId).toString()));
+        otherSegment.setTenant(MultiTenantContext.getTenant());
         otherSegment.setDataCollection(dataCollection);
         segmentEntityMgr.createOrUpdate(otherSegment);
         MultiTenantContext.setTenant(mainTestTenant);
@@ -88,15 +92,16 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         log.info("Start create test at " + preCreateTime.getTime());
         Thread.sleep(1000);
 
-        METADATA_SEGMENT.setName(SEGMENT_NAME);
+        METADATA_SEGMENT.setName(segmentName);
         METADATA_SEGMENT.setDisplayName(SEGMENT_DISPLAY_NAME);
         METADATA_SEGMENT.setDescription(SEGMENT_DESCRIPTION);
         METADATA_SEGMENT.setAccountRestriction(
                 Restriction.builder().let(BusinessEntity.Account, "A").eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
+        METADATA_SEGMENT.setTenant(MultiTenantContext.getTenant());
         segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
 
-        MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
+        MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
 
         assertNull(retrieved.getAccounts());
@@ -126,7 +131,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
         MetadataSegment UPDATED_SEGMENT = new MetadataSegment();
         UPDATED_SEGMENT.setPid(METADATA_SEGMENT.getPid());
-        UPDATED_SEGMENT.setName(SEGMENT_NAME);
+        UPDATED_SEGMENT.setName(segmentName);
         UPDATED_SEGMENT.setDisplayName(UPDATED_DISPLAY_SEGMENT_NAME);
         UPDATED_SEGMENT.setDescription(UPDATED_SEGMENT_DESCRIPTION);
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, "BUSINESS_NAME").eq("Hello")
@@ -138,9 +143,9 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         UPDATED_SEGMENT.setContacts(2L);
         UPDATED_SEGMENT.setProducts(3L);
 
-        segmentEntityMgr.createOrUpdate(UPDATED_SEGMENT);
+        segmentEntityMgr.createOrUpdateSegment(UPDATED_SEGMENT);
 
-        MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
+        MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
         assertEquals(retrieved.getDisplayName(), UPDATED_DISPLAY_SEGMENT_NAME);
         assertEquals(retrieved.getDescription(), UPDATED_SEGMENT_DESCRIPTION);
@@ -152,9 +157,9 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         StatisticsContainer container = new StatisticsContainer();
         container.setStatsCubes(ImmutableMap.of("Account", new StatsCube()));
         container.setVersion(dataCollectionEntityMgr.findActiveVersion());
-        segmentEntityMgr.upsertStats(SEGMENT_NAME, container);
+        segmentEntityMgr.upsertStats(segmentName, container);
 
-        retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
+        retrieved = segmentEntityMgr.findByName(segmentName);
         assertNotNull(retrieved);
 
         log.info("Finish update test at " + new Date().getTime());
@@ -169,7 +174,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")
     public void deleteSegment() {
-        MetadataSegment retrieved = segmentEntityMgr.findByName(SEGMENT_NAME);
+        MetadataSegment retrieved = segmentEntityMgr.findByName(segmentName);
         segmentEntityMgr.delete(retrieved);
         assertEquals(segmentEntityMgr.findAll().size(), 1);
     }

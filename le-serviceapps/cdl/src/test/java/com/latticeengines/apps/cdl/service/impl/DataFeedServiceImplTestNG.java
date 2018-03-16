@@ -30,6 +30,7 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.apps.cdl.service.DataFeedTaskService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.DataCollection.Version;
@@ -97,7 +98,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional")
     public void create() {
         DataCollection dataCollection = new DataCollection();
-        dataCollection.setName("DATA_COLLECTION_NAME");
+        dataCollection.setName(NamingUtils.timestamp("DATA_COLLECTION_NAME"));
         dataCollection.setTenant(MultiTenantContext.getTenant());
         dataCollection.setVersion(Version.Blue);
         dataCollectionEntityMgr.create(dataCollection);
