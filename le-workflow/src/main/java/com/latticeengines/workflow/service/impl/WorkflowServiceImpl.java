@@ -176,10 +176,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
 
         Long currentTime = System.currentTimeMillis();
+        String workflowType = workflowConfiguration.getWorkflowName();
         WorkflowJob workflowJob = new WorkflowJob();
         workflowJob.setTenant(tenant);
         workflowJob.setUserId(user);
         workflowJob.setWorkflowId(jobExecutionId);
+        workflowJob.setType(workflowType);
         workflowJob.setStatus(JobStatus.RUNNING.name());
         workflowJob.setStartTimeInMillis(currentTime);
         workflowJobEntityMgr.create(workflowJob);
@@ -197,6 +199,7 @@ public class WorkflowServiceImpl implements WorkflowService {
     public WorkflowExecutionId start(WorkflowConfiguration workflowConfiguration, WorkflowJob workflowJob) {
         long jobExecutionId = startWorkflowJob(workflowConfiguration);
         workflowJob.setWorkflowId(jobExecutionId);
+        workflowJob.setType(workflowConfiguration.getWorkflowName());
         workflowJob.setStatus(JobStatus.RUNNING.name());
         workflowJobEntityMgr.registerWorkflowId(workflowJob);
         workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
