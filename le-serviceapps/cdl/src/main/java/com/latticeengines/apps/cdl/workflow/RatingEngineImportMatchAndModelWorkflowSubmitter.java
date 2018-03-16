@@ -59,6 +59,8 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "RatingEngineImportMatchAndModelWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, parameters.getName());
+        inputProperties.put(WorkflowContextConstants.Inputs.RATING_ENGINE_ID, parameters.getRatingEngineId());
+        inputProperties.put(WorkflowContextConstants.Inputs.RATING_MODEL_ID, parameters.getAiModelId());
         ColumnSelection.Predefined predefinedSelection = ColumnSelection.Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
         if (StringUtils.isNotEmpty(predefinedSelectionName)) {

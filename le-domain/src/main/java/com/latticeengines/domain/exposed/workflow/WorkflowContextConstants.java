@@ -35,5 +35,7 @@ public class WorkflowContextConstants {
         public static final String ACTION_IDS = "ACTION_IDS";
         public static final String ACTION_ID = "ACTION_ID";
         public static final String DRAINING = "DRAINING";
+        public static final String RATING_ENGINE_ID = "RATING_ENGINE_ID";
+        public static final String RATING_MODEL_ID = "RATING_MODEL_ID";
     }
 }
