@@ -8,13 +8,14 @@ import static com.latticeengines.domain.exposed.query.BusinessEntity.Transaction
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.ConcreteRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.SubQuery;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -29,18 +30,60 @@ import com.querydsl.sql.SQLQuery;
 public class DateRangeTranslator extends TranslatorCommon {
 
     private static final BusinessEntity transaction = Transaction;
+    private static final Set<ComparisonType> NEGATIVE_COMPARATORS = ImmutableSet.of( //
+            ComparisonType.LESS_OR_EQUAL, //
+            ComparisonType.LESS_THAN, //
+            ComparisonType.IS_NULL);
 
     public Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
-                               AttributeRepository repository) {
-        SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository);
+            AttributeRepository repository) {
+        Restriction accountHasNotPurchased = null;
+        Restriction accountInRestriction = null;
+        if (isHasNotPurchased(txnRestriction) || isNegativeRestriction(txnRestriction)) {
+            SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository);
+            accountHasNotPurchased = Restriction.builder() //
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                    .notInSubquery(notPurchasedSubQuery) //
+                    .build();
+        }
 
-        Restriction accountInRestriction = Restriction.builder() //
-                .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
-                .inSubquery(subQuery) //
-                .build();
+        if (!isHasNotPurchased(txnRestriction)) {
+            SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository);
+            accountInRestriction = Restriction.builder() //
+                    .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
+                    .inSubquery(subQuery) //
+                    .build();
+        }
 
-        return txnRestriction.isNegate() ? Restriction.builder().not((ConcreteRestriction) accountInRestriction).build()
-                : accountInRestriction;
+        if (accountHasNotPurchased != null && accountInRestriction != null) {
+            return Restriction.builder().or(accountHasNotPurchased, accountInRestriction).build();
+        } else if (accountHasNotPurchased != null) {
+            return accountHasNotPurchased;
+        } else {
+            return accountInRestriction;
+        }
+    }
+
+    private boolean isHasNotPurchased(TransactionRestriction txnRestriction) {
+        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
+        AggregationFilter spendFilter = txnRestriction.getSpentFilter();
+        return unitFilter == null && spendFilter == null && Boolean.TRUE.equals(txnRestriction.isNegate());
+    }
+
+    /**
+     * Negative restriction means a restriction need to include null values
+     */
+    private boolean isNegativeRestriction(TransactionRestriction txnRestriction) {
+        AggregationFilter unitFilter = txnRestriction.getUnitFilter();
+        AggregationFilter spendFilter = txnRestriction.getSpentFilter();
+        boolean unitIsNegative = isNegativeAggregation(unitFilter);
+        boolean spendIsNegative = isNegativeAggregation(spendFilter);
+        return (unitIsNegative && spendIsNegative) || (unitFilter == null && spendIsNegative)
+                || (unitIsNegative && spendFilter == null);
+    }
+
+    private boolean isNegativeAggregation(AggregationFilter filter) {
+        return filter != null && NEGATIVE_COMPARATORS.contains(filter.getComparisonType());
     }
 
     private SubQuery constructSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
@@ -61,6 +104,24 @@ public class DateRangeTranslator extends TranslatorCommon {
             query = query.groupBy(accountId).having(aggPredicate);
         }
 
+        SubQuery subQuery = new SubQuery();
+        subQuery.setSubQueryExpression(query);
+        return subQuery;
+    }
+
+    private SubQuery constructHasPurchasedSubQuery(TransactionRestriction txnRestriction, QueryFactory queryFactory,
+            AttributeRepository repository) {
+        StringPath table = AttrRepoUtils.getTablePath(repository, transaction);
+        BooleanExpression productPredicate = getProductPredicate(txnRestriction.getProductId());
+        BooleanExpression datePredicate = getDatePredicate(txnRestriction.getTimeFilter());
+        BooleanExpression predicate = productPredicate;
+        if (datePredicate != null) {
+            predicate = productPredicate.and(datePredicate);
+        }
+        SQLQuery<?> query = queryFactory.getQuery(repository) //
+                .select(accountId) //
+                .from(table) //
+                .where(predicate);
         SubQuery subQuery = new SubQuery();
         subQuery.setSubQueryExpression(query);
         return subQuery;

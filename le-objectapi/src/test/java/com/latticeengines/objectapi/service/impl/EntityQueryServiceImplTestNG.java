@@ -129,6 +129,35 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertEquals(count1 + count2 + count3, totalCount);
     }
 
+    @Test(groups = "functional")
+    public void testAccountWithNegatvieTxn() {
+        MultiTenantContext.setTenant(tenant);
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+
+        TimeFilter timeFilter = new TimeFilter( //
+                ComparisonType.WITHIN, //
+                TimeFilter.Period.Month.name(), //
+                Collections.singletonList(1));
+
+        Bucket.Transaction txn0 = new Bucket.Transaction(prodId, timeFilter, null, null, true);
+        long count0 = countTxnBkt(txn0);
+        Assert.assertEquals(count0, 2952);
+
+        AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(500));
+        Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
+        long count1 = countTxnBkt(txn1);
+        Assert.assertEquals(count1, 3077);
+
+        AggregationFilter filter2 = new AggregationFilter(ComparisonType.LESS_OR_EQUAL, Collections.singletonList(5));
+        Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter, null, filter2, false);
+        long count2 = countTxnBkt(txn2);
+        Assert.assertEquals(count2, 3093);
+
+        Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter, filter1, filter2, false);
+        long count3 = countTxnBkt(txn3);
+        Assert.assertEquals(count3, 3067);
+    }
+
     @DataProvider(name = "timefilterProvider", parallel = true)
     public Object[][] timefilterProvider() {
         TimeFilter currentMonth = new TimeFilter( //
@@ -143,7 +172,8 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
                 ComparisonType.BETWEEN, //
                 TimeFilter.Period.Date.name(), //
                 Arrays.asList("2017-07-15", "2017-08-15"));
-        return new Object[][] { { TimeFilter.ever(), 832L }, //
+        return new Object[][] { //
+                { TimeFilter.ever(), 832L }, //
                 { currentMonth, 223L }, //
                 { lastMonth, 218L }, //
                 { betweendates, 223L }, //
