@@ -21,7 +21,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 public class ServiceConfigServiceImpl implements ServiceConfigService {
     private static final Logger log = LoggerFactory.getLogger(ServiceConfigServiceImpl.class);
 
-    private final String SERVICENAME = "Dante";
+    private final String SERVICENAME = "PLS";
     private final String INVOKETIME = "/InvokeTime";
 
     @Override

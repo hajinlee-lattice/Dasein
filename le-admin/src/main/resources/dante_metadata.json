@@ -1,6 +1,2 @@
 {
-  "RootPath": "/",
-  "Nodes": [
-    { "Node": "InvokeTime", "Data": {"Type": "number", "Required": false}}
-  ]
 }
