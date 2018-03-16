@@ -256,6 +256,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         job.setReports(getReports(workflowJob));
         job.setUser(workflowJob.getUserId());
         job.setJobStatus(JobStatus.fromString(workflowJob.getStatus()));
+        job.setName(workflowJob.getType());
 
         ErrorDetails errorDetails = workflowJob.getErrorDetails();
         if (errorDetails != null) {
