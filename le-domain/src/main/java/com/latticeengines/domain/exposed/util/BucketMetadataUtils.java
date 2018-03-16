@@ -1,11 +1,13 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 
 public class BucketMetadataUtils {
 
@@ -30,6 +32,24 @@ public class BucketMetadataUtils {
             result = minBucket;
         }
         return result;
+    }
+
+    public static List<BucketMetadata> getDefaultMetadata() {
+        List<BucketMetadata> buckets = new ArrayList<>();
+        buckets.add(addBucket(100, 95, BucketName.A));
+        buckets.add(addBucket(95, 85, BucketName.B));
+        buckets.add(addBucket(85, 50, BucketName.C));
+        buckets.add(addBucket(50, 5, BucketName.D));
+        buckets.add(addBucket(5, 0, BucketName.F));
+        return buckets;
+    }
+
+    private static BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
+        BucketMetadata bucket = new BucketMetadata();
+        bucket.setLeftBoundScore(leftBoundScore);
+        bucket.setRightBoundScore(rightBoundScore);
+        bucket.setBucket(bucketName);
+        return bucket;
     }
 
 }

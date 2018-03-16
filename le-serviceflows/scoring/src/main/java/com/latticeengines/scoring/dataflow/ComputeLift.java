@@ -99,7 +99,7 @@ public class ComputeLift extends TypesafeDataFlowBuilder<ComputeLiftParameters> 
         Node output = ratingAvg.innerJoin(ratingField, ratingCount, ratingField).innerJoin(modelGuidField, avg, modelGuidField);
         output = output.apply(String.format("%s > 0 ? RatingAvg / %s : 0.0", MODEL_AVG, MODEL_AVG),
                 new FieldList("RatingAvg", MODEL_AVG), new FieldMetadata(liftField, Double.class));
-        return output.retain(modelGuidField, ratingField, liftField, RATING_COUNT, MODEL_AVG);
+        return output.retain(modelGuidField, ratingField, liftField, RATING_COUNT);
     }
 
 }

@@ -28,6 +28,7 @@ import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
+import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
@@ -90,7 +91,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                     aiModel.setModelSummaryId(modelSummary.getId());
                     aiModel.setModelSummary(null);
                     if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
-                        List<BucketMetadata> bucketMetadata = getDefaultBucketMetadata(aiModel.getPredictionType());
+                        List<BucketMetadata> bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
                         summary.setBucketMetadata(bucketMetadata);
                     }
                 }

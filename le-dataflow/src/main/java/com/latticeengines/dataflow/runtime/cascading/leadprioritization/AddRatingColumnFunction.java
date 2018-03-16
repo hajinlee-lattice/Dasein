@@ -116,6 +116,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         if (CollectionUtils.isNotEmpty(bucketMetadata)) {
             bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadata, score).getBucket();
         } else {
+            //FIXME: should never go to this branch after M19
             // use default bucketing criteria
             if (log.isDebugEnabled()) {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");

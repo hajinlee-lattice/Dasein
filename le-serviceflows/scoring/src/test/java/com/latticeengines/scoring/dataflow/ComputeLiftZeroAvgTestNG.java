@@ -41,7 +41,7 @@ public class ComputeLiftZeroAvgTestNG extends ServiceFlowsDataFlowFunctionalTest
         parameters.setModelGuidField(ScoreResultField.ModelId.displayName);
         parameters.setScoreFieldMap(ImmutableMap.of( //
                 "ms__d794ef32-3d34-4391-95a9-9d9bd2621dcf-ai_lf__5", "ExpectedRevenue", //
-                "ms__1f9435e4-f824-4623-b110-61644dca8a70-ai_1g0mh", "Probability" //
+                "ms__1f9435e4-f824-4623-b110-61644dca8a70-ai_1g0mh", "RawScore" //
         ));
         return parameters;
     }

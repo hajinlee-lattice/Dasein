@@ -116,6 +116,8 @@ public enum InterfaceName {
     // Rating
     ModelId,
     Rating,
+    Score,
+    RawScore,
     ExpectedValue,
     Likelihood,
     Lift,

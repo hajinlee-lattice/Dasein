@@ -332,7 +332,6 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
-            computeLift.setBucketMetadata(bucketMetadata);
             return this;
         }
 

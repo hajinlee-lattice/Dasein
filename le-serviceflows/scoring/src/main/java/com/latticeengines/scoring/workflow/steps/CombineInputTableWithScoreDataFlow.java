@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
+import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("combineInputTableWithScoreDataFlow")
@@ -107,7 +108,11 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
                 getScoreResultTableName(), getInputTableName());
         AIModel aiModel = (AIModel) container.getModel();
         PredictionType predictionType = aiModel.getPredictionType();
-        params.setBucketMetadata(container.getEngineSummary().getBucketMetadata());
+        List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
+        if (CollectionUtils.isEmpty(bucketMetadata)) {
+            throw new IllegalArgumentException("AI model " + aiModel.getId() + " does not have bucket metadata.");
+        }
+        params.setBucketMetadata(bucketMetadata);
         params.setScoreFieldName(getScoreFieldName(predictionType));
         params.setPredictionType(predictionType);
         // no multiplier, because always calculate lift chart
@@ -119,7 +124,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         String scoreField;
         switch (predictionType) {
         case PROPENSITY:
-            scoreField = InterfaceName.Probability.name();
+            scoreField = InterfaceName.RawScore.name();
             break;
         case EXPECTED_VALUE:
             scoreField = InterfaceName.ExpectedRevenue.name();
@@ -158,7 +163,12 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private List<BucketMetadata> getBucketMetadata() {
-        return configuration.getBucketMetadata();
+        List<BucketMetadata> bucketMetadata = configuration.getBucketMetadata();
+        if (CollectionUtils.isEmpty(bucketMetadata)) {
+            bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
+        }
+        putObjectInContext(SCORING_BUCKET_METADATA, bucketMetadata);
+        return bucketMetadata;
     }
 
     private String getModelType() {

@@ -41,7 +41,7 @@ public class ComputeLiftTestNG extends ServiceFlowsDataFlowFunctionalTestNGBase 
         parameters.setModelGuidField(ScoreResultField.ModelId.displayName);
         parameters.setScoreFieldMap(ImmutableMap.of( //
                 "ms__9c1338b0-7052-4665-8960-a5acf7bfed43-CDLEnd2E", "ExpectedRevenue", //
-                "ms__21dd9b0f-f5be-4818-9efd-4ac9be61d41c-CDLEnd2E", "Probability" //
+                "ms__21dd9b0f-f5be-4818-9efd-4ac9be61d41c-CDLEnd2E", "RawScore" //
         ));
         return parameters;
     }

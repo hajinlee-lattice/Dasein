@@ -347,7 +347,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
-            computeLift.setBucketMetadata(bucketMetadata);
             return this;
         }
 
