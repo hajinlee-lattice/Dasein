@@ -22,7 +22,6 @@ import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
 public class TimeSeriesUtils {
 

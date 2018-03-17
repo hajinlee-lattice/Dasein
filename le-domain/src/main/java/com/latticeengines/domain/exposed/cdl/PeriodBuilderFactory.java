@@ -1,10 +1,10 @@
 package com.latticeengines.domain.exposed.cdl;
 
-import com.latticeengines.common.exposed.period.NaturalMonthPeriodBuilder;
-import com.latticeengines.common.exposed.period.NaturalQuarterPeriodBuilder;
-import com.latticeengines.common.exposed.period.NaturalWeekPeriodBuilder;
-import com.latticeengines.common.exposed.period.NaturalYearPeriodBuilder;
-import com.latticeengines.common.exposed.period.PeriodBuilder;
+import com.latticeengines.domain.exposed.period.NaturalMonthPeriodBuilder;
+import com.latticeengines.domain.exposed.period.NaturalQuarterPeriodBuilder;
+import com.latticeengines.domain.exposed.period.NaturalWeekPeriodBuilder;
+import com.latticeengines.domain.exposed.period.NaturalYearPeriodBuilder;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
 public final class PeriodBuilderFactory {
 

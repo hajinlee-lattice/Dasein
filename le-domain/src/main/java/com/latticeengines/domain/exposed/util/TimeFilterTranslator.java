@@ -13,9 +13,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 

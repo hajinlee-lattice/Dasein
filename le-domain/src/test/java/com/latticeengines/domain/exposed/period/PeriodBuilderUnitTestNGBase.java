@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.period;
+package com.latticeengines.domain.exposed.period;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
 public abstract class PeriodBuilderUnitTestNGBase {
 

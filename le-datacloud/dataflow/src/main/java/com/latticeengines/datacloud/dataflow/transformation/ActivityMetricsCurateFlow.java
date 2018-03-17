@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -33,6 +32,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;

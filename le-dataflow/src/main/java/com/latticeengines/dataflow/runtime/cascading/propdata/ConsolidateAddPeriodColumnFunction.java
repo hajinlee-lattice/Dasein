@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
