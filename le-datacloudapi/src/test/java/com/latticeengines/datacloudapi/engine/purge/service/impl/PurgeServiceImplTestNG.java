@@ -76,7 +76,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     private void preparePipelineTempSource() throws IOException {
         String srcName = "Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1";
-        String hdfsPath = hdfsPathBuilder.constructSnapshotRootDir(srcName).toString();
+        String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
         List<String> hdfsPaths = Collections.singletonList(hdfsPathBuilder.constructSourceDir(srcName).toString());
         pipelineTempSourceToPurge = new PurgeSource(srcName, hdfsPaths, null, false);

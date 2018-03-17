@@ -8,6 +8,8 @@ import java.util.List;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -22,6 +24,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
  * The entire source will be purged
  */
 public abstract class PatternedPurger implements SourcePurger {
+
+    private static Logger log = LoggerFactory.getLogger(PatternedPurger.class);
 
     @Autowired
     HdfsPathBuilder hdfsPathBuilder;
@@ -93,13 +97,17 @@ public abstract class PatternedPurger implements SourcePurger {
         srcNames.forEach(srcName -> {
             String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
-            List<String> versions = hdfsSourceEntityMgr.getVersions(new GeneralSource(srcName));
             List<String> hiveTables = null;
-            if (!CollectionUtils.isEmpty(versions)) {
-                hiveTables = new ArrayList<>();
-                for (String version : versions) {
-                    hiveTables.add(hiveTableService.tableName(srcName, version));
+            try {
+                List<String> versions = hdfsSourceEntityMgr.getVersions(new GeneralSource(srcName));
+                if (!CollectionUtils.isEmpty(versions)) {
+                    hiveTables = new ArrayList<>();
+                    for (String version : versions) {
+                        hiveTables.add(hiveTableService.tableName(srcName, version));
+                    }
                 }
+            } catch (Exception ex) {
+                log.warn("Fail to find versions for source " + srcName, ex);
             }
             PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, isToBak());
             toPurge.add(purgeSource);
