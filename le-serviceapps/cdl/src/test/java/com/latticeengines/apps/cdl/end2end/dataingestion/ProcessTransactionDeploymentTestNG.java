@@ -96,7 +96,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_1, //
-                RatingBucketName.D, RATING_D_COUNT_1, //
+                RatingBucketName.D, 7L, //
                 RatingBucketName.F, RATING_F_COUNT_1
         );
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
