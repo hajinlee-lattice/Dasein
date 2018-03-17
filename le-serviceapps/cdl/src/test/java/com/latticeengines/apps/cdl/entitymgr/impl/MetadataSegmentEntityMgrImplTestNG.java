@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -20,6 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -28,6 +30,8 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -71,6 +75,12 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
         MetadataSegment master = segmentEntityMgr.findMasterSegment(collectionName);
         Assert.assertNotNull(master);
+        ActionContext.remove();
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanupActionContext() {
+        ActionContext.remove();
     }
 
     private void createSegmentInOtherTenant() {
@@ -95,8 +105,7 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         METADATA_SEGMENT.setName(segmentName);
         METADATA_SEGMENT.setDisplayName(SEGMENT_DISPLAY_NAME);
         METADATA_SEGMENT.setDescription(SEGMENT_DESCRIPTION);
-        METADATA_SEGMENT.setAccountRestriction(
-                Restriction.builder().let(BusinessEntity.Account, "A").eq(null).build());
+        METADATA_SEGMENT.setAccountRestriction(Restriction.builder().let(BusinessEntity.Account, "A").eq(null).build());
         METADATA_SEGMENT.setDataCollection(dataCollection);
         METADATA_SEGMENT.setTenant(MultiTenantContext.getTenant());
         segmentEntityMgr.createOrUpdate(METADATA_SEGMENT);
@@ -125,6 +134,8 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
 
     @Test(groups = "functional", dependsOnMethods = "createSegment")
     public void updateSegment() throws InterruptedException {
+        Action action = ActionContext.getAction();
+        Assert.assertNull(action);
         Date preUpdateTime = new Date();
         log.info("Start create test at " + preUpdateTime.getTime());
         Thread.sleep(1500);
@@ -165,11 +176,15 @@ public class MetadataSegmentEntityMgrImplTestNG extends CDLFunctionalTestNGBase 
         log.info("Finish update test at " + new Date().getTime());
 
         assertTrue(preUpdateTime.after(retrieved.getCreated()),
-                String.format("Created time %d should be before the pre-update time %d", retrieved.getCreated().getTime(),
-                        preUpdateTime.getTime()));
+                String.format("Created time %d should be before the pre-update time %d",
+                        retrieved.getCreated().getTime(), preUpdateTime.getTime()));
         assertTrue(preUpdateTime.before(retrieved.getUpdated()),
-                String.format("Updated time %d should be after the pre-update time %d", retrieved.getUpdated().getTime(),
-                        preUpdateTime.getTime()));
+                String.format("Updated time %d should be after the pre-update time %d",
+                        retrieved.getUpdated().getTime(), preUpdateTime.getTime()));
+
+        action = ActionContext.getAction();
+        Assert.assertNotNull(action);
+        Assert.assertEquals(action.getType(), ActionType.METADATA_SEGMENT_CHANGE);
     }
 
     @Test(groups = "functional", dependsOnMethods = "updateSegment")

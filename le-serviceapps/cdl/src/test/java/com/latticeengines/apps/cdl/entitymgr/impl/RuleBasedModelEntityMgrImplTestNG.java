@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -83,6 +84,12 @@ public class RuleBasedModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngineId = createdRatingEngine.getId();
         createdRatingEngine = ratingEngineEntityMgr.findById(createdRatingEngine.getId());
         Assert.assertNotNull(createdRatingEngine);
+        ActionContext.remove();
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanupActionContext() {
+        ActionContext.remove();
     }
 
     @Test(groups = "functional")

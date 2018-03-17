@@ -154,7 +154,7 @@ public class RatingEngineResource {
         return ratingEngineService.getRatingModel(ratingEngineId, ratingModelId);
     }
 
-    @RequestMapping(value = "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @PostMapping(value = "/with-action/{ratingEngineId}/ratingmodels/{ratingModelId}")
     @ResponseBody
     @Action
     @ApiOperation(value = "Update a particular Rating Model associated with a Rating Engine given its Rating Engine id and Rating Model id, returns RatingModelAndActionDTO")

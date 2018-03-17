@@ -7,7 +7,8 @@ public enum ActionType {
 
     CDL_DATAFEED_IMPORT_WORKFLOW("cdlDataFeedImportWorkflow", "Import"), //
     CDL_OPERATION_WORKFLOW("cdlOperationWorkflow", "Delete"), //
-    RATING_ENGINE_CHANGE("ratingEngineChange", "Rating Engine"), //
+    RATING_ENGINE_CHANGE("ratingEngineChange", "Scoring"), //
+    METADATA_SEGMENT_CHANGE("segmentChange", "Segment Edited"), //
     METADATA_CHANGE("metadataChange", "Metadata Change"); //
 
     private String name;

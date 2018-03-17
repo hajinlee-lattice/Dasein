@@ -11,6 +11,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -82,6 +83,12 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngine.setCreatedBy(CREATED_BY);
         ratingEngine.setType(RatingEngineType.RULE_BASED);
         ratingEngine.setNote(RATING_ENGINE_NOTE);
+        ActionContext.remove();
+    }
+
+    @AfterClass(groups = "functional")
+    public void cleanupActionContext() {
+        ActionContext.remove();
     }
 
     @Test(groups = "functional")

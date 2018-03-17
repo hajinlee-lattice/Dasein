@@ -13,10 +13,15 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
@@ -26,9 +31,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final SegmentProxy segmentProxy;
 
+    private final ActionService actionService;
+
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService) {
         this.segmentProxy = segmentProxy;
+        this.actionService = actionService;
     }
 
     @Override
@@ -80,8 +88,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             throw new UnsupportedOperationException("Cannot change master segment.");
         }
         segment = translateForBackend(segment);
-        MetadataSegment updatedSegment = translateForFrontend(
-                segmentProxy.createOrUpdateSegment(customerSpace, segment));
+        MetadataSegmentAndActionDTO metadataSegmentAndAction = segmentProxy
+                .createOrUpdateSegmentAndActionDTO(customerSpace, segment);
+        Action action = metadataSegmentAndAction.getAction();
+        registerAction(action, MultiTenantContext.getTenant());
+        MetadataSegment updatedSegment = translateForFrontend(metadataSegmentAndAction.getMetadataSegment());
         try {
             Thread.sleep(500);
             log.info("Updating entity counts for segment " + segment.getName());
@@ -155,6 +166,18 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private FrontEndRestriction emptyFrontEndRestriction() {
         Restriction restriction = Restriction.builder().and(Collections.emptyList()).build();
         return new FrontEndRestriction(restriction);
+    }
+
+    private void registerAction(Action action, Tenant tenant) {
+        if (action != null) {
+            action.setTenant(tenant);
+            log.info(String.format("Registering action %s", action));
+            ActionConfiguration actionConfig = action.getActionConfiguration();
+            if (actionConfig != null) {
+                action.setDescription(actionConfig.serialize());
+            }
+            actionService.create(action);
+        }
     }
 
 }

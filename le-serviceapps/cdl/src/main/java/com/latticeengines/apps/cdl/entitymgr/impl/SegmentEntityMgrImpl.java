@@ -15,6 +15,7 @@ import com.latticeengines.apps.cdl.dao.SegmentDao;
 import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.SegmentEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.StatisticsContainerEntityMgr;
+import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
@@ -22,6 +23,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {
@@ -91,11 +94,20 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         if (existing != null) {
             existing = cloneForUpdate(existing, segment);
             segmentDao.update(existing);
+            setMetadataSegmentActionContext(existing);
             return existing;
         } else {
             segmentDao.create(segment);
             return segment;
         }
+    }
+
+    private void setMetadataSegmentActionContext(MetadataSegment metadataSegment) {
+        log.info(String.format("Set MetadataSegment Action Context for Segment %s", metadataSegment.getName()));
+        Action metadataSegmentAction = new Action();
+        metadataSegmentAction.setType(ActionType.METADATA_SEGMENT_CHANGE);
+        metadataSegmentAction.setActionInitiator(metadataSegment.getCreatedBy());
+        ActionContext.setAction(metadataSegmentAction);
     }
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)

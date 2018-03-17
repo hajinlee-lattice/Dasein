@@ -11,6 +11,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -27,6 +28,13 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/{customerSpace}/segments", //
                 shortenCustomerSpace(customerSpace));
         return post("createOrUpdateSegment", url, metadataSegment, MetadataSegment.class);
+    }
+
+    public MetadataSegmentAndActionDTO createOrUpdateSegmentAndActionDTO(String customerSpace,
+            MetadataSegment metadataSegment) {
+        String url = constructUrl("/{customerSpace}/segments/with-action", //
+                shortenCustomerSpace(customerSpace));
+        return post("createOrUpdateSegment with action", url, metadataSegment, MetadataSegmentAndActionDTO.class);
     }
 
     public MetadataSegment getMetadataSegmentByName(String customerSpace, String segmentName) {
@@ -61,14 +69,15 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
     }
 
-    public StatisticsContainer getSegmentStats(String customerSpace, String segmentName, DataCollection.Version version) {
+    public StatisticsContainer getSegmentStats(String customerSpace, String segmentName,
+            DataCollection.Version version) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/stats?version={version}", //
                 shortenCustomerSpace(customerSpace), segmentName, version);
         return get("getSegmentStats", url, StatisticsContainer.class);
     }
 
-    public SimpleBooleanResponse upsertStatsToSegment(String customerSpace, String segmentName, StatisticsContainer
-            statisticsContainer) {
+    public SimpleBooleanResponse upsertStatsToSegment(String customerSpace, String segmentName,
+            StatisticsContainer statisticsContainer) {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/stats", //
                 shortenCustomerSpace(customerSpace), segmentName);
         return post("upsertStatsToSegment", url, statisticsContainer, SimpleBooleanResponse.class);
