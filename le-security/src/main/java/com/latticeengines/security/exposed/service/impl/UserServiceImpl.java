@@ -108,14 +108,14 @@ public class UserServiceImpl implements UserService {
 
         User userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
 
+        Boolean result = Boolean.FALSE;
         if (userByEmail != null) {
             LOGGER.warn(String.format(
                     "A user with the same email address %s already exists. Please update instead of create user.",
                     userByEmail));
         } else {
             try {
-                globalUserManagementService.registerUser(user, creds);
-                userByEmail = globalUserManagementService.getUserByEmail(user.getEmail());
+                result = globalUserManagementService.registerUser(user, creds);
             } catch (Exception e) {
                 LOGGER.warn("Error creating admin user.");
                 globalUserManagementService.deleteUser(user.getUsername());
@@ -123,7 +123,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        return userByEmail != null;
+        return Boolean.TRUE.equals(result);
     }
 
 
