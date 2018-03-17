@@ -1,6 +1,5 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -180,19 +179,4 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
         this.type = type;
     }
 
-    public String getFullActivityMetricsName(String activityId) {
-        return activityId + "_" + getFullMetricsName();
-    }
-
-    public static String getFullActivityMetricsName(String fullMetricsName, String activityId) {
-        return activityId + "_" + fullMetricsName;
-    }
-
-    public String getFullMetricsName() {
-        List<String> periodNames = new ArrayList<>();
-        getPeriodsConfig().forEach(config -> {
-            periodNames.add(config.getPeriodRangeName());
-        });
-        return String.join("_", periodNames) + "_" + metrics;
-    }
 }

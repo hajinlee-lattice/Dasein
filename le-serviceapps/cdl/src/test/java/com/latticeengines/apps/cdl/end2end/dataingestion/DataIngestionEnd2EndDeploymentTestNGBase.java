@@ -101,7 +101,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
-    private static final String S3_VDB_VERSION = "1";
+    private static final String S3_VDB_VERSION = "2";
 
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;

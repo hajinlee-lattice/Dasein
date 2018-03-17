@@ -36,7 +36,8 @@ public interface DataFeedService {
 
     void resetImportByEntity(String customerSpace, String datafeedName, String entity);
 
-    DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod);
+    DataFeed updateEarliestLatestTransaction(String customerSpace, String datafeedName, Integer earliestDayPeriod,
+            Integer latestDayPeriod);
 
     DataFeed rebuildTransaction(String customerSpace, String datafeedName, Boolean isRebuild);
 

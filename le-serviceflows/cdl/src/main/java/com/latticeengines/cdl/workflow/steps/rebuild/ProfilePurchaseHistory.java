@@ -5,11 +5,11 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_PROFILER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
-import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_TRANSACTION_AGGREGATOR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +17,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,14 +25,17 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ActivityMetricsCuratorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ActivityMetricsPivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionAggregateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
@@ -40,12 +44,20 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
-import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 @Component(ProfilePurchaseHistory.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -55,13 +67,30 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     static final String BEAN_NAME = "profilePurchaseHistory";
 
-    private int aggregateStep, profileStep, bucketStep;
+    private List<Integer> initSteps;
+    private int curateStep, pivotStep, profileStep, bucketStep;
     private Map<String, List<Product>> productMap;
     private String dailyTableName;
     private String accountTableName;
+    private String productTableName;
+    private List<Table> periodTables;
+    private List<PeriodStrategy> periodStrategies;
+    private List<ActivityMetrics> purchaseMetrics;
+    private String maxTxnDate;
+
+    private String curatedMetricsTablePrefix;
 
     @Inject
     private Configuration yarnConfiguration;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private PeriodProxy periodProxy;
+
+    @Inject
+    private ActivityMetricsProxy metricsProxy;
 
     @Override
     protected BusinessEntity getEntityToBeProfiled() {
@@ -83,16 +112,27 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        aggregateStep = 0;
-        profileStep = 1;
-        bucketStep = 2;
+        // TODO: Should have more abstract way to support such multi-period tables
+        initSteps = new ArrayList<>();
+        curateStep = periodTables.size();
+        pivotStep = periodTables.size() + 1;
+        profileStep = periodTables.size() + 2;
+        bucketStep = periodTables.size() + 3;
 
-        TransformationStepConfig aggregate = aggregate(customerSpace, dailyTableName, accountTableName, productMap);
+        for (int i = 0; i < periodTables.size(); i++) {
+            TransformationStepConfig init = init(periodTables.get(i));
+            steps.add(init);
+            initSteps.add(i);
+        }
+
+        TransformationStepConfig curate = curate();
+        TransformationStepConfig pivot = pivot();
         TransformationStepConfig profile = profile();
         TransformationStepConfig bucket = bucket();
-        TransformationStepConfig calc = calcStats(customerSpace, statsTablePrefix);
-        TransformationStepConfig sortProfile = sortProfile(customerSpace, profileTablePrefix);
-        steps.add(aggregate);
+        TransformationStepConfig calc = calcStats();
+        TransformationStepConfig sortProfile = sortProfile();
+        steps.add(curate);
+        steps.add(pivot);
         steps.add(profile);
         steps.add(bucket);
         steps.add(calc);
@@ -101,6 +141,20 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         // -----------
         request.setSteps(steps);
         return request;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        String curatedMetricsTableName = TableUtils.getFullTableName(curatedMetricsTablePrefix, pipelineVersion);
+        if (metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName) == null) {
+            throw new IllegalStateException("Cannot find result curated metrics table");
+        }
+        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, TABLE_GOING_TO_REDSHIFT,
+                curatedMetricsTableName,
+                String.class);
+        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, APPEND_TO_REDSHIFT_TABLE, true,
+                Boolean.class);
+        super.onPostTransformationCompleted();
     }
 
     @Override
@@ -118,8 +172,17 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find account master table.");
         }
 
-        // TODO: not ready to publish purchase history to redshift
-        publishToRedshift = false;
+        maxTxnDate = findLatestTransactionDate();
+
+        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
+        periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+
+        purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
+        // HasPurchased is the default metrics to calculate
+        purchaseMetrics.add(createHasPurchasedMetrics());
+
+        curatedMetricsTablePrefix = TableRoleInCollection.CalculatedDepivotedPurchaseHistory.name();
     }
 
     private String getDailyTableName() {
@@ -152,6 +215,14 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         return accountTableName;
     }
 
+    private String findLatestTransactionDate() {
+        DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
+        if (feed.getLatestTransaction() == null) {
+            throw new IllegalStateException("Latest transaction day period in data feed is empty");
+        }
+        return DateTimeUtils.dayPeriodToDate(feed.getLatestTransaction());
+    }
+
     private void loadProductMap() {
         Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
@@ -165,9 +236,184 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
+        productTableName = productTable.getName();
         productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
+        // TODO: Wait for @Ke's change, then remove commented part
+        //productMap.values().removeIf(products -> products.get(0).getProductType() != ProductType.ANALYTIC);
     }
 
+    private TransformationStepConfig init(Table periodTable) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<String> baseSources = Arrays.asList(periodTable.getName(), accountTableName, productTableName);
+        step.setBaseSources(baseSources);
+        SourceTable periodSourceTable = new SourceTable(periodTable.getName(), customerSpace);
+        SourceTable accountSourceTable = new SourceTable(accountTableName, customerSpace);
+        SourceTable productSourceTable = new SourceTable(productTableName, customerSpace);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(periodTable.getName(), periodSourceTable);
+        baseTables.put(productTableName, productSourceTable);
+        baseTables.put(accountTableName, accountSourceTable);
+        step.setBaseTables(baseTables);
+        step.setTransformer(DataCloudConstants.PURCHASE_METRICS_INITIATOR);
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig curate() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(initSteps);
+        step.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(curatedMetricsTablePrefix);
+        targetTable.setPrimaryKey(InterfaceName.__Composite_Key__.name());
+        step.setTargetTable(targetTable);
+
+        ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
+        conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
+        conf.setMaxTxnDate(maxTxnDate);
+        conf.setMetrics(purchaseMetrics);
+        conf.setPeriodStrategies(periodStrategies);
+
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+    private TransformationStepConfig pivot() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(curateStep));
+        step.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(servingStoreTablePrefix);
+        step.setTargetTable(targetTable);
+
+        ActivityMetricsPivotConfig conf = new ActivityMetricsPivotConfig();
+        conf.setActivityType(ActivityType.PurchaseHistory);
+        conf.setGroupByField(InterfaceName.AccountId.name());
+        conf.setPivotField(InterfaceName.ProductId.name());
+        conf.setProductMap(productMap);
+
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+    private TransformationStepConfig profile() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(pivotStep));
+        step.setTransformer(TRANSFORMER_PROFILER);
+        ProfileConfig conf = new ProfileConfig();
+        conf.setEncAttrPrefix(CEAttr);
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+        return step;
+    }
+
+    private TransformationStepConfig bucket() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(pivotStep, profileStep));
+        step.setTransformer(TRANSFORMER_BUCKETER);
+        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig calcStats() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Arrays.asList(bucketStep, profileStep));
+        step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(statsTablePrefix);
+        step.setTargetTable(targetTable);
+
+        CalculateStatsConfig conf = new CalculateStatsConfig();
+        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
+        return step;
+    }
+
+    private TransformationStepConfig sortProfile() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<Integer> inputSteps = Collections.singletonList(profileStep);
+        step.setInputSteps(inputSteps);
+        step.setTransformer(TRANSFORMER_SORTER);
+
+        SorterConfig conf = new SorterConfig();
+        conf.setPartitions(1);
+        conf.setCompressResult(true);
+        conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
+        String confStr = appendEngineConf(conf, lightEngineConfig());
+        step.setConfiguration(confStr);
+
+        TargetTable targetTable = new TargetTable();
+        targetTable.setCustomerSpace(customerSpace);
+        targetTable.setNamePrefix(profileTablePrefix);
+        step.setTargetTable(targetTable);
+
+        return step;
+    }
+
+    @Override
+    protected void enrichTableSchema(Table servingStoreTable) {
+        List<Attribute> attributes = servingStoreTable.getAttributes();
+
+        for (Attribute attribute : attributes) {
+            attribute.setCategory(Category.PRODUCT_SPEND.getName());
+
+            if (!InterfaceName.AccountId.name().equalsIgnoreCase(attribute.getName())) {
+                String productId = ActivityMetricsUtils.getActivityIdFromFullName(attribute.getName());
+                log.info("ZDD productId = " + productId);
+                if (StringUtils.isBlank(productId)) {
+                    throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
+                }
+
+                String productName = null;
+                List<Product> products = productMap.get(productId);
+                if (products != null) {
+                    for (Product product : products) {
+                        productName = product.getProductName();
+                        if (productName != null) {
+                            break;
+                        }
+                    }
+                }
+                if (productName == null) {
+                    productName = productId;
+                }
+                if (StringUtils.isBlank(productName)) {
+                    throw new IllegalArgumentException("Cannot find product name for product id " + productId
+                            + " in product map " + JsonUtils.serialize(productMap));
+                }
+
+                Pair<String, String> displayNames = ActivityMetricsUtils
+                        .getDisplayNamesFromFullName(attribute.getName());
+                attribute.setDisplayName(displayNames.getLeft());
+                attribute.setSecondaryDisplayName(displayNames.getRight());
+                attribute.setSubcategory(productName);
+            }
+            attribute.removeAllowedDisplayNames();
+            log.info("ZDD " + JsonUtils.serialize(attribute));
+        }
+    }
+
+    private ActivityMetrics createHasPurchasedMetrics() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        ActivityMetrics metrics = new ActivityMetrics();
+        metrics.setMetrics(InterfaceName.HasPurchased);
+        metrics.setPeriodsConfig(Arrays.asList(TimeFilter.ever()));
+        metrics.setType(ActivityType.PurchaseHistory);
+        metrics.setTenant(tenant);
+        metrics.setEOL(false);
+        metrics.setDeprecated(null);
+        metrics.setCreated(new Date());
+        metrics.setUpdated(metrics.getCreated());
+        return metrics;
+    }
+
+
+    /* Show respect to Yunfeng's code. R.I.P
     private TransformationStepConfig aggregate(CustomerSpace customerSpace, String transactionTableName, //
             String accountTableName, Map<String, List<Product>> productMap) {
         TransformationStepConfig step = new TransformationStepConfig();
@@ -181,6 +427,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         baseSources.add(transactionSourceName);
         baseSources.add(accountSourceName);
         step.setBaseSources(baseSources);
+
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(transactionSourceName, transactionTable);
         baseTables.put(accountSourceName, accountTable);
@@ -214,109 +461,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         targetTable.setCustomerSpace(customerSpace);
         targetTable.setNamePrefix(servingStoreTablePrefix);
         step.setTargetTable(targetTable);
-
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
     }
 
-    private TransformationStepConfig profile() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Collections.singletonList(aggregateStep));
-        step.setTransformer(TRANSFORMER_PROFILER);
-        ProfileConfig conf = new ProfileConfig();
-        conf.setEncAttrPrefix(CEAttr);
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
-        return step;
-    }
-
-    private TransformationStepConfig bucket() {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(aggregateStep, profileStep));
-        step.setTransformer(TRANSFORMER_BUCKETER);
-        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig calcStats(CustomerSpace customerSpace, String statsTablePrefix) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(Arrays.asList(bucketStep, profileStep));
-        step.setTransformer(TRANSFORMER_STATS_CALCULATOR);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(statsTablePrefix);
-        step.setTargetTable(targetTable);
-
-        CalculateStatsConfig conf = new CalculateStatsConfig();
-        step.setConfiguration(appendEngineConf(conf, lightEngineConfig()));
-        return step;
-    }
-
-    private TransformationStepConfig sortProfile(CustomerSpace customerSpace, String profileTablePrefix) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        List<Integer> inputSteps = Collections.singletonList(profileStep);
-        step.setInputSteps(inputSteps);
-        step.setTransformer(TRANSFORMER_SORTER);
-
-        SorterConfig conf = new SorterConfig();
-        conf.setPartitions(1);
-        conf.setCompressResult(true);
-        conf.setSortingField(DataCloudConstants.PROFILE_ATTR_ATTRNAME);
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(profileTablePrefix);
-        step.setTargetTable(targetTable);
-
-        return step;
-    }
-
-    @Override
-    protected void enrichTableSchema(Table servingStoreTable) {
-        List<Attribute> attributes = servingStoreTable.getAttributes();
-
-        for (Attribute attribute : attributes) {
-            attribute.setCategory(Category.PRODUCT_SPEND.getName());
-
-            if (!InterfaceName.AccountId.name().equalsIgnoreCase(attribute.getName())) {
-                String productId = TransactionMetrics.getProductIdFromAttr(attribute.getName());
-                if (StringUtils.isBlank(productId)) {
-                    throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
-                }
-                String productName = null;
-                List<Product> products = productMap.get(productId);
-                if (products != null) {
-                    for (Product product : products) {
-                        productName = product.getProductName();
-                        if (productName != null) {
-                            break;
-                        }
-                    }
-                }
-
-                if (productName == null) {
-                    productName = productId;
-                }
-
-                if (StringUtils.isBlank(productName)) {
-                    throw new IllegalArgumentException("Cannot find product name for product id " + productId
-                            + " in product map " + JsonUtils.serialize(productMap));
-                } else {
-                    String periodName = TransactionMetrics.getPeriodFromAttr(attribute.getName());
-                    NamedPeriod period = NamedPeriod.fromName(periodName);
-                    String metricName = TransactionMetrics.getMetricFromAttr(attribute.getName());
-                    TransactionMetrics metric = TransactionMetrics.fromName(metricName);
-                    attribute.setDisplayName(getDisplayName(period, metric));
-                }
-                attribute.setSubcategory(productName);
-            }
-            attribute.removeAllowedDisplayNames();
-        }
-    }
 
     private String getDisplayName(NamedPeriod period, TransactionMetrics metric) {
         switch (metric) {
@@ -364,5 +510,5 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                     + " does not support period " + period + " for now.");
         }
     }
-
+     */
 }

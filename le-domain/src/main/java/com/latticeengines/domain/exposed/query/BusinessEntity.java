@@ -4,6 +4,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.A
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedPeriodTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.AggregatedTransaction;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.BucketedAccount;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedDepivotedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.CalculatedPurchaseHistory;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedAccount;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.ConsolidatedContact;
@@ -39,6 +40,7 @@ public enum BusinessEntity implements GraphNode {
     Transaction, //
     PeriodTransaction, //
     PurchaseHistory, //
+    DepivotedPurchaseHistory, //
 
     Rating, //
 
@@ -72,6 +74,8 @@ public enum BusinessEntity implements GraphNode {
 
         PurchaseHistory.setServingStore(CalculatedPurchaseHistory);
 
+        DepivotedPurchaseHistory.setServingStore(CalculatedDepivotedPurchaseHistory);
+
         Rating.setServingStore(PivotedRating);
 
         LatticeAccount.setServingStore(AccountMaster);
@@ -85,6 +89,7 @@ public enum BusinessEntity implements GraphNode {
         PeriodTransaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         PurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
+        DepivotedPurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
     }
 
     // Entity Definitions

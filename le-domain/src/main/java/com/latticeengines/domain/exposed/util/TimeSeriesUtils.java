@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
@@ -244,15 +245,17 @@ public class TimeSeriesUtils {
         pendingWrites.clear();
    }
 
-    public static Integer getEarliestPeriod(Configuration yarnConfiguration, Table transactionTable) {
+    public static Pair<Integer, Integer> getMinMaxPeriod(Configuration yarnConfiguration, Table transactionTable) {
         try {
             String avroDir = transactionTable.getExtracts().get(0).getPath();
             avroDir = getPath(avroDir);
             log.info("Looking for earliest period table " + transactionTable.getName() + " path " + avroDir);
             List<String> avroFiles = HdfsUtils.getFilesForDir(yarnConfiguration, avroDir, ".*.avro$");
             Collections.sort(avroFiles);
-            log.info("Get period from file " + avroFiles.get(0));
-            return getPeriodFromFileName(avroFiles.get(0));
+            log.info(String.format("Get min period %s & max period %s from file", avroFiles.get(0),
+                    avroFiles.get(avroFiles.size() - 1)));
+            return Pair.of(getPeriodFromFileName(avroFiles.get(0)),
+                    getPeriodFromFileName(avroFiles.get(avroFiles.size() - 1)));
         } catch (Exception e) {
             log.error("Failed to find earlies period", e);
             return null;

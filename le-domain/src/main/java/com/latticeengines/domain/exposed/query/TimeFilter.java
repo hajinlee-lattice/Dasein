@@ -20,6 +20,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TimeFilter {
 
+    public final static String SEPARATOR = "_"; // Needs to be different with
+                                                // ActivityMetrics.SEPARATOR
+
     @JsonIgnore
     private Lookup lhs;
 
@@ -112,16 +115,17 @@ public class TimeFilter {
     }
 
     public String getPeriodRangeName() {
-        if (relation == ComparisonType.EVER) {
-            return "Ever";
-        }
         List<String> strs = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(values)) {
-            values.forEach(value -> {
-                strs.add(String.valueOf(value));
-            });
+        strs.add(relation.name());
+        if (relation != ComparisonType.EVER) {
+            strs.add(period);
+            if (CollectionUtils.isNotEmpty(values)) {
+                values.forEach(value -> {
+                    strs.add(String.valueOf(value));
+                });
+            }
         }
-        return period + String.join("_", strs);
+        return String.join(SEPARATOR, strs);
     }
 
     public static class Period {

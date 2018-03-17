@@ -52,7 +52,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.NamedPeriod;
 import com.latticeengines.domain.exposed.metadata.transaction.TransactionMetrics;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
@@ -252,19 +251,17 @@ public class StatsCubeUtils {
     }
 
     public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
-        if (!attrName.startsWith("PH_")) {
+        if (!attrName.endsWith(ActivityMetricsUtils.SEPARATOR + InterfaceName.HasPurchased.name())) {
             return attrStats;
         }
 
-        String productId = TransactionMetrics.getProductIdFromAttr(attrName);
-        NamedPeriod namedPeriod = NamedPeriod.fromName(TransactionMetrics.getPeriodFromAttr(attrName));
-        TransactionMetrics metric = TransactionMetrics.fromName(TransactionMetrics.getMetricFromAttr(attrName));
+        String activityId = ActivityMetricsUtils.getActivityIdFromFullName(attrName);
 
         Buckets buckets = attrStats.getBuckets();
         buckets.setType(BucketType.TimeSeries);
         List<Bucket> bucketList = new ArrayList<>();
         buckets.getBucketList().forEach(bucket -> {
-            Bucket bucket1 = convertTxnBucket(productId, namedPeriod, metric, bucket);
+            Bucket bucket1 = convertTxnBucketForHasPurchased(activityId, bucket);
             if (bucket1 != null) {
                 bucketList.add(bucket1);
             }
@@ -277,6 +274,16 @@ public class StatsCubeUtils {
         return attrStats;
     }
 
+    private static Bucket convertTxnBucketForHasPurchased(String activityId, Bucket bucket) {
+        Bucket.Transaction transaction = new Bucket.Transaction(activityId, TimeFilter.ever(), null, null,
+                "No".equalsIgnoreCase(bucket.getLabel()));
+        bucket.setComparisonType(null);
+        bucket.setValues(null);
+        bucket.setTransaction(transaction);
+        return bucket;
+    }
+
+    /* Respect to @Yunfeng's code. R.I.P
     private static Bucket convertTxnBucket(String productId, NamedPeriod namedPeriod, TransactionMetrics metric,
             Bucket bucket) {
         TimeFilter timeFilter = null;
@@ -319,6 +326,7 @@ public class StatsCubeUtils {
         default:
             break;
         }
+        
 
         Bucket.Transaction transaction = new Bucket.Transaction(productId, timeFilter, spentFilter, unitFilter, negate);
         bucket.setComparisonType(null);
@@ -326,6 +334,7 @@ public class StatsCubeUtils {
         bucket.setTransaction(transaction);
         return bucket;
     }
+    */
 
     public static StatsCube retainTop5Bkts(StatsCube cube) {
         Map<String, AttributeStats> newStats = new HashMap<>();

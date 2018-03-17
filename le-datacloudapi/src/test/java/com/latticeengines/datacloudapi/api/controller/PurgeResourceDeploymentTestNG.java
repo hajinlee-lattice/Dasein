@@ -21,7 +21,8 @@ public class PurgeResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     private PurgeProxy purgeProxy;
 
     /**
-     * Just a simple test to see if mocked API works fine
+     * Just a simple test to see if API works fine
+     * Complete test scenarios are in functional tests
      */
     @Test(groups = "deployment")
     public void testGetPurgeSources() {

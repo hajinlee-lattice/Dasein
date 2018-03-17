@@ -26,6 +26,7 @@ public enum TableRoleInCollection {
     AggregatedTransaction, //
     AggregatedPeriodTransaction, //
     CalculatedPurchaseHistory, //
+    CalculatedDepivotedPurchaseHistory, //
 
     AnalyticPurchaseState, //
 
@@ -72,6 +73,9 @@ public enum TableRoleInCollection {
 
         CalculatedPurchaseHistory.primaryKey = InterfaceName.AccountId;
         CalculatedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
+
+        CalculatedDepivotedPurchaseHistory.primaryKey = InterfaceName.__Composite_Key__;
+        CalculatedDepivotedPurchaseHistory.foreignKeys = ImmutableList.copyOf(Collections.emptyList());
 
         PivotedRating.primaryKey = InterfaceName.AccountId;
         PivotedRating.foreignKeys = ImmutableList.copyOf(Collections.emptyList());

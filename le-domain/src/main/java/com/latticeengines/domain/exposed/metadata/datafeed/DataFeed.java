@@ -101,6 +101,10 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
     @JsonProperty("earliest_transaction")
     private Integer earliestTransaction;
 
+    @Column(name = "LATEST_TRANSACTION", nullable = true)
+    @JsonProperty("latest_transaction")
+    private Integer latestTransaction;
+
     @Column(name = "REBUILD_TRANSACTION", nullable = true)
     @JsonProperty("rebuildTransaction")
     private Boolean rebuildTransaction;
@@ -316,6 +320,14 @@ public class DataFeed implements HasName, HasPid, HasTenant, HasTenantId, Serial
 
     public void setEarliestTransaction(Integer earliestTransaction) {
         this.earliestTransaction = earliestTransaction;
+    }
+
+    public Integer getLatestTransaction() {
+        return latestTransaction;
+    }
+
+    public void setLatestTransaction(Integer latestTransaction) {
+        this.latestTransaction = latestTransaction;
     }
 
     public Boolean getRebuildTransaction() {

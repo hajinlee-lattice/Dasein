@@ -206,16 +206,18 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         post("resetImportByEntity", url, null, Void.class);
     }
 
-    public DataFeed updateEarliestTransaction(String customerSpace, Integer transactionDayPeriod) {
-        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/earliesttransaction/{transactionDayPeriod}",
-                shortenCustomerSpace(customerSpace), transactionDayPeriod.toString());
-        return post("updateEarliestTransaction", url, null, DataFeed.class);
+    public DataFeed updateEarliestLatestTransaction(String customerSpace, Integer earliestDayPeriod,
+            Integer latestDayPeriod) {
+        String url = constructUrl(
+                "/customerspaces/{customerSpace}/datafeed/earliesttransaction/{earliestDayPeriod}/{latestDayPeriod}",
+                shortenCustomerSpace(customerSpace), earliestDayPeriod.toString(), latestDayPeriod.toString());
+        return post("updateEarliestLatestTransaction", url, null, DataFeed.class);
     }
 
     public DataFeed rebuildTransaction(String customerSpace, Boolean isRebuild) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/rebuildtransaction/{status}",
                 shortenCustomerSpace(customerSpace), isRebuild.toString());
-        return post("updateEarliestTransaction", url, null, DataFeed.class);
+        return post("rebuildTransaction", url, null, DataFeed.class);
     }
 
 }

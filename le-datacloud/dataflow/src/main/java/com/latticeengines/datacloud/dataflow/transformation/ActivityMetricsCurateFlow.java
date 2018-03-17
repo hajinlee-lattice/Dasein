@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 
 import cascading.operation.Aggregator;
@@ -103,7 +104,9 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
             }
         }
 
-        return join(base, toJoin);
+        Node toReturn = join(base, toJoin);
+        toReturn = assignCompositeKey(toReturn);
+        return toReturn;
     }
 
     private void init() {
@@ -231,10 +234,10 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
 
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         Aggregator agg = new MetricsMarginAgg(new Fields(retainFields.toArray(new String[retainFields.size()])),
-                metrics.getFullMetricsName());
+                ActivityMetricsUtils.getNameWithPeriod(metrics));
         List<FieldMetadata> fms = prepareFms(node, metrics, true);
         node = node.groupByAndAggregate(new FieldList(config.getGroupByFields()), agg, fms)
                 .retain(new FieldList(retainFields));
@@ -246,7 +249,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
 
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> accountProductSpendAgg = Collections.singletonList(
                 new Aggregation(InterfaceName.TotalAmount.name(), "_APSpend_", AggregationType.SUM));
@@ -277,7 +280,8 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
                         new FieldList(InterfaceName.SpendAnalyticsSegment.name()), JoinType.LEFT);
 
         node = node.apply(
-                new MetricsShareOfWalletFunc(metrics.getFullMetricsName(), "_APSpend_", "_ATSpend_", "_SPSpend_",
+                new MetricsShareOfWalletFunc(ActivityMetricsUtils.getNameWithPeriod(metrics), "_APSpend_", "_ATSpend_",
+                        "_SPSpend_",
                         "_STSpend_"),
                 new FieldList(node.getFieldNames()), prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
@@ -287,7 +291,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
     private Node spendChange(Node base, Node node, ActivityMetrics metrics) {
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         TimeFilter withinFilter = metrics.getPeriodsConfig().get(0).getRelation() == ComparisonType.WITHIN
                 ? metrics.getPeriodsConfig().get(0)
@@ -307,8 +311,9 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         FieldList joinFields = new FieldList(config.getGroupByFields());
         List<FieldList> joinFieldsList = new ArrayList<FieldList>(Collections.nCopies(2, joinFields));
         node = base.coGroup(joinFields, Arrays.asList(new Node[] { last, previous }), joinFieldsList, JoinType.OUTER)
-                .apply(new MetricsSpendChangeFunc(metrics.getFullMetricsName(), "_LastPeriodAvgSpend_",
-                        "_PreviousPeriodAvgSpend_"), new FieldList("_LastPeriodAvgSpend_", "_PreviousPeriodAvgSpend_"),
+                .apply(new MetricsSpendChangeFunc(ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        "_LastPeriodAvgSpend_", "_PreviousPeriodAvgSpend_"),
+                        new FieldList("_LastPeriodAvgSpend_", "_PreviousPeriodAvgSpend_"),
                         prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_spendchange_node_");
@@ -319,14 +324,17 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
 
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> totalSpendAgg = Collections.singletonList(new Aggregation(InterfaceName.TotalAmount.name(),
-                metrics.getFullMetricsName(), AggregationType.SUM));
+                ActivityMetricsUtils.getNameWithPeriod(metrics), AggregationType.SUM));
         node = node.groupBy(new FieldList(config.getGroupByFields()), totalSpendAgg)
-                .apply(String.format("%s != null && %s == 0.0 ? null : %s", metrics.getFullMetricsName(),
-                        metrics.getFullMetricsName(), metrics.getFullMetricsName()),
-                        new FieldList(metrics.getFullMetricsName()), prepareFms(node, metrics, false).get(0))
+                .apply(String.format("%s != null && %s == 0.0 ? null : %s",
+                        ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        ActivityMetricsUtils.getNameWithPeriod(metrics)),
+                        new FieldList(ActivityMetricsUtils.getNameWithPeriod(metrics)),
+                        prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_totalspendovertime_node_");
     }
@@ -336,15 +344,19 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
 
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> avgSpendAgg = Collections.singletonList(
-                new Aggregation(InterfaceName.TotalAmount.name(), metrics.getFullMetricsName(), AggregationType.AVG));
+                new Aggregation(InterfaceName.TotalAmount.name(), ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        AggregationType.AVG));
         node = node
                 .groupBy(new FieldList(config.getGroupByFields()), avgSpendAgg)
-                .apply(String.format("%s != null && %s == 0.0 ? null : %s", metrics.getFullMetricsName(),
-                        metrics.getFullMetricsName(), metrics.getFullMetricsName()),
-                        new FieldList(metrics.getFullMetricsName()), prepareFms(node, metrics, false).get(0))
+                .apply(String.format("%s != null && %s == 0.0 ? null : %s",
+                        ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        ActivityMetricsUtils.getNameWithPeriod(metrics),
+                        ActivityMetricsUtils.getNameWithPeriod(metrics)),
+                        new FieldList(ActivityMetricsUtils.getNameWithPeriod(metrics)),
+                        prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_avgspendovertime_node_");
     }
@@ -353,13 +365,13 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         // Period range is ever, no need to filter by period
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
-        retainFields.add(metrics.getFullMetricsName());
+        retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
 
         List<Aggregation> totalSpendAgg = Collections.singletonList(
                 new Aggregation(InterfaceName.TotalAmount.name(), InterfaceName.TotalAmount.name(),
                         AggregationType.SUM));
         node = node.groupBy(new FieldList(config.getGroupByFields()), totalSpendAgg)
-                .apply(new AttrHasPurchasedFunction(metrics.getFullMetricsName()),
+                .apply(new AttrHasPurchasedFunction(ActivityMetricsUtils.getNameWithPeriod(metrics)),
                         new FieldList(InterfaceName.TotalAmount.name()), prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_haspurchased_node_");
@@ -369,11 +381,19 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
         for (ActivityMetrics metrics : config.getMetrics()) {
-            retainFields.add(metrics.getFullMetricsName());
+            retainFields.add(ActivityMetricsUtils.getNameWithPeriod(metrics));
         }
         FieldList joinFields = new FieldList(config.getGroupByFields());
         List<FieldList> joinFieldsList = new ArrayList<FieldList>(Collections.nCopies(toJoin.size(), joinFields));
         return base.coGroup(joinFields, toJoin, joinFieldsList, JoinType.OUTER).retain(new FieldList(retainFields));
+    }
+
+    private Node assignCompositeKey(Node node) {
+        node = node.apply(
+                String.format("%s + \"_\" + %s", InterfaceName.AccountId.name(), InterfaceName.ProductId.name()),
+                new FieldList(config.getGroupByFields()),
+                new FieldMetadata(InterfaceName.__Composite_Key__.name(), String.class));
+        return node;
     }
 
     private List<FieldMetadata> prepareFms(Node source, ActivityMetrics metrics, boolean includeGroupBy) {
@@ -383,7 +403,8 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
                 fms.add(source.getSchema(field));
             });
         }
-        fms.add(new FieldMetadata(metrics.getFullMetricsName(), metricsClasses.get(metrics.getMetrics())));
+        fms.add(new FieldMetadata(ActivityMetricsUtils.getNameWithPeriod(metrics),
+                metricsClasses.get(metrics.getMetrics())));
         return fms;
     }
 

@@ -6,7 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,10 +34,13 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
 
@@ -49,11 +55,15 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     private Table rawTable;
     private int mergeStep, dailyStep, dayPeriodStep;
 
+    @Inject
+    private DataFeedProxy dataFeedProxy;
+
     @Override
     protected void onPostTransformationCompleted() {
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
+        updateEarliestLatestTransaction();
     }
 
     protected void initializeConfiguration() {
@@ -187,9 +197,25 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         table.setExtracts(Collections.singletonList(extract));
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
         dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), role, inactive);
-        log.info("Upsert table " + table.getName() + " to role " + role + "version" + inactive);
+        log.info("Upsert table " + table.getName() + " to role " + role + "version " + inactive);
 
         return table;
+    }
+
+    private void updateEarliestLatestTransaction() {
+        DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
+
+        Pair<Integer, Integer> minMaxPeriod = TimeSeriesUtils.getMinMaxPeriod(yarnConfiguration, rawTable);
+        Integer earliestDayPeriod = minMaxPeriod.getLeft();
+        Integer latestDayPeriod = minMaxPeriod.getRight();
+        Integer currentEarliest = feed.getEarliestTransaction();
+        Integer currentLatest = feed.getLatestTransaction();
+        Integer newEarliest = currentEarliest == null || earliestDayPeriod < currentEarliest ? earliestDayPeriod
+                : currentEarliest;
+        Integer newLatest = currentLatest == null || latestDayPeriod > currentLatest ? latestDayPeriod : currentLatest;
+        if (newEarliest != currentEarliest || newLatest != currentLatest) {
+            dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), newEarliest, newLatest);
+        }
     }
 
 }

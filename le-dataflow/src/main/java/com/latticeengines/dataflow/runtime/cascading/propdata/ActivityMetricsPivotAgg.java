@@ -7,7 +7,7 @@ import java.util.Map;
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
@@ -57,7 +57,7 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
     protected Context updateContext(Context context, TupleEntry arguments) {
         Object pivotValue = arguments.getObject(pivotField);
         for (String metrics : metricsFields) {
-            context.pivotData.put(ActivityMetrics.getFullActivityMetricsName(metrics, String.valueOf(pivotValue)),
+            context.pivotData.put(ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotValue)),
                     arguments.getObject(metrics));
         }
         return context;
@@ -69,7 +69,7 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         result.set(namePositionMap.get(groupByField), context.groupByVal);
         pivotValues.forEach(pivotVal -> {
             metricsFields.forEach(metrics -> {
-                String field = ActivityMetrics.getFullActivityMetricsName(metrics, String.valueOf(pivotVal));
+                String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
                 if (activityType == ActivityType.PurchaseHistory && context.pivotData.get(field) == null
                         && field.endsWith(InterfaceName.HasPurchased.name())) {
                     result.set(namePositionMap.get(field), false);

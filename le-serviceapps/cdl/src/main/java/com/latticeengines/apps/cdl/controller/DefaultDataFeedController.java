@@ -137,13 +137,13 @@ public class DefaultDataFeedController {
         return datafeedService.rebuildTransaction(customerSpace, "", isRebuild);
     }
 
-    @PostMapping(value = "/earliesttransaction/{transactionDayPeriod}")
+    @PostMapping(value = "/earliesttransaction/{earliestDayPeriod}/{latestDayPeriod}")
     @ResponseBody
-    @ApiOperation(value = "rebuild transaction store")
-    public DataFeed updateEarliestTransaction(@PathVariable String customerSpace,
-            @PathVariable Integer transactionDayPeriod) {
+    @ApiOperation(value = "update earliest and latest transaction day period")
+    public DataFeed updateEarliestLatestTransaction(@PathVariable String customerSpace,
+            @PathVariable Integer earliestDayPeriod, @PathVariable Integer latestDayPeriod) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return datafeedService.updateEarliestTransaction(customerSpace, "", transactionDayPeriod);
+        return datafeedService.updateEarliestLatestTransaction(customerSpace, "", earliestDayPeriod, latestDayPeriod);
     }
 
     @PostMapping(value = "/resetimport")

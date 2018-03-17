@@ -309,13 +309,13 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Collections.singletonList("Amount"));
+        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
         // todo: add this to daily configuration to derive TransactionCount
         // attribute
         // config.setCountField(Collections.singletonList("Amount"));
-        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
-        config.setSumLongFields(Collections.singletonList("Quantity"));
-        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
+        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
@@ -365,14 +365,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setPeriodStrategy(strategy);
-        config.setSumFields(Collections.singletonList("TotalAmount"));
-        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
-        config.setSumLongFields(Collections.singletonList("TotalQuantity"));
+        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
 
         // todo: add this to period configuration to derive TransactionCount
         // attributes
         // config.setSumFields(Collections.singletonList("TotalAmount"));
-        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
+        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //

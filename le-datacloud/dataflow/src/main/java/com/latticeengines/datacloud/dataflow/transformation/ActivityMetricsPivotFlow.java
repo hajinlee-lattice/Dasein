@@ -13,7 +13,8 @@ import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowPa
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ActivityMetricsPivotConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
-import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
@@ -32,6 +33,9 @@ public class ActivityMetricsPivotFlow extends ConfigurableFlowBase<ActivityMetri
         Node node = addSource(parameters.getBaseTables().get(0));
 
         init();
+        if (node.getSchema(InterfaceName.__Composite_Key__.name()) != null) {
+            node = node.discard(InterfaceName.__Composite_Key__.name());
+        }
         node = pivot(node);
 
         return node;
@@ -64,7 +68,7 @@ public class ActivityMetricsPivotFlow extends ConfigurableFlowBase<ActivityMetri
 
         for (Object pivotVal : pivotValues)
             for (String metrics : metricsFields) {
-                String field = ActivityMetrics.getFullActivityMetricsName(metrics, String.valueOf(pivotVal));
+                String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
                 fields.add(field);
                 fms.add(new FieldMetadata(field, node.getSchema(metrics).getJavaType()));
             }

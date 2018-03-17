@@ -27,14 +27,14 @@ public class ActivityMetricsResource {
 
     @GetMapping(value = "/{type}")
     @ApiOperation(value = "Get all the active metrics for specific activity type")
-    public List<ActivityMetrics> getPurchaseMetrics(@PathVariable String customerSpace,
+    public List<ActivityMetrics> getActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type) {
         return metricsService.findActiveWithType(type);
     }
 
     @PostMapping(value = "/{type}")
     @ApiOperation(value = "Save purchase metrics")
-    public List<ActivityMetrics> savePurchaseMetrics(@PathVariable String customerSpace,
+    public List<ActivityMetrics> saveActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type, @RequestBody List<ActivityMetrics> metrics) {
         return metricsService.save(type, metrics);
     }

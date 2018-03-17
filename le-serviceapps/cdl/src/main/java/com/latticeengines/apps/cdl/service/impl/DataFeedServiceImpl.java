@@ -329,12 +329,14 @@ public class DataFeedServiceImpl implements DataFeedService {
     }
 
     @Override
-    public DataFeed updateEarliestTransaction(String customerSpace, String datafeedName, Integer transactionDayPeriod) {
+    public DataFeed updateEarliestLatestTransaction(String customerSpace, String datafeedName,
+            Integer earliestDayPeriod, Integer latestDayPeriod) {
         DataFeed datafeed = findDataFeedByName(customerSpace, datafeedName);
         if (datafeed == null) {
             throw new NullPointerException("Datafeed is null. Cannot update status.");
         } else {
-            datafeed.setEarliestTransaction(transactionDayPeriod);
+            datafeed.setEarliestTransaction(earliestDayPeriod);
+            datafeed.setLatestTransaction(latestDayPeriod);
             datafeedEntityMgr.update(datafeed);
         }
         return datafeed;

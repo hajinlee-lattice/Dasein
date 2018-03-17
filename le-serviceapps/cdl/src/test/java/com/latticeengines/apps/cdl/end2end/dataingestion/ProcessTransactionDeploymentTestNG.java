@@ -33,6 +33,8 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
     private static final long AGGREGATE_TRANSACTION_SIZE = 22747L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 78187L;
+    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
+    private static final long PIVOTED_METRICS_SIZE = 618L;
 
     private RatingEngine ratingEngine;
 
@@ -104,6 +106,8 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
+        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, PIVOTED_METRICS_SIZE);
         return expectedCnts;
     }
 }
