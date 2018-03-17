@@ -1,5 +1,8 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
 import java.io.InputStream;
 import java.util.Map;
 
@@ -9,9 +12,9 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 import com.latticeengines.common.exposed.util.CompressionUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.CategoryObject;
 import com.latticeengines.domain.exposed.pls.ModelDetail;
@@ -25,9 +28,8 @@ import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.ModelDetailService;
 import com.latticeengines.pls.service.ModelSummaryService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.security.exposed.service.TenantService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
 
 public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
     @Autowired
@@ -46,7 +48,7 @@ public class ModelDetailServiceImplTestNG extends PlsFunctionalTestNGBase {
 
     private Tenant tenant1;
 
-    private final String tenantName = ModelDetailServiceImpl.class.getName();
+    private final String tenantName = TestFrameworkUtils.generateTenantName();
     @Override
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
