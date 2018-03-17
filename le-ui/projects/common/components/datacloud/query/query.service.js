@@ -282,7 +282,7 @@ angular.module('common.datacloud.query.service',[
     }
 
     this.addRestriction = function(type, attribute, forceTreeRoot) {
-        console.log(type, attribute, forceTreeRoot);
+        //console.log(type, attribute, forceTreeRoot);
         attribute = this.setAttributeAttr(type, attribute);
 
         var treeRoot = this.getAddBucketTreeRoot(),
@@ -301,7 +301,7 @@ angular.module('common.datacloud.query.service',[
             restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
         } else {
             restrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;
-            console.log(':add:', type, attribute, bucketRestriction, restrictions);
+            //console.log(':add:', type, attribute, bucketRestriction, restrictions);
 
             var sameAttributes = restrictions.filter(function(restriction) {
                 var br = restriction.bucketRestriction;
@@ -312,7 +312,7 @@ angular.module('common.datacloud.query.service',[
                 return restriction.logicalRestriction;
             });
 
-            console.log(':buh:', sameAttributes, '\n', logicalRestrictions);
+            //console.log(':buh:', sameAttributes, '\n', logicalRestrictions);
 
             var newHome = null;
 
@@ -329,7 +329,7 @@ angular.module('common.datacloud.query.service',[
                 }
             });
 
-            console.log(':newHome:', newHome);
+            //console.log(':newHome:', newHome);
 
             if (newHome) {
                 restrictions = newHome;
@@ -438,16 +438,16 @@ angular.module('common.datacloud.query.service',[
         var deferred = $q.defer();
 
         this.GetEntitiesCountsByQuery(query).then(function(data){
-            data = data || {
-                Account: 0,
-                Contact: 0
-            };
+            console.log('getEntitiesCounts();', data, query);
+            if (!data) {
+                deferred.resolve({});
+            } else {
+                QueryStore.setResourceTypeCount('accounts', false, data['Account']);
+                QueryStore.setResourceTypeCount('contacts', false, data['Contact']);
+                QueryStore.setEntitiesProperty('loading', false);
 
-            QueryStore.setResourceTypeCount('accounts', false, data['Account']);
-            QueryStore.setResourceTypeCount('contacts', false, data['Contact']);
-            QueryStore.setEntitiesProperty('loading', false);
-
-            deferred.resolve(data);
+                deferred.resolve(data);
+            }
         });
 
         return deferred.promise;

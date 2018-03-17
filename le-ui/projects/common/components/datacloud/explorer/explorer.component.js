@@ -1522,12 +1522,14 @@ angular.module('common.datacloud.explorer', [
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
 
-        QueryStore.counts.accounts.loading = true;
-        QueryStore.counts.contacts.loading = true;
         var toAdd = entity;
-        if(toAdd === 'Rating'){
+        
+        if (toAdd === 'Rating'){
             toAdd = 'Account';
         }
+        
+        QueryStore.counts.accounts.loading = true;
+        QueryStore.counts.contacts.loading = true;
         QueryStore['add' + toAdd + 'Restriction']({
             columnName: attributeKey, 
             resourceType: entity, 
@@ -1558,6 +1560,8 @@ angular.module('common.datacloud.explorer', [
         vm.segmentAttributeInput[attributeKey] = !vm.segmentAttributeInput[attributeKey];
         vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
 
+        QueryStore.counts.accounts.loading = true;
+        QueryStore.counts.contacts.loading = true;
         QueryStore['add' + bucketToAdd + 'Restriction']({
             columnName: attributeKey, 
             resourceType: entity, 

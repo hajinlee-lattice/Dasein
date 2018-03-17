@@ -1,3 +1,7 @@
+/* jshint node: true */
+/* jshint esnext: true */
+/* jshint sub:true */
+/* jshint -W030 */
 'use strict';
 
 /*
@@ -16,11 +20,11 @@ const compress  = require('compression');
 const chalk     = require('chalk');
 const cors      = require('cors');
 const wsproxy   = require('http-proxy-middleware');
+const DateUtil  = require('./utilities/DateUtil');
 /*
 const proxy     = require('express-http-proxy');
 const session   = require('express-session');
 */
-const DateUtil = require('./utilities/DateUtil');
 
 class Server {
     constructor(express, app, options) {
@@ -92,7 +96,8 @@ class Server {
         this.app.use(compress());
 
         // helmet enables/modifies/removes http headers for security concerns
-        this.app.use(helmet({ frameguard: false }));
+        // x-frame-options: sameorigin gets set, can be removed with config allow_from
+        this.app.use(helmet());
 
         // default cookie behavior - favors security
         /* don't need this yet
@@ -324,12 +329,28 @@ class Server {
              */
             if (route.pages) {
                 const html5mode = route.html5mode === true;
+                
                 Object.keys(route.pages).forEach(page => {
                     //console.log('\t'+route.pages[page]+'\t->',page);
                     // if !internal ip && page == '/admin'
                     this.app.get(
                         page + (html5mode ? '*' : ''),
-                        (req, res) => res.render(dir + '/' + route.pages[page])
+                        (req, res) => {
+                            var host = req.protocol + '://' + req.get('host');
+
+                            if (route.xframe_allow) {
+                                console.log(
+                                    'XFRAME-OPTIONS-HOST: ' + host + 
+                                    ', ALLOWED: ' + route.xframe_allow.indexOf(host)
+                                );
+
+                                if (route.xframe_allow.indexOf(host) > -1) {
+                                    res.removeHeader('X-Frame-Options');
+                                }
+                            }
+
+                            res.render(dir + '/' + route.pages[page]);
+                        }
                     );
                 });
             }

@@ -63,6 +63,14 @@ module.exports = [{
 },{
     path: '/projects/insights',
     html5mode: true,
+    xframe_allow: [
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://localhost:3002',
+        'http://localhost:3003',
+        'https://salesforce.com',
+        'https://lattice-engines.com'
+    ],
     pages: {
         '/insights/': 'index.html',
         '/insights/index': 'index.html'
