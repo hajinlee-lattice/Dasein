@@ -40,26 +40,28 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
         if (BusinessEntity.Account.equals(namespace.getCoord2())) {
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
             CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem();
-            Set<String> ids = new HashSet<>();
-            if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
-                ids.addAll(externalSystem.getCRMIdList());
-            }
-            if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
-                ids.addAll(externalSystem.getMAPIdList());
-            }
-            if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
-                ids.addAll(externalSystem.getERPIdList());
-            }
-            if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
-                ids.addAll(externalSystem.getOtherIdList());
-            }
-            if (CollectionUtils.isNotEmpty(ids)) {
-                flux = Flux.fromIterable(ids).map(id -> {
-                    ColumnMetadata cm = new ColumnMetadata();
-                    cm.setAttrName(id);
-                    cm.enableGroup(ColumnSelection.Predefined.LookupId);
-                    return cm;
-                });
+            if (externalSystem != null) {
+                Set<String> ids = new HashSet<>();
+                if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
+                    ids.addAll(externalSystem.getCRMIdList());
+                }
+                if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
+                    ids.addAll(externalSystem.getMAPIdList());
+                }
+                if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
+                    ids.addAll(externalSystem.getERPIdList());
+                }
+                if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
+                    ids.addAll(externalSystem.getOtherIdList());
+                }
+                if (CollectionUtils.isNotEmpty(ids)) {
+                    flux = Flux.fromIterable(ids).map(id -> {
+                        ColumnMetadata cm = new ColumnMetadata();
+                        cm.setAttrName(id);
+                        cm.enableGroup(ColumnSelection.Predefined.LookupId);
+                        return cm;
+                    });
+                }
             }
         }
         return flux;
