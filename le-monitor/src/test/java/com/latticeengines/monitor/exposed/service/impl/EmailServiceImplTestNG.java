@@ -300,12 +300,12 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
     @Test(groups = "functional")
     public void sendPlsExportSegmentSuccessEmail() {
         Date date = new Date();
-        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type", date);
+        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("segment export complet"));
 
-        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type", date);
+        emailService.sendPlsExportSegmentSuccessEmail(user, HOSTPORT, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("segment export complete"));
@@ -313,14 +313,28 @@ public class EmailServiceImplTestNG extends AbstractTestNGSpringContextTests {//
 
     @Test(groups = "functional")
     public void sendPlsExportSegmentErrorEmail() {
-        emailService.sendPlsExportSegmentErrorEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportSegmentErrorEmail(user, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("PLS export segment error"));
 
-        emailService.sendPlsExportSegmentErrorEmail(user, HOSTPORT, "export_id", "type");
+        emailService.sendPlsExportSegmentErrorEmail(user, "export_id", "type");
 
         Mockito.verify(newLog, Mockito.times(0)).error(anyString());
         Assert.assertTrue(logs.get(0).contains("PLS export segment error"));
     }
+
+    @Test(groups = "functional")
+    public void sendPlsExportSegmentRunningEmail() {
+        emailService.sendPlsExportSegmentRunningEmail(user, "export_id");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("PLS export segment in-progress"));
+
+        emailService.sendPlsExportSegmentRunningEmail(user, "export_id");
+
+        Mockito.verify(newLog, Mockito.times(0)).error(anyString());
+        Assert.assertTrue(logs.get(0).contains("PLS export segment in-progress"));
+    } 
+
 }

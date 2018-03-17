@@ -68,6 +68,16 @@ public class EmailTemplateBuilder {
         mp.addBodyPart(logoPart);
     }
 
+    public void addCustomImagesToMultipart(Multipart mp, String imgSrc, String imgType, String cid) throws IOException, MessagingException {
+        MimeBodyPart customPart = new MimeBodyPart();
+        DataSource fds = new ByteArrayDataSource(Thread.currentThread().getContextClassLoader()
+                .getResourceAsStream(imgSrc), imgType);
+        customPart.setDisposition(MimeBodyPart.INLINE);
+        customPart.setDataHandler(new DataHandler(fds));
+        customPart.setHeader("Content-ID", "<" + cid + ">");
+        mp.addBodyPart(customPart);
+    }
+
     public enum Template {
         PLS_NEW_EXTERNAL_USER("new_user.html"), //
         PLS_NEW_INTERNAL_USER("new_user.html"), //
@@ -90,7 +100,8 @@ public class EmailTemplateBuilder {
                         "pls_internal_attribute_enrich_success_internal.html"), PLS_INTERNAL_ATTRIBUTE_ENRICH_ERROR_INTERNAL(
                                 "pls_internal_attribute_enrich_error_internal.html"), //
         PLS_EXPORT_SEGMENT_SUCCESS("pls_export_segment_success.html"), PLS_EXPORT_SEGMENT_ERROR(
-                "pls_export_segment_error.html"), //
+                "pls_export_segment_error.html"), PLS_EXPORT_SEGMENT_RUNNING(
+                "pls_export_segment_running.html"), //
         CDL_JOB_SUCCESS("cdl_job_success.html"), CDL_JOB_ERROR("cdl_job_error.html");
 
         private final static String templateRoot = "com/latticeengines/monitor/";

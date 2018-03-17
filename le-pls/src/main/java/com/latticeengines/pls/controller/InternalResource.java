@@ -993,10 +993,11 @@ public class InternalResource extends InternalResourceBase {
                     if (export != null) {
                         String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
                         if (result.equals("COMPLETED")) {
-                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType,
-                                    export.getCleanupBy());
+                            emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
                         } else if (result.equals("FAILED")) {
-                            emailService.sendPlsExportSegmentErrorEmail(user, url, exportID, exportType);
+                            emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
+                        } else if (result.equals("RUNNING")) {
+                            emailService.sendPlsExportSegmentRunningEmail(user, exportID);
                         }
                     }
                 }

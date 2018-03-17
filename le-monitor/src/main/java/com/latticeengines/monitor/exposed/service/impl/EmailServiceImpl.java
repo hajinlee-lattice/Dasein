@@ -609,7 +609,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type, Date cleanupBy) {
+    public void sendPlsExportSegmentSuccessEmail(User user, String hostport, String exportID, String type) {
         try {
             log.info("Sending segment export complete email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -619,10 +619,10 @@ public class EmailServiceImpl implements EmailService {
             builder.replaceToken("{{downloadLink}}", hostport);
             builder.replaceToken("{{exportID}}", exportID);
             builder.replaceToken("{{exportType}}", type);
-            builder.replaceToken("{{date}}", DateTimeUtils.convertToStringUTCISO8601(cleanupBy));
             builder.replaceToken("{{url}}", hostport);
 
             Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            builder.addCustomImagesToMultipart(mp, "com/latticeengines/monitor/export-instructions.png", "image/png", "instruction");
             sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_SUCCESS_SUBJECT, exportID), mp,
                     Collections.singleton(user.getEmail()));
             log.info("Sending PLS segment export complete email to " + user.getEmail() + " succeeded.");
@@ -632,7 +632,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendPlsExportSegmentErrorEmail(User user, String hostport, String exportID, String type) {
+    public void sendPlsExportSegmentErrorEmail(User user, String exportID, String type) {
         try {
             log.info("Sending PLS export segment error email to " + user.getEmail() + " started.");
             EmailTemplateBuilder builder = new EmailTemplateBuilder(
@@ -648,6 +648,24 @@ public class EmailServiceImpl implements EmailService {
             log.info("Sending PLS export segment error email to " + user.getEmail() + " succeeded.");
         } catch (Exception e) {
             log.error("Failed to send PLS export segment error email to " + user.getEmail() + " " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void sendPlsExportSegmentRunningEmail(User user, String exportID) {
+        try {
+            log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " started.");
+            EmailTemplateBuilder builder = new EmailTemplateBuilder(
+                    EmailTemplateBuilder.Template.PLS_EXPORT_SEGMENT_RUNNING);
+
+            builder.replaceToken("{{firstname}}", user.getFirstName());
+
+            Multipart mp = builder.buildMultipartWithoutWelcomeHeader();
+            sendMultiPartEmail(String.format(EmailSettings.PLS_METADATA_SEGMENT_EXPORT_IN_PROGRESS_SUBJECT, exportID), mp,
+                    Collections.singleton(user.getEmail()));
+            log.info("Sending PLS export segment in-progress email to " + user.getEmail() + " succeeded.");
+        } catch (Exception e) {
+            log.error("Failed to send PLS export segment in-progress email to " + user.getEmail() + " " + e.getMessage());
         }
     }
 
