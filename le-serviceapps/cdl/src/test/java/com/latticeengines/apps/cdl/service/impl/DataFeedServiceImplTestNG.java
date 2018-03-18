@@ -73,13 +73,14 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Inject
     private DataCollectionEntityMgr dataCollectionEntityMgr;
 
-    private static final String DATA_FEED_NAME = "datafeed";
+    private String dataFeedName;
 
     private DataFeed datafeed = new DataFeed();
 
     @BeforeClass(groups = "functional")
     public void setup() {
         setupTestEnvironment();
+        dataFeedName = NamingUtils.timestamp("datafeed");
         Job job = new Job();
         job.setJobStatus(JobStatus.FAILED);
         job.setInputs(new HashMap<>());
@@ -103,7 +104,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         dataCollection.setVersion(Version.Blue);
         dataCollectionEntityMgr.create(dataCollection);
 
-        datafeed.setName(DATA_FEED_NAME);
+        datafeed.setName(dataFeedName);
         datafeed.setStatus(Status.ProcessAnalyzing);
         datafeed.setDataCollection(dataCollection);
 
@@ -163,17 +164,17 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
                 Thread.sleep(100L);
                 MultiTenantContext.setTenant(t);
                 log.info("thread started locking execution");
-                assertFalse(datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA));
+                assertFalse(datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         });
         log.info("started locking execution");
-        datafeedService.lockExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA);
+        datafeedService.lockExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA);
         log.info("already locked execution");
-        assertNotNull(datafeedService.startExecution(customerSpace, DATA_FEED_NAME, DataFeedExecutionJobType.PA, 2L)
+        assertNotNull(datafeedService.startExecution(customerSpace, dataFeedName, DataFeedExecutionJobType.PA, 2L)
                 .getImports());
-        DataFeed df = datafeedService.findDataFeedByName(customerSpace, DATA_FEED_NAME);
+        DataFeed df = datafeedService.findDataFeedByName(customerSpace, dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         List<DataFeedExecution> execs = datafeedExecutionEntityMgr.findByDataFeed(df);
@@ -192,10 +193,10 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = "startExecution")
     public void finishExecution() {
         DataFeedExecution exec1 = datafeedService.finishExecution(MultiTenantContext.getTenant().getId(),
-                DATA_FEED_NAME, Status.Active.getName());
+                dataFeedName, Status.Active.getName());
         assertEquals(exec1.getStatus(), DataFeedExecution.Status.Completed);
 
-        DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
+        DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), dataFeedName);
         assertEquals(df.getStatus(), Status.Active);
 
         assertEquals(exec1.getStatus(), df.getActiveExecution().getStatus());
@@ -205,7 +206,7 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = "finishExecution", enabled = true)
     public void restartExecution() {
-        DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
+        DataFeed df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), dataFeedName);
         DataFeedExecution exec0 = df.getActiveExecution();
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Completed);
         int size = exec0.getImports().size();
@@ -217,16 +218,16 @@ public class DataFeedServiceImplTestNG extends CDLFunctionalTestNGBase {
         df.setStatus(Status.ProcessAnalyzing);
         datafeedEntityMgr.update(df);
 
-        Long workflowId = datafeedService.restartExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+        Long workflowId = datafeedService.restartExecution(MultiTenantContext.getTenant().getId(), dataFeedName,
                 DataFeedExecutionJobType.PA);
         assertEquals(exec0.getWorkflowId(), workflowId);
 
         exec0 = datafeedExecutionEntityMgr.findByPid(exec0.getPid());
         assertEquals(exec0.getStatus(), DataFeedExecution.Status.Failed);
 
-        DataFeedExecution exec1 = datafeedService.startExecution(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME,
+        DataFeedExecution exec1 = datafeedService.startExecution(MultiTenantContext.getTenant().getId(), dataFeedName,
                 DataFeedExecutionJobType.PA, workflowId + 1L);
-        df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), DATA_FEED_NAME);
+        df = datafeedService.findDataFeedByName(MultiTenantContext.getTenant().getId(), dataFeedName);
         assertEquals(df.getStatus(), Status.ProcessAnalyzing);
 
         assertEquals(exec1.getPid(), df.getActiveExecution().getPid());
