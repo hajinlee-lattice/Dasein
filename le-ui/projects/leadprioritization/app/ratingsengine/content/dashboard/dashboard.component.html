@@ -26,7 +26,7 @@
                         <dt>Model Type:</dt>
                         <dd>{{ vm.ratingEngineType }}</dd>
                         <dt>Segment:</dt>
-                        <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
+                        <dd class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
                         
                         <dt>Products:</dt>
                         <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>

@@ -121,9 +121,9 @@ angular
                         var deferred = $q.defer(),
                             id = $stateParams.modelId;
 
-                        console.log(id);
-                        console.log(ModelStore.data);
-                        console.log(RatingEngine);
+                        // console.log(id);
+                        // console.log(ModelStore.data);
+                        // console.log(RatingEngine);
 
                         if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
@@ -298,6 +298,22 @@ angular
                     }
                 },
                 views: {
+                    "navigation@home": {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+                            $scope.rating_id = $stateParams.rating_id || '';
+                            $scope.modelId = $stateParams.modelId || '';
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+                            $scope.stateName = function () {
+                                return $state.current.name;
+                            }
+                            $rootScope.$broadcast('header-back', {
+                                path: '^home.rating.dashboard',
+                                displayName: Dashboard.summary.displayName,
+                                sref: 'home.ratingsengine'
+                            });
+                        },
+                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
+                    },
                     'main@': {
                         controller: 'AdvancedQueryCtrl',
                         controllerAs: 'vm',
@@ -337,6 +353,22 @@ angular
                     section: 'dashboard.notes'
                 },
                 views: {
+                    "navigation@home": {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+                            $scope.rating_id = $stateParams.rating_id || '';
+                            $scope.modelId = $stateParams.modelId || '';
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+                            $scope.stateName = function () {
+                                return $state.current.name;
+                            }
+                            $rootScope.$broadcast('header-back', {
+                                path: '^home.rating.dashboard',
+                                displayName: Dashboard.summary.displayName,
+                                sref: 'home.ratingsengine'
+                            });
+                        },
+                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
+                    },
                     "main@": {
                         controller: 'NotesController',
                         controllerAs: 'vm',
@@ -660,7 +692,8 @@ angular
                 url: '/product/:rating_id/:wizard_steps',
                 params: {
                     wizard_steps: 'productpurchase',
-                    engineType: 'CROSS_SELL_FIRST_PURCHASE'
+                    engineType: 'CROSS_SELL_FIRST_PURCHASE',
+                    displayName: ''
                 },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
@@ -688,12 +721,29 @@ angular
                     },
                     'main@': {
                         resolve: {
-                            WizardHeaderTitle: function ($stateParams, RatingsEngineStore) {
+                            CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                                var deferred = $q.defer(),
+                                    ratingId = $stateParams.rating_id;
+
+                                if (ratingId !== '') {
+                                    RatingsEngineStore.getRating(ratingId).then(function(engine){
+                                        deferred.resolve(engine);
+                                    });
+                                } else {
+                                    deferred.resolve();
+                                }
+
+                                return deferred.promise;
+                            },
+                            WizardHeaderTitle: function ($stateParams, CurrentRatingEngine) {
 
                                 var engineType = $stateParams.engineType,
+                                    currentRating = CurrentRatingEngine,
                                     title = '';
 
-                                if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
+                                if (currentRating !== undefined){
+                                    title = currentRating.displayName;
+                                } else if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
                                     title = 'Create Model: Customers that will purchase a product for the first time';
                                 } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
                                     title = 'Create Model: Customers that will purchase again next quarter';

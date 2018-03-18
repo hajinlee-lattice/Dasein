@@ -21,7 +21,7 @@
             <div class="data" ng-if="IsRatingEngine || IsRuleBased">
                 <div class="stats stats-group">
                     <h3>Segment</h3>
-                    <h4>{{ segmentName }}</h4>
+                    <h4 class="text-ellipsis">{{ segmentName }}</h4>
                 </div>
                 <div class="stats stats-group">
                     <h3>Accounts</h3>
@@ -30,7 +30,7 @@
                 <div class="stats stats-group">
                     <h3>Scoring</h3>
                     <h4>{{ activeStatus }}</h4>
-                    <p class="pull-right">Last data refresh {{ lastRefreshedDate | date }}</p>
+                    <p>Last data refresh {{ lastRefreshedDate | date }}</p>
                 </div>
                 <div class="stats stats-group" ng-if="!IsRuleBased">
                     <h3>Active Version</h3>
