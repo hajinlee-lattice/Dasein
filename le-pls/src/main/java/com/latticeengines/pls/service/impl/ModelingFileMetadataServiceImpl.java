@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -49,7 +50,6 @@ import com.latticeengines.pls.util.ValidateFileHeaderUtils;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("modelingFileMetadataService")
 public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataService {
@@ -88,8 +88,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName,
-            String entity, String source, String feedType) {
+    public FieldMappingDocument getFieldMappingDocumentBestEffort(String sourceFileName, String entity, String source,
+            String feedType) {
         SourceFile sourceFile = getSourceFile(sourceFileName);
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         log.info(String.format("Customer Space: %s, entity: %s, source: %s, datafeed: %s", customerSpace.toString(),
@@ -107,24 +107,24 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             resultDocument = mergeFieldMappingBestEffort(fieldMappingFromTemplate, fieldMappingFromSchemaRepo);
         }
         for (FieldMapping fieldMapping : resultDocument.getFieldMappings()) {
-            if (fieldMapping.getMappedField() != null && fieldMapping.getMappedField().equals(InterfaceName
-                    .SalesforceAccountID.name())) {
+            if (fieldMapping.getMappedField() != null
+                    && fieldMapping.getMappedField().equals(InterfaceName.SalesforceAccountID.name())) {
                 fieldMapping.setCdlExternalSystemType(CDLExternalSystemType.CRM);
             }
         }
-        return  resultDocument;
+        return resultDocument;
     }
 
     private FieldMappingDocument mergeFieldMappingBestEffort(FieldMappingDocument templateMapping,
-                                                             FieldMappingDocument standardMapping) {
+            FieldMappingDocument standardMapping) {
         Map<String, FieldMapping> standardMappingMap = new HashMap<>();
         for (FieldMapping fieldMapping : standardMapping.getFieldMappings()) {
             standardMappingMap.put(fieldMapping.getUserField(), fieldMapping);
         }
         for (FieldMapping fieldMapping : templateMapping.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
-                if (standardMappingMap.containsKey(fieldMapping.getUserField()) &&
-                        standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
+                if (standardMappingMap.containsKey(fieldMapping.getUserField())
+                        && standardMappingMap.get(fieldMapping.getUserField()).getMappedField() != null) {
                     fieldMapping.setMappedField(standardMappingMap.get(fieldMapping.getUserField()).getMappedField());
                     fieldMapping.setMappedToLatticeField(false);
                 }
@@ -161,8 +161,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     @Override
-    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument,
-                                String entity, String source, String feedType) {
+    public void resolveMetadata(String sourceFileName, FieldMappingDocument fieldMappingDocument, String entity,
+            String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         fulfillFieldMapping(fieldMappingDocument);
         setCDLExternalSystems(fieldMappingDocument);
@@ -208,18 +208,18 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
                 fieldMapping.setMappedField(
                         ValidateFileHeaderUtils.convertFieldNameToAvroFriendlyFormat(fieldMapping.getMappedField()));
                 switch (fieldMapping.getCdlExternalSystemType()) {
-                    case CRM:
-                        crmIds.add(fieldMapping.getMappedField());
-                        break;
-                    case MAP:
-                        mapIds.add(fieldMapping.getMappedField());
-                        break;
-                    case ERP:
-                        erpIds.add(fieldMapping.getMappedField());
-                        break;
-                    case OTHER:
-                        otherIds.add(fieldMapping.getMappedField());
-                        break;
+                case CRM:
+                    crmIds.add(fieldMapping.getMappedField());
+                    break;
+                case MAP:
+                    mapIds.add(fieldMapping.getMappedField());
+                    break;
+                case ERP:
+                    erpIds.add(fieldMapping.getMappedField());
+                    break;
+                case OTHER:
+                    otherIds.add(fieldMapping.getMappedField());
+                    break;
                 }
             }
         }
@@ -228,7 +228,8 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         cdlExternalSystem.setMAPIdList(mapIds);
         cdlExternalSystem.setERPIdList(erpIds);
         cdlExternalSystem.setOtherIdList(otherIds);
-        cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(), cdlExternalSystem);
+        cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(MultiTenantContext.getCustomerSpace().toString(),
+                cdlExternalSystem);
     }
 
     private void fulfillFieldMapping(FieldMappingDocument fieldMappingDocument) {
@@ -245,12 +246,14 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     }
 
-    private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table, boolean cdlResolve) {
+    private void resolveMetadata(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument, Table table,
+            boolean cdlResolve) {
         MetadataResolver resolver = getMetadataResolver(sourceFile, fieldMappingDocument, cdlResolve);
 
         log.info(String.format("the ignored fields are: %s", fieldMappingDocument.getIgnoredFields()));
         if (!resolver.isFieldMappingDocumentFullyDefined()) {
-            throw new RuntimeException(String.format("Metadata is not fully defined for file %s", sourceFile.getName()));
+            throw new RuntimeException(
+                    String.format("Metadata is not fully defined for file %s", sourceFile.getName()));
         }
         resolver.calculateBasedOnFieldMappingDocument(table);
 
@@ -348,7 +351,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         latticeSchemaField.setName(attribute.getName());
         // latticeSchemaField.setFieldType(attribute.getPhysicalDataType());
         latticeSchemaField.setFieldType(MetadataResolver.getFieldTypeFromPhysicalType(attribute.getPhysicalDataType()));
-        if (!attribute.getNullable()) {
+        if (attribute.getRequired()) {
             latticeSchemaField.setRequiredType(RequiredType.Required);
 
         } else if (!attribute.getValidatorWrappers().isEmpty()) {
@@ -387,7 +390,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
     }
 
     private MetadataResolver getMetadataResolver(SourceFile sourceFile, FieldMappingDocument fieldMappingDocument,
-                                                 boolean cdlResolve) {
+            boolean cdlResolve) {
         return new MetadataResolver(sourceFile.getPath(), yarnConfiguration, fieldMappingDocument, cdlResolve);
     }
 }
