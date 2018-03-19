@@ -1,22 +1,28 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.apache.avro.generic.GenericRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -50,6 +56,23 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         MODEL_ID = UuidUtils.shortenUuid(UUID.randomUUID());
         modelSummary = BucketedScoreServiceTestUtils.createModelSummary(MODEL_ID);
         modelSummaryService.createModelSummary(modelSummary, tenant1.getId());
+    }
+
+    @Test(groups = { "functional" })
+    public void createBucketedScoreSummary() throws Exception {
+        InputStream is = ClassLoader
+                .getSystemResourceAsStream("com/latticeengines/pls/BucketedScoreSummary/data/part-00000.avro");
+        List<GenericRecord> records = AvroUtils.readFromInputStream(is);
+        BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(records);
+        bucketedScoreService.createBucketedScoreSummaryForModelId(modelSummary.getId(), bucketedScoreSummary);
+        BucketedScoreSummary retrieved = bucketedScoreService.getBucketedScoreSummaryForModelId(modelSummary.getId());
+        System.out.println(bucketedScoreSummary.getBucketedScores()[4]);
+        System.out.println(retrieved.getBucketedScores()[4]);
+        assertEquals(bucketedScoreSummary.getTotalNumConverted(), retrieved.getTotalNumConverted());
+        assertEquals(bucketedScoreSummary.getOverallLift(), retrieved.getOverallLift());
+        assertEquals(bucketedScoreSummary.getTotalNumLeads(), retrieved.getTotalNumLeads());
+        assertNotNull(retrieved.getBarLifts());
+        assertNotNull(retrieved.getBucketedScores());
     }
 
     @Test(groups = { "functional" })

@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.BucketMetadataEntityMgr;
+import com.latticeengines.pls.entitymanager.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
@@ -65,12 +66,27 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private BucketMetadataEntityMgr bucketMetadataEntityMgr;
 
     @Inject
+    private BucketedScoreSummaryEntityMgr bucketedScoreSummaryEntityMgr;
+
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
         ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+        BucketedScoreSummary bucketedScoreSummary = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
+        if (bucketedScoreSummary != null) {
+            return bucketedScoreSummary;
+        }
         return getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
+    }
+
+    @Override
+    public BucketedScoreSummary createBucketedScoreSummaryForModelId(String modelId,
+            BucketedScoreSummary bucketedScoreSummary) throws Exception {
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+        createBucketedScoreSummary(modelSummary, bucketedScoreSummary);
+        return bucketedScoreSummary;
     }
 
     private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
@@ -106,7 +122,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                 .generateBucketedScoreSummary(pivotedRecords);
-
+        createBucketedScoreSummary(modelSummary, bucketedScoreSummary);
         return bucketedScoreSummary;
     }
 
@@ -139,6 +155,11 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             bucketMetadata.setModelSummary(modelSummary);
             bucketMetadataEntityMgr.create(bucketMetadata);
         }
+    }
+
+    private void createBucketedScoreSummary(ModelSummary modelSummary, BucketedScoreSummary bucketedScoreSummary) {
+        bucketedScoreSummary.setModelSummary(modelSummary);
+        bucketedScoreSummaryEntityMgr.create(bucketedScoreSummary);
     }
 
     @Override

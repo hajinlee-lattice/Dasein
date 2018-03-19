@@ -767,6 +767,17 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
+    @RequestMapping(value = "/bucketedscoresummary/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "create bucketed score summary")
+    public void createBucketedScoreSummary(@PathVariable String modelId,
+            @RequestBody BucketedScoreSummary bucketedScoreSummary, HttpServletRequest request) throws Exception {
+        checkHeader(request);
+        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
+        manufactureSecurityContextForInternalAccess(modelSummary.getTenant());
+        bucketedScoreService.createBucketedScoreSummaryForModelId(modelId, bucketedScoreSummary);
+    }
+
     @RequestMapping(value = "/bucketmetadata/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create default abcd scored buckets")

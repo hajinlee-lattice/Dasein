@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -364,6 +365,22 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             throw new RuntimeException(
                     String.format("Remote call failure for creating abcd buckets for model %s of tenant %s", modelId,
                             customerSpace.toString()),
+                    e);
+        }
+
+    }
+
+    public void createBucketedScoreSummary(String modelId, CustomerSpace customerSpace,
+            BucketedScoreSummary bucketedScoreSummary) {
+        try {
+            String url = constructUrl("pls/internal/bucketedscoresummary/", modelId);
+            url += "?tenantId=" + customerSpace.toString();
+            log.debug(String.format("Posting to %s", url));
+            restTemplate.postForEntity(url, bucketedScoreSummary, Void.class);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    String.format("Remote call failure for creating bucketed score summary for model %s of tenant %s",
+                            modelId, customerSpace.toString()),
                     e);
         }
 

@@ -9,6 +9,10 @@ CREATE PROCEDURE `UpdateCDLTables`()
     drop table DATAFEED_PROFILE;
     alter table DATAFEED_EXECUTION ADD COLUMN `JOB_TYPE` varchar(255) not null DEFAULT 'PA';
     UPDATE DATAFEED_EXECUTION SET STATUS = 'Completed' where STATUS = 'ProcessAnalyzed';
+    
+    create table `BUCKETED_SCORE_SUMMARY` (`PID` bigint not null auto_increment, `BAR_LIFTS` JSON not null, `BUCKETED_SCORES` JSON not null, `OVERAL_LIFT` double precision not null, `TOTAL_NUM_CONVERTED` integer not null, `TOTAL_NUM_LEADS` integer not null, `FK_MODELSUMMARY_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
+    alter table `BUCKETED_SCORE_SUMMARY` add constraint `FK_BUCKETEDSCORESUMMARY_FKMODELSUMMARYID_MODELSUMMARY` foreign key (`FK_MODELSUMMARY_ID`) references `MODEL_SUMMARY` (`PID`) on delete cascade;
+
     END;
 //
 DELIMITER ;

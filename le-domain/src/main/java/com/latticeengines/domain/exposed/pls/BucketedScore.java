@@ -1,14 +1,29 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 
-public class BucketedScore {
+public class BucketedScore implements Serializable {
 
+    private static final long serialVersionUID = -6994756387548943771L;
     private int score;
     private int numLeads;
     private int numConverted;
     private int leftNumLeads;
     private int leftNumConverted;
+
+    public BucketedScore() {
+    }
+
+    public BucketedScore(int score, int numLeads, int numConverted, int leftNumLeads, int leftNumConverted) {
+        this.score = score;
+        this.numLeads = numLeads;
+        this.numConverted = numConverted;
+        this.leftNumLeads = leftNumLeads;
+        this.leftNumConverted = leftNumConverted;
+    }
 
     @JsonProperty("score")
     public int getScore() {
@@ -55,12 +70,9 @@ public class BucketedScore {
         this.leftNumConverted = leftNumConverted;
     }
 
-    public BucketedScore(int score, int numLeads, int numConverted, int leftNumLeads, int leftNumConverted) {
-        this.score = score;
-        this.numLeads = numLeads;
-        this.numConverted = numConverted;
-        this.leftNumLeads = leftNumLeads;
-        this.leftNumConverted = leftNumConverted;
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
 }
