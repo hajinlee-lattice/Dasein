@@ -1,7 +1,7 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
     $state, $stateParams, $scope, $timeout, $sce, $window,
-    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
@@ -24,6 +24,7 @@ angular.module('lp.import.calendar', [])
     });
 
     angular.extend(vm, {
+        lastFrom: StateHistory.lastFrom(),
         saving: false,
         calendar: Calendar,
         selectedDate: '01-01',
@@ -146,10 +147,10 @@ angular.module('lp.import.calendar', [])
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {
                 if(debug) {
-                    console.log('valid calendar, 10/10 would save:', vm.calendar);
+                    console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
                 } else {
                     ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
-                        $state.go("home.import.data.product_hierarchy.ids");
+                        $state.go(vm.lastFrom.name);
                     });
                 }
             }

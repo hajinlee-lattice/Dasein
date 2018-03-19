@@ -1,6 +1,6 @@
 angular.module('lp.import.wizard.productids', [])
 .controller('ImportWizardProductIDs', function(
-    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields
+    $state, $stateParams, $scope, $timeout, ResourceUtility, ImportWizardStore, FieldDocument, UnmappedFields, Calendar
 ) {
     var vm = this;
 
@@ -19,10 +19,21 @@ angular.module('lp.import.wizard.productids', [])
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
         initialMapping: {},
         keyMap: {},
-        saveMap: {}
+        saveMap: {},
+        showPage: false,
+        calendar: Calendar
     });
 
     vm.init = function() {
+        if(!FieldDocument) {
+            $state.go('home.import.entry.product_hierarchy');
+            return false;
+        } else if (!Calendar) {
+            $state.go('home.import.calendar');
+            return false;
+        }
+        vm.showPage = true;
+        
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);

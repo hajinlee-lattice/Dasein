@@ -33,6 +33,7 @@ angular.module('lp.import.wizard.producthierarchyids', [])
             return false;
         }
         vm.showPage = true;
+        
         vm.UnmappedFields = UnmappedFields;
 
         ImportWizardStore.setUnmappedFields(UnmappedFields);

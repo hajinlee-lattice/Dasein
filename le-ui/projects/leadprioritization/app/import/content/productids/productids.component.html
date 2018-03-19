@@ -1,11 +1,10 @@
-<div class="import-accountid container file-import-content">
+<div class="import-accountid container file-import-content" ng-show="vm.showPage">
     <div class="header">
         <h2>Product ID</h2>
         <p>
             Select your unique IDs to de-duplicate your product records.
         </p>
     </div>
-    <p>Select your unique IDs to de-duplicate your product records.</p>
     <form name="form">
         <div class="id-options" ng-if="!vm.state.accountDedupeField" ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">

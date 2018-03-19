@@ -578,6 +578,15 @@ angular
                     });
 
                     return deferred.promise;
+                },
+                Calendar: function($q, ImportWizardService, ImportWizardStore) {
+                    var deferred = $q.defer();
+
+                    ImportWizardStore.getCalendar().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
                 }
             }
         })
