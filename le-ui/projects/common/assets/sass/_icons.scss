@@ -70,6 +70,10 @@ Icons
 		-webkit-mask-image: url("/assets/images/ico-model.svg");
 		mask: url("/assets/images/ico-model.svg");
 	}
+	&.ico-dashboard {
+		background-color: transparent !important;
+		background: url("data:image/svg+xml;utf8,<svg version='1.1' id='Layer_1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 40 39'><g stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'><g fill='#ffffff'><path d='M1.96989318,28.7153 L30.8647793,28.7153 L30.8647793,2.44745 L1.96989318,2.44745 L1.96989318,28.7153 Z M32.0142736,0 L0.820398903,0 C0.329095378,0 0,0.3255 0,0.8153 L0,30.1847 C0,30.67295 0.329095378,31 0.820398903,31 L32.1796011,31 C32.6709046,31 33,30.67295 33,30.1847 L33,0.8153 C32.8362322,0.3255 32.5071368,0 32.0142736,0 Z'></path><polygon points='6 25 12 25 12 19 6 19'></polygon><polygon points='13.5 25 19.5 25 19.5 19 13.5 19'></polygon><polygon points='21 25 27 25 27 19 21 19'></polygon><polygon points='6 8 8 8 8 6 6 6'></polygon><polygon points='10 8 27 8 27 6 10 6'></polygon><polygon points='6 12 27 12 27 10 6 10'></polygon><polygon points='6 16 22 16 22 14 6 14'></polygon></g></g></svg>") no-repeat 2px 3px; 
+	}
 	&.ico-ratings {
 		background-color: transparent !important;
 		background-image: url("/assets/images/ico-ratings-navigation.png");
@@ -405,6 +409,9 @@ Icons
 		}
 		&.ico-bullseye {
 			background-image: url("/assets/images/ico-bullseye.png");
+		}
+		&.ico-dashboard {
+			background-image: url("/assets/images/ico-dashboard.png");
 		}
 		&.ico-model {
 			background-image: url("/assets/images/ico-model.png");

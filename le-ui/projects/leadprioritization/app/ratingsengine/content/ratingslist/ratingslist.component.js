@@ -148,14 +148,18 @@ angular.module('lp.ratingsengine.ratingslist', [
                         var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
                             modelingJobId = model.AI.modelingJobId;
 
-                        if(modelId !== null && modelingJobId !== null){
+                        console.log(modelId);
+                        console.log(modelingJobId);
+
+                        // if (modelId === null && modelingJobId !== null) {
+                        //     $state.go('home.ratingsengine.productpurchase.segment.products.prioritization.training.creation', {rating_id: rating.id, engineType: model.AI.modelingStrategy, fromList: true});
+                        if (modelingJobId !== null) {
                             $state.go('home.ratingsengine.dashboard', { 
                                 rating_id: rating.id, 
                                 modelId: modelId
                             });
                         } else {
-                            // console.log("model not ready");
-                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: model.AI.modelingStrategy});
+                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: model.AI.modelingStrategy, fromList: true});
                         }
                     });
                 });                

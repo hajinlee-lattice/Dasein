@@ -20,6 +20,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         vm.relatedItems = vm.dashboard.plays;
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
+        vm.hasBuckets = vm.ratingEngine.counts != null;
 
         var model = vm.ratingEngine.activeModel;
         

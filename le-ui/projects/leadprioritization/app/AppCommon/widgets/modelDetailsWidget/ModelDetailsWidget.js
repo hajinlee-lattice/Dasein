@@ -16,26 +16,33 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
     var data = ModelStore.data;
 
-    // console.log(data);
+    console.log(data);
 
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
-        $scope.modelingStrategy = ratingEngine.type;
 
-        // console.log(ratingEngine);
+        $scope.IsRatingEngine = true;
+        $scope.type = ratingEngine.type;
+        $scope.displayName = ratingEngine.displayName;
+        $scope.createdBy = ratingEngine.createdBy;
+        $scope.created = ratingEngine.created;
+
+        $scope.segmentName = ratingEngine.segment.display_name;
+        $scope.totalAccounts = ratingEngine.segment.accounts;
+        $scope.activeStatus = ratingEngine.status;
+        $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
+
+        if ($stateParams.modelId !== '') {
+            $scope.modelIsReady = true;
+        }
 
         $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
         if($scope.IsRuleBased) {
-            $scope.type = ratingEngine.type;
-            $scope.displayName = ratingEngine.displayName;
-            $scope.createdBy = ratingEngine.createdBy;
-            $scope.created = ratingEngine.created;
-
-            $scope.segmentName = ratingEngine.segment.display_name;
-            $scope.totalAccounts = ratingEngine.segment.accounts;
-            $scope.activeStatus = ratingEngine.status;
-            $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
+            $scope.modelingStrategy = ratingEngine.type;
             $scope.activeIteration = ratingEngine.activeModel.rule.iteration;
+        } else {
+            $scope.modelingStrategy = ratingEngine.activeModel.AI.modelingStrategy;
+            $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
         }
 
 

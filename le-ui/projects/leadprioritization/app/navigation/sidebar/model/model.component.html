@@ -19,7 +19,7 @@
     <li ng-if="vm.IsRatingEngine">
         <a ui-sref="home.ratingsengine.dashboard({ rating_id: vm.ratingEngine.id, modelId: vm.ratingEngine.activeModel.AI.id })">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}">
-                <span class="ico ico-attributes ico-light-gray"></span>
+                <span class="ico ico-dashboard ico-light-gray"></span>
             </span>
             <span class="label">{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_DASHBOARD')}}</span>
         </a>
@@ -129,7 +129,7 @@
     <li ng-if="vm.IsRatingEngine">
         <a ui-sref="home.ratingsengine.dashboard.notes({ rating_id: vm.ratingEngine.id, modelId: vm.ratingEngine.activeModel.AI.id })">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_ATTRIBUTES')}}">
-                <span class="ico ico-attributes ico-light-gray"></span>
+                <span class="ico ico-notes ico-light-gray"></span>
             </span>
             <span class="label">Notes</span>
         </a>

@@ -693,7 +693,8 @@ angular
                 params: {
                     wizard_steps: 'productpurchase',
                     engineType: 'CROSS_SELL_FIRST_PURCHASE',
-                    displayName: ''
+                    displayName: '',
+                    fromList: false
                 },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
@@ -739,9 +740,10 @@ angular
 
                                 var engineType = $stateParams.engineType,
                                     currentRating = CurrentRatingEngine,
+                                    fromList = $stateParams.fromList,
                                     title = '';
 
-                                if (currentRating !== undefined){
+                                if (currentRating !== undefined && fromList){
                                     title = currentRating.displayName;
                                 } else if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
                                     title = 'Create Model: Customers that will purchase a product for the first time';
