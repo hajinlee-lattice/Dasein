@@ -1,7 +1,10 @@
 <div class="import-accountid container file-import-content">
-    <p>
-        Select your Product ID and Account ID to match your transaction records. 
-    </p>
+    <div class="header">
+        <h2>Transaction ID</h2>
+        <p>
+            Select your Product ID and Account ID to match your transaction records. 
+        </p>
+    </div>
     <form name="form">
         <div class="id-options" ng-if="!vm.state.accountDedupeField"  ng-init="vm.checkFieldsDelay(form)">
             <div class="id-options-item">
