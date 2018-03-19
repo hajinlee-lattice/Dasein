@@ -43,7 +43,7 @@ public class PrepareScoringAfterModelingWorkflow
         case CDL:
         default:
             return builder.next(segmentExportInitStep) //
-                    .next(prepareSegmentMatchingStep) //
+                    // .next(prepareSegmentMatchingStep) //
                     .next(customEventSimpleMatchWorkflow) //
                     .build();
         }
