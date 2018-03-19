@@ -6,7 +6,7 @@ ARTIFACT_DIR=$WSHOME/le-dev/artifacts
 if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     echo "Bootstrapping tomcat ..."
     TOMCAT_MAJOR=9
-    TOMCAT_VERSION=9.0.5
+    TOMCAT_VERSION=9.0.6
 
     sudo rm -rf $CATALINA_HOME
     sudo mkdir -p ${CATALINA_HOME} || true
@@ -25,35 +25,33 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     rm -rf ${CATALINA_HOME}/webapps/docs
     rm -rf ${CATALINA_HOME}/webapps/ROOT
 
-    if [ "${USE_HTTPS}" == "true" ]; then
-        UNAME=`uname`
-        if [[ "${UNAME}" == 'Darwin' ]]; then
-            echo "You are on Mac"
-            APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
-            echo "You installed apr ${APR_VERSION}"
-            OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
-            echo "You installed openssl ${OPENSSL_VERSION}"
-            pushd $CATALINA_HOME/bin
-            tar xzf tomcat-native.tar.gz
-            cd tomcat-native-*-src/native
-            ./configure \
-                --with-java-home=$JAVA_HOME \
-                --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
-                --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
-                --prefix=$CATALINA_HOME
-            make && make install
-            popd
-        else
-            echo "You are on ${UNAME}"
-            pushd $CATALINA_HOME/bin
-            tar xzf tomcat-native.tar.gz
-            cd tomcat-native-*-src/native
-            ./configure \
-                --with-java-home=$JAVA_HOME \
-                --prefix=$CATALINA_HOME
-            make && make install
-            popd
-        fi
+    UNAME=`uname`
+    if [[ "${UNAME}" == 'Darwin' ]]; then
+        echo "You are on Mac"
+        APR_VERSION=`brew list apr | head -n 1 | cut -d / -f 6`
+        echo "You installed apr ${APR_VERSION}"
+        OPENSSL_VERSION=`brew list openssl | head -n 1 | cut -d / -f 6`
+        echo "You installed openssl ${OPENSSL_VERSION}"
+        pushd $CATALINA_HOME/bin
+        tar xzf tomcat-native.tar.gz
+        cd tomcat-native-*-src/native
+        ./configure \
+            --with-java-home=$JAVA_HOME \
+            --with-apr=/usr/local/Cellar/apr/${APR_VERSION}/ \
+            --with-ssl=/usr/local/Cellar/openssl/${OPENSSL_VERSION} \
+            --prefix=$CATALINA_HOME
+        make && make install
+        popd
+    else
+        echo "You are on ${UNAME}"
+        pushd $CATALINA_HOME/bin
+        tar xzf tomcat-native.tar.gz
+        cd tomcat-native-*-src/native
+        ./configure \
+            --with-java-home=$JAVA_HOME \
+            --prefix=$CATALINA_HOME
+        make && make install
+        popd
     fi
 
     sudo mkdir -p /etc/ledp/tls
@@ -73,10 +71,6 @@ for file in 'server.xml' 'web.xml' 'context.xml' 'catalina.properties' 'tomcat-u
     cp -f ${CATALINA_HOME}/conf/${file} ${CATALINA_HOME}/conf/${file}.BAK
     cp -f ${WSHOME}/le-dev/tomcat/${file} ${CATALINA_HOME}/conf/${file}
 done
-
-if [ "${USE_HTTPS}" == "true" ]; then
-    cp -f ${WSHOME}/le-dev/tomcat/server-http2.xml ${CATALINA_HOME}/conf/server.xml
-fi
 
 cp ${CATALINA_HOME}/bin/catalina.sh ${CATALINA_HOME}/bin/catalina.sh.BAK
 cp ${WSHOME}/le-dev/tomcat/catalina.sh ${CATALINA_HOME}/bin/catalina.sh

@@ -54,20 +54,8 @@ def aggregate_props(dir, keys, quiet=False):
                             else:
                                 continue
                         keys[key] = prop_file
-                    if "USE_HTTPS" in os.environ and os.environ["USE_HTTPS"] == "true":
-                        aggregated += replace_for_https(line)
-                    else:
-                        aggregated += line
+                    aggregated += line
     return aggregated + "\n"
-
-
-def replace_for_https(line):
-    if "http://localhost:8" in line and not "http://localhost:8000" in line:
-        new_line = line.replace("http://localhost:8", "https://localhost:9")
-        print "Change " + line.strip() + " to " + new_line.strip()
-        return new_line
-    else:
-        return line
 
 def confdir(environment):
     return os.path.join(WSHOME, 'le-config', 'conf', 'env', environment)
