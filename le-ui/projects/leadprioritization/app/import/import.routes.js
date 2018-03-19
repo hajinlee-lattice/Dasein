@@ -132,7 +132,7 @@ angular
                 },
                 WizardProgressItems: function($stateParams, ImportWizardStore) {                    
                     var entityType = ImportWizardStore.getEntityType(),
-                        wizard_steps = $stateParams.wizard_steps || entityType.toLowerCase();
+                        wizard_steps = $stateParams.wizard_steps || (entityType || '').toLowerCase();
 
                     return ImportWizardStore.getWizardProgressItems(wizard_steps || 'account');
                 }
@@ -358,7 +358,9 @@ angular
                 },
                 MatchingFields: function() {
                     return [
-                        { name: 'ContactName', displayName: 'Contact Name' },
+                        //{ name: 'ContactName', displayName: 'Contact Name' },
+                        { name: 'FirstName', displayName: 'First Name' },
+                        { name: 'LastName', displayName: 'Last Name' },
                         { name: 'Title', displayName: '' },
                         { name: 'Email', displayName: '' }
                         // { name: 'CompanyName', displayName: 'Company Name' },
