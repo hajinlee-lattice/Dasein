@@ -232,7 +232,8 @@ public class RatingQueryTranslator extends QueryTranslator {
             if (forScoreCount) {
                 cases.put(String.valueOf(idx.getAndIncrement()), joinRestrictions(outerRestriction, innerRestriction));
             } else {
-                cases.put(key, addExistsRestriction(outerRestriction, innerEntity, innerRestriction));
+                cases.put(key, addSubselectRestriction(entity, outerRestriction,
+                                                       innerEntity, innerRestriction));
             }
         });
         if (forScoreCount) {

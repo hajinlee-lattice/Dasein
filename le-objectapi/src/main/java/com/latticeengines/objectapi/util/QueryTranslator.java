@@ -288,15 +288,6 @@ abstract class QueryTranslator {
         return joinRestrictions(outerRestriction, innerRestriction);
     }
 
-    Restriction addExistsRestriction(Restriction outerRestriction, BusinessEntity innerEntity,
-            Restriction innerRestriction) {
-        Restriction existsRestriction = null;
-        if (innerRestriction != null) {
-            existsRestriction = Restriction.builder().exists(innerEntity).that(innerRestriction).build();
-        }
-        return joinRestrictions(outerRestriction, existsRestriction);
-    }
-
     void configurePagination(FrontEndQuery frontEndQuery) {
         if (frontEndQuery.getPageFilter() == null) {
             frontEndQuery.setPageFilter(DEFAULT_PAGE_FILTER);

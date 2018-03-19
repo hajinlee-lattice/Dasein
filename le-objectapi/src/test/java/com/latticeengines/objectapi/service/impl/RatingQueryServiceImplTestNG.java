@@ -134,9 +134,9 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 483L);
+                Assert.assertEquals((long) count, 533L);
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 99L);
+                Assert.assertEquals((long) count, 49L);
             }
         });
     }
@@ -156,6 +156,8 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Map<String, Restriction> ruleC = new HashMap<>();
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("H", "N")));
+        ruleC.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
+                  new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
 
         rule.setDefaultBucketName(RatingBucketName.A.getName());
