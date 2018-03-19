@@ -11,7 +11,7 @@ public class SpringBatchDataSourceBeanFactory extends DataSourceBeanFactory {
 
     private int webAppMaxPoolSize;
     private int yarnContainerMaxPoolSize;
-    private String jdbcUrlReadOnly;
+    private String jdbcUrlReader;
 
     @Override
     public DataSource getObject() {
@@ -22,7 +22,7 @@ public class SpringBatchDataSourceBeanFactory extends DataSourceBeanFactory {
         }
         if (WebApp.equals(currentEnv)) {
             setMaxPoolSize(webAppMaxPoolSize);
-            setJdbcUrl(jdbcUrlReadOnly);
+            setJdbcUrl(jdbcUrlReader);
         } else {
             setWebAppMaxPoolSize(yarnContainerMaxPoolSize);
         }
@@ -45,11 +45,11 @@ public class SpringBatchDataSourceBeanFactory extends DataSourceBeanFactory {
         this.yarnContainerMaxPoolSize = yarnContainerMaxPoolSize;
     }
 
-    public String getJdbcUrlReadOnly() {
-        return jdbcUrlReadOnly;
+    public String getJdbcUrlReader() {
+        return jdbcUrlReader;
     }
 
-    public void setJdbcUrlReadOnly(String jdbcUrlReadOnly) {
-        this.jdbcUrlReadOnly = jdbcUrlReadOnly;
+    public void setJdbcUrlReader(String jdbcUrlReader) {
+        this.jdbcUrlReader = jdbcUrlReader;
     }
 }
