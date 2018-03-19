@@ -16,8 +16,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
+import com.latticeengines.scoringapi.score.BulkMatchingContext;
+import com.latticeengines.scoringapi.score.SingleMatchingContext;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
@@ -30,41 +32,17 @@ public class SingleRecordMatcher extends AbstractMatcher {
     }
 
     @Override
-    public Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
-            InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, //
-            Map<String, Object> record, //
-            ModelSummary modelSummary, //
-            boolean forEnrichment, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean shouldReturnAllEnrichment) {
-        return matchAndJoin(space, interpreted, fieldSchemas, record, modelSummary, forEnrichment,
-                enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebugMode, matchLogs,
-                matchErrorLogs, shouldReturnAllEnrichment, false, false);
-    }
-
-    @Override
-    public Map<String, Map<String, Object>> matchAndJoin(CustomerSpace space, //
-            InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, //
-            Map<String, Object> record, //
-            ModelSummary modelSummary, //
-            boolean forEnrichment, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean shouldReturnAllEnrichment, //
-            boolean enforceFuzzyMatch, boolean skipDnBCache) {
+    public Map<String, Map<String, Object>> matchAndJoin(AdditionalScoreConfig additionalScoreConfig,
+            SingleMatchingContext singleMatchingConfig, InterpretedFields interpreted, Map<String, Object> record,
+            boolean forEnrichment) {
         boolean shouldCallEnrichmentExplicitly = false;
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
+        ModelSummary modelSummary = singleMatchingConfig.getModelSummary();
 
         if (forEnrichment) {
-            selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space, enrichInternalAttributes,
-                    shouldReturnAllEnrichment);
+            selectedLeadEnrichmentAttributes = getEnrichmentMetadata(additionalScoreConfig.getSpace(),
+                    additionalScoreConfig.isEnrichInternalAttributes(),
+                    additionalScoreConfig.isShouldReturnAllEnrichment());
 
             if (modelSummary != null) {
                 shouldCallEnrichmentExplicitly = shouldCallEnrichmentExplicitly(modelSummary, //
@@ -84,7 +62,7 @@ public class SingleRecordMatcher extends AbstractMatcher {
                                     modelSummary.getDataCloudVersion())//
                             .getVersion();
         }
-        
+
         if (shouldCallEnrichmentExplicitly) {
             Map<String, Map<String, Object>> result = new HashMap<>();
             // call regular match (without enrichment) if modelSummary is not
@@ -93,12 +71,8 @@ public class SingleRecordMatcher extends AbstractMatcher {
                 // IMP - make sure to not use performFetchOnlyForMatching for
                 // RTS based lookup
                 Map<String, Map<String, Object>> matchResult = //
-                        buildAndExecuteMatch(space, interpreted, //
-                                fieldSchemas, record, //
-                                modelSummary, false, //
-                                null, false, currentDataCloudVersion, //
-                                false, requestId, isDebugMode, //
-                                matchLogs, matchErrorLogs);
+                        buildAndExecuteMatch(additionalScoreConfig, singleMatchingConfig, interpreted, //
+                                record, false, null, false, currentDataCloudVersion);
                 result.putAll(matchResult);
             }
 
@@ -114,80 +88,43 @@ public class SingleRecordMatcher extends AbstractMatcher {
                             .getVersion();
 
             Map<String, Map<String, Object>> enrichmentResult = //
-                    buildAndExecuteMatch(space, interpreted, //
-                            fieldSchemas, record, //
-                            null, true, //
+                    buildAndExecuteMatch(additionalScoreConfig, singleMatchingConfig, interpreted, //
+                            record, //
+                            true, //
                             selectedLeadEnrichmentAttributes, true, //
-                            currentDataCloudVersionForEnrichment, performFetchOnlyForMatching, //
-                            requestId, isDebugMode, //
-                            matchLogs, matchErrorLogs, //
-                            enforceFuzzyMatch, skipDnBCache);
+                            currentDataCloudVersionForEnrichment);
 
             result.putAll(enrichmentResult);
 
             return result;
         } else {
             // call regular match
-            return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
-                    record, modelSummary, forEnrichment, //
-                    selectedLeadEnrichmentAttributes, (modelSummary == null), currentDataCloudVersion, //
-                    performFetchOnlyForMatching, requestId, isDebugMode, //
-                    matchLogs, matchErrorLogs, enforceFuzzyMatch, skipDnBCache);
+            return buildAndExecuteMatch(additionalScoreConfig, singleMatchingConfig, interpreted, record, forEnrichment, //
+                    selectedLeadEnrichmentAttributes, (modelSummary == null), currentDataCloudVersion);
         }
     }
 
-    @Override
-    public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
-            CustomerSpace space, //
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            boolean shouldEnrichOnly, //
-            boolean isDebugMode, //
-            String requestId, //
-            Map<RecordModelTuple, List<String>> matchLogMap, //
-            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
-        throw new NotImplementedException("matchAndJoin is not implemented");
-    }
-
     private Map<String, Map<String, Object>> buildAndExecuteMatch(//
-            CustomerSpace space, InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
-            ModelSummary modelSummary, boolean forEnrichment, //
-            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean skipPredefinedSelection, String overrideDataCloudVersion, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs) {
-        return buildAndExecuteMatch(space, interpreted, fieldSchemas, //
-                record, modelSummary, forEnrichment, selectedLeadEnrichmentAttributes, //
-                skipPredefinedSelection, overrideDataCloudVersion, //
-                performFetchOnlyForMatching, requestId, isDebugMode, matchLogs, //
-                matchErrorLogs, false, false);
-    }
-
-    private Map<String, Map<String, Object>> buildAndExecuteMatch(//
-            CustomerSpace space, InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, Map<String, Object> record, //
-            ModelSummary modelSummary, boolean forEnrichment, //
-            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean skipPredefinedSelection, String overrideDataCloudVersion, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean enforceFuzzyMatch, boolean skipDnBCache) {
-        MatchInput matchInput = buildMatchInput(space, interpreted, //
-                record, modelSummary, //
+            AdditionalScoreConfig additionalScoreConfig, SingleMatchingContext singleMatchingConfig,
+            InterpretedFields interpreted, //
+            Map<String, Object> record, //
+            boolean forEnrichment, //
+            List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, boolean skipPredefinedSelection,
+            String overrideDataCloudVersion //
+    ) {
+        MatchInput matchInput = buildMatchInput(additionalScoreConfig.getSpace(), interpreted, //
+                record, singleMatchingConfig.getModelSummary(), //
                 selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, //
-                performFetchOnlyForMatching, requestId, isDebugMode, enforceFuzzyMatch, skipDnBCache);
+                additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.getRequestId(),
+                additionalScoreConfig.isDebug(), additionalScoreConfig.isEnforceFuzzyMatch(),
+                additionalScoreConfig.isSkipDnBCache());
 
-        MatchOutput matchOutput = callMatch(matchInput, isDebugMode);
+        MatchOutput matchOutput = callMatch(matchInput, additionalScoreConfig.isDebug());
 
-        getRecordFromMatchOutput(fieldSchemas, record, matchInput, matchOutput, matchLogs, matchErrorLogs, requestId);
+        getRecordFromMatchOutput(singleMatchingConfig.getFieldSchemas(), record, matchInput, matchOutput,
+                singleMatchingConfig.getMatchLogs(), singleMatchingConfig.getMatchErrorLogs(),
+                additionalScoreConfig.getRequestId());
 
         Map<String, Map<String, Object>> resultMap = new HashMap<>();
 
@@ -227,5 +164,12 @@ public class SingleRecordMatcher extends AbstractMatcher {
         }
 
         return selectedLeadEnrichmentAttributes;
+    }
+
+    @Override
+    public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
+            AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean shouldEnrichOnly) {
+        throw new NotImplementedException("matchAndJoin is not implemented");
     }
 }

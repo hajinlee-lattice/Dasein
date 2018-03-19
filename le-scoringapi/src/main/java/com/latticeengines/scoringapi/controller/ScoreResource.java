@@ -90,7 +90,7 @@ public class ScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         return scorePercentileRecord(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
-                false, requestId);
+                false, requestId, false);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -102,7 +102,7 @@ public class ScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         return scorePercentileRecords(request, scoreRequest, customerSpace, //
                 ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), //
-                false, requestId);
+                false, requestId, false);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -114,7 +114,7 @@ public class ScoreResource extends BaseScoring {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         return scoreRecordsDebug(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId);
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -125,6 +125,6 @@ public class ScoreResource extends BaseScoring {
         CustomerSpace customerSpace = OAuth2Utils.getCustomerSpace(request, oAuthUserEntityMgr);
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, //
-                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId);
+                ScoreUtils.canEnrichInternalAttributes(batonService, customerSpace), false, requestId, false);
     }
 }

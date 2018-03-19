@@ -226,6 +226,8 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
                     new Double(signleRecordScoreResponseList.get(idx).getScore()).intValue());
             assertScoreIsWithinAcceptableRange(result.getScores().get(0).getScore().intValue(),
                     expectedScores.get(idx).intValue());
+            System.out.println("idx = " + idx);
+            System.out.println("single record request = " + JsonUtils.serialize(scoreRequests.get(idx)));
             matchTransformedRecord(signleRecordScoreResponseList.get(idx).getTransformedRecord(),
                     result.getTransformedRecordMap().get(result.getScores().get(0).getModelId()));
             idx++;
@@ -305,6 +307,16 @@ public class ScoringResourceDeploymentTestNG extends ScoringResourceDeploymentTe
             }
         }
 
+        if (singleRecordScoreTransformedRecord.size() != batchScoreTransformedRecord.size()) {
+            System.out.println(String.format(
+                    "singleRecordScoreTransformedRecord.size() = %d, batchScoreTransformedRecord.size() = %d"
+                            + "\n\nsingleRecordScoreTransformedRecord = %s\n======="
+                            + "\nbatchScoreTransformedRecord = %s\n\n",
+                    singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size(),
+                    JsonUtils.serialize(singleRecordScoreTransformedRecord),
+                    JsonUtils.serialize(batchScoreTransformedRecord)));
+            System.exit(1);
+        }
         Assert.assertEquals(singleRecordScoreTransformedRecord.size(), batchScoreTransformedRecord.size());
         Assert.assertTrue(singleRecordScoreTransformedRecord.size() > 0);
 

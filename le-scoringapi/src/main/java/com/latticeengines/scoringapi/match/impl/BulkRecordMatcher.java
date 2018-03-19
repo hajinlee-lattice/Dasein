@@ -26,6 +26,9 @@ import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.util.MatchTypeUtil;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
+import com.latticeengines.scoringapi.score.BulkMatchingContext;
+import com.latticeengines.scoringapi.score.SingleMatchingContext;
 import com.latticeengines.scoringapi.score.impl.RecordModelTuple;
 
 @Component
@@ -45,54 +48,12 @@ public class BulkRecordMatcher extends AbstractMatcher {
     }
 
     @Override
-    public Map<String, Map<String, Object>> matchAndJoin(//
-            CustomerSpace space, InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, //
-            Map<String, Object> record, //
-            ModelSummary modelSummary, //
-            boolean forEnrichment, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean shouldReturnAllEnrichment) {
-        throw new NotImplementedException("matchAndJoin is not implemented");
-    }
-
-    @Override
-    public Map<String, Map<String, Object>> matchAndJoin(//
-            CustomerSpace space, InterpretedFields interpreted, //
-            Map<String, FieldSchema> fieldSchemas, //
-            Map<String, Object> record, //
-            ModelSummary modelSummary, //
-            boolean forEnrichment, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            String requestId, boolean isDebugMode, //
-            List<String> matchLogs, List<String> matchErrorLogs, //
-            boolean shouldReturnAllEnrichment, //
-            boolean enforceFuzzyMatch, boolean skipDnBCache) {
-        throw new NotImplementedException("matchAndJoin is not implemented");
-    }
-
-    @Override
     public Map<RecordModelTuple, Map<String, Map<String, Object>>> matchAndJoin(//
-            CustomerSpace space, //
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous, //
-            boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            boolean shouldEnrichOnly, //
-            boolean isDebugMode, //
-            String requestId, //
-            Map<RecordModelTuple, List<String>> matchLogMap, //
-            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
+            AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean shouldEnrichOnly) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
-                buildMatchInput(space, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList, isHomogeneous, enrichInternalAttributes,
-                        performFetchOnlyForMatching, shouldEnrichOnly, isDebugMode, requestId);
+                buildMatchInput(additionalScoreConfig, bulkMatchingConfig, partiallyOrderedParsedTupleList,
+                        shouldEnrichOnly);
 
         Map<RecordModelTuple, Map<String, Map<String, Object>>> results = new HashMap<>();
 
@@ -103,9 +64,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 continue;
             }
 
-            BulkMatchOutput matchOutput = executeMatch(pair.getKey(), isDebugMode);
+            BulkMatchOutput matchOutput = executeMatch(pair.getKey(), additionalScoreConfig.isDebug());
 
-            postProcessMatchOutput(pair, matchOutput, results, uniqueFieldSchemasMap, matchLogMap, matchErrorLogMap);
+            postProcessMatchOutput(pair, matchOutput, results, bulkMatchingConfig);
         }
 
         if (log.isInfoEnabled()) {
@@ -120,9 +81,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
             Pair<BulkMatchInput, List<RecordModelTuple>> pair, //
             BulkMatchOutput matchOutput, //
             Map<RecordModelTuple, Map<String, Map<String, Object>>> results, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            Map<RecordModelTuple, List<String>> matchLogMap, //
-            Map<RecordModelTuple, List<String>> matchErrorLogMap) {
+            BulkMatchingContext bulkMatchingConfig) {
         int idx = 0;
 
         List<MatchOutput> outputList = matchOutput.getOutputList();
@@ -130,10 +89,10 @@ public class BulkRecordMatcher extends AbstractMatcher {
         for (RecordModelTuple tuple : pair.getValue()) {
             List<String> matchLogs = new ArrayList<>();
             List<String> matchErrorLogs = new ArrayList<>();
-            postProcessSingleMatchOutput(pair, results, uniqueFieldSchemasMap, //
+            postProcessSingleMatchOutput(pair, results, bulkMatchingConfig.getUniqueFieldSchemasMap(), //
                     idx++, outputList, tuple, matchLogs, matchErrorLogs);
-            matchLogMap.put(tuple, matchLogs);
-            matchErrorLogMap.put(tuple, matchErrorLogs);
+            bulkMatchingConfig.getUnorderedMatchLogMap().put(tuple, matchLogs);
+            bulkMatchingConfig.getUnorderedMatchErrorLogMap().put(tuple, matchErrorLogs);
         }
     }
 
@@ -194,27 +153,20 @@ public class BulkRecordMatcher extends AbstractMatcher {
     }
 
     private Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> buildMatchInput(//
-            CustomerSpace space, //
+            AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
             List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList, //
-            boolean isHomogeneous, boolean enrichInternalAttributes, //
-            boolean performFetchOnlyForMatching, //
-            boolean shouldEnrichOnly, //
-            boolean isDebugMode, //
-            String requestId) {
+            boolean shouldEnrichOnly) {
         Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap = //
-                initializeMatchInputMap(isHomogeneous);
+                initializeMatchInputMap(additionalScoreConfig.isHomogeneous());
 
-        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = getEnrichmentMetadata(space,
-                partiallyOrderedParsedTupleList, enrichInternalAttributes);
+        List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = getEnrichmentMetadata(
+                additionalScoreConfig.getSpace(), bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(),
+                additionalScoreConfig.isEnrichInternalAttributes());
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
-            prepareAndSetMatchInput(space, partiallyOrderedParsedTupleList, //
-                    uniqueFieldSchemasMap, originalOrderModelSummaryList, //
+            prepareAndSetMatchInput(additionalScoreConfig, bulkMatchingConfig, partiallyOrderedParsedTupleList, //
                     matchInputMap, recordModelTuple, selectedLeadEnrichmentAttributes, //
-                    enrichInternalAttributes, performFetchOnlyForMatching, //
-                    shouldEnrichOnly, isDebugMode, requestId);
+                    shouldEnrichOnly);
         }
 
         return matchInputMap;
@@ -242,17 +194,14 @@ public class BulkRecordMatcher extends AbstractMatcher {
         return selectedLeadEnrichmentAttributes;
     }
 
-    private void prepareAndSetMatchInput(CustomerSpace space, //
-            List<RecordModelTuple> partiallyOrderedParsedTupleList, //
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap, //
-            List<ModelSummary> originalOrderModelSummaryList, //
+    private void prepareAndSetMatchInput(AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig, List<RecordModelTuple> partiallyOrderedParsedTupleList, //
             Map<String, Pair<BulkMatchInput, List<RecordModelTuple>>> matchInputMap, //
             RecordModelTuple recordModelTuple, //
             List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes, //
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, //
-            boolean shouldEnrichOnly, boolean isDebugMode, //
-            String requestId) {
-        ModelSummary modelSummary = getModelSummary(originalOrderModelSummaryList, recordModelTuple.getModelId());
+            boolean shouldEnrichOnly) {
+        ModelSummary modelSummary = getModelSummary(bulkMatchingConfig.getOriginalOrderModelSummaryList(),
+                recordModelTuple.getModelId());
 
         boolean shouldCallEnrichmentExplicitly = //
                 shouldCallEnrichmentExplicitly(modelSummary, //
@@ -274,18 +223,19 @@ public class BulkRecordMatcher extends AbstractMatcher {
             if (!shouldEnrichOnly && modelSummary != null) {
                 // IMP - make sure to not use performFetchOnlyForMatching for
                 // RTS based lookup
-                MatchInput matchOnlyInput = buildMatchInput(space, //
+                MatchInput matchOnlyInput = buildMatchInput(additionalScoreConfig.getSpace(), //
                         recordModelTuple.getParsedData().getValue(), //
                         recordModelTuple.getParsedData().getKey(), //
                         modelSummary, null, false, currentDataCloudVersion, //
-                        false, requestId, isDebugMode, false, false);
+                        false, additionalScoreConfig.getRequestId(), additionalScoreConfig.isDebug(), false, false);
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, //
                         recordModelTuple, matchOnlyInput);
                 log.info(String.format(
                         "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                        space.getTenantId(), RTS_MATCH_ONLY, modelSummary == null ? null : modelSummary.getId(),
-                        matchOnlyInput.getDataCloudVersion(), matchOnlyInput.getData().size()));
+                        additionalScoreConfig.getSpace().getTenantId(), RTS_MATCH_ONLY,
+                        modelSummary == null ? null : modelSummary.getId(), matchOnlyInput.getDataCloudVersion(),
+                        matchOnlyInput.getData().size()));
             }
 
             // call enrichment (without predefined column selection) against
@@ -299,26 +249,29 @@ public class BulkRecordMatcher extends AbstractMatcher {
                                     null)//
                             .getVersion();
 
-            MatchInput matchAMEnrichmentInput = buildMatchInput(space, //
+            MatchInput matchAMEnrichmentInput = buildMatchInput(additionalScoreConfig.getSpace(), //
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     selectedLeadEnrichmentAttributes, //
                     true, currentDataCloudVersionForEnrichment, //
-                    performFetchOnlyForMatching, requestId, isDebugMode, false, false);
+                    additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.getRequestId(),
+                    additionalScoreConfig.isDebug(), false, false);
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, //
                     recordModelTuple, matchAMEnrichmentInput);
             log.info(String.format(
                     "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                    space.getTenantId(), AM_ENRICH_ONLY, modelSummary == null ? null : modelSummary.getId(),
-                    matchAMEnrichmentInput.getDataCloudVersion(), matchAMEnrichmentInput.getData().size()));
+                    additionalScoreConfig.getSpace().getTenantId(), AM_ENRICH_ONLY,
+                    modelSummary == null ? null : modelSummary.getId(), matchAMEnrichmentInput.getDataCloudVersion(),
+                    matchAMEnrichmentInput.getData().size()));
         } else {
             // call regular match
-            MatchInput matchInput = buildMatchInput(space, //
+            MatchInput matchInput = buildMatchInput(additionalScoreConfig.getSpace(), //
                     recordModelTuple.getParsedData().getValue(), //
                     recordModelTuple.getParsedData().getKey(), modelSummary, //
                     recordModelTuple.getRecord().isPerformEnrichment() ? selectedLeadEnrichmentAttributes : null, false,
-                    currentDataCloudVersion, performFetchOnlyForMatching, requestId, isDebugMode, false, false);
+                    currentDataCloudVersion, additionalScoreConfig.isPerformFetchOnlyForMatching(),
+                    additionalScoreConfig.getRequestId(), additionalScoreConfig.isDebug(), false, false);
 
             String key = RTS_MATCH_ONLY;
             if (modelSummary != null
@@ -329,8 +282,9 @@ public class BulkRecordMatcher extends AbstractMatcher {
             putInBulkMatchInput(key, matchInputMap, recordModelTuple, matchInput);
             log.info(String.format(
                     "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                    space.getTenantId(), key, modelSummary == null ? null : modelSummary.getId(),
-                    matchInput.getDataCloudVersion(), matchInput.getData().size()));
+                    additionalScoreConfig.getSpace().getTenantId(), key,
+                    modelSummary == null ? null : modelSummary.getId(), matchInput.getDataCloudVersion(),
+                    matchInput.getData().size()));
         }
     }
 
@@ -383,8 +337,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
             boolean isHomogeneous) {
         Pair<BulkMatchInput, List<RecordModelTuple>> pair = //
                 new MutablePair<BulkMatchInput, //
-                List<RecordModelTuple>>(bulkMatchInput, //
-                        tuplesForRTSMatchOnly);
+                        List<RecordModelTuple>>(bulkMatchInput, //
+                                tuplesForRTSMatchOnly);
         matchInputMap.put(key, pair);
         bulkMatchInput.setHomogeneous(isHomogeneous);
     }
@@ -398,5 +352,12 @@ public class BulkRecordMatcher extends AbstractMatcher {
         }
 
         return null;
+    }
+
+    @Override
+    public Map<String, Map<String, Object>> matchAndJoin(AdditionalScoreConfig additionalScoreConfig,
+            SingleMatchingContext singleMatchingConfig, InterpretedFields interpreted, Map<String, Object> record,
+            boolean forEnrichment) {
+        throw new NotImplementedException("matchAndJoin is not implemented");
     }
 }

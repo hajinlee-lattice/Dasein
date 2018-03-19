@@ -258,6 +258,9 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
+        if(count.intValue() !=  MAX_PREMIUM_SELECT){
+            System.exit(1);
+        }
         Assert.assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 

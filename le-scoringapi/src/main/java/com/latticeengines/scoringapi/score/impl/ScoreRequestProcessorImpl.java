@@ -26,7 +26,6 @@ import com.google.common.base.Strings;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -55,7 +54,10 @@ import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.match.Matcher;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
+import com.latticeengines.scoringapi.score.BulkMatchingContext;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
+import com.latticeengines.scoringapi.score.SingleMatchingContext;
 import com.latticeengines.scoringapi.transform.RecordTransformer;
 
 @Component("scoreRequestProcessor")
@@ -81,128 +83,118 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     private boolean shouldPublish;
 
     @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
-            boolean isCalledViaApiConsole) {
-        return process(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
-                isCalledViaApiConsole, false, false);
-    }
-
-    @Override
-    public ScoreResponse process(CustomerSpace space, ScoreRequest request, boolean isDebug, //
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
-            boolean isCalledViaApiConsole, boolean enforceFuzzyMatch, boolean skipDnBCache) {
+    public ScoreResponse process(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig) {
         split("requestPreparation");
         requestInfo.put("Rule", Strings.nullToEmpty(request.getRule()));
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
 
-        ScoringArtifacts scoringArtifacts = null;
         boolean shouldSkipMatching = false;
-        Map<String, FieldSchema> fieldSchemas = null;
-        ModelJsonTypeHandler modelJsonTypeHandler = null;
+
+        SingleMatchingContext singleMatchingConfig = SingleMatchingContext.instance();
 
         boolean shouldSkipScoring = false;
 
-        if (!isCalledViaApiConsole || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
+        if (!additionalScoreConfig.isCalledViaApiConsole()
+                || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
             if (StringUtils.isBlank(request.getModelId())) {
                 throw new ScoringApiException(LedpCode.LEDP_31101);
             }
 
-            scoringArtifacts = modelRetriever.getModelArtifacts(space, request.getModelId());
-            requestInfo.put("ModelId", scoringArtifacts.getModelSummary().getId());
-            requestInfo.put("ModelName", scoringArtifacts.getModelSummary().getDisplayName());
-            if (scoringArtifacts.getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
+            singleMatchingConfig.setScoringArtifacts( //
+                    modelRetriever.getModelArtifacts(additionalScoreConfig.getSpace(), request.getModelId()));
+
+            requestInfo.put("ModelId", singleMatchingConfig.getScoringArtifacts().getModelSummary().getId());
+            requestInfo.put("ModelName", singleMatchingConfig.getScoringArtifacts().getModelSummary().getDisplayName());
+
+            if (singleMatchingConfig.getScoringArtifacts().getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
                 throw new ScoringApiException(LedpCode.LEDP_31114,
-                        new String[] { scoringArtifacts.getModelSummary().getId() });
+                        new String[] { singleMatchingConfig.getScoringArtifacts().getModelSummary().getId() });
             }
-            requestInfo.put("ModelType",
-                    (scoringArtifacts.getModelType() == null ? "" : scoringArtifacts.getModelType().name()));
-            shouldSkipMatching = shouldSkipMatching(scoringArtifacts, performFetchOnlyForMatching);
-            fieldSchemas = scoringArtifacts.getFieldSchemas();
+            requestInfo.put("ModelType", (singleMatchingConfig.getScoringArtifacts().getModelType() == null ? ""
+                    : singleMatchingConfig.getScoringArtifacts().getModelType().name()));
+            shouldSkipMatching = shouldSkipMatching(singleMatchingConfig.getScoringArtifacts(),
+                    additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.isForceSkipMatching());
+
+            singleMatchingConfig.setFieldSchemas(singleMatchingConfig.getScoringArtifacts().getFieldSchemas());
 
             split("retrieveModelArtifacts");
 
-            modelJsonTypeHandler = getModelJsonTypeHandler(scoringArtifacts.getModelJsonType());
+            singleMatchingConfig.setModelJsonTypeHandler( //
+                    getModelJsonTypeHandler(singleMatchingConfig.getScoringArtifacts().getModelJsonType()));
 
             if (!shouldSkipMatching) {
-                ScoringApiException missingEssentialFieldsException = checkForMissingFields(scoringArtifacts,
-                        fieldSchemas, request.getRecord(), modelJsonTypeHandler, requestId);
+                ScoringApiException missingEssentialFieldsException = checkForMissingFields(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getFieldSchemas(),
+                        request.getRecord(), singleMatchingConfig.getModelJsonTypeHandler(),
+                        additionalScoreConfig.getRequestId());
                 if (missingEssentialFieldsException != null) {
-                    if (!performFetchOnlyForMatching || StringStandardizationUtils.objectIsNullOrEmptyString(
-                            request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
+                    if (!additionalScoreConfig.isPerformFetchOnlyForMatching()
+                            || StringStandardizationUtils.objectIsNullOrEmptyString(
+                                    request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
                         throw missingEssentialFieldsException;
                     }
                 }
             }
         } else {
             shouldSkipScoring = true;
-            fieldSchemas = new HashMap<>();
-            modelJsonTypeHandler = getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL);
+            singleMatchingConfig.setFieldSchemas(new HashMap<>());
+            singleMatchingConfig
+                    .setModelJsonTypeHandler(getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL));
         }
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
-                fieldSchemas, request.getRecord(), modelJsonTypeHandler, requestId);
+                singleMatchingConfig.getFieldSchemas(), request.getRecord(),
+                singleMatchingConfig.getModelJsonTypeHandler(), additionalScoreConfig.getRequestId());
+
         String recordId = getIdIfAvailable(parsedRecordAndInterpretedFields.getValue(), request.getRecord());
         requestInfo.put("RecordId", recordId);
         split("parseRecord");
-
-        Map<String, Object> readyToTransformRecord = null;
-        Map<String, Object> enrichmentAttributes = null;
-
-        List<String> matchLogs = new ArrayList<>();
-        List<String> matchErrorLogs = new ArrayList<>();
 
         if (shouldSkipMatching) {
             if (request.isPerformEnrichment()) {
                 // pass null model summary for performing matching for
                 // enrichment only
-                ModelSummary modelSummary = null;
-
-                Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
-                        parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
-                        parsedRecordAndInterpretedFields.getKey(), modelSummary, request.isPerformEnrichment(),
-                        enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebug, matchLogs,
-                        matchErrorLogs, isCalledViaApiConsole, enforceFuzzyMatch, skipDnBCache);
+                Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
+                        additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
+                        parsedRecordAndInterpretedFields.getKey(), true);
                 Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
-                addMissingFields(fieldSchemas, matchedRecord);
-                readyToTransformRecord = matchedRecord;
-                enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
+                addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
+
+                singleMatchingConfig //
+                        .setReadyToTransformRecord(matchedRecord)
+                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
+
             } else {
                 Map<String, Object> formattedRecord = parsedRecordAndInterpretedFields.getKey();
-                addMissingFields(fieldSchemas, formattedRecord);
-                readyToTransformRecord = formattedRecord;
+                addMissingFields(singleMatchingConfig.getFieldSchemas(), formattedRecord);
+                singleMatchingConfig //
+                        .setReadyToTransformRecord(formattedRecord);
             }
         } else {
-            ModelSummary modelSummary = null;
             if (!shouldSkipScoring) {
-                modelSummary = scoringArtifacts.getModelSummary();
+                singleMatchingConfig.setModelSummary(singleMatchingConfig.getScoringArtifacts().getModelSummary());
             }
 
-            Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(space,
-                    parsedRecordAndInterpretedFields.getValue(), fieldSchemas,
-                    parsedRecordAndInterpretedFields.getKey(), modelSummary, request.isPerformEnrichment(),
-                    enrichInternalAttributes, performFetchOnlyForMatching, requestId, isDebug, matchLogs,
-                    matchErrorLogs, isCalledViaApiConsole, enforceFuzzyMatch, skipDnBCache);
+            Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
+                    additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
+                    parsedRecordAndInterpretedFields.getKey(), request.isPerformEnrichment());
             Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
-            addMissingFields(fieldSchemas, matchedRecord);
-            readyToTransformRecord = matchedRecord;
+            addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
+
+            singleMatchingConfig //
+                    .setReadyToTransformRecord(matchedRecord);
 
             if (request.isPerformEnrichment()) {
-                enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
+                singleMatchingConfig //
+                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
             }
-        }
-
-        if (enrichmentAttributes == null) {
-            enrichmentAttributes = new HashMap<>();
         }
 
         split("matchRecord");
 
-        Map<String, Object> transformedRecord = null;
-        if (shouldSkipScoring) {
-            transformedRecord = new HashMap<>();
-        } else {
-            transformedRecord = transform(scoringArtifacts, readyToTransformRecord);
+        if (!shouldSkipScoring) {
+            singleMatchingConfig.setTransformedRecord(transform(singleMatchingConfig.getScoringArtifacts(),
+                    singleMatchingConfig.getReadyToTransformRecord()));
         }
 
         split("transformRecord");
@@ -210,30 +202,33 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         ScoreResponse scoreResponse = null;
 
         if (shouldSkipScoring) {
-            if (isDebug) {
+            if (additionalScoreConfig.isDebug()) {
                 DebugScoreResponse nonScoreResponse = new DebugScoreResponse();
-                nonScoreResponse.setMatchLogs(matchLogs);
-                nonScoreResponse.setMatchErrorMessages(matchErrorLogs);
+                nonScoreResponse.setMatchLogs(singleMatchingConfig.getMatchLogs());
+                nonScoreResponse.setMatchErrorMessages(singleMatchingConfig.getMatchErrorLogs());
                 scoreResponse = nonScoreResponse;
             } else {
                 scoreResponse = new ScoreResponse();
             }
         } else {
-            if (isDebug) {
-                scoreResponse = modelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                        readyToTransformRecord, matchLogs, matchErrorLogs);
+            if (additionalScoreConfig.isDebug()) {
+                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateDebugScoreResponse(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord(),
+                        singleMatchingConfig.getReadyToTransformRecord(), singleMatchingConfig.getMatchLogs(),
+                        singleMatchingConfig.getMatchErrorLogs());
             } else {
-                scoreResponse = modelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateScoreResponse(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord());
             }
         }
 
-        scoreResponse.setEnrichmentAttributeValues(enrichmentAttributes);
+        scoreResponse.setEnrichmentAttributeValues(singleMatchingConfig.getEnrichmentAttributes());
         scoreResponse.setId(recordId);
         scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
 
         split("scoreRecord");
         if (shouldPublish) {
-            scoreHistoryEntityMgr.publish(space.getTenantId(), request, scoreResponse);
+            scoreHistoryEntityMgr.publish(additionalScoreConfig.getSpace().getTenantId(), request, scoreResponse);
             split("publishScoreHistory");
         }
 
@@ -250,8 +245,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
     }
 
     @Override
-    public List<RecordScoreResponse> process(CustomerSpace space, BulkRecordScoreRequest request, //
-            boolean isDebug, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId) {
+    public List<RecordScoreResponse> process(BulkRecordScoreRequest request,
+            AdditionalScoreConfig additionalScoreConfig) {
         List<RecordScoreResponse> scoreResponse = new ArrayList<>();
         String requestTimestamp = DateTimeUtils.convertToStringUTCISO8601(new Date());
 
@@ -262,54 +257,31 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             }
             request.setRequestTimestamp(requestTimestamp);
 
-            Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap = new HashMap<>();
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap = new HashMap<>();
+            BulkMatchingContext bulkMatchingConfig = BulkMatchingContext.instance();
 
-            fetchModelArtifacts(space, request.getRecords(), uniqueScoringArtifactsMap, uniqueFieldSchemasMap);
+            fetchModelArtifacts(additionalScoreConfig, request.getRecords(), bulkMatchingConfig);
             split("retrieveModelArtifacts");
 
-            List<RecordModelTuple> originalOrderParsedTupleList = checkForMissingFields(uniqueScoringArtifactsMap,
-                    uniqueFieldSchemasMap, request, performFetchOnlyForMatching);
+            bulkMatchingConfig.setOriginalOrderParsedTupleList(
+                    checkForMissingFields(bulkMatchingConfig, request, additionalScoreConfig));
 
             split("parseRecord");
 
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList = new ArrayList<>();
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList = new ArrayList<>();
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList = new ArrayList<>();
-            List<RecordModelTuple> partiallyOrderedBadRecordList = new ArrayList<>();
+            extractParsedList(additionalScoreConfig, bulkMatchingConfig);
 
-            extractParsedList(originalOrderParsedTupleList, uniqueScoringArtifactsMap,
-                    partiallyOrderedParsedRecordWithMatchReqList, partiallyOrderedParsedRecordWithoutMatchReqList,
-                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, partiallyOrderedBadRecordList,
-                    performFetchOnlyForMatching);
-            List<ModelSummary> originalOrderModelSummaryList = extractModelSummaries(originalOrderParsedTupleList,
-                    uniqueScoringArtifactsMap);
+            bulkMatchingConfig.setOriginalOrderModelSummaryList(extractModelSummaries(bulkMatchingConfig));
 
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap = new HashMap<>();
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap = new HashMap<>();
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap = new HashMap<>();
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap = new HashMap<>();
-
-            handleBulkMatchingCases(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching,
-                    requestId, uniqueFieldSchemasMap, originalOrderParsedTupleList,
-                    partiallyOrderedParsedRecordWithMatchReqList, partiallyOrderedParsedRecordWithoutMatchReqList,
-                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, partiallyOrderedBadRecordList,
-                    originalOrderModelSummaryList, unorderedCombinedRecordMap, unorderedLeadEnrichmentMap,
-                    unorderedMatchLogMap, unorderedMatchErrorLogMap);
+            handleBulkMatchingCases(request, additionalScoreConfig, bulkMatchingConfig);
 
             split("matchRecord");
 
-            Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords = transform(
-                    uniqueScoringArtifactsMap, unorderedCombinedRecordMap, originalOrderParsedTupleList);
+            bulkMatchingConfig.setUnorderedTransformedRecords(transform(bulkMatchingConfig));
             split("transformRecord");
 
-            if (isDebug) {
-                scoreResponse = generateDebugScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, unorderedMatchLogMap,
-                        unorderedMatchErrorLogMap);
+            if (additionalScoreConfig.isDebug()) {
+                scoreResponse = generateDebugScoreResponse(additionalScoreConfig, bulkMatchingConfig);
             } else {
-                scoreResponse = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                        originalOrderParsedTupleList, unorderedLeadEnrichmentMap, false, null, null);
+                scoreResponse = generateScoreResponse(additionalScoreConfig, bulkMatchingConfig);
             }
 
             if (log.isInfoEnabled()) {
@@ -317,7 +289,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             }
             split("scoreRecord");
             if (shouldPublish) {
-                scoreHistoryEntityMgr.publish(space.getTenantId(), request.getRecords(), scoreResponse);
+                scoreHistoryEntityMgr.publish(additionalScoreConfig.getSpace().getTenantId(), request.getRecords(),
+                        scoreResponse);
                 split("publishScoreHistory");
             }
         } catch (Exception ex) {
@@ -328,108 +301,71 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     }
 
-    private void handleBulkMatchingCases(CustomerSpace space, BulkRecordScoreRequest request, boolean isDebug,
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> originalOrderParsedTupleList,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-            List<RecordModelTuple> partiallyOrderedBadRecordList, List<ModelSummary> originalOrderModelSummaryList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
-        handleBulkMatchAndEnrich(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching,
-                requestId, uniqueFieldSchemasMap, originalOrderParsedTupleList,
-                partiallyOrderedParsedRecordWithMatchReqList, originalOrderModelSummaryList, unorderedCombinedRecordMap,
-                unorderedLeadEnrichmentMap, unorderedMatchLogMap, unorderedMatchErrorLogMap);
+    private void handleBulkMatchingCases(BulkRecordScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
 
-        handleBulkEnrichOnly(space, request, isDebug, enrichInternalAttributes, performFetchOnlyForMatching, requestId,
-                uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-                originalOrderModelSummaryList, unorderedCombinedRecordMap, unorderedLeadEnrichmentMap,
-                unorderedMatchLogMap, unorderedMatchErrorLogMap);
+        handleBulkMatchAndEnrich(request, additionalScoreConfig, bulkMatchingConfig);
 
-        handleBulkNoMatchAndEnrich(uniqueFieldSchemasMap, originalOrderParsedTupleList,
-                partiallyOrderedParsedRecordWithoutMatchReqList, unorderedCombinedRecordMap);
+        handleBulkEnrichOnly(request, additionalScoreConfig, bulkMatchingConfig);
 
-        handleBulkBadRecords(partiallyOrderedBadRecordList, unorderedCombinedRecordMap);
+        handleBulkNoMatchAndEnrich(bulkMatchingConfig);
+
+        handleBulkBadRecords(bulkMatchingConfig);
     }
 
-    private void handleBulkBadRecords(List<RecordModelTuple> partiallyOrderedBadRecordList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap) {
-        if (!partiallyOrderedBadRecordList.isEmpty()) {
+    private void handleBulkBadRecords(BulkMatchingContext bulkMatchingConfig) {
+        if (!bulkMatchingConfig.getPartiallyOrderedBadRecordList().isEmpty()) {
             Map<RecordModelTuple, Map<String, Object>> partiallyOrderedBadRecordMap = generateMapForBadRecords(
-                    partiallyOrderedBadRecordList);
-            unorderedCombinedRecordMap.putAll(partiallyOrderedBadRecordMap);
+                    bulkMatchingConfig.getPartiallyOrderedBadRecordList());
+            bulkMatchingConfig.getUnorderedCombinedRecordMap().putAll(partiallyOrderedBadRecordMap);
         }
     }
 
-    private void handleBulkNoMatchAndEnrich(Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> originalOrderParsedTupleList,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap) {
-        if (!partiallyOrderedParsedRecordWithoutMatchReqList.isEmpty()) {
+    private void handleBulkNoMatchAndEnrich(BulkMatchingContext bulkMatchingConfig) {
+        if (!bulkMatchingConfig.getPartiallyOrderedParsedRecordWithoutMatchReqList().isEmpty()) {
             Map<RecordModelTuple, Map<String, Object>> unorderedFormattedRecordWithoutMatchReqMap = format(
-                    partiallyOrderedParsedRecordWithoutMatchReqList);
-            addMissingFields(uniqueFieldSchemasMap, unorderedFormattedRecordWithoutMatchReqMap,
-                    originalOrderParsedTupleList);
-            unorderedCombinedRecordMap.putAll(unorderedFormattedRecordWithoutMatchReqMap);
+                    bulkMatchingConfig.getPartiallyOrderedParsedRecordWithoutMatchReqList());
+            addMissingFields(bulkMatchingConfig, unorderedFormattedRecordWithoutMatchReqMap);
+            bulkMatchingConfig.getUnorderedCombinedRecordMap().putAll(unorderedFormattedRecordWithoutMatchReqMap);
         }
     }
 
-    private void handleBulkEnrichOnly(CustomerSpace space, BulkRecordScoreRequest request, boolean isDebug,
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-            List<ModelSummary> originalOrderModelSummaryList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
-        if (!partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList.isEmpty()) {
+    private void handleBulkEnrichOnly(BulkRecordScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
+        if (!bulkMatchingConfig.getPartiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList().isEmpty()) {
             boolean shouldEnrichOnly = true;
             Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
-                    true).matchAndJoin(space, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList,
-                            uniqueFieldSchemasMap, originalOrderModelSummaryList, request.isHomogeneous(),
-                            enrichInternalAttributes, performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId,
-                            unorderedMatchLogMap, unorderedMatchErrorLogMap);
+                    true).matchAndJoin(additionalScoreConfig, bulkMatchingConfig,
+                            bulkMatchingConfig.getPartiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList(),
+                            shouldEnrichOnly);
 
             Map<RecordModelTuple, Map<String, Object>> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap = format(
-                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList);
-            addMissingFields(uniqueFieldSchemasMap, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap,
-                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList);
-            unorderedCombinedRecordMap.putAll(partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap);
+                    bulkMatchingConfig.getPartiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList());
+            addMissingFields(bulkMatchingConfig, partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap);
+            bulkMatchingConfig.getUnorderedCombinedRecordMap()
+                    .putAll(partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqMap);
 
-            unorderedLeadEnrichmentMap.putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
+            bulkMatchingConfig.getUnorderedLeadEnrichmentMap()
+                    .putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
         }
     }
 
-    private void handleBulkMatchAndEnrich(CustomerSpace space, BulkRecordScoreRequest request, boolean isDebug,
-            boolean enrichInternalAttributes, boolean performFetchOnlyForMatching, String requestId,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap,
-            List<RecordModelTuple> originalOrderParsedTupleList,
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList,
-            List<ModelSummary> originalOrderModelSummaryList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
-        if (!partiallyOrderedParsedRecordWithMatchReqList.isEmpty()) {
+    private void handleBulkMatchAndEnrich(BulkRecordScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
+        if (!bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList().isEmpty()) {
             boolean shouldEnrichOnly = false;
             Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = getMatcher(
-                    true).matchAndJoin(space, partiallyOrderedParsedRecordWithMatchReqList, uniqueFieldSchemasMap,
-                            originalOrderModelSummaryList, request.isHomogeneous(), enrichInternalAttributes,
-                            performFetchOnlyForMatching, shouldEnrichOnly, isDebug, requestId, unorderedMatchLogMap,
-                            unorderedMatchErrorLogMap);
+                    true).matchAndJoin(additionalScoreConfig, bulkMatchingConfig,
+                            bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(), shouldEnrichOnly);
 
             Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap = bulkExtractMap(
                     unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
 
-            addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap, originalOrderParsedTupleList);
-            unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
+            addMissingFields(bulkMatchingConfig, unorderedMatchedRecordMap);
+            bulkMatchingConfig.getUnorderedCombinedRecordMap().putAll(unorderedMatchedRecordMap);
 
-            unorderedLeadEnrichmentMap.putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
+            bulkMatchingConfig.getUnorderedLeadEnrichmentMap()
+                    .putAll(bulkExtractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT));
         }
     }
 
@@ -489,60 +425,46 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return formattedMap;
     }
 
-    protected void extractParsedList(List<RecordModelTuple> parsedTupleList, //
-            Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedBadRecordList, //
-            boolean performFetchOnlyForMatching) {
-        for (RecordModelTuple tuple : parsedTupleList) {
-            extractParsedTuple(scoringArtifactsMap, //
-                    partiallyOrderedParsedRecordWithMatchReqList, //
-                    partiallyOrderedParsedRecordWithoutMatchReqList, //
-                    partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
-                    partiallyOrderedBadRecordList, tuple, performFetchOnlyForMatching);
+    protected void extractParsedList(AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
+            extractParsedTuple(additionalScoreConfig, bulkMatchingConfig, tuple);
         }
     }
 
-    private void extractParsedTuple(
-            Map<String, //
-                    Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
-            List<RecordModelTuple> partiallyOrderedBadRecordList, RecordModelTuple tuple, //
-            boolean performFetchOnlyForMatching) {
+    private void extractParsedTuple(AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
+            RecordModelTuple tuple) {
         // put this tuple in either partiallyOrderedPmmlParsedRecordList or in
         // partiallyOrderedParsedRecordWithMatchReqList based on model json type
 
         String modelId = tuple.getModelId();
-        ScoringArtifacts scoringArtifacts = scoringArtifactsMap.get(modelId).getValue();
-        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts, performFetchOnlyForMatching);
+        ScoringArtifacts scoringArtifacts = bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId).getValue();
+        boolean shouldSkipMatching = shouldSkipMatching(scoringArtifacts,
+                additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.isForceSkipMatching());
 
         if (tuple.getException() != null || //
-                scoringArtifactsMap.get(tuple.getModelId()).getValue() == null) {
-            partiallyOrderedBadRecordList.add(tuple);
+                bulkMatchingConfig.getUniqueScoringArtifactsMap().get(tuple.getModelId()).getValue() == null) {
+            bulkMatchingConfig.getPartiallyOrderedBadRecordList().add(tuple);
         } else if (shouldSkipMatching) {
             if (tuple.getRecord().isPerformEnrichment()) {
-                partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList.add(tuple);
+                bulkMatchingConfig.getPartiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList().add(tuple);
             } else {
-                partiallyOrderedParsedRecordWithoutMatchReqList.add(tuple);
+                bulkMatchingConfig.getPartiallyOrderedParsedRecordWithoutMatchReqList().add(tuple);
             }
         } else {
-            partiallyOrderedParsedRecordWithMatchReqList.add(tuple);
+            bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList().add(tuple);
         }
     }
 
-    protected List<ModelSummary> extractModelSummaries(List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<String, Entry<LedpException, ScoringArtifacts>> scoringArtifactsMap) {
+    protected List<ModelSummary> extractModelSummaries(BulkMatchingContext bulkMatchingConfig) {
         List<ModelSummary> originalOrderModelSummaryList = new ArrayList<>();
-        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
             String modelId = tuple.getModelId();
             if (StringUtils.isNotEmpty(modelId)) {
                 ModelSummary modelSummary = null;
-                if (scoringArtifactsMap.get(modelId).getValue() != null) {
-                    modelSummary = scoringArtifactsMap.get(modelId).getValue().getModelSummary();
+                if (bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId).getValue() != null) {
+                    modelSummary = bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId).getValue()
+                            .getModelSummary();
                 }
                 originalOrderModelSummaryList.add(modelSummary);
             } else {
@@ -552,30 +474,24 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return originalOrderModelSummaryList;
     }
 
-    protected List<RecordScoreResponse> generateDebugScoreResponse(
-            Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
-            List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
+    protected List<RecordScoreResponse> generateDebugScoreResponse(AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
         int idx = 0;
 
         List<RecordScoreResponse> debugResponseList = new ArrayList<>();
-        List<RecordScoreResponse> result = generateScoreResponse(uniqueScoringArtifactsMap, unorderedTransformedRecords,
-                originalOrderParsedTupleList, unorderedLeadEnrichmentMap, true, unorderedMatchLogMap,
-                unorderedMatchErrorLogMap);
+        List<RecordScoreResponse> result = generateScoreResponse(additionalScoreConfig, bulkMatchingConfig);
         try {
             for (RecordScoreResponse recordResponse : result) {
                 DebugRecordScoreResponse debugRecordResponse = new DebugRecordScoreResponse(recordResponse);
                 Map<String, Map<String, Object>> transformedDataMap = new HashMap<>();
 
                 for (ScoreModelTuple scoreModelTuple : recordResponse.getScores()) {
-                    RecordModelTuple tuple = originalOrderParsedTupleList.get(idx++);
-                    Map<String, Object> value = unorderedTransformedRecords.get(tuple);
+                    RecordModelTuple tuple = bulkMatchingConfig.getOriginalOrderParsedTupleList().get(idx++);
+                    Map<String, Object> value = bulkMatchingConfig.getUnorderedTransformedRecords().get(tuple);
                     transformedDataMap.put(scoreModelTuple.getModelId(), value);
-                    debugRecordResponse.setMatchLogs(unorderedMatchLogMap.get(tuple));
-                    debugRecordResponse.setMatchErrorMessages(unorderedMatchErrorLogMap.get(tuple));
+                    debugRecordResponse.setMatchLogs(bulkMatchingConfig.getUnorderedMatchLogMap().get(tuple));
+                    debugRecordResponse
+                            .setMatchErrorMessages(bulkMatchingConfig.getUnorderedMatchErrorLogMap().get(tuple));
                 }
 
                 debugRecordResponse.setTransformedRecordMap(transformedDataMap);
@@ -589,16 +505,11 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         }
     }
 
-    protected List<RecordScoreResponse> generateScoreResponse(
-            Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords,
-            List<RecordModelTuple> originalOrderParsedTupleList,
-            Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap, boolean isDebugMode,
-            Map<RecordModelTuple, List<String>> unorderedMatchLogMap,
-            Map<RecordModelTuple, List<String>> unorderedMatchErrorLogMap) {
+    protected List<RecordScoreResponse> generateScoreResponse(AdditionalScoreConfig additionalScoreConfig,
+            BulkMatchingContext bulkMatchingConfig) {
         Map<String, RecordScoreResponse> responseMap = new HashMap<>();
         List<RecordScoreResponse> responseList = new ArrayList<>();
-        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
             String latticeId = tuple.getLatticeId();
             String recordId = tuple.getRecord().getRecordId();
             Map<String, Object> transformedRecord = null;
@@ -626,29 +537,31 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 }
 
                 if (tuple.getException() == null) {
-                    transformedRecord = unorderedTransformedRecords.get(tuple);
+                    transformedRecord = bulkMatchingConfig.getUnorderedTransformedRecords().get(tuple);
 
-                    ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
+                    ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(
+                            bulkMatchingConfig.getUniqueScoringArtifactsMap(), tuple);
                     ModelJsonTypeHandler ModelJsonTypeHandler = getModelJsonTypeHandler(
                             scoringArtifacts.getModelJsonType());
-                    if (isDebugMode) {
+                    if (additionalScoreConfig.isDebug()) {
                         resp = ModelJsonTypeHandler.generateDebugScoreResponse(scoringArtifacts, transformedRecord,
-                                null, unorderedMatchLogMap.get(tuple), unorderedMatchErrorLogMap.get(tuple));
+                                null, bulkMatchingConfig.getUnorderedMatchLogMap().get(tuple),
+                                bulkMatchingConfig.getUnorderedMatchErrorLogMap().get(tuple));
                     } else {
                         resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
                     }
                 } else {
                     if (log.isInfoEnabled()) {
-                        log.info(String.format("Skip scoring for recordId=%s, modelId=%s, as it already has error=%s", 
-                            tuple.getRecord().getRecordId(), tuple.getModelId(),
-                            tuple.getException().getMessage()));
+                        log.info(String.format("Skip scoring for recordId=%s, modelId=%s, as it already has error=%s",
+                                tuple.getRecord().getRecordId(), tuple.getModelId(),
+                                tuple.getException().getMessage()));
                     }
                 }
 
                 if (recordResp != null && tuple.getException() == null
                         && recordResp.getEnrichmentAttributeValues() == null
                         && tuple.getRecord().isPerformEnrichment()) {
-                    Map<String, Object> enrichmentList = unorderedLeadEnrichmentMap.get(tuple);
+                    Map<String, Object> enrichmentList = bulkMatchingConfig.getUnorderedLeadEnrichmentMap().get(tuple);
                     if (enrichmentList == null) {
                         enrichmentList = new HashMap<>();
                     }
@@ -669,7 +582,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             if (exception == null) {
                 score.setScore(resp.getScore());
                 score.setBucket(resp.getBucket());
-                if (isDebugMode) {
+                if (additionalScoreConfig.isDebug()) {
                     score.setProbability(((DebugScoreResponse) resp).getProbability());
                 }
             } else {
@@ -700,16 +613,14 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return schema;
     }
 
-    protected Map<RecordModelTuple, Map<String, Object>> transform(
-            Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap,
-            List<RecordModelTuple> originalOrderParsedTupleList) {
+    protected Map<RecordModelTuple, Map<String, Object>> transform(BulkMatchingContext bulkMatchingConfig) {
         Map<RecordModelTuple, Map<String, Object>> resultMap = new HashMap<>();
-        for (RecordModelTuple tuple : unorderedCombinedRecordMap.keySet()) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getUnorderedCombinedRecordMap().keySet()) {
             try {
-                Map<String, Object> matchedRecord = unorderedCombinedRecordMap.get(tuple);
+                Map<String, Object> matchedRecord = bulkMatchingConfig.getUnorderedCombinedRecordMap().get(tuple);
 
-                ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(uniqueScoringArtifactsMap, tuple);
+                ScoringArtifacts scoringArtifacts = getScoringArtifactForTuple(
+                        bulkMatchingConfig.getUniqueScoringArtifactsMap(), tuple);
                 resultMap.put(tuple, transform(scoringArtifacts, matchedRecord));
             } catch (LedpException ex) {
                 tuple.setException(handleLedpException(ex));
@@ -723,26 +634,24 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return resultMap;
     }
 
-    protected void addMissingFields(Map<String, Map<String, FieldSchema>> fieldSchemasMap, //
-            Map<RecordModelTuple, Map<String, Object>> matchedRecords, //
-            List<RecordModelTuple> parsedTupleList) {
-        for (RecordModelTuple tuple : matchedRecords.keySet()) {
-            Map<String, Object> matchedRecord = matchedRecords.get(tuple);
-            Map<String, FieldSchema> schema = getSchemaForTuple(fieldSchemasMap, tuple);
+    protected void addMissingFields(BulkMatchingContext bulkMatchingConfig,
+            Map<RecordModelTuple, Map<String, Object>> matchedRecords) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getMatchedRecords().keySet()) {
+            Map<String, Object> matchedRecord = bulkMatchingConfig.getMatchedRecords().get(tuple);
+            Map<String, FieldSchema> schema = getSchemaForTuple(bulkMatchingConfig.getUniqueFieldSchemasMap(), tuple);
             addMissingFields(schema, matchedRecord);
         }
     }
 
-    protected List<RecordModelTuple> checkForMissingFields(
-            Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<String, Map<String, FieldSchema>> fieldSchemasMap, BulkRecordScoreRequest request,
-            boolean performFetchOnlyForMatching) {
+    protected List<RecordModelTuple> checkForMissingFields(BulkMatchingContext bulkMatchingConfig,
+            BulkRecordScoreRequest request, AdditionalScoreConfig additionalScoreConfig) {
         List<RecordModelTuple> recordAndFieldList = new ArrayList<>();
         for (Record record : request.getRecords()) {
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                Map<String, FieldSchema> fieldSchemas = fieldSchemasMap.get(modelId);
+                Map<String, FieldSchema> fieldSchemas = bulkMatchingConfig.getUniqueFieldSchemasMap().get(modelId);
                 Map<String, Object> attrValMap = record.getModelAttributeValuesMap().get(modelId);
-                Entry<LedpException, ScoringArtifacts> modelArtifactTuple = uniqueScoringArtifactsMap.get(modelId);
+                Entry<LedpException, ScoringArtifacts> modelArtifactTuple = bulkMatchingConfig
+                        .getUniqueScoringArtifactsMap().get(modelId);
                 String latticeId = record.getRecordId();
                 SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecord = null;
                 ScoringApiException missingEssentialFieldsOrBadModelException = null;
@@ -753,7 +662,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                     ModelJsonTypeHandler modelJsonTypeHandler = getModelJsonTypeHandler(
                             scoringArtifact.getModelJsonType());
 
-                    if (!shouldSkipMatching(scoringArtifact, performFetchOnlyForMatching)) {
+                    if (!shouldSkipMatching(scoringArtifact, additionalScoreConfig.isPerformFetchOnlyForMatching(),
+                            additionalScoreConfig.isForceSkipMatching())) {
                         missingEssentialFieldsOrBadModelException = checkForMissingFields(record.getRecordId(),
                                 scoringArtifact, fieldSchemas, attrValMap, modelJsonTypeHandler, modelId);
                     }
@@ -799,9 +709,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return missingEssentialFieldsOrBadModelException;
     }
 
-    protected void fetchModelArtifacts(CustomerSpace space, List<Record> records,
-            Map<String, java.util.Map.Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap,
-            Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap) {
+    protected void fetchModelArtifacts(AdditionalScoreConfig additionalScoreConfig, List<Record> records,
+            BulkMatchingContext bulkMatchingConfig) {
         // extract a set of unique modelIds across all modelIds
         Set<String> uniqueModelIds = new HashSet<>();
         for (Record record : records) {
@@ -822,7 +731,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             Map<String, FieldSchema> fieldSchema = null;
 
             try {
-                scoringArtifacts = modelRetriever.getModelArtifacts(space, modelId);
+                scoringArtifacts = modelRetriever.getModelArtifacts(additionalScoreConfig.getSpace(), modelId);
                 fieldSchema = scoringArtifacts.getFieldSchemas();
             } catch (Exception e) {
                 log.error(e.getMessage(), e);
@@ -841,8 +750,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
             java.util.Map.Entry<LedpException, ScoringArtifacts> entry = new java.util.AbstractMap.SimpleEntry<>(ex,
                     scoringArtifacts);
-            uniqueScoringArtifactsMap.put(modelId, entry);
-            uniqueFieldSchemasMap.put(modelId, fieldSchema);
+            bulkMatchingConfig.getUniqueScoringArtifactsMap().put(modelId, entry);
+            bulkMatchingConfig.getUniqueFieldSchemasMap().put(modelId, fieldSchema);
         }
     }
 
@@ -975,7 +884,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 : "[For ModelId - " + modelId + "] => ";
     }
 
-    private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts, boolean performFetchOnlyForMatching) {
+    private boolean shouldSkipMatching(ScoringArtifacts scoringArtifacts, boolean performFetchOnlyForMatching,
+            boolean forceSkipMatching) {
+        // priority to this flag
+        if (forceSkipMatching) {
+            return true;
+        }
         boolean shouldSkipMatching = false;
         if (performFetchOnlyForMatching) {
             return shouldSkipMatching;

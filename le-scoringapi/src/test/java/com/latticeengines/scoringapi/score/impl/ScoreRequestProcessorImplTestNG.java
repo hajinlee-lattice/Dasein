@@ -32,6 +32,7 @@ import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.model.ModelRetriever;
 import com.latticeengines.scoringapi.functionalframework.ScoringApiFunctionalTestNGBase;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGBase {
@@ -101,7 +102,18 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
     public void testProcessSingleRecord() {
         boolean thrownException = false;
         try {
-            scoreRequestProcessor.process(space, request, false, false, false, "requestId", false);
+            AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
+                    .setSpace(space) //
+                    .setDebug(false) //
+                    .setEnrichInternalAttributes(false) //
+                    .setPerformFetchOnlyForMatching(false) //
+                    .setRequestId("requestId") //
+                    .setCalledViaApiConsole(false) //
+                    .setEnforceFuzzyMatch(false) //
+                    .setSkipDnBCache(false) //
+                    .setForceSkipMatching(false);
+
+            scoreRequestProcessor.process(request, additionalScoreConfig);
         } catch (Exception e) {
             thrownException = true;
             Assert.assertTrue(e instanceof LedpException);
@@ -116,8 +128,16 @@ public class ScoreRequestProcessorImplTestNG extends ScoringApiFunctionalTestNGB
                 .thenThrow(new LedpException(LedpCode.LEDP_31026, new String[] { modelId }));
         when(warnings.getWarnings(any(String.class))).thenReturn(Collections.emptyList());
         try {
-            List<RecordScoreResponse> responseList = scoreRequestProcessor.process(space, bulkRequest, false, false,
-                    false, requestId);
+            AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
+                    .setSpace(space) //
+                    .setDebug(false) //
+                    .setEnrichInternalAttributes(false) //
+                    .setPerformFetchOnlyForMatching(false) //
+                    .setRequestId(requestId) //
+                    .setHomogeneous(bulkRequest.isHomogeneous()) //
+                    .setForceSkipMatching(false);
+
+            List<RecordScoreResponse> responseList = scoreRequestProcessor.process(bulkRequest, additionalScoreConfig);
             log.info(String.format("ResponseList is %s", responseList.toString()));
             String errorStr = responseList.get(0).getScores().get(0).getError();
             Assert.assertNotNull(errorStr);

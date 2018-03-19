@@ -6,25 +6,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.UUID;
 
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.BulkRecordScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.DebugRecordScoreResponse;
-import com.latticeengines.domain.exposed.scoringapi.FieldSchema;
 import com.latticeengines.domain.exposed.scoringapi.Record;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreModelTuple;
 import com.latticeengines.scoringapi.controller.ScoringResourceDeploymentTestNG;
 import com.latticeengines.scoringapi.controller.TestModelArtifactDataComposition;
 import com.latticeengines.scoringapi.controller.TestModelConfiguration;
-import com.latticeengines.scoringapi.exposed.ScoringArtifacts;
 import com.latticeengines.scoringapi.match.Matcher;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
+import com.latticeengines.scoringapi.score.BulkMatchingContext;
 import com.latticeengines.scoringapi.score.ScoreRequestProcessor;
 
 public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploymentTestNG {
@@ -33,35 +31,29 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     private ScoreRequestProcessor scoreRequestProcessor;
     private ScoreRequestProcessorImpl scoreRequestProcessorImpl;
     private List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList;
-    private Map<String, Map<String, FieldSchema>> uniqueFieldSchemasMap = new HashMap<>();
-    private Map<String, Entry<LedpException, ScoringArtifacts>> uniqueScoringArtifactsMap = new HashMap<>();
     private BulkRecordScoreRequest request;
-    private List<RecordModelTuple> originalOrderParsedTupleList;
-    private List<RecordModelTuple> partiallyOrderedParsedTupleList;
-    private List<RecordModelTuple> partiallyOrderedPmmlParsedRecordList;
-    private List<RecordModelTuple> partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList;
-    private List<RecordModelTuple> partiallyOrderedBadRecordList;
-    private Map<RecordModelTuple, Map<String, Object>> unorderedCombinedRecordMap;
-    private Map<RecordModelTuple, Map<String, Object>> unorderedTransformedRecords;
-    private List<ModelSummary> originalOrderModelSummaryList;
     private Map<RecordModelTuple, Map<String, Object>> unorderedMatchedRecordMap;
     private Map<RecordModelTuple, Map<String, Object>> unorderedLeadEnrichmentMap;
     private Map<String, Map<String, Predefined>> recordModelIdSelectionMap;
-    private Map<RecordModelTuple, List<String>> matchLogMap;
-    private Map<RecordModelTuple, List<String>> matchErrorLogMap;
+    private AdditionalScoreConfig additionalScoreConfig;
+    private BulkMatchingContext bulkMatchingConfig;
 
     public void init() throws IOException {
         scoreRequestProcessor = applicationContext.getBean("customScoreRequestProcessor", ScoreRequestProcessor.class);
         scoreRequestProcessorImpl = (ScoreRequestProcessorImpl) scoreRequestProcessor;
         modelList = createModelList();
-        matchLogMap = new HashMap<>();
-        matchErrorLogMap = new HashMap<>();
+
+        additionalScoreConfig = AdditionalScoreConfig.instance() //
+                .setSpace(customerSpace);
+
+        bulkMatchingConfig = BulkMatchingContext.instance();
     }
 
     private void overwritePredifinedSelection() {
         int i = 0;
-        for (String modelId : uniqueScoringArtifactsMap.keySet()) {
-            ModelSummary modelSummary = uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary();
+        for (String modelId : bulkMatchingConfig.getUniqueScoringArtifactsMap().keySet()) {
+            ModelSummary modelSummary = bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId).getValue()
+                    .getModelSummary();
             Predefined predefinedSelection = (i++ % 2 == 0 ? Predefined.Model : Predefined.RTS);
             modelSummary.setPredefinedSelection(predefinedSelection);
             System.out.println(modelSummary.getId() + " -- " + predefinedSelection);
@@ -73,13 +65,12 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
             Map<String, Predefined> modelIdSelectionMap = new HashMap<>();
 
             for (String modelId : record.getModelAttributeValuesMap().keySet()) {
-                modelIdSelectionMap.put(modelId,
-                        uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary().getPredefinedSelection());
+                modelIdSelectionMap.put(modelId, bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId)
+                        .getValue().getModelSummary().getPredefinedSelection());
             }
 
             recordModelIdSelectionMap.put(record.getRecordId(), modelIdSelectionMap);
         }
-
     }
 
     @Test(groups = "deployment", enabled = true)
@@ -87,11 +78,11 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
         init();
         request = getBulkScoreRequest(MAX_RECORD_COUNT, modelList, false);
         List<Record> records = request.getRecords();
-        scoreRequestProcessorImpl.fetchModelArtifacts(customerSpace, records, uniqueScoringArtifactsMap,
-                uniqueFieldSchemasMap);
+
+        scoreRequestProcessorImpl.fetchModelArtifacts(additionalScoreConfig, records, bulkMatchingConfig);
         Assert.assertEquals(MAX_RECORD_COUNT, records.size());
-        Assert.assertEquals(modelList.size(), uniqueScoringArtifactsMap.size());
-        Assert.assertEquals(modelList.size(), uniqueFieldSchemasMap.size());
+        Assert.assertEquals(modelList.size(), bulkMatchingConfig.getUniqueScoringArtifactsMap().size());
+        Assert.assertEquals(modelList.size(), bulkMatchingConfig.getUniqueFieldSchemasMap().size());
         overwritePredifinedSelection();
     }
 
@@ -116,10 +107,14 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
             dunsRecords.add(dunsRecord);
             dunsRecords.add(missingDUNSRecord);
             bulkRequest.setRecords(dunsRecords);
-            originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
-                    uniqueFieldSchemasMap, bulkRequest, false);
 
-            for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+            AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
+                    .setSpace(customerSpace);
+
+            bulkMatchingConfig.setOriginalOrderParsedTupleList(scoreRequestProcessorImpl
+                    .checkForMissingFields(bulkMatchingConfig, bulkRequest, additionalScoreConfig));
+
+            for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
                 Assert.assertNull(tuple.getException());
             }
         }
@@ -127,12 +122,13 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testFetchModelArtifacts" })
     public void testCheckForMissingFields() throws IOException {
-        originalOrderParsedTupleList = scoreRequestProcessorImpl.checkForMissingFields(uniqueScoringArtifactsMap,
-                uniqueFieldSchemasMap, request, false);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderParsedTupleList.size());
+        bulkMatchingConfig.setOriginalOrderParsedTupleList(
+                scoreRequestProcessorImpl.checkForMissingFields(bulkMatchingConfig, request, additionalScoreConfig));
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                bulkMatchingConfig.getOriginalOrderParsedTupleList().size());
 
         int idx = 0;
-        for (RecordModelTuple tuple : originalOrderParsedTupleList) {
+        for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
             Assert.assertNull(tuple.getException());
             Record record = request.getRecords().get(idx / RECORD_MODEL_CARDINALITY);
             Assert.assertEquals(record, tuple.getRecord());
@@ -153,31 +149,23 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testCheckForMissingFields" })
     public void testExtractParsedList() {
-        partiallyOrderedParsedTupleList = new ArrayList<>();
-        partiallyOrderedPmmlParsedRecordList = new ArrayList<>();
-        partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList = new ArrayList<>();
-        scoreRequestProcessorImpl.extractParsedList(originalOrderParsedTupleList, //
-                uniqueScoringArtifactsMap, partiallyOrderedParsedTupleList, //
-                partiallyOrderedPmmlParsedRecordList, //
-                partiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList, //
-                partiallyOrderedBadRecordList, false);
-
+        scoreRequestProcessorImpl.extractParsedList(additionalScoreConfig, bulkMatchingConfig);
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractParsedList" })
     public void testExtractModelSummaries() {
-        originalOrderModelSummaryList = scoreRequestProcessorImpl.extractModelSummaries(originalOrderParsedTupleList,
-                uniqueScoringArtifactsMap);
-        Assert.assertNotNull(originalOrderModelSummaryList);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, originalOrderModelSummaryList.size());
+        bulkMatchingConfig
+                .setOriginalOrderModelSummaryList(scoreRequestProcessorImpl.extractModelSummaries(bulkMatchingConfig));
+        Assert.assertNotNull(bulkMatchingConfig.getOriginalOrderModelSummaryList());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                bulkMatchingConfig.getOriginalOrderModelSummaryList().size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testExtractModelSummaries" })
     public void testBulkMatchAndJoin() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
-                .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList, false, false, false, false, true, UUID.randomUUID().toString(),
-                        matchLogMap, matchErrorLogMap);
+                .getMatcher(true).matchAndJoin(additionalScoreConfig, bulkMatchingConfig,
+                        bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(), false);
 
         unorderedMatchedRecordMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.RESULT);
         unorderedLeadEnrichmentMap = extractMap(unorderedMatchedRecordEnrichmentMap, Matcher.ENRICHMENT);
@@ -189,28 +177,26 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testBulkMatchAndJoin" })
     public void testAddMissingFields() {
-        scoreRequestProcessorImpl.addMissingFields(uniqueFieldSchemasMap, unorderedMatchedRecordMap,
-                originalOrderParsedTupleList);
-        unorderedCombinedRecordMap = new HashMap<>();
-        unorderedCombinedRecordMap.putAll(unorderedMatchedRecordMap);
-        Assert.assertNotNull(unorderedCombinedRecordMap);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedCombinedRecordMap.size());
+        scoreRequestProcessorImpl.addMissingFields(bulkMatchingConfig, unorderedMatchedRecordMap);
+        bulkMatchingConfig.getUnorderedCombinedRecordMap().putAll(unorderedMatchedRecordMap);
+        Assert.assertNotNull(bulkMatchingConfig.getUnorderedCombinedRecordMap());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                bulkMatchingConfig.getUnorderedCombinedRecordMap().size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testAddMissingFields" })
     public void testTransform() {
-        unorderedTransformedRecords = scoreRequestProcessorImpl.transform(uniqueScoringArtifactsMap,
-                unorderedCombinedRecordMap, originalOrderParsedTupleList);
+        bulkMatchingConfig.setUnorderedTransformedRecords(scoreRequestProcessorImpl.transform(bulkMatchingConfig));
 
-        Assert.assertNotNull(unorderedTransformedRecords);
-        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY, unorderedTransformedRecords.size());
+        Assert.assertNotNull(bulkMatchingConfig.getUnorderedTransformedRecords());
+        Assert.assertEquals(MAX_RECORD_COUNT * RECORD_MODEL_CARDINALITY,
+                bulkMatchingConfig.getUnorderedTransformedRecords().size());
     }
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testTransform" })
     public void testGenerateDebugScoreResponse() {
-        List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl.generateDebugScoreResponse(
-                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList,
-                unorderedLeadEnrichmentMap, matchLogMap, matchErrorLogMap);
+        List<RecordScoreResponse> recordScoreResponseDebugList = scoreRequestProcessorImpl
+                .generateDebugScoreResponse(additionalScoreConfig, bulkMatchingConfig);
 
         Assert.assertNotNull(recordScoreResponseDebugList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseDebugList.size());
@@ -225,10 +211,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
 
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateDebugScoreResponse" })
     public void testGenerateScoreResponse() {
-        List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl.generateScoreResponse(
-                uniqueScoringArtifactsMap, unorderedTransformedRecords, originalOrderParsedTupleList,
-                unorderedLeadEnrichmentMap, false, new HashMap<RecordModelTuple, List<String>>(),
-                new HashMap<RecordModelTuple, List<String>>());
+        List<RecordScoreResponse> recordScoreResponseList = scoreRequestProcessorImpl
+                .generateScoreResponse(additionalScoreConfig, bulkMatchingConfig);
 
         Assert.assertNotNull(recordScoreResponseList);
         Assert.assertEquals(MAX_RECORD_COUNT, recordScoreResponseList.size());
@@ -241,9 +225,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
     @Test(groups = "deployment", enabled = true, dependsOnMethods = { "testGenerateScoreResponse" })
     public void testBulkMatchAndJoinEnrichOnly() {
         Map<RecordModelTuple, Map<String, Map<String, Object>>> unorderedMatchedRecordEnrichmentMap = scoreRequestProcessorImpl
-                .getMatcher(true).matchAndJoin(customerSpace, partiallyOrderedParsedTupleList, uniqueFieldSchemasMap,
-                        originalOrderModelSummaryList, false, false, false, true, true, UUID.randomUUID().toString(),
-                        matchLogMap, matchErrorLogMap);
+                .getMatcher(true).matchAndJoin(additionalScoreConfig, bulkMatchingConfig,
+                        bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(), false);
 
         Map<RecordModelTuple, Map<String, Object>> matchedResult = extractMap(unorderedMatchedRecordEnrichmentMap,
                 Matcher.RESULT);
@@ -306,8 +289,8 @@ public class ScoreRequestProcessorDeploymentTestNG extends ScoringResourceDeploy
                 Map<String, Object> matchedResult = unorderedMatchedRecordMap.get(tuple);
                 String modelId = tuple.getModelId();
 
-                Predefined columnSelection = uniqueScoringArtifactsMap.get(modelId).getValue().getModelSummary()
-                        .getPredefinedSelection();
+                Predefined columnSelection = bulkMatchingConfig.getUniqueScoringArtifactsMap().get(modelId).getValue()
+                        .getModelSummary().getPredefinedSelection();
 
                 Assert.assertEquals(modelIdSelectionMap.get(modelId), columnSelection);
 

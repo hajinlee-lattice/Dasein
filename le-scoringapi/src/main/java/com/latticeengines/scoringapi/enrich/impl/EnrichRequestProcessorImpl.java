@@ -1,6 +1,5 @@
 package com.latticeengines.scoringapi.enrich.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,6 +23,8 @@ import com.latticeengines.scoringapi.enrich.EnrichRequestProcessor;
 import com.latticeengines.scoringapi.exposed.InterpretedFields;
 import com.latticeengines.scoringapi.exposed.exception.ScoringApiException;
 import com.latticeengines.scoringapi.match.Matcher;
+import com.latticeengines.scoringapi.score.AdditionalScoreConfig;
+import com.latticeengines.scoringapi.score.SingleMatchingContext;
 import com.latticeengines.scoringapi.score.impl.BaseRequestProcessorImpl;
 
 @Component("enrichRequestProcessor")
@@ -63,11 +64,17 @@ public class EnrichRequestProcessorImpl extends BaseRequestProcessorImpl impleme
         split("requestPreparation");
 
         Map<String, Object> enrichmentAttributes = null;
+        AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
+                .setSpace(space) //
+                .setEnrichInternalAttributes(enrichInternalAttributes) //
+                .setRequestId(requestId);
+
+        SingleMatchingContext singleMatchingConfig = SingleMatchingContext.instance() //
+                .setFieldSchemas(fieldSchemas);
 
         Map<String, Map<String, Object>> matchedRecordEnrichmentMap = //
-                getMatcher(false).matchAndJoin(space, interpreted, //
-                        fieldSchemas, record, null, true, enrichInternalAttributes, false, requestId, false,
-                        new ArrayList<String>(), new ArrayList<String>(), false);
+                getMatcher(false).matchAndJoin(additionalScoreConfig, singleMatchingConfig, interpreted, //
+                        record, true);
         enrichmentAttributes = extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT);
         if (enrichmentAttributes == null) {
             enrichmentAttributes = new HashMap<>();
