@@ -30,8 +30,6 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.controller.RatingEngineResourceDeploymentTestNG;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
@@ -86,10 +84,7 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         modelSummary = BucketedScoreServiceTestUtils.createModelSummary(modelId);
         modelSummaryService.createModelSummary(modelSummary, mainTestTenant.getId());
 
-        segment = new MetadataSegment();
-        Restriction accountRestriction = RatingEngineResourceDeploymentTestNG.getTestRestriction();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setContactFrontEndRestriction(new FrontEndRestriction());
+        segment = RatingEngineResourceDeploymentTestNG.constructSegment(SEGMENT_NAME);
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);

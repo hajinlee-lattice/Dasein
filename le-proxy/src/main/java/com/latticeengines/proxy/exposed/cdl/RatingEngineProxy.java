@@ -38,8 +38,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return getRatingEngineSummaries(customerSpace, null, null);
     }
 
-    @SuppressWarnings("rawtypes")
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace, String status, String type) {
+        return getRatingEngineSummaries(customerSpace, status, type, null);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace, String status, String type,
+            Boolean onlyInRedshift) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(status)) {
@@ -47,6 +52,9 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         }
         if (StringUtils.isNotBlank(type)) {
             params.add("type=" + type);
+        }
+        if (onlyInRedshift != null) {
+            params.add("only-in-redshift=" + onlyInRedshift.toString());
         }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
@@ -136,7 +144,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertList(list, RatingEngineNote.class);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     public Map<RatingEngineDependencyType, List<String>> getRatingEngineDependencies(String customerSpace,
             String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/dependencies", shortenCustomerSpace(customerSpace),

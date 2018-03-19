@@ -47,4 +47,7 @@ public interface RatingEngineService {
 
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, RatingModel ratingModel, String userEmail);
 
+    List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
+            Boolean onlyInRedshift);
+
 }

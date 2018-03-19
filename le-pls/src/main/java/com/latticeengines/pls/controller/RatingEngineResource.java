@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -71,14 +72,15 @@ public class RatingEngineResource {
     @Inject
     private ActionService actionService;
 
-    @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
+    @GetMapping(value = "")
     @ResponseBody
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @RequestParam(value = "status", required = false) String status, //
-            @RequestParam(value = "type", required = false) String type) {
+            @RequestParam(value = "type", required = false) String type, //
+            @RequestParam(value = "only-in-redshift", required = false) Boolean onlyInRedshift) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type);
+        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, onlyInRedshift);
     }
 
     @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")

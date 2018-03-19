@@ -81,6 +81,9 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(rbRatingEngine.getType(), RatingEngineType.RULE_BASED);
         assertRatingEngine(rbRatingEngine);
         rbRatingEngineId = rbRatingEngine.getId();
+        // Only mock the Rulebased Rating data in Redshift to test the filtering
+        // logic
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), rbRatingEngineId, null);
 
         // Test AI Rating Engine
         aiRatingEngine = createRatingEngine(RatingEngineType.CROSS_SELL);
@@ -161,6 +164,19 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
+        // test Rating Attributes in Redshift
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.CROSS_SELL.name(),
+                RatingEngineStatus.INACTIVE.name(), true);
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.CROSS_SELL.name(),
+                RatingEngineStatus.INACTIVE.name(), false);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name(), true);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.INACTIVE.name(), false);
+        Assert.assertEquals(summaries.size(), 1);
 
         // test basic find For RuleBased
         assertFindRatingEngine(rbRatingEngineId, RatingEngineType.RULE_BASED);
@@ -227,10 +243,27 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(summaries.size(), 0);
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(summaries.size(), 0);
-
         summaries = getAllRatingEngineSummariesWithTypeAndStatus(RatingEngineType.CROSS_SELL.name(),
                 RatingEngineStatus.ACTIVE.name());
         Assert.assertEquals(summaries.size(), 1);
+        // test Rating Attributes in Redshift
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.CROSS_SELL.name(),
+                RatingEngineStatus.ACTIVE.name(), true);
+        Assert.assertEquals(summaries.size(), 0);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.CROSS_SELL.name(),
+                RatingEngineStatus.ACTIVE.name(), false);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name(), true);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(RatingEngineType.RULE_BASED.name(),
+                RatingEngineStatus.ACTIVE.name(), false);
+        Assert.assertEquals(summaries.size(), 1);
+        summaries = getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(null, RatingEngineStatus.ACTIVE.name(),
+                true);
+        Assert.assertEquals(summaries.size(), 1);
+        Assert.assertEquals(summaries.get(0).getId(), rbRatingEngineId);
+
     }
 
     protected void updateRatingEngine(RatingEngine ratingEngine) {
@@ -286,6 +319,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     protected List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status) {
         return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
+    }
+
+    protected List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeStatusAndRedshiftStatus(String type,
+            String status, Boolean onlyInRedshift) {
+        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, onlyInRedshift);
     }
 
     protected RatingEngine getRatingEngineById(String ratingEngineId, boolean populateRefreshedDate,

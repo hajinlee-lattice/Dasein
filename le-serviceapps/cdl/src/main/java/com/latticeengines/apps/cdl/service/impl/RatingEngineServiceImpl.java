@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
@@ -120,6 +121,12 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status) {
+        return getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, false);
+    }
+
+    @Override
+    public List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
+            Boolean onlyInRedshift) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format(
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
@@ -127,7 +134,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingEngineSummary> result = new ArrayList<>();
         ratingEngineEntityMgr.findAllByTypeAndStatus(type, status)
                 .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
-        return result;
+        if (onlyInRedshift != null && onlyInRedshift) {
+            Set<String> availableRatingIdInRedshift = engineIdsAvailableInRedshift();
+            return result.stream()
+                    .filter(ratingEngineSummary -> availableRatingIdInRedshift.contains(ratingEngineSummary.getId()))
+                    .collect(Collectors.toList());
+        } else {
+            return result;
+        }
     }
 
     @Override
@@ -329,7 +343,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         }
     }
 
-    private Set<String> engineIdsAvailableInRedshift() {
+    @VisibleForTesting
+    Set<String> engineIdsAvailableInRedshift() {
         Set<String> engineIds = new HashSet<>();
         String customerSpace = MultiTenantContext.getCustomerSpace().toString();
         DataCollection.Version version = dataCollectionService.getActiveVersion(customerSpace);

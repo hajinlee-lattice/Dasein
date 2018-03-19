@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -50,6 +51,9 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     private SegmentProxy segmentProxy;
 
     @Inject
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     private RatingEngine re1;
@@ -60,7 +64,7 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
-
+        cdlTestDataService.populateData(mainTestTenant.getId());
         MetadataSegment segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), segment);
         Assert.assertNotNull(createdSegment);
@@ -75,6 +79,9 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
     @Test(groups = "deployment")
     public void testCreate() {
         testCreate(re1);
+        // Only mock the Rulebased Rating data in Redshift to test the filtering
+        // logic
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), re1.getId(), null);
         testRatingEngineNoteCreation(re1, true);
         testCreate(re2);
         testRatingEngineNoteCreation(re2, false);
@@ -118,6 +125,20 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
         ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
                 "CROSS_SELL");
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+
+        // test Rating Attribute in Redshift
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
+                "CROSS_SELL", true);
+        Assert.assertEquals(ratingEngineSummaries.size(), 0);
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "INACTIVE",
+                "CROSS_SELL", false);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE",
+                "RULE_BASED", true);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), "ACTIVE",
+                "RULE_BASED", false);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
 
         // test RuleBased rating engine
@@ -171,6 +192,12 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
                 .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 2);
+
+        // test Rating Attribute in Redshift
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId(), null, null, true);
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        Assert.assertEquals(ratingEngineSummaries.get(0).getId(), re1.getId());
 
         ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re1.getId());
         Assert.assertEquals(RATING_ENGINE_NAME_1, ratingEngine.getDisplayName());

@@ -73,8 +73,9 @@ public class RatingEngineResource {
     @ApiOperation(value = "Get all Rating Engine summaries for a tenant")
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @PathVariable String customerSpace, @RequestParam(value = "status", required = false) String status, //
-            @RequestParam(value = "type", required = false) String type) {
-        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatus(type, status);
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "only-in-redshift", required = false, defaultValue = "FALSE") Boolean onlyInRedshift) {
+        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, onlyInRedshift);
     }
 
     @GetMapping(value = "/types")

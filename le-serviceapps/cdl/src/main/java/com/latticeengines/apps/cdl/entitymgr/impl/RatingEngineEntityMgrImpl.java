@@ -179,6 +179,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         if (ratingEngine.getStatus() != null) {
             validateForStatusUpdate(retrievedRatingEngine, ratingEngine);
+            // set Activation Action Context
+            if (retrievedRatingEngine.getStatus() == RatingEngineStatus.INACTIVE
+                    && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+                setActivationActionContext(retrievedRatingEngine);
+            }
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
         if (ratingEngine.getNote() != null) {
@@ -200,11 +205,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         }
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
-
-        // set Activation Action Context
-        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
-            setActivationActionContext(retrievedRatingEngine);
-        }
     }
 
     @VisibleForTesting

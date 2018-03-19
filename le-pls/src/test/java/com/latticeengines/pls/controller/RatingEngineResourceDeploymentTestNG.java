@@ -14,6 +14,8 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -27,12 +29,15 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
@@ -64,6 +69,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
 
+    @Autowired
+    private CDLTestDataService cdlTestDataService;
+
     private MetadataSegment segment;
 
     private RatingEngine re1;
@@ -75,12 +83,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         mainTestTenant = testBed.getMainTestTenant();
         switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
-
-        segment = new MetadataSegment();
-        Restriction accountRestriction = getTestRestriction();
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(accountRestriction));
-        segment.setContactFrontEndRestriction(new FrontEndRestriction());
-        segment.setDisplayName(SEGMENT_NAME);
+        cdlTestDataService.populateData(mainTestTenant.getId());
+        segment = constructSegment(SEGMENT_NAME);
         MetadataSegment createdSegment = metadataSegmentService.createOrUpdateSegment(segment);
         Assert.assertNotNull(createdSegment);
         MetadataSegment retrievedSegment = metadataSegmentService.getSegmentByName(createdSegment.getName(), false);
@@ -93,6 +97,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = "deployment")
     public void testCreate() {
         testCreate(re1);
+        // Only mock the Rulebased Rating data in Redshift to test the filtering
+        // logic
+        cdlTestDataService.mockRatingTableWithSingleEngine(mainTestTenant.getId(), re1.getId(), null);
         testRatingEngineNoteCreation(re1, true);
         testCreate(re2);
         testRatingEngineNoteCreation(re2, false);
@@ -141,6 +148,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         ratingEngineSummarieObjects = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        // test Rating Attribute in Redshift
+        ratingEngineSummarieObjects = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&only-in-redshift=true",
+                List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        ratingEngineSummarieObjects = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&only-in-redshift=false",
+                List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        ratingEngineSummarieObjects = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&only-in-redshift=true", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        ratingEngineSummarieObjects = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL&only-in-redshift=true", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
 
         // test get specific rating engine
         RatingEngine ratingEngine = restTemplate
@@ -208,6 +230,13 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
                 List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        // test Rating Attribute in Redshift
+        ratingEngineSummaries = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?only-in-redshift=true", List.class);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        ratingEngineSummaries = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?only-in-redshift=false", List.class);
+        Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
         // test update rule based model
         List<?> ratingModelObjects = restTemplate
@@ -364,68 +393,17 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
     }
 
-    public static Restriction getTestRestriction() {
-        return JsonUtils.deserialize(TEST_RESTRICTION, Restriction.class);
+    public static MetadataSegment constructSegment(String segmentName) {
+        MetadataSegment segment = new MetadataSegment();
+        Restriction accountRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Account, "LDC_Name"),
+                Bucket.notNullBkt());
+        segment.setAccountRestriction(accountRestriction);
+        Bucket titleBkt = Bucket.valueBkt("Buyer");
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, InterfaceName.Title.name()), titleBkt);
+        segment.setContactRestriction(contactRestriction);
+        segment.setDisplayName(segmentName);
+        return segment;
     }
-
-    private static String TEST_RESTRICTION = "{ " //
-            + "  \"logicalRestriction\": { " //
-            + "    \"operator\": \"AND\", " //
-            + "    \"restrictions\": [ " //
-            + "      { " //
-            + "        \"logicalRestriction\": { " //
-            + "          \"operator\": \"AND\", " //
-            + "          \"restrictions\": [ " //
-            + "            { " //
-            + "              \"logicalRestriction\": { " //
-            + "                \"operator\": \"AND\", " //
-            + "                \"restrictions\": [ " //
-            + "                  { " //
-            + "                    \"bucketRestriction\": { " //
-            + "                      \"bkt\": { " //
-            + "                        \"Lbl\": \"Yes\", " //
-            + "                        \"Cnt\": 2006, " //
-            + "                        \"Id\": 1 " //
-            + "                      }, " //
-            + "                      \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
-            + "                    } " //
-            + "                  } " //
-            + "                ] " //
-            + "              } " //
-            + "            }, " //
-            + "            { " //
-            + "              \"bucketRestriction\": { " //
-            + "                \"bkt\": { " //
-            + "                  \"Lbl\": \"Yes\", " //
-            + "                  \"Cnt\": 2006, " //
-            + "                  \"Id\": 1 " //
-            + "                }, " //
-            + "                \"attr\": \"Account." + LE_IS_PRIMARY_DOMAIN + "\" " //
-            + "              } " //
-            + "            } " //
-            + "          ] " //
-            + "        } " //
-            + "      }, " //
-            + "      { " //
-            + "        \"concreteRestriction\": { " //
-            + "          \"negate\": false, " //
-            + "          \"lhs\": { " //
-            + "            \"attribute\": { " //
-            + "              \"entity\": \"Account\", " //
-            + "              \"attribute\": \"" + LDC_NAME + "\" " //
-            + "            } " //
-            + "          }, " //
-            + "          \"relation\": \"WITHIN\", " //
-            + "          \"rhs\": { " //
-            + "            \"range\": { " //
-            + "              \"min\": \"A\", " //
-            + "              \"max\": \"O\" " //
-            + "            } " //
-            + "          } " //
-            + "        } " //
-            + "      } " //
-            + "    ] " //
-            + "  } " //
-            + "} ";
 
 }

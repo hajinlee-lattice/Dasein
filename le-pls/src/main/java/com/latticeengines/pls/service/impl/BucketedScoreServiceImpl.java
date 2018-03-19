@@ -212,7 +212,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         if (ratingEngine == null) {
             throw new NullPointerException(String.format("Cannot find Rating Engine with Id %s", ratingEngineId));
         }
-        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasBasedOnRatingEngine(ratingEngine);
+        AIModel activeModel = (AIModel) ratingEngine.getActiveModel();
+        ModelSummary modelSummary = activeModel.getModelSummary();
+        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
     }
 
     @Override
