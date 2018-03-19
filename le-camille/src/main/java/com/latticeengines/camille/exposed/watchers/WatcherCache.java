@@ -30,9 +30,11 @@ public class WatcherCache<K, V> {
     private final String cacheName;
     private final String watcherName;
     private final Object[] initKeys;
+    private final int capacity;
+    private long expire;
+    private TimeUnit expireUnit;
     private BiFunction<String, Set<K>, Collection<K>> refreshKeyResolver;
     private BiFunction<String, Set<K>, Collection<K>> evictKeyResolver;
-    private final int capacity;
     private Cache<K, V> cache;
 
     WatcherCache(String cacheName, String watcherName, Function<K, V> load, int capacity, Object... initKeys) {
@@ -78,10 +80,9 @@ public class WatcherCache<K, V> {
         return cache;
     }
 
-    public void scheduleInit(long duration, TimeUnit timeUnit) {
-        log.info("Scheduled to initialize the WatcherCache " + cacheName + " watching " + watcherName + " after "
-                + duration + " " + timeUnit);
-        scheduler.schedule(this::initialize, duration, timeUnit);
+    public void setExpire(long expire, TimeUnit expireUnit) {
+        this.expire = expire;
+        this.expireUnit = expireUnit;
     }
 
     @SuppressWarnings("unchecked")
@@ -95,7 +96,11 @@ public class WatcherCache<K, V> {
                 log.info("ZK watcher " + watcherName + " changed, updating " + cacheName + " ...");
                 refresh(NodeWatcher.getWatchedData(watcherName));
             });
-            cache = Caffeine.newBuilder().maximumSize(capacity).build();
+            Caffeine caffeine = Caffeine.newBuilder().maximumSize(capacity);
+            if (expireUnit != null) {
+                caffeine = caffeine.expireAfterWrite(expire, expireUnit);
+            }
+            cache = caffeine.build();
             if (initKeys != null) {
                 log.info("Loading " + initKeys.length + " initial keys.");
                 Arrays.stream(initKeys).map(k -> (K) k).forEach(this::loadKey);

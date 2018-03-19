@@ -48,6 +48,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -66,6 +67,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private PeriodProxy periodProxy;
 
     @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
@@ -119,6 +123,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         } else {
             setEntityImportsMap(execution);
         }
+
+        String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+        putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
 
         createReportJson();
         updateActions();

@@ -51,6 +51,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         RatingModel model = ruleBasedModel();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
@@ -113,6 +114,7 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         RatingModel model = ruleBasedModel();
 
         FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
         Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
         frontEndRestriction.setRestriction(accountRestriction);

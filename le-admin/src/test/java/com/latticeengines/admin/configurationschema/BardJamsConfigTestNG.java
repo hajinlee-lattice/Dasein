@@ -29,7 +29,7 @@ public class BardJamsConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() {
+    public void testDefaultConfigurationFunctional() {
         runFunctionalMainFlow();
     }
 

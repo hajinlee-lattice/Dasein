@@ -380,6 +380,9 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setDataLicense(getDataLicense());
         metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
+        if (isEol()) {
+            metadata.setDeprecated(true);
+        }
 
         // deprecated properties
         metadata.setMatchDestination(getMatchDestination());

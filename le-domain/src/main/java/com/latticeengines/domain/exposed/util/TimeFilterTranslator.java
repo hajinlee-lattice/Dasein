@@ -22,22 +22,22 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 public class TimeFilterTranslator {
 
     private final ImmutableMap<String, PeriodBuilder> periodBuilders;
-    private final ImmutableMap<String, Integer> maxPeriodIds;
+    private final ImmutableMap<String, Integer> currentPeriodIds;
 
-    public TimeFilterTranslator(List<PeriodStrategy> strategyList, String maxTxnDate) {
-        Map<String, Integer> maxPeriodMap = new HashMap<>();
+    public TimeFilterTranslator(List<PeriodStrategy> strategyList, String evaluationDate) {
+        Map<String, Integer> currentPeriodMap = new HashMap<>();
         if (CollectionUtils.isNotEmpty(strategyList)) {
             Map<String, PeriodBuilder> builderMap = new HashMap<>();
             strategyList.forEach(strategy -> {
                 PeriodBuilder builder = PeriodBuilderFactory.build(strategy);
                 builderMap.put(strategy.getName(), builder);
-                maxPeriodMap.put(strategy.getName(), builder.toPeriodId(maxTxnDate));
+                currentPeriodMap.put(strategy.getName(), builder.toPeriodId(evaluationDate));
             });
             periodBuilders = ImmutableMap.copyOf(builderMap);
         } else {
             periodBuilders = ImmutableMap.copyOf(Collections.emptyMap());
         }
-        this.maxPeriodIds = ImmutableMap.copyOf(maxPeriodMap);
+        this.currentPeriodIds = ImmutableMap.copyOf(currentPeriodMap);
     }
 
     public TimeFilter translate(TimeFilter timeFilter) {
@@ -96,11 +96,11 @@ public class TimeFilterTranslator {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.WITHIN, vals);
 
-        int maxPeriodId = maxPeriodIds.get(period);
-        int targetPeriod = maxPeriodId - offset;
+        int currentPeriodId = currentPeriodIds.get(period);
+        int targetPeriod = currentPeriodId - offset;
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, maxPeriodId - 1);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, currentPeriodId - 1);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);
@@ -110,8 +110,8 @@ public class TimeFilterTranslator {
         verifyPeriodIsValid(period);
         int offset = parseSingleInteger(ComparisonType.PRIOR_ONLY, vals);
 
-        int maxPeriodId = maxPeriodIds.get(period);
-        int targetPeriod = maxPeriodId - offset - 1;
+        int currentPeriodId = currentPeriodIds.get(period);
+        int targetPeriod = currentPeriodId - offset - 1;
 
         PeriodBuilder builder = periodBuilders.get(period);
         Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(targetPeriod, targetPeriod);
@@ -125,9 +125,9 @@ public class TimeFilterTranslator {
         int offset1 = Math.max(offsets.get(0), offsets.get(1));
         int offset2 = Math.min(offsets.get(0), offsets.get(1));
 
-        int maxPeriodId = maxPeriodIds.get(period);
-        int fromPeriod = maxPeriodId - offset1;
-        int toPeriod = maxPeriodId - offset2;
+        int currentPeriodId = currentPeriodIds.get(period);
+        int fromPeriod = currentPeriodId - offset1;
+        int toPeriod = currentPeriodId - offset2;
 
         PeriodBuilder builder = periodBuilders.get(period);
         Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(fromPeriod, toPeriod);
@@ -141,8 +141,8 @@ public class TimeFilterTranslator {
             throw new RuntimeException("Cannot find a period builder for period " + period);
         }
 
-        if (!maxPeriodIds.containsKey(period)) {
-            throw new RuntimeException("Cannot determine max period id for period " + period);
+        if (!currentPeriodIds.containsKey(period)) {
+            throw new RuntimeException("Cannot determine current period id for period " + period);
         }
     }
 
@@ -202,14 +202,14 @@ public class TimeFilterTranslator {
             throw new RuntimeException("Cannot find a period builder for period " + period);
         }
 
-        if (!maxPeriodIds.containsKey(period)) {
-            throw new RuntimeException("Cannot determine max period id for period " + period);
+        if (!currentPeriodIds.containsKey(period)) {
+            throw new RuntimeException("Cannot determine current period id for period " + period);
         }
 
-        int maxPeriodId = maxPeriodIds.get(period);
+        int currentPeriodId = currentPeriodIds.get(period);
 
         PeriodBuilder builder = periodBuilders.get(period);
-        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(maxPeriodId, maxPeriodId);
+        Pair<LocalDate, LocalDate> dateRange = builder.toDateRange(currentPeriodId, currentPeriodId);
         String start = dateRange.getLeft().format(DateTimeFormatter.ISO_DATE);
         String end = dateRange.getRight().format(DateTimeFormatter.ISO_DATE);
         return Pair.of(start, end);

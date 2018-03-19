@@ -45,6 +45,15 @@
           "Data": "false"
         }
       ]
+    },
+    {
+      "RootPath": "/CDL",
+      "Nodes": [
+        {
+          "Node": "FakeCurrentDate",
+          "Data": "2017-08-01"
+        }
+      ]
     }
   ],
   "CustomerSpaceInfo": {

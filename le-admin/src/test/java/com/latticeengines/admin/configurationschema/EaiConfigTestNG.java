@@ -26,7 +26,7 @@ public class EaiConfigTestNG extends ConfigurationSchemaTestNGBase{
     public void testUnitMainFlow() { runUnitMainFlow(); }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() { runFunctionalMainFlow(); }
+    public void testDefaultConfigurationFunctional() { runFunctionalMainFlow(); }
 
     /*
     ================================================================================

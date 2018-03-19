@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -222,15 +221,5 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
-    }
-
-    public void bootstrap(CDLBootstrapRequest bootstrapRequest) {
-        String url = constructUrl("/tenant/");
-        post("bootstrap cdl tenant", url, bootstrapRequest, ResponseDocument.class);
-    }
-
-    public void cleanup(String tenantId) {
-        String url = constructUrl("/tenant/{tenantId}/", shortenCustomerSpace(tenantId));
-        delete("cleanup cdl tenant", url);
     }
 }

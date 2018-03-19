@@ -59,6 +59,9 @@ public class FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.PREEXISTING_SEGMENT_NAME)
     private String preexistingSegmentName;
 
+    @JsonProperty(FrontEndQueryConstants.EVALUATION_DATE)
+    private String evaluationDateStr;
+
     public FrontEndRestriction getAccountRestriction() {
         return accountRestriction;
     }
@@ -145,6 +148,14 @@ public class FrontEndQuery {
 
     public void setPreexistingSegmentName(String preexistingSegmentName) {
         this.preexistingSegmentName = preexistingSegmentName;
+    }
+
+    public String getEvaluationDateStr() {
+        return evaluationDateStr;
+    }
+
+    public void setEvaluationDateStr(String evaluationDateStr) {
+        this.evaluationDateStr = evaluationDateStr;
     }
 
     public void addLookups(BusinessEntity businessEntity, String... attrNames) {

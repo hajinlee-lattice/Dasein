@@ -31,7 +31,7 @@ public class DataCloudConfigTestNG extends ConfigurationSchemaTestNGBase {
     }
 
     @Test(groups = "functional")
-    public void testDefaultConfigurationFuncational() {
+    public void testDefaultConfigurationFunctional() {
         runFunctionalMainFlow();
     }
 

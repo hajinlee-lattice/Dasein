@@ -1,18 +1,27 @@
 package com.latticeengines.admin.tenant.batonadapter;
 
 import java.util.Arrays;
+import java.util.List;
 
+import com.latticeengines.common.exposed.util.Base64Utils;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
+import org.springframework.web.client.RestTemplate;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.admin.functionalframework.AdminDeploymentTestNGBase;
+import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
+import com.latticeengines.domain.exposed.pls.LoginDocument;
+import com.latticeengines.domain.exposed.pls.UserDocument;
+import com.latticeengines.domain.exposed.security.Credentials;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.security.exposed.Constants;
 
 /**
@@ -22,12 +31,17 @@ import com.latticeengines.security.exposed.Constants;
  */
 public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTestNGBase {
 
+    protected final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
+    protected final static String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
+
     protected String contractId, tenantId, serviceName;
     private static final long TIMEOUT = 180000L;
     private static final long WAIT_INTERVAL = 3000L;
 
     @Value("${common.test.pls.url}")
     private String plsHostPort;
+
+    protected RestTemplate plsRestTemplate = HttpClientUtils.newRestTemplate();
 
     @BeforeClass(groups = { "deployment", "functional", "lp2" })
     public void setup() throws Exception {
@@ -101,5 +115,34 @@ public abstract class BatonAdapterDeploymentTestNGBase extends AdminDeploymentTe
             System.out.println(state.errorMessage);
         }
         return state;
+    }
+
+    public UserDocument loginAndAttachPls(String username, String password, String tenantId) {
+        Credentials creds = new Credentials();
+        creds.setUsername(username);
+        creds.setPassword(DigestUtils.sha256Hex(password));
+
+        LoginDocument doc = plsRestTemplate.postForObject(getPlsHostPort() + "/pls/login", creds, LoginDocument.class);
+
+        addAuthHeader.setAuthValue(doc.getData());
+        plsRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addAuthHeader }));
+
+        List<Tenant> tenants = doc.getResult().getTenants();
+
+        if (tenants == null || tenants.isEmpty()) {
+            Assert.fail("No tenant for the login user " + username);
+        }
+
+        Tenant tenant = null;
+        for (Tenant tenant1 : doc.getResult().getTenants()) {
+            if (tenant1.getId().equals(tenantId)) {
+                tenant = tenant1;
+                break;
+            }
+        }
+
+        Assert.assertNotNull(tenant);
+
+        return plsRestTemplate.postForObject(getPlsHostPort() + "/pls/attach", tenant, UserDocument.class);
     }
 }

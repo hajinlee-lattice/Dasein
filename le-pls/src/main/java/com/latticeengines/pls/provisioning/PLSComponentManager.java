@@ -23,12 +23,8 @@ import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.security.User;
 import com.latticeengines.domain.exposed.security.UserRegistration;
-import com.latticeengines.domain.exposed.serviceapps.cdl.CDLBootstrapRequest;
-import com.latticeengines.domain.exposed.serviceapps.lp.LPBootstrapRequest;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.util.ValidateEnrichAttributesUtils;
-import com.latticeengines.proxy.exposed.cdl.CDLProxy;
-import com.latticeengines.proxy.exposed.lp.LPProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.service.TenantService;
 import com.latticeengines.security.exposed.service.UserService;
@@ -50,12 +46,6 @@ public class PLSComponentManager {
 
     @Inject
     private TenantConfigService tenantConfigService;
-
-    @Inject
-    private CDLProxy cdlProxy;
-
-    @Inject
-    private LPProxy lpProxy;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -128,29 +118,6 @@ public class PLSComponentManager {
         }
 
         provisionTenant(tenant, superAdminEmails, internalAdminEmails, externalAdminEmails, thirdPartyEmails);
-
-        try {
-            if (products.contains(LatticeProduct.LPA3)) {
-                LOGGER.info("Bootstrapping " + camilleTenantId + " in LP.");
-                LPBootstrapRequest bootstrapRequest = new LPBootstrapRequest();
-                bootstrapRequest.setTenantId(PLSTenantId);
-                lpProxy.bootstrap(bootstrapRequest);
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to bootstrapping " + camilleTenantId + " in LP.");
-        }
-
-        try {
-            if (products.contains(LatticeProduct.CG)) {
-                LOGGER.info("Bootstrapping " + camilleTenantId + " in CDL.");
-                CDLBootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
-                bootstrapRequest.setTenantId(PLSTenantId);
-                cdlProxy.bootstrap(bootstrapRequest);
-            }
-        } catch (Exception e) {
-            LOGGER.warn("Failed to bootstrapping " + camilleTenantId + " in CDL.");
-        }
-
     }
 
     public void provisionTenant(Tenant tenant, List<String> superAdminEmails, List<String> internalAdminEmails,
@@ -188,23 +155,6 @@ public class PLSComponentManager {
         Tenant tenant = tenantService.findByTenantId(tenantId);
         if (tenant != null) {
             discardTenant(tenant);
-        }
-        try {
-            LOGGER.info("Cleaning up " + tenantId + " from LP.");
-            LPBootstrapRequest bootstrapRequest = new LPBootstrapRequest();
-            bootstrapRequest.setTenantId(tenantId);
-            lpProxy.bootstrap(bootstrapRequest);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to cleaning up " + tenantId + " from LP.");
-        }
-
-        try {
-            LOGGER.info("Cleaning up " + tenantId + " from CDL.");
-            CDLBootstrapRequest bootstrapRequest = new CDLBootstrapRequest();
-            bootstrapRequest.setTenantId(tenantId);
-            cdlProxy.bootstrap(bootstrapRequest);
-        } catch (Exception e) {
-            LOGGER.warn("Failed to cleaning up " + tenantId + " from CDL.");
         }
     }
 

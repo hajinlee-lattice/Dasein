@@ -1,11 +1,12 @@
 package com.latticeengines.objectapi.service.impl;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
@@ -37,16 +38,10 @@ import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
-
 @Component("transactionService")
 public class TransactionServiceImpl implements TransactionService {
 
     private static final Logger log = LoggerFactory.getLogger(TransactionServiceImpl.class);
-    private static final String DEFAULT = "default";
 
     @Inject
     private QueryEvaluatorService queryEvaluatorService;
@@ -54,7 +49,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Inject
     private PeriodProxy periodProxy;
 
-    private static final Scheduler scheduler = Schedulers.newElastic("time-filter", 10);
     private LocalCacheManager<String, TimeFilterTranslator> timeTranslatorCache = null;
 
     @Override
@@ -65,25 +59,22 @@ public class TransactionServiceImpl implements TransactionService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public TimeFilterTranslator getTimeFilterTranslator(DataCollection.Version version) {
+    public TimeFilterTranslator getTimeFilterTranslator(String evaluationDate) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
         initializeTimeTranslatorCache();
-        String versionStr = version == null ? DEFAULT : version.name();
+        if (StringUtils.isBlank(evaluationDate)) {
+            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+        }
         return timeTranslatorCache.getWatcherCache() //
-                .get(String.format("%s|%s", customerSpace.getTenantId(), versionStr));
+                .get(String.format("%s|%s", customerSpace.getTenantId(), evaluationDate));
     }
 
     @SuppressWarnings("unchecked")
     private TimeFilterTranslator getTimeFilterTranslatorBehindCache(String key) {
         String[] tokens = key.split("\\|");
         CustomerSpace customerSpace = CustomerSpace.parse(tokens[0]);
-        DataCollection.Version version = DEFAULT.equalsIgnoreCase(tokens[1]) ? null : DataCollection.Version.valueOf(tokens[1]);
-
-        Mono<Object> strategiesMono = Mono.fromCallable(() -> getPeriodStrategies(customerSpace));
-        Mono<Object> maxDateMono = Mono.fromCallable(() -> getMaxTransactionDate(customerSpace, version));
-        Flux<Object> flux = strategiesMono.concatWith(maxDateMono).publishOn(scheduler);
-        List<Object> objs = flux.toStream().collect(Collectors.toList());
-        return new TimeFilterTranslator((List<PeriodStrategy>) objs.get(0), (String) objs.get(1));
+        String evaluationDate = tokens[1];
+        return new TimeFilterTranslator(getPeriodStrategies(customerSpace), evaluationDate);
     }
 
     private String getMaxTransactionDate(CustomerSpace customerSpace, DataCollection.Version version) {
@@ -155,6 +146,7 @@ public class TransactionServiceImpl implements TransactionService {
                     CacheName.TimeTranslatorCache, //
                     this::getTimeFilterTranslatorBehindCache, //
                     500); //
+            timeTranslatorCache.getWatcherCache().setExpire(1, TimeUnit.DAYS);
             log.info("Initialized loading cache timeTranslatorCache.");
         }
     }

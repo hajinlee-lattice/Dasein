@@ -42,6 +42,15 @@
                 errorMessage = None
                 installedVersion = 1
                 state = u'OK'
+            /CDL
+              /FakeCurrentDate
+                string_value = '2017-08-01'
+              /lock
+              /state.json
+                desiredVersion = 1
+                errorMessage = None
+                installedVersion = 1
+                state = u'OK'
             /PLS
               /EnrichAttributesMaxNumber
                 string_value = '10'

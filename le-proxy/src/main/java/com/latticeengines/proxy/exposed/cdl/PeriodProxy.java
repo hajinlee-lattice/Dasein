@@ -5,8 +5,6 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -23,42 +21,45 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
         super("cdl");
     }
 
-    public List<String> getPeriodNames(@PathVariable String customerSpace) {
+    public List<String> getPeriodNames(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/names", shortenCustomerSpace(customerSpace));
         List list = get("get period names", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }
 
-    public List<PeriodStrategy> getPeriodStrategies(@PathVariable String customerSpace) {
+    public List<PeriodStrategy> getPeriodStrategies(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/strategies", shortenCustomerSpace(customerSpace));
         List list = get("get period strategies", url, List.class);
         return JsonUtils.convertList(list, PeriodStrategy.class);
     }
 
-    public BusinessCalendar getBusinessCalendar(@PathVariable String customerSpace) {
+    public BusinessCalendar getBusinessCalendar(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/calendar", shortenCustomerSpace(customerSpace));
         return get("get business calendar", url, BusinessCalendar.class);
     }
 
-    public BusinessCalendar saveBusinessCalendar(@PathVariable String customerSpace,
-            @RequestBody BusinessCalendar businessCalendar) {
+    public BusinessCalendar saveBusinessCalendar(String customerSpace, BusinessCalendar businessCalendar) {
         String url = constructUrl(URL_PREFIX + "/calendar", shortenCustomerSpace(customerSpace));
         return post("validate business calendar", url, businessCalendar, BusinessCalendar.class);
     }
 
-    public String validateBusinessCalendar(@PathVariable String customerSpace,
-            @RequestBody BusinessCalendar businessCalendar) {
+    public String validateBusinessCalendar(String customerSpace, BusinessCalendar businessCalendar) {
         String url = constructUrl(URL_PREFIX + "/calendar/validate", shortenCustomerSpace(customerSpace));
         return post("validate business calendar", url, businessCalendar, String.class);
     }
 
-    public int getMaxPeriodId(@PathVariable String customerSpace, @PathVariable String periodname) {
+    public String getEvaluationDate(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/evaluationdate", shortenCustomerSpace(customerSpace));
+        return get("get evaluation date", url, String.class);
+    }
+
+    public int getMaxPeriodId(String customerSpace, String periodname) {
         String url = constructUrl(URL_PREFIX + "/names/{periodname}/maxid", shortenCustomerSpace(customerSpace),
                 periodname);
         return get("get max periodid for the given period name", url, Integer.class);
     }
 
-    public int getEvaluationPeriodId(@PathVariable String customerSpace, @PathVariable String periodname) {
+    public int getEvaluationPeriodId(String customerSpace, String periodname) {
         String url = constructUrl(URL_PREFIX + "/names/{periodname}/evaluationid", shortenCustomerSpace(customerSpace),
                 periodname);
         return get("get evaluation periodid for the given period name", url, Integer.class);

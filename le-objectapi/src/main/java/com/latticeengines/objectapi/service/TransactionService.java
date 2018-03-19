@@ -8,7 +8,7 @@ public interface TransactionService {
 
     String getMaxTransactionDate(DataCollection.Version version);
 
-    TimeFilterTranslator getTimeFilterTranslator(DataCollection.Version version);
+    TimeFilterTranslator getTimeFilterTranslator(String evaluationDate);
 
     boolean hasTransactionBucket(FrontEndQuery frontEndQuery);
 

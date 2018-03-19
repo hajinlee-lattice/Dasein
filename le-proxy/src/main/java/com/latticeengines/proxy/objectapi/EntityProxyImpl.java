@@ -61,7 +61,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
 
         dataCache = new LocalCacheManager<>(CacheName.EntityDataCache, str -> {
             String[] tokens = str.split("\\|");
-            return getDataFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+            return getDataBySerializedKeyFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 200); //
 
         ratingCache = new LocalCacheManager<>(CacheName.EntityRatingCountCache, str -> {
@@ -94,7 +94,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
 
     @Cacheable(cacheNames = CacheName.Constants.EntityDataCacheName, key = "T(java.lang.String).format(\"%s|%s|data\", T(com.latticeengines.proxy.exposed.ProxyUtils).shortenCustomerSpace(#customerSpace), #frontEndQuery)", sync = true)
     public DataPage getDataFromCache(String customerSpace, FrontEndQuery frontEndQuery) {
-        return getDataFromObjectApi(
+        return getDataBySerializedKeyFromObjectApi(
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
     }
 
@@ -168,12 +168,11 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         return post("getCount", url, frontEndQuery, Long.class);
     }
 
-    private DataPage getDataFromObjectApi(String serializedKey) {
+    private DataPage getDataBySerializedKeyFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
         FrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, FrontEndQuery.class);
-        String url = constructUrl("/{customerSpace}/entity/data", tenantId);
-        return post("getData", url, frontEndQuery, DataPage.class);
+        return getDataFromObjectApi(tenantId, frontEndQuery);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

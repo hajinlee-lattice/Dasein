@@ -52,6 +52,12 @@ public class PeriodResource {
         return businessCalendarService.find();
     }
 
+    @GetMapping(value = "/evaluationdate")
+    @ApiOperation(value = "Get evaluation date")
+    public String getEvaluationDate(@PathVariable String customerSpace) {
+        return periodService.getEvaluationDate();
+    }
+
     @PostMapping(value = "/calendar")
     @ApiOperation(value = "Save business calendar")
     public BusinessCalendar saveBusinessCalendar(@PathVariable String customerSpace,

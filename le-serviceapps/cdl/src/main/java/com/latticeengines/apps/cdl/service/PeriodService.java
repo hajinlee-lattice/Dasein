@@ -11,6 +11,8 @@ public interface PeriodService {
 
     List<PeriodStrategy> getPeriodStrategies();
 
+    String getEvaluationDate();
+
     int getEvaluationPeriod(String customerSpace, DataCollection.Version version, PeriodStrategy periodStrategy);
 
     int getMaxPeriod(String customerSpace, DataCollection.Version version, PeriodStrategy periodStrategy);

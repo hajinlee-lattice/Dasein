@@ -14,8 +14,8 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.objectapi.functionalframework.ObjectApiFunctionalTestNGBase;
 import com.latticeengines.objectapi.service.TransactionService;
-import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTestNGBase {
@@ -29,6 +29,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
     private QueryEvaluatorService queryEvaluatorService;
 
     protected Tenant tenant;
+    protected String maxTransactionDate;
 
     protected void setup() {
         mockDataCollectionProxy();
@@ -36,7 +37,7 @@ public abstract class QueryServiceImplTestNGBase extends ObjectApiFunctionalTest
         tenant = new Tenant("LocalTest");
         tenant.setPid(1L);
         MultiTenantContext.setTenant(tenant);
-        String maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
+        maxTransactionDate = transactionService.getMaxTransactionDate(DataCollection.Version.Blue);
         log.info("Max txn date is " + maxTransactionDate);
     }
 

@@ -18,7 +18,6 @@ import com.latticeengines.admin.tenant.batonadapter.BatonAdapterDeploymentTestNG
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.Base64Utils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
@@ -33,9 +32,6 @@ import com.latticeengines.security.exposed.globalauth.GlobalUserManagementServic
 
 @Component
 public class PLSComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase {
-
-    private final static String testAdminUsername = "pls-installer-tester@lattice-engines.com";
-    private final static String testAdminPassword = Base64Utils.encodeBase64WithDefaultTrim(testAdminUsername);
 
     private final static Logger log = LoggerFactory.getLogger(PLSComponentDeploymentTestNG.class);
 

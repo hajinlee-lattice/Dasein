@@ -72,7 +72,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), false);
-            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query);
@@ -97,7 +97,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
             EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                     attrRepo);
             QueryDecorator decorator = getDecorator(frontEndQuery.getMainEntity(), true);
-            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+            TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
             Query query = queryTranslator.translateEntityQuery(frontEndQuery, decorator, timeTranslator);
             if (query.getLookups() == null || query.getLookups().isEmpty()) {
                 query.addLookup(new EntityLookup(frontEndQuery.getMainEntity()));
@@ -153,7 +153,7 @@ public class EntityQueryServiceImpl implements EntityQueryService {
                 queryEvaluatorService);
         EntityQueryTranslator queryTranslator = new EntityQueryTranslator(queryEvaluatorService.getQueryFactory(),
                 attrRepo);
-        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery, version);
+        TimeFilterTranslator timeTranslator = getTimeFilterTranslator(frontEndQuery);
         Query query = queryTranslator.translateEntityQuery(frontEndQuery, null, timeTranslator);
         query.setPageFilter(null);
         query.setSort(null);
@@ -166,9 +166,9 @@ public class EntityQueryServiceImpl implements EntityQueryService {
         return query;
     }
 
-    private TimeFilterTranslator getTimeFilterTranslator(FrontEndQuery frontEndQuery, DataCollection.Version version) {
+    private TimeFilterTranslator getTimeFilterTranslator(FrontEndQuery frontEndQuery) {
         if (transactionService.hasTransactionBucket(frontEndQuery)) {
-            return transactionService.getTimeFilterTranslator(version);
+            return transactionService.getTimeFilterTranslator(frontEndQuery.getEvaluationDateStr());
         } else {
             return null;
         }

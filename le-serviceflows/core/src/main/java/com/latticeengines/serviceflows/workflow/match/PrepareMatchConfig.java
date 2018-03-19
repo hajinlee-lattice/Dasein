@@ -83,9 +83,10 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
     private Table preMatchEventTable() {
         Table preMatchEventTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
-        if (preMatchEventTable == null)
+        if (preMatchEventTable == null) {
             preMatchEventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                     configuration.getInputTableName());
+        }
         preMatchEventTable.setName(preMatchEventTable.getName() + "_" + System.currentTimeMillis());
         return preMatchEventTable;
     }
