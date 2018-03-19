@@ -197,7 +197,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder metadataSegmentExport(MetadataSegmentExport metadataSegmentExport) {
-            modelWorkflowBuilder.targetTableName(metadataSegmentExport.getTableName());
+            if (metadataSegmentExport != null) {
+                modelWorkflowBuilder.targetTableName(metadataSegmentExport.getTableName());
+            }
             prepareConfigForScoringBuilder.metadataSegmentExport(metadataSegmentExport);
             return this;
         }
