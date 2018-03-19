@@ -441,7 +441,7 @@ public class SelfServiceModelingToBulkScoringEndToEndDeploymentTestNG extends Pl
                     String jobModelId = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_ID);
                     String jobModelName = job.getInputs().get(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
                     return job.getJobType() != null && job.getJobType().equals(jobType) && modelId.equals(jobModelId)
-                            && SelfServiceModelingEndToEndDeploymentTestNG.MODEL_DISPLAY_NAME.equals(jobModelName);
+                            && selfServiceModeling.modelDisplayName.equals(jobModelName);
                 }
             });
 

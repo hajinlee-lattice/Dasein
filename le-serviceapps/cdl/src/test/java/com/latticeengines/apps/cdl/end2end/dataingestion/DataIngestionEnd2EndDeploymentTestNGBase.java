@@ -86,13 +86,11 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
-import com.latticeengines.yarn.exposed.service.JobService;
 
 public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploymentTestNGBase {
 
@@ -148,12 +146,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     protected ModelingFileUploadProxy fileUploadProxy;
-
-    @Inject
-    private EaiProxy eaiProxy;
-
-    @Inject
-    private JobService jobService;
 
     @Inject
     protected Configuration yarnConfiguration;
