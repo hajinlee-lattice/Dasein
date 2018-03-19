@@ -795,7 +795,6 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.Cost.name()) //
                 .allowedDisplayNames(Sets.newHashSet("COST")) //
-                .required() //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.Cost) //
                 .logicalType(LogicalDataType.Metric) //
