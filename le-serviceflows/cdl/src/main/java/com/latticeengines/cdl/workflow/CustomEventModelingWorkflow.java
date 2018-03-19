@@ -35,10 +35,10 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private CreateTableImportReport createTableImportReport;
 
     @Inject
-    private CustomEventMatchWorkflow customEventMatchWorkflow;
+    private ModelDataValidationWorkflow modelValidationWorkflow;
 
     @Inject
-    private ModelDataValidationWorkflow modelValidationWorkflow;
+    private CustomEventMatchWorkflow customEventMatchWorkflow;
 
     @Inject
     private DedupEventTable dedupEventTableDataFlow;
@@ -72,8 +72,8 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
         return new WorkflowBuilder(name(), config) //
                 .next(importData) //
                 .next(createTableImportReport) //
-                .next(customEventMatchWorkflow) //
                 .next(modelValidationWorkflow) //
+                .next(customEventMatchWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
