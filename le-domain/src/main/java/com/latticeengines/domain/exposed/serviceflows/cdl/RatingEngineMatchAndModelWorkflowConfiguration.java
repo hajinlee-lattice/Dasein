@@ -178,6 +178,12 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
+            ratingEngineScoreWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
             return this;
@@ -255,6 +261,11 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
             return this;
         }
 
+        public Builder skipImport(boolean skipImport) {
+            ratingEngineScoreWorkflowBuilder.skipImport(skipImport);
+            return this;
+        }
+
         public Builder userRefinedAttributes(List<Attribute> userRefinedAttributes) {
             resolveAttributes.setUserRefinedAttributes(userRefinedAttributes);
             return this;
@@ -301,6 +312,55 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
             return this;
         }
 
+        public Builder cdlModel(boolean isCdlModel) {
+            cdlModelWorkflowBuilder.cdlModel(isCdlModel);
+            ratingEngineScoreWorkflowBuilder.cdlModel(isCdlModel);
+            return this;
+        }
+
+        public Builder liftChart(boolean liftChart) {
+            ratingEngineScoreWorkflowBuilder.liftChart(liftChart);
+            pivotScoreAndEvent.setLiftChart(liftChart);
+            return this;
+        }
+
+        public Builder aiModelId(String aiModelId) {
+            cdlModelWorkflowBuilder.aiModelId(aiModelId);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            cdlModelWorkflowBuilder.ratingEngineId(ratingEngineId);
+            return this;
+        }
+
+        public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
+            ratingEngineScoreWorkflowBuilder.setUniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            ratingEngineScoreWorkflowBuilder.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
+            ratingEngineScoreWorkflowBuilder.setModelIdFromRecord(setModelIdFromRecord);
+            return this;
+        }
+
+        public Builder setEventColumn(String eventColumn) {
+            ratingEngineScoreWorkflowBuilder.setEventColumn(eventColumn);
+            return this;
+        }
+
+        public Builder setExpectedValue(boolean expectedValue) {
+            cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
+            ratingEngineScoreWorkflowBuilder.setExpectedValue(expectedValue);
+            pivotScoreAndEvent.setExpectedValue(expectedValue);
+            return this;
+        }
+
         public Builder runTimeParams(Map<String, String> runTimeParams) {
             addStandardAttributes.setRuntimeParams(runTimeParams);
             return this;
@@ -319,9 +379,7 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
             configuration.add(dedupEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(cdlModelWorkflowBuilder.build());
-            RatingEngineScoreWorkflowConfiguration scoreConf = ratingEngineScoreWorkflowBuilder.build();
-            scoreConf.setSkipImport(true);
-            configuration.add(scoreConf);
+            configuration.add(ratingEngineScoreWorkflowBuilder.build());
             configuration.add(addStandardAttributes);
             configuration.add(resolveAttributes);
             configuration.add(setConfigForScoring);

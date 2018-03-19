@@ -200,6 +200,11 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder skipImport(boolean skipImport) {
+            configuration.setSkipImport(skipImport);
+            return this;
+        }
+
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadataList) {
             combineInputWithScores.setBucketMetadata(bucketMetadataList);
             return this;
@@ -207,6 +212,11 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
 
         public Builder matchQueue(String queue) {
             matchDataCloudWorkflowBuilder.matchQueue(queue);
+            return this;
+        }
+
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
             return this;
         }
 
@@ -256,7 +266,7 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             combineInputWithScores.microserviceStepConfiguration(microserviceStepConfiguration);
             scoreAggregate.microserviceStepConfiguration(microserviceStepConfiguration);
             addStandardAttributes.microserviceStepConfiguration(microserviceStepConfiguration);
-            
+
             export.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlTargetTableTupleFilter.microserviceStepConfiguration(microserviceStepConfiguration);
             cdlEventTable.microserviceStepConfiguration(microserviceStepConfiguration);

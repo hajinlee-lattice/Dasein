@@ -8,7 +8,10 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
@@ -22,6 +25,8 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -31,16 +36,20 @@ import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Predictor;
 import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -113,7 +122,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         modelingParameters.setEventFilterTableName(eventFilterTableName);
         modelingParameters.setTargetFilterTableName(targetFilterTableName);
 
-        modelingParameters.setExpectedValue(true);
+        modelingParameters.setExpectedValue(false);
         modelingParameters.setLiftChart(true);
 
         log.info("Test environment setup finished.");
@@ -125,7 +134,11 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         setupTables();
         createModel();
         ModelSummary modelSummary = retrieveModelSummary();
+
         scoreWorkflow(modelSummary);
+
+        cloneAndRemodel(modelSummary);
+        retrieveModelSummaryForClonedModel();
     }
 
     private void scoreWorkflow(ModelSummary modelSummary) {
@@ -211,6 +224,7 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
 
     public void createModel() {
         modelName = modelingParameters.getName();
+        log.info("modelName:" + modelName);
         model(modelingParameters);
     }
 
@@ -227,6 +241,91 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
 
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    void cloneAndRemodel(ModelSummary baseModelSummary) {
+        log.info("Cloning and remodel the model summary ...");
+        @SuppressWarnings("unchecked")
+        List<Object> rawFields = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), baseModelSummary.getId()),
+                List.class);
+        List<VdbMetadataField> fields = new ArrayList<>();
+        for (Object rawField : rawFields) {
+            VdbMetadataField field = JsonUtils.convertValue(rawField, VdbMetadataField.class);
+            fields.add(field);
+            if (field.getColumnName().equals("EMPLOYEES_HERE_RELIABILITY_CODE")) {
+                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+            if (field.getColumnName().equals("IMPORT_EXPORT_AGENT_CODE")) {
+                field.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }
+
+        // Now remodel
+        CloneModelingParameters parameters = new CloneModelingParameters();
+        parameters.setName(modelName + "_clone");
+        modelName = parameters.getName();
+        parameters.setDisplayName(MODEL_DISPLAY_NAME);
+        parameters.setDescription("clone");
+        parameters.setAttributes(fields);
+        parameters.setSourceModelSummaryId(baseModelSummary.getId());
+        parameters.setDeduplicationType(DedupType.MULTIPLELEADSPERDOMAIN);
+        parameters.setEnableTransformations(false);
+        parameters.setExcludePropDataAttributes(false);
+        parameters.setActivateModelSummaryByDefault(true);
+        ResponseDocument<?> response;
+        response = restTemplate.postForObject(
+                String.format("%s/pls/models/rating/%s/clone", getRestAPIHostPort(), modelName), parameters,
+                ResponseDocument.class);
+        modelingWorkflowApplicationId = new ObjectMapper().convertValue(response.getResult(), String.class);
+        log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
+        JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false);
+        assertEquals(completedStatus, JobStatus.COMPLETED);
+    }
+
+    public void retrieveModelSummaryForClonedModel() throws InterruptedException, IOException {
+        log.info("Retrieve the model summary after cloning and remodeling ...");
+        ModelSummary clonedModelSummary = waitToDownloadModelSummary(modelName);
+        assertNotNull(clonedModelSummary);
+        List<Predictor> predictors = clonedModelSummary.getPredictors();
+        assertTrue(!Iterables.any(predictors, new Predicate<Predictor>() {
+            @Override
+            public boolean apply(@Nullable Predictor predictor) {
+                return predictor.getName().equals(InterfaceName.Website.toString())
+                        || predictor.getName().equals(InterfaceName.Country.toString());
+            }
+
+        }));
+        assertEquals(clonedModelSummary.getSourceSchemaInterpretation(),
+                SchemaInterpretation.SalesforceAccount.toString());
+        // assertEquals(clonedModelSummary.getModelSummaryConfiguration()
+        // .getString(ProvenancePropertyName.TransformationGroupName, null),
+        // TransformationGroup.ALL.getName());
+        String trainingTableName = clonedModelSummary.getTrainingTableName();
+        assertNotNull(trainingTableName);
+        String targetTableName = clonedModelSummary.getTargetTableName();
+        assertEquals(trainingTableName + "_TargetTable", targetTableName);
+
+        @SuppressWarnings("unchecked")
+        List<Object> rawFields = restTemplate.getForObject(
+                String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), clonedModelSummary.getId()),
+                List.class);
+        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
+            @Override
+            public boolean apply(@Nullable Object raw) {
+                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+                return metadataField.getColumnName().equals("EMPLOYEES_HERE_RELIABILITY_CODE")
+                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }));
+        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
+            @Override
+            public boolean apply(@Nullable Object raw) {
+                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+                return metadataField.getColumnName().equals("IMPORT_EXPORT_AGENT_CODE")
+                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
+            }
+        }));
     }
 
     public ModelSummary retrieveModelSummary() throws InterruptedException {

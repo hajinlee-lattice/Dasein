@@ -49,6 +49,9 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     @JsonProperty("skip_dedupe")
     private boolean skipDedupe;
 
+    @JsonProperty("fetch_only")
+    private boolean fetchOnly;
+
     @JsonProperty("match_request_source")
     private MatchRequestSource matchRequestSource;
 
@@ -246,6 +249,14 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
     public void setSkipDedupe(boolean skipDedupe) {
         this.skipDedupe = skipDedupe;
+    }
+
+    public boolean isFetchOnly() {
+        return fetchOnly;
+    }
+
+    public void setFetchOnly(boolean fetchOnly) {
+        this.fetchOnly = fetchOnly;
     }
 
     public void setMatchRequestSource(MatchRequestSource matchRequestSource) {

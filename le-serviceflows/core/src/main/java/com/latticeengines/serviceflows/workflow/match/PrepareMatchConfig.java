@@ -225,7 +225,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
     private void checkFetchOnly(MatchInput matchInput) {
         String fetchOnly = getStringValueFromContext(MATCH_FETCH_ONLY);
-        if ("true".equalsIgnoreCase(fetchOnly)) {
+        if ("true".equalsIgnoreCase(fetchOnly) || configuration.isFetchOnly()) {
             log.info("Match fetch only = true");
             matchInput.setFetchOnly(true);
             matchInput.setSkipKeyResolution(true);

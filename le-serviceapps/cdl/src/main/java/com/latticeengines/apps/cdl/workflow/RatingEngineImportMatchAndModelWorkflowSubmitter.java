@@ -93,6 +93,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
+                .skipImport(false) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //

@@ -274,6 +274,7 @@ public class ModelingServiceExecutor {
         model.setFeaturesThreshold(50);
         String extraProperties = "DataLoader_Query=x DataLoader_TenantName=" + builder.getCustomer()
                 + " DataLoader_Instance=z";
+        extraProperties += " Expected_Value=" + builder.isExpectedValue();
         setProvenanceProperties(model, extraProperties);
         return submitModel(model);
     }

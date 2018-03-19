@@ -2,7 +2,6 @@ package com.latticeengines.pls.controller;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -46,7 +45,6 @@ import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.workflow.MatchAndModelWorkflowSubmitter;
 import com.latticeengines.pls.workflow.PMMLModelWorkflowSubmitter;
-import com.latticeengines.pls.workflow.RatingEngineMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.cdl.CDLModelProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
@@ -62,9 +60,6 @@ public class ModelResource {
 
     @Autowired
     private MatchAndModelWorkflowSubmitter modelWorkflowSubmitter;
-
-    @Autowired
-    private RatingEngineMatchAndModelWorkflowSubmitter ratingEngineModelWorkflowSubmitter;
 
     @Autowired
     private ModelSummaryService modelSummaryService;
@@ -128,28 +123,9 @@ public class ModelResource {
     public ResponseDocument<String> ratingEngineCloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
 
-        if (!NameValidationUtils.validateModelName(modelName)) {
-            String message = String.format("Not qualified modelName %s contains unsupported characters.", modelName);
-            log.error(message);
-            throw new RuntimeException(message);
-        }
-        log.info(String.format("cloneAndRemodel called with parameters %s, dedupOption: %s", parameters.toString(),
-                parameters.getDeduplicationType()));
-        ModelSummary modelSummary = modelSummaryService
-                .getModelSummaryEnrichedByDetails(parameters.getSourceModelSummaryId());
-
-        List<Table> trainingTargetTables = modelMetadataService.cloneTrainingTargetTable(modelSummary);
-        List<String> trainingTargetTableNames = Arrays.asList(trainingTargetTables.get(0).getName(),
-                trainingTargetTables.get(1).getName());
-        Table parentModelEventTable = metadataProxy.getTable(MultiTenantContext.getTenant().getId(),
-                modelSummary.getEventTableName());
-        List<Attribute> userRefinedAttributes = modelMetadataService
-                .getAttributesFromFields(parentModelEventTable.getAttributes(), parameters.getAttributes());
-        modelSummaryDownloadFlagEntityMgr.addDownloadFlag(MultiTenantContext.getTenant().getId());
         parameters.setUserId(MultiTenantContext.getEmailAddress());
-        return ResponseDocument.successResponse( //
-                ratingEngineModelWorkflowSubmitter
-                        .submit(trainingTargetTableNames, parameters, userRefinedAttributes, modelSummary).toString());
+        return ResponseDocument
+                .successResponse(cdlModelProxy.clone(MultiTenantContext.getTenant().getId(), modelName, parameters));
     }
 
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)

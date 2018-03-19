@@ -47,6 +47,15 @@ public class CloneModelingParameters {
     @JsonProperty
     private boolean activateModelSummaryByDefault = false;
 
+    @JsonProperty
+    private boolean expectedValue;
+
+    @JsonProperty
+    private String aiModelId;
+
+    @JsonProperty
+    private String ratingEngineId;
+
     public String getName() {
         return name;
     }
@@ -149,6 +158,30 @@ public class CloneModelingParameters {
 
     public void setActivateModelSummaryByDefault(boolean value) {
         this.activateModelSummaryByDefault = value;
+    }
+
+    public boolean isExpectedValue() {
+        return expectedValue;
+    }
+
+    public void setExpectedValue(boolean expectedValue) {
+        this.expectedValue = expectedValue;
+    }
+
+    public String getAiModelId() {
+        return aiModelId;
+    }
+
+    public void setAiModelId(String aiModelId) {
+        this.aiModelId = aiModelId;
+    }
+
+    public String getRatingEngineId() {
+        return ratingEngineId;
+    }
+
+    public void setRatingEngineId(String ratingEngineId) {
+        this.ratingEngineId = ratingEngineId;
     }
 
     @Override

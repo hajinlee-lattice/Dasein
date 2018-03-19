@@ -109,6 +109,7 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .columnSelection(selection, selectionVersion) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchRequestSource(MatchRequestSource.SCORING) //
+                .skipImport(false) //
                 .outputFileFormat(ExportFormat.CSV) //
                 .outputFilename("/"
                         + StringUtils.substringBeforeLast(

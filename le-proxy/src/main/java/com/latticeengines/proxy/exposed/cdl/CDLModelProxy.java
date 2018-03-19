@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
+import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
@@ -31,4 +32,8 @@ public class CDLModelProxy extends MicroserviceRestApiProxy implements ProxyInte
         return post("modelRatingEngine", url, ratingEngineModelingParameters, String.class);
     }
 
+    public String clone(String customerSpace, String modelName, CloneModelingParameters cloneModelingParameters) {
+        String url = constructUrl(URL_PREFIX + "/rating/{modelName}/clone", customerSpace, modelName);
+        return post("cloneAndRemodel", url, cloneModelingParameters, String.class);
+    }
 }

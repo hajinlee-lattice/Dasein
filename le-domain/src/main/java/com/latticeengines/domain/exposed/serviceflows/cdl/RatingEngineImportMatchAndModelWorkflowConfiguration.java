@@ -174,6 +174,11 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder skipImport(boolean skipImport) {
+            ratingEngineScoreWorkflowBuilder.skipImport(skipImport);
+            return this;
+        }
+
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             ratingEngineScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);

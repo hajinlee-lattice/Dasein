@@ -22,6 +22,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
@@ -80,6 +82,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Credentials;
@@ -106,6 +109,7 @@ import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.pls.workflow.RatingEngineBucketBuilder;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
 import com.latticeengines.security.exposed.InternalResourceBase;
@@ -209,6 +213,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Inject
     private WorkflowJobService workflowJobService;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -388,6 +395,18 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(tenantId);
         log.info(String.format("Set model summary download flag for tenant %s", tenantId));
         modelSummaryDownloadFlagEntityMgr.addDownloadFlag(tenantId);
+    }
+
+    @RequestMapping(value = "/attributesFromFields/" + TENANT_ID_PATH
+            + "/{eventTableName}", method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "get Attributes with user defined fields")
+    public List<Attribute> getAttributesFromFields(@PathVariable("tenantId") String tenantId,
+            @PathVariable("eventTableName") String eventTableName, @RequestBody List<VdbMetadataField> fields) {
+        manufactureSecurityContextForInternalAccess(tenantId);
+        log.info(String.format("Get attributes for tenant=%s, table name=%s", tenantId, eventTableName));
+        Table eventTable = metadataProxy.getTable(tenantId, eventTableName);
+        return modelMetadataService.getAttributesFromFields(eventTable.getAttributes(), fields);
     }
 
     @RequestMapping(value = "/modelsummaries/{modelId}/"

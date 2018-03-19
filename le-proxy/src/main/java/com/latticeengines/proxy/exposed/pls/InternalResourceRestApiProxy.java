@@ -21,6 +21,7 @@ import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.TargetMarket;
+import com.latticeengines.domain.exposed.pls.VdbMetadataField;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -484,6 +486,17 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             restTemplate.exchange(url, HttpMethod.POST, null, Object.class);
         } catch (Exception e) {
             throw new RuntimeException("set model summary flag: Remote call failure", e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Attribute> getAttributesFromFields(String tenantId, String eventTableName,
+            List<VdbMetadataField> fields) {
+        try {
+            return restTemplate.postForObject(
+                    constructUrl("pls/internal/attributesFromFields", tenantId, eventTableName), fields, List.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getAttributesFromFields: Remote call failure", e);
         }
     }
 

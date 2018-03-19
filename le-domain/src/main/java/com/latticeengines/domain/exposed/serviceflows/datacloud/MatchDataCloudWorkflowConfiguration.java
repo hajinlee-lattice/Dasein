@@ -128,6 +128,11 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            match.setFetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder skipMatchingStep(boolean skipMatchingStep) {
             match.setSkipStep(skipMatchingStep);
             matchResult.setSkipStep(skipMatchingStep);

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndModelWorkflowConfiguration;
-import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
@@ -41,7 +40,7 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
     private ResolveMetadataFromUserRefinedAttributes resolveMetadataFromUserRefinedAttributes;
 
     @Inject
-    private ModelWorkflow modelWorkflow;
+    private CdlModelWorkflow modelWorkflow;
 
     @Autowired
     private SetConfigurationForScoring setConfigurationForScoring;
@@ -62,8 +61,8 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
     public Workflow defineWorkflow(RatingEngineMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchDataCloudWorkflow) //
-                .next(dedupEventTableDataFlow) //
-                .next(addStandardAttributesDataFlow) //
+                // .next(dedupEventTableDataFlow) //
+                // .next(addStandardAttributesDataFlow) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
