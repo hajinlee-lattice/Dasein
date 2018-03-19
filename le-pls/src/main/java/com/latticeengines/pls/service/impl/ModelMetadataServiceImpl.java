@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -98,14 +99,12 @@ public class ModelMetadataServiceImpl implements ModelMetadataService {
             boolean found = false;
             for (Attribute attribute : attributes) {
                 if (attribute.getName().equals(field.getColumnName())) {
-                    ApprovedUsage approvedUsageOriginal = attribute.getApprovedUsage() != null
-                            && attribute.getApprovedUsage().size() > 0
-                                    ? ApprovedUsage.fromName(attribute.getApprovedUsage().get(0)) : null;
+                    ApprovedUsage approvedUsageOriginal = CollectionUtils.isNotEmpty(attribute.getApprovedUsage())
+                            ? ApprovedUsage.fromName(attribute.getApprovedUsage().get(0)) : null;
                     attributeCopy.remove(attribute);
                     Attribute updatedAttribute = overwriteAttributeWithFieldValues(attribute, field);
-                    ApprovedUsage approvedUsageUpdated = updatedAttribute.getApprovedUsage() != null
-                            && updatedAttribute.getApprovedUsage().size() > 0
-                                    ? ApprovedUsage.fromName(updatedAttribute.getApprovedUsage().get(0)) : null;
+                    ApprovedUsage approvedUsageUpdated = CollectionUtils.isNotEmpty(updatedAttribute.getApprovedUsage())
+                            ? ApprovedUsage.fromName(updatedAttribute.getApprovedUsage().get(0)) : null;
                     if (approvedUsageUpdated != null && approvedUsageUpdated != approvedUsageOriginal)
                         userEditedAttributes.add(updatedAttribute);
                     if (updatedAttribute != null)
