@@ -85,7 +85,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
     }
 
     @Test(groups = "functional", dependsOnMethods = { "addJob" })
-    public void triggerJob() {
+    public void triggerJob() throws InterruptedException {
         JobKey jobKey = new JobKey(JOB_NAME, JOB_GROUP);
         try {
             scheduler.triggerJob(jobKey);
@@ -95,6 +95,7 @@ public class CustomQuartzJobTestNG extends AbstractTestNGSpringContextTests {
         List<TriggerJobThread> jobList = new ArrayList<>();
         for (int i = 0; i < 5; i++) {
             jobList.add(new TriggerJobThread(jobKey));
+            Thread.sleep(100);
         }
         JobInfoDetail jobDetail = schedulerEntityMgr.getJobDetail(JOB_GROUP, JOB_NAME);
         List<JobHistory> jobHistories = jobDetail.getHistoryJobs();
