@@ -365,6 +365,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
+            rtsBulkScoreWorkflowBuilder.skipMatchingStep(Boolean.TRUE);
             rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
             computeLift.setScoreField(InterfaceName.Event.name());
 
