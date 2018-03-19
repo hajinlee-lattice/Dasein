@@ -113,12 +113,12 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private MetadataSegment translateForBackend(MetadataSegment segment) {
         try {
             FrontEndRestriction accountFrontEndRestriction = segment.getAccountFrontEndRestriction();
-            if (segment.getAccountRestriction() == null) {
+            if (accountFrontEndRestriction != null) {
                 segment.setAccountRestriction(accountFrontEndRestriction.getRestriction());
                 segment.setAccountFrontEndRestriction(null);
             }
             FrontEndRestriction contactFrontEndRestriction = segment.getContactFrontEndRestriction();
-            if (segment.getContactRestriction() == null) {
+            if (contactFrontEndRestriction != null) {
                 segment.setContactRestriction(contactFrontEndRestriction.getRestriction());
                 segment.setContactFrontEndRestriction(null);
             }
