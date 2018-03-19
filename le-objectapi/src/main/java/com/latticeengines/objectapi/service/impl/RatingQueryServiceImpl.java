@@ -82,7 +82,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
             query.setLookups(Collections.singletonList(new EntityLookup(frontEndQuery.getMainEntity())));
             return queryEvaluatorService.getCount(attrRepo, query);
         } catch (Exception e) {
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
@@ -110,7 +110,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
             return queryEvaluatorService.getDataFlux(attrRepo, query) //
                     .map(row -> postProcess(frontEndQuery.getMainEntity(), row));
         } catch (Exception e) {
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
@@ -133,7 +133,7 @@ public class RatingQueryServiceImpl implements RatingQueryService {
             });
             return counts;
         } catch (Exception e) {
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
