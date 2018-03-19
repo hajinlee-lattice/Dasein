@@ -58,7 +58,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
     public Set<String> premiumAttributes(String dataCloudVersion) {
         List<ColumnMetadata> allColumns = getAllColumns(dataCloudVersion);
         return allColumns.stream() //
-                .filter(cm -> StringUtils.isNotBlank(cm.getDataLicense())) //
+                .filter(cm -> Boolean.TRUE.equals(cm.isPremium())) //
                 .map(ColumnMetadata::getAttrName) //
                 .collect(Collectors.toSet());
     }
