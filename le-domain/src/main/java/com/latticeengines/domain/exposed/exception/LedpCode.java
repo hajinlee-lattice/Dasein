@@ -296,6 +296,8 @@ public enum LedpCode {
     LEDP_18177("Websocket session {0} has NOT associated with any authentication token yet."), //
     LEDP_18178("Websocket session {0} has associated with tenant {1} and cannot associate with tenant {2}."), //
     LEDP_18179("Error finding the AI Model for {0}."), //
+    LEDP_18180(
+            "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

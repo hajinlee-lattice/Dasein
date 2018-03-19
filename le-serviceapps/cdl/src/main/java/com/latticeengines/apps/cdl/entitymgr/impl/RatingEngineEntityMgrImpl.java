@@ -225,6 +225,15 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                 throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getDisplayName() });
             }
         }
+
+        // Check active model of Rating Engine
+        if (ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+            if (retrievedRatingEngine.getActiveModelPid() == null) {
+                log.error(
+                        String.format("Active Model check failed for Rating Engine=%s", retrievedRatingEngine.getId()));
+                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getDisplayName() });
+            }
+        }
     }
 
     private void createNewRatingEngine(RatingEngine ratingEngine, String tenantId) {
