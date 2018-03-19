@@ -95,6 +95,7 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
 
         public Builder metadataSegmentExport(MetadataSegmentExport metadataSegmentExport) {
             initStepConf.setMetadataSegmentExport(metadataSegmentExport);
+            matchCdlWorkflowConfBuilder.matchInputTableName(metadataSegmentExport.getTableName());
             return this;
         }
 
