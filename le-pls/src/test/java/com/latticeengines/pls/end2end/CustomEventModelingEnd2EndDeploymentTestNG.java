@@ -111,7 +111,7 @@ public class CustomEventModelingEnd2EndDeploymentTestNG extends SelfServiceModel
                     JsonNode tags = predictor.get("Tags");
                     assertEquals(tags.size(), 1);
                     assertEquals(tags.get(0).textValue(), ModelingMetadata.INTERNAL_TAG);
-                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_LEAD_INFORMATION);
+                    assertEquals(predictor.get("Category").textValue(), ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION);
                 } else if (predictor.get("Name").asText().equals("Industry")) {
                     JsonNode approvedUsages = predictor.get("ApprovedUsage");
                     assertEquals(approvedUsages.size(), 1);
