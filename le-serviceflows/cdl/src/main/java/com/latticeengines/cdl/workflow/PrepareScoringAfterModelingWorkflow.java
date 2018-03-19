@@ -27,6 +27,7 @@ public class PrepareScoringAfterModelingWorkflow
     @Inject
     private SegmentExportInitStep segmentExportInitStep;
 
+    @SuppressWarnings("unused")
     @Inject
     private PrepareSegmentMatchingStep prepareSegmentMatchingStep;
 
