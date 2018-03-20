@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModel;
 public class ModelingConfigFilter {
 
     @JsonProperty("configName")
-    private ModelingConfig configName;
+    private CrossSellModelingConfigKeys configName;
 
     @JsonProperty("criteria")
     private ComparisonType criteria;
@@ -21,17 +21,17 @@ public class ModelingConfigFilter {
 
     }
 
-    public ModelingConfigFilter(ModelingConfig configName, ComparisonType criteria, Integer value) {
+    public ModelingConfigFilter(CrossSellModelingConfigKeys configName, ComparisonType criteria, Integer value) {
         this.configName = configName;
         this.criteria = criteria;
         this.value = value;
     }
 
-    public ModelingConfig getConfigName() {
+    public CrossSellModelingConfigKeys getConfigName() {
         return configName;
     }
 
-    public void setConfigName(ModelingConfig configName) {
+    public void setConfigName(CrossSellModelingConfigKeys configName) {
         this.configName = configName;
     }
 

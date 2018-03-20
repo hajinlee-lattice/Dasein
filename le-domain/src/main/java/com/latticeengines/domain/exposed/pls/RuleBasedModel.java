@@ -5,8 +5,8 @@ import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Transient;
 
-import com.latticeengines.common.exposed.util.AvroUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 
@@ -35,40 +36,63 @@ public class RuleBasedModel extends RatingModel {
     public RuleBasedModel() {
     }
 
+    private RatingRule ratingRule;
+
+    private List<String> selectedAttributes;
+
+    public void setRatingRuleString(String ratingRuleStr) {
+        if (StringUtils.isNotBlank(ratingRuleStr)) {
+            this.ratingRule = JsonUtils.deserialize(ratingRuleStr, RatingRule.class);
+        }
+    }
+
     @JsonIgnore
     @Column(name = "RULE", nullable = true)
     @Type(type = "text")
-    private String ratingRule;
+    public String getRatingRuleString() {
+        String ratingRuleStr = null;
+        if (this.ratingRule != null) {
+            ratingRuleStr = JsonUtils.serialize(this.ratingRule);
+        }
+        return ratingRuleStr;
+    }
+
+    public void setRatingRule(RatingRule ratingRule) {
+        this.ratingRule = ratingRule;
+    }
+
+    @Transient
+    @JsonProperty("ratingRule")
+    public RatingRule getRatingRule() {
+        return this.ratingRule;
+    }
+
+    public void setSelectedAttributesString(String selectedAttributesStr) {
+        if (StringUtils.isNotBlank(selectedAttributesStr)) {
+            List<?> tempSelectedAttributes = JsonUtils.deserialize(selectedAttributesStr, List.class);
+            this.selectedAttributes = JsonUtils.convertList(tempSelectedAttributes, String.class);
+        }
+    }
 
     @JsonIgnore
     @Column(name = "SELECTED_ATTRIBUTES", nullable = true)
     @Type(type = "text")
-    private String selectedAttributes;
-
-    @JsonProperty("ratingRule")
-    public void setRatingRule(RatingRule ratingRule) {
-        this.ratingRule = JsonUtils.serialize(ratingRule);
+    public String getSelectedAttributesString() {
+        String selectedAttributesStr = null;
+        if (this.selectedAttributes != null) {
+            selectedAttributesStr = JsonUtils.serialize(this.selectedAttributes);
+        }
+        return selectedAttributesStr;
     }
 
-    @JsonProperty("ratingRule")
-    public RatingRule getRatingRule() {
-        return JsonUtils.deserialize(this.ratingRule, RatingRule.class);
-    }
-
-    @JsonProperty("selectedAttributes")
     public void setSelectedAttributes(List<String> selectedAttributes) {
-        this.selectedAttributes = JsonUtils.serialize(selectedAttributes);
+        this.selectedAttributes = selectedAttributes;
     }
 
+    @Transient
     @JsonProperty("selectedAttributes")
     public List<String> getSelectedAttributes() {
-        List<String> attrList = null;
-        if (StringUtils.isNotBlank(this.selectedAttributes)) {
-            List<?> attrListIntermediate = JsonUtils.deserialize(this.selectedAttributes, List.class);
-            attrList = JsonUtils.convertList(attrListIntermediate, String.class);
-        }
-
-        return attrList;
+        return this.selectedAttributes;
     }
 
     @Override
@@ -77,7 +101,7 @@ public class RuleBasedModel extends RatingModel {
     }
 
     public static String generateIdStr() {
-    	    String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
-    	    return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, uuid);
+        String uuid = AvroUtils.getAvroFriendlyString(UuidUtils.shortenUuid(UUID.randomUUID()));
+        return String.format(RULE_BASED_MODEL_FORMAT, RULE_BASED_MODEL_PREFIX, uuid);
     }
 }

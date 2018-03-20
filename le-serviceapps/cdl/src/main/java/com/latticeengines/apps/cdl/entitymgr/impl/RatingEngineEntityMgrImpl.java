@@ -47,6 +47,12 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CustomEventRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.AdvancedModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ConcreteRestriction;
@@ -116,6 +122,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                     RatingModel ruleBasedModel = ruleBasedModelDao.findByKey(RuleBasedModel.class, activeModelPid);
                     ratingEngine.setActiveModel(ruleBasedModel);
                     break;
+                case CUSTOM_EVENT:
                 case CROSS_SELL:
                     RatingModel aiModel = aiModelDao.findByKey(AIModel.class, activeModelPid);
                     ratingEngine.setActiveModel(aiModel);
@@ -203,6 +210,14 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
         if (MapUtils.isNotEmpty(ratingEngine.getCountsAsMap())) {
             retrievedRatingEngine.setCountsByMap(ratingEngine.getCountsAsMap());
         }
+        if (ratingEngine.getAdvancedRatingConfig() != null) {
+            if (retrievedRatingEngine.getAdvancedRatingConfig() != null) {
+                retrievedRatingEngine.getAdvancedRatingConfig().copyConfig(ratingEngine.getAdvancedRatingConfig());
+            } else {
+                retrievedRatingEngine.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
+            }
+        }
+
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
     }
@@ -269,6 +284,31 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             ratingEngineNote.setId(UUID.randomUUID().toString());
             ratingEngine.addRatingEngineNote(ratingEngineNote);
         }
+
+        AdvancedModelingConfig advancedModelingConfig = null;
+        AdvancedRatingConfig advancedRatingConfig = ratingEngine.getAdvancedRatingConfig();
+        switch (type) {
+        case CROSS_SELL:
+            if (advancedModelingConfig == null) {
+                advancedModelingConfig = new CrossSellModelingConfig();
+            }
+            if (advancedRatingConfig == null) {
+                advancedRatingConfig = new CrossSellRatingConfig();
+            }
+            break;
+        case CUSTOM_EVENT:
+            if (advancedModelingConfig == null) {
+                advancedModelingConfig = new CustomEventModelingConfig();
+            }
+            if (advancedRatingConfig == null) {
+                advancedRatingConfig = new CustomEventRatingConfig();
+            }
+            break;
+        default:
+            break;
+        }
+
+        ratingEngine.setAdvancedRatingConfig(advancedRatingConfig);
         ratingEngineDao.create(ratingEngine);
 
         // set Activation Action Context
@@ -276,31 +316,36 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             setActivationActionContext(ratingEngine);
         }
 
-        switch (type) {
-        case RULE_BASED:
-            RuleBasedModel ruleBasedModel = new RuleBasedModel();
-            ruleBasedModel.setId(RuleBasedModel.generateIdStr());
-            ruleBasedModel.setRatingEngine(ratingEngine);
-            ruleBasedModel.setRatingRule(new RatingRule());
-            List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
-            ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
-            ruleBasedModelDao.create(ruleBasedModel);
-            ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
-            ratingEngine.setActiveModel(ruleBasedModel);
-            ratingEngineDao.update(ratingEngine);
-            break;
-        case CROSS_SELL:
-            AIModel aiModel = new AIModel();
-            aiModel.setId(AIModel.generateIdStr());
-            aiModel.setRatingEngine(ratingEngine);
-            aiModelDao.create(aiModel);
-            ratingEngine.setActiveModelPid(aiModel.getPid());
-            ratingEngine.setActiveModel(aiModel);
-            ratingEngineDao.update(ratingEngine);
-            break;
-        default:
-            break;
+        if (type == RatingEngineType.RULE_BASED) {
+            createRuleBasedModel(ratingEngine);
+        } else {
+            createAIModel(ratingEngine, advancedModelingConfig);
         }
+    }
+
+    private void createRuleBasedModel(RatingEngine ratingEngine) {
+        RuleBasedModel ruleBasedModel = new RuleBasedModel();
+        ruleBasedModel.setId(RuleBasedModel.generateIdStr());
+        ruleBasedModel.setRatingEngine(ratingEngine);
+        ruleBasedModel.setRatingRule(new RatingRule());
+        List<String> usedAttributesInSegment = findUsedAttributes(ratingEngine.getSegment());
+        ruleBasedModel.setSelectedAttributes(usedAttributesInSegment);
+        ruleBasedModelDao.create(ruleBasedModel);
+        ratingEngine.setActiveModelPid(ruleBasedModel.getPid());
+        ratingEngine.setActiveModel(ruleBasedModel);
+        ratingEngineDao.update(ratingEngine);
+    }
+
+    private void createAIModel(RatingEngine ratingEngine, AdvancedModelingConfig advancedModelingConfig) {
+        AIModel aiModel = new AIModel();
+        aiModel.setId(AIModel.generateIdStr());
+        aiModel.setRatingEngine(ratingEngine);
+        aiModel.setAdvancedModelingConfig(advancedModelingConfig);
+        aiModelDao.create(aiModel);
+        ratingEngine.setActiveModelPid(aiModel.getPid());
+        ratingEngine.setActiveModel(aiModel);
+        ratingEngineDao.update(ratingEngine);
+
     }
 
     private void setActivationActionContext(RatingEngine ratingEngine) {

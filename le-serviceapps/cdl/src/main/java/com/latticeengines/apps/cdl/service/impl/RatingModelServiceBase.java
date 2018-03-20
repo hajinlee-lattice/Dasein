@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
@@ -13,6 +14,10 @@ public abstract class RatingModelServiceBase<RatingModel> implements RatingModel
 
     @SuppressWarnings("rawtypes")
     private static Map<RatingEngineType, RatingModelService> registry = new HashMap<>();
+
+    protected RatingModelServiceBase(List<RatingEngineType> ratingEngineTypes) {
+        ratingEngineTypes.stream().forEach(type -> registry.put(type, this));
+    }
 
     protected RatingModelServiceBase(RatingEngineType ratingEngineType) {
         registry.put(ratingEngineType, this);

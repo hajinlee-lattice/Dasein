@@ -30,6 +30,9 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.controller.RatingEngineResourceDeploymentTestNG;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
@@ -103,9 +106,10 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
     private AIModel createAIModel(AIModel aiModel, ModelSummary modelSummary, PredictionType predictionType) {
         aiModel.setModelSummary(modelSummary);
-        aiModel.setTargetProducts(Collections.singletonList(TARGET_PRODUCT));
+        CrossSellModelingConfig advancedModelingConf = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
+        advancedModelingConf.setTargetProducts(Collections.singletonList(TARGET_PRODUCT));
         aiModel.setPredictionType(predictionType);
-        aiModel.setModelingStrategy(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE);
+        advancedModelingConf.setModelingStrategy(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE);
         return aiModel;
     }
 

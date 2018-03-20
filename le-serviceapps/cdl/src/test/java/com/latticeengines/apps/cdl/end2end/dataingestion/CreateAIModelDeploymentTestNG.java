@@ -19,10 +19,11 @@ import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.ModelingConfig;
+import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -115,14 +116,16 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), testRatingEngine);
         testAIModel = (AIModel) testRatingEngine.getActiveModel();
-        testAIModel.setModelingStrategy(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
-        Map<ModelingConfig, ModelingConfigFilter> myMap = new HashMap<>();
-        myMap.put(ModelingConfig.PURCHASED_BEFORE_PERIOD,
-                new ModelingConfigFilter(ModelingConfig.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
-        testAIModel.setModelingConfigFilters(myMap);
+        CrossSellModelingConfig advancedConf = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
+        advancedConf.setModelingStrategy(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
+        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
+        myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
+                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
+        CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
+        config.setFilters(myMap);
         testAIModel.setPredictionType(PredictionType.EXPECTED_VALUE);
-        testAIModel.setTargetProducts(Collections.singletonList(targetProductId));
-        testAIModel.setTrainingProducts(Collections.singletonList(trainingProductId));
+        config.setTargetProducts(Collections.singletonList(targetProductId));
+        config.setTrainingProducts(Collections.singletonList(trainingProductId));
         testAIModel.setTrainingSegment(trainSegment);
 
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),

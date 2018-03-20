@@ -74,26 +74,21 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
             if (retrievedAIModel == null) {
                 throw new UnsupportedOperationException("Create new AIModel is not yet Supported");
             } else {
-                updateExistingRuleBasedModel(retrievedAIModel, aiModel, ratingEngineId);
+                updateExistingAIModel(retrievedAIModel, aiModel, ratingEngineId);
                 getDao().update(retrievedAIModel);
                 return retrievedAIModel;
             }
         }
     }
 
-    private void updateExistingRuleBasedModel(AIModel retrievedAIModel, AIModel aiModel, String ratingEngineId) {
+    private void updateExistingAIModel(AIModel retrievedAIModel, AIModel aiModel, String ratingEngineId) {
         log.info(String.format("Updating AI Model with id %s for ratingEngine %s", aiModel.getId(), ratingEngineId));
-
         retrievedAIModel.setPredictionType(aiModel.getPredictionType());
-        retrievedAIModel.setModelingStrategy(aiModel.getModelingStrategy());
-        retrievedAIModel.setWorkflowType(aiModel.getWorkflowType());
-        retrievedAIModel.setTargetProducts(aiModel.getTargetProducts());
-        retrievedAIModel.setTrainingProducts(aiModel.getTrainingProducts());
         retrievedAIModel.setTrainingSegment(aiModel.getTrainingSegment());
-        retrievedAIModel
-                .setModelingJobId(aiModel.getModelingJobId() != null ? aiModel.getModelingJobId().toString() : null);
-        retrievedAIModel.setModelingConfigFilters(aiModel.getModelingConfigFilters());
+        retrievedAIModel.setModelingJobId(
+                aiModel.getModelingYarnJobId() != null ? aiModel.getModelingYarnJobId().toString() : null);
         retrievedAIModel.setModelSummary(aiModel.getModelSummary());
+        retrievedAIModel.getAdvancedModelingConfig().copyConfig(aiModel.getAdvancedModelingConfig());
     }
 
 }

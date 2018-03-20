@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -63,8 +64,13 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     @Inject
     private DataCollectionService dataCollectionService;
 
+    private static RatingEngineType[] types = //
+            new RatingEngineType[] { //
+                    RatingEngineType.CROSS_SELL, //
+                    RatingEngineType.CUSTOM_EVENT };
+
     protected AIModelServiceImpl() {
-        super(RatingEngineType.CROSS_SELL);
+        super(Arrays.asList(types));
     }
 
     @Override
@@ -109,8 +115,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             ModelingQueryType modelingQueryType) {
+        CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
 
-        if (Arrays.asList(ModelingStrategy.values()).contains(aiModel.getModelingStrategy())) {
+        if (advancedConf != null
+                && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
             int evaluationPeriod = periodService.getEvaluationPeriod(customerSpace,
                     dataCollectionService.getActiveVersion(customerSpace), PeriodStrategy.CalendarMonth);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder

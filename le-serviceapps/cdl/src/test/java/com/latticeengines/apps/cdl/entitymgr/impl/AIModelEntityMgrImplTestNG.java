@@ -17,11 +17,11 @@ import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
-import com.latticeengines.domain.exposed.pls.ModelingConfig;
+import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 
 public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
@@ -87,23 +87,26 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(aiModel.getRatingEngine().getId(), ratingEngineId);
 
         // update aiModel by updating its selected attributes and rules
-        aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
-        aiModel.setTargetProducts(generateSeletedProducts());
-        aiModelEntityMgr.createOrUpdate(aiModel);
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
+                .setTargetProducts(generateSeletedProducts());
+        aiModel = aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);
+
         aiModelList = aiModelEntityMgr.findByRatingEngineId(ratingEngineId, null);
+
         Assert.assertNotNull(aiModelList);
         Assert.assertEquals(aiModelList.size(), 1);
         aiModel = aiModelEntityMgr.findById(aiModelList.get(0).getId());
+
         assertUpdatedAIModel(aiModel);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateTrainingData() {
         aiModel.setTrainingSegment(createMetadataSegment(TRAINING_SEGMENT_NAME));
-        aiModel.setTrainingProducts(generateTrainingProducts());
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
+                .setTrainingProducts(generateTrainingProducts());
 
         aiModel.setModelingJobId(APP_JOB_ID);
-
         aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);
 
         aiModel = aiModelEntityMgr.findById(aiModel.getId());
@@ -113,21 +116,21 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateTrainingData" })
     public void testUpdateRefineSettings() {
-        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD,
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.SPEND_IN_PERIOD,
                 ComparisonType.LESS_OR_EQUAL, 1500);
-        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
+        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD,
                 ComparisonType.GREATER_OR_EQUAL, 10);
-        ModelingConfigFilter trainingFilter = new ModelingConfigFilter(ModelingConfig.TRAINING_SET_PERIOD,
+        ModelingConfigFilter trainingFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.TRAINING_SET_PERIOD,
                 ComparisonType.WITHIN, 10);
-        ModelingConfigFilter repeatPurchaseFilter = new ModelingConfigFilter(ModelingConfig.PURCHASED_BEFORE_PERIOD,
-                ComparisonType.PRIOR, 6);
+        ModelingConfigFilter repeatPurchaseFilter = new ModelingConfigFilter(
+                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR, 6);
 
-        Map<ModelingConfig, ModelingConfigFilter> configFitlers = new HashMap<>();
-        configFitlers.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
-        configFitlers.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
-        configFitlers.put(ModelingConfig.TRAINING_SET_PERIOD, trainingFilter);
-        configFitlers.put(ModelingConfig.PURCHASED_BEFORE_PERIOD, repeatPurchaseFilter);
-        aiModel.setModelingConfigFilters(configFitlers);
+        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> configFitlers = new HashMap<>();
+        configFitlers.put(CrossSellModelingConfigKeys.SPEND_IN_PERIOD, spendFilter);
+        configFitlers.put(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD, quantityFilter);
+        configFitlers.put(CrossSellModelingConfigKeys.TRAINING_SET_PERIOD, trainingFilter);
+        configFitlers.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, repeatPurchaseFilter);
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setFilters(configFitlers);
 
         aiModelEntityMgr.createOrUpdateAIModel(aiModel, ratingEngineId);
 
@@ -149,9 +152,12 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(aiModel.getRatingEngine());
         Assert.assertEquals(aiModel.getRatingEngine().getId(), ratingEngineId);
 
-        Assert.assertNotNull(aiModel.getTargetProducts());
-        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID1));
-        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID2));
+        Assert.assertNotNull(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts());
+        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()
+                .contains(PRODUCT_ID1));
+        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()
+                .contains(PRODUCT_ID2));
     }
 
     private void assertUpdatedModelWithTrainingData(AIModel aiModel) {
@@ -159,19 +165,23 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertNotNull(aiModel.getTrainingSegment());
         Assert.assertNotNull(aiModel.getTrainingSegment().getName());
 
-        Assert.assertNotNull(aiModel.getTrainingProducts());
-        Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
+        Assert.assertNotNull(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts());
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel)
+                .getTrainingProducts().contains(PRODUCT_ID3));
 
-        Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
+        Assert.assertEquals(aiModel.getModelingYarnJobId().toString(), APP_JOB_ID);
     }
 
     private void assertUpdatedModelWithConfigFilters(AIModel aiModel,
-            Map<ModelingConfig, ModelingConfigFilter> filters) {
+            Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters) {
         assertUpdatedAIModel(aiModel);
-        Assert.assertNotNull(aiModel.getModelingConfigFilters());
-        Assert.assertEquals(aiModel.getModelingConfigFilters().size(), filters.size());
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters());
+        Assert.assertEquals(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(),
+                filters.size());
         for (ModelingConfigFilter filter : filters.values()) {
-            Assert.assertTrue(aiModel.getModelingConfigFilters().values().contains(filter));
+            Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters()
+                    .values().contains(filter));
         }
     }
 
@@ -181,7 +191,8 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(aiModel.getIteration(), 1);
         Assert.assertNotNull(aiModel.getRatingEngine());
 
-        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTargetProducts()));
+        Assert.assertTrue(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
     }
 
     private List<String> generateSeletedProducts() {
@@ -196,5 +207,4 @@ public class AIModelEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         trainingProducts.add(PRODUCT_ID3);
         return trainingProducts;
     }
-
 }

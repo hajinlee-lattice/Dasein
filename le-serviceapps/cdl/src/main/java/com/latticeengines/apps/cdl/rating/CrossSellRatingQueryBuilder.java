@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
@@ -98,7 +99,8 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
         this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
         this.aiModel = aiModel;
-        this.productIds = String.join(",", aiModel.getTargetProducts());
+        CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
+        this.productIds = String.join(",", config.getTargetProducts());
         this.evaluationPeriod = evaluationPeriod;
     }
 

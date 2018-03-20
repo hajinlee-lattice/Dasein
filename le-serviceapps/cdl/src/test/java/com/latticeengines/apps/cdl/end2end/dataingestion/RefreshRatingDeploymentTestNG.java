@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -96,7 +97,8 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/prop_model.tar.gz");
     }
 
-    private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary, PredictionType predictionType) throws InterruptedException {
+    private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary,
+            PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setSegment(segment);
@@ -116,9 +118,10 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private AIModel createAIModel(AIModel aiModel, ModelSummary modelSummary, PredictionType predictionType) {
         aiModel.setModelSummary(modelSummary);
-        aiModel.setTargetProducts(Collections.singletonList(TARGET_PRODUCT));
+        CrossSellModelingConfig advancedConf = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
+        advancedConf.setTargetProducts(Collections.singletonList(TARGET_PRODUCT));
         aiModel.setPredictionType(predictionType);
-        aiModel.setModelingStrategy(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE);
+        advancedConf.setModelingStrategy(ModelingStrategy.CROSS_SELL_FIRST_PURCHASE);
         return aiModel;
     }
 

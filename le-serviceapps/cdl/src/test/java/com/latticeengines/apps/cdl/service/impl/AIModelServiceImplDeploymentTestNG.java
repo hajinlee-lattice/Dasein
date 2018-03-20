@@ -26,14 +26,14 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelWorkflowType;
-import com.latticeengines.domain.exposed.pls.ModelingConfig;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
@@ -135,9 +135,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         AIModel aiModel = getSpecificRatingModel();
         assertDefaultAIModel(aiModel);
 
-        aiModel.setWorkflowType(ModelWorkflowType.CROSS_SELL);
-        aiModel.setTargetProducts(generateSeletedProducts());
-        aiModel.setTrainingProducts(generateTrainingProducts());
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setTargetProducts(generateSeletedProducts());
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setTrainingProducts(generateTrainingProducts());
         aiModel.setModelingJobId(APP_JOB_ID);
 
         updateRatingModel(aiModel);
@@ -162,18 +161,18 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         // test get specific rating model
         AIModel aiModel = getSpecificRatingModel();
 
-        ModelingConfigFilter spendFilter = new ModelingConfigFilter(ModelingConfig.SPEND_IN_PERIOD,
+        ModelingConfigFilter spendFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.SPEND_IN_PERIOD,
                 ComparisonType.LESS_OR_EQUAL, 1500);
-        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(ModelingConfig.QUANTITY_IN_PERIOD,
+        ModelingConfigFilter quantityFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD,
                 ComparisonType.LESS_OR_EQUAL, 10);
-        ModelingConfigFilter trainFilter = new ModelingConfigFilter(ModelingConfig.TRAINING_SET_PERIOD,
+        ModelingConfigFilter trainFilter = new ModelingConfigFilter(CrossSellModelingConfigKeys.TRAINING_SET_PERIOD,
                 ComparisonType.PRIOR_ONLY, 4);
 
-        Map<ModelingConfig, ModelingConfigFilter> configFilters = new HashMap<>();
-        configFilters.put(ModelingConfig.SPEND_IN_PERIOD, spendFilter);
-        configFilters.put(ModelingConfig.QUANTITY_IN_PERIOD, quantityFilter);
-        configFilters.put(ModelingConfig.TRAINING_SET_PERIOD, trainFilter);
-        aiModel.setModelingConfigFilters(configFilters);
+        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> configFilters = new HashMap<>();
+        configFilters.put(CrossSellModelingConfigKeys.SPEND_IN_PERIOD, spendFilter);
+        configFilters.put(CrossSellModelingConfigKeys.QUANTITY_IN_PERIOD, quantityFilter);
+        configFilters.put(CrossSellModelingConfigKeys.TRAINING_SET_PERIOD, trainFilter);
+        CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).setFilters(configFilters);
 
         updateRatingModel(aiModel);
         assertUpdatedModelWithConfigFilters(getSpecificRatingModel(), configFilters);
@@ -271,13 +270,12 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel);
         Assert.assertEquals(1, aiModel.getIteration());
 
-        Assert.assertNotNull(aiModel.getTargetProducts());
-        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID1));
-        Assert.assertTrue(aiModel.getTargetProducts().contains(PRODUCT_ID2));
-        Assert.assertEquals(aiModel.getWorkflowType(), ModelWorkflowType.CROSS_SELL);
-        Assert.assertFalse(CollectionUtils.isEmpty(aiModel.getTrainingProducts()));
-        Assert.assertNotNull(aiModel.getTrainingProducts().contains(PRODUCT_ID3));
-        Assert.assertEquals(aiModel.getModelingJobId().toString(), APP_JOB_ID);
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts());
+        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID1));
+        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID2));
+        Assert.assertFalse(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts().contains(PRODUCT_ID3));
+        Assert.assertEquals(aiModel.getModelingYarnJobId().toString(), APP_JOB_ID);
     }
 
     private void assertUpdatedModelWithRelationshipObjects(AIModel aiModel) {
@@ -289,16 +287,16 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     private void assertUpdatedModelWithConfigFilters(AIModel aiModel,
-            Map<ModelingConfig, ModelingConfigFilter> testFilters) {
+            Map<CrossSellModelingConfigKeys, ModelingConfigFilter> testFilters) {
         assertUpdatedModelWithRelationshipObjects(aiModel);
 
         if (testFilters == null) {
             return;
         }
-        Assert.assertNotNull(aiModel.getModelingConfigFilters());
-        Assert.assertEquals(aiModel.getModelingConfigFilters().size(), testFilters.size());
+        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters());
+        Assert.assertEquals(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(), testFilters.size());
         for (ModelingConfigFilter filter : testFilters.values()) {
-            Assert.assertTrue(aiModel.getModelingConfigFilters().values().contains(filter));
+            Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().values().contains(filter));
         }
     }
 
@@ -317,11 +315,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel.getId());
         Assert.assertEquals(aiModel.getIteration(), 1);
 
-        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTargetProducts()));
-        Assert.assertTrue(CollectionUtils.isEmpty(aiModel.getTrainingProducts()));
+        Assert.assertTrue(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
+        Assert.assertTrue(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
         Assert.assertNull(aiModel.getTrainingSegment());
-        Assert.assertNull(aiModel.getWorkflowType());
-        Assert.assertNull(aiModel.getModelingJobId());
+        Assert.assertNull(aiModel.getModelingYarnJobId());
     }
 
     protected void deleteRatingEngine(String ratingEngineId) {

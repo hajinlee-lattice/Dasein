@@ -1,6 +1,10 @@
 CREATE PROCEDURE `UpdateCDLTables`()
     BEGIN
 
+    ALTER TABLE `PLS_MultiTenant`.`RATING_ENGINE` ADD COLUMN `ADVANCED_RATING_CONFIG` longtext;
+        
+    ALTER TABLE `PLS_MultiTenant`.`AI_MODEL` ADD COLUMN `ADVANCED_MODELING_CONFIG` longtext;
+        
     ALTER TABLE `PLS_MultiTenant`.`BUCKET_METADATA` ADD COLUMN `RATING_ENGINE_ID` bigint;
         
     ALTER TABLE `PLS_MultiTenant`.`BUCKET_METADATA` add constraint `FK_BUCKETMETADATA_RATINGENGINEID_RATINGENGINE` foreign key (`RATING_ENGINE_ID`) references `RATING_ENGINE` (`PID`) on delete cascade;

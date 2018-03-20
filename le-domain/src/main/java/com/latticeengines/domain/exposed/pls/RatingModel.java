@@ -44,36 +44,16 @@ import com.latticeengines.domain.exposed.db.HasAuditingFields;
 @NamedEntityGraph(name = "RatingModel.ratingEngine", attributeNodes = @NamedAttributeNode("ratingEngine"))
 public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingFields {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonIgnore
-    @Column(name = "PID", nullable = false)
     private Long pid;
 
-    @JsonProperty("id")
-    @Column(name = "ID", nullable = false, unique = true)
     private String id;
 
-    @JsonProperty("iteration")
-    @Column(name = "Iteration", nullable = false)
     private int iteration = 1;
 
-    @JsonProperty("created")
-    @Column(name = "CREATED", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
     private Date created;
 
-    @JsonProperty("updated")
-    @Column(name = "UPDATED", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @LastModifiedDate
     private Date updated;
 
-    @JsonIgnore
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     protected RatingEngine ratingEngine;
 
     @Override
@@ -82,6 +62,10 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
+    @Column(name = "PID", nullable = false)
     public Long getPid() {
         return this.pid;
     }
@@ -92,6 +76,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
+    @JsonProperty("id")
+    @Column(name = "ID", nullable = false, unique = true)
     public String getId() {
         return this.id;
     }
@@ -102,6 +88,10 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @CreatedDate
     public Date getCreated() {
         return this.created;
     }
@@ -112,6 +102,10 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     }
 
     @Override
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
+    @LastModifiedDate
     public Date getUpdated() {
         return this.updated;
     }
@@ -120,6 +114,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         this.iteration = iteration;
     }
 
+    @JsonProperty("iteration")
+    @Column(name = "Iteration", nullable = false)
     public int getIteration() {
         return this.iteration;
     }
@@ -128,6 +124,10 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
         this.ratingEngine = ratingEngine;
     }
 
+    @JsonIgnore
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_RATING_ENGINE_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public RatingEngine getRatingEngine() {
         return this.ratingEngine;
     }

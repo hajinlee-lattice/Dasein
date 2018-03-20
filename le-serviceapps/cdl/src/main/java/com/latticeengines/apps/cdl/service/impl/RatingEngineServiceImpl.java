@@ -53,6 +53,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
@@ -302,9 +303,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             String userEmail) {
         if (ratingModel instanceof AIModel) {
             AIModel aiModel = (AIModel) ratingModel;
-            ApplicationId jobId = aiModel.getModelingJobId();
+            ApplicationId jobId = aiModel.getModelingYarnJobId();
             if (jobId == null) {
-                if (CollectionUtils.isEmpty(((AIModel) ratingModel).getTargetProducts())) {
+                if (CollectionUtils
+                        .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(((AIModel) ratingModel)).getTargetProducts())) {
                     throw new LedpException(LedpCode.LEDP_40012,
                             new String[] { ratingModel.getId(), CustomerSpace.parse(customerSpace).toString() });
                 }
@@ -416,4 +418,5 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
     }
+
 }

@@ -3,6 +3,7 @@ package com.latticeengines.domain.exposed.pls;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -20,6 +21,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
@@ -45,6 +47,7 @@ import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -73,101 +76,64 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     );
 
     // needed for both prediction types
-    public static final List<ScoreType> COMMON_SCORES = Collections.singletonList(ScoreType.NormalizedScore);
+    public static final List<ScoreType> COMMON_SCORES = Arrays.asList(ScoreType.Probability, ScoreType.NormalizedScore);
 
     // needed for ev models
     public static final List<ScoreType> EV_SCORES = Collections.singletonList(ScoreType.ExpectedRevenue);
 
-    public RatingEngine() {
-    }
+    private Long pid;
 
+    private String id;
+
+    private Tenant tenant;
+
+    private String displayName;
+
+    private String note;
+
+    private RatingEngineType type;
+
+    private RatingEngineStatus status;
+
+    private MetadataSegment segment;
+
+    private Date created;
+
+    private Date updated;
+
+    private String createdBy;
+
+    private Long activeModelPid;
+
+    private RatingModel activeModel;
+
+    private List<RatingEngineNote> ratingEngineNotes;
+
+    private Map<String, Long> countMap;
+
+    private Date lastRefreshedDate;
+
+    private AdvancedRatingConfig advancedRatingConfig;
+
+    @Override
     @JsonProperty("pid")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)
-    private Long pid;
-
-    @JsonProperty("id")
-    @Column(name = "ID", unique = true, nullable = false)
-    private String id;
-
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
-    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private Tenant tenant;
-
-    @JsonProperty("displayName")
-    @Column(name = "DISPLAY_NAME", nullable = true)
-    private String displayName;
-
-    @JsonProperty("note")
-    @Transient
-    private String note;
-
-    @JsonProperty("type")
-    @Column(name = "TYPE", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RatingEngineType type;
-
-    @JsonProperty("status")
-    @Column(name = "STATUS", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RatingEngineStatus status;
-
-    @JsonProperty("segment")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private MetadataSegment segment;
-
-    @JsonProperty("created")
-    @Column(name = "CREATED", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date created;
-
-    @JsonProperty("updated")
-    @Column(name = "UPDATED", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date updated;
-
-    @JsonProperty("createdBy")
-    @Column(name = "CREATED_BY", nullable = false)
-    private String createdBy;
-
-    @JsonIgnore
-    @Column(name = "ACTIVE_MODEL_PID")
-    private Long activeModelPid;
-
-    @JsonProperty("activeModel")
-    @Transient
-    private RatingModel activeModel;
-
-    @JsonIgnore
-    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH,
-            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private List<RatingEngineNote> ratingEngineNotes;
-
-    @Column(name = "COUNTS", length = 1000)
-    @JsonIgnore
-    private String counts;
-
-    @JsonProperty("lastRefreshedDate")
-    @Transient
-    private Date lastRefreshedDate;
-
-    @Override
     public Long getPid() {
         return this.pid;
     }
 
     @Override
+    @JsonProperty("pid")
     public void setPid(Long pid) {
         this.pid = pid;
     }
 
     @Override
+    @JsonProperty("id")
+    @Column(name = "ID", unique = true, nullable = false)
     public String getId() {
         return this.id;
     }
@@ -183,6 +149,9 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @Override
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.LAZY)
+    @JoinColumn(name = "FK_TENANT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public Tenant getTenant() {
         return this.tenant;
     }
@@ -191,113 +160,154 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.displayName = displayName;
     }
 
+    @JsonProperty("displayName")
+    @Column(name = "DISPLAY_NAME", nullable = true)
     public String getDisplayName() {
         return this.displayName;
     }
 
     @Override
+    @JsonProperty("created")
     public void setCreated(Date time) {
         this.created = time;
     }
 
     @Override
+    @JsonProperty("created")
+    @Column(name = "CREATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     public Date getCreated() {
         return this.created;
     }
 
     @Override
+    @JsonProperty("updated")
     public void setUpdated(Date time) {
         this.updated = time;
     }
 
     @Override
+    @JsonProperty("updated")
+    @Column(name = "UPDATED", nullable = false)
+    @Temporal(TemporalType.TIMESTAMP)
     public Date getUpdated() {
         return this.updated;
     }
 
+    @JsonProperty("note")
     public void setNote(String note) {
         this.note = note;
     }
 
+    @JsonProperty("note")
+    @Transient
     public String getNote() {
         return this.note;
     }
 
+    @JsonProperty("type")
     public void setType(RatingEngineType type) {
         this.type = type;
     }
 
+    @JsonProperty("type")
+    @Column(name = "TYPE", nullable = false)
+    @Enumerated(EnumType.STRING)
     public RatingEngineType getType() {
         return this.type;
     }
 
+    @JsonProperty("status")
     public void setStatus(RatingEngineStatus status) {
         this.status = status;
     }
 
+    @JsonProperty("status")
+    @Column(name = "STATUS", nullable = false)
+    @Enumerated(EnumType.STRING)
     public RatingEngineStatus getStatus() {
         return this.status;
     }
 
+    @JsonProperty("segment")
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
     }
 
+    @JsonProperty("segment")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public MetadataSegment getSegment() {
         return this.segment;
     }
 
+    @JsonProperty("createdBy")
     public void setCreatedBy(String user) {
         this.createdBy = user;
     }
 
+    @JsonProperty("createdBy")
+    @Column(name = "CREATED_BY", nullable = false)
     public String getCreatedBy() {
         return this.createdBy;
     }
 
+    @JsonProperty("lastRefreshedDate")
+    @Transient
     public Date getLastRefreshedDate() {
         return lastRefreshedDate;
     }
 
+    @JsonProperty("lastRefreshedDate")
     public void setLastRefreshedDate(Date lastRefreshedDate) {
         this.lastRefreshedDate = lastRefreshedDate;
     }
 
-    @SuppressWarnings("unused")
-    private String getCounts() {
+    @Column(name = "COUNTS", length = 1000)
+    public String getCountsStr() {
+        String counts = null;
+        if (!MapUtils.isEmpty(countMap)) {
+            counts = JsonUtils.serialize(countMap);
+        }
         return counts;
     }
 
-    private void setCounts(String counts) {
-        this.counts = counts;
+    public void setCountsStr(String counts) {
+        if (!StringUtils.isBlank(counts)) {
+            Map<?, ?> map = JsonUtils.deserialize(counts, Map.class);
+            this.countMap = JsonUtils.convertMap(map, String.class, Long.class);
+        } else {
+            this.countMap = null;
+        }
     }
 
     @JsonProperty("counts")
+    @Transient
     public Map<String, Long> getCountsAsMap() {
-        if (StringUtils.isBlank(counts)) {
-            return null;
-        }
-        Map map = JsonUtils.deserialize(counts, Map.class);
-        return JsonUtils.convertMap(map, String.class, Long.class);
+        return countMap;
     }
 
     @JsonProperty("counts")
     public void setCountsByMap(Map<String, Long> countMap) {
-        if (MapUtils.isEmpty(countMap)) {
-            counts = null;
-        } else {
-            counts = JsonUtils.serialize(countMap);
-        }
+        this.countMap = countMap;
     }
 
+    @JsonIgnore
+    @OneToMany(cascade = { CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.REFRESH,
+            CascadeType.MERGE }, mappedBy = "ratingEngine", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     public List<RatingEngineNote> getRatingEngineNotes() {
         return this.ratingEngineNotes;
     }
 
+    @JsonIgnore
     public void setRatingEngineNotes(List<RatingEngineNote> ratingEngineNotes) {
         this.ratingEngineNotes = ratingEngineNotes;
     }
 
+    @Transient
+    @JsonIgnore
     public void addRatingEngineNote(RatingEngineNote ratingEngineNote) {
         if (this.ratingEngineNotes == null) {
             this.ratingEngineNotes = new ArrayList<>();
@@ -306,25 +316,51 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
         this.ratingEngineNotes.add(ratingEngineNote);
     }
 
-    @Override
-    public String toString() {
-        return JsonUtils.serialize(this);
-    }
-
+    @JsonProperty("activeModel")
+    @Transient
     public RatingModel getActiveModel() {
         return this.activeModel;
     }
 
+    @JsonProperty("activeModel")
     public void setActiveModel(RatingModel model) {
         this.activeModel = model;
     }
 
+    @JsonIgnore
+    @Column(name = "ACTIVE_MODEL_PID")
     public Long getActiveModelPid() {
         return this.activeModelPid;
     }
 
+    @JsonIgnore
     public void setActiveModelPid(Long pid) {
         this.activeModelPid = pid;
+    }
+
+    @JsonIgnore
+    @Lob
+    @Column(name = "ADVANCED_RATING_CONFIG")
+    public String getAdvancedRatingConfigStr() {
+        return JsonUtils.serialize(advancedRatingConfig);
+    }
+
+    public void setAdvancedRatingConfigStr(String advancedRatingConfigStr) {
+        AdvancedRatingConfig advancedRatingConfig = null;
+        if (advancedRatingConfigStr != null) {
+            advancedRatingConfig = JsonUtils.deserialize(advancedRatingConfigStr, AdvancedRatingConfig.class);
+        }
+        this.advancedRatingConfig = advancedRatingConfig;
+    }
+
+    @Transient
+    @JsonProperty("advancedRatingConfig")
+    public AdvancedRatingConfig getAdvancedRatingConfig() {
+        return advancedRatingConfig;
+    }
+
+    public void setAdvancedRatingConfig(AdvancedRatingConfig advancedRatingConfig) {
+        this.advancedRatingConfig = advancedRatingConfig;
     }
 
     public static String generateIdStr() {
@@ -346,6 +382,11 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
             attr += "_" + SCORE_ATTR_SUFFIX.get(scoreType);
         }
         return attr;
+    }
+
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
     }
 
     public enum ScoreType {
