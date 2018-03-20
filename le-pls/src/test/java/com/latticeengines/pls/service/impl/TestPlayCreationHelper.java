@@ -67,6 +67,9 @@ public class TestPlayCreationHelper {
     @Autowired
     private CDLTestDataService cdlTestDataService;
 
+    @Autowired
+    private EntityProxyImpl entityProxy;
+
     private String tenantIdentifier;
 
     private Tenant tenant;
@@ -209,7 +212,7 @@ public class TestPlayCreationHelper {
 
     public EntityProxy initEntityProxy() throws NoSuchFieldException, IllegalAccessException {
 
-        EntityProxy entityProxy = new EntityProxyImpl(null, null);
+        EntityProxy entityProxy = new EntityProxyImpl(null, this.entityProxy);
 
         Field f1 = entityProxy.getClass().getSuperclass().getSuperclass().getDeclaredField("initialWaitMsec");
         f1.setAccessible(true);
