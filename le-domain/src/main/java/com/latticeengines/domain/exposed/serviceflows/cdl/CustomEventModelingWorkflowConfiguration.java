@@ -216,6 +216,13 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            customEventMatchWorkflowConfigurationBuilder.fetchOnly(fetchOnly);
+            rtsBulkScoreWorkflowBuilder.fetchOnly(fetchOnly);
+            prepareConfigForScoringBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
                     selectionVersion);

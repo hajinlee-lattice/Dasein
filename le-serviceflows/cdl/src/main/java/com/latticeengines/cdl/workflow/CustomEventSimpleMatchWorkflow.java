@@ -7,8 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdSimpleFinishStep;
-import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdSimpleStartStep;
 import com.latticeengines.cdl.workflow.steps.MatchCdlWithAccountIdStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.MatchCdlAccountWorkflowConfiguration;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -25,21 +23,13 @@ public class CustomEventSimpleMatchWorkflow extends AbstractWorkflow<MatchCdlAcc
     private MatchCdlWithAccountIdStep matchAccountIdStep;
 
     @Inject
-    private MatchCdlWithAccountIdSimpleStartStep matchStartStep;
-
-    @Inject
-    private MatchCdlWithAccountIdSimpleFinishStep matchFinishStep;
-
-    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Override
     public Workflow defineWorkflow(MatchCdlAccountWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchAccountIdStep) //
-                .next(matchStartStep) //
                 .next(matchDataCloudWorkflow) //
-                .next(matchFinishStep) //
                 .build();
     }
 

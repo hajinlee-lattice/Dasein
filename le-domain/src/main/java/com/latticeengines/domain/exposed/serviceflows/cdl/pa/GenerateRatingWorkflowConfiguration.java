@@ -48,6 +48,11 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            generateAIRatingWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public GenerateRatingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("generateRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

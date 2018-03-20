@@ -14,7 +14,6 @@ public class MatchCdlWithAccountIdFinishStep extends BaseWorkflowStep<MatchCdlSt
 
     @Override
     public void execute() {
-        removeObjectFromContext(MATCH_FETCH_ONLY);
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         if (eventTable != null) {
             putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT_ID, eventTable);

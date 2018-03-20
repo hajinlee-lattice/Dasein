@@ -123,6 +123,7 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .bucketMetadata(
                         new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .matchQueue(LedpQueueAssigner.getScoringQueueNameForSubmission()) //
+                .fetchOnly(true) //
                 .cdlModel(true) //
                 .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
                 .setUseScorederivation(false) //

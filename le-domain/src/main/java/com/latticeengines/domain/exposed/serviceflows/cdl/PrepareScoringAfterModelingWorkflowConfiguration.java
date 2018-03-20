@@ -101,6 +101,11 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchCdlWorkflowConfBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public PrepareScoringAfterModelingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("prepareScoringAfterModelingWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

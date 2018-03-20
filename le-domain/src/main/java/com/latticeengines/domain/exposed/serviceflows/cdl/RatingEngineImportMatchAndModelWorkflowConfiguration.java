@@ -168,6 +168,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
+            ratingEngineScoreWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
             ratingEngineScoreWorkflowBuilder.matchRequestSource(matchRequestSource);

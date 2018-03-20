@@ -129,6 +129,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .excludePublicDomains(false) //
                 .excludeDataCloudAttrs(false) //
                 .skipDedupStep(true) //
+                .fetchOnly(true) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString()) //
                 .build();
         workflowConfig.setModelingType(modelingType);

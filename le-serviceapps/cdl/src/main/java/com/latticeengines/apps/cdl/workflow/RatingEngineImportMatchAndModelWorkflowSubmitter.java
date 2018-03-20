@@ -92,6 +92,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
+                .fetchOnly(true) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .skipImport(false) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //

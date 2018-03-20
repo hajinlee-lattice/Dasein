@@ -117,6 +117,11 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchAccountWithIdBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             matchAccountWithIdBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);

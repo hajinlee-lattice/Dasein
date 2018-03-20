@@ -199,6 +199,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                         !parameters.getExcludePropDataColumns() && FeatureFlagUtils.isMatchDebugEnabled(flags)) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
+                .fetchOnly(true) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest

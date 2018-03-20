@@ -199,6 +199,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchYarnQueue(scoringQueue) //
+                .fetchOnly(true) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //

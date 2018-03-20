@@ -159,6 +159,11 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public RTSBulkScoreWorkflowConfiguration build() {
             configuration.setContainerConfiguration("rtsBulkScoreWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());

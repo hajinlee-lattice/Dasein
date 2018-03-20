@@ -87,6 +87,11 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            ldcConfigurationBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             ldcConfigurationBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;

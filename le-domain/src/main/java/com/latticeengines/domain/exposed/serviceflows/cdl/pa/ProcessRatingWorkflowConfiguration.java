@@ -64,6 +64,11 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            generateRatingWorfklowConfigurationBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             if (CollectionUtils.isNotEmpty(entities)) {
                 if (entities.contains(BusinessEntity.Rating)) {

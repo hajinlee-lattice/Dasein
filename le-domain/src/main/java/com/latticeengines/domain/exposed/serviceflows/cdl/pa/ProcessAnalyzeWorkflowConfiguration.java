@@ -125,6 +125,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            processRatingWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             processAccountWorkflowBuilder.rebuildEntities(entities);
             processContactWorkflowBuilder.rebuildEntities(entities);

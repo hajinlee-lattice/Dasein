@@ -74,6 +74,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder fetchOnly(boolean fetchOnly) {
+            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
         public GenerateAIRatingWorkflowConfiguration build() {
             setCdlEventTableConfig();
             setMatchConfig();

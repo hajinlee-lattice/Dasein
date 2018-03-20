@@ -47,7 +47,6 @@ public class MatchCdlWithAccountIdStartStep extends BaseWorkflowStep<MatchCdlSte
         }
 
         putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, inputTable);
-        putStringValueInContext(MATCH_FETCH_ONLY, "true");
         enableEmbeddedWorkflow(getParentNamespace(), accountIdWorkflow.name(),
                 MatchCdlAccountWorkflowConfiguration.class);
 
