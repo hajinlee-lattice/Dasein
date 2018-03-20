@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.cdl.workflow.steps.CloneTableService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -52,14 +54,58 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     @Inject
     private WorkflowProxy workflowProxy;
 
+    @Inject
+    private CloneTableService cloneTableService;
+
+    private DataCollection.Version active;
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
 
     @Override
     public void execute() {
         customerSpace = configuration.getCustomerSpace();
+        active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        swapMissingTableRoles();
         registerReport();
+    }
+
+    private void swapMissingTableRoles() {
+        cloneTableService.setCustomerSpace(customerSpace);
+        cloneTableService.setActiveVersion(active);
+        Set<BusinessEntity> resetEntities = getSetObjectFromContext(RESET_ENTITIES, BusinessEntity.class);
+        if (resetEntities == null) {
+            resetEntities = Collections.emptySet();
+        }
+        for (TableRoleInCollection role : TableRoleInCollection.values()) {
+            BusinessEntity ownerEntity = getOwnerEntity(role);
+            if (ownerEntity != null && resetEntities.contains(ownerEntity)) {
+                // skip swap for reset entities
+                continue;
+            }
+            cloneTableService.linkInactiveTable(role);
+        }
+    }
+
+    private BusinessEntity getOwnerEntity(TableRoleInCollection role) {
+        BusinessEntity owner = Arrays.stream(BusinessEntity.values()).filter(entity -> //
+                role.equals(entity.getBatchStore()) || role.equals(entity.getServingStore())) //
+                .findFirst().orElse(null);
+        if (owner == null) {
+            switch (role) {
+                case Profile:
+                    return BusinessEntity.Account;
+                case ContactProfile:
+                    return BusinessEntity.Contact;
+                case PurchaseHistoryProfile:
+                    return BusinessEntity.PurchaseHistory;
+                case ConsolidatedRawTransaction:
+                    return BusinessEntity.Transaction;
+                default:
+                    return null;
+            }
+        }
+        return owner;
     }
 
     private void registerReport() {
