@@ -1026,7 +1026,7 @@ public class InternalResource extends InternalResourceBase {
                             emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
                         } else if (result.equals("FAILED")) {
                             emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
-                        } else if (result.equals("RUNNING")) {
+                        } else if (result.equals("STARTED")) {
                             emailService.sendPlsExportSegmentRunningEmail(user, exportID);
                         }
                     }
