@@ -18,7 +18,7 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
     private boolean enableDebug;
 
-    private boolean enableMatching;
+    private boolean enableMatching = Boolean.TRUE;
 
     private boolean scoreTestFile;
 
