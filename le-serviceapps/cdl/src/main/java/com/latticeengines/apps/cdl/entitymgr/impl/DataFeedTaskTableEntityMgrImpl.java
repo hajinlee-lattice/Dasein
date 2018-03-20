@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.DataFeedTaskTableDao;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskTableEntityMgr;
-import com.latticeengines.apps.cdl.repository.DataFeedTaskTableRepository;
+import com.latticeengines.apps.cdl.repository.writer.DataFeedTaskTableRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;

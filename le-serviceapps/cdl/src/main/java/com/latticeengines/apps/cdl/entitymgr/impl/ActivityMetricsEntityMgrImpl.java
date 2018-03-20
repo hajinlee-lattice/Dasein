@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.ActivityMetricsDao;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
-import com.latticeengines.apps.cdl.repository.ActivityMetricsRepository;
+import com.latticeengines.apps.cdl.repository.writer.ActivityMetricsRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.BusinessCalendarDao;
 import com.latticeengines.apps.cdl.entitymgr.BusinessCalendarEntityMgr;
-import com.latticeengines.apps.cdl.repository.BusinessCalendarRepository;
+import com.latticeengines.apps.cdl.repository.writer.BusinessCalendarRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.cdl.dao.DataFeedImportDao;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedImportEntityMgr;
-import com.latticeengines.apps.cdl.repository.DataFeedImportRepository;
+import com.latticeengines.apps.cdl.repository.writer.DataFeedImportRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;

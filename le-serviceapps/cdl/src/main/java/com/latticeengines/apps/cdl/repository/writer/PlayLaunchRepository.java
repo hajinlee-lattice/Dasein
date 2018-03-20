@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.repository;
+package com.latticeengines.apps.cdl.repository.writer;
 
 import java.util.Date;
 import java.util.List;

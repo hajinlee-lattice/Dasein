@@ -350,6 +350,7 @@ public class CheckpointService {
             Matcher matcher = pattern.matcher(hdfsPath);
             String str = JsonUtils.serialize(json);
             str = str.replaceAll("/Pods/Default/", "/Pods/" + podId + "/");
+            str = str.replaceAll("/Pods/QA/", "/Pods/" + podId + "/");
             if (matcher.find()) {
                 tenantNames[0] = matcher.group(1);
                 logger.info("Found tenant name " + tenantNames[0] + " in json.");

@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.PlayDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
-import com.latticeengines.apps.cdl.repository.PlayRepository;
+import com.latticeengines.apps.cdl.repository.writer.PlayRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;

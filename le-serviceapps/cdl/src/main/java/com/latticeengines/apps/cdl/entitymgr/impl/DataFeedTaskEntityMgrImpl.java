@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.latticeengines.apps.cdl.dao.DataFeedTaskDao;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskTableEntityMgr;
-import com.latticeengines.apps.cdl.repository.DataFeedTaskRepository;
+import com.latticeengines.apps.cdl.repository.writer.DataFeedTaskRepository;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;

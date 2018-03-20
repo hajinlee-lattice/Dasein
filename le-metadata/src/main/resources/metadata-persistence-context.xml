@@ -8,12 +8,12 @@
 
     <import resource="classpath:db-persistence-context.xml" />
     <import resource="classpath:documentdb-persistence-context.xml" />
-    <import resource="classpath:db-readonly-persistence-context.xml" />
+    <import resource="classpath:db-reader-persistence-context.xml" />
 
     <jpa:repositories base-package="com.latticeengines.metadata.repository.db"
                       base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-                      entity-manager-factory-ref="entityManagerFactoryReadOnly"
-                      transaction-manager-ref="transactionManagerReadOnly"  />
+                      entity-manager-factory-ref="entityManagerFactoryReader"
+                      transaction-manager-ref="transactionManagerReader"  />
 
 
     <jpa:repositories base-package="com.latticeengines.metadata.repository.document"

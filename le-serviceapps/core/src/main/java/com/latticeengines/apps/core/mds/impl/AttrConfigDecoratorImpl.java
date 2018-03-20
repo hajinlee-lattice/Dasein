@@ -37,7 +37,7 @@ public class AttrConfigDecoratorImpl implements AttrConfigDecorator {
         return new MapDecorator("AttrConfig") {
             @Override
             protected Collection<ColumnMetadata> loadInternal() {
-                List<AttrConfig> attrConfigList = entityMgr.findAllForEntity(tenantId, entity);
+                List<AttrConfig> attrConfigList = entityMgr.findAllForEntityInReader(tenantId, entity);
                 if (CollectionUtils.isNotEmpty(attrConfigList)) {
                     return attrConfigList.stream().map(AttrConfig::toColumnMetadata).collect(Collectors.toList());
                 } else {

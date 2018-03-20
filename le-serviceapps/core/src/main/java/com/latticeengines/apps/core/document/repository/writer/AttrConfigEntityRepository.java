@@ -1,4 +1,4 @@
-package com.latticeengines.apps.core.document.repository;
+package com.latticeengines.apps.core.document.repository.writer;
 
 import java.util.List;
 

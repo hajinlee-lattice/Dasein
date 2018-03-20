@@ -4,18 +4,18 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
       http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
-    <bean id="dataSourceReadOnly" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
-        <property name="driverClass" value="${db.datasource.readonly.driver}" />
-        <property name="jdbcUrl" value="${db.datasource.readonly.url}"/>
+    <bean id="dataSourceReader" class="com.latticeengines.common.exposed.bean.DataSourceBeanFactory" depends-on="beanEnvironment">
+        <property name="driverClass" value="${db.datasource.reader.driver}" />
+        <property name="jdbcUrl" value="${db.datasource.reader.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
         <property name="maxPoolSize" value="32"/>
     </bean>
 
     <!-- Entity manager factory -->
-    <bean id="entityManagerFactoryReadOnly"
+    <bean id="entityManagerFactoryReader"
           class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
-        <property name="dataSource" ref="dataSourceReadOnly" />
+        <property name="dataSource" ref="dataSourceReader" />
         <property name="packagesToScan" value="com.latticeengines.domain.exposed" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
@@ -37,8 +37,8 @@
         </property>
     </bean>
 
-    <bean id="transactionManagerReadOnly" class="org.springframework.orm.jpa.JpaTransactionManager">
-        <property name="entityManagerFactory" ref="entityManagerFactoryReadOnly"/>
+    <bean id="transactionManagerReader" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactoryReader"/>
     </bean>
 
 </beans>

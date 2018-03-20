@@ -18,7 +18,7 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedExecutionEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.DataFeedTaskEntityMgr;
-import com.latticeengines.apps.cdl.repository.DataFeedRepository;
+import com.latticeengines.apps.cdl.repository.writer.DataFeedRepository;
 import com.latticeengines.common.exposed.util.HibernateUtils;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;

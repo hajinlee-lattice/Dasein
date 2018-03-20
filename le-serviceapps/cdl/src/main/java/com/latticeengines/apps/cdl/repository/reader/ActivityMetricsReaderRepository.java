@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.repository;
+package com.latticeengines.apps.cdl.repository.reader;
 
 import java.util.List;
 
@@ -7,11 +7,10 @@ import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
-public interface ActivityMetricsRepository extends BaseJpaRepository<ActivityMetrics, Long> {
+public interface ActivityMetricsReaderRepository extends BaseJpaRepository<ActivityMetrics, Long> {
     List<ActivityMetrics> findAllByIsEOLAndType(boolean isEOL, ActivityType type);
 
     List<ActivityMetrics> findAllByType(ActivityType type);
 
     List<ActivityMetrics> findAllByTenant(Tenant tenant);
-
 }

@@ -13,6 +13,8 @@ public interface AttrConfigEntityMgr {
 
     List<AttrConfig> findAllForEntity(String tenantId, BusinessEntity entity);
 
+    List<AttrConfig> findAllForEntityInReader(String tenantId, BusinessEntity entity);
+
     void cleanupTenant(String tenantId);
 
 }

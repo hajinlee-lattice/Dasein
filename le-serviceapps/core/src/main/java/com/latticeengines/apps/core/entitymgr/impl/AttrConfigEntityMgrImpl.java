@@ -15,7 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.latticeengines.apps.core.document.repository.AttrConfigEntityRepository;
+import com.latticeengines.apps.core.document.repository.reader.AttrConfigEntityReaderRepository;
+import com.latticeengines.apps.core.document.repository.writer.AttrConfigEntityRepository;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.documentdb.entity.AttrConfigEntity;
@@ -30,6 +31,9 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
 
     @Inject
     private AttrConfigEntityRepository repository;
+
+    @Inject
+    private AttrConfigEntityReaderRepository readerRepository;
 
     @Override
     public BaseJpaRepository<AttrConfigEntity, String> getRepository() {
@@ -72,6 +76,14 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<AttrConfig> findAllForEntity(String tenantId, BusinessEntity entity) {
         List<AttrConfigEntity> attrConfigEntities = repository.findByTenantIdAndEntity(tenantId, entity);
+        return attrConfigEntities.stream() //
+                .map(AttrConfigEntity::getDocument) //
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AttrConfig> findAllForEntityInReader(String tenantId, BusinessEntity entity) {
+        List<AttrConfigEntity> attrConfigEntities = readerRepository.findByTenantIdAndEntity(tenantId, entity);
         return attrConfigEntities.stream() //
                 .map(AttrConfigEntity::getDocument) //
                 .collect(Collectors.toList());
