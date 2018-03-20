@@ -14,7 +14,7 @@ angular.module('lp.ratingsengine.wizard.products', [
             showPagination: true,
             selectedAll: false,
             engineType: $stateParams.engineType,
-            modelingConfigFilters: {},
+            configFilters: {},
             purchasedBeforePeriod: '6'
         });
 
@@ -44,8 +44,8 @@ angular.module('lp.ratingsengine.wizard.products', [
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
 
-                if(rating.activeModel.AI.targetProducts.length > 0){
-                    var selectedTargetProducts = rating.activeModel.AI.targetProducts;
+                if(rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts.length > 0){
+                    var selectedTargetProducts = rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts;
                     angular.forEach(selectedTargetProducts, function(value, key) {
                         
                         var product = Products.filter(function( product ) {
@@ -124,13 +124,13 @@ angular.module('lp.ratingsengine.wizard.products', [
     }
 
     vm.resellFormOnChange = function(){
-        vm.modelingConfigFilters.PURCHASED_BEFORE_PERIOD = {
+        vm.configFilters.PURCHASED_BEFORE_PERIOD = {
             "configName": "PURCHASED_BEFORE_PERIOD",
             "criteria": "PRIOR_ONLY",
             "value": parseInt(vm.purchasedBeforePeriod)
         };
 
-        RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
+        RatingsEngineStore.setConfigFilters(vm.configFilters);
     };
 
     vm.getSelectedCount = function () {

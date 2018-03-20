@@ -15,7 +15,7 @@ angular.module('lp.ratingsengine.wizard.training', [
         quantityValue: 2,
         periodsCriteria: "WITHIN",
         periodsValue: 2,
-        modelingConfigFilters: RatingsEngineStore.getModelingConfigFilters(),
+        configFilters: RatingsEngineStore.getConfigFilters(),
         trainingSegment: null,
         trainingProducts: null,
         ratingEngine: Rating,
@@ -28,9 +28,9 @@ angular.module('lp.ratingsengine.wizard.training', [
         
         vm.engineId = vm.ratingEngine.id;
         vm.modelId = vm.ratingEngine.activeModel.AI.id;
-        vm.modelingStrategy = vm.ratingEngine.activeModel.AI.modelingStrategy;
+        vm.modelingStrategy = vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy;
 
-        console.log(vm.modelingConfigFilters);
+        console.log(vm.configFilters);
 
         vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -60,7 +60,7 @@ angular.module('lp.ratingsengine.wizard.training', [
     vm.segmentCallback = function(selectedSegment) {
         vm.trainingSegment = selectedSegment[0];
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
-        vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
+        vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingSegment = vm.trainingSegment;
 
         console.log(vm.ratingEngine);
 
@@ -73,7 +73,7 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.trainingProducts.push(product.ProductId);
         });
         RatingsEngineStore.setTrainingProducts(vm.trainingProducts);
-        vm.ratingEngine.activeModel.AI.trainingProducts = vm.trainingProducts;
+        vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = vm.trainingProducts;
 
         vm.autcompleteChange();        
     }
@@ -89,53 +89,51 @@ angular.module('lp.ratingsengine.wizard.training', [
 
         if($scope.checkboxModel) {
             if($scope.checkboxModel.spend) {
-                vm.modelingConfigFilters.SPEND_IN_PERIOD = {
+                vm.configFilters.SPEND_IN_PERIOD = {
                     "configName": "SPEND_IN_PERIOD",
                     "criteria": vm.spendCriteria,
                     "value": vm.spendValue
                 };
             } else {
-                delete vm.modelingConfigFilters.SPEND_IN_PERIOD;
+                delete vm.configFilters.SPEND_IN_PERIOD;
             }
 
             if($scope.checkboxModel.quantity) {
-                vm.modelingConfigFilters.QUANTITY_IN_PERIOD = {
+                vm.configFilters.QUANTITY_IN_PERIOD = {
                     "configName": "QUANTITY_IN_PERIOD",
                     "criteria": vm.quantityCriteria,
                     "value": vm.quantityValue
                 };
             } else {
-                delete vm.modelingConfigFilters.QUANTITY_IN_PERIOD;
+                delete vm.configFilters.QUANTITY_IN_PERIOD;
             }
 
             if($scope.checkboxModel.periods) {
-                vm.modelingConfigFilters.TRAINING_SET_PERIOD = {
+                vm.configFilters.TRAINING_SET_PERIOD = {
                     "configName": "TRAINING_SET_PERIOD",
                     "criteria": vm.periodsCriteria,
                     "value": vm.periodsValue
                 };
             } else {
-                delete vm.modelingConfigFilters.TRAINING_SET_PERIOD;
+                delete vm.configFilters.TRAINING_SET_PERIOD;
             }
 
             if($scope.checkboxModel.spend || $scope.checkboxModel.quantity || $scope.checkboxModel.periods) {
-                RatingsEngineStore.setModelingConfigFilters(vm.modelingConfigFilters);
+                RatingsEngineStore.setConfigFilters(vm.configFilters);
             }
 
-            vm.ratingEngine.activeModel.AI.modelingConfigFilters = vm.modelingConfigFilters;
+            vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.filters = vm.configFilters;
 
             vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
             vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
         }
 
-        console.log(vm.modelingConfigFilters);
-
     };
 
     $scope.$on('$destroy', function() {
-        delete vm.modelingConfigFilters.SPEND_IN_PERIOD;
-        delete vm.modelingConfigFilters.QUANTITY_IN_PERIOD;
-        delete vm.modelingConfigFilters.TRAINING_SET_PERIOD;
+        delete vm.configFilters.SPEND_IN_PERIOD;
+        delete vm.configFilters.QUANTITY_IN_PERIOD;
+        delete vm.configFilters.TRAINING_SET_PERIOD;
     });
 
     vm.init();

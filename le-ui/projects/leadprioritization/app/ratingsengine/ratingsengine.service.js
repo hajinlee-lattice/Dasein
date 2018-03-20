@@ -45,7 +45,7 @@ angular.module('lp.ratingsengine')
         this.modelingStrategy = '';
         this.predictionType = 'PROPENSITY';
         this.type = null;
-        this.modelingConfigFilters = {};
+        this.configFilters = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
 
@@ -581,16 +581,16 @@ angular.module('lp.ratingsengine')
         return this.predictionType;
     }
     
-    this.setModelingConfigFilters = function(modelingConfigFilters) {
-        var currentConfig = this.modelingConfigFilters;
+    this.setConfigFilters = function(configFilters) {
+        var currentConfig = this.configFilters;
         if(currentConfig != null){
-            this.modelingConfigFilters = angular.extend(currentConfig, modelingConfigFilters);
+            this.configFilters = angular.extend(currentConfig, configFilters);
         } else {
-            this.modelingConfigFilters = modelingConfigFilters;
+            this.configFilters = configFilters;
         }
     }
-    this.getModelingConfigFilters = function() {
-        return this.modelingConfigFilters;
+    this.getConfigFilters = function() {
+        return this.configFilters;
     }
 
     this.setTrainingSegment = function(trainingSegment) {
@@ -613,8 +613,11 @@ angular.module('lp.ratingsengine')
                 type: "CROSS_SELL",
                 activeModel: {
                     AI: {
-                        workflowType: 'CROSS_SELL',
-                        modelingStrategy: engineType
+                        advancedModelingConfig: {
+                            cross_sell: {
+                                modelingStrategy: engineType
+                            }
+                        }
                     }
                 }
             };
@@ -632,7 +635,7 @@ angular.module('lp.ratingsengine')
             var model = rating.activeModel.AI,
                 targetProducts = (model.targetProducts === []) ? [] : RatingsEngineStore.getProductsSelectedIds(),
                 predictionType = RatingsEngineStore.getPredictionType(),
-                modelingConfigFilters = RatingsEngineStore.getModelingConfigFilters(),
+                configFilters = RatingsEngineStore.getConfigFilters(),
                 modelingStrategy = $stateParams.engineType,
                 trainingSegment = RatingsEngineStore.getTrainingSegment(),
                 trainingProducts = RatingsEngineStore.getTrainingProducts(),
@@ -641,12 +644,16 @@ angular.module('lp.ratingsengine')
             obj = {
                 AI: {
                     id: rating.activeModel.AI.id,
-                    targetProducts: targetProducts,
                     predictionType: predictionType,
-                    modelingStrategy: modelingStrategy,
-                    modelingConfigFilters: modelingConfigFilters,
                     trainingSegment: trainingSegment,
-                    trainingProducts: trainingProducts
+                    advancedModelingConfig: {
+                        cross_sell: {
+                            targetProducts: targetProducts,
+                            trainingProducts: trainingProducts,
+                            modelingStrategy: modelingStrategy,
+                            filters: configFilters
+                        }
+                    }
                 }
             };
 

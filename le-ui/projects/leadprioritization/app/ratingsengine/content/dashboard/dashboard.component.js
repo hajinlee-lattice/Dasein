@@ -26,16 +26,16 @@ angular.module('lp.ratingsengine.dashboard', [
         
         if(!vm.isRulesBased){
 
-            if((Object.keys(model.AI.modelingConfigFilters).length === 0 || (model.AI.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.modelingConfigFilters).length === 1)) && model.AI.trainingSegment === null && model.AI.trainingProducts.length === 0) {
+            if((Object.keys(model.AI.advancedModelingConfig.cross_sell.filters).length === 0 || (model.AI.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig.cross_sell.filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig.cross_sell.filters.trainingProducts.length === 0) {
                 vm.hasSettingsInfo = false;
             }
 
-            vm.targetProducts = model.AI.targetProducts;
-            vm.modelingStrategy = model.AI.modelingStrategy;
+            vm.targetProducts = model.AI.advancedModelingConfig.cross_sell.targetProducts;
+            vm.modelingStrategy = model.AI.advancedModelingConfig.cross_sell.modelingStrategy;
             vm.predictionType = model.AI.predictionType;
-            vm.modelingConfigFilters = model.AI.modelingConfigFilters;
+            vm.configFilters = model.AI.advancedModelingConfig.cross_sell.filters;
             vm.trainingSegment = model.AI.trainingSegment;
-            vm.trainingProducts = model.AI.trainingProducts;
+            vm.trainingProducts = model.AI.advancedModelingConfig.cross_sell.trainingProducts;
 
             if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
                 vm.ratingEngineType = 'First Purchase Cross-Sell'
@@ -49,16 +49,16 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.prioritizeBy = 'Likely to spend';
             }
 
-            if (vm.modelingConfigFilters['SPEND_IN_PERIOD']) {
-                if (vm.modelingConfigFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+            if (vm.configFilters['SPEND_IN_PERIOD']) {
+                if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
                     vm.spendCriteria = 'at least';
                 } else {
                     vm.spendCriteria = 'at most';
                 }
             }
 
-            if (vm.modelingConfigFilters['QUANTITY_IN_PERIOD']) {
-                if (vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+            if (vm.configFilters['QUANTITY_IN_PERIOD']) {
+                if (vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
                     vm.quantityCriteria = 'at least';
                 } else {
                     vm.quantityCriteria = 'at most';

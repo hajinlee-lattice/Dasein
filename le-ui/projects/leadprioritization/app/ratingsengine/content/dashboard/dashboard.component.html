@@ -32,8 +32,8 @@
                         <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
                         <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
 
-                        <dt ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
-                        <dd ng-if="vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.modelingConfigFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
+                        <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
+                        <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
 
                         <dt>Prioritize by:</dt>
                         <dd>{{ vm.prioritizeBy }}</dd>
@@ -42,16 +42,16 @@
                         <dd ng-if="vm.hasSettingsInfo">
                             <ul>
                                 <li 
-                                    ng-if="vm.modelingConfigFilters['SPEND_IN_PERIOD']">
-                                    Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.modelingConfigFilters['SPEND_IN_PERIOD'].value | number }}
+                                    ng-if="vm.configFilters['SPEND_IN_PERIOD']">
+                                    Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
                                 </li>
                                 <li
-                                    ng-if="vm.modelingConfigFilters['QUANTITY_IN_PERIOD']">
-                                    Quantity bought was {{ vm.quantityCriteria }} {{ vm.modelingConfigFilters['QUANTITY_IN_PERIOD'].value | number }} units
+                                    ng-if="vm.configFilters['QUANTITY_IN_PERIOD']">
+                                    Quantity bought was {{ vm.quantityCriteria }} {{ vm.configFilters['QUANTITY_IN_PERIOD'].value | number }} units
                                 </li>
                                 <li
-                                    ng-if="vm.modelingConfigFilters['TRAINING_SET_PERIOD']">
-                                    {{ vm.modelingConfigFilters['TRAINING_SET_PERIOD'].value }} months of historical records
+                                    ng-if="vm.configFilters['TRAINING_SET_PERIOD']">
+                                    {{ vm.configFilters['TRAINING_SET_PERIOD'].value }} months of historical records
                                 </li>
                                 <li
                                     ng-if="vm.trainingSegment !== null">
