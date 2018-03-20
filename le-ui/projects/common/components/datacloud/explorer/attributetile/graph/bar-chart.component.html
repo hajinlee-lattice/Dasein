@@ -1,0 +1,54 @@
+<div class="attribute-stats">
+
+    <div class="info-container">
+        <div class="info-row header" ng-click="clicked()">
+            <div class="flex-row header-item">
+                <div class="flex-item flex-item-left flex-graph-container text-ellipsis">
+                    <span>Attributes Value</span>
+                </div>
+                <div class="flex-item flex-value flex-item-right text-ellipsis" ng-repeat="column in getColumns()">{{column.label}}</div>
+            </div>
+        </div>
+        <div class="nostats-container" ng-if="bktlist.length == 0">{{emptymsg}}</div>
+        <div class="info-container" ng-repeat="stat in bktlist">
+            <div class="info-row" 
+                    ng-class="($index%2 == 0) ? 'info-row-odd' : ''" 
+                    ng-click="clicked(stat)"
+                    >
+                <div class="flex-row content-item">
+                    <div class="flex-item flex-lable text-ellipsis flex-item-left">
+                        <i class="plus fa fa-plus" ng-if="showstatcount && statcount == 0"></i>
+                        <i class="plus fa fa-check" ng-if="showstatcount && statcount == 1"></i>
+                        <i class="plus attribute-use-count" ng-if="showstatcount && statcount >= 2">{{ statcount }}</i>
+                        <span>{{stat.Lbl}}</span>
+
+                    </div>
+                    <div class="flex-item flex-graph-container flex-item-left">
+                        <div class="graph">
+                            <div class="bar-graph" style="width: 0%;" ng-style="{'width': getHorizontalPercentage(stat, 0), 'background-color': color}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-item flex-value text-ellipsis flex-item-right" ng-repeat="column in getColumns()">{{getValue(stat, column)}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- X axis -->
+        <div class="vlines-container" ng-if="showVerticalLines()">
+            <div>
+                <div class="flex-row">
+                    <div class="flex-item flex-lable">
+                    </div>
+                    <div class="flex-item flex-graph-container flex-item-left">
+                        <div class="vline" ng-style="{'margin-left': line.perc}" ng-repeat="line in getVerticalLines()">
+                            <span class="label">{{line.label}}</span>
+                        </div>
+                    </div>
+                    <div class="flex-item flex-value" ng-repeat="column in getColumns()"></div>
+                </div>
+            </div>
+        </div>
+        <!--  -->
+    </div>
+</div>

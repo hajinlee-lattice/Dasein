@@ -76,12 +76,28 @@
             <h4>Businesses with this product</h4>
             <p>
                 About {{vm.NumberUtility.AbbreviateLargeNumber(vm.booleanStats(vm.cube.Stats[enrichment.ColumnId].Bkts.List).No.Cnt, 1)}} mid-sized and enterprise companies don't use this.
-            </p>
+            </p> 
         </div>
         -->
+
+        <!-- Rating -->
+        <bar-chart ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+                            vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
+                            !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
+                            && enrichment.Entity === 'Rating'"
+                        vm="vm"
+                        statcount="statcount = vm.getAttributeRules(enrichment, stat).length"
+                        config="vm.getChartConfig(vm.getData(enrichment.Entity, enrichment.ColumnId))" 
+                        bktlist="vm.getData(enrichment.Entity, enrichment.ColumnId)"
+                        callback="vm.chartRowClicked(stat)">
+        </bar-chart>
+
+
+        <!-- Account - Contacts - PurchaseHistory Entity -->
         <div class="stats" ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
                                   vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
-                                  !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1">
+                                  !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
+                                  && enrichment.Entity !== 'Rating'">
     <!-- && (vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Boolean' || vm.cube.Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? (vm.section == 'segment.analysis' ? true : false) : true)*/"> -->
             <h5><label>{{vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.Type == 'Numerical' ? 'Attribute range' : 'Attribute values'}}</label><label>Records</label></h5>
             
@@ -136,6 +152,8 @@
                 See {{ vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length - 5 | number }} More
             </div>
         </div>
+
+        <!--  -->
         <div ng-if="vm.cube && (!vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List || 
                                   !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length) && 
                                   (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)" class="stats"> 
