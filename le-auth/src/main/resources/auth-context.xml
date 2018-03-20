@@ -7,4 +7,5 @@
     <context:component-scan base-package="com.latticeengines.auth"/>
 
     <import resource="classpath:auth-persistence-context.xml"/>
+    <import resource="classpath:auth-aspects-context.xml"/>
 </beans>
