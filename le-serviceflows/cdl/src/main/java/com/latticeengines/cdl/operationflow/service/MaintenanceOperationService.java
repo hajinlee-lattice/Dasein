@@ -4,12 +4,18 @@ import java.lang.reflect.ParameterizedType;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.latticeengines.domain.exposed.cdl.MaintenanceOperationConfiguration;
 
 public abstract class MaintenanceOperationService<T extends MaintenanceOperationConfiguration> {
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     private static final Logger log = LoggerFactory.getLogger(MaintenanceOperationService.class);
 

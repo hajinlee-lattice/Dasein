@@ -48,8 +48,10 @@ public class DeleteFileUploadStep extends BaseReportStep<DeleteFileUploadStepCon
             Long totalFailed = 0L;
             totalFailed += jobDetail.getIgnoredRows() == null ? 0L : jobDetail.getIgnoredRows();
             totalFailed += jobDetail.getDedupedRows() == null ? 0L : jobDetail.getDedupedRows();
-            getJson().put("tatal_rows", jobDetail.getTotalRows()).put("imported_rows", jobDetail.getProcessedRecords())
-                    .put("ignored_rows", jobDetail.getIgnoredRows()).put("deduped_rows", jobDetail.getDedupedRows())
+            getJson().put("tatal_rows", jobDetail.getTotalRows())
+                    .put("imported_rows", jobDetail.getProcessedRecords())
+                    .put("ignored_rows", jobDetail.getIgnoredRows())
+                    .put("deduped_rows", jobDetail.getDedupedRows())
                     .put("total_failed_rows", totalFailed);
         } else {
             log.error("Cannot get Eai Import job detail for appId: " + applicationId);

@@ -1,7 +1,5 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -11,7 +9,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
@@ -36,9 +35,6 @@ public class CleanupByDateRangeService extends MaintenanceOperationService<Clean
 
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
-
-    @Autowired
-    private YarnConfiguration yarnConfiguration;
 
     @Override
     public Map<String, Long> invoke(CleanupByDateRangeConfiguration config) {

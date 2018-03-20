@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.operationflow.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.operationflow.service.MaintenanceOperationService;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -28,6 +31,7 @@ import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 public class CleanupAllService extends MaintenanceOperationService<CleanupAllConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(CleanupAllService.class);
+
     @Autowired
     private DataCollectionProxy dataCollectionProxy;
 
@@ -137,8 +141,16 @@ public class CleanupAllService extends MaintenanceOperationService<CleanupAllCon
             return 0L;
         }
         Long lines = 0L;
+        List<String> paths = new ArrayList<>();
         for (Extract extract : table.getExtracts()) {
-            lines += extract.getProcessedRecords();
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
+        }
+        for (String path : paths) {
+            lines += AvroUtils.count(yarnConfiguration, path);
         }
         return lines;
     }

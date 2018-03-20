@@ -61,7 +61,7 @@ public class TimeSeriesUtils {
         cleanupPeriodData(yarnConfiguration, avroDir, periods, false);
     }
 
-    public static Long cleanupPeriodData(YarnConfiguration yarnConfiguration, String avroDir, Set<Integer> periods,
+    public static Long cleanupPeriodData(Configuration yarnConfiguration, String avroDir, Set<Integer> periods,
             boolean countRows) {
         avroDir = getPath(avroDir);
         log.info("Clean periods from " + avroDir);

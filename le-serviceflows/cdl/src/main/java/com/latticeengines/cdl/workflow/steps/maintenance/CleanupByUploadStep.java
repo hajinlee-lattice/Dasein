@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupByUploadConfiguration;
@@ -379,8 +380,16 @@ public class CleanupByUploadStep extends BaseTransformWrapperStep<CleanupByUploa
             return 0L;
         }
         Long lines = 0L;
+        List<String> paths = new ArrayList<>();
         for (Extract extract : table.getExtracts()) {
-            lines += extract.getProcessedRecords();
+            if (!extract.getPath().endsWith("avro")) {
+                paths.add(extract.getPath() + "/*.avro");
+            } else {
+                paths.add(extract.getPath());
+            }
+        }
+        for (String path : paths) {
+            lines += AvroUtils.count(yarnConfiguration, path);
         }
         return lines;
     }
