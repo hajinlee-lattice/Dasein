@@ -137,8 +137,10 @@ angular
                     /***********************************************************/
 
                     /************************** Chart Config ***********************/
+                    $scope.header = $scope.config.chart.header ? $scope.config.chart.header : 'Header';
                     $scope.emptymsg = $scope.config.chart.emptymsg ? $scope.config.chart.emptymsg : 'No Stats';
                     $scope.color = $scope.config.chart.color ? $scope.config.chart.color : '#D0D1D0';
+                    $scope.mousehover = $scope.config.chart.mousehover ? $scope.config.chart.mousehover : false;
                     $scope.hovercolor = $scope.config.chart.hovercolor ? $scope.config.chart.hovercolor : '#D0D1D0';
                     $scope.chartType = $scope.config.chart.type ? $scope.config.chart.type : 'decimal';
                     $scope.showVLines = $scope.config.chart.showVLines ? $scope.config.chart.showVLines : false;
@@ -218,6 +220,14 @@ angular
 
                 $scope.getBarColor = function (hoverGActive) {
                     return $scope.color;
+                }
+
+                $scope.getMouseOverColor = function(){
+                    if($scope.mousehover){
+                        return $scope.hovercolor;
+                    }else{
+                        return '';
+                    }
                 }
 
 
