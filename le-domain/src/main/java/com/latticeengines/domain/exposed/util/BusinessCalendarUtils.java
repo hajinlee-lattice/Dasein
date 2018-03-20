@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.util;
+package com.latticeengines.domain.exposed.util;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -38,7 +39,7 @@ public final class BusinessCalendarUtils {
         }
     }
 
-    private static String validateStartingDay(String startingDay, int evaluationYear) {
+    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDay(String startingDay, int evaluationYear) {
         if (StringUtils.isBlank(startingDay)) {
             String msg = "Cannot configure business calendar with empty starting day.";
             IllegalArgumentException exception = new IllegalArgumentException(msg);
@@ -77,12 +78,40 @@ public final class BusinessCalendarUtils {
         try {
             startDate = parseDate(month, idx, dayOfWeek, evaluationYear);
             endDate = parseDate(month, idx, dayOfWeek, evaluationYear + 1);
-            endDate = endDate.plusDays(-1);
+            endDate = endDate.minusDays(1);
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_40015, e, new String[] { startingDay });
         }
 
-        return getStartingDayNote(startDate, endDate, evaluationYear);
+        return Pair.of(startDate, endDate);
+    }
+
+    public static Pair<LocalDate, LocalDate> parseDateRangeFromStartDate(String startingDate, int evaluationYear) {
+        if (StringUtils.isBlank(startingDate)) {
+            throw new LedpException(LedpCode.LEDP_40015, new String[] { startingDate });
+        }
+        if ("FEB-29".equals(startingDate.toUpperCase())) {
+            String msg = "Should not use February 29th to configure your business calendar.";
+            IllegalArgumentException exception = new IllegalArgumentException(msg);
+            throw new LedpException(LedpCode.LEDP_40015, msg, exception);
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
+        String formattedDate = startingDate.substring(0, 1).toUpperCase() + startingDate.substring(1).toLowerCase();
+        String fullDate = String.format("%04d-%s", evaluationYear, formattedDate);
+        String fullDateNextYear = String.format("%04d-%s", evaluationYear + 1, formattedDate);
+        LocalDate startDate, endDate;
+        try {
+            startDate = LocalDate.parse(fullDate, formatter);
+            endDate = LocalDate.parse(fullDateNextYear, formatter).minusDays(1);
+        } catch (Exception e) {
+            throw new LedpException(LedpCode.LEDP_40015, e, new String[] { formattedDate });
+        }
+        return Pair.of(startDate, endDate);
+    }
+
+    private static String validateStartingDay(String startingDay, int evaluationYear) {
+        Pair<LocalDate, LocalDate> dateRange = parseDateRangeFromStartDay(startingDay, evaluationYear);
+        return getStartingDayNote(dateRange.getLeft(), dateRange.getRight(), evaluationYear);
     }
 
     private static String getStartingDayNote(LocalDate startDate, LocalDate endDate, int evaluationYear) {
@@ -124,22 +153,7 @@ public final class BusinessCalendarUtils {
     }
 
     private static String validateStartingDate(String startingDate, int evaluationYear) {
-        if (StringUtils.isBlank(startingDate)) {
-            throw new LedpException(LedpCode.LEDP_40015, new String[] { startingDate });
-        }
-        if ("FEB-29".equals(startingDate.toUpperCase())) {
-            String msg = "Should not use February 29th to configure your business calendar.";
-            IllegalArgumentException exception = new IllegalArgumentException(msg);
-            throw new LedpException(LedpCode.LEDP_40015, msg, exception);
-        }
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
-        String formattedDate = startingDate.substring(0, 1).toUpperCase() + startingDate.substring(1).toLowerCase();
-        String fullDate = String.format("%04d-%s", evaluationYear, formattedDate);
-        try {
-            LocalDate.parse(fullDate, formatter);
-        } catch (Exception e) {
-            throw new LedpException(LedpCode.LEDP_40015, e, new String[] { formattedDate });
-        }
+        parseDateRangeFromStartDate(startingDate, evaluationYear);
         return getStartingDateNote(evaluationYear);
     }
 

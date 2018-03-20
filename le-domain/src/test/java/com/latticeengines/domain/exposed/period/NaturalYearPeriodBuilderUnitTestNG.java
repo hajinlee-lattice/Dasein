@@ -6,7 +6,7 @@ import org.testng.annotations.DataProvider;
 import com.latticeengines.domain.exposed.period.NaturalYearPeriodBuilder;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
-public class NaturalYearPeriodBuilderUnitTestNG extends PeriodBuilderUnitTestNGBase {
+public class NaturalYearPeriodBuilderUnitTestNG extends NaturalPeriodBuilderUnitTestNGBase {
 
     @DataProvider(name = PERIOD_ID_DATA_PROVIDER)
     protected Object[][] providePeriodIds() {

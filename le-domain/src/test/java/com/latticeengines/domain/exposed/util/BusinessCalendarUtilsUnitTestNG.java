@@ -1,4 +1,4 @@
-package com.latticeengines.apps.cdl.util;
+package com.latticeengines.domain.exposed.util;
 
 import java.time.LocalDate;
 
@@ -9,6 +9,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
+import com.latticeengines.domain.exposed.util.BusinessCalendarUtils;
 
 public class BusinessCalendarUtilsUnitTestNG {
 

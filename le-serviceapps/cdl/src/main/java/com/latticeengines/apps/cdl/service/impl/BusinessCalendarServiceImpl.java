@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.BusinessCalendarEntityMgr;
 import com.latticeengines.apps.cdl.service.BusinessCalendarService;
-import com.latticeengines.apps.cdl.util.BusinessCalendarUtils;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
+import com.latticeengines.domain.exposed.util.BusinessCalendarUtils;
 
 
 @Service("businessCalendarService")

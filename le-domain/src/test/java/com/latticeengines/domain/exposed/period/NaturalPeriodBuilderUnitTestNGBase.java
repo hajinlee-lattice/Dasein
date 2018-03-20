@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
-public abstract class PeriodBuilderUnitTestNGBase {
+public abstract class NaturalPeriodBuilderUnitTestNGBase {
 
     static final String PERIOD_ID_DATA_PROVIDER = "periodCountDtaProvider";
     static final String PERIOD_RANGE_DATA_PROVIDER = "periodRangeDtaProvider";

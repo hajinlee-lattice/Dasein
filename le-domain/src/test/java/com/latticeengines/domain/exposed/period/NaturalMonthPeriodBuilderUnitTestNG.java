@@ -5,7 +5,7 @@ import org.testng.annotations.DataProvider;
 import com.latticeengines.domain.exposed.period.NaturalMonthPeriodBuilder;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
-public class NaturalMonthPeriodBuilderUnitTestNG extends PeriodBuilderUnitTestNGBase {
+public class NaturalMonthPeriodBuilderUnitTestNG extends NaturalPeriodBuilderUnitTestNGBase {
 
     @DataProvider(name = PERIOD_ID_DATA_PROVIDER)
     protected Object[][] providePeriodIds() {

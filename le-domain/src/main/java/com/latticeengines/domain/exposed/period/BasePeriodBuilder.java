@@ -6,6 +6,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 public abstract class BasePeriodBuilder implements PeriodBuilder {
 
+    private static final long serialVersionUID = -7573365240345035161L;
+
     protected abstract LocalDate getStartDate(int period);
     protected abstract LocalDate getEndDate(int period);
 
