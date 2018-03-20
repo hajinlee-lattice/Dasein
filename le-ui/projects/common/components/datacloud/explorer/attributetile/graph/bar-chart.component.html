@@ -15,7 +15,7 @@
                 <div class="flex-row content-item">
                     <div class="flex-item flex-lable text-ellipsis flex-item-left">
                         <i class="plus fa fa-plus" ng-if="showstatcount && statcount == 0 && ($index == rowHover)"></i>
-                        <i class="plus fa fa-check" ng-if="showstatcount && statcount == 1"></i>
+                        <i class="plus fa fa-check" ng-if="showstatcount && statcount == 1" ng-style="{'color': color}"></i>
                         <i class="plus attribute-use-count" ng-if="showstatcount && statcount >= 2">{{ statcount }}</i>
                         <span>{{stat.Lbl}}</span>
 

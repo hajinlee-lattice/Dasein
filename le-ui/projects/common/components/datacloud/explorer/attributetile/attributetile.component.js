@@ -15,6 +15,7 @@ angular
                 DataCloudStore, NumberUtility, QueryTreeService
             ) {
                 var vm = $scope.vm;
+                vm.enrichment = $scope.enrichment;
                 angular.extend(vm, {});
                 vm.booleanStats = function (stats) {
                     var booleans = {};
@@ -57,7 +58,6 @@ angular
                                 'emptymsg': '',
                                 'color': '#2E6099',
                                 'mousehover': true,
-                                'hovercolor': '#2E6099',
                                 'type': 'integer',
                                 'showstatcount': true,
                                 'maxVLines': 3,
@@ -91,7 +91,6 @@ angular
                                 'emptymsg': '',
                                 'color': '#2E6099',
                                 'mousehover': true,
-                                'hovercolor': '#2E6099',
                                 'type': 'decimal',
                                 'showstatcount': true,
                                 'maxVLines': 3,
@@ -128,11 +127,13 @@ angular
 
                 vm.getData = function (entity, columnId) {
                     var data = vm.cube.data[entity].Stats[columnId].Bkts.List;
+                    // console.log('Data ',data);
                     return data;
                 }
 
                 vm.chartRowClicked = function (stat) {
-                    vm.selectSegmentAttributeRange($scope.enrichment, stat, (vm.section != 'segment.analysis'));
+                    console.log('Stat clicked --> ',stat);
+                    vm.selectSegmentAttributeRange(vm.enrichment, stat, (vm.section != 'segment.analysis'));
                 }
                 vm.NumberUtility = NumberUtility;
 

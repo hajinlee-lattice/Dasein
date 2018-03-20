@@ -60,7 +60,7 @@
                 <li data-corner-ribbon="internal" ng-if="enrichment.IsInternal" class="internal noselect-children"><strong>internal</strong></li>
             </ul>
         </div>
-
+        <p>{{enrichment.SecondaryDisplayName}}</p>
         <p class="description" title="{{enrichment.Description}}">
             <a ng-if="enrichment.FundamentalType === 'URI'" ng-href="{{vm.lookupFiltered[enrichment.ColumnId]}}" target="_blank" class="{{vm.categoryClass(enrichment.Category)}} color"><strong>{{vm.lookupFiltered[enrichment.ColumnId]}}</strong></a>
             <strong ng-if="vm.lookupFiltered[enrichment.ColumnId] && enrichment.FundamentalType !== 'URI'" title="{{vm.lookupFiltered[enrichment.ColumnId]}}">{{vm.filterLookupFiltered(vm.lookupFiltered[enrichment.ColumnId], enrichment.FundamentalType)}}</strong>
@@ -85,7 +85,6 @@
                             vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                             !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                             && enrichment.Entity === 'Rating'"
-                        vm="vm"
                         statcount="statcount = vm.getAttributeRules(enrichment, stat).length"
                         config="vm.getChartConfig(vm.getData(enrichment.Entity, enrichment.ColumnId))" 
                         bktlist="vm.getData(enrichment.Entity, enrichment.ColumnId)"
