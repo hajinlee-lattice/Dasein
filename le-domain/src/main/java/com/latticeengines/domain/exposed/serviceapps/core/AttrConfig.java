@@ -31,6 +31,12 @@ public class AttrConfig implements IsColumnMetadata {
     @JsonProperty("Props")
     private Map<String, AttrConfigProp<?>> attrProps;
 
+    @JsonProperty("Impact_Warning")
+    private ImpactWarnings impactWarnings;
+
+    @JsonProperty("Validation_Error")
+    private ValidationErrors validationErrors;
+
     public String getAttrName() {
         return attrName;
     }
@@ -76,6 +82,22 @@ public class AttrConfig implements IsColumnMetadata {
             return valueClz.cast(prop.getCustomValue());
         }
         return null;
+    }
+
+    public ImpactWarnings getImpactWarnings() {
+        return impactWarnings;
+    }
+
+    public void setImpactWarnings(ImpactWarnings impactWarnings) {
+        this.impactWarnings = impactWarnings;
+    }
+
+    public ValidationErrors getValidationErrors() {
+        return validationErrors;
+    }
+
+    public void setValidationErrors(ValidationErrors validationErrors) {
+        this.validationErrors = validationErrors;
     }
 
     @Override
