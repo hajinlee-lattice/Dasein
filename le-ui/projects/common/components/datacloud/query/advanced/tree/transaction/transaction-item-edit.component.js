@@ -64,10 +64,10 @@ angular
 
                     if (!reset) {
                         var fromQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['from'].position, 'Qty');
-                        vm.qtyConf['from'].value = (fromQty != null && fromQty != 0) ? Number(fromQty) : undefined;
+                        vm.qtyConf['from'].value = (fromQty != null && fromQty >= 0) ? Number(fromQty) : undefined;
 
                         var toQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['to'].position, 'Qty');
-                        vm.qtyConf['to'].value = (toQty != null && toQty != 0) ? Number(toQty) : undefined;
+                        vm.qtyConf['to'].value = (toQty != null && toQty >= 0) ? Number(toQty) : undefined;
 
                         vm.showFromUnit = vm.showUnitFrom();
                         vm.showToUnit = vm.showUnitTo();
@@ -94,10 +94,10 @@ angular
 
                     if (!reset) {
                         var fromAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['from'].position, 'Amt');
-                        vm.amtConf['from'].value = fromAmt != 0 ? Number(fromAmt) : undefined;
+                        vm.amtConf['from'].value = fromAmt >= 0 ? Number(fromAmt) : undefined;
 
                         var toAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['to'].position, 'Amt');
-                        vm.amtConf['to'].value = toAmt != 0 ? Number(toAmt) : undefined;
+                        vm.amtConf['to'].value = toAmt >= 0 ? Number(toAmt) : undefined;
 
                         vm.showFromAmt = vm.showAmtFrom();
                         vm.showToAmt = vm.showAmtTo();
