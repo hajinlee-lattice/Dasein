@@ -138,7 +138,12 @@ angular
                 }
             },
             views: {
-                'wizard_progress': {
+                'wizard_progress': {                    
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
@@ -294,7 +299,12 @@ angular
                 }
             },
             views: {
-                'wizard_progress': {
+                'wizard_progress': {                    
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
@@ -427,7 +437,12 @@ angular
                 }
             },
             views: {
-                'wizard_progress': {
+                'wizard_progress': {                    
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
@@ -533,7 +548,12 @@ angular
                 }
             },
             views: {
-                'wizard_progress': {
+                'wizard_progress': {                    
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'
@@ -651,6 +671,11 @@ angular
             },
             views: {
                 'wizard_progress': {
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'

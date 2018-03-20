@@ -1,3 +1,9 @@
+<le-modal-window 
+    config="vm.config" 
+    callback-function="vm.modalCallback(args)">
+    <div ng-include="vm.viewUrl()"></div>
+</le-modal-window>
+
 <section 
     class="rating-engine dashboard">
     <div class="container row">
@@ -8,17 +14,34 @@
                 <h2 class="pull-left">Model Dashboard</h2>
 
                 <div class="actions pull-right">
+                    <!-- ng-model="vm.status_toggle" -->
                     <button
-                        class="button orange-button">
+                        class="button"
+                        ng-class="{ 'orange-button': !vm.status_toggle, 'gray-button': vm.status_toggle }"
+                        ng-if="vm.isRulesBased"
+                        ng-click="vm.toggleActive()">
+                        {{ vm.toggleScoringButtonText }}
+                    </button>
+                    <button
+                        class="button orange-button"
+                        ng-if="vm.isRulesBased"
+                        ui-sref="home.playbook.wizard.rating({rating_id: vm.rating.summary.id})" 
+                        ng-disabled="!vm.status_toggle">
+                        Create Play
+                    </button>
+
+                    <button
+                        class="button orange-button"
+                        ng-if="!vm.isRulesBased">
                         Activate Scoring
                     </button>
                     <button
-                        class="button orange-button">
+                        class="button orange-button"
+                        ng-if="!vm.isRulesBased">
                         Create Play
                     </button>
                 </div>
             </div>
-
             <div class="content">
                 <div ng-if="!vm.isRulesBased">
                     <h3>Creation Settings</h3>

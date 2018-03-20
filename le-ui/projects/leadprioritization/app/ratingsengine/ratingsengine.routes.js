@@ -436,6 +436,11 @@ angular
                         templateUrl: '/components/wizard/header/header.component.html'
                     },
                     'wizard_progress@home.ratingsengine.rulesprospects': {
+                        resolve: {
+                            DisableWizardNavOnLastStep: function () {
+                                return null;
+                            }
+                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
@@ -762,6 +767,11 @@ angular
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
                     'wizard_progress@home.ratingsengine.productpurchase': {
+                        resolve: {
+                            DisableWizardNavOnLastStep: function () {
+                                return null;
+                            }
+                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
@@ -929,6 +939,17 @@ angular
                     }
                 },
                 views: {
+                    'wizard_progress@home.ratingsengine.productpurchase': {
+                        resolve: {
+                            DisableWizardNavOnLastStep: function () {
+                                return true;
+                            }
+                        },
+                        controller: 'ImportWizardProgress',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/wizard/progress/progress.component.html'
+
+                    },
                     'wizard_content@home.ratingsengine.productpurchase': {
                         controller: 'RatingsEngineCreation',
                         controllerAs: 'vm',

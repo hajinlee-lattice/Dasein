@@ -508,6 +508,11 @@ angular
                     templateUrl: '/components/wizard/wizard.component.html'
                 },
                 'wizard_progress@home.playbook.create': {
+                    resolve: {
+                        DisableWizardNavOnLastStep: function () {
+                            return null;
+                        }
+                    },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/progress/progress.component.html'

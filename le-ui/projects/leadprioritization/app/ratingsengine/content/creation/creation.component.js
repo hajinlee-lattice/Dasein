@@ -18,55 +18,61 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.setValidation('creation', true);
 
-    	var model = vm.ratingEngine.activeModel.AI;
-        if((Object.keys(model.AI.advancedModelingConfig.cross_sell.filters).length === 0 || (model.AI.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig.cross_sell.filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig.cross_sell.filters.trainingProducts.length === 0) {
-            vm.hasSettingsInfo = false;
+    	var model = vm.ratingEngine.activeModel.AI,
+            type = vm.ratingEngine.type.toLowerCase();
+
+        if (type === 'cross_sell') {
+
+            console.log(model);
+
+            if((Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 0 || (model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 1)) && model.trainingSegment === null && model.advancedModelingConfig.cross_sell.trainingProducts === null) {
+                vm.hasSettingsInfo = false;
+            }
+
+            vm.targetProducts = model.advancedModelingConfig.cross_sell.targetProducts;
+            vm.modelingStrategy = model.advancedModelingConfig.cross_sell.modelingStrategy;
+            vm.configFilters = model.advancedModelingConfig.cross_sell.filters;
+            vm.trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
+            
+            if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
+                vm.ratingEngineType = 'First Purchase Cross-Sell'
+            } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
+                vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
+            }
+
+            if (vm.predictionType === 'PROPENSITY') {
+                vm.prioritizeBy = 'Likely to Buy';
+            } else if (vm.predictionType === 'EXPECTED_VALUE') {
+                vm.prioritizeBy = 'Likely Amount of Spend';
+            }
+
+            if (vm.configFilters['SPEND_IN_PERIOD']) {
+                if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+                    vm.spendCriteria = 'at least';
+                } else {
+                    vm.spendCriteria = 'at most';
+                }
+            }
+
+            if (vm.configFilters['QUANTITY_IN_PERIOD']) {
+                if (vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
+                    vm.quantityCriteria = 'at least';
+                } else {
+                    vm.quantityCriteria = 'at most';
+                }
+            }
+
+            if (vm.targetProducts !== null) {
+                vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
+            }
+            if (vm.trainingProducts !== null) {
+                vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
+            }
+
         }
-
-        vm.targetProducts = model.AI.advancedModelingConfig.cross_sell.targetProducts;
-        vm.modelingStrategy = model.AI.advancedModelingConfig.cross_sell.modelingStrategy;
-        vm.predictionType = model.AI.predictionType;
-        vm.configFilters = model.AI.advancedModelingConfig.cross_sell.filters;
-        vm.trainingSegment = model.AI.trainingSegment;
-        vm.trainingProducts = model.AI.advancedModelingConfig.cross_sell.trainingProducts;
-
-
-
-    	if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
-        	vm.ratingEngineType = 'First Purchase Cross-Sell'
-        } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
-        	vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
-        }
-
-    	if (vm.predictionType === 'PROPENSITY') {
-    		vm.prioritizeBy = 'Likely to Buy';
-    	} else if (vm.predictionType === 'EXPECTED_VALUE') {
-    		vm.prioritizeBy = 'Likely Amount of Spend';
-    	}
-
-    	if (vm.configFilters['SPEND_IN_PERIOD']) {
-    		if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
-	    		vm.spendCriteria = 'at least';
-	    	} else {
-	    		vm.spendCriteria = 'at most';
-	    	}
-	    }
-
-	    if (vm.configFilters['QUANTITY_IN_PERIOD']) {
-	    	if (vm.configFilters['QUANTITY_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
-	    		vm.quantityCriteria = 'at least';
-	    	} else {
-	    		vm.quantityCriteria = 'at most';
-	    	}
-	    }
-
-        if (vm.targetProducts.length === 1) {
-            vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
-        }
-        if (vm.trainingProducts.length === 1) {
-            vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
-        }
-
+        
+        vm.predictionType = model.predictionType;        
+        vm.trainingSegment = model.trainingSegment;
     };
 
     vm.checkJobStatus = $interval(function() { 

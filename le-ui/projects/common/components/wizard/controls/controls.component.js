@@ -15,7 +15,8 @@ angular.module('common.wizard.controls', [])
         }(),
         valid: false,
         toState: $state.current,
-        nextDisabled: false
+        nextDisabled: false,
+        prevDisabled: false 
     });
 
     vm.init = function() {

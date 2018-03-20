@@ -3,13 +3,14 @@ angular.module('common.wizard.progress', [
 ])
 .controller('ImportWizardProgress', function(
     $state, $stateParams, $scope, $timeout, ResourceUtility, WizardProgressContext, 
-    WizardProgressItems, WizardValidationStore, ServiceErrorUtility
+    WizardProgressItems, WizardValidationStore, ServiceErrorUtility, DisableWizardNavOnLastStep
 ) {
     var vm = this;
 
     angular.extend(vm, {
         items: WizardProgressItems,
         context: WizardProgressContext,
+        disabledNav: DisableWizardNavOnLastStep || false,
         wizard: '.',
         rootState: function() {
             return 'home.' + WizardProgressContext + '.';
@@ -50,11 +51,12 @@ angular.module('common.wizard.progress', [
             })
         } else {
             var nextState = vm.rootState + state,
+                nextStateUrl = 'home.' + vm.context + vm.wizard + nextState,
                 current = vm.itemMap[vm.rootState + $state.current.name.split('.').pop()];
             if (current.nextFn) {
-                current.nextFn(nextState);
+                current.nextFn(nextStateUrl);
             } else {
-                $state.go(nextState);
+                $state.go(nextStateUrl);
             }
         }
     }

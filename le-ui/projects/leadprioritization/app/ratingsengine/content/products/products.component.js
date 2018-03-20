@@ -44,7 +44,9 @@ angular.module('lp.ratingsengine.wizard.products', [
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
 
-                if(rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts.length > 0){
+                console.log(rating.activeModel.AI);
+
+                if(rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts !== null){
                     var selectedTargetProducts = rating.activeModel.AI.advancedModelingConfig.cross_sell.targetProducts;
                     angular.forEach(selectedTargetProducts, function(value, key) {
                         

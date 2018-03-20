@@ -1,6 +1,6 @@
 <ul class="import-wizard-progress">
     <li     ng-repeat="item in vm.items"
-            ng-if="!item.hide"
+            ng-if="!item.hide && !vm.disabledNav"
             ng-click="vm.click(item.state, $event)"
             ui-sref="home.{{ vm.context }}{{ vm.wizard }}{{ item.state }}" 
             ui-sref-active="previous" 
@@ -9,5 +9,10 @@
         <span class="import-wizard-progress-validation" ng-class="{'invalid': item.invalid }">
             <i class="fa fa-warning"></i> Step Incomplete
         </span>
+    </li>
+    <li     ng-repeat="item in vm.items"
+            ng-if="!item.hide && vm.disabledNav"  
+            class="previous disabled">
+        {{ item.label }}
     </li>
 </ul>

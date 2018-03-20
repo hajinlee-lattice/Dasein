@@ -13,10 +13,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     NavUtility, StringUtility, ModelStore, ModelService, RatingsEngineStore
 ) {
     $scope.ResourceUtility = ResourceUtility;
-
     var data = ModelStore.data;
-
-    console.log(data);
 
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
@@ -37,14 +34,19 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         }
 
         $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
-        if($scope.IsRuleBased) {
+        $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
+        if($scope.IsRuleBased || $scope.IsCustomEvent) {
+            if($scope.IsRuleBased) {
+                $scope.activeIteration = ratingEngine.activeModel.rule.iteration;
+            } else {
+                $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
+            }
             $scope.modelingStrategy = ratingEngine.type;
-            $scope.activeIteration = ratingEngine.activeModel.rule.iteration;
         } else {
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.modelingStrategy;
+            var type = ratingEngine.type.toLowerCase();
+            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
             $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
         }
-
 
     } else {
 

@@ -31,10 +31,17 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.modelingStrategy = vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy;
 
         console.log(vm.configFilters);
+        console.log(vm.ratingEngine);
 
         vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getScoringCount(vm.engineId, vm.modelId, vm.ratingEngine);
+
+        $scope.$on("$destroy", function() {
+            delete vm.configFilters.SPEND_IN_PERIOD;
+            delete vm.configFilters.QUANTITY_IN_PERIOD;
+            delete vm.configFilters.TRAINING_SET_PERIOD;
+        });
 
     }
 
