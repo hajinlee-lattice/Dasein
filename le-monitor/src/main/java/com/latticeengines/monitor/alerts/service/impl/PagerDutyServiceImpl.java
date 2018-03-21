@@ -78,13 +78,17 @@ public class PagerDutyServiceImpl implements PagerDutyService {
             throws IOException {
         // response should look like this -
         // {"status":"success","message":"Event processed","incident_key":”acdcfa307f3e47d1b42b37edcbf22ae7"}
-        String payload = getRequestPayload(description, clientUrl, dedupKey, details);
+        String descriptionForPayload = description;
+        if (descriptionForPayload.length() > 1024) {
+            descriptionForPayload = descriptionForPayload.substring(0, 1024);
+        }
+        String payload = getRequestPayload(descriptionForPayload, clientUrl, dedupKey, details);
         log.info("Trigger event payload: " + payload);
 
         JsonNode filterJson = getFilterJsonNode();
         if(filterJson != null) {
             JsonNode contentJson = om.readTree(payload);
-            if(!filterEvent(contentJson.get("description").toString(), filterJson.findValues("subject"))) {
+            if(!filterEvent(description, filterJson.findValues("subject"))) {
                 log.info("Filter Subject Fail.");
                 return "filterSubjectFail";
             }

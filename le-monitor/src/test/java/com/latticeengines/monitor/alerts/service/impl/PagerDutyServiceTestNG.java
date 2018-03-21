@@ -1,6 +1,7 @@
 package com.latticeengines.monitor.alerts.service.impl;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.message.BasicNameValuePair;
@@ -74,6 +75,20 @@ public class PagerDutyServiceTestNG extends MonitorFunctionalTestNGBase {
 
         result = this.pagerDutyService.triggerEvent("AlertServiceTestNG", "http://AlertServiceTestNG",
                 "testTriggerOneDetail", new BasicNameValuePair("c1", "Test trigger one detail"));
+        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+    }
+
+    @Test(groups = "functional", enabled = true)
+    public void testTriggerLargeDescription() throws ClientProtocolException, IOException {
+        char[] description_1023 = new char[1023];
+        Arrays.fill(description_1023, 'a');
+        String description = new String(description_1023);
+        String result = this.pagerDutyService.triggerEvent(description, "http://AlertServiceTestNG",
+                "description less than 1024 chars");
+        PagerDutyTestUtils.confirmPagerDutyIncident(result);
+
+        result = this.pagerDutyService.triggerEvent(description + "bb", "http://AlertServiceTestNG",
+                "description more than 1024 chars");
         PagerDutyTestUtils.confirmPagerDutyIncident(result);
     }
 }
