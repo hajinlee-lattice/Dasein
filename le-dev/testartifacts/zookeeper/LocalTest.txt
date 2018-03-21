@@ -45,6 +45,8 @@
             /CDL
               /FakeCurrentDate
                 string_value = '2017-08-01'
+              /InvokeTime
+                string_value = '3'
               /lock
               /state.json
                 desiredVersion = 1

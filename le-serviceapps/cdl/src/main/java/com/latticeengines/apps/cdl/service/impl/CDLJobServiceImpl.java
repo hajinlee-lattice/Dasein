@@ -2,7 +2,6 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,18 +9,20 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLJobDetailEntityMgr;
 import com.latticeengines.apps.cdl.service.CDLJobService;
+import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -45,20 +46,26 @@ public class CDLJobServiceImpl implements CDLJobService {
 
     private static final Logger log = LoggerFactory.getLogger(CDLJobServiceImpl.class);
 
-    @Autowired
+    @Inject
     private CDLJobDetailEntityMgr cdlJobDetailEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private WorkflowProxy workflowProxy;
 
-    @Autowired
+    @Inject
     private CDLProxy cdlProxy;
 
-    @Autowired
+    @Inject
     private BatonService batonService;
+
+    @Inject
+    private ZKConfigService zkConfigService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Value("${cdl.processAnalyze.concurrent.job.count:2}")
     private int concurrentProcessAnalyzeJobs;
@@ -98,6 +105,34 @@ public class CDLJobServiceImpl implements CDLJobService {
         return true;
     }
 
+    @Override
+    public Date getNextInvokeTime(CustomerSpace customerSpace) {
+        Date invokeTime = null;
+        boolean allowAutoSchedule = false;
+        try {
+            allowAutoSchedule = batonService.isEnabled(customerSpace,LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        } catch (Exception e) {
+            log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+        }
+        if (allowAutoSchedule) {
+            int invokeHour = zkConfigService.getInvokeTime(customerSpace);
+            log.info(String.format("configured invoke hour: %d", invokeHour));
+
+            Tenant tenantInContext = MultiTenantContext.getTenant();
+            try {
+                Tenant tenant = tenantEntityMgr.findByTenantId(customerSpace.toString());
+                MultiTenantContext.setTenant(tenant);
+                CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
+                Date create_date = processAnalyzeJobDetail == null ? null : processAnalyzeJobDetail.getCreateDate();
+                invokeTime = getInvokeTime(invokeHour, create_date, new Date(tenant.getRegisteredTime()));
+                log.info(String.format("next invoke time for %s: %s", customerSpace.getTenantId(), invokeTime.toString()));
+            } finally {
+                MultiTenantContext.setTenant(tenantInContext);
+            }
+        }
+        return invokeTime;
+    }
+
     private void orchestrateJob(int runningProcessAnalyzeJobs) {
         List<SimpleDataFeed> allDataFeeds = dataFeedProxy.getAllSimpleDataFeeds();
         log.info(String.format("data feeds count: %d", allDataFeeds.size()));
@@ -118,15 +153,10 @@ public class CDLJobServiceImpl implements CDLJobService {
                 log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
             }
 
-            if(dataFeed != null && runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
-                int invokeHour = internalResourceRestApiProxy.getInvokeTime(CustomerSpace.parse(tenant.getId()));
-                log.info(String.format("configured invoke hour: %d", invokeHour));
-
+            if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
                 CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                Date create_date = processAnalyzeJobDetail == null ? null : processAnalyzeJobDetail.getCreateDate();
-                Date invokeTime = getInvokeTime(invokeHour, create_date, new Date(tenant.getRegisteredTime()));
-                log.info(String.format("next invoke time: %s", invokeTime.toString()));
-
+                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()));
+                log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
                 if (currentTimeMillis > invokeTime.getTime()) {
                     list.add(new HashMap.SimpleEntry<>(invokeTime,
                             new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
@@ -134,13 +164,7 @@ public class CDLJobServiceImpl implements CDLJobService {
             }
         }
 
-        Collections.sort(list, new Comparator<Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>>>() {
-            @Override
-            public int compare(Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> o1,
-                               Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> o2) {
-                return o1.getKey().compareTo(o2.getKey());
-            }
-        });
+        list.sort(Comparator.comparing(Map.Entry::getKey));
 
         log.info(String.format("need to submit process analyze jobs count: %d", list.size()));
         for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {

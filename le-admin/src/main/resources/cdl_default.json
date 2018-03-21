@@ -4,6 +4,10 @@
     {
       "Node": "FakeCurrentDate",
       "Data": ""
+    },
+    {
+      "Node": "InvokeTime",
+      "Data": -1
     }
   ]
 }

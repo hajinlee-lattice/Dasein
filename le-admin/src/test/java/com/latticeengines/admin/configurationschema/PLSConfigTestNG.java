@@ -25,7 +25,7 @@ public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
         uploadDirectory();
     }
 
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testUnitMainFlow() {
         runUnitMainFlow();
     }
@@ -45,7 +45,7 @@ public class PLSConfigTestNG extends ConfigurationSchemaTestNGBase {
     /**
      * this test demonstrate how to get configuration using DocumentDirectory
      */
-    @Test(groups = "unit")
+    @Test(groups = "unit", enabled = false)
     public void testConfig4() throws IOException {
         DocumentDirectory dir = batonService.getDefaultConfiguration(this.component.getName());
 

@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import static org.testng.Assert.assertNotNull;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -130,6 +132,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory,
                 BusinessEntity.Rating);
         verifyRuleBasedEngines();
+        verifyDecoratedMetadata();
     }
 
     private void verifyRuleBasedEngines() {
@@ -139,6 +142,11 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 RatingBucketName.F, RATING_F_COUNT_1);
         verifyRatingEngineCount(rule1.getId(), ratingCounts);
         verifyRatingEngineCount(rule2.getId(), ratingCounts);
+    }
+
+    private void verifyDecoratedMetadata() {
+        List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
+         Assert.assertEquals(ratingMetadata.size(), 10);
     }
 
     private ProcessAnalyzeRequest constructRequest() {

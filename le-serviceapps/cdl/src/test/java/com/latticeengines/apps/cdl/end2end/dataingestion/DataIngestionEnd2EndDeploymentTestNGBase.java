@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -86,6 +87,7 @@ import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
@@ -145,7 +147,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private PlsCDLImportProxy plsCDLImportProxy;
 
     @Inject
-    protected ModelingFileUploadProxy fileUploadProxy;
+    private ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
     protected Configuration yarnConfiguration;
@@ -161,6 +163,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
+
+    @Inject
+    private ServingStoreProxy servingStoreProxy;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -745,6 +750,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                         + " expected " + counts.get(bkt.getName()) + " found " + count);
             }
         });
+    }
+
+    List<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity) {
+        return servingStoreProxy.getDecoratedMetadata(mainCustomerSpace, entity).collectList().block();
     }
 
     void verifyUpdateActions() {

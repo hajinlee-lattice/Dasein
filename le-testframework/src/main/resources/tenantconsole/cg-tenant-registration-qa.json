@@ -52,6 +52,10 @@
         {
           "Node": "FakeCurrentDate",
           "Data": "2017-08-01"
+        },
+        {
+          "Node": "InvokeTime",
+          "Data": "-1"
         }
       ]
     }

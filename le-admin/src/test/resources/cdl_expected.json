@@ -4,6 +4,7 @@
     {
     "Node":"FakeCurrentDate",
     "Data": ""
-    }
+    },
+    {"Node":"InvokeTime","Data":"-1","Metadata":{"Type":"number","Required":false}}
   ]
 }

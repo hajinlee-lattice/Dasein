@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.apps.cdl.service.CDLJobService;
 import com.latticeengines.apps.cdl.service.DataFeedService;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -32,6 +35,9 @@ public class DefaultDataFeedController {
 
     @Inject
     private DataFeedService datafeedService;
+
+    @Inject
+    private CDLJobService cdlJobService;
 
     @GetMapping(value = "")
     @ResponseBody
@@ -161,4 +167,13 @@ public class DefaultDataFeedController {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         datafeedService.resetImportByEntity(customerSpace, "", entity);
     }
+
+    @GetMapping(value = "/nextinvoketime")
+    @ResponseBody
+    @ApiOperation(value = "Get tentative next invoke time of scheduled P&A")
+    public Long nextInvokeTime(@PathVariable String customerSpace) {
+        Date invokeTime = cdlJobService.getNextInvokeTime(CustomerSpace.parse(customerSpace));
+        return invokeTime != null ? invokeTime.getTime() : null;
+    }
+
 }

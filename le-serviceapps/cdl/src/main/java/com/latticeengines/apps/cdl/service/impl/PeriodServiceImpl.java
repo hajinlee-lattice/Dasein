@@ -12,15 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.apps.cdl.service.ZKConfigService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -36,6 +32,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private ZKConfigService zkConfigService;
 
     @Override
     public List<String> getPeriodNames() {
@@ -55,7 +54,7 @@ public class PeriodServiceImpl implements PeriodService {
     @Override
     public String getEvaluationDate() {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        String evaluationDate = getFakeCurrentDateFromZK(customerSpace);
+        String evaluationDate = zkConfigService.getFakeCurrentDate(customerSpace);
         if (StringUtils.isBlank(evaluationDate)) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
             evaluationDate = LocalDate.now().format(formatter);
@@ -74,22 +73,6 @@ public class PeriodServiceImpl implements PeriodService {
             dateStr = LocalDate.now().toString();
         }
         return PeriodBuilderFactory.build(periodStrategy).toPeriodId(dateStr);
-    }
-
-    private String getFakeCurrentDateFromZK(CustomerSpace customerSpace) {
-        try {
-            String fakeCurrentDate = null;
-            Path cdlPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace,
-                    CDLComponent.componentName);
-            Path fakeCurrentDatePath = cdlPath.append("FakeCurrentDate");
-            Camille camille = CamilleEnvironment.getCamille();
-            if (camille.exists(fakeCurrentDatePath)) {
-                fakeCurrentDate = camille.get(fakeCurrentDatePath).getData();
-            }
-            return fakeCurrentDate;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to get FakeCurrentDate from ZK for " + customerSpace.getTenantId());
-        }
     }
 
 }
