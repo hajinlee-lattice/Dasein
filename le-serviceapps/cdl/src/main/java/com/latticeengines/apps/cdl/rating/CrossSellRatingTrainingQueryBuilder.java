@@ -75,10 +75,6 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
 
     @Override
     protected void setQueryEvaluationId() {
-        queryEvaluationId = getTargetPeriodId() - 2;
-    }
-
-    private CrossSellModelingConfig getAdvancedConfig() {
-        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+        queryEvaluationId = getTargetPeriodId() - 1;
     }
 }

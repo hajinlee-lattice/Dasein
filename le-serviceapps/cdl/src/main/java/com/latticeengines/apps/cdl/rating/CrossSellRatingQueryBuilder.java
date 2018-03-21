@@ -119,4 +119,8 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
             throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
         }
     }
+
+    protected CrossSellModelingConfig getAdvancedConfig() {
+        return (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
+    }
 }
