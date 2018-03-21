@@ -37,7 +37,6 @@ public class DataFlowStepConfiguration extends MicroserviceStepConfiguration {
     private String beanName;
 
     @NotEmptyString
-    @NotNull
     @JsonProperty("target_table_name")
     private String targetTableName;
 
