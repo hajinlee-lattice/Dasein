@@ -103,6 +103,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Override
     public void execute() {
+        clearExecutionContext();
         customerSpace = configuration.getCustomerSpace();
         addActionAssociateTables();
         determineVersions();

@@ -49,17 +49,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public boolean setup() {
-        T configuration = getObjectFromContext(namespace, configurationClass);
+        T configuration = getConfiguration();
         if (configuration != null) {
             setConfiguration(configuration);
             return true;
         }
-        String stepStringConfig = jobParameters.getString(namespace);
-        if (stepStringConfig != null) {
-            setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
-            return true;
-        }
-
         return false;
     }
 
@@ -87,7 +81,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public T getConfiguration() {
-        return configuration;
+        T configuration = getObjectFromContext(namespace, configurationClass);
+        if (configuration != null) {
+            setConfiguration(configuration);
+            return configuration;
+        }
+        String stepStringConfig = jobParameters.getString(namespace);
+        if (stepStringConfig != null) {
+            setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
+            return configuration;
+        }
+        return null;
     }
 
     public Class<T> getConfigurationClass() {
@@ -181,6 +185,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
                         JsonUtils.deserialize(config, BaseStepConfiguration.class));
             });
         }
+
+    }
+
+    protected void clearExecutionContext() {
+        executionContext.entrySet().clear();
     }
 
     protected void removeObjectFromContext(String key) {
