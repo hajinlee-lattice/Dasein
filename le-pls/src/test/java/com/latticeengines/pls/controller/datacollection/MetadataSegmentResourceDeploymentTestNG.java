@@ -122,13 +122,9 @@ public class MetadataSegmentResourceDeploymentTestNG extends PlsDeploymentTestNG
         Map<String, Long> ratingCounts = ratingEngine.getCountsAsMap();
         Assert.assertTrue(MapUtils.isNotEmpty(ratingCounts));
         String counts = JsonUtils.serialize(ratingCounts);
-        // TODO uncomment the assertion PLS-7360
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()),
-        // new Long(136), counts);
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()),
-        // new Long(1018), counts);
-        // Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()),
-        // new Long(88), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.A.getName()), new Long(136), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.D.getName()), new Long(1018), counts);
+        Assert.assertEquals(ratingCounts.get(RatingBucketName.F.getName()), new Long(88), counts);
     }
 
     private Map<String, Map<RatingBucketName, Long>> generateRatingCounts(String ratingEngineId) {

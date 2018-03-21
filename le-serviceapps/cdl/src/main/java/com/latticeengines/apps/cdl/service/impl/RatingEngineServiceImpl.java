@@ -382,9 +382,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             log.warn("Cannot find a Tenant in MultiTenantContext, skip getting rating count.");
             return Collections.emptyMap();
         } else {
-            MetadataSegment segment = ratingEngine.getSegment();
-            RatingEngineFrontEndQuery frontEndQuery = segment != null
-                    ? segment.toRatingEngineFrontEndQuery(BusinessEntity.Account) : new RatingEngineFrontEndQuery();
+            RatingEngineFrontEndQuery frontEndQuery = new RatingEngineFrontEndQuery();
             frontEndQuery.setRatingEngineId(ratingEngine.getId());
             frontEndQuery.setMainEntity(BusinessEntity.Account);
             Map<String, Long> counts = entityProxy.getRatingCount(tenant.getId(), frontEndQuery);
