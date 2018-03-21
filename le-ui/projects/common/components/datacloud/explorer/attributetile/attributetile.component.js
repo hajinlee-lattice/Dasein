@@ -15,7 +15,6 @@ angular
                 DataCloudStore, NumberUtility, QueryTreeService
             ) {
                 var vm = $scope.vm;
-                vm.enrichment = $scope.enrichment;
                 angular.extend(vm, {});
                 vm.booleanStats = function (stats) {
                     var booleans = {};
@@ -119,6 +118,7 @@ angular
                 }
 
                 vm.getChartConfig = function (list) {
+                    // console.log('Request chart config on list ', list);
                     if (list != null && list.length > 0 && list[0].Lift != undefined) {
                         return getBarChartLiftConfig();
                     }
@@ -131,9 +131,9 @@ angular
                     return data;
                 }
 
-                vm.chartRowClicked = function (stat) {
-                    console.log('Stat clicked --> ',stat);
-                    vm.selectSegmentAttributeRange(vm.enrichment, stat, (vm.section != 'segment.analysis'));
+                vm.chartRowClicked = function (stat, enrichment) {
+                    // console.log('Stat clicked: ',stat, ' - Enrichment: ', enrichment);
+                    vm.selectSegmentAttributeRange(enrichment, stat, (vm.section != 'segment.analysis'));
                 }
                 vm.NumberUtility = NumberUtility;
 

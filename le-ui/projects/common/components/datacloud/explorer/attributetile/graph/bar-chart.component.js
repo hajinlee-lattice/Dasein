@@ -4,17 +4,18 @@ angular
         return {
             restrict: 'E',
             scope: {
-                vm: '=',
+                vm: '=?',
                 bktlist: '=',
                 callback: '&',
                 config: '=',
-                statcount: '='
+                statcount: '=',
+                enrichment:'=?'
 
             },
             templateUrl: '/components/datacloud/explorer/attributetile/graph/bar-chart.component.html',
             controller: function ($scope, $filter, $timeout) {
 
-                console.log('Loading chart ==> ', $scope.bktlist);
+                console.log('Loading chart ==> ', $scope.bktlist, ' Enrichment', $scope.enrichment);
 
                 function getHighestStat(stats, fieldName) {
                     var highest = 0;
@@ -281,9 +282,7 @@ angular
                  */
                 $scope.clicked = function (stat) {
                     if ($scope.callback) {
-                        $scope.callback({
-                            stat: stat
-                        });
+                        $scope.callback()(stat, $scope.enrichment);
                     }
 
                 }
