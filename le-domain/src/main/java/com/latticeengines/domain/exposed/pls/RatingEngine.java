@@ -97,7 +97,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     @JsonProperty("deleted")
     @Column(name = "DELETED")
-    private Boolean deleted;
+    private Boolean deleted = false;
 
     @JsonProperty("segment")
     @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
