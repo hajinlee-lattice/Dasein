@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.PrepareSegmentMatchingStep;
 import com.latticeengines.cdl.workflow.steps.SegmentExportInitStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PrepareScoringAfterModelingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -27,10 +26,6 @@ public class PrepareScoringAfterModelingWorkflow
     @Inject
     private SegmentExportInitStep segmentExportInitStep;
 
-    @SuppressWarnings("unused")
-    @Inject
-    private PrepareSegmentMatchingStep prepareSegmentMatchingStep;
-
     @Inject
     private CustomEventSimpleMatchWorkflow customEventSimpleMatchWorkflow;
 
@@ -44,8 +39,8 @@ public class PrepareScoringAfterModelingWorkflow
         case CDL:
         default:
             return builder.next(segmentExportInitStep) //
-                    // .next(prepareSegmentMatchingStep) //
                     .next(customEventSimpleMatchWorkflow) //
+                    .next(setConfigurationForScoring) //
                     .build();
         }
     }
