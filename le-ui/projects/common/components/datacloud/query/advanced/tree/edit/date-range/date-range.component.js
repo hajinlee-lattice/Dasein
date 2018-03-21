@@ -237,6 +237,14 @@ angular
                     }
                 }
 
+                $scope.getErrorMsg = function(){
+                    if(getConfigField(0).visible == true &&  getConfigField(1).visible == true){
+                        return 'Enter a valid range';
+                    }else {
+                        return 'Enter a valid date';
+                    }
+                }
+
                 $scope.show = function (position) {
                     var visible = getConfigField(position).visible;
                     return visible;

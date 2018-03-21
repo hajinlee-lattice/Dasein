@@ -12,5 +12,5 @@
         </span>
         <input type="text" id="{{getToDateId()}}" name="{{getName(1)}}"  ng-model="toDate" readonly ng-click="openPicker(1)">
     </div>
-    <span class="error-message" ng-show="showErrorMessage(0) || showErrorMessage(1)"><i class="fa fa-exclamation-circle"></i> Please enter a valid date range.</span>
+    <span class="error-message" ng-show="showErrorMessage(0) || showErrorMessage(1)">{{getErrorMsg()}}</span>
 </div>

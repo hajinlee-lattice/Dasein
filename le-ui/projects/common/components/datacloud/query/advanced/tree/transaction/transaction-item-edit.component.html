@@ -28,7 +28,7 @@
             <select ng-model="vm.timeframePeriod" ng-change="vm.changeTimeFramePeriod()">
                 <option ng-repeat="(key, value) in vm.periodList" value="{{value.name}}">{{value.displayName}}</option>
             </select>
-            <span class="error-message" ng-if="!vm.isPeriodRangeValid()"><i class="fa fa-exclamation-circle"></i> Please enter a valid numerical range.</span>
+            <span class="error-message error-date" ng-if="!vm.isPeriodRangeValid()">{{vm.getErrorMsg()}}</span>
         </div>
 
         <!-- Date picker -->

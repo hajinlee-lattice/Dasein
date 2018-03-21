@@ -194,6 +194,14 @@ angular
                     return valid;
                 }
 
+                $scope.getErrorMsg = function(){
+                    if($scope.showFrom() && $scope.showTo()){
+                        return 'Enter a valid range';
+                    }else {
+                        return 'Enter a valid number';
+                    }
+                }
+
                 $scope.showErrorMessage = function() {
                     var ret = $scope.showmessage != undefined ? $scope.showmessage : true;
                     return ret;

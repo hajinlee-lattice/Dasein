@@ -20,5 +20,5 @@
                 ng-change="changeValue(1)"
                 ng-class="!isValValid(1) ? 'invalid-field' : ''" 
                 required>
-        <span class="error-message" ng-show="showErrorMessage() && (!isValValid(0) || !isValValid(1))"><i class="fa fa-exclamation-circle"></i> Please enter a valid numerical range.</span>
+        <span class="error-message" ng-if="showErrorMessage() && (!isValValid(0) || !isValValid(1))">{{getErrorMsg()}}</span>
 </div>

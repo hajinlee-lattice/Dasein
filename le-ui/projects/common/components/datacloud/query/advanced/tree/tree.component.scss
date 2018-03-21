@@ -2,7 +2,11 @@
     min-width: 560px;
     min-height: 25px;
     .error-message{
-        color: #D52E57;
+        color: #B50A20;
+        vertical-align: baseline;
+    }
+    .error-date{
+        padding-top: .2em;
     }
     @media only screen and (max-width: 1000px) {
         min-height: 80px;

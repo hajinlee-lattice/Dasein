@@ -3,12 +3,14 @@ div.transaction-container {
     margin-top: -22px;
     margin-bottom: 0px;
     // border: 1px solid yellow;
+    
     .transaction-row {
         display: flex;
         justify-content: flex-start;
         // border: 1px solid orange;
         .transaction-element-title {
             min-width: 100px;
+            margin-top: .2em;
             font-weight: bold;
         }
         .transaction-element {

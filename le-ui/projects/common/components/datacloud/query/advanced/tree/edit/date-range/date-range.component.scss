@@ -13,19 +13,16 @@
         }
     }
     input[type=text]:readonly {
-        // border-width: 1px;
+        outline: none;
+        border: 1px solid #ccc;
         max-width: 120px;
-        border: 1px solid #eee;
-        border-top: 1px solid #ccc;
-        border-left: 1px solid #ccc;
+        border-color: rgba(204, 204, 204, 0.747);
         height: 1.65em;
         font-size: 12px;
     }
+
     input[type=text].invalid-field {
-        border-left-width: 5px;
-        border-left-color: #D52E57;
-        border-top-width: 1px;
-        border-top-color: #ccc;
-        padding-left: 3px;
+        border-left: 3px solid #B50A20;
+        padding-left: 4px;
     }
 }

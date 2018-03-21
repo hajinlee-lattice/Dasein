@@ -292,6 +292,14 @@ angular
                     return valid;
                 }
 
+                vm.getErrorMsg = function(){
+                    if(vm.showPeriodFrom() && vm.showPeriodTo()){
+                        return 'Enter a valid range';
+                    }else {
+                        return 'Enter a valid number';
+                    }
+                }
+
                 vm.showTimeframePeriod = function () {
                     switch (vm.timeCmp) {
                         case 'EVER':
