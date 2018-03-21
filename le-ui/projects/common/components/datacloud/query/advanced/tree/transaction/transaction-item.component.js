@@ -21,7 +21,7 @@ angular
                 vm.getPeriod = function(){
                     var period = QueryTreeService.getPeriodValue($scope.bucketrestriction, $scope.type, 'Time');
                     if(period != 'Date' && vm.getCmp('Time') !== 'Ever'){
-                        return period;
+                        return period+'(s)';
                     }
                 }
 

@@ -50,20 +50,13 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 QueryTreeTransactionService.getPeriods().then(
                     function (result) {
                         result.forEach(function (element) {
-                            QueryTreeTransactionStore.periods.push({ 'name': element, 'displayName': element });
+                            QueryTreeTransactionStore.periods.push({ 'name': element, 'displayName': element+'(s)' });
                         });
 
                     }
                 );
             }
             return QueryTreeTransactionStore.periods;
-            // List that will be supported by the back end
-            // return [
-            //     { 'name': 'Week', 'displayName': 'Week' },
-            //     { 'name': 'Month', 'displayName': 'Month' },
-            //     { 'name': 'Quarter', 'displayName': 'Quarter' },
-            //     { 'name': 'Year', 'displayName': 'Year' }
-            // ];
         }
         this.unitPurchasedCmpChoises = function () {
             return [

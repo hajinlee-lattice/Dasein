@@ -256,6 +256,9 @@ angular
                             if (vm.showTimeFrameDate()) {
                                 vm.timeframePeriod = 'Date';
                                 vm.changeTimeFramePeriod();
+                            }else{
+                                vm.timeframePeriod = vm.periodList[0].name;
+                                vm.changeTimeFramePeriod();
                             }
                             break;
                         }
