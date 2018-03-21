@@ -42,7 +42,7 @@ public class StartProcessingUnitTestNG {
         ProcessStepConfiguration config = new ProcessStepConfiguration();
         config.setDataCloudBuildNumber("1000");
         startProcessing.setConfiguration(config);
-        Set<BusinessEntity> entities = startProcessing.new RebuildOnDLVersionTemplate().getRebuildEntities();
+        Set<BusinessEntity> entities = startProcessing.new RebuildOnDCBuildNumberTemplate().getRebuildEntities();
         assertTrue(entities.contains(BusinessEntity.Account));
         assertEquals(entities.size(), 1);
     }

@@ -88,6 +88,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
@@ -144,6 +145,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     CDLProxy cdlProxy;
 
     @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
     private PlsCDLImportProxy plsCDLImportProxy;
 
     @Inject
@@ -188,6 +192,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         logger.info("Test environment setup finished.");
         createDataFeed();
+        updateDataCloudBuildNumber();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(plsCDLImportProxy);
@@ -433,6 +438,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         dataTable.setName("dataTable");
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(mainTestTenant);
+
+    }
+
+    protected void updateDataCloudBuildNumber() {
+        String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
+        dataCollectionProxy.updateDataCloudBuildNumber(mainTestTenant.getId(), currentDataCloudBuildNumber);
     }
 
     long countTableRole(TableRoleInCollection role) {

@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.metadata.TableType;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -103,7 +102,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
-    public List<Table> findTablesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+    public List<Table> findTablesOfRole(String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -114,7 +114,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
-    public List<String> findTableNamesOfRole(String collectionName, TableRoleInCollection tableRole, DataCollection.Version version) {
+    public List<String> findTableNamesOfRole(String collectionName, TableRoleInCollection tableRole,
+            DataCollection.Version version) {
         List<String> tableNames = dataCollectionDao.getTableNamesOfRole(collectionName, tableRole, version);
         if (tableNames == null) {
             return Collections.emptyList();
@@ -125,7 +126,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
-    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role, DataCollection.Version version) {
+    public void upsertTableToCollection(String collectionName, String tableName, TableRoleInCollection role,
+            DataCollection.Version version) {
         Table table = tableEntityMgr.findByName(tableName);
         if (table != null) {
             DataCollection collection = getDataCollection(collectionName);
@@ -143,7 +145,8 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void removeTableFromCollection(String collectionName, String tableName, DataCollection.Version version) {
-        List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByName(collectionName, tableName, version);
+        List<DataCollectionTable> dataCollectionTables = dataCollectionTableDao.findAllByName(collectionName, tableName,
+                version);
         if (CollectionUtils.isNotEmpty(dataCollectionTables)) {
             dataCollectionTables.forEach(dataCollectionTableDao::delete);
         }
@@ -179,7 +182,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
                 + "Cannot determine which one is the default.");
     }
 
-
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override
     public DataCollection findDefaultCollectionReadOnly() {
@@ -193,7 +195,6 @@ public class DataCollectionEntityMgrImpl extends BaseEntityMgrImpl<DataCollectio
         throw new RuntimeException("There are " + collections.size() + " data collections in current tenant. "
                 + "Cannot determine which one is the default.");
     }
-
 
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     @Override

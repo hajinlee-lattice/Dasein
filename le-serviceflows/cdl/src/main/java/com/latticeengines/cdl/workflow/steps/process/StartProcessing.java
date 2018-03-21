@@ -260,7 +260,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         public static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
             Collection<Class<? extends RebuildEntitiesTemplate>> decrators = Arrays
-                    .asList(RebuildOnDLVersionTemplate.class, RebuildOnDeleteJobTemplate.class);
+                    .asList(RebuildOnDCBuildNumberTemplate.class, RebuildOnDeleteJobTemplate.class);
             for (Class<? extends RebuildEntitiesTemplate> c : decrators) {
                 try {
                     RebuildEntitiesTemplate template = ((RebuildEntitiesTemplate) c
@@ -297,7 +297,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
     }
 
-    class RebuildOnDLVersionTemplate extends RebuildEntitiesTemplate {
+    class RebuildOnDCBuildNumberTemplate extends RebuildEntitiesTemplate {
 
         @Override
         public Set<BusinessEntity> getRebuildEntities() {

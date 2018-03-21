@@ -23,6 +23,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
+    @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(UpdateContactDeploymentTestNG.class);
 
     static final String CHECK_POINT = "update2";
@@ -49,6 +50,10 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         }
     }
 
+    @Override
+    protected void updateDataCloudBuildNumber() {
+    }
+
     private void importData() throws Exception {
         mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
         Thread.sleep(2000);
@@ -73,18 +78,15 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_3);
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_3, BusinessEntity.Contact, SEGMENT_1_CONTACT_3);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_2);
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2, BusinessEntity.Contact, SEGMENT_2_CONTACT_2);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_2, //
                 RatingBucketName.D, RATING_D_COUNT_2, //
-                RatingBucketName.F, RATING_F_COUNT_2
-        );
+                RatingBucketName.F, RATING_F_COUNT_2);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
