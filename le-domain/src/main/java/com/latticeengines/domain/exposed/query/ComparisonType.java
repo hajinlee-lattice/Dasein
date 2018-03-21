@@ -25,8 +25,9 @@ public enum ComparisonType {
     PRIOR_ONLY, //
     FOLLOWING,  //
     WITHIN, //
-    BEFORE, //
-    AFTER, //
+    BEFORE, // only for exact date
+    AFTER, // only for exact date
+    BETWEEN_DATE, // only for exact date range
     @Deprecated
     PRIOR; //
 

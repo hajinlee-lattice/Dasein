@@ -45,7 +45,7 @@ public class TimeFilterTranslatorUnitTestNG {
         TimeFilter between1And3Month = new TimeFilter( //
                 ComparisonType.BETWEEN, TimeFilter.Period.Month.name(), Arrays.asList(1, 3));
         TimeFilter betweenDates = new TimeFilter( //
-                ComparisonType.BETWEEN, TimeFilter.Period.Date.name(), Arrays.asList("2018-02-01", "2019-01-01"));
+                ComparisonType.BETWEEN_DATE, TimeFilter.Period.Date.name(), Arrays.asList("2018-02-01", "2019-01-01"));
         TimeFilter beforeDate = new TimeFilter( //
                 ComparisonType.BEFORE, TimeFilter.Period.Date.name(), Collections.singletonList("2018-02-01"));
         TimeFilter afterDate = new TimeFilter( //

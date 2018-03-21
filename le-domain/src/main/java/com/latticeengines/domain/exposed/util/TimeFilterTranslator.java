@@ -78,6 +78,7 @@ public class TimeFilterTranslator {
         List<Object> vals = timeFilter.getValues();
         switch (operator) {
             case BETWEEN:
+            case BETWEEN_DATE:
                 verifyDoubleVals(operator, vals);
                 List<String> dates = vals.stream().map(this::castToDate).collect(Collectors.toList());
                 return Pair.of(dates.get(0), dates.get(1));
