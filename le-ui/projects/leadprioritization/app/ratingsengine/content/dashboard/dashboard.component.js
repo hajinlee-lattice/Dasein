@@ -117,13 +117,16 @@ angular.module('lp.ratingsengine.dashboard', [
             var type = vm.ratingEngine.type.toLowerCase();
 
             if (type === 'cross_sell') {
-                if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts.length === 0) {
+                if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {
                     vm.hasSettingsInfo = false;
                 }
-                vm.targetProducts = model.AI.advancedModelingConfig[0].targetProducts;
-                vm.modelingStrategy = model.AI.advancedModelingConfig[0].modelingStrategy;
-                vm.configFilters = model.AI.advancedModelingConfig[0].filters;
-                vm.trainingProducts = model.AI.advancedModelingConfig[0].trainingProducts;
+
+                console.log(model);
+
+                vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
+                vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;
+                vm.configFilters = model.AI.advancedModelingConfig[type].filters;
+                vm.trainingProducts = model.AI.advancedModelingConfig[type].trainingProducts;
 
                 if (vm.configFilters['SPEND_IN_PERIOD']) {
                     if (vm.configFilters['SPEND_IN_PERIOD'].criteria === 'GREATER_OR_EQUAL') {
@@ -141,10 +144,10 @@ angular.module('lp.ratingsengine.dashboard', [
                     }
                 }
 
-                if (vm.targetProducts.length === 1) {
+                if (vm.targetProducts !== null) {
                     vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
                 }
-                if (vm.trainingProducts.length === 1) {
+                if (vm.trainingProducts !== null) {
                     vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
                 }
 
