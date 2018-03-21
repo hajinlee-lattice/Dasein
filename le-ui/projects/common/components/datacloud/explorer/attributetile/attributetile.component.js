@@ -55,6 +55,7 @@ angular
                             'chart': {
                                 'header':'Attributes Value',
                                 'emptymsg': '',
+                                'usecolor': false,
                                 'color': '#2E6099',
                                 'mousehover': true,
                                 'type': 'integer',
@@ -88,6 +89,7 @@ angular
                             'chart': {
                                 'header':'Attributes Value',
                                 'emptymsg': '',
+                                'usecolor': false,
                                 'color': '#2E6099',
                                 'mousehover': true,
                                 'type': 'decimal',

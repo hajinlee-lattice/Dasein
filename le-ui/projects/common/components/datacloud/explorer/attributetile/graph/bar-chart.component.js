@@ -124,25 +124,26 @@ angular
 
 
                     /************************************* Config ************************************************/
-                    validateConfig()
+                    validateConfig();
 
                     /************************Data config ***********************/
                     $scope.tosort = $scope.config.data.tosort == undefined ? false : $scope.config.data.tosort;
-                    $scope.sortBy = $scope.config.data.sortBy ? $scope.config.data.sortBy : '-Cnt';
-                    $scope.trimData = $scope.config.data.trim ? $scope.config.data.trim : false;
-                    $scope.top = $scope.config.data.top ? $scope.config.data.top : 5;
+                    $scope.sortBy = $scope.config.data.sortBy !== undefined ? $scope.config.data.sortBy : '-Cnt';
+                    $scope.trimData = $scope.config.data.trim  !== undefined ? $scope.config.data.trim : false;
+                    $scope.top = $scope.config.data.top  !== undefined ? $scope.config.data.top : 5;
 
                     /***********************************************************/
 
                     /************************** Chart Config ***********************/
-                    $scope.header = $scope.config.chart.header ? $scope.config.chart.header : 'Header';
-                    $scope.emptymsg = $scope.config.chart.emptymsg ? $scope.config.chart.emptymsg : 'No Stats';
-                    $scope.color = $scope.config.chart.color ? $scope.config.chart.color : '#D0D1D0';
-                    $scope.mousehover = $scope.config.chart.mousehover ? $scope.config.chart.mousehover : false;
-                    $scope.hovercolor = $scope.config.chart.hovercolor ? $scope.config.chart.hovercolor : $scope.color;
-                    $scope.chartType = $scope.config.chart.type ? $scope.config.chart.type : 'decimal';
-                    $scope.showVLines = $scope.config.chart.showVLines ? $scope.config.chart.showVLines : false;
-                    $scope.maxVLines = $scope.config.chart.maxVLines ? $scope.config.chart.maxVLines : 3;
+                    $scope.header = $scope.config.chart.header !== undefined ? $scope.config.chart.header : 'Header';
+                    $scope.emptymsg = $scope.config.chart.emptymsg !== undefined ? $scope.config.chart.emptymsg : 'No Stats';
+                    $scope.color = $scope.config.chart.color !== undefined ? $scope.config.chart.color : '#D0D1D0';
+                    $scope.usecolor = $scope.config.chart.usecolor!== undefined ? Boolean($scope.config.chart.usecolor) : true;
+                    $scope.mousehover = $scope.config.chart.mousehover !== undefined ? $scope.config.chart.mousehover : false;
+                    $scope.hovercolor = $scope.config.chart.hovercolor !== undefined ? $scope.config.chart.hovercolor : $scope.color;
+                    $scope.chartType = $scope.config.chart.type !== undefined ? $scope.config.chart.type : 'decimal';
+                    $scope.showVLines = $scope.config.chart.showVLines !== undefined ? Boolean($scope.config.chart.showVLines) : false;
+                    $scope.maxVLines = $scope.config.chart.maxVLines !== undefined ? $scope.config.chart.maxVLines : 3;
                     $scope.showstatcount = $scope.config.chart.showstatcount !== undefined ? $scope.config.chart.showstatcount : false;
 
                     /***************************************************************/
@@ -152,7 +153,7 @@ angular
                     /*********************************************************************************************/
 
                     /****************************** V Lines Config ******************************************/
-                    $scope.vlinesSuffix = $scope.config.vlines.suffix ? $scope.config.vlines.suffix : '';
+                    $scope.vlinesSuffix = $scope.config.vlines.suffix !== undefined ? $scope.config.vlines.suffix : '';
 
                     /****************************************************************************************/
 
@@ -216,8 +217,12 @@ angular
                     return $scope.showVLines;
                 }
 
-                $scope.getBarColor = function () {
-                    return $scope.color;
+                $scope.getBarColor = function (stat) {
+                    if($scope.usecolor == true || $scope.getStatCount(stat) > 0){
+                        return $scope.color;
+                    }else{
+                        return "#939393";
+                    }
                 }
 
                 $scope.getMouseOverColor = function(){
@@ -278,6 +283,7 @@ angular
                     var count = $scope.vm.getAttributeRules($scope.enrichment, stat).length;
                     return count;
                 }
+
 
                 /**
                  * Clicked on the single row of the chart
