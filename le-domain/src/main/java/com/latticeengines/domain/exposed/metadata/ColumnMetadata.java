@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.AttributeUseCase;
 import com.latticeengines.domain.exposed.pls.HasAttributeCustomizations;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -32,16 +33,10 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 public class ColumnMetadata implements HasAttributeCustomizations, Serializable {
     private static final long serialVersionUID = -8532367815438372761L;
 
-    public static final String SUBCATEGORY_OTHER = "Other";
-
     @JsonProperty(ColumnMetadataKey.AttrName)
     private String attrName;
     @JsonProperty(ColumnMetadataKey.Description)
     private String description;
-    @JsonProperty("DataType")
-    private String dataType;
-    @JsonProperty("JavaClass")
-    private String javaClass;
     @JsonProperty(ColumnMetadataKey.DisplayName)
     private String displayName;
     @JsonProperty(ColumnMetadataKey.SecondaryDisplayName)
@@ -49,16 +44,10 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Category category;
     @JsonProperty(ColumnMetadataKey.Subcategory)
     private String subcategory;
-    @JsonProperty("DiscretizationStrategy")
-    private String discretizationStrategy;
-    @JsonProperty("Entity")
+    @JsonProperty(ColumnMetadataKey.Entity)
     private BusinessEntity entity;
-    @JsonProperty("ImportanceOrdering")
-    private Integer importanceOrdering;
-    @JsonProperty("LogicalDataType")
-    private LogicalDataType logicalDataType;
-    @JsonProperty(ColumnMetadataKey.IsDeprecated)
-    private Boolean isDeprecated;
+    @JsonProperty(ColumnMetadataKey.State)
+    private AttrState attrState;
 
     private StatisticalType statisticalType;
     private FundamentalType fundamentalType;
@@ -66,6 +55,16 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private String tags;
     private String decodeStrategy;
 
+    @JsonProperty("DataType")
+    private String dataType;
+    @JsonProperty("JavaClass")
+    private String javaClass;
+    @JsonProperty("ImportanceOrdering")
+    private Integer importanceOrdering;
+    @JsonProperty("LogicalDataType")
+    private LogicalDataType logicalDataType;
+    @JsonProperty("DiscretizationStrategy")
+    private String discretizationStrategy;
     @JsonProperty("Groups")
     private Map<ColumnSelection.Predefined, Boolean> groups;
 
@@ -154,6 +153,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.javaClass = javaClass;
     }
 
+    public AttrState getAttrState() {
+        return attrState;
+    }
+
+    public void setAttrState(AttrState attrState) {
+        this.attrState = attrState;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
@@ -224,14 +231,6 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setEntity(BusinessEntity entity) {
         this.entity = entity;
-    }
-
-    public Boolean getDeprecated() {
-        return isDeprecated;
-    }
-
-    public void setDeprecated(Boolean deprecated) {
-        isDeprecated = deprecated;
     }
 
     @JsonIgnore

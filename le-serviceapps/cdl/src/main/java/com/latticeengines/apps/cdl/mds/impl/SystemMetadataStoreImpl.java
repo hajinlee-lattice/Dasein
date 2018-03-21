@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -80,6 +81,10 @@ public class SystemMetadataStoreImpl extends
                             if (BusinessEntity.Account.equals(entity)) {
                                 cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
                                 cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+                                // TODO: should be handled by AM metadata
+                                if (Category.INTENT.equals(cm.getCategory()) || Category.TECHNOLOGY_PROFILE.equals(cm.getCategory())) {
+                                    cm.setAttrState(AttrState.Inactive);
+                                }
                             }
                             return cm;
                         }) //

@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 @Entity
 @Access(AccessType.FIELD)
@@ -380,8 +381,11 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setDataLicense(getDataLicense());
         metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
+        if (StringUtils.isNotBlank(metadata.getDataLicense())) {
+            metadata.setAttrState(AttrState.Inactive);
+        }
         if (isEol()) {
-            metadata.setDeprecated(true);
+            metadata.setAttrState(AttrState.Deprecated);
         }
 
         // deprecated properties
