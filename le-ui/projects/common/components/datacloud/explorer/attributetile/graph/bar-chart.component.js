@@ -15,8 +15,6 @@ angular
             templateUrl: '/components/datacloud/explorer/attributetile/graph/bar-chart.component.html',
             controller: function ($scope, $filter, $timeout) {
 
-                console.log('Loading chart ==> ', $scope.bktlist, ' Enrichment', $scope.enrichment);
-
                 function getHighestStat(stats, fieldName) {
                     var highest = 0;
                     stats.forEach(function (stat) {
@@ -274,6 +272,11 @@ angular
                         $scope.vertcalLines = lines;
                     }
                     return $scope.vertcalLines;
+                }
+
+                $scope.getStatCount = function(stat){
+                    var count = $scope.vm.getAttributeRules($scope.enrichment, stat).length;
+                    return count;
                 }
 
                 /**

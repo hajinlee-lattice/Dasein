@@ -14,9 +14,9 @@
             <div class="info-row" ng-class="($index%2 == 0) ? 'info-row-odd' : ''" ng-click="clicked(stat)">
                 <div class="flex-row content-item">
                     <div class="flex-item flex-lable text-ellipsis flex-item-left">
-                        <i class="plus fa fa-plus" ng-if="showstatcount && statcount == 0 && ($index == rowHover)"></i>
-                        <i class="plus fa fa-check" ng-if="showstatcount && statcount == 1" ng-style="{'color': color}"></i>
-                        <i class="plus attribute-use-count" ng-if="showstatcount && statcount >= 2">{{ statcount }}</i>
+                        <i class="plus fa fa-plus" ng-if="showstatcount && getStatCount(stat) == 0 && ($index == rowHover)"></i>
+                        <i class="plus fa fa-check" ng-if="showstatcount && getStatCount(stat) == 1" ng-style="{'color': color}"></i>
+                        <i class="plus attribute-use-count" ng-if="showstatcount && getStatCount(stat) >= 2">{{ statcount }}</i>
                         <span>{{stat.Lbl}}</span>
 
                     </div>
@@ -37,7 +37,7 @@
 
         <!-- X axis -->
         <div class="vlines-container" ng-if="showVerticalLines()">
-            <div>
+            <!-- <div> -->
                 <div class="flex-row">
                     <div class="flex-item flex-lable">
                     </div>
@@ -48,7 +48,8 @@
                     </div>
                     <div class="flex-item flex-value" ng-repeat="column in getColumns()"></div>
                 </div>
-            </div>
+            <!-- </div> -->
+
         </div>
         <!--  -->
     </div>
