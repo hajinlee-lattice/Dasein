@@ -850,6 +850,7 @@ angular.module('common.datacloud.explorer', [
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment') {
             var topCategories = [
+                'Lattice Rating',
                 'Firmographics',
                 'My Attributes',
                 'Contact Attributes',
