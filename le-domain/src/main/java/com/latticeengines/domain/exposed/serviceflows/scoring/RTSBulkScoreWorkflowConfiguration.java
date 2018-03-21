@@ -212,5 +212,10 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
+        public Builder excludePublicDomain(boolean excludePublicDomains) {
+            matchDataCloudWorkflowBuilder.excludePublicDomains(excludePublicDomains);
+            return this;
+        }
+
     }
 }

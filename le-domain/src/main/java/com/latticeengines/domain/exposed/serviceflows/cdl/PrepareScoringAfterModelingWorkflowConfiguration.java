@@ -6,8 +6,12 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
+import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
@@ -103,6 +107,61 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
 
         public Builder fetchOnly(boolean fetchOnly) {
             matchCdlWorkflowConfBuilder.fetchOnly(fetchOnly);
+            return this;
+        }
+
+        public Builder excludePublicDomains(boolean excludePublicDomains) {
+            matchCdlWorkflowConfBuilder.excludePublicDomains(excludePublicDomains);
+            return this;
+        }
+
+        public Builder excludeDataCloudAttrs(boolean exclude) {
+            matchCdlWorkflowConfBuilder.excludeDataCloudAttrs(exclude);
+            return this;
+        }
+
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            matchCdlWorkflowConfBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder matchDestTables(String destTables) {
+            matchCdlWorkflowConfBuilder.matchDestTables(destTables);
+            return this;
+        }
+
+        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
+            matchCdlWorkflowConfBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
+            return this;
+        }
+
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            matchCdlWorkflowConfBuilder.dataCloudVersion(dataCloudVersion);
+            return this;
+        }
+
+        public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
+            matchCdlWorkflowConfBuilder.matchClientDocument(matchClientDocument);
+            return this;
+        }
+
+        public Builder matchType(MatchCommandType matchCommandType) {
+            matchCdlWorkflowConfBuilder.matchType(matchCommandType);
+            return this;
+        }
+
+        public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
+            matchCdlWorkflowConfBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
+            return this;
+        }
+
+        public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
+            matchCdlWorkflowConfBuilder.matchRequestSource(matchRequestSource);
+            return this;
+        }
+
+        public Builder matchQueue(String queue) {
+            matchCdlWorkflowConfBuilder.matchQueue(queue);
             return this;
         }
 
