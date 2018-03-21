@@ -4,8 +4,12 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +19,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -113,6 +119,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         matchInput.setExcludePublicDomain(false);
         matchInput.setPublicDomainAsNormalDomain(true);
         matchInput.setDataCloudVersion(getDataCloudVersion());
+        matchInput.setKeyMap(getMatchKeys());
         matchInput.setSkipKeyResolution(false);
         matchInput.setUseDnBCache(true);
         matchInput.setUseRemoteDnB(true);
@@ -123,5 +130,33 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         config.setMatchInput(matchInput);
         return JsonUtils.serialize(config);
     }
+
+    private Map<MatchKey, List<String>> getMatchKeys() {
+        String tableName = inputTableNames.get(0);
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), tableName);
+        Set<String> names = cms.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+        Map<MatchKey, List<String>> matchKeys = new HashMap<>();
+        addMatchKeyIfExists(names, matchKeys, MatchKey.Domain, InterfaceName.Website.name());
+        addMatchKeyIfExists(names, matchKeys, MatchKey.DUNS, InterfaceName.DUNS.name());
+
+        addMatchKeyIfExists(names, matchKeys, MatchKey.Name, InterfaceName.CompanyName.name());
+        addMatchKeyIfExists(names, matchKeys, MatchKey.City, InterfaceName.City.name());
+        addMatchKeyIfExists(names, matchKeys, MatchKey.State, InterfaceName.State.name());
+        addMatchKeyIfExists(names, matchKeys, MatchKey.Country, InterfaceName.Country.name());
+
+        addMatchKeyIfExists(names, matchKeys, MatchKey.PhoneNumber, InterfaceName.PhoneNumber.name());
+        addMatchKeyIfExists(names, matchKeys, MatchKey.Zipcode, InterfaceName.PostalCode.name());
+
+        log.info("Using match keys: " + JsonUtils.serialize(matchKeys));
+        return matchKeys;
+    }
+
+    private void addMatchKeyIfExists(Set<String> cols, Map<MatchKey, List<String>> keyMap, MatchKey key, String columnName) {
+        if (cols.contains(columnName)) {
+            keyMap.put(key, Collections.singletonList(columnName));
+        }
+    }
+
+
 
 }
