@@ -1,7 +1,9 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.List;
+import java.util.Map;
 
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 
 public class RatingEngineDashboard {
@@ -13,6 +15,8 @@ public class RatingEngineDashboard {
     private List<Play> plays;
 
     private MetadataSegment segment;
+
+    private Map<RatingEngineDependencyType, List<String>> dependencies;
 
     public CoverageInfo getCoverageInfo() {
         return coverageInfo;
@@ -44,5 +48,11 @@ public class RatingEngineDashboard {
 
     public void setSegment(MetadataSegment segment) {
         this.segment = segment;
+    }
+
+    public Map<RatingEngineDependencyType, List<String>> getDependencies() { return dependencies; }
+
+    public void setDependencies(Map<RatingEngineDependencyType, List<String>> dependencies) {
+        this.dependencies = dependencies;
     }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.CoverageInfo;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -60,10 +62,16 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
         List<Play> plays = playProxy.getPlays(tenant.getId(), false, ratingEngineId);
         log.info(String.format("Step 3 - Loading related plays completed for : %s", ratingEngineId));
 
+        // get dependencies
+        Map<RatingEngineDependencyType, List<String>> dependencies = ratingEngineProxy
+                .getRatingEngineDependencies(tenant.getId(), ratingEngineId);
+        log.info(String.format("Step 3.1 - Loading related dependencies completed for : %s", ratingEngineId));
+
         dashboard.setSummary(ratingEngineSummary);
         dashboard.setCoverageInfo(coverageInfo);
         dashboard.setSegment(segment);
         dashboard.setPlays(plays);
+        dashboard.setDependencies(dependencies);
 
         return dashboard;
     }
