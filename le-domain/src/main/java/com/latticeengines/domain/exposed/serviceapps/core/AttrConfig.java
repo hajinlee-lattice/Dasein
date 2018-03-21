@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.IsColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -27,6 +28,9 @@ public class AttrConfig implements IsColumnMetadata {
 
     @JsonProperty("Type")
     private AttrType attrType;
+
+    @JsonProperty("Entity")
+    private BusinessEntity entity;
 
     @JsonProperty("Props")
     private Map<String, AttrConfigProp<?>> attrProps;
@@ -51,6 +55,14 @@ public class AttrConfig implements IsColumnMetadata {
 
     public void setAttrType(AttrType attrType) {
         this.attrType = attrType;
+    }
+
+    public BusinessEntity getEntity() {
+        return entity;
+    }
+
+    public void setEntity(BusinessEntity entity) {
+        this.entity = entity;
     }
 
     public Map<String, AttrConfigProp<?>> getAttrProps() {

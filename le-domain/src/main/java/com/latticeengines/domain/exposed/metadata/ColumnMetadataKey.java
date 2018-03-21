@@ -11,6 +11,8 @@ public final class ColumnMetadataKey {
     public static final String Category = "Category";
     public static final String Subcategory = "Subcategory";
 
+    public static final String ApprovedUsage = "ApprovedUsage";
+
     public static final String IsDeprecated = "IsDeprecated";
 
 }
