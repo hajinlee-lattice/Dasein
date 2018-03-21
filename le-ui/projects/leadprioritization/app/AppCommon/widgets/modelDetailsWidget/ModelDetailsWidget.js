@@ -60,17 +60,18 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         if($scope.IsRatingEngine){
             var engineId = $stateParams.rating_id,
-                ratingEngine = RatingsEngineStore.getCurrentRating();
+                ratingEngine = RatingsEngineStore.getCurrentRating(),
+                type = ratingEngine.type.toLowerCase();
 
             $scope.RatingEngine = ratingEngine;
 
-            console.log(engineId);
-            console.log(ratingEngine);
+            // console.log(engineId);
+            // console.log(ratingEngine);
 
             $scope.displayName = ratingEngine.displayName;
             $scope.createdBy = ratingEngine.createdBy;
             $scope.created = ratingEngine.created;
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.modelingStrategy;
+            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
 
             $scope.segmentName = ratingEngine.segment.display_name;
             $scope.totalAccounts = ratingEngine.segment.accounts;

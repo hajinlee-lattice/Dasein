@@ -17,8 +17,11 @@ angular
             admin: '=',
             auth: '='
         },
-        controller: function($scope, JobsStore, JobsService, CancelJobModal, BrowserStorageUtility) {
+        controller: function($scope, JobsStore, JobsService, CancelJobModal, RatingsEngineStore, BrowserStorageUtility) {
             var job = $scope.job;
+
+            // console.log(job);
+
             $scope.showProgress = false;
             $scope.jobType = job.jobType ? job.jobType : 'placeholder';
             $scope.jobRunning = false;
@@ -26,9 +29,30 @@ angular
             $scope.jobRowExpanded = $scope.expanded[job.id] ? true : false;
             $scope.job.isDeleted = job.isDeleted;
             $scope.job.modelName = job.modelName;
+            $scope.job.rating_id = job.inputs.RATING_ENGINE_ID;
             job.cancelling = $scope.cancelling[job.id] ? true : false;
             $scope.cancelClicked = $scope.cancelling[job.id] ? true : false;
+            $scope.isRatingEngine = (job.inputs.RATING_ENGINE_ID != undefined);
             $scope.isPMML = job.modelType === 'PmmlModel';
+
+
+            if ($scope.isRatingEngine) {
+                RatingsEngineStore.getRatingModel($scope.job.rating_id, job.source).then(function(model){
+                    var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
+                        modelingJobId = model.AI.modelingJobId;
+
+                    if (modelingJobId !== null) {
+                        $scope.job.modelId = modelId;
+                    } else {
+                        $state.go('home.ratingsengine.productpurchase', {rating_id: $scope.job.rating_id, engineType: model.AI.modelingStrategy, fromList: true});
+                    }
+                    
+                });
+            } else {
+                $scope.job.modelId = job.source;
+            }
+
+            // console.log(job.source);
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
