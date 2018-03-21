@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         eventTable = eventTable.filter(INT_LDC_REMOVED + " == 0", new FieldList(INT_LDC_REMOVED));
         FieldList sortCols = new FieldList(SORT_EVENT);
         log.info("Using " + sortCols + " as sorting attributes");
-        eventTable = addSortColumns(eventTable);
+        eventTable = addSortColumns(parameters, eventTable);
 
         Node hasDedupeId = eventTable.filter(INT_LDC_DEDUPE_ID + " != null", new FieldList(INT_LDC_DEDUPE_ID));
         Node noDedupeId = eventTable.filter(INT_LDC_DEDUPE_ID + " == null", new FieldList(INT_LDC_DEDUPE_ID));
@@ -41,8 +42,11 @@ public class DedupEventTable extends TypesafeDataFlowBuilder<DedupEventTablePara
         return result;
     }
 
-    private Node addSortColumns(Node eventTable) {
+    private Node addSortColumns(DedupEventTableParameters parameters, Node eventTable) {
         String eventColumn = InterfaceName.Event.name();
+        if (StringUtils.isNotEmpty(parameters.eventColumn)) {
+            eventColumn = parameters.eventColumn;
+        }
         eventTable = eventTable.apply(String.format("Boolean.TRUE.equals(%s) ? 1 : 0", eventColumn), new FieldList(
                 eventColumn), new FieldMetadata(SORT_EVENT, Integer.class));
         return eventTable;

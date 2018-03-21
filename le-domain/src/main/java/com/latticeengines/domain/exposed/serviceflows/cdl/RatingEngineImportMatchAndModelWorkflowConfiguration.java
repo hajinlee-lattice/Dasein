@@ -102,7 +102,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             return this;
         }
 
-
         public Builder filterTableNames(String trainFilterTableName, String eventFilterTableName,
                 String targetFilterTableName) {
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
@@ -240,6 +239,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
                 List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
+            ratingEngineScoreWorkflowBuilder.transformationGroup(transformationGroup);
+            ratingEngineScoreWorkflowBuilder.transformDefinitions(stdTransformDefns);
             cdlModelWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }
@@ -359,6 +360,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTable.setEventColumn(eventColumn);
             cdlEventTableTupleFilter.setEventColumn(eventColumn);
             ratingEngineScoreWorkflowBuilder.setEventColumn(eventColumn);
+            dedupEventTable.setEventColumn(eventColumn);
             return this;
         }
 

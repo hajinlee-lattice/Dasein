@@ -67,9 +67,11 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlModelWorkflowConfigura
                 .next(writeMetadataFiles) //
                 .next(profile) //
 //                .next(reviewModel) //
+                // .next(remediateDataRules) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .next(createNote) //
+                // .next(persistDataRules) //
                 .next(invokeDataScienceAnalysis) //
                 .build();
     }

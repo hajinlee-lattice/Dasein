@@ -144,6 +144,8 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
                 List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
+            ratingEngineScoreWorkflowBuilder.transformationGroup(transformationGroup);
+            ratingEngineScoreWorkflowBuilder.transformDefinitions(stdTransformDefns);
             cdlModelWorkflowBuilder.addProvenanceProperty(ProvenancePropertyName.TransformationGroupName,
                     transformationGroup.getName());
             return this;
@@ -186,6 +188,7 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
 
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
+            ratingEngineScoreWorkflowBuilder.skipStandardTransform(skipTransform);
             return this;
         }
 
@@ -351,6 +354,7 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
 
         public Builder setEventColumn(String eventColumn) {
             ratingEngineScoreWorkflowBuilder.setEventColumn(eventColumn);
+            dedupEventTable.setEventColumn(eventColumn);
             return this;
         }
 

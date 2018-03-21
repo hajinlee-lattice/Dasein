@@ -15,8 +15,6 @@ import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
@@ -156,19 +154,6 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
             return columnMetadataProxy.latestVersion(dataCloudVersion).getVersion();
         }
         return null;
-    }
-
-    private String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
-        String transformationGroupName = modelSummary.getModelSummaryConfiguration()
-                .getString(ProvenancePropertyName.TransformationGroupName, null);
-        if (transformationGroupName == null) {
-            transformationGroupName = modelSummary.getTransformationGroupName();
-        }
-        if (transformationGroupName == null) {
-            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
-        }
-
-        return transformationGroupName;
     }
 
 }

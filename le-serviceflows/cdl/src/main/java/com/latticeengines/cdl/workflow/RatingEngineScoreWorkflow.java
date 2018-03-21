@@ -62,7 +62,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
                     .next(createCdlEventTableStep);
         }
         builder.next(matchDataCloudWorkflow) //
-                // .next(addStandardAttributesDataFlow) //
+                .next(addStandardAttributesDataFlow) //
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //

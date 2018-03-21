@@ -220,6 +220,11 @@ public class RatingEngineScoreWorkflowConfiguration extends BaseCDLWorkflowConfi
             return this;
         }
 
+        public Builder skipStandardTransform(boolean skipTransform) {
+            addStandardAttributes.setSkipStep(skipTransform);
+            return this;
+        }
+
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
             score.setUniqueKeyColumn(uniqueKeyColumn);
             return this;

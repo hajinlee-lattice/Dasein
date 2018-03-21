@@ -8,12 +8,23 @@ public class DedupEventTableConfiguration extends BaseModelingDataFlowStepConfig
     @JsonProperty("dedup_type")
     private DedupType dedupType;
 
+    @JsonProperty("event_column")
+    private String eventColumn;
+
     public DedupType getDedupType() {
         return dedupType;
     }
 
     public void setDedupType(DedupType dedupType) {
         this.dedupType = dedupType;
+    }
+
+    public String getEventColumn() {
+        return eventColumn;
+    }
+
+    public void setEventColumn(String eventColumn) {
+        this.eventColumn = eventColumn;
     }
 
 }

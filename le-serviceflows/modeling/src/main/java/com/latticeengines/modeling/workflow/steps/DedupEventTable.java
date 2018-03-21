@@ -30,7 +30,7 @@ public class DedupEventTable extends RunDataFlow<DedupEventTableConfiguration> {
         Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
         configuration.setTargetTableName(eventTable.getName() + "_deduped");
         configuration.setDataFlowParams(new DedupEventTableParameters( //
-                eventTable.getName(), configuration.getDedupType()));
+                eventTable.getName(), configuration.getDedupType(), configuration.getEventColumn()));
     }
 
     @Override

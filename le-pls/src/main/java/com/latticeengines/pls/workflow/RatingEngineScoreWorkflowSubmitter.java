@@ -21,16 +21,19 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngineScoringParameters;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineScoreWorkflowConfiguration;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
 @Component
@@ -40,6 +43,9 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
 
     @Autowired
     private MatchCommandProxy matchCommandProxy;
+
+    @Autowired
+    private MetadataProxy metadataProxy;
 
     @Autowired
     private ModelSummaryService modelSummaryService;
@@ -58,12 +64,28 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_18007, new String[] { modelId });
         }
 
-        RatingEngineScoreWorkflowConfiguration configuration = generateConfiguration(modelId, parameters);
+        Table modelingEventTable = metadataProxy.getTable(MultiTenantContext.getCustomerSpace().toString(),
+                modelSummary.getEventTableName());
+        if (modelingEventTable == null) {
+            throw new LedpException(LedpCode.LEDP_18098, new String[] { modelSummary.getEventTableName() });
+        }
+
+        TransformationGroup transformationGroup;
+        String originalTransformationGroup = getTransformationGroupNameForModelSummary(modelSummary);
+        if (originalTransformationGroup == null) {
+            transformationGroup = TransformationGroup.NONE;
+        } else {
+            transformationGroup = TransformationGroup.fromName(originalTransformationGroup);
+        }
+
+        RatingEngineScoreWorkflowConfiguration configuration = generateConfiguration(modelId, parameters,
+                modelingEventTable, transformationGroup);
         return workflowJobService.submit(configuration);
     }
 
     public RatingEngineScoreWorkflowConfiguration generateConfiguration(String modelId,
-            RatingEngineScoringParameters parameters) {
+            RatingEngineScoringParameters parameters, Table modelingEventTable,
+            TransformationGroup transformationGroup) {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         Map<String, String> inputProperties = new HashMap<>();
@@ -116,9 +138,8 @@ public class RatingEngineScoreWorkflowSubmitter extends WorkflowSubmitter {
                                 parameters.getSourceDisplayName().replaceAll("[^A-Za-z0-9_]", "_"), ".csv")
                         + "_scored_" + DateTime.now().getMillis()) //
                 .inputProperties(inputProperties) //
-                // .transformationGroup(transformationGroup) //
-                // .transformDefinitions(getTransformDefinitions(modelingEventTable,
-                // transformationGroup))//
+                .transformationGroup(transformationGroup) //
+                .transformDefinitions(getTransformDefinitions(modelingEventTable, transformationGroup))//
                 // .bucketMetadata(bucketMetadataList) //
                 .bucketMetadata(
                         new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //

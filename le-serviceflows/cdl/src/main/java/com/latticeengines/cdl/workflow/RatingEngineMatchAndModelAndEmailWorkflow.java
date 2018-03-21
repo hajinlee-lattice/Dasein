@@ -61,8 +61,8 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
     public Workflow defineWorkflow(RatingEngineMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(matchDataCloudWorkflow) //
-                // .next(dedupEventTableDataFlow) //
-                // .next(addStandardAttributesDataFlow) //
+                .next(dedupEventTableDataFlow) //
+                .next(addStandardAttributesDataFlow) //
                 .next(resolveMetadataFromUserRefinedAttributes) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //

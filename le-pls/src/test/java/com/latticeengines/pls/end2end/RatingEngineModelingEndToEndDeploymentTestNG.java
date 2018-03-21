@@ -117,6 +117,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         modelingParameters.setDescription("Test");
         modelingParameters.setModuleName("module");
         modelingParameters.setActivateModelSummaryByDefault(true);
+        //modelingParameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
+        //modelingParameters.setExcludePropDataColumns(true);
 
         modelingParameters.setTrainFilterTableName(trainFilterTableName);
         modelingParameters.setEventFilterTableName(eventFilterTableName);

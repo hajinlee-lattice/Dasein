@@ -66,8 +66,8 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(createCdlEventTableFilterStep) //
                 .next(createCdlEventTableStep) //
                 .next(matchDataCloudWorkflow) //
-                // .next(dedupEventTableDataFlow) //
-                // .next(addStandardAttributesDataFlow) //
+                .next(dedupEventTableDataFlow) //
+                .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(scoreWorkflow) //

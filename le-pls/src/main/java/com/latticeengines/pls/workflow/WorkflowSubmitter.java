@@ -7,10 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
+import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -20,7 +24,6 @@ import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.pls.service.PlsFeatureFlagService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public abstract class WorkflowSubmitter {
@@ -30,7 +33,7 @@ public abstract class WorkflowSubmitter {
 
     @Autowired
     protected ColumnMetadataProxy columnMetadataProxy;
-    
+
     @Autowired
     protected PlsFeatureFlagService plsFeatureFlagService;
 
@@ -88,6 +91,18 @@ public abstract class WorkflowSubmitter {
             return TransformationPipeline.getTransforms(transformationGroup);
         }
         return modelingEventTable.getRealTimeTransformationMetadata().getValue();
+    }
+
+    protected static String getTransformationGroupNameForModelSummary(ModelSummary modelSummary) {
+        String transformationGroupName = modelSummary.getModelSummaryConfiguration()
+                .getString(ProvenancePropertyName.TransformationGroupName, null);
+        if (transformationGroupName == null) {
+            transformationGroupName = modelSummary.getTransformationGroupName();
+        }
+        if (transformationGroupName == null) {
+            throw new LedpException(LedpCode.LEDP_18108, new String[] { modelSummary.getId() });
+        }
+        return transformationGroupName;
     }
 
 }
