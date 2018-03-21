@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.provision.impl.CDLComponent;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.proxy.exposed.objectapi.TransactionProxy;
 
@@ -33,6 +33,9 @@ public class PeriodServiceImpl implements PeriodService {
 
     @Inject
     private TransactionProxy transactionProxy;
+
+    @Inject
+    private DataCollectionService dataCollectionService;
 
     @Override
     public List<String> getPeriodNames() {
@@ -63,14 +66,13 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public int getEvaluationPeriod(String customerSpace, DataCollection.Version version,
-            PeriodStrategy periodStrategy) {
-        return getMaxPeriod(customerSpace, version, periodStrategy) - 1;
-    }
-
-    @Override
-    public int getMaxPeriod(String customerSpace, DataCollection.Version version, PeriodStrategy periodStrategy) {
-        String dateStr = transactionProxy.getMaxTransactionDate(customerSpace, version);
+    public int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy) {
+        String dateStr = transactionProxy.getMaxTransactionDate(customerSpace,
+                dataCollectionService.getActiveVersion(customerSpace));
+        LocalDate date = LocalDate.parse(dateStr);
+        if (date.isAfter(LocalDate.now())) {
+            dateStr = LocalDate.now().toString();
+        }
         return PeriodBuilderFactory.build(periodStrategy).toPeriodId(dateStr);
     }
 

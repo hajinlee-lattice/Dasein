@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
@@ -25,19 +23,16 @@ import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
-import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder {
 
+    private int targetPeriodId;
     protected AIModel aiModel;
     protected MetadataSegment baseSegment;
     protected String productIds;
     protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
-    private int evaluationPeriod;
-
-    @Inject
-    protected PeriodProxy periodProxy;
+    protected int queryEvaluationId;
 
     protected abstract void handleCustomSegment();
 
@@ -47,11 +42,14 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
 
     protected abstract void handleCustomTrainingPeriod();
 
+    protected abstract void setQueryEvaluationId();
+
     public final EventFrontEndQuery build() {
         handleCustomSegment();
         handleProxyProducts();
         removeTimeWindowRestrictions();
         buildProductTransactionRestrictions();
+        setQueryEvaluationId();
         buildRatingFrontEndQuery();
         handleCustomTrainingPeriod();
         return ratingFrontEndQuery;
@@ -85,7 +83,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
         ratingFrontEndQuery.setPeriodName(TimeFilter.Period.Month.name());
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
-        ratingFrontEndQuery.setEvaluationPeriodId(evaluationPeriod);
+        ratingFrontEndQuery.setEvaluationPeriodId(queryEvaluationId);
     }
 
     private List<String> getProductsAsList() {
@@ -96,23 +94,27 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         return productList;
     }
 
-    protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
+    protected CrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int targetPeriodId) {
         this.baseSegment = (MetadataSegment) ratingEngine.getSegment().clone();
         this.aiModel = aiModel;
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
         this.productIds = String.join(",", config.getTargetProducts());
-        this.evaluationPeriod = evaluationPeriod;
+        this.targetPeriodId = targetPeriodId;
+    }
+
+    protected int getTargetPeriodId() {
+        return targetPeriodId;
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType, int evaluationPeriod) {
+            ModelingQueryType modelingQueryType, int targetPeriodId) {
         switch (modelingQueryType) {
         case TARGET:
-            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
+            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         case TRAINING:
-            return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
+            return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         case EVENT:
-            return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, evaluationPeriod);
+            return new CrossSellRatingEventQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         default:
             throw new LedpException(LedpCode.LEDP_40010, new String[] { modelingQueryType.getModelingQueryTypeName() });
         }

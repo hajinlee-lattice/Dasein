@@ -66,4 +66,9 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     protected void handleCustomTrainingPeriod() {
         // Do nothing for target query
     }
+
+    @Override
+    protected void setQueryEvaluationId() {
+        queryEvaluationId = getTargetPeriodId();
+    }
 }

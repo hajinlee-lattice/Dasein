@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -283,7 +284,11 @@ public class RatingEngineResource {
         RatingEngine ratingEngine = getRatingEngine(customerSpace, ratingEngineId);
         RatingModel ratingModel = getRatingModel(customerSpace, ratingEngineId, ratingModelId);
 
-        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, ratingModel, userEmail);
+        if (!(ratingModel instanceof AIModel)) {
+            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+        }
+
+        return ratingEngineService.modelRatingEngine(customerSpace, ratingEngine, (AIModel) ratingModel, userEmail);
     }
 
     @PostMapping(value = "/coverage")

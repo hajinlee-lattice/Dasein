@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
@@ -45,7 +46,7 @@ public interface RatingEngineService {
     Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType);
 
-    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, RatingModel ratingModel, String userEmail);
+    String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel, String userEmail);
 
     List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
             Boolean onlyInRedshift);

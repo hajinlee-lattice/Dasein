@@ -72,4 +72,10 @@ public class PeriodResource {
         return businessCalendarService.validate(businessCalendar);
     }
 
+    @PostMapping(value = "/maxperiodid")
+    @ApiOperation(value = "Get the largest period id")
+    // Only a temporary helper api for data science
+    public int getMaxPeriodId(@PathVariable String customerSpace, @RequestBody PeriodStrategy periodStrategy) {
+        return periodService.getMaxPeriodId(customerSpace, periodStrategy);
+    }
 }

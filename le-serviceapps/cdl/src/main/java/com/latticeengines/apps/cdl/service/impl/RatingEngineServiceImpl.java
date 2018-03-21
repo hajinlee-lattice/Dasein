@@ -299,49 +299,54 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
+    public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             String userEmail) {
-        if (ratingModel instanceof AIModel) {
-            AIModel aiModel = (AIModel) ratingModel;
+
+        switch (ratingEngine.getType()) {
+        case RULE_BASED:
+            throw new LedpException(LedpCode.LEDP_31107,
+                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+        case CROSS_SELL:
             ApplicationId jobId = aiModel.getModelingYarnJobId();
             if (jobId == null) {
                 if (CollectionUtils
-                        .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(((AIModel) ratingModel)).getTargetProducts())) {
+                        .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
                     throw new LedpException(LedpCode.LEDP_40012,
-                            new String[] { ratingModel.getId(), CustomerSpace.parse(customerSpace).toString() });
+                            new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
                 }
                 internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
                 RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
-                parameters.setName(ratingModel.getId());
-                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + ratingModel.getIteration());
+                parameters.setName(aiModel.getId());
+                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
                 parameters.setDescription(ratingEngine.getDisplayName());
                 parameters.setModuleName("Module");
                 parameters.setUserId(userEmail);
                 parameters.setRatingEngineId(ratingEngine.getId());
                 parameters.setAiModelId(aiModel.getId());
                 parameters.setTargetFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, ratingModel, ModelingQueryType.TARGET));
-                parameters.setTargetFilterTableName(ratingModel.getId() + "_target");
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET));
+                parameters.setTargetFilterTableName(aiModel.getId() + "_target");
                 parameters.setTrainFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, ratingModel, ModelingQueryType.TRAINING));
-                parameters.setTrainFilterTableName(ratingModel.getId() + "_train");
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING));
+                parameters.setTrainFilterTableName(aiModel.getId() + "_train");
                 parameters.setEventFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, ratingModel, ModelingQueryType.EVENT));
-                parameters.setEventFilterTableName(ratingModel.getId() + "_event");
+                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT));
+                parameters.setEventFilterTableName(aiModel.getId() + "_event");
 
-                if (((AIModel) ratingModel).getPredictionType() == PredictionType.EXPECTED_VALUE) {
+                if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                     parameters.setExpectedValue(true);
                 }
 
                 log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
                 jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
 
-                ((AIModel) ratingModel).setModelingJobId(jobId.toString());
-                updateRatingModel(ratingEngine.getId(), ratingModel.getId(), ratingModel);
+                aiModel.setModelingJobId(jobId.toString());
+                updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
             }
             return jobId.toString();
-        } else {
-            throw new LedpException(LedpCode.LEDP_31107, new String[] { ratingModel.getClass().getName() });
+        default:
+            throw new LedpException(LedpCode.LEDP_31107,
+                    new String[] { ratingEngine.getType().getRatingEngineTypeName() });
         }
     }
 

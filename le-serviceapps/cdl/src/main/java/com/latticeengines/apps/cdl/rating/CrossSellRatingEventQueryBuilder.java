@@ -79,8 +79,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
         Bucket.Transaction txn;
         switch (advancedConf.getModelingStrategy()) {
         case CROSS_SELL_REPEAT_PURCHASE:
-            ModelingConfigFilter configFilter = filters
-                    .get(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD);
+            ModelingConfigFilter configFilter = filters.get(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD);
             if (configFilter == null) {
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
@@ -106,5 +105,10 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
             throw new LedpException(LedpCode.LEDP_40017);
         }
 
+    }
+
+    @Override
+    protected void setQueryEvaluationId() {
+        queryEvaluationId = getTargetPeriodId() - 1;
     }
 }

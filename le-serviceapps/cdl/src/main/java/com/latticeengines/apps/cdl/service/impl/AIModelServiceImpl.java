@@ -16,7 +16,6 @@ import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
 import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
 import com.latticeengines.apps.cdl.service.AIModelService;
-import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -60,9 +59,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private PeriodService periodService;
-
-    @Inject
-    private DataCollectionService dataCollectionService;
 
     private static RatingEngineType[] types = //
             new RatingEngineType[] { //
@@ -119,10 +115,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
-            int evaluationPeriod = periodService.getEvaluationPeriod(customerSpace,
-                    dataCollectionService.getActiveVersion(customerSpace), PeriodStrategy.CalendarMonth);
+            int maxPeriod = periodService.getMaxPeriodId(customerSpace, PeriodStrategy.CalendarMonth);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, evaluationPeriod);
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,

@@ -71,7 +71,11 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
         default:
             throw new LedpException(LedpCode.LEDP_40017);
         }
+    }
 
+    @Override
+    protected void setQueryEvaluationId() {
+        queryEvaluationId = getTargetPeriodId() - 2;
     }
 
     private CrossSellModelingConfig getAdvancedConfig() {
