@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobParameters;
@@ -59,8 +60,7 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     public void setConfiguration(T configuration) {
         this.configuration = configuration;
-        log.info("Configuration instance set for " + configurationClass.getName());
-
+        log.info("Configuration instance {} set for {}", configuration, configurationClass.getName());
     }
 
     public void onConfigurationInitialized() {
@@ -83,13 +83,11 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     public T getConfiguration() {
         T configuration = getObjectFromContext(namespace, configurationClass);
         if (configuration != null) {
-            setConfiguration(configuration);
             return configuration;
         }
         String stepStringConfig = jobParameters.getString(namespace);
-        if (stepStringConfig != null) {
-            setConfiguration(JsonUtils.deserialize(stepStringConfig, configurationClass));
-            return configuration;
+        if (StringUtils.isNotEmpty(stepStringConfig)) {
+            return JsonUtils.deserialize(stepStringConfig, configurationClass);
         }
         return null;
     }
