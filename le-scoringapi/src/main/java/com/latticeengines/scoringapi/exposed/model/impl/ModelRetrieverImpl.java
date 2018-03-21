@@ -163,7 +163,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
             return null;
         } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceLead.name())) {
             return ModelType.CONTACT;
-        } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceAccount.name())) {
+        } else if (sourceSchemaInterpretation.equals(SchemaInterpretation.SalesforceAccount.name()) //
+                || sourceSchemaInterpretation.equals(SchemaInterpretation.Account.name())) {
             return ModelType.ACCOUNT;
         }
         return null;
@@ -190,8 +191,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
         String dataCloudVersion = modelSummary.getDataCloudVersion();
-        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion
-                + " for model=" + modelId);
+        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion + " for model="
+                + modelId);
 
         if (StringUtils.isEmpty(dataCloudVersion) || dataCloudVersion.equals(RTS_DATA_CLOUD_VERSION)) {
             fields.setValidationExpression(FieldInterpretationCollections.RTS_MODEL_VALIDATION_EXPRESSION);
@@ -326,8 +327,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
         boolean fuzzyMatchEnabled = batonService.isEnabled(customerSpace, LatticeFeatureFlag.ENABLE_FUZZY_MATCH);
         String dataCloudVersion = modelSummary.getDataCloudVersion();
-        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion
-                + " for model=" + modelId);
+        log.info("fuzzyMatchEnabled=" + fuzzyMatchEnabled + ", and dataCloudVersion=" + dataCloudVersion + " for model="
+                + modelId);
 
         Triple<String, String, String> artifactBaseAndEventTableDirs = determineScoreArtifactBaseEventTableAndSamplePath(
                 customerSpace, modelSummary);

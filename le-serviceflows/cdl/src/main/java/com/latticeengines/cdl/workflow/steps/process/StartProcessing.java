@@ -137,10 +137,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 namespace);
         exportDataToRedshiftConfig.upsertToInactiveVersion();
         putObjectInContext(namespace, exportDataToRedshiftConfig);
-        // clearPhaseForRetry();
+        clearPhaseForRetry();
     }
 
-    @SuppressWarnings("unused")
     private void clearPhaseForRetry() {
         Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow("", "",
                 ProcessAnalyzeWorkflowConfiguration.class);

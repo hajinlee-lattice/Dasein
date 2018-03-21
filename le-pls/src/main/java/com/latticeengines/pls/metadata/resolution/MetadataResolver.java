@@ -58,8 +58,8 @@ public class MetadataResolver {
         super();
     }
 
-    public MetadataResolver(String csvPath, Configuration yarnConfiguration,
-                            FieldMappingDocument fieldMappingDocument, boolean cdlResolve) {
+    public MetadataResolver(String csvPath, Configuration yarnConfiguration, FieldMappingDocument fieldMappingDocument,
+            boolean cdlResolve) {
         this.csvPath = csvPath;
         this.yarnConfiguration = yarnConfiguration;
         this.fieldMappingDocument = fieldMappingDocument;
@@ -347,6 +347,7 @@ public class MetadataResolver {
         try {
             SchemaInterpretation schemaInterpretation = SchemaInterpretation.valueOf(schemaInterpretationString);
             switch (schemaInterpretation) {
+            case Account:
             case SalesforceAccount:
                 return ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION;
             case SalesforceLead:

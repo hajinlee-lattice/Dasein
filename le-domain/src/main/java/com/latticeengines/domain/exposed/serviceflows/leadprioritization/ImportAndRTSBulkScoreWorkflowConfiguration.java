@@ -145,7 +145,7 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
         }
 
         public Builder skipMatchingStep(boolean skipMatchingStep) {
-            rtsBulkScoreWorkflowConfigurationBuilder.skipMatchingStep(skipMatchingStep);
+            rtsBulkScoreWorkflowConfigurationBuilder.skipMatching(skipMatchingStep);
             return this;
         }
 

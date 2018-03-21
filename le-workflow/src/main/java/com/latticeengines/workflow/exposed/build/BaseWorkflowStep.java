@@ -1,9 +1,11 @@
 package com.latticeengines.workflow.exposed.build;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -99,7 +101,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
-    protected static final String CDL_EVALUATION_DATE= "CDL_EVALUATION_DATE";
+    protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
@@ -287,41 +289,64 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         });
     }
 
+    private Map<String, BaseStepConfiguration> getStepConfigMap(String parentNamespace, String workflowName,
+            Class<? extends WorkflowConfiguration> workflowConfigClass,
+            Function<? super SimpleEntry<String, String>, ? extends BaseStepConfiguration> valueMapper) {
+        return jobParameters.getParameters()//
+                .entrySet() //
+                .stream() //
+                .filter(e -> {
+                    String wfName = workflowName;
+                    if (StringUtils.isEmpty(wfName)) {
+                        WorkflowConfiguration workflowConfig = WorkflowConfigurationUtils
+                                .getDefaultWorkflowConfiguration(workflowConfigClass);
+                        wfName = workflowConfig.getWorkflowName();
+                    }
+                    if (StringUtils.isNotEmpty(parentNamespace)) {
+                        wfName = parentNamespace + "." + wfName;
+                    }
+                    return e.getKey().startsWith(wfName);
+                }).map(e -> new SimpleEntry<String, String>(e.getKey(), e.getValue().toString()))
+                .collect(Collectors.toMap(Map.Entry::getKey, valueMapper::apply));
+    }
+
+    protected Map<String, BaseStepConfiguration> getStepConfigMapFromJobParams(String parentNamespace,
+            String workflowName, Class<? extends WorkflowConfiguration> workflowConfigClass) {
+        return getStepConfigMap(parentNamespace, workflowName, workflowConfigClass,
+                e -> JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class));
+    }
+
+    protected Map<String, BaseStepConfiguration> getStepConfigMapFromContextBeforeJobParams(String parentNamespace,
+            String workflowName, Class<? extends WorkflowConfiguration> workflowConfigClass) {
+        return getStepConfigMap(parentNamespace, workflowName, workflowConfigClass, e -> {
+            BaseStepConfiguration stepConfig = getObjectFromContext(e.getKey(), BaseStepConfiguration.class);
+            if (stepConfig == null) {
+                stepConfig = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
+            }
+            return stepConfig;
+        });
+    }
+
     protected Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace, String workflowName,
             Class<? extends WorkflowConfiguration> workflowConfigClass) {
         String ns = StringUtils.isEmpty(parentNamespace) ? workflowConfigClass.getSimpleName()
                 : parentNamespace + "." + workflowConfigClass.getSimpleName();
         WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowConfigClass);
-        if (workflowConfig == null) {
+        if (workflowConfig != null) {
+            Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
+            Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
+                    .collect(Collectors.toMap(e -> parentNamespace + "." + e.getKey(), e -> {
+                        String namespace = e.getKey();
+                        if (StringUtils.isNotEmpty(parentNamespace)) {
+                            namespace = parentNamespace + "." + namespace;
+                        }
+                        return JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
+                    }));
+            return result;
+        } else {
             log.warn("There is no workflow configuration of class " + workflowConfigClass.getSimpleName()
                     + " in context.");
-            try {
-                workflowConfig = WorkflowConfigurationUtils.getDefaultWorkflowConfiguration(workflowConfigClass);
-                if (StringUtils.isNotEmpty(workflowName)) {
-                    workflowConfig.setWorkflowName(workflowName);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(String.format("Can't instantiate workflow configuration %s",
-                        workflowConfigClass.getSimpleName()), e);
-            }
+            return getStepConfigMapFromContextBeforeJobParams(parentNamespace, workflowName, workflowConfigClass);
         }
-        Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
-        Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
-                .collect(Collectors.toMap(e -> parentNamespace + "." + e.getKey(), e -> {
-                    String namespace = e.getKey();
-                    if (!StringUtils.isEmpty(parentNamespace)) {
-                        namespace = parentNamespace + "." + namespace;
-                    }
-                    BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
-                    if (step == null) {
-                        step = getConfigurationFromJobParameters(namespace);
-                        if (step == null) {
-                            step = JsonUtils.deserialize(e.getValue(), BaseStepConfiguration.class);
-                        }
-                    }
-                    return step;
-                }));
-        return result;
-
     }
 }

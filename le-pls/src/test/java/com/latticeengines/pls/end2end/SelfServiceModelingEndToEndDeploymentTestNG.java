@@ -101,7 +101,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
     private Tenant secondTenant;
 
     protected String fileName;
-    protected String modelName;
+    protected String modelName = this.getClass().getSimpleName() + "_" + DateTime.now().getMillis();
     protected String modelDisplayName;
     protected SourceFile sourceFile;
     protected SchemaInterpretation schemaInterpretation;
@@ -130,7 +130,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         saveAttributeSelection(CustomerSpace.parse(firstTenant.getName()));
         secondTenant = testBed.getTestTenants().get(1);
         fileName = "Hootsuite_PLS132_LP3_ScoringLead_20160330_165806_modified.csv";
-        modelName = "SelfServiceModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
         modelDisplayName = "Self Service Modeling Test Display Name";
         schemaInterpretation = SchemaInterpretation.SalesforceLead;
 

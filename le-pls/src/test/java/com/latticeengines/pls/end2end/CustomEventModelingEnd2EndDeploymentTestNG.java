@@ -7,7 +7,6 @@ import static org.testng.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeClass;
@@ -55,7 +54,6 @@ public class CustomEventModelingEnd2EndDeploymentTestNG extends SelfServiceModel
 
         // TODO: Set file name
         fileName = null;
-        modelName = "CustomEventModelingEndToEndDeploymentTestNG_" + DateTime.now().getMillis();
         modelDisplayName = "Custom Event Modeling Test Display Name";
         schemaInterpretation = SchemaInterpretation.Account;
 

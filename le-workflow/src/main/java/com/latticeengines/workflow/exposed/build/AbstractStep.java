@@ -31,11 +31,12 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     protected T configuration;
     protected Long jobId;
     protected String namespace = "";
+    protected JobParameters jobParameters;
 
     private boolean dryRun = false;
     private boolean runAgainWhenComplete = true;
     private Class<T> configurationClass;
-    private JobParameters jobParameters;
+
     private int seq;
     private InjectableFailure injectedFailure;
 
@@ -257,7 +258,8 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
 
     public void throwFailureIfInjected(InjectableFailure failure) {
         if (failure != null && failure.equals(injectedFailure)) {
-            throw new InjectedWorkflowException(String.format("Throw injected failure %s at [%d] %s", failure.name(), getSeq(), name()));
+            throw new InjectedWorkflowException(
+                    String.format("Throw injected failure %s at [%d] %s", failure.name(), getSeq(), name()));
         }
     }
 

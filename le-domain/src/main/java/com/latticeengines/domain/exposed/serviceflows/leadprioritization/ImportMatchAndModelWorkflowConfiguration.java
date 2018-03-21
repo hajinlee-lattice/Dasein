@@ -374,7 +374,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
 
             configuration.setContainerConfiguration("importMatchAndModelWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            rtsBulkScoreWorkflowBuilder.skipMatchingStep(Boolean.TRUE);
+            rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
             computeLift.setScoreField(InterfaceName.Event.name());
             configuration.add(importData);
             configuration.add(registerReport);

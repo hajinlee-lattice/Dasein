@@ -145,19 +145,20 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
                 if (!CollectionUtils.isEmpty(selectedLeadEnrichmentAttributes)) {
 
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                    .getParsedData().getKey(), modelSummary, selectedLeadEnrichmentAttributes,
-                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                    recordModelTuple.getParsedData().getKey(), modelSummary,
+                                    selectedLeadEnrichmentAttributes, skipPredefinedSelection,
+                                    performFetchOnlyForMatching, requestId, isDebugMode));
                 } else {
                     matchInputList.add(//
-                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                    .getParsedData().getKey(), modelSummary, null, skipPredefinedSelection,
-                                    performFetchOnlyForMatching, requestId, isDebugMode));
+                            buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                    recordModelTuple.getParsedData().getKey(), modelSummary, null,
+                                    skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
                 }
             } else {
                 matchInputList.add(//
-                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(), recordModelTuple
-                                .getParsedData().getKey(), modelSummary, null, //
+                        buildMatchInput(space, recordModelTuple.getParsedData().getValue(),
+                                recordModelTuple.getParsedData().getKey(), modelSummary, null, //
                                 skipPredefinedSelection, performFetchOnlyForMatching, requestId, isDebugMode));
             }
         }
@@ -198,7 +199,8 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             MatchInput matchInput) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         if (modelSummary != null
-                && SchemaInterpretation.SalesforceAccount.name().equals(modelSummary.getSourceSchemaInterpretation())
+                && (SchemaInterpretation.SalesforceAccount.name().equals(modelSummary.getSourceSchemaInterpretation()) //
+                        || SchemaInterpretation.Account.name().equals(modelSummary.getSourceSchemaInterpretation()))
                 && interpreted.getWebsite() != null) {
             keyMap.put(MatchKey.Domain, Collections.singletonList(interpreted.getWebsite()));
             addToKeyMapIfValueExists(keyMap, MatchKey.PhoneNumber, interpreted.getPhoneNumber(), record);

@@ -119,7 +119,7 @@ public class RTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .matchColumnSelection(Predefined.ID, "1.0.0") //
                 .dataCloudVersion(dataCloudVersion) //
                 .excludeDataCloudAttrs(skipIdMatch) //
-                .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
+                .skipMatching(ModelType.PMML.getModelType().equals(modelType)) //
                 .matchDebugEnabled(!skipIdMatch && !ModelType.PMML.getModelType().equals(modelType)
                         && plsFeatureFlagService.isMatchDebugEnabled()) //
                 .matchRequestSource(MatchRequestSource.ENRICHMENT) //

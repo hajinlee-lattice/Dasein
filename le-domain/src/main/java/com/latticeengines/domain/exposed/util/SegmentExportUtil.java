@@ -14,7 +14,6 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
-import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class SegmentExportUtil {
@@ -51,7 +50,6 @@ public class SegmentExportUtil {
         segmentExportTable.setTableType(TableType.DATATABLE);
 
         segmentExportTable.setDisplayName(displayName);
-        segmentExportTable.setInterpretation(SchemaInterpretation.SalesforceAccount.name());
         segmentExportTable.setTenant(tenant);
         segmentExportTable.setTenantId(tenant.getPid());
         segmentExportTable.setMarkedForPurge(false);
