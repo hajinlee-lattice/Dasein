@@ -208,6 +208,21 @@ angular
                 }
 
                 /**
+                 * Pattern applied to the attribute pattern
+                 * Ex. for only integer you need to pass the value \\\d* 
+                 * This is going to be transformed into \d*
+                 * @param {*} position 
+                 */
+                $scope.getPattern = function(position){
+                    var conf = getConfigField(position);
+                    if(conf.pattern !== undefined){
+                        return conf.pattern;
+                    }else {
+                        return '';
+                    }
+                }
+
+                /**
                  * NOT USED at the moment
                  * Force the val of the field range to a valid value based on the min or max of the other field
                  * @param {*} position 

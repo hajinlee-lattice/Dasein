@@ -303,7 +303,7 @@ angular
                 vm.showTimeframePeriod = function () {
                     switch (vm.timeCmp) {
                         case 'EVER':
-                        case 'BETWEEN':
+                        case 'BETWEEN_DATE':
                         case 'BEFORE':
                         case 'AFTER': {
                             return false;
@@ -316,7 +316,7 @@ angular
 
                 vm.showTimeFrameDate = function () {
                     switch (vm.timeCmp) {
-                        case 'BETWEEN':
+                        case 'BETWEEN_DATE':
                         case 'BEFORE':
                         case 'AFTER': {
                             return true;
@@ -329,7 +329,7 @@ angular
 
                 vm.showTimeFrom = function () {
                     switch (vm.timeCmp) {
-                        case 'BETWEEN':
+                        case 'BETWEEN_DATE':
                         case 'AFTER': {
                             return true;
                         }
@@ -342,7 +342,7 @@ angular
                 vm.showTimeTo = function () {
                     switch (vm.timeCmp) {
                         case 'BEFORE':
-                        case 'BETWEEN':
+                        case 'BETWEEN_DATE':
                         case 'PRIOR_ONLY': {
                             return true;
                         }
@@ -356,7 +356,7 @@ angular
                     switch (vm.timeCmp) {
                         case 'EVER':
                         case 'IN_CURRENT_PERIOD':
-                        case 'BETWEEN':
+                        case 'BETWEEN_DATE':
                         case 'BEFORE':
                         case 'AFTER':
                         case 'WITHIN': 
@@ -370,7 +370,7 @@ angular
                 vm.showPeriodTo = function () {
                     switch (vm.timeCmp) {
                         case 'AFTER':
-                        case 'BETWEEN_LT':
+                        case 'BETWEEN':
                         case 'WITHIN': 
                         case 'PRIOR_ONLY':{
                             return true;

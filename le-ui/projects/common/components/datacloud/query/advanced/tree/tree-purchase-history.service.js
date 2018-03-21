@@ -4,8 +4,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         function setValsBasedOnPosition(cmp, valsArray, position, value) {
             switch (cmp) {
                 case 'GTE_AND_LT':
-                case 'BETWEEN_LT':
-                case 'BETWEEN':{
+                case 'BETWEEN':
+                case 'BETWEEN_DATE':{
                     valsArray[position] = value;
                     break;
                 }
@@ -17,10 +17,9 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         function getValsBasedOnPosition(cmp, valsArray, position) {
             switch (cmp) {
                 case 'GTE_AND_LT':
-                case 'BETWEEN_LT':
-                case 'BETWEEN': {
+                case 'BETWEEN':
+                case 'BETWEEN_DATE': {
                     return valsArray[position];
-                    break;
                 }
                 case 'GREATER_THAN':
                 case 'GREATER_OR_EQUAL':
@@ -30,7 +29,6 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     } else {
                         return null;
                     }
-                    break;
                 }
                 case 'LESS_THAN':
                 case 'LESS_OR_EQUAL':
@@ -42,8 +40,6 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     } else {
                         return valsArray[valsArray.length - 1];
                     }
-                    break;
-                    ;
                 }
                 default: {
                     return null;

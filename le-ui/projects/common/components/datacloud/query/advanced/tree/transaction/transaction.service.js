@@ -18,8 +18,8 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
 
         this.getPeriodNumericalConfig = function () {
             return {
-                from: { name: 'from-period', value: undefined, position: 0, type: 'Time', min: '1', max: '' },
-                to: { name: 'to-period', value: undefined, position: 1, type: 'Time', min: '1', max: '' }
+                from: { name: 'from-period', value: undefined, position: 0, type: 'Time', min: '1', max: '', pattern:'\\\d*' },
+                to: { name: 'to-period', value: undefined, position: 1, type: 'Time', min: '1', max: '', pattern:'\\\d*' }
             };
         }
 
@@ -38,8 +38,8 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 { 'name': 'IN_CURRENT_PERIOD', 'displayName': 'Current' },
                 { 'name': 'WITHIN', 'displayName': 'Previous' },
                 { 'name': 'PRIOR_ONLY', 'displayName': 'Only Prior to Last' },
-                { 'name': 'BETWEEN_LT', 'displayName': 'Between Last' },
-                { 'name': 'BETWEEN', 'displayName': 'Between' },
+                { 'name': 'BETWEEN', 'displayName': 'Between Last' },
+                { 'name': 'BETWEEN_DATE', 'displayName': 'Between' },
                 { 'name': 'BEFORE', 'displayName': 'Before' },
                 { 'name': 'AFTER', 'displayName': 'After' }
             ];
