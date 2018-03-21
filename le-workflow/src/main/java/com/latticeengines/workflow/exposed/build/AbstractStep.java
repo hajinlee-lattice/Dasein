@@ -50,7 +50,13 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public boolean setup() {
-        T configuration = getConfiguration();
+        T configuration = getObjectFromContext(namespace, configurationClass);
+        if (configuration == null) {
+            String stepStringConfig = jobParameters.getString(namespace);
+            if (StringUtils.isNotEmpty(stepStringConfig)) {
+                configuration = JsonUtils.deserialize(stepStringConfig, configurationClass);
+            }
+        }
         if (configuration != null) {
             setConfiguration(configuration);
             return true;
@@ -81,13 +87,6 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
     }
 
     public T getConfiguration() {
-        T configuration = getObjectFromContext(namespace, configurationClass);
-        if (configuration == null) {
-            String stepStringConfig = jobParameters.getString(namespace);
-            if (StringUtils.isNotEmpty(stepStringConfig)) {
-                configuration = JsonUtils.deserialize(stepStringConfig, configurationClass);
-            }
-        }
         return configuration;
     }
 
