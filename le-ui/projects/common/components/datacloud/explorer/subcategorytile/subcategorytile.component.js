@@ -45,6 +45,32 @@ angular
                     vm.updateStateParams();
                 }
             }
+
+            /**
+             * Retrurn the path of the image starting from /assets
+             * In case of category === 'latticerating' or 'productspendprofile'
+             * it returns the category icon 
+             * @param {*} category 
+             * @param {*} subcategory 
+             */
+            vm.subcategoryIcon = function(category, subcategory){
+                var path = '/assets/images/enrichments/subcategories/',
+                    category = vm.subcategoryRenamer(category),
+                    subcategory = vm.subcategoryRenamer(subcategory),
+                    icon = category + (subcategory ? '-'+subcategory : '') + '.png';
+                
+                switch(category){
+                    case 'latticerating': {
+                        icon = 'latticerating.png';
+                        break;
+                    }
+                    case 'productspendprofile': {
+                        icon = 'productspendprofile.png';
+                        break;
+                    }
+                }
+                return path + icon;
+            }
         }
     };
 });
