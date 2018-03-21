@@ -75,7 +75,7 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
                 { 'name': 'GREATER_THAN', 'displayName': 'Greater Than' },
                 { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater or Equal' },
                 { 'name': 'LESS_THAN', 'displayName': 'Less Than' },
-                { 'name': 'LESS_THAN', 'displayName': 'Less or Equal' },
+                { 'name': 'LESS_OR_EQUAL', 'displayName': 'Less or Equal' },
                 { 'name': 'GTE_AND_LT', 'displayName': 'Between' }
 
             ];
