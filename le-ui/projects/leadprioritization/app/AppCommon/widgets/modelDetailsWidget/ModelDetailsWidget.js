@@ -18,6 +18,8 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
 
+        console.log(ratingEngine);
+
         $scope.IsRatingEngine = true;
         $scope.type = ratingEngine.type;
         $scope.displayName = ratingEngine.displayName;
@@ -29,24 +31,27 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         $scope.activeStatus = ratingEngine.status;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
 
-        if ($stateParams.modelId !== '') {
-            $scope.modelIsReady = true;
-        }
-
         $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
         $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
         if($scope.IsRuleBased || $scope.IsCustomEvent) {
             if($scope.IsRuleBased) {
-                $scope.activeIteration = ratingEngine.activeModel.rule.iteration;
+                $scope.typeContext = 'rule';
             } else {
-                $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
+                $scope.typeContext = 'AI';
             }
             $scope.modelingStrategy = ratingEngine.type;
         } else {
             var type = ratingEngine.type.toLowerCase();
+
+            $scope.typeContext = 'AI';
             $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
             $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
         }
+
+        console.log(ratingEngine.activeModel[$scope.typeContext].modelSummary);
+
+        $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
+        $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummary !== null || ratingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
 
     } else {
 
@@ -67,6 +72,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
             // console.log(engineId);
             // console.log(ratingEngine);
+
+            console.log($stateParams.modelId);
+            if ($stateParams.modelId !== '') {
+                $scope.modelIsReady = true;
+            }
 
             $scope.displayName = ratingEngine.displayName;
             $scope.createdBy = ratingEngine.createdBy;

@@ -30,8 +30,8 @@ angular.module('lp.ratingsengine.wizard.training', [
         vm.modelId = vm.ratingEngine.activeModel.AI.id;
         vm.modelingStrategy = vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy;
 
-        console.log(vm.configFilters);
-        console.log(vm.ratingEngine);
+        // console.log(vm.configFilters);
+        // console.log(vm.ratingEngine);
 
         vm.getRecordsCount(vm.engineId, vm.modelId, vm.ratingEngine);
         vm.getPurchasesCount(vm.engineId, vm.modelId, vm.ratingEngine);
@@ -122,6 +122,9 @@ angular.module('lp.ratingsengine.wizard.training', [
             }
 
             if($scope.checkboxModel.periods) {
+
+                // console.log(vm.periodsValue);
+
                 vm.configFilters.TRAINING_SET_PERIOD = {
                     "configName": "TRAINING_SET_PERIOD",
                     "criteria": vm.periodsCriteria,

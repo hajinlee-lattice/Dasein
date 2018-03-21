@@ -280,21 +280,32 @@ nav.primary-nav {
             width: 37px;
         }
         li {
-            &> a {
+            & > a {
                 font-size: 14px;
                 color: rgba(255, 255, 255, 0.7);
             }
             &:hover > a {
                 color: rgba(255, 255, 255, 0.85);
                 transition: none;
-            }
-            &:hover > a span:first-of-type {
-                background-color: #505050;
-                transition: none;
-                span:not(.no-svg) {
-                    background-color: white;
+                span:first-of-type {
+                    background-color: #505050;
+                    transition: none;
+                    span:not(.no-svg) {
+                        background-color: white;
+                    }
+                } 
+                &.disabled {
+                    color: rgba(255,255,255,0.7);
+                    span:first-of-type {
+                        background-color: #444;
+                        cursor: default;
+                        transition: none;
+                        span:not(.no-svg) {
+                            background-color: rgba(255,255,255,0.4);
+                        }
+                    }
                 }
-            } 
+            }
             &.active > a span:first-of-type,
             &.active:hover > a span:first-of-type,
             &.activate > a span:first-of-type,
@@ -425,6 +436,11 @@ html:not(.no-cssmask) {
         }
         .ico.ico-campaign:not(.no-svg) {
             background-color: none;
+        }
+        .disabled {
+            .ico:not(.no-svg) {
+                background-color: rgba(255,255,255,0.4);
+            }
         }
     }
 }

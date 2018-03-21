@@ -64,6 +64,7 @@
                     ng-click="vm.tileClick($event, rating)"
                     ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.current.ratings.length > 0"
+                    class="{{ rating.modelingStrategy }}"
                     ng-class="{editing: vm.current.tileStates[rating.id].editRating}">
 
                     <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
