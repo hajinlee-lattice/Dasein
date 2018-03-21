@@ -75,7 +75,7 @@ public class RatingEngineResource {
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @PathVariable String customerSpace, @RequestParam(value = "status", required = false) String status, //
             @RequestParam(value = "type", required = false) String type,
-            @RequestParam(value = "only-in-redshift", required = false, defaultValue = "FALSE") Boolean onlyInRedshift) {
+            @RequestParam(value = "only-in-redshift", required = false, defaultValue = "false") Boolean onlyInRedshift) {
         return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, onlyInRedshift);
     }
 
@@ -128,8 +128,9 @@ public class RatingEngineResource {
     @DeleteMapping(value = "/{ratingEngineId}")
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
-    public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
-        ratingEngineService.deleteById(ratingEngineId);
+    public Boolean deleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId, //
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
+        ratingEngineService.deleteById(ratingEngineId, hardDelete);
         return true;
     }
 

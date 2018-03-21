@@ -56,7 +56,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
+public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
 
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
@@ -95,6 +95,14 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private RatingEngineStatus status;
 
+    @JsonProperty("deleted")
+    @Column(name = "DELETED")
+    private Boolean deleted;
+
+    @JsonProperty("segment")
+    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
+    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
 
     private Date created;
@@ -227,6 +235,16 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Enumerated(EnumType.STRING)
     public RatingEngineStatus getStatus() {
         return this.status;
+    }
+
+    @Override
+    public Boolean getDeleted() {
+        return this.deleted;
+    }
+
+    @Override
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @JsonProperty("segment")

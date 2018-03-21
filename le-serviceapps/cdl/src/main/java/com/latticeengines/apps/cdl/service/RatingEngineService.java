@@ -29,7 +29,9 @@ public interface RatingEngineService {
 
     Map<String, Long> updateRatingEngineCounts(String engineId);
 
-    void deleteById(String Id);
+    void deleteById(String id);
+
+    void deleteById(String id, boolean hardDelete);
 
     List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);
 

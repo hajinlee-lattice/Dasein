@@ -204,8 +204,13 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id) {
+        deleteById(id, true);
+    }
+
+    @Override
+    public void deleteById(String id, boolean hardDelete) {
         RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
-        ratingEngineEntityMgr.deleteRatingEngine(ratingEngine);
+        ratingEngineEntityMgr.deleteRatingEngine(ratingEngine, hardDelete);
         evictRatingMetadataCache();
     }
 

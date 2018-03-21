@@ -378,8 +378,14 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId());
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId());
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), false);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), false);
+        RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re1.getId());
+        Assert.assertTrue(ratingEngine.getDeleted());
+        ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re2.getId());
+        Assert.assertTrue(ratingEngine.getDeleted());
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), true);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), true);
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
                 .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);

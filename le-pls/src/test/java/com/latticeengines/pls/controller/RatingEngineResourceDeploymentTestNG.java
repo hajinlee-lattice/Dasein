@@ -390,6 +390,16 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        RatingEngine re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(),
+                RatingEngine.class);
+        Assert.assertTrue(re.getDeleted());
+        re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId(), RatingEngine.class);
+        Assert.assertTrue(re.getDeleted());
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "?hard-delete=true");
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId() + "?hard-delete=true");
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
+        Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
     }
 

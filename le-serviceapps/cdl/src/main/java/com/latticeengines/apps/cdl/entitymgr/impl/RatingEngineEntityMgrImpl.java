@@ -138,18 +138,55 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id) {
-        // Old implementation was loading entire object into memory with all
-        // dependencies and then deleting it.
-        ratingEngineDao.deleteById(id);
+        deleteById(id, true);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteRatingEngine(RatingEngine ratingEngine) {
-        if (ratingEngine == null) {
-            throw new NullPointerException("RatingEngine cannot be found");
+        deleteRatingEngine(ratingEngine, true);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteById(String id, boolean hardDelete) {
+        if (hardDelete) {
+            // Old implementation was loading entire object into memory with all
+            // dependencies and then deleting it.
+            ratingEngineDao.deleteById(id);
+        } else {
+            RatingEngine ratingEngine = findById(id);
+            checkDependencies(ratingEngine);
+            ratingEngine.setDeleted(true);
+            ratingEngineDao.update(ratingEngine);
         }
-        super.delete(ratingEngine);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteRatingEngine(RatingEngine ratingEngine, boolean hardDelete) {
+        if (hardDelete) {
+            if (ratingEngine == null) {
+                throw new NullPointerException("RatingEngine cannot be found");
+            }
+            super.delete(ratingEngine);
+        } else {
+            RatingEngine retrievedRatingEngine = findById(ratingEngine.getId());
+            if (retrievedRatingEngine == null) {
+                throw new NullPointerException("RatingEngine cannot be found");
+            }
+            checkDependencies(retrievedRatingEngine);
+            retrievedRatingEngine.setDeleted(true);
+            ratingEngineDao.update(retrievedRatingEngine);
+        }
+    }
+
+    private void checkDependencies(RatingEngine ratingEngine) {
+        if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(ratingEngine,
+                Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
+            log.error(String.format("Dependency check failed for Rating Engine=%s", ratingEngine.getId()));
+            throw new LedpException(LedpCode.LEDP_18175, new String[] { ratingEngine.getDisplayName() });
+        }
     }
 
     @Override
@@ -230,15 +267,6 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
                     retrievedRatingEngine.getId()));
             throw new LedpException(LedpCode.LEDP_18174, new String[] { retrievedRatingEngine.getStatus().name(),
                     ratingEngine.getStatus().name(), ratingEngine.getDisplayName() });
-        }
-
-        // Check dependency of Rating Engine
-        if (ratingEngine.getStatus() == RatingEngineStatus.DELETED) {
-            if (CollectionUtils.isNotEmpty(playEntityMgr.findByRatingEngineAndPlayStatusIn(retrievedRatingEngine,
-                    Arrays.asList(PlayStatus.ACTIVE, PlayStatus.INACTIVE)))) {
-                log.error(String.format("Dependency check failed for Rating Engine=%s", retrievedRatingEngine.getId()));
-                throw new LedpException(LedpCode.LEDP_18175, new String[] { retrievedRatingEngine.getDisplayName() });
-            }
         }
 
         // Check active model of Rating Engine

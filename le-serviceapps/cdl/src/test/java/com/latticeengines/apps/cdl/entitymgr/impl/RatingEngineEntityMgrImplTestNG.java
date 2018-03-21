@@ -244,22 +244,12 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Play play = generateDefaultPlay(createdRatingEngine);
         playEntityMgr.createOrUpdatePlay(play);
         re = new RatingEngine();
-        re.setStatus(RatingEngineStatus.DELETED);
         re.setId(ratingEngine.getId());
-        try {
-            createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
-            Assert.fail("Should have thrown exeption due to the transition should fail");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof LedpException);
-            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18174);
-        }
-
         re.setStatus(RatingEngineStatus.INACTIVE);
         ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
 
-        re.setStatus(RatingEngineStatus.DELETED);
         try {
-            ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+            ratingEngineEntityMgr.deleteRatingEngine(re, false);
             Assert.fail("Should have thrown exeption due to the transition should fail");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof LedpException);
@@ -268,8 +258,9 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         play.setPlayStatus(PlayStatus.DELETED);
         playEntityMgr.createOrUpdatePlay(play);
-        createdRatingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
-        Assert.assertEquals(createdRatingEngine.getStatus(), RatingEngineStatus.DELETED);
+        ratingEngineEntityMgr.deleteRatingEngine(re, false);
+        re = ratingEngineEntityMgr.findById(re.getId());
+        Assert.assertTrue(re.getDeleted());
     }
 
     private void validateActionContext(RatingEngine ratingEngine) {

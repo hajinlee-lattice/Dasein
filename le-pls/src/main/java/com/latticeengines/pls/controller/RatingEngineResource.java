@@ -149,9 +149,10 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Delete a Rating Engine given its id")
     @PreAuthorize("hasRole('Edit_PLS_RatingEngines')")
-    public Boolean deleteRatingEngine(@PathVariable String ratingEngineId) {
+    public Boolean deleteRatingEngine(@PathVariable String ratingEngineId, //
+            @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
-        ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId);
+        ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete);
         return true;
     }
 

@@ -303,6 +303,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         String createdRatingEngineStr = ratingEngine.toString();
         log.info("Before delete, getting complete Rating Engine : " + createdRatingEngineStr);
 
+        // test soft delete
+        deleteById(ratingEngine.getId(), false);
+        ratingEngine = getRatingEngineById(ratingEngineId, false, false);
+        Assert.assertNotNull(ratingEngine);
+        Assert.assertTrue(ratingEngine.getDeleted());
         // test delete
         deleteById(ratingEngine.getId());
         ratingEngine = getRatingEngineById(ratingEngineId, false, false);
@@ -337,5 +342,9 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     protected void deleteById(String ratingEngineId) {
         ratingEngineService.deleteById(ratingEngineId);
+    }
+
+    protected void deleteById(String ratingEngineId, boolean hardDelete) {
+        ratingEngineService.deleteById(ratingEngineId, hardDelete);
     }
 }

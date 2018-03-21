@@ -9,8 +9,7 @@ import com.google.common.collect.Sets;
 public enum RatingEngineStatus {
 
     ACTIVE(0), //
-    INACTIVE(1), //
-    DELETED(2);
+    INACTIVE(1); //
 
     private int stautsId;
 
@@ -22,8 +21,7 @@ public enum RatingEngineStatus {
             statusMap.put(status.getStatusId(), status);
         }
         transitionMap.put(ACTIVE, Sets.newHashSet(INACTIVE));
-        transitionMap.put(INACTIVE, Sets.newHashSet(ACTIVE, DELETED));
-        transitionMap.put(DELETED, Sets.newHashSet(INACTIVE));
+        transitionMap.put(INACTIVE, Sets.newHashSet(ACTIVE));
     }
 
     private RatingEngineStatus(int statusId) {
@@ -39,7 +37,8 @@ public enum RatingEngineStatus {
     }
 
     public static boolean canTransit(RatingEngineStatus srcState, RatingEngineStatus dstState) {
-        return srcState.equals(dstState) || transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
+        return srcState.equals(dstState)
+                || transitionMap.containsKey(srcState) && transitionMap.get(srcState).contains(dstState);
     }
 
 }
