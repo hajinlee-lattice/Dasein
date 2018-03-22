@@ -243,6 +243,9 @@ abstract class QueryTranslator {
 
     private static void modifyTxnRestriction(TransactionRestriction txRestriction,
             TimeFilterTranslator timeTranslator) {
+        if (timeTranslator == null) {
+            throw new NullPointerException("TimeTranslator cannot be null.");
+        }
         txRestriction.setTimeFilter(timeTranslator.translate(txRestriction.getTimeFilter()));
         if (txRestriction.getUnitFilter() != null) {
             txRestriction.setUnitFilter(setAggToSum(txRestriction.getUnitFilter()));
