@@ -207,6 +207,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private long countInRedshift(BusinessEntity entity) {
+        if (StringUtils.isBlank(
+                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive))) {
+            log.warn("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
+            return 0L;
+        }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
         return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
