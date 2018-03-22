@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.serviceflows.cdl.CdlModelWorkflowConfiguration;
+import com.latticeengines.modeling.workflow.steps.PersistDataRules;
+import com.latticeengines.modeling.workflow.steps.RemediateDataRules;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateModel;
 import com.latticeengines.modeling.workflow.steps.modeling.CreateNote;
 import com.latticeengines.modeling.workflow.steps.modeling.DownloadAndProcessModelSummaries;
@@ -53,6 +55,12 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlModelWorkflowConfigura
     private CreateNote createNote;
 
     @Inject
+    private PersistDataRules persistDataRules;
+
+    @Inject
+    private RemediateDataRules remediateDataRules;
+
+    @Inject
     private InvokeDataScienceAnalysis invokeDataScienceAnalysis;
 
     @Autowired
@@ -66,12 +74,12 @@ public class CdlModelWorkflow extends AbstractWorkflow<CdlModelWorkflowConfigura
                 .next(setMatchSelection) //
                 .next(writeMetadataFiles) //
                 .next(profile) //
-//                .next(reviewModel) //
-                // .next(remediateDataRules) //
+                .next(reviewModel) //
+                .next(remediateDataRules) //
                 .next(createModel) //
                 .next(downloadAndProcessModelSummaries) //
                 .next(createNote) //
-                // .next(persistDataRules) //
+                .next(persistDataRules) //
                 .next(invokeDataScienceAnalysis) //
                 .build();
     }
