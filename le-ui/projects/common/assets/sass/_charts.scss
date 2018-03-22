@@ -1,10 +1,10 @@
 .barChart {
-    & > .bars {
+    &>.bars {
         display: flex;
         justify-content: center;
         align-items: flex-end;
         height: 120px;
-        & > li {
+        &>li {
             display: flex;
             justify-content: flex-end;
             align-items: center;
@@ -13,14 +13,15 @@
             width: 15%;
             margin: 0 2px;
             text-align: center;
-            & > div {
+            &>div {
                 flex: 0 0 1;
-                &:nth-child(1), &:nth-child(3){
+                &:nth-child(1),
+                &:nth-child(3) {
                     height: 22px;
                 }
             }
             .bar {
-                background-color: rgba(0,0,0,.5);
+                background-color: rgba(0, 0, 0, .5);
                 width: 100%;
                 min-height: 2px;
             }
@@ -83,9 +84,10 @@
         }
     }
 }
+
 .inactive {
     .barChart {
-        & > .bars > li {
+        &>.bars>li {
             .value {
                 color: #bbb;
             }
@@ -97,61 +99,47 @@
     }
 }
 
-
 .attribute-stats {
-    // margin-top: 100px; // border: 1px solid red;
-    max-width: 475px;
-    // border: 1px solid rgba(202, 202, 202, 0.446);
-    padding: 6px;
-    .info-container {
+    
+    &>div {
         position: relative;
         width: 100%;
-        height: 100%; // border: 1px solid red;
-        // background-color: rgba(245, 237, 225, 0.186);
-        .info-row {
-            width: 100%; // border: 1px solid red; // padding: 5px;
-        }
-
-        .mouse-over{
+        height: 100%;
+    }
+    .row-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        .mouse-over {
             height: 100%;
             width: 100%;
             position: absolute;
             right: 0;
             top: 0;
         }
-
-        .mouse-over:hover{
+        .mouse-over:hover {
             opacity: 0.5;
             color: white;
         }
-        
-        .header {
-            padding-bottom: 0px;
-            padding-top: 0px;
-            background-color: white;
-            color: #80808078;
-        }
-        .nostats-container{
-            // border-top: 1px solid #80808078;
+        .nostats-container {
             text-align: center;
             padding: 6px;
             font-size: 12px;
             color: #80808078;
-            text-transform: uppercase;;
+            text-transform: uppercase;
+            ;
         }
-
     }
-    .info-row-odd {
+    .row-container:nth-child(even) {
         background-color: #EFF3F4;
     }
     .flex-row {
         display: flex;
-        flex-wrap: nowrap; // background-color: rgb(180, 178, 178);
+        flex-wrap: nowrap;
         padding: 5px;
         .flex-item {
-            // background-color: rgb(211, 211, 54);
             text-align: center;
-            width: 100px; // border: 1px solid black;
+            width: 100px;
         }
         .flex-item-left {
             text-align: left;
@@ -161,6 +149,10 @@
         }
         .flex-graph-container {
             flex-grow: 3;
+            
+            .bar-graph {
+                height: 100%;
+            }
         }
         .flex-value {
             max-width: 50px;
@@ -169,7 +161,11 @@
             max-width: 80px;
         }
     }
-    .header-item {
+    .header {
+        padding-bottom: 0px;
+        padding-top: 0px;
+        background-color: white;
+        color: #80808078;
         font-size: 10px;
         text-transform: uppercase;
     }
@@ -177,60 +173,38 @@
         font-size: 12px;
         text-transform: uppercase;
     }
-    .graph {
-        // background-color: rgba(216, 216, 216, 0.597);
-        width: 100%;
-        height: 100%;
-        .bar-graph {
-            height: 100%;
-        }
-       
-        .y-axis {
-            margin-top: -20px;
-            border: .1em solid #D0D1D0;
-            background-color: #D0D1D0;
-        }
-        .x-axis {
-            background-color: white;
-        }
-        
-    }
-    .vlines-container{
+    
+    .vlines-container {
         position: absolute;
         pointer-events: none;
         height: 100%;
         width: 100%;
         top: 18px;
-
-        & > div {
-            width: 100%;
-            height: 100%;
-           
-        }
-        .vline{
+        .vline {
             width: 1px;
-            border-right: 1px solid #D0D1D0;
             height: 100%;
             position: absolute;
             display: flex;
             flex-direction: column;
             justify-content: flex-end;
-            & > span{
+            &>div {
+                flex: 1;
+                border: 1px solid #D0D1D0;
+            }
+            &>span {
                 font-size: 10px;
                 margin-left: -5px;
             }
-            
         }
-        .flex-row{
+        .flex-row {
             height: 100%;
             align-items: stretch;
             padding: 0px;
-
-            .flex-graph-container{
+            .flex-graph-container {
                 margin-right: 5px;
             }
         }
-        .flex-item{
+        .flex-item {
             position: relative;
         }
     }

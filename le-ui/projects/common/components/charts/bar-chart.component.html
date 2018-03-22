@@ -1,33 +1,26 @@
 <div class="attribute-stats">
-
-    <div class="info-container">
-        <div class="info-row header" ng-click="clicked()">
-            <div class="flex-row header-item">
-                <div class="flex-item flex-item-left flex-graph-container text-ellipsis">
-                    <span>{{header}}</span>
-                </div>
-                <div class="flex-item flex-value flex-item-right text-ellipsis" ng-repeat="column in getColumns()">{{column.label}}</div>
+    <div>
+        <div class="flex-row header">
+            <div class="flex-item flex-item-left flex-graph-container text-ellipsis">
+                <span>{{header}}</span>
             </div>
+            <div class="flex-item flex-value flex-item-right text-ellipsis" ng-repeat="column in getColumns()">{{column.label}}</div>
         </div>
         <div class="nostats-container" ng-if="bktlist.length == 0">{{emptymsg}}</div>
-        <div class="info-container" ng-repeat="stat in bktlist" ng-mouseenter="rowHover=$index" ng-mouseleave="rowHover = -1">
-            <div class="info-row" ng-class="($index%2 == 0) ? 'info-row-odd' : ''" ng-click="clicked(stat)">
-                <div class="flex-row content-item">
-                    <div class="flex-item flex-lable text-ellipsis flex-item-left">
-                        <i class="plus fa fa-plus" ng-if="showstatcount && getStatCount(stat) == 0 && ($index == rowHover)"></i>
-                        <i class="plus fa fa-check" ng-if="showstatcount && getStatCount(stat) == 1" ng-style="{'color': color}"></i>
-                        <i class="plus attribute-use-count" ng-if="showstatcount && getStatCount(stat) >= 2">{{ statcount }}</i>
-                        <span>{{stat.Lbl}}</span>
+        <div class="row-container" ng-repeat="stat in bktlist" ng-mouseenter="rowHover=$index" ng-mouseleave="rowHover = -1">
+            <div class="flex-row content-item" ng-click="clicked(stat)">
+                <div class="flex-item flex-lable text-ellipsis flex-item-left">
+                    <i class="plus fa fa-plus" ng-if="showstatcount && getStatCount(stat) == 0 && ($index == rowHover)"></i>
+                    <i class="plus fa fa-check" ng-if="showstatcount && getStatCount(stat) == 1" ng-style="{'color': color}"></i>
+                    <i class="plus attribute-use-count" ng-if="showstatcount && getStatCount(stat) >= 2">{{ statcount }}</i>
+                    <span>{{stat.Lbl}}</span>
 
-                    </div>
-                    <div class="flex-item flex-graph-container flex-item-left">
-                        <div class="graph">
-                            <div class="bar-graph" style="width: 0%;" ng-style="{'width': getHorizontalPercentage(stat, 0), 'background-color': getBarColor(stat)}">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex-item flex-value text-ellipsis flex-item-right" ng-repeat="column in getColumns()">{{getValue(stat, column)}}</div>
                 </div>
+                <div class="flex-item flex-graph-container flex-item-left">
+                    <div class="bar-graph" style="width: 0%;" ng-style="{'width': getHorizontalPercentage(stat, 0), 'background-color': getBarColor(stat)}">
+                    </div>
+                </div>
+                <div class="flex-item flex-value text-ellipsis flex-item-right" ng-repeat="column in getColumns()">{{getValue(stat, column)}}</div>
             </div>
             <!-- Mouse Hover layer -->
             <div class="mouse-over" ng-if="mousehover" ng-style="$index===rowHover ? {'background-color': getMouseOverColor()} : {'background-color':''}"
@@ -35,20 +28,19 @@
             <!--  -->
         </div>
 
-        <!-- X axis -->
+        <!-- X axis Layer -->
         <div class="vlines-container" ng-if="showVerticalLines()">
-            <!-- <div> -->
-                <div class="flex-row">
-                    <div class="flex-item flex-lable">
-                    </div>
-                    <div class="flex-item flex-graph-container flex-item-left">
-                        <div class="vline" ng-style="{'margin-left': line.perc}" ng-repeat="line in getVerticalLines()">
-                            <span class="label">{{line.label}}</span>
-                        </div>
-                    </div>
-                    <div class="flex-item flex-value" ng-repeat="column in getColumns()"></div>
-                </div>
-            <!-- </div> -->
+            <ul class="flex-row">
+                <li class="flex-item flex-lable">
+                </li>
+                <ul class="flex-item flex-graph-container flex-item-left">
+                    <li class="vline" ng-style="{'margin-left': line.perc}" ng-repeat="line in getVerticalLines()">
+                        <div></div>
+                        <span>{{line.label}}</span>
+                    </li>
+                </ul>
+                <li class="flex-item flex-value" ng-repeat="column in getColumns()"></li>
+            </ul>
 
         </div>
         <!--  -->
