@@ -98,9 +98,7 @@ public class RemediateDataRules extends BaseWorkflowStep<ModelStepConfiguration>
             for (Attribute attribute : eventTable.getAttributes()) {
                 for (String parentName : attribute.getParentAttributeNames()) {
                     Attribute parent = eventTable.getAttribute(parentName);
-                    if (!parentChild.containsKey(parent)) {
-                        parentChild.put(parent, new ArrayList<Attribute>());
-                    }
+                    parentChild.putIfAbsent(parent, new ArrayList<Attribute>());
                     parentChild.get(parent).add(attribute);
                 }
             }

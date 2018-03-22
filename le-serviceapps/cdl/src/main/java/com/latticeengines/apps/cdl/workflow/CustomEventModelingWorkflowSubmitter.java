@@ -46,14 +46,12 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -67,9 +65,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private MetadataProxy metadataProxy;
-
-    @Inject
-    private SegmentProxy segmentProxy;
 
     @Inject
     private MatchCommandProxy matchCommandProxy;
@@ -207,7 +202,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .fetchOnly(true) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
-                .skipLdcOnlyAttributes(parameters.getExcludePropDataColumns()) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
@@ -278,7 +272,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
             metadataSegmentExport.setContactFrontEndRestriction(segment.getContactFrontEndRestriction());
 
             metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT_ID);
-            metadataSegmentExport.setAccountFrontEndRestriction(new FrontEndRestriction());
             String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExport.getExportPrefix(), null,
                     metadataSegmentExport.getType());
             metadataSegmentExport.setFileName(exportedFileName);
