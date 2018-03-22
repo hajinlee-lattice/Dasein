@@ -81,7 +81,7 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
         weekOffset -= 13 * quarterOffset;
         int sum = 0;
         for (int i = 0; i < 2; i++) {
-            if (i == calendar.getLongerMonth()) {
+            if (i == calendar.getLongerMonth() - 1) { // longer month 1,2,3
                 sum += 5;
             } else {
                 sum += 4;
@@ -98,7 +98,7 @@ public abstract class BusinessCalendarBasedPeriodBuilder extends BasePeriodBuild
         monthOffset -= 3 * quarterOffset;
         int weekOffset = quarterOffset * 13;
         for (int i = 0; i < monthOffset; i++) {
-            if (i == calendar.getLongerMonth()) {
+            if (i == calendar.getLongerMonth() - 1) { // longer month 1,2,3
                 weekOffset += 5;
             } else {
                 weekOffset += 4;

@@ -10,6 +10,8 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 public abstract class BusinessPeriodBuilderUnitTestNGBase {
@@ -18,9 +20,9 @@ public abstract class BusinessPeriodBuilderUnitTestNGBase {
     static final String SPECIAL_DATE_PROVIDER = "dateProvider";
 
     @Test(groups = "unit", dataProvider = BUSINESS_CALENDAR_PROVIDER)
-    public void testPeriodIntegrity(BusinessCalendar.Mode mode, String startingDate, String startingDay, int longerMonth) {
+    public void testPeriodIntegrity(BusinessCalendar.Mode mode, String startingFrom, int longerMonth) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
-        BusinessCalendar calendar = createBusinessCalendar(mode, startingDate, startingDay, longerMonth);
+        BusinessCalendar calendar = createBusinessCalendar(mode, startingFrom, longerMonth);
         PeriodBuilder periodBuilder = getBuilder(calendar);
         LocalDate previousEnd = null;
         for (int i = -100; i < 100; i++) {
@@ -48,21 +50,31 @@ public abstract class BusinessPeriodBuilderUnitTestNGBase {
     }
 
     @Test(groups = "unit", dataProvider = SPECIAL_DATE_PROVIDER)
-    public void testPeriodIntegrity(BusinessCalendar.Mode mode, String startingDate, String startingDay,
+    public void testPeriodIntegrity(BusinessCalendar.Mode mode, String startingFrom,
             int longerMonth, int startYear, String date, int periodId) {
-        BusinessCalendar calendar = createBusinessCalendar(mode, startingDate, startingDay, longerMonth);
+        BusinessCalendar calendar = createBusinessCalendar(mode, startingFrom, longerMonth);
         PeriodBuilder periodBuilder = getBuilder(calendar, startYear);
         Assert.assertEquals(periodBuilder.toPeriodId(date), periodId);
     }
 
 
-    private BusinessCalendar createBusinessCalendar(BusinessCalendar.Mode mode, String startingDate, String startingDay,
+    private BusinessCalendar createBusinessCalendar(BusinessCalendar.Mode mode, String startingFrom,
             int longerMonth) {
         BusinessCalendar calendar = new BusinessCalendar();
         calendar.setMode(mode);
         calendar.setLongerMonth(longerMonth);
-        calendar.setStartingDate(startingDate);
-        calendar.setStartingDay(startingDay);
+        switch (mode) {
+        case STARTING_DATE:
+            calendar.setStartingDate(startingFrom);
+            break;
+        case STARTING_DAY:
+            calendar.setStartingDay(startingFrom);
+            break;
+        default:
+            String msg = "Unknown business calendar mode " + calendar.getMode();
+            throw new LedpException(LedpCode.LEDP_40015, msg, new UnsupportedOperationException(msg));
+        }
+
         return calendar;
     }
 
@@ -70,33 +82,33 @@ public abstract class BusinessPeriodBuilderUnitTestNGBase {
 
     protected abstract PeriodBuilder getBuilder(BusinessCalendar calendar, int startYear);
 
-    // Schema: Mode, StartingDate, StartingDay, LongerMonth
+    // Schema: Mode, StartingFrom, LongerMonth
     @DataProvider(name = BUSINESS_CALENDAR_PROVIDER)
     protected Object[][] provideBusinessCalendarParas() {
         return new Object[][] { //
-                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", null, 0 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", null, 0 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "APR-15", null, 0 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", 1 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", 1 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "APR-15", 1 }, //
 
-                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", null, 1 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", null, 1 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "MAY-15", null, 1 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", 2 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", 2 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "MAY-15", 2 }, //
 
-                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", null, 2 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", null, 2 }, //
-                { BusinessCalendar.Mode.STARTING_DATE, "JUN-15", null, 2 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "JAN-01", 3 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "DEC-31", 3 }, //
+                { BusinessCalendar.Mode.STARTING_DATE, "JUN-15", 3 }, //
 
-                { BusinessCalendar.Mode.STARTING_DAY, null, "1st-MON-JAN", 0 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "4th-FRI-DEC", 0 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "3rd-WED-APR", 0 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "1st-MON-JAN", 1 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "4th-FRI-DEC", 1 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "3rd-WED-APR", 1 }, //
 
-                { BusinessCalendar.Mode.STARTING_DAY, null, "1st-MON-JAN", 1 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "4th-FRI-DEC", 1 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "3rd-WED-MAY", 1 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "1st-MON-JAN", 2 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "4th-FRI-DEC", 2 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "3rd-WED-MAY", 2 }, //
 
-                { BusinessCalendar.Mode.STARTING_DAY, null, "1st-MON-JAN", 2 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "4th-FRI-DEC", 2 }, //
-                { BusinessCalendar.Mode.STARTING_DAY, null, "3rd-WED-JUN", 2 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "1st-MON-JAN", 3 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "4th-FRI-DEC", 3 }, //
+                { BusinessCalendar.Mode.STARTING_DAY, "3rd-WED-JUN", 3 }, //
         };
     }
 }
