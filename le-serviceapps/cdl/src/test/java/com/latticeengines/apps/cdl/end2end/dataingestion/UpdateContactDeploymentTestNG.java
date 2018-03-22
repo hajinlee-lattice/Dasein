@@ -93,6 +93,8 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.SortedContact, (long) CONTACT_IMPORT_SIZE_2);
+        // Because Account is enforced to rebuild
+        expectedCnts.put(TableRoleInCollection.BucketedAccount, (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
         return expectedCnts;
     }
 
