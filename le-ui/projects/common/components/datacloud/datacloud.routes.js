@@ -697,6 +697,18 @@ angular
                 pageIcon: 'ico-analysis',
                 section: 'segment.analysis'               
             },
+            resolve: {
+                SegmentExport: ['$q', '$stateParams', 'SegmentService', function($q, $stateParams, SegmentService) {
+                    var deferred = $q.defer();
+
+                    var exportId = $stateParams.exportID;
+
+                    SegmentService.GetSegmentExportByExportId(exportId).then(function(result) {
+                        deferred.resolve(result);
+                    });
+                    return deferred.promise;
+                }]
+            },
             views: {
                 "main@": {
                     controller: 'SegmentExportController',

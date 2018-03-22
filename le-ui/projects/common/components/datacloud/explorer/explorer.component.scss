@@ -2259,4 +2259,22 @@
     }
 }
 
+.error-message {
+    color: #fff;
+    background-color: #ffa500;
+    margin: 20px 0;
+    padding: 15px 20px;
+    border-radius: 3px;
+    width: 99%;
+    h3 {
+        color: #fff;
+        font-size: 18px;
+        display: inline-block;
+        text-transform: none;
+    }
+    i {
+        float: right;
+}
+    }
+
 

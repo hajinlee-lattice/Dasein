@@ -1,28 +1,36 @@
 angular
     .module('common.datacloud.explorer.export', [])
     .controller('SegmentExportController', function(
-        $scope, $q, $state, $stateParams, $rootScope, $http, ApiHost, 
-        DataCloudStore, DataCloudService, SegmentService, SegmentStore, DataCloudStore
+        $scope, $q, $state, $stateParams, $http, 
+        SegmentService, SegmentExport
     ){
+        console.log(SegmentExport);
         var vm = this;
         angular.extend(vm, {
-            metadata: DataCloudStore.metadata,
             stateParams: $stateParams,
             segment: $stateParams.segment,
             exportId: $stateParams.exportID,
-            segmentExport: SegmentService.GetSegmentExportByExportId(vm.exportId),
-            showDownloadMessage: false
+            segmentExport: SegmentExport,
+            showDownloadMessage: false,
+            disableDownload: false,
+            showErrorMessage: false,
         });
 
         vm.init = function() {
-            console.log($stateParams);
-            console.log(vm);
-            vm.downloadSegmentExport(); //automatic download
+            if (!vm.isExpired()) {
+                vm.downloadSegmentExport(); //automatic download
+            } else {
+                vm.disableDownload = true;
+                vm.showErrorMessage = true;
+            }
+        }
+
+        vm.isExpired = function() {
+            var currentTime = Date.now();
+            return currentTime > vm.segmentExport.cleanup_by;
         }
 
         
-
-
         vm.downloadSegmentExport = function() {
             if (vm.exportId && vm.exportId !== null) {
                 SegmentService.DownloadExportedSegment(vm.exportId).then(function (result) {

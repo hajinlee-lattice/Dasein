@@ -5,8 +5,11 @@
 			    <h3> Your download has now begun. </h3>
 			    <i class="fa fa-times fa-inverse" data-ng-click="vm.hideDownloadMessage()"></i>
             </div>
+            <div data-ng-if="vm.showErrorMessage" class="error-message">
+                <h3> Your download has expired. </h3>
+            </div>
             <div class="text-center" data-ng-show="!loading">
-				<a style="margin-top: 50px" class="button icon-button orange-button" ng-click="vm.downloadSegmentExport()">
+				<a style="margin-top: 50px" class="button icon-button orange-button" ng-class="{'disabled': vm.disableDownload}" ng-click="!vm.disableDownload ? vm.downloadSegmentExport() : '' " ng-disabled="vm.disableDownload">
 				    Download Your Exported Segment
 				</a>
             </div>
