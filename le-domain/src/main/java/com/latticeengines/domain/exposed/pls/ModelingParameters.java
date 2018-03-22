@@ -67,6 +67,9 @@ public class ModelingParameters {
     private boolean activateModelSummaryByDefault = false;
 
     @JsonProperty
+    private boolean ldcOnlyAttributes = false;
+
+    @JsonProperty
     private String segmentName;
 
     @JsonProperty
@@ -214,6 +217,14 @@ public class ModelingParameters {
 
     public void setActivateModelSummaryByDefault(boolean value) {
         this.activateModelSummaryByDefault = value;
+    }
+
+    public boolean isLdcOnlyAttributes() {
+        return ldcOnlyAttributes;
+    }
+
+    public void setLdcOnlyAttributes(boolean ldcOnlyAttributes) {
+        this.ldcOnlyAttributes = ldcOnlyAttributes;
     }
 
     public ModelingType getModelingType() {

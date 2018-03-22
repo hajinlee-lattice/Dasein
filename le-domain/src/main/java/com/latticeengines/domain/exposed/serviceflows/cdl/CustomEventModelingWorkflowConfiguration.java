@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
@@ -62,6 +63,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
+        private LdcOnlyAttributesConfiguration ldcOnlyAttributes = new LdcOnlyAttributesConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -71,6 +73,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelDataValidationWorkflow.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
+            ldcOnlyAttributes.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             modelWorkflowBuilder.customer(customerSpace);
             prepareConfigForScoringBuilder.customer(customerSpace);
@@ -89,6 +92,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
 
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
+            ldcOnlyAttributes.setMicroServiceHostPort(microServiceHostPort);
             modelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
 
             rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
@@ -138,6 +142,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             modelWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            ldcOnlyAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             prepareConfigForScoringBuilder.internalResourceHostPort(internalResourceHostPort);
             rtsBulkScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
@@ -304,6 +309,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder skipLdcOnlyAttributes(boolean skipLdcOnly) {
+            ldcOnlyAttributes.setSkipStep(skipLdcOnly);
+            return this;
+        }
+
         public Builder modelName(String modelName) {
             modelWorkflowBuilder.modelName(modelName);
             return this;
@@ -395,6 +405,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
             configuration.add(dedupEventTable);
             configuration.add(addStandardAttributes);
+            configuration.add(ldcOnlyAttributes);
             configuration.add(modelWorkflowBuilder.build());
             configuration.add(prepareConfigForScoringBuilder.build());
             configuration.add(rtsBulkScoreWorkflowBuilder.build());

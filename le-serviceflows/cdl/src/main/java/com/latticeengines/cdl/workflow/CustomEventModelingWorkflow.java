@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.steps.LdcOnlyAttributesStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
@@ -47,6 +48,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private AddStandardAttributes addStandardAttributesDataFlow;
 
     @Inject
+    private LdcOnlyAttributesStep ldcOnlyAttributesDataFlow;
+
+    @Inject
     private ModelWorkflow modelWorkflow;
 
     @Inject
@@ -76,6 +80,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(customEventMatchWorkflow) //
                 .next(dedupEventTableDataFlow) //
                 .next(addStandardAttributesDataFlow) //
+                .next(ldcOnlyAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(prepareScoringAfterModelingWorkflow) //
                 .next(rtsBulkScoreWorkflow) //
