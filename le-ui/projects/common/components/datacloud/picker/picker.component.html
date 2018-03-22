@@ -26,9 +26,9 @@
                     <span class="fa fa-times" ng-show="vm.query.length && !vm.queryInProgress"></span>
                     <span class="fa fa-spinner fa-pulse fa-fw" ng-show="vm.queryInProgress"></span>
                 </a>
-                <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
+                <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.page = 1" />
             </div>
-            <a class="sort button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.metadata.current = 1;">
+            <a class="sort button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.page = 1;">
                 <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
             </a>
         </li>
@@ -41,7 +41,7 @@
     </div>
 
     <div class="picker-buckets noselect-children">
-        <div ng-repeat="bucket in (filteredList = (vm.buckets | filter: vm.queryText | orderBy: [ vm.sortPrefix + 'Cnt', 'Lbl' ])) | startFrom: vm.page_size * (vm.page - 1) | limitTo: vm.page_size">
+        <div ng-repeat="bucket in (filteredList = (vm.buckets | filter: vm.queryText)) | orderBy: [ vm.sortPrefix + 'Cnt', 'Lbl' ] | startFrom: vm.page_size * (vm.page - 1) | limitTo: vm.page_size">
             <label for="{{ bucket.Lbl }}" class="button white-button" ng-class="{ 'checked': bucket.checked }">
                 {{ bucket.Lbl }}
                 <input  type="checkbox"

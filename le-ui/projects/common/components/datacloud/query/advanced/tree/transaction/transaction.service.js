@@ -61,10 +61,10 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
         this.unitPurchasedCmpChoises = function () {
             return [
                 { 'name': 'ANY', 'displayName': 'Any' },
-                { 'name': 'GREATER_THAN', 'displayName': 'Greater Than' },
-                { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater or Equal' },
-                { 'name': 'LESS_THAN', 'displayName': 'Less Than' },
-                { 'name': 'LESS_OR_EQUAL', 'displayName': 'Less or Equal' },
+                { 'name': 'GREATER_THAN', 'displayName': 'Greater than' },
+                { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater than or Equal to' },
+                { 'name': 'LESS_THAN', 'displayName': 'Less than' },
+                { 'name': 'LESS_OR_EQUAL', 'displayName': 'Less than or Equal to' },
                 { 'name': 'GTE_AND_LT', 'displayName': 'Between' }
             ];
         }
@@ -72,12 +72,11 @@ angular.module('common.datacloud.query.builder.tree.transaction.service', [])
         this.amountSpentCmpChoises = function () {
             return [
                 { 'name': 'ANY', 'displayName': 'Any' },
-                { 'name': 'GREATER_THAN', 'displayName': 'Greater Than' },
-                { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater or Equal' },
-                { 'name': 'LESS_THAN', 'displayName': 'Less Than' },
-                { 'name': 'LESS_OR_EQUAL', 'displayName': 'Less or Equal' },
+                { 'name': 'GREATER_THAN', 'displayName': 'Greater than' },
+                { 'name': 'GREATER_OR_EQUAL', 'displayName': 'Greater than or Equal to' },
+                { 'name': 'LESS_THAN', 'displayName': 'Less than' },
+                { 'name': 'LESS_OR_EQUAL', 'displayName': 'Less than or Equal to' },
                 { 'name': 'GTE_AND_LT', 'displayName': 'Between' }
-
             ];
         }
     })

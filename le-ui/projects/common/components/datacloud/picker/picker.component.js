@@ -85,7 +85,7 @@ angular.module('common.datacloud.valuepicker', [])
         }
 
         if (vals.length == 0) {
-            bkt.Cmp = 'IS_EMPTY';
+            bkt.Cmp = 'IS_NULL';
         } else if (bkt.Cmp == 'NOT_EQUAL' || bkt.Cmp == 'NOT_IN_COLLECTION') {
             bkt.Cmp = vals.length == 1 ? 'NOT_EQUAL' : 'NOT_IN_COLLECTION';
         } else {
@@ -124,9 +124,9 @@ angular.module('common.datacloud.valuepicker', [])
             });
         }
 
-        if (vals && vals.length > 0) {
+        //if (vals && vals.length > 0) {
             vm.controller.updateBucketCount();
-        }
+        //}
     }
 
     vm.pushItem = function(item, bucketRestriction, controller) {
