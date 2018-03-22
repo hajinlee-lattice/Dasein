@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -141,6 +142,27 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         });
     }
 
+    @Test(groups = "functional")
+    public void testRuleModelWithTxn() {
+        RatingModel model = ruleBasedModelWithTxn();
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
+        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(ratingCounts);
+        Assert.assertFalse(ratingCounts.isEmpty());
+        ratingCounts.forEach((score, count) -> {
+            if (RatingBucketName.A.getName().equals(score)) {
+                Assert.assertEquals((long) count, 832L);
+            } else if (RatingBucketName.C.getName().equals(score)) {
+                Assert.assertEquals((long) count, 2338L);
+            }
+        });
+    }
+
     private RuleBasedModel ruleBasedModel() {
         RuleBasedModel model = new RuleBasedModel();
         model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
@@ -157,10 +179,29 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         ruleC.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.Account, ATTR_ACCOUNT_NAME, Bucket.rangeBkt("H", "N")));
         ruleC.put(FrontEndQueryConstants.CONTACT_RESTRICTION,
-                  new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
+                new BucketRestriction(BusinessEntity.Contact, ATTR_CONTACT_TITLE, Bucket.rangeBkt("A", "N")));
         rule.getBucketToRuleMap().put(RatingBucketName.C.getName(), ruleC);
 
         rule.setDefaultBucketName(RatingBucketName.A.getName());
+
+        model.setRatingRule(rule);
+
+        return model;
+    }
+
+    private RuleBasedModel ruleBasedModelWithTxn() {
+        RuleBasedModel model = new RuleBasedModel();
+        model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
+        RatingRule rule = RatingRule.constructDefaultRule();
+
+        Map<String, Restriction> ruleA = new HashMap<>();
+        String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
+                new BucketRestriction(BusinessEntity.PurchaseHistory, "HasPurchased", Bucket.txnBkt(txn)));
+        rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);
+
+        rule.setDefaultBucketName(RatingBucketName.C.getName());
 
         model.setRatingRule(rule);
 

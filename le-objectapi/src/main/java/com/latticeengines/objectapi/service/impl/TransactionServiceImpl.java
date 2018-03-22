@@ -1,11 +1,14 @@
 package com.latticeengines.objectapi.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +27,8 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AggregateLookup;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
@@ -112,6 +117,23 @@ public class TransactionServiceImpl implements TransactionService {
         if (frontEndQuery.getContactRestriction() != null) {
             Restriction restriction = frontEndQuery.getContactRestriction().getRestriction();
             hasTxn = hasTxn || hasTransactionBucket(restriction);
+        }
+        if (CollectionUtils.isNotEmpty(frontEndQuery.getRatingModels())) {
+            for (RatingModel ratingModel: frontEndQuery.getRatingModels()) {
+                if (ratingModel instanceof RuleBasedModel) {
+                    hasTxn = hasTxn || hasTransactionBucket((RuleBasedModel) ratingModel);
+                }
+            }
+        }
+        return hasTxn;
+    }
+
+    private boolean hasTransactionBucket(RuleBasedModel model) {
+        boolean hasTxn = false;
+        if (model.getRatingRule() != null) {
+            Stream<Restriction> restrictions = model.getRatingRule().getBucketToRuleMap().values().stream()
+                    .flatMap(map -> map.values().stream()).filter(Objects::nonNull);
+            hasTxn = restrictions.anyMatch(this::hasTransactionBucket);
         }
         return hasTxn;
     }
