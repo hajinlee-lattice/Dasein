@@ -21,6 +21,9 @@ angular
         $stateProvider
             .state('home.ratingsengine', {
                 url: '/ratings_engine',
+                onExit: function(QueryStore) {
+                    QueryStore.clear();
+                },
                 redirectTo: 'home.ratingsengine.list'
             })
             .state('home.ratingsengine.list', {

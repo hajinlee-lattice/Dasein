@@ -59,6 +59,19 @@ angular.module('common.datacloud.query.service',[
             }
         }
     }
+
+    this.clear = function() {
+        delete this.accountBucketTreeRoot;
+        delete this.contactBucketTreeRoot;
+        delete this.addBucketTreeRoot;
+        this.addBucketTreeType = '';
+        this.mode = '';
+        this.segment = null;
+        this.accounts = [];
+        this.contacts = [];
+        this.initRestrictions();
+    };
+
     this.initRestrictions = function() {
         var template = {
             restriction: {
@@ -70,7 +83,6 @@ angular.module('common.datacloud.query.service',[
         };
 
         this.entities.forEach(function(entity) {
-            
             QueryStore[getEntity(entity) + 'Restriction'] = angular.copy(template);
         });
     }
@@ -594,7 +606,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.getDataCloudAttributes = function(ignoreCache) {
-        var treeRoot = QueryStore.getAddBucketTreeRoot();
+        //var treeRoot = QueryStore.getAddBucketTreeRoot();
         var restrictions = [];
 
         if (QueryStore.mode == 'rules') {
