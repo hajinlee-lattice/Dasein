@@ -291,7 +291,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
             throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngine.toString() });
         }
         MetadataSegment segment = ratingEngine.getSegment();
-        if (segment == null || segment.getName() == null) {
+        if (ratingEngine.getType().isTargetSegmentMandatory() && (segment == null || segment.getName() == null)) {
             throw new LedpException(LedpCode.LEDP_18153, new String[] { ratingEngine.toString() });
         }
 
