@@ -166,6 +166,28 @@ angular
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+
+
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
+                            $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
+                            if($scope.isRuleBased || $scope.isCustomEvent) {
+                                if($scope.isRuleBased) {
+                                    $scope.typeContext = 'rule';
+                                } else {
+                                    $scope.typeContext = 'AI';
+                                }
+                                $scope.modelingStrategy = RatingEngine.type;
+                            } else {
+                                var type = RatingEngine.type.toLowerCase();
+                                $scope.typeContext = 'AI';
+
+                                $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+                            }
+                            $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
+                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary !== null || RatingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
+
+                            // console.log(RatingEngine);
+
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }

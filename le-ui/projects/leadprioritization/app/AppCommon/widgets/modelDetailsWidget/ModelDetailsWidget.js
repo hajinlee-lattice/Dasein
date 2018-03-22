@@ -42,16 +42,15 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             $scope.modelingStrategy = ratingEngine.type;
         } else {
             var type = ratingEngine.type.toLowerCase();
-
             $scope.typeContext = 'AI';
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
-            $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
-        }
 
-        console.log(ratingEngine.activeModel[$scope.typeContext].modelSummary);
+            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+        }
 
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
         $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummary !== null || ratingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
+
+        console.log($scope.modelIsReady);
 
     } else {
 
@@ -73,21 +72,35 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             // console.log(engineId);
             // console.log(ratingEngine);
 
-            console.log($stateParams.modelId);
-            if ($stateParams.modelId !== '') {
-                $scope.modelIsReady = true;
-            }
-
             $scope.displayName = ratingEngine.displayName;
             $scope.createdBy = ratingEngine.createdBy;
             $scope.created = ratingEngine.created;
-            $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+
+            $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
+            $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
+            if($scope.IsRuleBased || $scope.IsCustomEvent) {
+                if($scope.IsRuleBased) {
+                    $scope.typeContext = 'rule';
+                } else {
+                    $scope.typeContext = 'AI';
+                }
+                $scope.modelingStrategy = ratingEngine.type;
+            } else {
+                var type = ratingEngine.type.toLowerCase();
+                $scope.typeContext = 'AI';
+
+                $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+            }
+            $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
+            $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummary !== null || ratingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
+
+            // $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
 
             $scope.segmentName = ratingEngine.segment.display_name;
             $scope.totalAccounts = ratingEngine.segment.accounts;
             $scope.activeStatus = ratingEngine.status;
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
-            $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
+            // $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
         }
 
         var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
