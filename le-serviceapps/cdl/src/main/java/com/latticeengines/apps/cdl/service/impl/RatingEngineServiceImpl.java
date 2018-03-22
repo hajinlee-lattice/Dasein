@@ -29,6 +29,7 @@ import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
+import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
 import com.latticeengines.apps.cdl.workflow.RatingEngineImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.cache.exposed.service.CacheService;
 import com.latticeengines.cache.exposed.service.CacheServiceBase;
@@ -48,12 +49,14 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
@@ -100,6 +103,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
+
+    @Inject
+    private CustomEventModelingWorkflowSubmitter customEventModelingWorkflowSubmitter;
 
     @Inject
     private TableRoleTemplate tableRoleTemplate;
@@ -306,13 +312,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             String userEmail) {
+        ApplicationId jobId;
 
         switch (ratingEngine.getType()) {
         case RULE_BASED:
             throw new LedpException(LedpCode.LEDP_31107,
                     new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
         case CROSS_SELL:
-            ApplicationId jobId = aiModel.getModelingYarnJobId();
+            jobId = aiModel.getModelingYarnJobId();
             if (jobId == null) {
                 if (CollectionUtils
                         .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
@@ -342,11 +349,41 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                     parameters.setExpectedValue(true);
                 }
 
-                log.info(String.format("Rating Engine model called with parameters %s", parameters.toString()));
+                log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
                 jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
 
                 aiModel.setModelingJobId(jobId.toString());
                 updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
+            }
+            return jobId.toString();
+        case CUSTOM_EVENT:
+            jobId = aiModel.getModelingYarnJobId();
+            if (jobId == null) {
+                CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
+                ModelingParameters modelingParameters = new ModelingParameters();
+                modelingParameters.setName(aiModel.getId());
+                modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+                modelingParameters.setDescription(ratingEngine.getDisplayName());
+                modelingParameters.setModuleName("Module");
+                modelingParameters.setUserId(userEmail);
+                modelingParameters.setRatingEngineId(ratingEngine.getId());
+                modelingParameters.setAiModelId(aiModel.getId());
+                modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
+                modelingParameters.setFilename(config.getSourceFileName());
+                modelingParameters.setActivateModelSummaryByDefault(true);
+                modelingParameters.setDeduplicationType(config.getDeduplicationType());
+                modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
+                modelingParameters.setExcludePropDataColumns(
+                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
+                modelingParameters.setExcludeCDLAttributes(
+                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
+                modelingParameters.setExcludeCustomFileAttributes(
+                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
+                internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+
+                log.info(String.format("Custom event modelling job submitted with parameters %s",
+                        modelingParameters.toString()));
+                jobId = customEventModelingWorkflowSubmitter.submit(customerSpace, modelingParameters);
             }
             return jobId.toString();
         default:

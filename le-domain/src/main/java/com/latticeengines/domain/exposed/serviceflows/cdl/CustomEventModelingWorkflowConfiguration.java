@@ -12,7 +12,7 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -196,9 +196,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder modelingType(ModelingType modelingType) {
-            customEventMatchWorkflowConfigurationBuilder.modelingType(modelingType);
-            prepareConfigForScoringBuilder.modelingType(modelingType);
+        public Builder modelingType(CustomEventModelingType customEventModelingType) {
+            customEventMatchWorkflowConfigurationBuilder.modelingType(customEventModelingType);
+            prepareConfigForScoringBuilder.modelingType(customEventModelingType);
             return this;
         }
 

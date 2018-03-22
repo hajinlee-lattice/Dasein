@@ -6,7 +6,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 /**
@@ -34,7 +34,13 @@ public class ModelingParameters {
     private DedupType deduplicationType = DedupType.MULTIPLELEADSPERDOMAIN;
 
     @JsonProperty
-    private boolean excludePropDataColumns = false;
+    private boolean excludePropDataColumns; // LDC or no LDC
+
+    @JsonProperty
+    private boolean excludeCDLAttributes;
+
+    @JsonProperty
+    private boolean excludeCustomFileAttributes;
 
     @JsonProperty
     private boolean excludePublicDomains = false;
@@ -67,13 +73,13 @@ public class ModelingParameters {
     private boolean activateModelSummaryByDefault = false;
 
     @JsonProperty
-    private boolean ldcOnlyAttributes = false;
+    private CustomEventModelingType customEventModelingType = CustomEventModelingType.LPI;
 
     @JsonProperty
-    private String segmentName;
+    private String aiModelId;
 
     @JsonProperty
-    private ModelingType modelingType = ModelingType.LPI;
+    private String ratingEngineId;
 
     public String getFilename() {
         return filename;
@@ -203,14 +209,6 @@ public class ModelingParameters {
         this.notesContent = notesContent;
     }
 
-    public String getSegmentName() {
-        return segmentName;
-    }
-
-    public void setSegmentName(String segmentName) {
-        this.segmentName = segmentName;
-    }
-
     public boolean getActivateModelSummaryByDefault() {
         return this.activateModelSummaryByDefault;
     }
@@ -219,20 +217,44 @@ public class ModelingParameters {
         this.activateModelSummaryByDefault = value;
     }
 
-    public boolean isLdcOnlyAttributes() {
-        return ldcOnlyAttributes;
+    public CustomEventModelingType getCustomEventModelingType() {
+        return this.customEventModelingType;
     }
 
-    public void setLdcOnlyAttributes(boolean ldcOnlyAttributes) {
-        this.ldcOnlyAttributes = ldcOnlyAttributes;
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
-    public ModelingType getModelingType() {
-        return this.modelingType;
+    public String getAiModelId() {
+        return aiModelId;
     }
 
-    public void setModelingType(ModelingType modelingType) {
-        this.modelingType = modelingType;
+    public void setAiModelId(String aiModelId) {
+        this.aiModelId = aiModelId;
+    }
+
+    public String getRatingEngineId() {
+        return ratingEngineId;
+    }
+
+    public void setRatingEngineId(String ratingEngineId) {
+        this.ratingEngineId = ratingEngineId;
+    }
+
+    public boolean isExcludeCDLAttributes() {
+        return excludeCDLAttributes;
+    }
+
+    public void setExcludeCDLAttributes(boolean excludeCDLAttributes) {
+        this.excludeCDLAttributes = excludeCDLAttributes;
+    }
+
+    public boolean isExcludeCustomFileAttributes() {
+        return excludeCustomFileAttributes;
+    }
+
+    public void setExcludeCustomFileAttributes(boolean excludeCustomFileAttributes) {
+        this.excludeCustomFileAttributes = excludeCustomFileAttributes;
     }
 
     @Override

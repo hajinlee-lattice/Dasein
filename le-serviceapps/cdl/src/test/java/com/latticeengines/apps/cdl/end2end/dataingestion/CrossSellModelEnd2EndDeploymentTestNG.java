@@ -33,11 +33,11 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 /**
  * This test is for generating model artifacts for other tests
  */
-public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
+public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(CreateAIModelDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1521225340349";
+    private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM1521680290015";
     private static final boolean EV_MODEL = true;
 
     private MetadataSegment testSegment;
@@ -133,14 +133,14 @@ public class CreateAIModelDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
-        Assert.assertEquals(targetCount, 19);
+        Assert.assertEquals(targetCount, 22);
 
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TRAINING);
-        Assert.assertEquals(trainingCount, 1219);
+        Assert.assertEquals(trainingCount, 1186);
 
         long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
-        Assert.assertEquals(eventCount, 135);
+        Assert.assertEquals(eventCount, 131);
     }
 }

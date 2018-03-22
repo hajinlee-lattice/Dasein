@@ -22,7 +22,7 @@ import com.latticeengines.domain.exposed.camille.scopes.CustomerSpaceScope;
 import com.latticeengines.domain.exposed.encryption.EncryptionGlobalState;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modeling.factory.AlgorithmFactory;
 import com.latticeengines.domain.exposed.modeling.factory.DataFlowFactory;
 import com.latticeengines.domain.exposed.modeling.factory.SamplingFactory;
@@ -89,7 +89,7 @@ public class CustomEventModelingEnd2EndDeploymentTestNG extends SelfServiceModel
         runtimeParams.put(AlgorithmFactory.RF_SEED_KEY, "987654");
         runtimeParams.put(DataFlowFactory.DATAFLOW_DO_SORT_FOR_ATTR_FLOW, "");
         parameters.setRunTimeParams(runtimeParams);
-        parameters.setModelingType(ModelingType.CDL);
+        parameters.setCustomEventModelingType(CustomEventModelingType.CDL);
 
         // TODO: set segmentName
         return parameters;

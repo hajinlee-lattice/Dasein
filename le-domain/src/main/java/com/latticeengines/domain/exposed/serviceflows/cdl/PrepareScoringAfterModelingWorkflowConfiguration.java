@@ -6,10 +6,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -19,15 +19,15 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
 public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
-    @JsonProperty("modelingType")
-    private ModelingType modelingType;
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
 
-    public ModelingType getModelingType() {
-        return modelingType;
+    public CustomEventModelingType getCustomEventModelingType() {
+        return customEventModelingType;
     }
 
-    public void setModelingType(ModelingType modelingType) {
-        this.modelingType = modelingType;
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
     @Override
@@ -92,8 +92,8 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             return this;
         }
 
-        public Builder modelingType(ModelingType modelingType) {
-            configuration.setModelingType(modelingType);
+        public Builder modelingType(CustomEventModelingType customEventModelingType) {
+            configuration.setCustomEventModelingType(customEventModelingType);
             return this;
         }
 

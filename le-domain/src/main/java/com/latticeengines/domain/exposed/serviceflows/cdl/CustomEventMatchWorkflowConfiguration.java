@@ -8,7 +8,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeConfiguration;
@@ -27,15 +27,15 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
                 .build();
     }
 
-    @JsonProperty("modelingType")
-    private ModelingType modelingType;
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
 
-    public ModelingType getModelingType() {
-        return modelingType;
+    public CustomEventModelingType getCustomEventModelingType() {
+        return customEventModelingType;
     }
 
-    public void setModelingType(ModelingType modelingType) {
-        this.modelingType = modelingType;
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
     public static class Builder {
@@ -98,8 +98,8 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder modelingType(ModelingType modelingType) {
-            configuration.setModelingType(modelingType);
+        public Builder modelingType(CustomEventModelingType customEventModelingType) {
+            configuration.setCustomEventModelingType(customEventModelingType);
             return this;
         }
 

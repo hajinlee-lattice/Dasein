@@ -3,6 +3,7 @@ package com.latticeengines.workflowapi.flows;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.modeling.ModelingType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventMatchWorkflowConfiguration;
@@ -97,20 +97,20 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
 
     @Test(groups = "workflow", enabled = true)
     public void customEventMatchAllCdl() throws Exception {
-        customEventMatch(inputTable, ModelingType.CDL);
+        customEventMatch(inputTable, CustomEventModelingType.CDL);
     }
 
     @Test(groups = "workflow", enabled = false)
     public void customEventMatchWithAccountId() throws Exception {
-        customEventMatch(inputTableWithAccountId, ModelingType.CDL);
+        customEventMatch(inputTableWithAccountId, CustomEventModelingType.CDL);
     }
 
     @Test(groups = "workflow", enabled = false)
     public void customEventMatchWithoutAccountId() throws Exception {
-        customEventMatch(inputTableWithoutAccountId, ModelingType.CDL);
+        customEventMatch(inputTableWithoutAccountId, CustomEventModelingType.CDL);
     }
 
-    private void customEventMatch(Table table, ModelingType modelingType) throws Exception {
+    private void customEventMatch(Table table, CustomEventModelingType customEventModelingType) throws Exception {
         MatchClientDocument matchClientDocument = matchCommandProxy.getBestMatchClient(3000);
 
         CustomEventMatchWorkflowConfiguration workflowConfig = new CustomEventMatchWorkflowConfiguration.Builder()
@@ -132,7 +132,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .fetchOnly(true) //
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString()) //
                 .build();
-        workflowConfig.setModelingType(modelingType);
+        workflowConfig.setCustomEventModelingType(customEventModelingType);
 
         workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);

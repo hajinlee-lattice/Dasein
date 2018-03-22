@@ -58,7 +58,7 @@ public class CustomEventMatchWorkflow extends AbstractWorkflow<CustomEventMatchW
     @Override
     public Workflow defineWorkflow(CustomEventMatchWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config);
-        switch (config.getModelingType()) {
+        switch (config.getCustomEventModelingType()) {
         case LPI:
             return builder.next(matchCdlLdcStartStep) //
                     .next(matchDataCloudWorkflow) //

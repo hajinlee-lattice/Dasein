@@ -32,7 +32,7 @@ public class PrepareScoringAfterModelingWorkflow
     @Override
     public Workflow defineWorkflow(PrepareScoringAfterModelingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config);
-        switch (config.getModelingType()) {
+        switch (config.getCustomEventModelingType()) {
         case LPI:
             return builder.next(setConfigurationForScoring) //
                     .build();

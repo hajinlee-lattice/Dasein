@@ -691,12 +691,14 @@ public enum LedpCode {
             "RatingEngine {0} or RatingModel {1} type unsupported for modeling query generation. Customer Space {2}"), //
     LEDP_40010("Invalid ModelingQueryType {0}."), //
     LEDP_40011("Cross sell Repeat Purchase model {0} is missing PURCHASED_BEFORE_PERIOD configuration."), //
-    LEDP_40012("Cannot model AI Model {0} since no target products were defined. Customer Space {1}"), //
+    LEDP_40012("Cannot model Cross-Sell AI Model {0} since no target products were defined. Customer Space {1}"), //
     LEDP_40013("No Rating Engine provided. Customer Space {0}"), //
     LEDP_40014("RatingModel for the Rating Engine {0} cannot be null. Customer Space {1}"), //
     LEDP_40015("Cannot parse {0} to a valid starting date"), //
     LEDP_40016("No Rating Engine with ID {0} found for Customer Space {1}"), //
-    LEDP_40017("Unsupported Modeling strategy") //
+    LEDP_40017("Unsupported Modeling strategy"), //
+    LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"),
+    LEDP_40019("Unsupported Custom Event Modeling Type {0}") //
     ;
 
     private String message;

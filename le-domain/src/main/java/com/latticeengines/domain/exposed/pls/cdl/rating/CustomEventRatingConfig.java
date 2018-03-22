@@ -2,65 +2,47 @@ package com.latticeengines.domain.exposed.pls.cdl.rating;
 
 import java.util.List;
 
-import com.latticeengines.domain.exposed.modeling.ModelingType;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 
 public class CustomEventRatingConfig implements AdvancedRatingConfig {
 
-    private ModelingType modelingType;
+    private CustomEventModelingType customEventModelingType;
 
-    private String fieldMappingMetadataTableId;
+    private String sourceFileName;
 
-    private String trainingFilePath;
+    private List<CustomEventModelingConfig.DataStore> dataStores;
 
-    private List<DataStore> dataStores;
-
-    public ModelingType getModelingType() {
-        return modelingType;
+    public CustomEventModelingType getCustomEventModelingType() {
+        return customEventModelingType;
     }
 
-    public void setModelingType(ModelingType modelingType) {
-        this.modelingType = modelingType;
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
-    public String getFieldMappingMetadataTableId() {
-        return fieldMappingMetadataTableId;
+    public String getSourceFileName() {
+        return sourceFileName;
     }
 
-    public void setFieldMappingMetadataTableId(String fieldMappingMetadataTableId) {
-        this.fieldMappingMetadataTableId = fieldMappingMetadataTableId;
+    public void setSourceFileName(String sourceFileName) {
+        this.sourceFileName = sourceFileName;
     }
 
-    public String getTrainingFilePath() {
-        return trainingFilePath;
-    }
-
-    public void setTrainingFilePath(String trainingFilePath) {
-        this.trainingFilePath = trainingFilePath;
-    }
-
-    public List<DataStore> getDataStores() {
+    public List<CustomEventModelingConfig.DataStore> getDataStores() {
         return dataStores;
     }
 
-    public void setDataStores(List<DataStore> dataStores) {
+    public void setDataStores(List<CustomEventModelingConfig.DataStore> dataStores) {
         this.dataStores = dataStores;
-    }
-
-    public static enum DataStore {
-        DataCloud, //
-        CDL, //
-        CustomAttributes;
     }
 
     @Override
     public void copyConfig(AdvancedRatingConfig config) {
         CustomEventRatingConfig advancedConfInRetrievedAIModel = this;
         CustomEventRatingConfig advancedConfInAIModel = (CustomEventRatingConfig) config;
-        advancedConfInRetrievedAIModel.setModelingType(advancedConfInAIModel.getModelingType());
-        advancedConfInRetrievedAIModel
-                .setFieldMappingMetadataTableId(advancedConfInAIModel.getFieldMappingMetadataTableId());
-        advancedConfInRetrievedAIModel.setTrainingFilePath(advancedConfInAIModel.getTrainingFilePath());
+        advancedConfInRetrievedAIModel.setCustomEventModelingType(advancedConfInAIModel.getCustomEventModelingType());
+        advancedConfInRetrievedAIModel.setSourceFileName(advancedConfInAIModel.getSourceFileName());
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
-
     }
 }

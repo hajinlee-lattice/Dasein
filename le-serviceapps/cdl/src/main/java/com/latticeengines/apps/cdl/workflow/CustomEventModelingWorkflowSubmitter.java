@@ -36,12 +36,14 @@ import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExportType;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
@@ -50,6 +52,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWor
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.util.SegmentExportUtil;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
@@ -79,6 +82,9 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private BatonService batonService;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Value("${pls.modeling.validation.min.rows:300}")
     private long minRows;
@@ -201,11 +207,11 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .fetchOnly(true) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
-                .skipLdcOnlyAttributes(!parameters.isLdcOnlyAttributes()) //
+                .skipLdcOnlyAttributes(parameters.getExcludePropDataColumns()) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
-                .modelingType(parameters.getModelingType()) //
+                .modelingType(parameters.getCustomEventModelingType()) //
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //
                 .sourceSchemaInterpretation(schemaInterpretation) //
@@ -232,7 +238,8 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
                 .notesContent(parameters.getNotesContent()) //
-                .metadataSegmentExport(createMetadataSegmentExport(parameters.getSegmentName())) //
+                .metadataSegmentExport(createMetadataSegmentExport(parameters.getRatingEngineId(),
+                        parameters.getCustomEventModelingType())) //
                 .build();
     }
 
@@ -247,31 +254,45 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         return null;
     }
 
-    private MetadataSegmentExport createMetadataSegmentExport(String segmentName) {
-        if (StringUtils.isEmpty(segmentName)) {
+    private MetadataSegmentExport createMetadataSegmentExport(String ratingEngineId, CustomEventModelingType type) {
+        if (StringUtils.isEmpty(ratingEngineId) && type.equals(CustomEventModelingType.LPI)) {
             return null;
         }
         CustomerSpace customerSpace = CustomerSpace.parse(MultiTenantContext.getTenant().getId());
-        MetadataSegment segment = segmentProxy.getMetadataSegmentByName(customerSpace.toString(), segmentName);
-        MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
-        metadataSegmentExport.setAccountFrontEndRestriction(segment.getAccountFrontEndRestriction());
-        metadataSegmentExport.setContactFrontEndRestriction(segment.getContactFrontEndRestriction());
 
-        metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT_ID);
-        metadataSegmentExport.setAccountFrontEndRestriction(new FrontEndRestriction());
-        String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExport.getExportPrefix(), null,
-                metadataSegmentExport.getType());
-        metadataSegmentExport.setFileName(exportedFileName);
-        Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(MultiTenantContext.getTenant(),
-                metadataSegmentExport.getType(), exportedFileName);
+        RatingEngine re = ratingEngineProxy.getRatingEngine(customerSpace.toString(), ratingEngineId);
+        MetadataSegment segment = re.getSegment();
 
-        segmentExportTable = metadataProxy.getTable(customerSpace.toString(), segmentExportTable.getName());
-        metadataSegmentExport.setTableName(segmentExportTable.getName());
+        if (segment == null) {
+            switch (type) {
+            case CDL:
+                throw new LedpException(LedpCode.LEDP_40018, new String[] { ratingEngineId });
+            case LPI:
+                return null;
+            default:
+                throw new LedpException(LedpCode.LEDP_40019, new String[] { type.name() });
+            }
+        } else {
+            MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
+            metadataSegmentExport.setAccountFrontEndRestriction(segment.getAccountFrontEndRestriction());
+            metadataSegmentExport.setContactFrontEndRestriction(segment.getContactFrontEndRestriction());
 
-        String path = PathBuilder.buildDataFileUniqueExportPath(CamilleEnvironment.getPodId(), customerSpace)
-                .toString();
-        metadataSegmentExport.setPath(path);
-        return metadataSegmentExport;
+            metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT_ID);
+            metadataSegmentExport.setAccountFrontEndRestriction(new FrontEndRestriction());
+            String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExport.getExportPrefix(), null,
+                    metadataSegmentExport.getType());
+            metadataSegmentExport.setFileName(exportedFileName);
+            Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(MultiTenantContext.getTenant(),
+                    metadataSegmentExport.getType(), exportedFileName);
+
+            segmentExportTable = metadataProxy.getTable(customerSpace.toString(), segmentExportTable.getName());
+            metadataSegmentExport.setTableName(segmentExportTable.getName());
+
+            String path = PathBuilder.buildDataFileUniqueExportPath(CamilleEnvironment.getPodId(), customerSpace)
+                    .toString();
+            metadataSegmentExport.setPath(path);
+            return metadataSegmentExport;
+        }
     }
 
 }

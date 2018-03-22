@@ -1,7 +1,6 @@
 package com.latticeengines.domain.exposed.modeling;
 
-public enum ModelingType {
-
+public enum CustomEventModelingType {
     LPI, //
-    CDL;
+    CDL
 }
