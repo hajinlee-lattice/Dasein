@@ -12,7 +12,7 @@ angular
                 enrichment:'=?'
 
             },
-            templateUrl: '/components/datacloud/explorer/attributetile/graph/bar-chart.component.html',
+            templateUrl: '/components/charts/bar-chart.component.html',
             controller: function ($scope, $filter, $timeout) {
 
                 function getHighestStat(stats, fieldName) {
