@@ -56,6 +56,14 @@ public class ActivityMetricsUtils {
         return fullName.substring(0, fullName.indexOf(SEPARATOR));
     }
 
+    public static String getDepivotedAttrNameFromFullName(String fullName) {
+        if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
+            return null;
+        }
+        fullName = fullName.substring(HEADER.length()); // remove header
+        return fullName.substring(fullName.indexOf(SEPARATOR) + 2);
+    }
+
     public static String getMetricsFromFullName(String fullName) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;

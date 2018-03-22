@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
@@ -23,34 +24,34 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 public class RestrictionUtils {
 
     public static final AttributeLookup TRANSACTION_LOOKUP =
-            new AttributeLookup(BusinessEntity.PurchaseHistory, "Has_Purchased");
+            new AttributeLookup(BusinessEntity.PurchaseHistory, "HasPurchased");
 
     public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction) {
+        Restriction restriction;
         Bucket bkt = bucketRestriction.getBkt();
-        AttributeLookup attr = bucketRestriction.getAttr();
         if (bkt == null) {
             throw new IllegalArgumentException("cannot convert null bucket restriction");
         }
 
-        if (BusinessEntity.TRANSACTION_ENTITIES.contains(attr.getEntity())) {
-            Bucket.Transaction transaction = bkt.getTransaction();
-            if (transaction == null) {
-                throw new IllegalArgumentException(
-                        "A " + attr.getEntity() + " bucket must have transaction (Txn) field.");
+        Bucket.Transaction transaction = bkt.getTransaction();
+        if (transaction != null) {
+            restriction = convertTxnBucket(transaction);
+        } else {
+            ComparisonType comparisonType = bkt.getComparisonType();
+            List<Object> values = bkt.getValues();
+            if (comparisonType == null) {
+                throw new UnsupportedOperationException(
+                        "Bucket without comparator is obsolete. You might need to update your query to latest schema.");
             } else {
-                return convertTxnBucket(transaction);
+                AttributeLookup attr = bucketRestriction.getAttr();
+                if (BusinessEntity.PurchaseHistory.equals(attr.getEntity())) {
+                    restriction = convertPurchaseHistoryBucket(attr, comparisonType, values);
+                } else {
+                    restriction = convertValueComparisons(attr, comparisonType, values);
+                }
             }
         }
-
-        ComparisonType comparisonType = bkt.getComparisonType();
-        List<Object> values = bkt.getValues();
-
-        if (comparisonType == null) {
-            throw new UnsupportedOperationException(
-                    "Bucket without comparator is obsolete. You might need to update your query to latest schema.");
-        } else {
-            return RestrictionUtils.convertValueComparisons(attr, comparisonType, values);
-        }
+        return restriction;
     }
 
     public static Restriction convertConcreteRestriction(ConcreteRestriction concreteRestriction) {
@@ -95,6 +96,18 @@ public class RestrictionUtils {
             transactionRestriction.setSpentFilter(spentFilter);
         }
         return transactionRestriction;
+    }
+
+    private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator, List<Object> values) {
+        String fullAttrName = attr.getAttribute();
+        String metricAttr = ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullAttrName);
+        String bundleId = ActivityMetricsUtils.getActivityIdFromFullName(fullAttrName);
+        AttributeLookup metricAttrLookup = new AttributeLookup(BusinessEntity.DepivotedPurchaseHistory, metricAttr);
+        Restriction metricRestriction = convertValueComparisons(metricAttrLookup, comparator, values);
+        Restriction bundleIdRestriction = Restriction.builder() //
+                .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()) //
+                .eq(bundleId).build();
+        return Restriction.builder().and(bundleIdRestriction, metricRestriction).build();
     }
 
     private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType,

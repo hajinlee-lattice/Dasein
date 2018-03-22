@@ -112,7 +112,8 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         for (String existingTableName : existingTableNames) {
             log.info("There are already table(s) of role " + role + " in data collection " + collectionName);
             if (!existingTableName.equals(tableName)) {
-                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName).size();
+                int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName)
+                        .size();
                 removeTable(customerSpace, collectionName, existingTableName, role, version);
                 if (numLinks == 1) {
                     new Thread(() -> {
@@ -302,13 +303,18 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 version);
         AttributeRepository attrRepo = AttributeRepository.constructRepo(statsCubes, tableMap,
                 CustomerSpace.parse(customerSpace), collectionName);
-        List<Table> productTables = getTables(customerSpace, collectionName, BusinessEntity.Product.getServingStore(),
-                version);
+        addEntityToAttrRepo(attrRepo, BusinessEntity.Product, customerSpace, collectionName, version);
+        addEntityToAttrRepo(attrRepo, BusinessEntity.DepivotedPurchaseHistory, customerSpace, collectionName, version);
+        return attrRepo;
+    }
+
+    private void addEntityToAttrRepo(AttributeRepository attrRepo, BusinessEntity entity, String customerSpace,
+            String collectionName, DataCollection.Version version) {
+        List<Table> productTables = getTables(customerSpace, collectionName, entity.getServingStore(), version);
         if (productTables != null && !productTables.isEmpty()) {
             Table productTable = productTables.get(0);
-            attrRepo.appendServingStore(BusinessEntity.Product, productTable);
+            attrRepo.appendServingStore(entity, productTable);
         }
-        return attrRepo;
     }
 
     private Map<TableRoleInCollection, Table> constructRoleTableMap(String customerSpace, String collectionName,
@@ -348,7 +354,6 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         if (entitySet.contains(BusinessEntity.PurchaseHistory)) {
             entitySet.add(BusinessEntity.Transaction);
             entitySet.add(BusinessEntity.PeriodTransaction);
-            // TODO: do not remove after M18
             entitySet.remove(BusinessEntity.PurchaseHistory);
         }
         return entitySet.stream().map(BusinessEntity::getServingStore).collect(Collectors.toList());
@@ -358,12 +363,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
     public String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber) {
         DataCollection collection = getDataCollection(customerSpace, collectionName);
         collection.setDataCloudBuildNumber(dataCloudBuildNumber);
-        log.info("Setting DataCloudBuildNumber of " + collection.getName() + " in " + customerSpace + " to " + dataCloudBuildNumber);
+        log.info("Setting DataCloudBuildNumber of " + collection.getName() + " in " + customerSpace + " to "
+                + dataCloudBuildNumber);
         dataCollectionEntityMgr.update(collection);
         return collection.getDataCloudBuildNumber();
     }
-
-
 
     @Override
     @NoCustomerSpace
