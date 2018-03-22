@@ -22,7 +22,7 @@
                   auth="Container"
                   type="javax.sql.DataSource"
                   driverClassName="com.mysql.jdbc.Driver"
-                  url="jdbc:mysql://localhost:3306/PLS_MultiTenant?autoReconnect=true&useSSL=false"
+                  url="jdbc:mysql://localhost:3306/PLS_MultiTenant?autoReconnect=true&amp;useSSL=false"
                   username="root"
                   password="welcome"
 
@@ -34,7 +34,7 @@
                   auth="Container"
                   type="javax.sql.DataSource"
                   driverClassName="com.mysql.jdbc.Driver"
-                  url="jdbc:mysql://localhost:3306/GlobalAuthentication?autoReconnect=true&useSSL=false"
+                  url="jdbc:mysql://localhost:3306/GlobalAuthentication?autoReconnect=true&amp;useSSL=false"
                   username="root"
                   password="welcome"
 
@@ -46,7 +46,7 @@
                   auth="Container"
                   type="javax.sql.DataSource"
                   driverClassName="com.mysql.jdbc.Driver"
-                  url="jdbc:mysql://localhost:3306/QuartzDB?autoReconnect=true&useSSL=false"
+                  url="jdbc:mysql://localhost:3306/QuartzDB?autoReconnect=true&amp;useSSL=false"
                   username="root"
                   password="welcome"
 
@@ -58,7 +58,7 @@
                   auth="Container"
                   type="javax.sql.DataSource"
                   driverClassName="com.mysql.jdbc.Driver"
-                  url="jdbc:mysql://localhost:3306/Data_MultiTenant?autoReconnect=true&useSSL=false"
+                  url="jdbc:mysql://localhost:3306/Data_MultiTenant?autoReconnect=true&amp;useSSL=false"
                   username="root"
                   password="welcome"
 
