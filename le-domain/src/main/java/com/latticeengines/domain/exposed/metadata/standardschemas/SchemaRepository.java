@@ -1256,13 +1256,17 @@ public class SchemaRepository {
                 .build();
 
         List<Attribute> attrs = new ArrayList<>();
-        if (schema == SchemaInterpretation.Account || schema == SchemaInterpretation.SalesforceAccount) {
+        if (schema == SchemaInterpretation.SalesforceAccount) {
             attrs.add(website);
             attrs.add(accountCompanyName);
-            if (schema == SchemaInterpretation.Account) {
-                attrs.addAll(Arrays.asList(address1, address2));
-            }
             attrs.addAll(Arrays.asList(city, state, country, postalCode, phoneNumber, duns));
+            attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
+        } else if (schema == SchemaInterpretation.Account) {
+            List<Attribute> attributeWithDefaultValue = Arrays.asList(website, accountCompanyName, duns, city, state,
+                    country, postalCode, phoneNumber);
+            setDefaultEmptyStrForAttrs(attributeWithDefaultValue);
+            attrs.addAll(attributeWithDefaultValue);
+            attrs.addAll(Arrays.asList(address1, address2));
             attrs.forEach(a -> a.setCategory(Category.ACCOUNT_INFORMATION));
         } else if (schema == SchemaInterpretation.Contact || schema == SchemaInterpretation.SalesforceLead) {
             attrs.add(email);
@@ -1278,6 +1282,12 @@ public class SchemaRepository {
             }
         }
         return attrs;
+    }
+
+    private void setDefaultEmptyStrForAttrs(List<Attribute> attributeList) {
+        for (Attribute attr : attributeList) {
+            attr.setDefaultValueStr("");
+        }
     }
 
     public List<Attribute> matchingAttributes(BusinessEntity entity) {
