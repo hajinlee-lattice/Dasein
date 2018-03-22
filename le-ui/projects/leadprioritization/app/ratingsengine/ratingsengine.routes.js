@@ -8,6 +8,7 @@ angular
         'lp.ratingsengine.creationhistory',
         'lp.ratingsengine.ratingsenginetype',
         'lp.ratingsengine.dashboard',
+        'lp.ratingsengine.activatescoring',
         'lp.notes',
         'lp.ratingsengine.wizard.segment',
         'lp.ratingsengine.wizard.attributes',
@@ -398,6 +399,46 @@ angular
                         controller: 'NotesController',
                         controllerAs: 'vm',
                         templateUrl: 'app/notes/NotesView.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.dashboard.activatescoring', {
+                url: '/activatescoring',
+                resolve: {
+                    Tmp: function($q, $stateParams) {
+                        var deferred = $q.defer();
+
+                        deferred.resolve([]);
+
+                        return deferred.promise;
+                    }
+                },
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Activate Scoring',
+                    section: 'dashboard.activatescoring'
+                },
+                views: {
+                    "navigation@home": {
+                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+                            $scope.rating_id = $stateParams.rating_id || '';
+                            $scope.modelId = $stateParams.modelId || '';
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+                            $scope.stateName = function () {
+                                return $state.current.name;
+                            }
+                            $rootScope.$broadcast('header-back', {
+                                path: '^home.rating.dashboard',
+                                displayName: Dashboard.summary.displayName,
+                                sref: 'home.ratingsengine'
+                            });
+                        },
+                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
+                    },
+                    "main@": {
+                        controller: 'RatingsEngineActivateScoring',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/activatescoring/activatescoring.component.html'
                     }
                 }
             })
