@@ -281,8 +281,13 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Kick off modeling job for a Rating Engine AI model and return the job id. Returns the job id if the modeling job already exists.")
     public String ratingEngineModel(@PathVariable String ratingEngineId, @PathVariable String ratingModelId) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId,
-                MultiTenantContext.getEmailAddress());
+        try {
+            Tenant tenant = MultiTenantContext.getTenant();
+            return ratingEngineProxy.modelRatingEngine(tenant.getId(), ratingEngineId, ratingModelId,
+                    MultiTenantContext.getEmailAddress());
+        } catch (Exception ex) {
+            log.error("Modeling job failed!", ex);
+            throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
+        }
     }
 }

@@ -67,8 +67,13 @@ public class ScoreResource {
     public String scoreRating(//
             @PathVariable String modelId, //
             @RequestBody RatingEngineScoringParameters parameters) {
-        return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
-                scoringJobService.scoreRatinggData(modelId, parameters)));
+        try {
+            return JsonUtils.serialize(ImmutableMap.<String, String> of("applicationId", //
+                    scoringJobService.scoreRatinggData(modelId, parameters)));
+        } catch (Exception ex) {
+            log.error("Scoring job failed!", ex);
+            throw new RuntimeException("Scoring job failed, contact Lattice support for details!");
+        }
 
     }
 }

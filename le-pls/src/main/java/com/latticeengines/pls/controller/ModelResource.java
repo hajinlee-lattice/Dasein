@@ -113,8 +113,13 @@ public class ModelResource {
     public ResponseDocument<String> ratingEngineModel(@PathVariable String modelName, //
             @RequestBody RatingEngineModelingParameters parameters) {
         parameters.setUserId(MultiTenantContext.getEmailAddress());
-        return ResponseDocument
-                .successResponse(cdlModelProxy.model(MultiTenantContext.getTenant().getId(), modelName, parameters));
+        try {
+            return ResponseDocument.successResponse(
+                    cdlModelProxy.model(MultiTenantContext.getTenant().getId(), modelName, parameters));
+        } catch (Exception ex) {
+            log.error("Modeling job failed!", ex);
+            throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
+        }
     }
 
     @RequestMapping(value = "/rating/{modelName}/clone", method = RequestMethod.POST)
@@ -123,9 +128,14 @@ public class ModelResource {
     public ResponseDocument<String> ratingEngineCloneAndRemodel(@PathVariable String modelName,
             @RequestBody CloneModelingParameters parameters) {
 
-        parameters.setUserId(MultiTenantContext.getEmailAddress());
-        return ResponseDocument
-                .successResponse(cdlModelProxy.clone(MultiTenantContext.getTenant().getId(), modelName, parameters));
+        try {
+            parameters.setUserId(MultiTenantContext.getEmailAddress());
+            return ResponseDocument.successResponse(
+                    cdlModelProxy.clone(MultiTenantContext.getTenant().getId(), modelName, parameters));
+        } catch (Exception ex) {
+            log.error("Modeling job failed!", ex);
+            throw new RuntimeException("Modeling job failed, contact Lattice support for details!");
+        }
     }
 
     @RequestMapping(value = "/{modelName}/clone", method = RequestMethod.POST)
