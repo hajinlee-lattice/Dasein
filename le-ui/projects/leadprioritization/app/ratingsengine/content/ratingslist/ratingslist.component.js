@@ -46,12 +46,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.init = function($q, $filter) {
-
-        vm.current.ratings[vm.current.ratings.length - 1].modelingStrategy = 'CROSS_SELL_FIRST_PURCHASE';
-        vm.current.ratings[vm.current.ratings.length - 2].modelingStrategy = 'CROSS_SELL_REPEAT_PURCHASE';
-        vm.current.ratings[vm.current.ratings.length - 3].modelingStrategy = 'RULE_BASED';
-        vm.current.ratings[vm.current.ratings.length - 4].modelingStrategy = 'CUSTOM_EVENT';
-
+        
         // console.log(vm.current.ratings);
 
         RatingsEngineStore.clear();

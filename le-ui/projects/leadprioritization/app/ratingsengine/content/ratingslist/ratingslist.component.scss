@@ -8,6 +8,9 @@
 			background-position: center;
 		}
 	}
+	.tile-header h2 {
+		background-image: url('/assets/images/ico-model-black.png');
+	}
 	.tiles {
 		& > li.CROSS_SELL_FIRST_PURCHASE {
 			.tile-header h2 {
