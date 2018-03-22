@@ -2,7 +2,7 @@ angular
 .module('lp.create.import')
 .controller('CustomFieldsController', function(
     $scope, $state, $stateParams, $timeout, $anchorScroll, ResourceUtility, FeatureFlagService,
-    ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal
+    ImportService, ImportStore, FieldDocument, UnmappedFields, CancelJobModal, RatingsEngineStore
 ) {
     var _mappingOptions = [
         { id: 0, name: "Custom Predictor" },
@@ -16,6 +16,7 @@ angular
         FormValidated: true,
         ResourceUtility: ResourceUtility,
         csvFileName: $stateParams.csvFileName,
+        cdlEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_CDL),
         fuzzyMatchEnabled: FeatureFlagService.FlagIsEnabled(FeatureFlagService.Flags().ENABLE_FUZZY_MATCH),
         mappingOptions: _mappingOptions.slice(),
         mappingOptionsReserved: Array.prototype.concat(_mappingOptions.slice(0,1), _mappingOptions.slice(2)),
@@ -36,13 +37,18 @@ angular
         ignoredFieldLabel: '-- Unmapped Field --',
         UnmappedFieldsMap: {},
         standardFieldMappings: {},
-        AvailableFields: []
+        AvailableFields: [],
+        showAdditionalFieldsCDL: true
     });
 
     vm.init = function() {
+        if (RatingsEngineStore.getModelingType()) {
+            RatingsEngineStore.setValidation("mapping", false);
+            vm.showAdditionalFieldsCDL = RatingsEngineStore.getModelingType() != 'CDL';
+        }
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};
-        vm.schema = vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
+        vm.schema = vm.cdlEnabled ? 'SalesforceAccount' : vm.csvMetadata.schemaInterpretation || 'SalesforceLead';
         vm.UnmappedFields = UnmappedFields[vm.schema] || [];
 
         vm.standardFieldsList[2] = (vm.schema === 'SalesforceLead') ? 'Email' : 'Website';
@@ -121,6 +127,10 @@ angular
         mapping.fieldType = vm.UnmappedFieldsMap[mapping.mappedField] ? vm.UnmappedFieldsMap[mapping.mappedField].fieldType : null;
 
         vm.refreshLatticeFields();
+
+        if (vm.cdlEnabled) {
+            vm.updateFieldMappings();
+        }
     };
 
     vm.refreshLatticeFields = function() {
@@ -167,6 +177,10 @@ angular
     vm.clickNext = function() {
         vm.NextClicked = true;
 
+        vm.updateFieldMappings();
+    };
+
+    vm.updateFieldMappings = function() {
         var userFieldMappingsMap = {},
             mappedFieldMappingsMap = {};
 
@@ -310,6 +324,10 @@ angular
 
         for (var field in vm.requiredFieldsMissing) {
              vm.FormValidated = vm.FormValidated && !vm.requiredFieldsMissing[field];
+        }
+
+        if (vm.cdlEnabled) {
+            RatingsEngineStore.setValidation("mapping", vm.FormValidated);
         }
     };
 

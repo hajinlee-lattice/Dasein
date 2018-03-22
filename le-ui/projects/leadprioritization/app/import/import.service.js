@@ -521,6 +521,9 @@ angular.module('lp.import')
                 'source': 'File',
 	            'feedType': entity + 'Schema' 
             };
+            if (!entity) {
+                params = {};
+            }
 
 	        $http({
 	            method: 'GET',
@@ -534,14 +537,22 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.GetFieldDocument = function(FileName, entity) {
+	    this.GetFieldDocument = function(FileName, entity, schema) {
 	        var deferred = $q.defer();
 	        var entity = entity;
-	        var params =  {
-                'entity': entity,
-                'source': 'File',
-	            'feedType': entity + 'Schema'
-            };
+            var data = data || {};
+            var params = {};
+            if (entity) {
+    	       params = {
+                    'entity': entity,
+                    'source': 'File',
+    	            'feedType': entity + 'Schema'
+                }
+            } else {
+                params = {
+                    'schema': schema
+                }
+            }
 
 	        $http({
 	            method: 'POST',

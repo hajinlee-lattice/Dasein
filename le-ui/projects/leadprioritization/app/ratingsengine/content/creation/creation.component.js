@@ -18,10 +18,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         vm.setValidation('creation', true);
 
-    	var model = vm.ratingEngine.activeModel.AI,
-            type = vm.ratingEngine.type.toLowerCase();
+    	var model = vm.ratingEngine.activeModel.AI;
+        vm.type = vm.ratingEngine.type.toLowerCase();
 
-        if (type === 'cross_sell') {
+        if (vm.type === 'cross_sell') {
 
             console.log(model);
 
@@ -68,6 +68,14 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             if (vm.trainingProducts !== null) {
                 vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
             }
+
+        } else if (vm.type == 'custom_event') {
+
+            vm.ratingEngineType = 'Custom Event'
+            vm.prioritizeBy = 'Likely to Buy';
+
+            var dataStore = model.advancedModelingConfig.custom_event.dataStores;
+            vm.attributesUsed = dataStore.length == 1 ? vm.formatTrainingAttributes(dataStore[0]) : vm.formatTrainingAttributes(dataStore[0]) + ' and ' + vm.formatTrainingAttributes(dataStore[1]);
 
         }
         
@@ -116,6 +124,17 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     vm.setValidation = function (type, validated) {
         RatingsEngineStore.setValidation(type, validated);
     };
+
+    vm.formatTrainingAttributes = function(type) {
+        switch (type) {
+            case 'DataCloud':
+                return 'DataCloud';
+            case 'CDL':
+                return 'Lattice Database';
+            case 'CustomAttributes':
+                return 'custom';
+        }
+    }
 
     vm.init();
 

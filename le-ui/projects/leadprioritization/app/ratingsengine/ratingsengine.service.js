@@ -1,7 +1,7 @@
 angular.module('lp.ratingsengine')
 .service('RatingsEngineStore', function(
     $q, $state, $stateParams,  $rootScope, RatingsEngineService, DataCloudStore,
-    BrowserStorageUtility, SegmentStore, $timeout
+    BrowserStorageUtility, SegmentStore, ImportWizardService, $timeout
 ){
     var RatingsEngineStore = this;
     
@@ -28,7 +28,8 @@ angular.module('lp.ratingsengine')
             prioritization: false,
             training: true,
             refine: false,
-            model: false
+            model: false,
+            mapping: false
         }
 
         this.segment_form = {
@@ -48,6 +49,15 @@ angular.module('lp.ratingsengine')
         this.configFilters = {};
         this.trainingSegment = null;
         this.trainingProducts = null;
+        this.dataStores = [];
+        this.modelTrainingOptions = {
+            "deduplicationType": "ONELEADPERDOMAIN",
+            "excludePublicDomains": false,
+        },
+        this.modelingType = "";
+        this.FieldDocument = {};
+        this.fileName = "";
+        this.filePath = ""; //TO_DELETE -- SHOULD ONLY NEED FILENAME
 
         this.wizardProgressItems = {
             "rulesprospects": [
@@ -157,6 +167,49 @@ angular.module('lp.ratingsengine')
                         $state.go('home.ratingsengine.ratingsenginetype');
                     } 
                 }
+            ],
+            "customevent": [
+                {
+                    label:'Segment',
+                    state:'segment',
+                    nextLabel: 'Next',
+                    nextFn: function(nextState) {
+                        console.log('nextState', nextState);
+                        RatingsEngineStore.nextSaveCustomEventRatingEngine(nextState);
+                    }
+                },
+                {
+                    label:'Attributes',
+                    state:'segment.attributes',
+                    nextLabel: 'Next',
+                    nextFn: function(nextState) {
+                        console.log('nextState', nextState);
+                        RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
+                    }
+                },
+                {
+                    label:'Training',
+                    state:'segment.attributes.training',
+                    nextLabel: 'Next',
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
+                    }
+                }, {
+                    label:'Mapping',
+                    state:'segment.attributes.training.mapping',
+                    nextLabel: 'Next',
+                    nextFn: function(nextState) {
+                        RatingsEngineStore.saveFieldMapping(nextState);
+                    }
+                },{
+                    label:'Creation',
+                    state:'segment.attributes.training.mapping.creation',
+                    nextLabel: 'Done',
+                    nextFn: function(nextState) {
+                        console.log('Done');
+                    }
+                }
+
             ]
         };
     }
@@ -567,6 +620,29 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
+    this.getModelTrainingOptions = function() {
+        return this.modelTrainingOptions;
+    }
+
+    this.setModelTrainingOptions = function(trainingOptions) {
+        this.modelTrainingOptions = trainingOptions;
+    }
+
+    this.setDataStores = function(dataStores) {
+        this.dataStores = dataStores;
+    }
+
+    this.getDataStores = function() {
+        return this.dataStores;
+    }
+
+    this.setModelingType = function(modelingType) {
+        this.modelingType = modelingType;
+    }
+
+    this.getModelingType = function() {
+        return this.modelingType;
+    }
 
     this.setModelingStrategy = function(modelingStrategy) {
         this.modelingStrategy = modelingStrategy;
@@ -579,6 +655,30 @@ angular.module('lp.ratingsengine')
     }
     this.getPredictionType = function() {
         return this.predictionType;
+    }
+
+    this.setFieldDocument = function(fieldDocument) {
+        RatingsEngineStore.FieldDocument = fieldDocument;
+    }
+
+    this.getFieldDocument = function() {
+        return RatingsEngineStore.FieldDocument;
+    }
+
+    this.setCSVFileName = function(fileName) {
+        RatingsEngineStore.fileName = fileName;
+    }
+
+    this.getCSVFileName = function() {
+        return RatingsEngineStore.fileName;
+    }
+
+    this.setFilePath = function(filePath) {
+        RatingsEngineStore.filePath = filePath;
+    }
+
+    this.getFilePath = function() {
+        return RatingsEngineStore.filePath;
     }
     
     this.setConfigFilters = function(configFilters) {
@@ -625,6 +725,80 @@ angular.module('lp.ratingsengine')
         RatingsEngineStore.saveRating(opts).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });
+    }
+
+    this.nextSaveCustomEventRatingEngine = function(nextState){
+
+        var opts = {
+          type: "CUSTOM_EVENT"
+        };
+
+        RatingsEngineStore.saveRating(opts).then(function(rating) {
+            $state.go(nextState, { rating_id: rating.id });
+        });
+    }
+
+    this.nextSaveCustomEventRatingModel = function(nextState) {
+        var ratingId = $stateParams.rating_id;
+        RatingsEngineStore.getRating(ratingId).then(function(rating) {
+            var model = rating.activeModel,
+                predictionType = RatingsEngineStore.getPredictionType(),
+                dataStores = RatingsEngineStore.getDataStores(),
+                modelingType = RatingsEngineStore.getModelingType();
+                modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
+                filePath = RatingsEngineStore.getFilePath(); // TO DELETE
+                fileName = RatingsEngineStore.getCSVFileName();
+                obj = {};
+
+            obj = {
+                AI: {
+                    id: rating.activeModel.AI.id,
+                    predictionType: predictionType,
+                    advancedModelingConfig: {
+                        'custom_event': {
+                            modelingType: modelingType,
+                            dataStores: dataStores,
+                            trainingFilePath: filePath, // TO DELETE
+                            sourceFileName: fileName,
+                            fieldMappingMetadataTableId: fileName, // TO DELETE
+                            deduplicationType: modelTrainingOptions['deduplicationType'],
+                            excludePublicDomains: modelTrainingOptions['excludePublicDomains']
+                        }
+                    }
+                }
+            }
+
+            RatingsEngineService.updateRatingModel(ratingId, obj.AI.id, obj).then(function(model) {
+                $state.go(nextState, { rating_id: ratingId });
+            });
+        });
+    }
+
+    this.saveFieldMapping = function(nextState) {
+        var ratingId = $stateParams.rating_id;
+        
+        var FieldDocument = RatingsEngineStore.getFieldDocument();
+        FieldDocument.fieldMappings.forEach(function(fieldMapping) {
+            if (fieldMapping.ignored) {
+                FieldDocument.ignoredFields.push(fieldMapping.userField);
+                delete fieldMapping.ignored;
+            } else if (!fieldMapping.mappedToLatticeField) {
+                // CustomFieldsController handles LPI case
+                if (RatingsEngineStore.getModelingType() == 'CDL') { 
+                    // treat unmapped fields as ignored
+                    fieldMapping.mappedField = fieldMapping.userField;
+                    fieldMapping.ignored = true;
+                    FieldDocument.ignoredFields.push(fieldMapping.mappedField);
+                }
+            }
+        });
+
+        ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument).then(function(result) {
+            RatingsEngineStore.getRating(ratingId).then(function(rating) {
+                RatingsEngineStore.nextLaunchAIModel(nextState, rating.activeModel);
+            });
+        });
+        $state.go(nextState);
     }
 
     this.nextSaveAIRatingModel = function(nextState){

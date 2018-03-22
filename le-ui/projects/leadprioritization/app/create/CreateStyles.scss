@@ -211,6 +211,9 @@ Create Model: Custom Fields Page
 ================================================================== */
 section.container.custom-fields {
     margin-top: 3em;
+    &.no-borders {
+        margin-top: 0px;
+    }
     hgroup {
         position: relative;
         margin-bottom: 49px;

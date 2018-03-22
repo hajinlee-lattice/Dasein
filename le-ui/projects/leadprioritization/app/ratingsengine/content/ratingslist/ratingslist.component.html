@@ -124,7 +124,7 @@
                         
                         <div 
                             ng-class="{'inactive': rating.status === 'INACTIVE'}"
-                            ng-if="rating.type != 'CROSS_SELL'">
+                            ng-if="rating.type != 'CROSS_SELL' && rating.type != 'CUSTOM_EVENT' ">
                             <barchart 
                                 header="Account Ratings"	
                                 ratings="true" 
@@ -137,7 +137,7 @@
                         </div> -->
 
                         <div 
-                            ng-if="rating.type === 'CROSS_SELL'"
+                            ng-if="rating.type === 'CROSS_SELL' || rating.type == 'CUSTOM_EVENT'"
                             class="ai-based">
                         </div>
 

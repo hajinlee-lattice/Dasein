@@ -15,7 +15,8 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         showPagination: true,
         hasSegments: true,
         sortBy: 'Selected',
-        segmentsKeyMap: {}
+        segmentsKeyMap: {},
+        scoreTrainingFile: false
     });
 
     var makeSegmentsKeyMap = function(segments) {
@@ -140,6 +141,20 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
         RatingsEngineStore.setValidation('segment', true);
     	RatingsEngineStore.setSegment(segment);
+        RatingsEngineStore.setModelingType('CDL');
+    }
+
+    vm.selectTrainingFile = function() {
+        if (vm.scoreTrainingFile) {
+            // RatingsEngineStore.setSegment(vm.segments[vm.segments.length - 1]);
+            RatingsEngineStore.setSegment(null);
+
+            vm.stored.segment_selection = "";
+            RatingsEngineStore.setModelingType('LPI');
+            RatingsEngineStore.setValidation('segment', true);
+        } else {
+            RatingsEngineStore.setValidation('segment', false);
+        }
     }
 
 

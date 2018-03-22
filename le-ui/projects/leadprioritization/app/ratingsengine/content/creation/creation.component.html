@@ -14,7 +14,7 @@
                     <dt>Segment:</dt>
                     <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
                     
-                    <dt>Products:</dt>
+                    <dt ng-if="vm.targetProducts.length > 0">Products:</dt>
                     <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
                     <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
 
@@ -27,7 +27,7 @@
                 <dl ng-if="vm.hasSettingsInfo">
                     <dt>Model Settings:</dt>
                     <dd>
-                        <ul>
+                        <ul ng-if="vm.type == 'cross_sell'">
                             <li 
                                 ng-if="vm.configFilters['SPEND_IN_PERIOD']">
                                 Spend in the quarter was {{ vm.spendCriteria }} ${{ vm.configFilters['SPEND_IN_PERIOD'].value | number }}
@@ -45,10 +45,15 @@
                                 Model with similar segment: {{ vm.trainingSegment.display_name }}
                             </li>
                             <li
-                                ng-if="vm.trainingProducts.length !== 0">
+                                ng-if="vm.trainingProducts.length > 0">
                                 Model with similar product(s): 
                                 <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
                                 <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
+                            </li>
+                        </ul>
+                        <ul ng-if="vm.type == 'custom_event'">
+                            <li>
+                                Model with {{vm.attributesUsed}} attributes
                             </li>
                         </ul>
                     </dd>

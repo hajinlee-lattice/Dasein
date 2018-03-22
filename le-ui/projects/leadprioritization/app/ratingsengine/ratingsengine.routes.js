@@ -1022,5 +1022,207 @@ angular
                         templateUrl: 'app/ratingsengine/content/creation/creation.component.html'
                     }
                 }
+            })
+            .state('home.ratingsengine.customevent', {
+                url: '/custom/:rating_id/:wizard_steps',
+                params: {
+                    rating_id: '',
+                    wizard_steps: 'customevent'
+                },
+                resolve: {
+                    WizardValidationStore: function (RatingsEngineStore) {
+                        return RatingsEngineStore;
+                    },
+                    WizardProgressContext: function () {
+                        return 'ratingsengine.customevent';
+                    },
+                    WizardProgressItems: function ($stateParams, RatingsEngineStore) {
+                        var rating_id = $stateParams.rating_id || '',
+                            wizard_steps = $stateParams.wizard_steps || 'customevent';
+
+                        console.log(wizard_steps);
+
+                        return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
+                    }
+                },
+                views: {
+                    'summary@': {
+                        controller: function ($state, $scope, RatingsEngineStore) {
+                            $scope.$on('$destroy', function () {
+                                if (!$state.params.wizard_steps) {
+                                    RatingsEngineStore.clear();
+                                }
+                            });
+                        },
+                        templateUrl: 'app/navigation/summary/BlankLine.html'
+                    },
+                    'main@': {
+                        resolve: {
+                            WizardHeaderTitle: function () {
+                                return 'Create Custom Event Model';
+                            },
+                            WizardContainerId: function () {
+                                return 'ratingsengine';
+                            }
+                        },
+                        controller: 'ImportWizard',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/wizard/wizard.component.html'
+                    },
+                    'wizard_progress@home.ratingsengine.customevent': {
+                        resolve: {
+                            DisableWizardNavOnLastStep: function () {
+                                return null;
+                            }
+                        },
+                        controller: 'ImportWizardProgress',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/wizard/progress/progress.component.html'
+
+                    },
+                    'wizard_controls@home.ratingsengine.customevent': {
+                        resolve: {
+                            WizardControlsOptions: function (RatingsEngineStore) {
+                                return {
+                                    backState: 'home.ratingsengine',
+                                    nextState: 'home.ratingsengine.dashboard'
+                                };
+                            }
+                        },
+                        controller: 'ImportWizardControls',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/wizard/controls/controls.component.html'
+                    }
+                },
+                redirectTo: 'home.ratingsengine.customevent.segment'
+            })
+            .state('home.ratingsengine.customevent.segment', {
+                url: '/segment',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
+                    section: 'wizard.ratingsengine_segment'
+                },
+                resolve: {
+                    Segments: function (SegmentService) {
+                        return SegmentService.GetSegments();
+                    },
+                    CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if (!$stateParams.rating_id) {
+                            deferred.resolve(RatingsEngineStore.currentRating);
+                        } else {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                                deferred.resolve(result);
+                            });
+                        }
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.customevent': {
+                        controller: 'RatingsEngineSegment',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.customevent.segment.attributes', {
+                url: '/attributes',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
+                    section: 'wizard.ratingsengine_attributes'
+                },
+                resolve: {
+                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                            deferred.resolve(result)
+                        });
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.customevent': {
+                        controller: 'RatingsEngineAttributes',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/attributes/attributes.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.customevent.segment.attributes.training', {
+                url: '/training',
+                views: {
+                    'wizard_content@home.ratingsengine.customevent': {
+                        controller: 'RatingsEngineCustomEventTraining',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/training/customeventtraining.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.customevent.segment.attributes.training.mapping', {
+                url: '/mapping',
+                resolve: {
+                    FieldDocument: function($q, RatingsEngineStore, ImportWizardService, ImportWizardStore) {
+                        var deferred = $q.defer();
+
+                        var modelingType = RatingsEngineStore.getModelingType();
+                        ImportWizardService.GetFieldDocument(RatingsEngineStore.getCSVFileName(), '', modelingType == 'CDL' ? 'Account' : 'SalesforceAccount').then(function(result) {
+                            RatingsEngineStore.setFieldDocument(result.Result);
+                            deferred.resolve(result.Result);
+                        });
+
+                        return deferred.promise;
+                    },
+                    UnmappedFields: function($q, ImportWizardService, ImportWizardStore) {
+                        var deferred = $q.defer();
+
+                        ImportWizardService.GetSchemaToLatticeFields(null).then(function(result) {
+                            deferred.resolve(result['SalesforceAccount']);
+                        });
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.customevent': {
+                        controllerAs: 'vm',
+                        controller: 'CustomFieldsController',
+                        templateUrl: 'app/create/customfields/CustomFieldsView.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.customevent.segment.attributes.training.mapping.creation', {
+                url: '/creation',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Rating Engines',
+                },
+                resolve: {
+                    Rating: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                            deferred.resolve(result)
+                        });
+
+                        return deferred.promise;
+                    },
+                    Products: function () {
+                        return [];
+                    }
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.customevent': {
+                        controller: 'RatingsEngineCreation',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/creation/creation.component.html'
+                    }
+                }
             });
     });
