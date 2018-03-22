@@ -3,6 +3,7 @@ package com.latticeengines.pls.service.impl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.WorkflowJobService;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 @Component("workflowJobService")
@@ -73,6 +75,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private DataFeedProxy dataFeedProxy;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -204,9 +209,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
-            DateTime dateTime = new DateTime();
-            // set the start time to be in the future for UI sorting purpose
-            job.setStartTimestamp(dateTime.plusDays(1).toDate());
+            Date nextInvokeDate = new DateTime().plus(1).toDate();
+            try {
+                nextInvokeDate = new Date(dataFeedProxy.nextInvokeTime(MultiTenantContext.getTenantId()));
+            } catch (Exception e) {
+                log.warn(String.format("Geting next invoke time for tenant %s has error.",
+                        MultiTenantContext.getTenantId()));
+            }
+            job.setStartTimestamp(nextInvokeDate);
             if (expandChildrenJobs) {
                 job.setSubJobs(expandActions(actions));
             }

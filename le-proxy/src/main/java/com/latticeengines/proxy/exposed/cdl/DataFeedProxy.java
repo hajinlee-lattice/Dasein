@@ -139,6 +139,12 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return get("getDataFeedTaskById", url, DataFeedTask.class);
     }
 
+    public Long nextInvokeTime(String customerSpace) {
+        String url = constructUrl("/customerspaces/{customerSpace}/datafeed/nextinvoketime",
+                shortenCustomerSpace(customerSpace));
+        return get("getNextInvokeTime", url, Long.class);
+    }
+
     public List<DataFeedTask> getDataFeedTaskWithSameEntity(String customerSpace, String entity) {
         String url = constructUrl("/customerspaces/{customerSpace}/datafeed/tasks/{entity}/list",
                 shortenCustomerSpace(customerSpace), entity);
@@ -159,7 +165,8 @@ public class DataFeedProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(res, String.class);
     }
 
-    public List<String> registerExtracts(String customerSpace, String taskId, String tableName, List<Extract> extracts) {
+    public List<String> registerExtracts(String customerSpace, String taskId, String tableName,
+            List<Extract> extracts) {
         String url = constructUrl(
                 "/customerspaces/{customerSpace}/datafeed/tasks/{taskId}/registerextracts/{tableName}",
                 shortenCustomerSpace(customerSpace), taskId, tableName);
