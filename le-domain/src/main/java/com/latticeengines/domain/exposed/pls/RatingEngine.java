@@ -95,8 +95,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private RatingEngineStatus status;
 
-    @JsonProperty("deleted")
-    @Column(name = "DELETED")
     private Boolean deleted = false;
 
     @JsonProperty("segment")
@@ -238,6 +236,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     }
 
     @Override
+    @JsonProperty("deleted")
+    @Column(name = "DELETED")
     public Boolean getDeleted() {
         return this.deleted;
     }
