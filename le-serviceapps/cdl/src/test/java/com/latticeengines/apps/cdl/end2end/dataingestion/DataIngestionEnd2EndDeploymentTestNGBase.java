@@ -133,6 +133,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_D_COUNT_2 = 22;
     static final long RATING_F_COUNT_2 = 0;
 
+    static final long RATING_A_COUNT_2_REBUILD = 18;
+    static final long RATING_D_COUNT_2_REBUILD = 22;
+    static final long RATING_F_COUNT_2_REBUILD = 0;
+
     static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";
 
     int actionsNumber = 0;
