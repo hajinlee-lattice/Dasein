@@ -20,6 +20,9 @@ else
     sed -i 's/alter table .* drop foreign key .*;//g' $DDL
 fi
 
+rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv || true
+gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn206.csv
+
 rm -rf $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv || true
 gunzip -c $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv.gz > $WSHOME/le-dev/testartifacts/LDC_ManageDB/AccountMasterColumn208.csv
 
