@@ -91,7 +91,7 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
     /**
      * In setup, orchestrateForInstall a full tenant.
      **/
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         tenantId = testContract + tenantId + System.currentTimeMillis();
         contractId = tenantId;
@@ -102,12 +102,12 @@ public class LPIEndToEndDeploymentTestNG extends AdminDeploymentTestNGBase {
         magicRestTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
     }
 
-    @AfterClass(groups = "deployment")
+    @AfterClass(groups = "deployment", enabled = false)
     public void tearDown() throws Exception {
         cleanup();
     }
 
-    @Test(groups = "deployment")
+    @Test(groups = "deployment", enabled = false)
     public void testEnd2End() throws Exception {
         provisionEndToEndTestTenants();
         log.info("Verify installation");
