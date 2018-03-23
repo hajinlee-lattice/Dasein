@@ -39,7 +39,7 @@ public class RatingResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
     public Long getCount(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                         @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return ratingQueryService.getCount(frontEndQuery, version);
     }
 
@@ -47,7 +47,7 @@ public class RatingResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Mono<DataPage> getData(@PathVariable String customerSpace, @RequestBody FrontEndQuery frontEndQuery,
-                                  @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         final Tenant tenant = MultiTenantContext.getTenant();
         return Mono.fromCallable(() -> {
             MultiTenantContext.setTenant(tenant);
@@ -59,8 +59,8 @@ public class RatingResource {
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
     public Map<String, Long> getRatingCount(@PathVariable String customerSpace,
-                                            @RequestBody FrontEndQuery frontEndQuery,
-                                            @RequestParam(value = "version", required = false) DataCollection.Version version) {
+            @RequestBody FrontEndQuery frontEndQuery,
+            @RequestParam(value = "version", required = false) DataCollection.Version version) {
         return ratingQueryService.getRatingCount(frontEndQuery, version);
     }
 

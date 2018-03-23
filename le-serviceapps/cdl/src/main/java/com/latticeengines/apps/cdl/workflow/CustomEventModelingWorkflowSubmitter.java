@@ -219,6 +219,8 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .notesContent(parameters.getNotesContent()) //
                 .metadataSegmentExport(createMetadataSegmentExport(parameters.getRatingEngineId(),
                         parameters.getCustomEventModelingType())) //
+                .skipLdcAttributesOnly(
+                        !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
                 .build();
     }
 

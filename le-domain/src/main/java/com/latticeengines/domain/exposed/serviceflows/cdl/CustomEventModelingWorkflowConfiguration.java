@@ -281,7 +281,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelWorkflowBuilder.excludeDataCloudAttrs(exclude);
             rtsBulkScoreWorkflowBuilder.excludeDataCloudAttrs(exclude);
             prepareConfigForScoringBuilder.excludeDataCloudAttrs(exclude);
-            ldcOnlyAttributes.setSkipStep(exclude);
             return this;
         }
 
@@ -379,6 +378,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder setActivateModelSummaryByDefault(boolean value) {
             modelWorkflowBuilder.setActivateModelSummaryByDefault(value);
+            return this;
+        }
+
+        public Builder skipLdcAttributesOnly(boolean skipLdcAttributesOnly) {
+            ldcOnlyAttributes.setSkipStep(skipLdcAttributesOnly);
             return this;
         }
 
