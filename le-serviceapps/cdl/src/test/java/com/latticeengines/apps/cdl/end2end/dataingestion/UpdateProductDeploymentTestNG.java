@@ -104,6 +104,11 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.SortedProduct, (long) PRODUCT_IMPORT_SIZE_2);
+        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
+                (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
+                (long) ((ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2)
+                        * (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2)));
         return expectedCnts;
     }
 
