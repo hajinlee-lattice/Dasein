@@ -391,7 +391,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 }
 
                 Pair<String, String> displayNames = ActivityMetricsUtils
-                        .getDisplayNamesFromFullName(attribute.getName(), null, null);
+                        .getDisplayNamesFromFullName(attribute.getName(), maxTxnDate, periodStrategies);
                 attribute.setDisplayName(displayNames.getLeft());
                 attribute.setSecondaryDisplayName(displayNames.getRight());
                 attribute.setSubcategory(productName);

@@ -1,7 +1,5 @@
 package com.latticeengines.domain.exposed.util;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,10 +9,8 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
@@ -161,24 +157,12 @@ public class ActivityMetricsUtils {
                 period = strs[1];
             }
         }
-        String[] strs = period.split(SUB_SEPARATOR);
-        PeriodStrategy strategy = findPeriodStrategyFromPeriodAbbr(strs[0], strategies);
-        PeriodBuilder periodBuilder = PeriodBuilderFactory.build(strategy);
-        int endPeriodId = periodBuilder.toPeriodId(currentTxnDate);
-        int startPeriodId = endPeriodId - Integer.valueOf(strs[1]);
-        LocalDate startDate = periodBuilder.toDateRange(startPeriodId, endPeriodId).getLeft();
-        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return "(" + startDate.format(df) + " to " + currentTxnDate + ")";
-    }
 
-    private static PeriodStrategy findPeriodStrategyFromPeriodAbbr(String periodAbbr, List<PeriodStrategy> strategies) {
-        PeriodStrategy.Template template = periodAbbrRev.get(periodAbbr);
-        for (PeriodStrategy strategy : strategies) {
-            if (template == strategy.getTemplate()) {
-                return strategy;
-            }
-        }
-        throw new RuntimeException("Fail to find period strategy based on period abbreviation " + periodAbbr);
+        String[] strs = period.split(SUB_SEPARATOR);
+        TimeFilterTranslator timeFilterTranslator = new TimeFilterTranslator(strategies, currentTxnDate);
+        TimeFilter timeFilter = TimeFilter.within(Integer.valueOf(strs[1]), periodAbbrRev.get(strs[0]).name());
+        List<Object> translatedTxnDateRange = timeFilterTranslator.translate(timeFilter).getValues();
+        return "(" + translatedTxnDateRange.get(0).toString() + " to " + translatedTxnDateRange.get(1).toString() + ")";
     }
 
     private static String periodStrToDisplayName(String period, InterfaceName metrics) {
