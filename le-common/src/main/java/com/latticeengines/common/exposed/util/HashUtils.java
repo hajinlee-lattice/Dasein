@@ -10,7 +10,7 @@ public final class HashUtils {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] thedigest = md.digest(str.getBytes("UTF-8"));
-            return Base64Utils.encodeBase64(thedigest).substring(0, 16);
+            return Base64Utils.encodeBase64(thedigest).substring(0, 32);
         } catch (NoSuchAlgorithmException|UnsupportedEncodingException e) {
             throw new RuntimeException("Failed to get SHA-256 short hash of string " + str, e);
         }

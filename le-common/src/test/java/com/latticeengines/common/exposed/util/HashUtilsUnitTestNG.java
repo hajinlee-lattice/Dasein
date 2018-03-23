@@ -19,23 +19,18 @@ public class HashUtilsUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(HashUtilsUnitTestNG.class);
 
     private static final String LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private static final int NUM_SEEDS = 10;
     private static final int SEED_LENGTH = 16;
     private static final int MAX_LOWER_CASES = 8;
-    private static final int MAX_SPACES = 2;
-    private static final int MAX_UNDERSCORES = 2;
+    private static final int MAX_SPACES = 1;
+    private static final int MAX_UNDERSCORES = 1;
 
     private Random random;
 
     @Test(groups = "unit")
     public void testHashCollision() {
         random = new Random(System.currentTimeMillis());
-        List<String> seeds = Arrays.asList( //
-                getRandomString(SEED_LENGTH), //
-                getRandomString(SEED_LENGTH), //
-                getRandomString(SEED_LENGTH), //
-                getRandomString(SEED_LENGTH), //
-                getRandomString(SEED_LENGTH) //
-        );
+        List<String> seeds = Flux.range(0, NUM_SEEDS).map(k -> getRandomString(SEED_LENGTH)).collectList().block();
         log.info("Generating distinct tokens from seeds ...");
         List<String> tokens = generateTokens(seeds).collectList().block();
         Assert.assertNotNull(tokens);
