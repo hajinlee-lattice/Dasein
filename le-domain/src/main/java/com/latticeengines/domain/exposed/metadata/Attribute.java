@@ -341,13 +341,13 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
                     for (int i = 0; i < array.length; ++i) {
                         array[i] = array[i].trim();
                     }
-                    setPropertyValue(key, Arrays.asList(array));
+                    setPropertyValue(key, new ArrayList<>(Arrays.asList(array)));
                 }
             } else {
-                setPropertyValue(key, Arrays.asList(value));
+                setPropertyValue(key, new ArrayList<>(Arrays.asList(value)));
             }
         } else {
-            setPropertyValue(key, Arrays.asList(value));
+            setPropertyValue(key, new ArrayList<>(Arrays.asList(value)));
         }
     }
 
