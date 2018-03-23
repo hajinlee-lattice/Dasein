@@ -59,7 +59,8 @@ module.exports = [{
         'http://localhost:3002',
         'http://localhost:3003',
         'https://salesforce.com',
-        'https://lattice-engines.com'
+        'https://app.lattice-engines.com',
+        'https://testapp.lattice-engines.com'
     ],
     pages: {
         '/insights/': 'assets/index.html',
