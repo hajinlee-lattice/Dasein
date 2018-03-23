@@ -11,10 +11,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -23,8 +19,11 @@ import com.latticeengines.playmaker.dao.PlaymakerRecommendationDao;
 
 public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implements PlaymakerRecommendationDao {
 
-    private static final Logger log = LoggerFactory.getLogger(PlaymakerRecommendationDaoImpl.class);
     private static final String DATEDIFF_1970 = "DATEDIFF(s,'19700101 00:00:00:000',";
+    private static final String ID_KEY = "ID";
+    private static final String SFDC_ACC_ID_KEY = "SfdcAccountID";
+    private static final String SFDC_CONT_ID_KEY = "SfdcContactID";
+    private static final String LAST_MODIFIED_TIME_KEY = "LastModificationDate";
 
     public PlaymakerRecommendationDaoImpl(NamedParameterJdbcTemplate namedJdbcTemplate) {
         super(namedJdbcTemplate);
@@ -265,87 +264,65 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             String filterBy, Long recStart, String columns, boolean hasSfdcContactId) {
         List<Integer> accountIds = idStrListToIntList(idStrList);
 
-        log.info("Before calling idStrListToIntList");
-        Pair<String, Long> findFirstLmdAndAccIdTuple = findFirstLmdAndAccId(start, offset, maximum, accountIds);
-
-        log.info("Completed call to getAccountExtensions");
-        log.info("Before calling getAccountExtensions");
-
-        List<Map<String, Object>> result = getAccountExtensions(start, offset, maximum, filterBy, recStart, columns,
-                hasSfdcContactId, accountIds, findFirstLmdAndAccIdTuple);
-        log.info("Completed call to getAccountExtensions");
-        return result;
-    }
-
-    private Pair<String, Long> findFirstLmdAndAccId(Long start, int offset, int maximum, List<Integer> accountIds) {
-        String accountIdKey = "LEAccount_ID";
-        String lastModificationTimeKey = "lastModificationTime";
-
-        // logic is to find first LastModifiedDate and firstAccountId for
-        // requested page
-
-        String sql = //
-                "SELECT TOP(1) " //
-                        + " * " //
-                        + "FROM (" //
-                        + "      SELECT TOP(:offset_plus_one) " //
-                        + "   " + accountIdKey + ", " //
-                        + "   " + getAccountLastModificationDate() + "AS " + lastModificationTimeKey //
-                        + "      FROM  LEAccount A " //
-                        + "      WHERE " + getAccountLastModificationDate() + " >= " //
-                        + "          DATEADD(s, :start, '1970-01-01 00:00:00')" //
-                        + "      AND   IsActive = 1 " //
-                        + "  " + getAndClauseForAccountIds(accountIds) //
-                        + "      ORDER BY " + lastModificationTimeKey + " ASC, LEAccount_ID ASC" //
-                        + "     ) z " //
-                        + " ORDER BY  " + lastModificationTimeKey + "  DESC " + ", " + accountIdKey + " DESC ";
-
-        MapSqlParameterSource source = new MapSqlParameterSource();
-        source.addValue("start", start);
-        source.addValue("offset_plus_one", offset + 1);
-        if (!CollectionUtils.isEmpty(accountIds)) {
-            source.addValue("accountIds", accountIds);
-        }
-        List<Map<String, Object>> res = queryForListOfMap(sql, source);
-
-        Pair<String, Long> pair = null;
-        if (CollectionUtils.isNotEmpty(res)) {
-            Map<String, Object> row = res.get(0);
-
-            Long accountId = Long.parseLong(row.get(accountIdKey).toString());
-            String realLMD = row.get(lastModificationTimeKey).toString();
-            pair = new ImmutablePair<String, Long>(realLMD, accountId);
-        }
-
-        if (pair == null) {
-            pair = new ImmutablePair<String, Long>(null, null);
-        }
-
-        log.info(String.format(
-                "start = %s, offset = %s, max = %s, firstLmd = %s, firstAccountId = %s, accountIds.size = %s"
-                        + "\nSQL = %s",
-                start, offset, maximum, pair.getLeft(), pair.getRight(), accountIds == null ? 0 : accountIds.size(),
-                sql));
-        return pair;
+        return getAccountExtensions(start, offset, maximum, filterBy, recStart, columns, hasSfdcContactId, accountIds);
     }
 
     private List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, String filterBy,
-            Long recStart, String columns, boolean hasSfdcContactId, List<Integer> accountIds,
-            Pair<String, Long> findFirstLmdAndAccIdTuple) {
-        String lastModificationTime = findFirstLmdAndAccIdTuple.getLeft();
-        Long accountId = findFirstLmdAndAccIdTuple.getRight();
+            Long recStart, String columns, boolean hasSfdcContactId, List<Integer> accountIds) {
+        List<String> additionalColumnsList = new ArrayList<>();
+        String additionalColumns = getAccountExtensionColumns(columns, additionalColumnsList);
+        if (!StringUtils.isBlank(additionalColumns)) {
+            additionalColumns = additionalColumns.trim();
+            if (additionalColumns.endsWith(",")) {
+                additionalColumns = additionalColumns.substring(0, additionalColumns.lastIndexOf(","));
+            }
+        }
 
-        String sql = //
-                "SELECT TOP(:maximum) " //
-                        + "[Item_ID] AS ID, " //
-                        + getSfdcAccountContactIds(hasSfdcContactId) + " " //
-                        + "A.External_ID AS LEAccountExternalID, " //
-                        + getAccountExtensionColumns(columns) + " " //
-                        + DATEDIFF_1970 + " " //
-                        + "    " + getAccountLastModificationDate() //
-                        + "    ) AS LastModificationDate " //
+        String sqlStr = //
+                " DECLARE @startdate int = :start; " //
+                        + " DECLARE @startrow int = (:offset + 1); " //
+                        + " DECLARE @endrow int = (:offset + :maximum) ; " //
+                        + "  " //
+                        + " DECLARE @rowcount int; " //
+                        + " DECLARE @first_id int; " //
+                        + " DECLARE @first_lmd datetime; " //
+                        + "  " //
+                        + " --if startrow is zero or less set it to 1 this will prevent  \n" //
+                        + " --issues later when @rowcount is calculated \n" //
+                        + " IF @startrow <= 0 " //
+                        + " BEGIN " //
+                        + "     SET @startrow = 1 " //
+                        + " END " //
+                        + "  " //
+                        + " --return at most @startrow number of records and assign  \n" //
+                        + " --the values of the last row returned to @first_lmd and @first_id \n" //
+                        + " SET ROWCOUNT @startrow; " //
+                        + " SELECT @first_lmd = Last_Modification_Date, @first_id = LEAccount_ID " //
+                        + " FROM   LEAccount " //
+                        + " WHERE  [Last_Modification_Date] >= DATEADD(s, @startdate, '1970-01-01 00:00:00') "
+                        + " AND    IsActive = 1 ORDER BY Last_Modification_Date, LEAccount_ID; " //
+                        + "      " //
+                        + " --only query for records if @startrow is less than or equal to the \n" //
+                        + " --number of rows actually returned (@@ROWCOUNT) \n" //
+                        + " IF @startrow <= @@ROWCOUNT " //
+                        + " BEGIN " //
+                        + "     PRINT @first_lmd " //
+                        + "     PRINT @first_id " //
+                        + "  " //
+                        + "     SET @rowcount = (@endrow - @startrow) + 1; " //
+                        + "     SET ROWCOUNT @rowcount; " //
+                        + "     SELECT " //
+                        + "       E.Item_ID AS " + ID_KEY + ", " //
+                        + " " + getSfdcAccountContactIds(hasSfdcContactId) //
+                        + "     DATEDIFF(s, '19700101 00:00:00:000', A.[Last_Modification_Date]) AS "
+                        + LAST_MODIFIED_TIME_KEY + ", " //
+                        + " " + additionalColumns //
+                        + " "
                         + getAccountExtensionFromWhereClause(accountIds, filterBy, //
-                                false, lastModificationTime == null);
+                                false, start == null)
+                        + "; " + "  " //
+                        + "     SET ROWCOUNT 0; " //
+                        + " END ";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
@@ -355,34 +332,35 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             }
             source.addValue("recStart", recStart);
         }
+        source.addValue("start", start);
+        source.addValue("offset", offset);
         source.addValue("maximum", maximum);
-        source.addValue("start", lastModificationTime == null ? start : lastModificationTime);
-        source.addValue("firstAccId", accountId);
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
 
-        List<Map<String, Object>> result = queryForListOfMap(sql, source);
-        log.info(String.format(
-                "Fetching data now => start = %s, offset = %s, max = %s, firstLmd = %s, firstAccountId = %s, accountIds.size = %s"
-                        + "\nSQL = %s",
-                start, offset, maximum, findFirstLmdAndAccIdTuple.getLeft(), findFirstLmdAndAccIdTuple.getRight(),
-                accountIds == null ? 0 : accountIds.size(), sql));
+        List<String> allColumns = new ArrayList<>();
+        allColumns.addAll(Arrays.asList(ID_KEY, SFDC_ACC_ID_KEY, SFDC_CONT_ID_KEY, LAST_MODIFIED_TIME_KEY));
+        if (CollectionUtils.isNotEmpty(additionalColumnsList)) {
+            allColumns.addAll(additionalColumnsList);
+        }
 
-        return result;
+        return queryNativeSql(sqlStr, source, allColumns);
     }
 
     private String getSfdcAccountContactIds(boolean hasSfdcContactId) {
         if (hasSfdcContactId) {
-            return "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '001%' THEN A.External_ID ELSE NULL END AS SfdcAccountID, "
-                    + "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '003%' THEN A.External_ID ELSE NULL END AS SfdcContactID, ";
+            return "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '001%' THEN A.External_ID ELSE NULL END AS "
+                    + SFDC_ACC_ID_KEY + ", "
+                    + "CASE WHEN A.External_ID IS NOT NULL AND A.External_ID like '003%' THEN A.External_ID ELSE NULL END AS "
+                    + SFDC_CONT_ID_KEY + ", ";
         } else {
-            return "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS SfdcAccountID, "
-                    + " NULL AS SfdcContactID, ";
+            return "CASE WHEN A.CRMAccount_External_ID IS NOT NULL THEN A.CRMAccount_External_ID ELSE A.Alt_ID END AS "
+                    + SFDC_ACC_ID_KEY + ", " + " NULL AS " + SFDC_CONT_ID_KEY + ", ";
         }
     }
 
-    private String getAccountExtensionColumns(String columns) {
+    private String getAccountExtensionColumns(String columns, List<String> addToColumnList) {
         if (columns != null) {
             columns = StringUtils.strip(columns);
             if ("".equals(columns)) {
@@ -393,17 +371,20 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         StringBuilder builder = new StringBuilder();
         Set<String> columnsInDb = new HashSet<>();
         for (Map<String, Object> field : schema) {
-            builder.append("E.").append(field.get("Field")).append(", ");
+            builder.append("E.").append(field.get("Field")).append(" as ").append(field.get("Field")).append(", ");
             columnsInDb.add(field.get("Field").toString());
+            if (columns == null) {
+                addToColumnList.add(field.get("Field").toString());
+            }
         }
         if (columns == null) {
             return builder.toString();
         }
-        return getSelectedColumns(columns, columnsInDb);
+        return getSelectedColumns(columns, columnsInDb, addToColumnList);
 
     }
 
-    private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb) {
+    private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb, List<String> addToColumnList) {
         StringBuilder builder = new StringBuilder();
         if (StringUtils.isNotEmpty(selectedColumns)) {
             selectedColumns = selectedColumns.trim();
@@ -411,7 +392,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             for (String column : columns) {
                 column = column.trim();
                 if (StringUtils.isNotEmpty(column) && columnsInDb.contains(column)) {
-                    builder.append("E.").append(column).append(", ");
+                    builder.append("E.").append(column).append(" as ").append(column).append(", ");
+                    addToColumnList.add(column);
                 }
             }
         }
@@ -438,6 +420,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         if (!CollectionUtils.isEmpty(accountIds)) {
             source.addValue("accountIds", accountIds);
         }
+
         return queryForObject(sql, source, Long.class);
     }
 
@@ -450,28 +433,16 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         } else {
             fromAndWhereClause = getAccountExtensionFromClause();
         }
-        fromAndWhereClause += " AND (( " + getTimestampStr(isIntegerTimestamp, true) + " %s ) " + "OR "
-                + getTimestampStr(isIntegerTimestamp, false) + " ) %s";
 
+        fromAndWhereClause += " %s ";
         return String.format(fromAndWhereClause, //
                 forCount ? //
-                        "" //
-                        : "AND A.LEAccount_ID >= :firstAccId", //
-                forCount ? //
-                        "" //
-                        : "ORDER BY " + getAccountLastModificationDate() + " ASC, A.LEAccount_ID ASC");
-    }
-
-    private String getTimestampStr(boolean isIntegerTimestamp, boolean equalSign) {
-        String suffix = equalSign ? " = " //
-                : " > ";
-        suffix += isIntegerTimestamp ? //
-                " :start " //
-                : "";
-        return (isIntegerTimestamp ? //
-                DATEDIFF_1970 + " " + getAccountLastModificationDate() + ") " + suffix //
-                : //
-                getAccountLastModificationDate() + suffix + " CAST(:start AS datetime) ");
+                        " AND (" + DATEDIFF_1970 + " " + getAccountLastModificationDate() + " ) >=  " + ":start )  "
+                        : " AND ( " //
+                                + " ( A.Last_Modification_Date = @first_lmd AND A.LEAccount_ID >= @first_id) " //
+                                + "   OR " //
+                                + "   A.Last_Modification_Date > @first_lmd ) " //
+                                + " ORDER BY A.Last_Modification_Date, A.LEAccount_ID");
     }
 
     private String getAccountLastModificationDate() {

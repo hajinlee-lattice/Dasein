@@ -49,6 +49,8 @@ public enum LedpCode {
     LEDP_12010("Failed to {0} data by using Sqoop"), //
     LEDP_12011("Failed to complete Python process due to {0}"), //
     LEDP_12012("Failed to retrieve CapacitySchedulerInfo via reflection"), //
+    LEDP_12013("Failed to get prepared statement creator via reflection"), //
+    LEDP_12014("Failed to execute sql query: {0}."), //
 
     // Metric system: 13000-13999
     LEDP_13000("Tag {0} does not have a value."), //
@@ -697,8 +699,8 @@ public enum LedpCode {
     LEDP_40015("Cannot parse {0} to a valid starting date"), //
     LEDP_40016("No Rating Engine with ID {0} found for Customer Space {1}"), //
     LEDP_40017("Unsupported Modeling strategy"), //
-    LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"),
-    LEDP_40019("Unsupported Custom Event Modeling Type {0}") //
+    LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"), LEDP_40019(
+            "Unsupported Custom Event Modeling Type {0}") //
     ;
 
     private String message;
