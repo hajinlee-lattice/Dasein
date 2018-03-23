@@ -23,6 +23,12 @@ public class AttrConfig implements IsColumnMetadata {
 
     private static final long serialVersionUID = -118514979620559934L;
 
+    public static final String Segment = "Segment";
+    public static final String Model = "Model";
+    public static final String Enrichment = "Enrichment";
+    public static final String CompanyProfile = "CompanyProfile";
+    public static final String TalkingPoint = "TalkingPoint";
+
     @JsonProperty(ColumnMetadataKey.AttrName)
     private String attrName;
 
@@ -136,6 +142,43 @@ public class AttrConfig implements IsColumnMetadata {
                 cm.disableGroup(group);
             }
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof AttrConfig)) {
+            return false;
+        }
+        AttrConfig config = (AttrConfig) o;
+        boolean flag1 = StringUtils.equals(attrName, config.getAttrName()) && attrType == config.getAttrType();
+        if (!flag1) {
+            return false;
+        }
+        boolean flag2 = true;
+        Map<String, AttrConfigProp<?>> attrProps2 = config.getAttrProps();
+        if (attrProps == attrProps2) {
+            flag2 = true;
+        }
+        else if (attrProps != null && attrProps2 != null) {
+            if (attrProps.keySet().size() != attrProps2.keySet().size()) {
+                flag2 = false;
+            } else {
+                for (Map.Entry<String, AttrConfigProp<?>> entry : attrProps.entrySet()) {
+                    String key = entry.getKey();
+                    AttrConfigProp<?> val = entry.getValue();
+                    if (!(val == attrProps2.get(key) || (val != null && val.equals(attrProps2.get(key))))) {
+                        flag2 = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            flag2 = false;
+        }
+        return flag2;
     }
 
 }

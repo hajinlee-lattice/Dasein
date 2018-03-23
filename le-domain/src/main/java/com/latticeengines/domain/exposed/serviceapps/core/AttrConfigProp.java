@@ -46,4 +46,20 @@ public class AttrConfigProp<T extends Serializable> implements Serializable {
         this.customValue = customValue;
     }
 
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof AttrConfigProp)) {
+            return false;
+        }
+        AttrConfigProp obj = (AttrConfigProp) o;
+        return allowCustomization == obj.isAllowCustomization()
+                && ((systemValue == obj.getSystemValue())
+                        || (systemValue != null && systemValue.equals(obj.getSystemValue())))
+                && (customValue == obj.getCustomValue()
+                        || (customValue != null && (customValue.equals(obj.getCustomValue()))));
+    }
 }
