@@ -5,12 +5,19 @@ import java.util.List;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.service.WorkflowJobService;
+import com.latticeengines.apps.core.util.ArtifactUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataplatform.HasApplicationId;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Artifact;
+import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -20,7 +27,6 @@ import com.latticeengines.domain.exposed.transform.TransformationPipeline;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public abstract class WorkflowSubmitter {
@@ -30,6 +36,9 @@ public abstract class WorkflowSubmitter {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    protected Configuration yarnConfiguration;
 
     @Value("${common.test.pls.url}")
     protected String internalResourceHostPort;
@@ -85,6 +94,21 @@ public abstract class WorkflowSubmitter {
             return TransformationPipeline.getTransforms(transformationGroup);
         }
         return modelingEventTable.getRealTimeTransformationMetadata().getValue();
+    }
+
+    protected Artifact getPivotArtifact(String moduleName, final String pivotFileName) {
+        Artifact pivotArtifact = null;
+
+        if (StringUtils.isNotEmpty(moduleName) && StringUtils.isNotEmpty(pivotFileName)) {
+            List<Artifact> pivotArtifacts = ArtifactUtils.getArtifacts(moduleName, ArtifactType.PivotMapping,
+                    yarnConfiguration);
+            pivotArtifact = pivotArtifacts.stream().filter(artifact -> artifact.getName().equals(pivotFileName))
+                    .findFirst().orElse(null);
+            if (pivotArtifact == null) {
+                throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
+            }
+        }
+        return pivotArtifact;
     }
 
 }

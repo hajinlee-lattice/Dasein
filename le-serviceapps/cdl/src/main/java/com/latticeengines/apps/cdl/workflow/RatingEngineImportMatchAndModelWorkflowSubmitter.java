@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.cdl.RatingEngineModelingParameters;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleListName;
 import com.latticeengines.domain.exposed.modelreview.DataRuleLists;
@@ -71,6 +72,8 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
         }
 
         String moduleName = parameters.getModuleName();
+        final String pivotFileName = parameters.getPivotFileName();
+        Artifact pivotArtifact = getPivotArtifact(moduleName, pivotFileName);
         log.info("Modeling parameters: " + parameters.toString());
 
         TransformationGroup transformationGroup = parameters.getTransformationGroup();
@@ -112,8 +115,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .addProvenanceProperty(ProvenancePropertyName.TrainingFilePath, getTrainPath(parameters)) //
                 .addProvenanceProperty(ProvenancePropertyName.FuzzyMatchingEnabled, true) //
                 // TODO: plsFeatureFlagService.isFuzzyMatchEnabled()) //
-                // .pivotArtifactPath(pivotArtifact != null ?
-                // pivotArtifact.getPath() : null) //
+                .pivotArtifactPath(pivotArtifact != null ? pivotArtifact.getPath() : null) //
                 .moduleName(moduleName) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //

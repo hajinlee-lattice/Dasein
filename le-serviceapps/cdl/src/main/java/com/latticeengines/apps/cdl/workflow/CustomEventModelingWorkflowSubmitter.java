@@ -8,7 +8,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +32,6 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
-import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
@@ -68,9 +66,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     private MatchCommandProxy matchCommandProxy;
-
-    @Inject
-    private Configuration yarnConfiguration;
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
@@ -158,17 +153,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
 
         String moduleName = parameters.getModuleName();
         final String pivotFileName = parameters.getPivotFileName();
-        Artifact pivotArtifact = null;
-
-        if (StringUtils.isNotEmpty(moduleName) && StringUtils.isNotEmpty(pivotFileName)) {
-            List<Artifact> pivotArtifacts = ArtifactUtils.getArtifacts(moduleName, ArtifactType.PivotMapping,
-                    yarnConfiguration);
-            pivotArtifact = pivotArtifacts.stream().filter(artifact -> artifact.getName().equals(pivotFileName))
-                    .findFirst().orElse(null);
-            if (pivotArtifact == null) {
-                throw new LedpException(LedpCode.LEDP_28026, new String[] { pivotFileName, moduleName });
-            }
-        }
+        Artifact pivotArtifact = getPivotArtifact(moduleName, pivotFileName);
         if (pivotArtifact != null) {
             trainingTable = ArtifactUtils.getPivotedTrainingTable(pivotArtifact.getPath(), trainingTable,
                     yarnConfiguration);
