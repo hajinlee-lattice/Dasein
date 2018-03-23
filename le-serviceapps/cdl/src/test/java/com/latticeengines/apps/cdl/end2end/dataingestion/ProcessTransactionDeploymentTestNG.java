@@ -106,8 +106,9 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
-        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, PIVOTED_METRICS_SIZE);
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
+                (long) (ACCOUNT_IMPORT_SIZE_1 * PRODUCT_IMPORT_SIZE_1));
+        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_1);
         return expectedCnts;
     }
 }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -85,7 +86,8 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
             }
 
             productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(new Bucket.Transaction(productIds,
-                    TimeFilter.priorOnly(configFilter.getValue() - 1, TimeFilter.Period.Month), null, null, false)));
+                    TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()), null, null,
+                    false)));
             break;
         case CROSS_SELL_FIRST_PURCHASE:
             if (unitsFilter == null && spentFilter == null) {
@@ -93,7 +95,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                 productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
             } else {
                 Bucket txnBkt1 = Bucket.txnBkt(new Bucket.Transaction(productIds,
-                        TimeFilter.priorOnly(1, TimeFilter.Period.Month), null, null, true));
+                        TimeFilter.priorOnly(1, PeriodStrategy.Template.Month.name()), null, null, true));
                 Bucket txnBkt2 = Bucket.txnBkt(new Bucket.Transaction(productIds,
                         new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, null), spentFilter, unitsFilter, false));
                 productTxnRestriction = Restriction.builder()

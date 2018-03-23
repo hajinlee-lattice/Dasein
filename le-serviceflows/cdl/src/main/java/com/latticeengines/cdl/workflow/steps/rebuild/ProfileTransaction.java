@@ -171,7 +171,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             extract.setName("extract_target");
             extract.setExtractionTimestamp(DateTime.now().getMillis());
             extract.setProcessedRecords(1L);
-            extract.setPath(hdfsPath + "/" + tableName + "/");
+            extract.setPath(hdfsPath + "/" + tableName + "/*.avro");
             table.setExtracts(Collections.singletonList(extract));
             metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
             tableNames.add(table.getName());

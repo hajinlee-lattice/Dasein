@@ -15,7 +15,10 @@ import cascading.tuple.TupleEntry;
  * If lastAvgSpend is not available, spend change is -100%
  * If previousAvgSpend is not available, spend  change is 100%
  */
+@SuppressWarnings("rawtypes")
 public class MetricsSpendChangeFunc extends BaseOperation implements Function {
+
+    private static final long serialVersionUID = -8810559531494520419L;
 
     private String lastAvgSpendField;
     private String previousAvgSpendField;
@@ -26,7 +29,6 @@ public class MetricsSpendChangeFunc extends BaseOperation implements Function {
         this.previousAvgSpendField = previousAvgSpendField;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();

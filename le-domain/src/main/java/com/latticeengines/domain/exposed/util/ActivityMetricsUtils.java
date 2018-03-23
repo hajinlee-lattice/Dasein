@@ -1,43 +1,92 @@
 package com.latticeengines.domain.exposed.util;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.period.PeriodBuilder;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtils {
 
-    public final static String SEPARATOR = "__"; // Need to be different with
-                                                  // TimeFilter.SEPARATOR
-    public final static String HEADER = "AM_"; // Avro field name only allows to
-                                               // start with letter or "_"
+    public final static String SEPARATOR = "__";
+    public final static String SUB_SEPARATOR = "_";
+    public final static String HEADER = "AM_"; // Avro field name only allows to start with letter or "_"
 
     @SuppressWarnings("serial")
-    private static Map<String, String> metricsDisplayNames = new HashMap<String, String>() {
+    private static Map<InterfaceName, String> metricsDisplayNames = new HashMap<InterfaceName, String>() {
         {
-            put(InterfaceName.Margin.name(), "Percentage margin");
-            put(InterfaceName.SpendChange.name(), "Percentage spend change");
-            put(InterfaceName.ShareOfWallet.name(), "Percentage share of wallet");
-            put(InterfaceName.AvgSpendOvertime.name(), "Average spend");
-            put(InterfaceName.TotalSpendOvertime.name(), "Total spend");
-            put(InterfaceName.HasPurchased.name(), "Has Purchased");
+            put(InterfaceName.Margin, "% margin");
+            put(InterfaceName.SpendChange, "% spend change");
+            put(InterfaceName.ShareOfWallet, "% share of wallet");
+            put(InterfaceName.AvgSpendOvertime, "Average spend");
+            put(InterfaceName.TotalSpendOvertime, "Total spend");
+            put(InterfaceName.HasPurchased, "Has Purchased");
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private static Map<InterfaceName, String> metricsAbbr = new HashMap<InterfaceName, String>() {
+        {
+            put(InterfaceName.Margin, "MG");
+            put(InterfaceName.SpendChange, "SC");
+            put(InterfaceName.ShareOfWallet, "SW");
+            put(InterfaceName.AvgSpendOvertime, "AS");
+            put(InterfaceName.TotalSpendOvertime, "TS");
+            put(InterfaceName.HasPurchased, "HP");
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private static Map<String, InterfaceName> metricsAbbrRev = new HashMap<String, InterfaceName>() {
+        {
+            put("MG", InterfaceName.Margin);
+            put("SC", InterfaceName.SpendChange);
+            put("SW", InterfaceName.ShareOfWallet);
+            put("AS", InterfaceName.AvgSpendOvertime);
+            put("TS", InterfaceName.TotalSpendOvertime);
+            put("HP", InterfaceName.HasPurchased);
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private static Map<String, String> periodAbbr = new HashMap<String, String> () {
+        {
+            put(PeriodStrategy.Template.Year.name(), "Y");
+            put(PeriodStrategy.Template.Quarter.name(), "Q");
+            put(PeriodStrategy.Template.Month.name(), "M");
+            put(PeriodStrategy.Template.Week.name(), "W");
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private static Map<String, PeriodStrategy.Template> periodAbbrRev = new HashMap<String, PeriodStrategy.Template>() {
+        {
+            put("Y", PeriodStrategy.Template.Year);
+            put("Q", PeriodStrategy.Template.Quarter);
+            put("M", PeriodStrategy.Template.Month);
+            put("W", PeriodStrategy.Template.Week);
         }
     };
 
     public static String getNameWithPeriod(ActivityMetrics activityMetrics) {
         List<String> periodNames = new ArrayList<>();
         activityMetrics.getPeriodsConfig().forEach(config -> {
-            periodNames.add(config.getPeriodRangeName());
+            periodNames.add(getPeriodRangeName(config));
         });
-        return String.join(SEPARATOR, periodNames) + SEPARATOR + activityMetrics.getMetrics();
+        return String.join(SEPARATOR, periodNames) + SEPARATOR + metricsAbbr.get(activityMetrics.getMetrics());
     }
 
     public static String getFullName(ActivityMetrics activityMetrics, String activityId) {
@@ -64,12 +113,12 @@ public class ActivityMetricsUtils {
         return fullName.substring(fullName.indexOf(SEPARATOR) + 2);
     }
 
-    public static String getMetricsFromFullName(String fullName) {
+    public static InterfaceName getMetricsFromFullName(String fullName) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;
         }
         fullName = fullName.substring(HEADER.length()); // remove header
-        return fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length());
+        return metricsAbbrRev.get(fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length()));
     }
     
     public static String getPeriodsFromFullName(String fullName) {
@@ -81,34 +130,87 @@ public class ActivityMetricsUtils {
     }
 
     // <DisplayName, SecondDisplayName>
-    public static Pair<String, String> getDisplayNamesFromFullName(String fullName) {
+    public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String currentTxnDate,
+            List<PeriodStrategy> strategies) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;
         }
-        String metrics = getMetricsFromFullName(fullName);
+        InterfaceName metrics = getMetricsFromFullName(fullName);
         String displayName = metricsDisplayNames.get(metrics);
         String period = getPeriodsFromFullName(fullName);
-        // Currently only SpendChange has 2 periods.
-        // Only show first period in display name per PM's requirement
-        if (period.contains(SEPARATOR)) {
-            period = period.substring(0, period.indexOf(SEPARATOR));
-        }
-        displayName += periodStrToDisplayName(period);
-        // TODO: populate second display name
-        return Pair.of(displayName, null);
+        displayName += periodStrToDisplayName(period, metrics);
+        String secDisplayName = periodStrToSecondDisplayName(period, metrics, currentTxnDate, strategies);
+        return Pair.of(displayName, secDisplayName);
     }
 
-    private static String periodStrToDisplayName(String period) {
-        String[] strs = period.split(TimeFilter.SEPARATOR);
-        if (strs[0].equalsIgnoreCase(ComparisonType.EVER.name())) {
-            return "";
-        } else if (strs[0].equalsIgnoreCase(ComparisonType.WITHIN.name())) {
-            return String.format(" in last %s %s%s", strs[2], strs[1].toLowerCase(),
-                    Integer.valueOf(strs[2]) > 1 ? "s" : "");
-        } else {
-            // Currently only has EVER and WITHIN case
-            throw new UnsupportedOperationException(strs[0] + " comparison type is not fully supported yet");
-        }
+    public static String getHasPurchasedAbbr() {
+        return metricsAbbr.get(InterfaceName.HasPurchased);
+    }
 
+    private static String periodStrToSecondDisplayName(String period, InterfaceName metrics, String currentTxnDate,
+            List<PeriodStrategy> strategies) {
+        if (metrics == InterfaceName.HasPurchased || StringUtils.isBlank(currentTxnDate)
+                || CollectionUtils.isEmpty(strategies)) {
+            return null;
+        }
+        if (metrics == InterfaceName.SpendChange) {
+            String strs[] = period.split(SEPARATOR);
+            if (strs[0].split(SUB_SEPARATOR).length == 2) {
+                period = strs[0];
+            } else {
+                period = strs[1];
+            }
+        }
+        String[] strs = period.split(SUB_SEPARATOR);
+        PeriodStrategy strategy = findPeriodStrategyFromPeriodAbbr(strs[0], strategies);
+        PeriodBuilder periodBuilder = PeriodBuilderFactory.build(strategy);
+        int endPeriodId = periodBuilder.toPeriodId(currentTxnDate);
+        int startPeriodId = endPeriodId - Integer.valueOf(strs[1]);
+        LocalDate startDate = periodBuilder.toDateRange(startPeriodId, endPeriodId).getLeft();
+        DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return "(" + startDate.format(df) + " to " + currentTxnDate + ")";
+    }
+
+    private static PeriodStrategy findPeriodStrategyFromPeriodAbbr(String periodAbbr, List<PeriodStrategy> strategies) {
+        PeriodStrategy.Template template = periodAbbrRev.get(periodAbbr);
+        for (PeriodStrategy strategy : strategies) {
+            if (template == strategy.getTemplate()) {
+                return strategy;
+            }
+        }
+        throw new RuntimeException("Fail to find period strategy based on period abbreviation " + periodAbbr);
+    }
+
+    private static String periodStrToDisplayName(String period, InterfaceName metrics) {
+        if (metrics == InterfaceName.HasPurchased) {
+            return "";
+        }
+        if (metrics == InterfaceName.SpendChange) {
+            String strs[] = period.split(SEPARATOR);
+            if (strs[0].split(SUB_SEPARATOR).length == 2) {
+                period = strs[0];
+            } else {
+                period = strs[1];
+            }
+        }
+        return getDisplayNameForWithinComp(period);
+    }
+
+    private static String getDisplayNameForWithinComp(String period) {
+        String[] strs = period.split(SUB_SEPARATOR);
+        return String.format(" in last %s %s%s", strs[1], periodAbbrRev.get(strs[0]).name().toLowerCase(),
+                Integer.valueOf(strs[1]) > 1 ? "s" : "");
+    }
+
+    private static String getPeriodRangeName(TimeFilter timeFilter) {
+        if (timeFilter.getRelation() == ComparisonType.EVER) {
+            return ComparisonType.EVER.name();
+        }
+        List<String> strs = new ArrayList<>();
+        strs.add(periodAbbr.get(timeFilter.getPeriod()));
+        timeFilter.getValues().forEach(value -> {
+            strs.add(String.valueOf(value));
+        });
+        return String.join(SUB_SEPARATOR, strs);
     }
 }

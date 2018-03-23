@@ -251,7 +251,8 @@ public class StatsCubeUtils {
     }
 
     public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
-        if (!attrName.endsWith(ActivityMetricsUtils.SEPARATOR + InterfaceName.HasPurchased.name())) {
+        if (!attrName.startsWith(ActivityMetricsUtils.HEADER)
+                || !attrName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr())) {
             return attrStats;
         }
 

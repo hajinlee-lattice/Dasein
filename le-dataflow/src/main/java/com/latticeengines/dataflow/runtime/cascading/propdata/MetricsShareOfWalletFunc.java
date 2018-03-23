@@ -19,6 +19,8 @@ import cascading.tuple.TupleEntry;
 @SuppressWarnings("rawtypes")
 public class MetricsShareOfWalletFunc extends BaseOperation implements Function {
 
+    private static final long serialVersionUID = -6717920362621336533L;
+
     private static final Logger log = LoggerFactory.getLogger(MetricsShareOfWalletFunc.class);
 
     private String apField;

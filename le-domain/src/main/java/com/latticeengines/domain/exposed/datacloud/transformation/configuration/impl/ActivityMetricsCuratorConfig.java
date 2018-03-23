@@ -11,14 +11,13 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
     private List<ActivityMetrics> metrics;
 
     @JsonProperty("PeriodStrategy")
-    private List<PeriodStrategy> periodStrategies; // all the selected
-                                                   // period strategies
+    private List<PeriodStrategy> periodStrategies;
 
     @JsonProperty("GroupByFields")
     private List<String> groupByFields;
 
-    @JsonProperty("MaxTxnDate")
-    private String maxTxnDate;
+    @JsonProperty("CurrentDate")
+    private String currentDate;
 
     public List<ActivityMetrics> getMetrics() {
         return metrics;
@@ -44,11 +43,11 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
         this.groupByFields = groupByFields;
     }
 
-    public String getMaxTxnDate() {
-        return maxTxnDate;
+    public String getCurrentDate() {
+        return currentDate;
     }
 
-    public void setMaxTxnDate(String maxTxnDate) {
-        this.maxTxnDate = maxTxnDate;
+    public void setCurrentDate(String currentDate) {
+        this.currentDate = currentDate;
     }
 }

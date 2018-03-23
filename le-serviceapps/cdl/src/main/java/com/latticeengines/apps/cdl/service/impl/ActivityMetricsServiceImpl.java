@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TimeFilter.Period;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
@@ -41,24 +41,25 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
     private List<ActivityMetrics> fakeMetrics() {
         ActivityMetrics margin = fakeSingleMetrics();
         margin.setMetrics(InterfaceName.Margin);
-        margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, Period.Week)));
+        margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
         ActivityMetrics shareOfWallet = fakeSingleMetrics();
         shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
-        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, Period.Month)));
+        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name())));
 
         ActivityMetrics avgSpendOvertime = fakeSingleMetrics();
         avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
-        avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, Period.Quarter)));
+        avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
 
         ActivityMetrics totalSpendOvertime = fakeSingleMetrics();
         totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
-        totalSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, Period.Year)));
+        totalSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
 
         ActivityMetrics spendChange = fakeSingleMetrics();
         spendChange.setMetrics(InterfaceName.SpendChange);
         spendChange.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, Period.Month), TimeFilter.between(2, 3, Period.Month)));
+                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name()),
+                        TimeFilter.between(2, 3, PeriodStrategy.Template.Month.name())));
 
         return Arrays.asList(margin, shareOfWallet, avgSpendOvertime, totalSpendOvertime, spendChange);
     }

@@ -31,8 +31,8 @@ public class ProcessAccountDeploymentTestNG extends DataIngestionEnd2EndDeployme
 
     static final String CHECK_POINT = "process1";
 
-    private static final int ACCOUNT_IMPORT_SIZE_1_1 = 350;
-    private static final int ACCOUNT_IMPORT_SIZE_1_2 = 150;
+    public static final int ACCOUNT_IMPORT_SIZE_1_1 = 350;
+    public static final int ACCOUNT_IMPORT_SIZE_1_2 = 150;
     private static final int CONTACT_IMPORT_SIZE_1_1 = 600;
     private static final int CONTACT_IMPORT_SIZE_1_2 = 500;
     private static final int PRODUCT_IMPORT_SIZE_1_1 = 70;

@@ -68,7 +68,7 @@ public class PurchaseAttributesDeriverFlow extends ConfigurableFlowBase<Purchase
                     break;
                 case HasPurchased:
                     node = node.apply(
-                        new AttrHasPurchasedFunction(field.name()),
+                        new AttrHasPurchasedFunction(field.name(), true),
                             new FieldList(node.getFieldNames()),
                             new FieldMetadata(field.name(), fieldType));
                     break;

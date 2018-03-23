@@ -25,6 +25,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -55,6 +57,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessT
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -155,6 +158,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, APPEND_TO_REDSHIFT_TABLE, true,
                 Boolean.class);
         super.onPostTransformationCompleted();
+        generateReport();
     }
 
     @Override
@@ -271,7 +275,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
         conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
-        conf.setMaxTxnDate(maxTxnDate);
+        conf.setCurrentDate(maxTxnDate);
         conf.setMetrics(purchaseMetrics);
         conf.setPeriodStrategies(periodStrategies);
 
@@ -364,7 +368,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
             if (!InterfaceName.AccountId.name().equalsIgnoreCase(attribute.getName())) {
                 String productId = ActivityMetricsUtils.getActivityIdFromFullName(attribute.getName());
-                log.info("ZDD productId = " + productId);
                 if (StringUtils.isBlank(productId)) {
                     throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
                 }
@@ -388,13 +391,12 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 }
 
                 Pair<String, String> displayNames = ActivityMetricsUtils
-                        .getDisplayNamesFromFullName(attribute.getName());
+                        .getDisplayNamesFromFullName(attribute.getName(), null, null);
                 attribute.setDisplayName(displayNames.getLeft());
                 attribute.setSecondaryDisplayName(displayNames.getRight());
                 attribute.setSubcategory(productName);
             }
             attribute.removeAllowedDisplayNames();
-            log.info("ZDD " + JsonUtils.serialize(attribute));
         }
     }
 
@@ -410,6 +412,35 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         metrics.setCreated(new Date());
         metrics.setUpdated(metrics.getCreated());
         return metrics;
+    }
+
+    private void generateReport() {
+        ObjectNode report = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
+                ObjectNode.class);
+        updateReportPayload(report);
+        putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), report);
+    }
+
+    private void updateReportPayload(ObjectNode report) {
+        try {
+            JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+            if (entitiesSummaryNode == null) {
+                entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
+            }
+            JsonNode entityNode = entitiesSummaryNode.get(entity.name());
+            if (entityNode == null) {
+                entityNode = ((ObjectNode) entitiesSummaryNode).putObject(entity.name());
+            }
+            JsonNode consolidateSummaryNode = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+            if (consolidateSummaryNode == null) {
+                consolidateSummaryNode = ((ObjectNode) entityNode)
+                        .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+            }
+            ((ObjectNode) consolidateSummaryNode).put("PRODUCT", productMap.size());
+            ((ObjectNode) consolidateSummaryNode).put("METRICS", purchaseMetrics.size());
+        } catch (Exception e) {
+            throw new RuntimeException("Fail to update report payload", e);
+        }
     }
 
 

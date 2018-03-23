@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.query;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -14,14 +12,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class TimeFilter {
-
-    public final static String SEPARATOR = "_"; // Needs to be different with
-                                                // ActivityMetrics.SEPARATOR
 
     @JsonIgnore
     private Lookup lhs;
@@ -36,37 +32,37 @@ public class TimeFilter {
     private String period;
 
     public static TimeFilter ever() {
-        return ever(Period.Month);
+        return ever(PeriodStrategy.Template.Month.name());
     }
 
-    public static TimeFilter ever(Period period) {
+    public static TimeFilter ever(String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.EVER;
-        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
         filter.values = Collections.singletonList(-1);
         return filter;
     }
 
-    public static TimeFilter priorOnly(int val, Period period) {
+    public static TimeFilter priorOnly(int val, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.PRIOR_ONLY;
-        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
         filter.values = Collections.singletonList(val);
         return filter;
     }
 
-    public static TimeFilter within(int val, Period period) {
+    public static TimeFilter within(int val, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.WITHIN;
-        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
         filter.values = Collections.singletonList(val);
         return filter;
     }
 
-    public static TimeFilter between(int begin, int end, Period period) {
+    public static TimeFilter between(int begin, int end, String period) {
         TimeFilter filter = new TimeFilter();
         filter.relation = ComparisonType.BETWEEN;
-        filter.period = period != null ? period.name() : Period.Month.name();
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
         filter.values = Arrays.asList(begin, end);
         return filter;
     }
@@ -112,20 +108,6 @@ public class TimeFilter {
 
     public void setPeriod(String period) {
         this.period = period;
-    }
-
-    public String getPeriodRangeName() {
-        List<String> strs = new ArrayList<>();
-        strs.add(relation.name());
-        if (relation != ComparisonType.EVER) {
-            strs.add(period);
-            if (CollectionUtils.isNotEmpty(values)) {
-                values.forEach(value -> {
-                    strs.add(String.valueOf(value));
-                });
-            }
-        }
-        return String.join(SEPARATOR, strs);
     }
 
     public static class Period {

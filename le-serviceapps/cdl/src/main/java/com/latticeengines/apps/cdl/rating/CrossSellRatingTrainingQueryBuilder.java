@@ -4,6 +4,7 @@ import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
 
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -62,7 +63,8 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
             productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(new Bucket.Transaction(productIds,
-                    TimeFilter.priorOnly(config.getValue() - 1, TimeFilter.Period.Month), null, null, false)));
+                    TimeFilter.priorOnly(config.getValue() - 1, PeriodStrategy.Template.Month.name()), null, null,
+                    false)));
             break;
         case CROSS_SELL_FIRST_PURCHASE:
             Bucket.Transaction txn = new Bucket.Transaction(productIds, TimeFilter.ever(), null, null, true);

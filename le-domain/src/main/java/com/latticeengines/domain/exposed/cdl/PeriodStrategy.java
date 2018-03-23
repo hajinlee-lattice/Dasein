@@ -70,7 +70,7 @@ public class PeriodStrategy implements Serializable {
     }
 
     public enum Template {
-        Day, Week, Month, Quarter, Year
+        Date, Day, Week, Month, Quarter, Year
     }
 
 }

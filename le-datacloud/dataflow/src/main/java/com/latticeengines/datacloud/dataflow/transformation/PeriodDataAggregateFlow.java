@@ -32,6 +32,12 @@ public class PeriodDataAggregateFlow extends ConsolidateBaseFlow<PeriodDataAggre
         Node result = null;
         for (String sourceName : parameters.getBaseTables()) {
             Node source = addSource(sourceName);
+            // TODO: temporary solution for missing cost field in daily transaction
+            // Should be handled at transaction standardization
+            if (config.getSumFields().contains(InterfaceName.Cost.name())
+                    && source.getSchema(InterfaceName.Cost.name()) == null) {
+                source = source.addColumnWithFixedValue(InterfaceName.Cost.name(), null, Long.class);
+            }
             if (result == null) {
                 result = source;
             } else {
