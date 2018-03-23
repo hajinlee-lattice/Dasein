@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -21,10 +22,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.CollectionLookup;
+import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.ConcreteRestriction;
+import com.latticeengines.domain.exposed.query.LogicalOperator;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
@@ -130,8 +137,9 @@ public class FrontEndQueryCreator {
         RatingEngine ratingEngine = play.getRatingEngine();
 
         if (ratingEngine.getSegment() != null) {
-            FrontEndRestriction accountRestriction = new FrontEndRestriction(
-                    ratingEngine.getSegment().getAccountRestriction());
+            FrontEndRestriction accountRestriction = createAccountQueryWithAllowedRating(playLaunchContext, ratingId,
+                    ratingEngine);
+
             FrontEndRestriction contactRestriction = new FrontEndRestriction(
                     ratingEngine.getSegment().getContactRestriction());
 
@@ -152,6 +160,24 @@ public class FrontEndQueryCreator {
         List<Lookup> lookups = accountFrontEndQuery.getLookups();
         Lookup lookup = new AttributeLookup(BusinessEntity.Rating, ratingId);
         lookups.add(lookup);
+    }
+
+    private FrontEndRestriction createAccountQueryWithAllowedRating(PlayLaunchContext playLaunchContext,
+            String ratingId, RatingEngine ratingEngine) {
+        Lookup rhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
+        Collection<Object> allowedRatingsCollection = getAllowedRatingsCollection(
+                playLaunchContext.getPlayLaunch().getBucketsToLaunch());
+        Lookup lhs = new CollectionLookup(allowedRatingsCollection);
+        Restriction allowedRatingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
+        Restriction finalAccountRestriction = new LogicalRestriction(LogicalOperator.AND,
+                Arrays.asList(ratingEngine.getSegment().getAccountRestriction(), allowedRatingRestriction));
+        return new FrontEndRestriction(finalAccountRestriction);
+    }
+
+    private Collection<Object> getAllowedRatingsCollection(Set<RatingBucketName> allowedRatings) {
+        Collection<Object> coll = new ArrayList<>();
+        allowedRatings.stream().forEach(rating -> coll.add(rating.getName()));
+        return coll;
     }
 
     private FrontEndRestriction prepareContactRestriction(Restriction extractedContactRestriction,
