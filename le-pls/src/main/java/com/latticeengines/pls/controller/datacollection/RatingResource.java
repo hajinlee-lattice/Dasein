@@ -40,7 +40,7 @@ public class RatingResource {
     public Long getCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-            frontEndQuery.setMainEntity(BusinessEntity.Rating);
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
             return ratingProxy.getCountFromObjectApi(tenantId, frontEndQuery, null);
         } catch (Exception e) {
             log.error("Failed to get rating data", e);
@@ -54,7 +54,7 @@ public class RatingResource {
     public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
-            frontEndQuery.setMainEntity(BusinessEntity.Rating);
+            frontEndQuery.setMainEntity(BusinessEntity.Account);
             return ratingProxy.getData(tenantId, frontEndQuery);
         } catch (Exception e) {
             log.error("Failed to get rating data", e);
