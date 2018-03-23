@@ -35,6 +35,7 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setCreated(ratingEngine.getCreated());
         ratingEngineSummary.setUpdated(ratingEngine.getUpdated());
         ratingEngineSummary.setCoverage(ratingEngine.getCountsAsMap());
+        ratingEngineSummary.setAdvancedRatingConfig(ratingEngine.getAdvancedRatingConfig());
 
         MetadataSegment segment = ratingEngine.getSegment();
         if (segment != null) {

@@ -105,6 +105,9 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
             } else if (r.getId().equals(id2)) {
                 possibleRatingEngineSummary2 = r;
             }
+            if (r.getType() != RatingEngineType.RULE_BASED) {
+                Assert.assertNotNull(r.getAdvancedRatingConfig());
+            }
         }
         Assert.assertNotNull(possibleRatingEngineSummary1);
         Assert.assertNotNull(possibleRatingEngineSummary2);

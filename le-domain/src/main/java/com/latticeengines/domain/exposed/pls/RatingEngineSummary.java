@@ -5,10 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RatingEngineSummary {
 
     public RatingEngineSummary() {
@@ -61,6 +64,9 @@ public class RatingEngineSummary {
 
     @JsonProperty("bucketMetadata")
     private List<BucketMetadata> bucketMetadata;
+
+    @JsonProperty("advancedRatingConfig")
+    private AdvancedRatingConfig advancedRatingConfig;
 
     public String getId() {
         return this.id;
@@ -188,6 +194,14 @@ public class RatingEngineSummary {
 
     public void setBucketMetadata(List<BucketMetadata> bucketMetadata) {
         this.bucketMetadata = bucketMetadata;
+    }
+
+    public AdvancedRatingConfig getAdvancedRatingConfig() {
+        return advancedRatingConfig;
+    }
+
+    public void setAdvancedRatingConfig(AdvancedRatingConfig advancedRatingConfig) {
+        this.advancedRatingConfig = advancedRatingConfig;
     }
 
     @Override
