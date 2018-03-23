@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller;
 
+import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
@@ -114,6 +115,7 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(noRedirectClient));
         HttpHeaders requestHeaders = new HttpHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>("", requestHeaders);
+        SSLUtils.turnOffSSLNameVerification();
         ResponseEntity<String> responseEntity = restTemplate.exchange(url, HttpMethod.GET, requestEntity, String.class);
         System.out.println(String.format("%s: %d", url, responseEntity.getStatusCode().value()));
         Assert.assertEquals(HttpStatus.FOUND, responseEntity.getStatusCode());
