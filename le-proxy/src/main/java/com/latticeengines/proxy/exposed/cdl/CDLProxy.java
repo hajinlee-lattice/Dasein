@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.cdl.MaintenanceOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.ProxyInterface;
 
@@ -221,5 +222,15 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         } else {
             throw new RuntimeException("Failed to cleanupByUpload: " + StringUtils.join(responseDoc.getErrors(), ","));
         }
+    }
+
+    public AttrConfigRequest getAttrConfigRequest(String customerSpace, BusinessEntity entity) {
+        StringBuilder builder = new StringBuilder();
+        String url = constructUrl("/customerspaces/{customerspace}/attrconfig", shortenCustomerSpace(customerSpace));
+        builder.append(url);
+        if (entity != null) {
+            builder.append("?entity=").append(entity);
+        }
+        return get("getAttrConfigRequest", builder.toString(), AttrConfigRequest.class);
     }
 }

@@ -34,6 +34,7 @@ import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
@@ -44,6 +45,9 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
+import com.latticeengines.proxy.exposed.lp.LPProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -60,6 +64,8 @@ public class LatticeInsightsResource {
 
     public static final String AM_STATS_PATH = "/stats";
 
+    public static final String ATTR_CONFIG_PATH = "/attrconfig";
+
     @Autowired
     private AttributeService attributeService;
 
@@ -68,6 +74,9 @@ public class LatticeInsightsResource {
 
     @Autowired
     private BatonService batonService;
+
+    @Autowired
+    private LPProxy proxy;
 
     // ------------START for Insights-------------------//
     @GetMapping(value = INSIGHTS_PATH + "/categories")
@@ -261,6 +270,26 @@ public class LatticeInsightsResource {
         Tenant tenant = MultiTenantContext.getTenant();
         Boolean considerInternalAttributes = shouldConsiderInternalAttributes(tenant);
         return attributeService.getSelectedAttributePremiumCount(tenant, considerInternalAttributes);
+    }
+
+    @RequestMapping(value = ATTR_CONFIG_PATH, //
+            method = RequestMethod.GET, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get attr config request")
+    public AttrConfigRequest getAttrConfigRequest(HttpServletRequest request) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return proxy.getAttrConfigRequest(tenant.getId());
+    }
+
+    @RequestMapping(value = ATTR_CONFIG_PATH, //
+            method = RequestMethod.POST, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Save attr config request")
+    public ResponseDocument<String> saveAttrConfigRequest(HttpServletRequest request,
+            @RequestBody List<AttrConfig> configs) {
+        return ResponseDocument.successResponse("the method is not realized");
     }
 
     private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,
