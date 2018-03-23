@@ -65,7 +65,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             if (vm.targetProducts !== null) {
                 vm.targetProductName = vm.returnProductNameFromId(vm.targetProducts[0]);
             }
-            if (vm.trainingProducts !== null) {
+            if (vm.trainingProducts !== null && vm.trainingProducts != undefined) {
                 vm.trainingProductName = vm.returnProductNameFromId(vm.trainingProducts[0]);
             }
 

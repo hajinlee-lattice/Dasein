@@ -1,5 +1,4 @@
-angular.module('lp.ratingsengine.wizard.training', [
-])
+angular.module('lp.ratingsengine.wizard.training')
 .controller('RatingsEngineCustomEventTraining', function (
     $q, $scope, $stateParams, RatingsEngineStore, ResourceUtility, ImportStore) {
     var vm = this;

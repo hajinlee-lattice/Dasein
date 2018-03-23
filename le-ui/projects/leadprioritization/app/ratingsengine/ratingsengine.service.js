@@ -206,7 +206,7 @@ angular.module('lp.ratingsengine')
                     state:'segment.attributes.training.mapping.creation',
                     nextLabel: 'Done',
                     nextFn: function(nextState) {
-                        console.log('Done');
+                        $state.go('home.ratingsengine.list');
                     }
                 }
 
@@ -746,7 +746,6 @@ angular.module('lp.ratingsengine')
                 dataStores = RatingsEngineStore.getDataStores(),
                 modelingType = RatingsEngineStore.getModelingType();
                 modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
-                filePath = RatingsEngineStore.getFilePath(); // TO DELETE
                 fileName = RatingsEngineStore.getCSVFileName();
                 obj = {};
 
@@ -758,9 +757,7 @@ angular.module('lp.ratingsengine')
                         'custom_event': {
                             modelingType: modelingType,
                             dataStores: dataStores,
-                            trainingFilePath: filePath, // TO DELETE
                             sourceFileName: fileName,
-                            fieldMappingMetadataTableId: fileName, // TO DELETE
                             deduplicationType: modelTrainingOptions['deduplicationType'],
                             excludePublicDomains: modelTrainingOptions['excludePublicDomains']
                         }
