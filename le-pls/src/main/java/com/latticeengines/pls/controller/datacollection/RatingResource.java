@@ -37,7 +37,7 @@ public class RatingResource {
     @RequestMapping(value = "/count", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the number of rows for the specified query")
-    public Long getCount(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
+    public Long getCount(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
             frontEndQuery.setMainEntity(BusinessEntity.Rating);
@@ -51,7 +51,7 @@ public class RatingResource {
     @RequestMapping(value = "/data", method = RequestMethod.POST)
     @ResponseBody
     @ApiOperation(value = "Retrieve the rows for the specified query")
-    public DataPage getData(@RequestBody(required = false) FrontEndQuery frontEndQuery) {
+    public DataPage getData(@RequestBody FrontEndQuery frontEndQuery) {
         try {
             String tenantId = MultiTenantContext.getCustomerSpace().getTenantId();
             frontEndQuery.setMainEntity(BusinessEntity.Rating);
