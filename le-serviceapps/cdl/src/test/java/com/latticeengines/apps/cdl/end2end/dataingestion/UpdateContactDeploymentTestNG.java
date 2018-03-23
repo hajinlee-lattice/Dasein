@@ -85,9 +85,9 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 SEGMENT_2_CONTACT_2_REBUILD);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RatingBucketName.A, RATING_A_COUNT_2, //
-                RatingBucketName.D, RATING_D_COUNT_2, //
-                RatingBucketName.F, RATING_F_COUNT_2);
+                RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
+                RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
+                RatingBucketName.F, RATING_F_COUNT_2_REBUILD);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
