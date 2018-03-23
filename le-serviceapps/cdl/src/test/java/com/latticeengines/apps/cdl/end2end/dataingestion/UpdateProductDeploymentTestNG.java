@@ -33,9 +33,13 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private static final long AGGREGATE_TRANSACTION_SIZE = 30000L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
 
+    private static final int EARLIEST_TRANSACTION = 48033;
+    private static final int LATEST_TRANSACTION = 48929;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeVdbCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
+        dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
         long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
