@@ -102,6 +102,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
         RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
+
         ratingEngine1.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
@@ -127,8 +129,8 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         segment.setDisplayName(SEGMENT_NAME);
         MetadataSegment createdSegment = segmentProxy
                 .createOrUpdateSegment(CustomerSpace.parse(tenant.getId()).toString(), segment);
-        MetadataSegment retrievedSegment = segmentProxy.getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(),
-                createdSegment.getName());
+        MetadataSegment retrievedSegment = segmentProxy
+                .getMetadataSegmentByName(CustomerSpace.parse(tenant.getId()).toString(), createdSegment.getName());
         Assert.assertNotNull(retrievedSegment);
         return retrievedSegment;
     }
