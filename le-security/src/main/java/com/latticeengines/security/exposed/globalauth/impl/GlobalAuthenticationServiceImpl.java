@@ -64,7 +64,7 @@ public class GlobalAuthenticationServiceImpl extends GlobalAuthenticationService
 
     private Ticket globalAuthAuthenticateUser(String username, String password) throws Exception {
         GlobalAuthAuthentication latticeAuthenticationData = gaAuthenticationEntityMgr.findByUsername(username);
-        if (latticeAuthenticationData == null) {
+        if (latticeAuthenticationData == null || latticeAuthenticationData.getGlobalAuthUser() == null) {
             throw new Exception("The specified user doesn't exists");
         }
 
