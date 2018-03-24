@@ -6,6 +6,17 @@ angular.module('common.datacloud.query.builder.tree.service', [
     ) {
         // console.log('TEST service');
         var QueryTreeService = this;
+        /**
+         * This object is used to define the association among treeMode and the entity
+         */
+        this.treeMapping = {
+            'rating': 'account',
+            'purchasehistory': 'account',
+            'account': 'account',
+            'contact':'contact'
+
+
+        };
 
         this.cmpMap = {
             "Yes": "is",
@@ -452,10 +463,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
             };
 
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
-            if (this.treeMode === 'purchasehistory' || this.treeMode === 'rating' ) {
-                this.treeMode = 'account';
-            }
-
+            //This call is done to associate some mode to account
+            this.treeMode = QueryTreeService.treeMapping[this.treeMode];
             segment[this.treeMode + '_restriction'] = {
                 "restriction": {
                     "bucketRestriction": angular.copy(bucketRestriction)
