@@ -30,7 +30,6 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     static final String CHECK_POINT = "update3";
     private RatingEngine ratingEngine;
 
-    private static final long AGGREGATE_TRANSACTION_SIZE = 30000L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
 
     private static final int EARLIEST_TRANSACTION = 48033;
@@ -102,7 +101,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
-        expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
+        expectedCnts.put(TableRoleInCollection.AggregatedTransaction, (long) TRANSACTION_IMPORT_SIZE_1);
         expectedCnts.put(TableRoleInCollection.SortedProduct, (long) PRODUCT_IMPORT_SIZE_2);
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
                 (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
