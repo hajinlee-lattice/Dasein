@@ -38,7 +38,7 @@ def getMomentum(newacct,
         dqsum = sum(dq)
         d = dqsum - dq[-1]
         n = dqsum - dq[0]
-        if n!=0 and d!=0:
+        if i > (winlen - 2) and n!=0 and d!=0:
             mmtm[i] = n / d - 1
     return mmtm
 
