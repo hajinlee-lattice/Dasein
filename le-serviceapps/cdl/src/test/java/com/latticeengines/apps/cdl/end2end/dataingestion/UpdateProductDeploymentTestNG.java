@@ -88,13 +88,13 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_3);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_2);
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_2_REBUILD, BusinessEntity.Contact,
+                SEGMENT_2_CONTACT_2_REBUILD);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
-                RatingBucketName.A, RATING_A_COUNT_2, //
-                RatingBucketName.D, RATING_D_COUNT_2, //
-                RatingBucketName.F, RATING_F_COUNT_2
+                RatingBucketName.A, RATING_A_COUNT_2_REBUILD, //
+                RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
+                RatingBucketName.F, RATING_F_COUNT_2_REBUILD
         );
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
