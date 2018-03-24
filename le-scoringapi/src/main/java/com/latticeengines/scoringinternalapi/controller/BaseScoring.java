@@ -182,6 +182,7 @@ public abstract class BaseScoring extends CommonBase {
                     .setPerformFetchOnlyForMatching(performFetchOnlyForMatching) //
                     .setRequestId(requestId) //
                     .setCalledViaApiConsole(isCalledViaApiConsole) //
+                    .setShouldReturnAllEnrichment(isCalledViaApiConsole) //
                     .setEnforceFuzzyMatch(enforceFuzzyMatch) //
                     .setSkipDnBCache(skipDnBCache) //
                     .setForceSkipMatching(forceSkipMatching);
