@@ -1183,7 +1183,7 @@ angular
                         var deferred = $q.defer();
 
                         ImportWizardService.GetSchemaToLatticeFields(null).then(function(result) {
-                            deferred.resolve(result['SalesforceAccount']);
+                            deferred.resolve(result);
                         });
 
                         return deferred.promise;
