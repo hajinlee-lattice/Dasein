@@ -50,8 +50,6 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     private static final String RATING_ENGINE_NOTE = "This is a Rating Engine that covers North America market";
     private static final String RATING_ENGINE_NEW_NOTE = "This is a Rating Engine that covers East Asia market";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
-    private static final String LDC_NAME = "LDC_Name";
-    private static final String LE_IS_PRIMARY_DOMAIN = "LE_IS_PRIMARY_DOMAIN";
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -247,7 +245,7 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         re.setId(ratingEngine.getId());
         re.setStatus(RatingEngineStatus.INACTIVE);
         ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
-
+        re = ratingEngineEntityMgr.findById(ratingEngine.getId());
         try {
             ratingEngineEntityMgr.deleteRatingEngine(re, false);
             Assert.fail("Should have thrown exeption due to the transition should fail");
@@ -259,8 +257,24 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         play.setPlayStatus(PlayStatus.DELETED);
         playEntityMgr.createOrUpdatePlay(play);
         ratingEngineEntityMgr.deleteRatingEngine(re, false);
-        re = ratingEngineEntityMgr.findById(re.getId());
-        Assert.assertTrue(re.getDeleted());
+        RatingEngine retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
+        Assert.assertNotNull(retrievedRe);
+        Assert.assertTrue(retrievedRe.getDeleted());
+        ratingEngineList = ratingEngineEntityMgr.findAllDeleted();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.get(0).getId(), ratingEngine.getId());
+        Assert.assertTrue(ratingEngineList.get(0).getDeleted());
+
+        re.setStatus(RatingEngineStatus.INACTIVE);
+        ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        ratingEngineEntityMgr.deleteById(ratingEngine.getId(), false);
+        retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
+        Assert.assertNotNull(retrievedRe);
+        Assert.assertTrue(retrievedRe.getDeleted());
+        ratingEngineList = ratingEngineEntityMgr.findAllDeleted();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.get(0).getId(), ratingEngine.getId());
+        Assert.assertTrue(ratingEngineList.get(0).getDeleted());
     }
 
     private void validateActionContext(RatingEngine ratingEngine) {

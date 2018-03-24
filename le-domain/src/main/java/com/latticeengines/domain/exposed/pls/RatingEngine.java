@@ -32,8 +32,12 @@ import javax.persistence.Transient;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.FilterDefs;
+import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
+import org.hibernate.annotations.ParamDef;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -54,7 +58,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @Entity
 @Table(name = "RATING_ENGINE")
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
+@FilterDefs({
+        @FilterDef(name = "tenantFilter", defaultCondition = "FK_TENANT_ID = :tenantFilterId", parameters = {
+                @ParamDef(name = "tenantFilterId", type = "java.lang.Long") }),
+        @FilterDef(name = "softDeleteFilter", defaultCondition = "DELETED !=true") })
+@Filters({ @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId"),
+        @Filter(name = "softDeleteFilter", condition = "DELETED != true") })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
 

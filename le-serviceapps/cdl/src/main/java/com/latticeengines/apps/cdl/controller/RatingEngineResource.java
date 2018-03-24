@@ -79,6 +79,13 @@ public class RatingEngineResource {
         return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, onlyInRedshift);
     }
 
+    @GetMapping(value = "/deleted")
+    @ResponseBody
+    @ApiOperation(value = "Get all Deleted Rating Engines")
+    public List<RatingEngine> getAllDeletedRatingEngines(@PathVariable String customerSpace) {
+        return ratingEngineService.getAllDeletedRatingEngines();
+    }
+
     @GetMapping(value = "/types")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")

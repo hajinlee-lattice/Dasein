@@ -290,15 +290,27 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingEngine" })
     public void testDelete() {
-        deleteRatingEngine(rbRatingEngineId);
-        deleteRatingEngine(aiRatingEngineId);
+        deleteSoftRatingEngine(rbRatingEngineId);
+        deleteSoftRatingEngine(aiRatingEngineId);
 
         List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
+
+        ratingEngineList = getAllDeletedRatingEngines();
+        Assert.assertEquals(ratingEngineList.size(), 2);
+        Assert.assertTrue(ratingEngineList.stream().allMatch(r -> r.getDeleted()));
+
+        hardDeleteRatingEngine(rbRatingEngineId);
+        hardDeleteRatingEngine(aiRatingEngineId);
+        ratingEngineList = ratingEngineService.getAllRatingEngines();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 0);
+        ratingEngineList = getAllDeletedRatingEngines();
+        Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
-    protected void deleteRatingEngine(String ratingEngineId) {
+    protected void deleteSoftRatingEngine(String ratingEngineId) {
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         String createdRatingEngineStr = ratingEngine.toString();
         log.info("Before delete, getting complete Rating Engine : " + createdRatingEngineStr);
@@ -308,9 +320,11 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         Assert.assertNotNull(ratingEngine);
         Assert.assertTrue(ratingEngine.getDeleted());
-        // test delete
-        deleteById(ratingEngine.getId());
-        ratingEngine = getRatingEngineById(ratingEngineId, false, false);
+    }
+
+    protected void hardDeleteRatingEngine(String ratingEngineId) {
+        deleteById(ratingEngineId);
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         Assert.assertNull(ratingEngine);
     }
 
@@ -346,5 +360,9 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     protected void deleteById(String ratingEngineId, boolean hardDelete) {
         ratingEngineService.deleteById(ratingEngineId, hardDelete);
+    }
+
+    protected List<RatingEngine> getAllDeletedRatingEngines() {
+        return ratingEngineService.getAllDeletedRatingEngines();
     }
 }

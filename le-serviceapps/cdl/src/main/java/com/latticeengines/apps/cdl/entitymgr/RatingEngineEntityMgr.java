@@ -10,6 +10,8 @@ public interface RatingEngineEntityMgr {
 
     List<RatingEngine> findAll();
 
+    List<RatingEngine> findAllDeleted();
+
     List<RatingEngine> findAllByTypeAndStatus(String type, String status);
 
     List<String> findAllIdsInSegment(String segmentName);

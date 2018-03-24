@@ -26,7 +26,6 @@ import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.DataCollectionService;
-import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.service.RatingModelService;
 import com.latticeengines.apps.cdl.workflow.CustomEventModelingWorkflowSubmitter;
@@ -99,9 +98,6 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     private EventProxy eventProxy;
 
     @Inject
-    private PeriodService periodService;
-
-    @Inject
     private RatingEngineImportMatchAndModelWorkflowSubmitter ratingEngineImportMatchAndModelWorkflowSubmitter;
 
     @Inject
@@ -124,6 +120,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries() {
         return getAllRatingEngineSummariesWithTypeAndStatus(null, null);
+    }
+
+    @Override
+    public List<RatingEngine> getAllDeletedRatingEngines() {
+        return ratingEngineEntityMgr.findAllDeleted();
     }
 
     @Override
@@ -215,8 +216,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public void deleteById(String id, boolean hardDelete) {
-        RatingEngine ratingEngine = ratingEngineEntityMgr.findById(id);
-        ratingEngineEntityMgr.deleteRatingEngine(ratingEngine, hardDelete);
+        ratingEngineEntityMgr.deleteById(id, hardDelete);
         evictRatingMetadataCache();
     }
 

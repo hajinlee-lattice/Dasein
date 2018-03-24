@@ -83,6 +83,14 @@ public class RatingEngineResource {
         return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, onlyInRedshift);
     }
 
+    @GetMapping(value = "/deleted")
+    @ResponseBody
+    @ApiOperation(value = "Get all Deleted Rating Engines")
+    public List<RatingEngine> getAllDeletedRatingEngines() {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getAllDeletedRatingEngines(tenant.getId());
+    }
+
     @RequestMapping(value = "/types", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get types for Rating Engines")

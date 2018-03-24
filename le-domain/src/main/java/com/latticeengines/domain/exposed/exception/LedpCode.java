@@ -700,8 +700,10 @@ public enum LedpCode {
     LEDP_40016("No Rating Engine with ID {0} found for Customer Space {1}"), //
     LEDP_40017("Unsupported Modeling strategy"), //
     LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"), LEDP_40019(
-            "Unsupported Custom Event Modeling Type {0}") //
-    ;
+            "Unsupported Custom Event Modeling Type {0}"), //
+
+    // le-db
+    LEDP_50000("Object {0} is not soft deletable."); //
 
     private String message;
 

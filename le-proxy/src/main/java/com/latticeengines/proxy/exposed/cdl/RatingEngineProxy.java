@@ -63,6 +63,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return JsonUtils.convertList(list, RatingEngineSummary.class);
     }
 
+    @SuppressWarnings("rawtypes")
+    public List<RatingEngine> getAllDeletedRatingEngines(String customerSpace) {
+        String url = constructUrl(URL_PREFIX + "/deleted", shortenCustomerSpace(customerSpace));
+        List list = get("get all deleted rating engines", url, List.class);
+        return JsonUtils.convertList(list, RatingEngine.class);
+    }
+
     public RatingEngine getRatingEngine(String customerSpace, String ratingEngineId) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}", shortenCustomerSpace(customerSpace),
                 ratingEngineId);

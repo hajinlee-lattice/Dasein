@@ -3,8 +3,8 @@ package com.latticeengines.apps.cdl.dao.impl;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.query.Query;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.RatingEngineDao;
@@ -60,10 +60,7 @@ public class RatingEngineDaoImpl extends BaseDaoImpl<RatingEngine> implements Ra
 
     @Override
     public void deleteById(String id) {
-        Session session = getSessionFactory().getCurrentSession();
-        Query<?> query = session.createQuery("delete from " + getEntityClass().getSimpleName() + " where id = :id")
-                .setParameter("id", id);
-        query.executeUpdate();
+        super.deleteById(id, true);
     }
 
 }

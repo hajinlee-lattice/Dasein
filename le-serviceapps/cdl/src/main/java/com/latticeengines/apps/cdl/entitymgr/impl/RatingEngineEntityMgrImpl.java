@@ -25,12 +25,15 @@ import com.latticeengines.apps.cdl.dao.RatingEngineDao;
 import com.latticeengines.apps.cdl.dao.RuleBasedModelDao;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
+import com.latticeengines.apps.cdl.repository.writer.RatingEngineRepository;
 import com.latticeengines.apps.cdl.util.ActionContext;
+import com.latticeengines.apps.core.annotation.IncludeDeleted;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
+import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -62,12 +65,16 @@ import com.latticeengines.domain.exposed.query.SubQueryAttrLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("ratingEngineEntityMgr")
-public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> implements RatingEngineEntityMgr {
+public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<RatingEngine, Long>
+        implements RatingEngineEntityMgr {
 
     private static final Logger log = LoggerFactory.getLogger(RatingEngineEntityMgrImpl.class);
 
     @Inject
     private RatingEngineDao ratingEngineDao;
+
+    @Inject
+    private RatingEngineRepository ratingEngineRepository;
 
     @Inject
     private RuleBasedModelDao ruleBasedModelDao;
@@ -87,6 +94,11 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     }
 
     @Override
+    public BaseJpaRepository<RatingEngine, Long> getRepository() {
+        return ratingEngineRepository;
+    }
+
+    @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAll() {
         return findAllByTypeAndStatus(null, null);
@@ -96,6 +108,13 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAllByTypeAndStatus(String type, String status) {
         return ratingEngineDao.findAllByTypeAndStatus(type, status);
+    }
+
+    @Override
+    @IncludeDeleted
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<RatingEngine> findAllDeleted() {
+        return ratingEngineRepository.findByDeletedTrue();
     }
 
     @Override
@@ -150,35 +169,19 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrImpl<RatingEngine> i
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteById(String id, boolean hardDelete) {
-        if (hardDelete) {
-            // Old implementation was loading entire object into memory with all
-            // dependencies and then deleting it.
-            ratingEngineDao.deleteById(id);
-        } else {
-            RatingEngine ratingEngine = findById(id);
-            checkDependencies(ratingEngine);
-            ratingEngine.setDeleted(true);
-            ratingEngineDao.update(ratingEngine);
-        }
+        RatingEngine ratingEngine = findById(id);
+        checkDependencies(ratingEngine);
+        ratingEngineDao.deleteById(id, hardDelete);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteRatingEngine(RatingEngine ratingEngine, boolean hardDelete) {
-        if (hardDelete) {
-            if (ratingEngine == null) {
-                throw new NullPointerException("RatingEngine cannot be found");
-            }
-            super.delete(ratingEngine);
-        } else {
-            RatingEngine retrievedRatingEngine = findById(ratingEngine.getId());
-            if (retrievedRatingEngine == null) {
-                throw new NullPointerException("RatingEngine cannot be found");
-            }
-            checkDependencies(retrievedRatingEngine);
-            retrievedRatingEngine.setDeleted(true);
-            ratingEngineDao.update(retrievedRatingEngine);
+        if (ratingEngine == null || ratingEngine.getPid() == null) {
+            throw new NullPointerException("RatingEngine cannot be found");
         }
+        checkDependencies(ratingEngine);
+        ratingEngineDao.deleteByPid(ratingEngine.getPid(), hardDelete);
     }
 
     private void checkDependencies(RatingEngine ratingEngine) {

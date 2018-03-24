@@ -9,13 +9,20 @@ import javax.sql.DataSource;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.orm.hibernate5.SessionFactoryUtils;
 
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.SoftDeletable;
 
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractBaseDaoImpl.class);
 
     protected abstract SessionFactory getSessionFactory();
 
@@ -24,6 +31,13 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
      * with.
      */
     protected abstract Class<T> getEntityClass();
+
+    @Deprecated
+    // This is a temporary workaround to get the entity class from outside
+    // When we migrate to pure JPA, we will delete this method
+    public Class<T> getEntityClassReference() {
+        return getEntityClass();
+    }
 
     /**
      * This is a generic create for the ORM layer. This should work for all
@@ -176,6 +190,45 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         }
         Session currSession = getSessionFactory().getCurrentSession();
         currSession.delete(currSession.contains(entity) ? entity : currSession.merge(entity));
+    }
+
+    @Override
+    public void deleteById(String id, boolean hardDelete) {
+        if (hardDelete) {
+            hardDelete("id", id);
+        } else {
+            softDelete("id", id);
+        }
+    }
+
+    @Override
+    public void deleteByPid(Long pid, boolean hardDelete) {
+        if (hardDelete) {
+            hardDelete("pid", pid);
+        } else {
+            softDelete("pid", pid);
+        }
+    }
+
+    private void hardDelete(String field, Object id) {
+        log.info(String.format("Delete entry of %s with %s = %s", getEntityClass().getSimpleName(), field, id));
+        Session session = getSessionFactory().getCurrentSession();
+        Query<?> query = session
+                .createQuery("delete from " + getEntityClass().getSimpleName() + " where " + field + "= :id")
+                .setParameter("id", id);
+        query.executeUpdate();
+    }
+
+    private void softDelete(String field, Object id) {
+        Session session = getSessionFactory().getCurrentSession();
+        if (SoftDeletable.class.isAssignableFrom(getEntityClass())) {
+            Query<?> query = session.createQuery(
+                    "update " + getEntityClass().getSimpleName() + " set DELETED = true where " + field + "= :id")
+                    .setParameter("id", id);
+            query.executeUpdate();
+        } else {
+            throw new LedpException(LedpCode.LEDP_50000, new String[] { getEntityClass().getSimpleName() });
+        }
     }
 
     @Override

@@ -387,12 +387,21 @@ public class RatingEngineResourceDeploymentTestNG extends CDLDeploymentTestNGBas
         Assert.assertTrue(ratingEngine.getDeleted());
         ratingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), re2.getId());
         Assert.assertTrue(ratingEngine.getDeleted());
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), true);
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), true);
+        List<RatingEngine> ratingEngineList = ratingEngineProxy.getAllDeletedRatingEngines(mainTestTenant.getId());
+        Assert.assertEquals(ratingEngineList.size(), 2);
+        // test the deleteFilter
         List<RatingEngineSummary> ratingEngineSummaries = ratingEngineProxy
                 .getRatingEngineSummaries(mainTestTenant.getId());
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
+
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re1.getId(), true);
+        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), re2.getId(), true);
+        ratingEngineSummaries = ratingEngineProxy.getRatingEngineSummaries(mainTestTenant.getId());
+        Assert.assertNotNull(ratingEngineSummaries);
+        Assert.assertEquals(ratingEngineSummaries.size(), 0);
+        ratingEngineList = ratingEngineProxy.getAllDeletedRatingEngines(mainTestTenant.getId());
+        Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
 }

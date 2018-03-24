@@ -393,7 +393,11 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 0);
+        List<RatingEngine> ratingEngineList = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines/deleted", List.class);
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 2);
         RatingEngine re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(),
                 RatingEngine.class);
         Assert.assertTrue(re.getDeleted());
@@ -404,6 +408,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
+        ratingEngineList = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/deleted", List.class);
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 0);
     }
 
     public static MetadataSegment constructSegment(String segmentName) {
