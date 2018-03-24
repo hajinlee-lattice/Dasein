@@ -47,7 +47,8 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
 
     @AfterClass(groups = "deployment")
     public void tearDown() throws Exception {
-        log.info("Start tearing down public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
+        log.info(
+                "Start tearing down public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBase");
         super.tearDown();
         plsComponentDeploymentTestNG.tearDown();
     }
@@ -55,14 +56,20 @@ public class CDLComponentDeploymentTestNG extends BatonAdapterDeploymentTestNGBa
     @Test(groups = "deployment")
     public void testInstallation() {
         loginAD();
-        bootstrap(contractId, tenantId, PLSComponent.componentName, plsComponentDeploymentTestNG.getPLSDocumentDirectory());
-        bootstrap(contractId, tenantId, CDLComponent.componentName, batonService.getDefaultConfiguration(getServiceName()));
+        bootstrap(contractId, tenantId, PLSComponent.componentName,
+                plsComponentDeploymentTestNG.getPLSDocumentDirectory());
+        bootstrap(contractId, tenantId, CDLComponent.componentName,
+                batonService.getDefaultConfiguration(getServiceName()));
         BootstrapState state = waitUntilStateIsNotInitial(contractId, tenantId, CDLComponent.componentName);
         Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
+        state = waitUntilStateIsNotInitial(contractId, tenantId, PLSComponent.componentName);
+        Assert.assertEquals(state.state, BootstrapState.State.OK, state.errorMessage);
 
-        String customerSpace = String.format("%s.%s.%s", contractId, tenantId, CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
+        String customerSpace = String.format("%s.%s.%s", contractId, tenantId,
+                CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID);
         loginAndAttachPls(testAdminUsername, testAdminPassword, customerSpace);
-        Map map = plsRestTemplate.postForObject(getPlsHostPort() + "/pls/entities/counts", new FrontEndQuery(), Map.class);
+        Map map = plsRestTemplate.postForObject(getPlsHostPort() + "/pls/entities/counts", new FrontEndQuery(),
+                Map.class);
         Assert.assertTrue(MapUtils.isNotEmpty(map));
         Map<BusinessEntity, Long> counts = JsonUtils.convertMap(map, BusinessEntity.class, Long.class);
         counts.forEach((entity, count) -> Assert.assertEquals(count, new Long(0)));
