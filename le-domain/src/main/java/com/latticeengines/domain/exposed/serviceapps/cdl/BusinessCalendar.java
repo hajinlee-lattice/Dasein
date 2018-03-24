@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
 
+import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Basic;
@@ -28,6 +29,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
 import com.latticeengines.domain.exposed.security.HasTenant;
@@ -39,7 +41,9 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields {
+public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields, Serializable {
+
+    private static final long serialVersionUID = -8569929129948247705L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -175,5 +179,8 @@ public class BusinessCalendar implements HasPid, HasTenant, HasAuditingFields {
         STARTING_DATE, STARTING_DAY
     }
 
-
+    @Override
+    public String toString() {
+        return JsonUtils.serialize(this);
+    }
 }

@@ -86,6 +86,7 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
@@ -176,6 +177,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     private ServingStoreProxy servingStoreProxy;
+
+    @Inject
+    protected PeriodProxy periodProxy;
 
     @Value("${camille.zk.pod.id}")
     private String podId;

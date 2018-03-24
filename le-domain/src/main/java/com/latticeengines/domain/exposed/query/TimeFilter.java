@@ -110,6 +110,7 @@ public class TimeFilter {
         this.period = period;
     }
 
+    @Deprecated
     public static class Period {
 
         public static final Period Date = new Period("Date");

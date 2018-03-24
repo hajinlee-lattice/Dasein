@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -36,6 +37,12 @@ public class PeriodStrategy implements Serializable {
         this.setName(template.name());
     }
 
+    public PeriodStrategy(BusinessCalendar calendar, Template template) {
+        this.setTemplate(template);
+        this.setName(template.name());
+        this.setBusinessCalendar(calendar);
+    }
+
     @JsonProperty("template")
     private Template template;
 
@@ -44,6 +51,9 @@ public class PeriodStrategy implements Serializable {
 
     @JsonProperty("start_time")
     private String startTimeStr;
+
+    @JsonProperty("business_calendar")
+    private BusinessCalendar businessCalendar;
 
     public Template getTemplate() {
         return template;
@@ -68,6 +78,15 @@ public class PeriodStrategy implements Serializable {
     public void setStartTimeStr(String startTimeStr) {
         this.startTimeStr = startTimeStr;
     }
+
+    public BusinessCalendar getBusinessCalendar() {
+        return businessCalendar;
+    }
+
+    public void setBusinessCalendar(BusinessCalendar businessCalendar) {
+        this.businessCalendar = businessCalendar;
+    }
+
 
     public enum Template {
         Date, Day, Week, Month, Quarter, Year

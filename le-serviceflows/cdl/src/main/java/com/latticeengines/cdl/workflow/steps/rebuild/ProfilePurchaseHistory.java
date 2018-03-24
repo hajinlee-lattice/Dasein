@@ -259,7 +259,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         baseTables.put(accountTableName, accountSourceTable);
         step.setBaseTables(baseTables);
         step.setTransformer(DataCloudConstants.PURCHASE_METRICS_INITIATOR);
-        step.setConfiguration(emptyStepConfig(lightEngineConfig()));
+        step.setConfiguration("{}");
         return step;
     }
 
@@ -279,8 +279,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setMetrics(purchaseMetrics);
         conf.setPeriodStrategies(periodStrategies);
 
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
+        step.setConfiguration(JsonUtils.serialize(conf));
         return step;
     }
 
@@ -299,8 +298,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setPivotField(InterfaceName.ProductId.name());
         conf.setProductMap(productMap);
 
-        String confStr = appendEngineConf(conf, lightEngineConfig());
-        step.setConfiguration(confStr);
+        step.setConfiguration(JsonUtils.serialize(conf));
         return step;
     }
 

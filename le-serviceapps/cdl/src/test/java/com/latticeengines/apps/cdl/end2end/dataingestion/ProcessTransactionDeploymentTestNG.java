@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 /**
  * Process Transaction imports after ProcessAccountDeploymentTestNG
@@ -32,9 +33,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private static final int TRANSACTION_IMPORT_SIZE_1_1 = 20000;
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
     private static final long AGGREGATE_TRANSACTION_SIZE = 22747L;
-    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 78187L;
-    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
-    private static final long PIVOTED_METRICS_SIZE = 618L;
+    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 77266L;
 
     private RatingEngine ratingEngine;
 
@@ -42,6 +41,9 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
         resumeVdbCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+
+        // Test starting date mode for business calendar
+        setupBusinessCalendar();
 
         new Thread(() -> {
             createTestSegment1();
@@ -110,5 +112,13 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
                 (long) (ACCOUNT_IMPORT_SIZE_1 * PRODUCT_IMPORT_SIZE_1));
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_1);
         return expectedCnts;
+    }
+
+    private void setupBusinessCalendar() {
+        BusinessCalendar calendar = new BusinessCalendar();
+        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
+        calendar.setStartingDate("JAN-01");
+        calendar.setLongerMonth(1);
+        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), calendar);
     }
 }
