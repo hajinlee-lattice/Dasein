@@ -815,6 +815,13 @@ public class SchemaRepository {
                 .defaultValueStr("Purchase").interfaceName(InterfaceName.TransactionType) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
+        table.addAttribute(attr(InterfaceName.CustomTrxField.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CUSTOMFIELD", "CUSTOM_FIELD", "CUSTOM FIELD")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CustomTrxField) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
         return table;
     }
 
@@ -892,6 +899,13 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_NUMERIC) //
                 .category(ModelingMetadata.CATEGORY_ACCOUNT_INFORMATION) //
                 .build());
+        table.addAttribute(attr(InterfaceName.Cost.name()) //
+                .allowedDisplayNames(Sets.newHashSet("COST")) //
+                .type(Schema.Type.INT) //
+                .interfaceName(InterfaceName.Cost) //
+                .logicalType(LogicalDataType.Metric) //
+                .fundamentalType(ModelingMetadata.FT_NUMERIC) //
+                .build());
         table.addAttribute(attr(InterfaceName.TransactionTime.name()) //
                 .allowedDisplayNames(Sets.newHashSet("TIMESTAMP", "TIME STAMP", "TRANSACTION_TIME", "TRANSACTION TIME")) //
                 .type(Schema.Type.STRING) //
@@ -921,6 +935,13 @@ public class SchemaRepository {
                 .allowedDisplayNames(Sets.newHashSet("DAYPERIOD", "TRANSACTION_DAY_PERIOD", "TRANSACTION DAY PERIOD")) //
                 .type(Schema.Type.INT) //
                 .interfaceName(InterfaceName.TransactionDayPeriod) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .fundamentalType(ModelingMetadata.FT_ALPHA) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CustomTrxField.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CUSTOMFIELD", "CUSTOM_FIELD", "CUSTOM FIELD")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.CustomTrxField) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());

@@ -8,6 +8,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
@@ -25,11 +26,14 @@ import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodCollectorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataCleanerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDataDistributorConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PeriodDateConvertorConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransactionStandardizerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -53,10 +57,16 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     static final String BEAN_NAME = "mergeTransaction";
 
     private Table rawTable;
-    private int mergeStep, dailyStep, dayPeriodStep;
+    private int mergeStep, dailyStep, mergeRawStep, standardizeStep, dayPeriodStep;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    List<String> stringFields;
+    List<String> longFields;
+    List<String> intFields;
+
+    boolean schemaChanged;
 
     @Override
     protected void onPostTransformationCompleted() {
@@ -76,18 +86,117 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             throw new IllegalStateException("Cannot find raw period store");
         }
         log.info("Found rawTable " + rawTable.getName());
+
+        stringFields = new ArrayList<String>();
+        longFields = new ArrayList<String>();
+        intFields = new ArrayList<String>();
+        Table rawTemplate = SchemaRepository.instance().getSchema(SchemaInterpretation.TransactionRaw, true);
+        getTableFields(rawTemplate, stringFields, longFields, intFields);
+
+        List<String> curStringFields = new ArrayList<String>();
+        List<String> curLongFields = new ArrayList<String>();
+        List<String> curIntFields = new ArrayList<String>();
+        getTableFields(rawTable, curStringFields, curLongFields, curIntFields);
+
+        schemaChanged = compareFields(stringFields, curStringFields);
+        if (!schemaChanged) {
+            schemaChanged = compareFields(longFields, curLongFields);
+        }
+        if (!schemaChanged) {
+            schemaChanged = compareFields(intFields, curIntFields);
+        }
+
+        if (schemaChanged) {
+            log.info("Detected schema change. Updating raw table");
+            rawTable.setAttributes(rawTemplate.getAttributes());
+            metadataProxy.updateTable(customerSpace.toString(), rawTable.getName(), rawTable);
+        }
+        
+    }
+
+
+    private void getTableFields(Table table, List<String> stringFields, List<String> longFields, List<String> intFields) {
+        List<Attribute> attrs = table.getAttributes();
+        for (Attribute attr: attrs) {
+            Type attrType = Type.valueOf(attr.getPhysicalDataType()); 
+            String attrName = attr.getName();
+            if (attrType == Type.STRING) {
+                stringFields.add(attrName);
+            } else if (attrType == Type.LONG) {
+                longFields.add(attrName);
+            } else if (attrType == Type.INT) {
+                intFields.add(attrName);
+            } else {
+                log.warn("Invalid attribute type for " + attrName);
+            }
+        }
+        Collections.sort(stringFields);
+        Collections.sort(longFields);
+        Collections.sort(intFields);
+    }
+
+    private boolean compareFields(List<String> fields, List<String> curFields) {
+        if (fields.size() != curFields.size()) {
+            return true;
+        }
+        for (int i = 0; i < fields.size(); i++) {
+            if (!(fields.get(i).equals(curFields.get(i)))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public PipelineTransformationRequest getConsolidateRequest() {
         PipelineTransformationRequest request = new PipelineTransformationRequest();
         request.setName("MergeTransaction");
+        List<TransformationStepConfig> steps;
+        if (schemaChanged) {
+            steps = getUpgradeSteps();
+        } else {
+            steps = getSteps();
+        }
+        request.setSteps(steps);
+        return request;
+   }
 
+    private List<TransformationStepConfig> getUpgradeSteps() {
         mergeStep = 0;
         dailyStep = 1;
-        dayPeriodStep = 2;
+        mergeRawStep = 2;
+        standardizeStep = 3;
+        dayPeriodStep = 4;
 
         TransformationStepConfig inputMerge = mergeInputs(true, false, true);
         TransformationStepConfig daily = addTrxDate();
+        TransformationStepConfig rawMerge = mergeRaw();
+        TransformationStepConfig standardize = standardizeTrx(mergeRawStep);
+        TransformationStepConfig dayPeriods = collectDays();
+        TransformationStepConfig rawCleanup = cleanupRaw(rawTable);
+        TransformationStepConfig dailyPartition = partitionDaily();
+        TransformationStepConfig report = reportDiff(dayPeriodStep);
+
+        List<TransformationStepConfig> steps = new ArrayList<>();
+        steps.add(inputMerge);
+        steps.add(daily);
+        steps.add(rawMerge);
+        steps.add(standardize);
+        steps.add(dayPeriods);
+        steps.add(rawCleanup);
+        steps.add(dailyPartition);
+        steps.add(report);
+        return steps;
+    }
+
+    private List<TransformationStepConfig> getSteps() {
+        mergeStep = 0;
+        dailyStep = 1;
+        standardizeStep = 2;
+        dayPeriodStep = 3;
+
+        TransformationStepConfig inputMerge = mergeInputs(true, false, true);
+        TransformationStepConfig daily = addTrxDate();
+        TransformationStepConfig standardize = standardizeTrx(dailyStep);
         TransformationStepConfig dayPeriods = collectDays();
         TransformationStepConfig dailyPartition = partitionDaily();
         TransformationStepConfig report = reportDiff(dayPeriodStep);
@@ -95,12 +204,13 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(inputMerge);
         steps.add(daily);
+        steps.add(standardize);
         steps.add(dayPeriods);
         steps.add(dailyPartition);
         steps.add(report);
-        request.setSteps(steps);
-        return request;
+        return steps;
     }
+
 
     private TransformationStepConfig addTrxDate() {
         TransformationStepConfig step = new TransformationStepConfig();
@@ -114,10 +224,41 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return step;
     }
 
+    TransformationStepConfig mergeRaw() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        List<String> baseSources;
+        Map<String, SourceTable> baseTables;
+        String rawName = rawTable.getName();
+        baseSources = Collections.singletonList(rawName);
+        baseTables = new HashMap<>();
+        SourceTable sourceMasterTable = new SourceTable(rawName, customerSpace);
+        baseTables.put(rawName, sourceMasterTable);
+        step.setBaseSources(baseSources);
+        step.setBaseTables(baseTables);
+        step.setInputSteps(Collections.singletonList(dailyStep));
+        step.setTransformer("consolidateDataTransformer");
+        step.setConfiguration(getConsolidateDataConfig(false, false, true));
+
+        return step;
+    }
+
+    private TransformationStepConfig standardizeTrx(int inputStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.TRANSACTION_STANDARDIZER);
+        step.setInputSteps(Collections.singletonList(inputStep));
+        TransactionStandardizerConfig config = new TransactionStandardizerConfig();
+        config.setStringFields(stringFields);
+        config.setLongFields(longFields);
+        config.setIntFields(intFields);
+        config.setCustomField(InterfaceName.CustomTrxField.name());
+        step.setConfiguration(JsonUtils.serialize(config));
+        return step;
+    }
+
     private TransformationStepConfig collectDays() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_COLLECTOR);
-        step.setInputSteps(Collections.singletonList(dailyStep));
+        step.setInputSteps(Collections.singletonList(standardizeStep));
         PeriodCollectorConfig config = new PeriodCollectorConfig();
         config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
 
@@ -130,12 +271,31 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         return step;
     }
 
+    private TransformationStepConfig cleanupRaw(Table periodTable) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setTransformer(DataCloudConstants.PERIOD_DATA_CLEANER);
+        step.setInputSteps(Collections.singletonList(dayPeriodStep));
+
+        String tableSourceName = "PeriodTable";
+        String sourceTableName = periodTable.getName();
+        SourceTable sourceTable = new SourceTable(sourceTableName, customerSpace);
+        List<String> baseSources = Collections.singletonList(tableSourceName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        baseTables.put(tableSourceName, sourceTable);
+        step.setBaseTables(baseTables);
+        PeriodDataCleanerConfig config = new PeriodDataCleanerConfig();
+        config.setPeriodField(InterfaceName.TransactionDayPeriod.name());
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
+
     private TransformationStepConfig partitionDaily() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setTransformer(DataCloudConstants.PERIOD_DATA_DISTRIBUTOR);
         List<Integer> inputSteps = new ArrayList<>();
         inputSteps.add(dayPeriodStep);
-        inputSteps.add(dailyStep);
+        inputSteps.add(standardizeStep);
         step.setInputSteps(inputSteps);
 
         String tableSourceName = "RawTransaction";

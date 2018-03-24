@@ -77,6 +77,7 @@ public enum InterfaceName {
     SpendChange, //
     TotalSpendOvertime, //
     AvgSpendOvertime, //
+    CustomTrxField, //
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb

@@ -33,11 +33,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     private boolean initialized = false;
 
     private boolean enforceRebuild = false;
-    private boolean hasImports = false;
     private boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
     private boolean hasBatchStore = false;
 
+    boolean hasImports = false;
     boolean rebuild = false;
     boolean update = false;
     boolean reset = false;
@@ -183,11 +183,11 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
-    private boolean shouldMerge() {
+    protected boolean shouldMerge() {
         return hasImports;
     }
 
-    private boolean shouldReset() {
+    protected boolean shouldReset() {
         if (!hasBatchStore && !hasImports) {
             log.info("No batch store and no imports, going to reset entity.");
             return true;

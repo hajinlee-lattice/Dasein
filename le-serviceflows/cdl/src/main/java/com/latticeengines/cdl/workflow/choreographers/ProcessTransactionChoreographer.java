@@ -181,8 +181,22 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     @Override
+    protected boolean shouldReset() {
+        if (!hasRawStore && !shouldMerge()) {
+            log.info("No raw store and no imports, going to reset entity.");
+            return true;
+        }
+        return false;
+    }
+
+    @Override
     protected boolean shouldRebuild() {
         boolean should = super.shouldRebuild();
+
+        if (reset) {
+            return should;
+        }
+
         if (!should) {
             if (hasRawStore && hasProducts) {
                 if (productChoreographer.update || productChoreographer.rebuild) {
