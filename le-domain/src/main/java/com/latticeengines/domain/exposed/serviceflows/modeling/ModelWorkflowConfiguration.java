@@ -165,6 +165,16 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
             return this;
         }
 
+        public Builder aiModelId(String aiModelId) {
+            model.setAiModelId(aiModelId);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            model.setRatingEngineId(ratingEngineId);
+            return this;
+        }
+
         public ModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
 

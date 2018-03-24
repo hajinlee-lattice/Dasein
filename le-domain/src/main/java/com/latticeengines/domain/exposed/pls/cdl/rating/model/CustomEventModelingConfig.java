@@ -5,6 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
+import com.latticeengines.domain.exposed.pls.AIModel;
 
 @JsonIgnoreProperties
 public class CustomEventModelingConfig implements AdvancedModelingConfig {
@@ -74,5 +75,12 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
         advancedConfInRetrievedAIModel.setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
         advancedConfInRetrievedAIModel.setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());
+    }
+
+    public static CustomEventModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
+        if (aiModel.getAdvancedModelingConfig() == null) {
+            aiModel.setAdvancedModelingConfig(new CustomEventModelingConfig());
+        }
+        return (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
     }
 }

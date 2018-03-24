@@ -157,7 +157,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private PlsCDLImportProxy plsCDLImportProxy;
 
     @Inject
-    private ModelingFileUploadProxy fileUploadProxy;
+    protected ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
     protected Configuration yarnConfiguration;

@@ -33,7 +33,6 @@ import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
-import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -150,7 +149,7 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam(value = "source", required = false, defaultValue = "") String source,
             @RequestParam(value = "feedType", required = false, defaultValue = "") String feedType,
-            @RequestParam(value = "customEventModelingType", required = false, defaultValue = "LPI") CustomEventModelingType modelingType,
+            @RequestParam(value = "excludeCustomFileAttributes", required = false, defaultValue = "false") boolean excludeCustomFileAttributes,
             @RequestBody FieldMappingDocument fieldMappingDocument) {
         if (StringUtils.isEmpty(entity) || StringUtils.isEmpty(source)) {
             modelingFileMetadataService.resolveMetadata(csvFileName, fieldMappingDocument);

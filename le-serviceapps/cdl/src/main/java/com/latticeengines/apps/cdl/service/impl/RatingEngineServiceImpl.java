@@ -376,6 +376,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                 modelingParameters.setExcludePropDataColumns(
                         !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
                 modelingParameters.setExcludeCDLAttributes(
+
                         !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
                 modelingParameters.setExcludeCustomFileAttributes(
                         !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
@@ -383,7 +384,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
                 log.info(String.format("Custom event modelling job submitted with parameters %s",
                         modelingParameters.toString()));
-                jobId = customEventModelingWorkflowSubmitter.submit(customerSpace, modelingParameters);
+                jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
+                        modelingParameters);
             }
             return jobId.toString();
         default:

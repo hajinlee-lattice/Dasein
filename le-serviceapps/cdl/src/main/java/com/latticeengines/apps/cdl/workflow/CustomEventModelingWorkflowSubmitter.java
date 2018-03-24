@@ -221,6 +221,8 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                         parameters.getCustomEventModelingType())) //
                 .skipLdcAttributesOnly(
                         !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
+                .aiModelId(parameters.getAiModelId()) //
+                .ratingEngineId(parameters.getRatingEngineId()) //
                 .build();
     }
 
@@ -265,6 +267,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
             Table segmentExportTable = SegmentExportUtil.constructSegmentExportTable(MultiTenantContext.getTenant(),
                     metadataSegmentExport.getType(), exportedFileName);
 
+            metadataProxy.createTable(customerSpace.toString(), segmentExportTable.getName(), segmentExportTable);
             segmentExportTable = metadataProxy.getTable(customerSpace.toString(), segmentExportTable.getName());
             metadataSegmentExport.setTableName(segmentExportTable.getName());
 

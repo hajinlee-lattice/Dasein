@@ -210,6 +210,16 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder aiModelId(String aiModelId) {
+            modelWorkflowBuilder.aiModelId(aiModelId);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            modelWorkflowBuilder.ratingEngineId(ratingEngineId);
+            return this;
+        }
+
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             customEventMatchWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
             prepareConfigForScoringBuilder.matchRequestSource(matchRequestSource);
