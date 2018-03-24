@@ -9,14 +9,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.retry.RetryCallback;
-import org.springframework.retry.RetryContext;
 import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
@@ -41,32 +37,30 @@ public class RedisCacheService extends CacheServiceBase {
     @Override
     public void refreshKeysByPattern(String pattern, CacheName... cacheNames) {
         RetryTemplate retry = getRetryTemplate();
-        retry.execute(new RetryCallback<Void, RuntimeException>() {
-            @Override
-            public Void doWithRetry(RetryContext context) {
-                redisTemplate.execute(new SessionCallback<Long>() {
-                    @SuppressWarnings({ "unchecked", "rawtypes" })
-                    @Override
-                    public Long execute(RedisOperations operations) throws DataAccessException {
-                        List<Object> rawkeys = redisTemplate.executePipelined(new RedisCallback<Object>() {
-                            @Override
-                            public Object doInRedis(RedisConnection connection) throws DataAccessException {
-                                for (CacheName cacheName : cacheNames) {
-                                    log.info("Getting keys via pattern " + pattern + " from " + cacheName);
-                                    connection.keys(String.format("*%s*", pattern).getBytes());
-                                }
-                                return null;
+        retry.execute(context -> {
+            redisTemplate.execute(new SessionCallback<Long>() {
+                @SuppressWarnings({ "unchecked", "rawtypes" })
+                @Override
+                public Long execute(RedisOperations operations) throws DataAccessException {
+                    List<Object> rawkeys = redisTemplate.executePipelined(new SessionCallback<Object>() {
+
+                        @Override
+                        public Object execute(RedisOperations operations) throws DataAccessException {
+                            for (CacheName cacheName : cacheNames) {
+                                log.info("Getting keys via pattern " + pattern + " from " + cacheName);
+                                operations.keys(String.format("*%s*", pattern));
                             }
-                        }, new StringRedisSerializer());
-                        Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
-                                .collect(Collectors.toSet());
-                        long cnt = operations.delete(keys);
-                        log.info("Deleted " + cnt);
-                        return cnt;
-                    }
-                });
-                return null;
-            }
+                            return null;
+                        }
+                    }, new StringRedisSerializer());
+                    Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
+                            .collect(Collectors.toSet());
+                    long cnt = operations.delete(keys);
+                    log.info("Deleted " + cnt);
+                    return cnt;
+                }
+            });
+            return null;
         });
     }
 
