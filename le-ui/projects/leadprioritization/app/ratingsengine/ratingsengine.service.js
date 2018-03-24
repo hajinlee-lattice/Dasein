@@ -57,7 +57,6 @@ angular.module('lp.ratingsengine')
         this.modelingType = "";
         this.FieldDocument = {};
         this.fileName = "";
-        this.filePath = ""; //TO_DELETE -- SHOULD ONLY NEED FILENAME
 
         this.wizardProgressItems = {
             "rulesprospects": [
@@ -671,14 +670,6 @@ angular.module('lp.ratingsengine')
 
     this.getCSVFileName = function() {
         return RatingsEngineStore.fileName;
-    }
-
-    this.setFilePath = function(filePath) {
-        RatingsEngineStore.filePath = filePath;
-    }
-
-    this.getFilePath = function() {
-        return RatingsEngineStore.filePath;
     }
     
     this.setConfigFilters = function(configFilters) {

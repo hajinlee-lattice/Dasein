@@ -21,6 +21,9 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     	var model = vm.ratingEngine.activeModel.AI;
         vm.type = vm.ratingEngine.type.toLowerCase();
 
+        vm.predictionType = model.predictionType;  
+        vm.trainingSegment = model.trainingSegment;
+
         if (vm.type === 'cross_sell') {
 
             console.log(model);
@@ -78,9 +81,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             vm.attributesUsed = dataStore.length == 1 ? vm.formatTrainingAttributes(dataStore[0]) : vm.formatTrainingAttributes(dataStore[0]) + ' and ' + vm.formatTrainingAttributes(dataStore[1]);
 
         }
-        
-        vm.predictionType = model.predictionType;        
-        vm.trainingSegment = model.trainingSegment;
+
     };
 
     vm.checkJobStatus = $interval(function() { 
@@ -131,7 +132,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 return 'DataCloud';
             case 'CDL':
                 return 'Lattice Database';
-            case 'CustomAttributes':
+            case 'CustomFileAttributes':
                 return 'custom';
         }
     }

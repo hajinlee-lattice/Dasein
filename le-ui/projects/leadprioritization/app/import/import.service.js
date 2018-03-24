@@ -540,7 +540,6 @@ angular.module('lp.import')
 	    this.GetFieldDocument = function(FileName, entity, schema) {
 	        var deferred = $q.defer();
 	        var entity = entity;
-            var data = data || {};
             var params = {};
             if (entity) {
     	       params = {

@@ -67,7 +67,6 @@ angular.module('lp.ratingsengine.wizard.training')
         if (result.Result) {
             vm.fileName = result.Result.name;
             RatingsEngineStore.setCSVFileName(vm.fileName);
-            RatingsEngineStore.setFilePath(result.Result.path);
             vm.next = vm.goState;
             RatingsEngineStore.setValidation("training", true);
         }

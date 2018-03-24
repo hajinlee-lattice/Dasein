@@ -1,16 +1,15 @@
 angular.module('lp.ratingsengine.wizard.attributes', [])
-.controller('RatingsEngineAttributes', function ($q, $state, $stateParams, Rating, RatingsEngineStore) {
+.controller('RatingsEngineAttributes', function ($q, $state, $stateParams, RatingsEngineStore) {
+
     var vm = this;
-    console.log(Rating);
     angular.extend(vm, {
         disableTrainingAttributes: false,
         disableCDLAttributes: false,
         scoringAttributes: {
         	'DataCloud': false,
         	'CDL': false,
-        	'CustomAttributes': false
+        	'CustomFileAttributes': false
         },
-        rating: Rating
     });
 
     vm.init = function() {
