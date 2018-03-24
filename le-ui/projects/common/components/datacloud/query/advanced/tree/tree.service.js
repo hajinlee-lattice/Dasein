@@ -452,7 +452,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             };
 
             this.treeMode = bucketRestriction.attr.split('.')[0].toLowerCase();
-            if (this.treeMode === 'purchasehistory') {
+            if (this.treeMode === 'purchasehistory' || this.treeMode === 'rating' ) {
                 this.treeMode = 'account';
             }
 
