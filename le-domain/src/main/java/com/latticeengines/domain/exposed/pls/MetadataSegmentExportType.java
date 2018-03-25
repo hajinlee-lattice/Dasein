@@ -55,8 +55,7 @@ public enum MetadataSegmentExportType {
             Arrays.asList("Contact Id", "Contact Name", "Email", "Contact Phone", "Account Id", //
                     "Company Name", "Website", "Street", "City", "State", "Zip", "Country", "Salesforce Id")), //
     ACCOUNT_ID("Account_ID", //
-            Collections.singletonList(//
-                    MetadataSegmentExport.ACCOUNT_PREFIX + InterfaceName.AccountId.name()),
+            Collections.singletonList(InterfaceName.AccountId.name()), //
             Collections.singletonList("Account Id")); // ;
 
     String displayName;

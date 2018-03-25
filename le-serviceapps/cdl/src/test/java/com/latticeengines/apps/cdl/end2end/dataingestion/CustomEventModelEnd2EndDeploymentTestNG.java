@@ -34,8 +34,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1521680290015";
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "LETest1521961872915";
 
     private MetadataSegment testSegment;
     private RatingEngine testRatingEngine;
@@ -109,9 +109,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
                 fm.setMappedField("CompanyName");
                 fm.setMappedToLatticeField(true);
             }
-            if (fm.getUserField().equals("ID")) {
-                fm.setMappedField("ID");
-                fm.setMappedToLatticeField(true);
+            if (fm.getUserField().equals("Id")) {
+                fm.setMappedField("Id");
+                fm.setMappedToLatticeField(false);
             }
         }
 

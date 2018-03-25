@@ -168,6 +168,8 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
 
+        String tableName = parameters.getFilename();
+        String targetTableName = tableName + "_TargetTable";
         return new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -221,6 +223,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .notesContent(parameters.getNotesContent()) //
                 .metadataSegmentExport(createMetadataSegmentExport(parameters.getRatingEngineId(),
                         parameters.getCustomEventModelingType())) //
+                .targetTableName(targetTableName) //
                 .skipLdcAttributesOnly(
                         !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
                 .aiModelId(parameters.getAiModelId()) //
@@ -274,7 +277,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
             metadataSegmentExport.setTableName(segmentExportTable.getName());
 
             String path = PathBuilder.buildDataFileUniqueExportPath(CamilleEnvironment.getPodId(), customerSpace)
-                    .toString();
+                    .append("/").toString();
             metadataSegmentExport.setPath(path);
             return metadataSegmentExport;
         }

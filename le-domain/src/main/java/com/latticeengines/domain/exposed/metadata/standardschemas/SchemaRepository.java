@@ -235,9 +235,9 @@ public class SchemaRepository {
     private Table getSalesforceAccountSchema() {
         Table table = createTable(SchemaInterpretation.SalesforceAccount);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        table.setPrimaryKey(createPrimaryKey(InterfaceName.Id.name()));
 
-        table.addAttribute(attr("Id") //
+        table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
@@ -335,9 +335,9 @@ public class SchemaRepository {
     private Table getSalesforceLeadSchema() {
         Table table = createTable(SchemaInterpretation.SalesforceLead);
         table.setLastModifiedKey(createLastModifiedKey("LastModifiedDate"));
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        table.setPrimaryKey(createPrimaryKey(InterfaceName.Id.name()));
 
-        table.addAttribute(attr("Id") //
+        table.addAttribute(attr(InterfaceName.Id.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "LEAD", "LEAD ID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
@@ -455,9 +455,9 @@ public class SchemaRepository {
 
     private Table getAccountSchema() {
         Table table = createTable(SchemaInterpretation.Account);
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        table.setPrimaryKey(createPrimaryKey(InterfaceName.AccountId.name()));
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.AccountId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "ACCOUNT", "ACCOUNT ID", "ACCOUNTID", "EXTERNAL_ID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
@@ -542,9 +542,9 @@ public class SchemaRepository {
 
     private Table getContactSchema() {
         Table table = createTable(SchemaInterpretation.Contact);
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        table.setPrimaryKey(createPrimaryKey(InterfaceName.ContactId.name()));
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.ContactId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "CONTACT", "EXTERNAL_ID", "CONTACT ID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //
@@ -658,9 +658,9 @@ public class SchemaRepository {
 
     private Table getProductSchema() {
         Table table = createTable(SchemaInterpretation.Product);
-        table.setPrimaryKey(createPrimaryKey("Id"));
+        table.setPrimaryKey(createPrimaryKey(InterfaceName.ProductId.name()));
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
                 .required().notNull() //
@@ -731,7 +731,7 @@ public class SchemaRepository {
     private Table getTransactionSchema() {
         Table table = createTable(SchemaInterpretation.Transaction);
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.TransactionId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionId) //
@@ -837,7 +837,7 @@ public class SchemaRepository {
     private Table getRawTransactionSchema(boolean includeCdlTimestamps) {
         Table table = createTable(SchemaInterpretation.TransactionRaw);
 
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.TransactionId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "TRANSACTION_ID", "TRANSACTION ID")) //
                 .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.TransactionId) //
@@ -993,7 +993,7 @@ public class SchemaRepository {
                 .logicalType(LogicalDataType.Id) //
                 .fundamentalType(ModelingMetadata.FT_ALPHA) //
                 .build());
-        table.addAttribute(attr(InterfaceName.Id.name()) //
+        table.addAttribute(attr(InterfaceName.ProductId.name()) //
                 .allowedDisplayNames(Sets.newHashSet("ID", "PRODUCT_ID", "PRODUCT ID")) //
                 .type(Schema.Type.STRING) //
                 .notNull() //

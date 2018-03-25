@@ -6,10 +6,10 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
@@ -102,6 +102,11 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
             if (metadataSegmentExport != null) {
                 matchCdlWorkflowConfBuilder.matchInputTableName(metadataSegmentExport.getTableName());
             }
+            return this;
+        }
+
+        public Builder matchCdlTargetTableName(String cdlTargetTableName) {
+            matchCdlWorkflowConfBuilder.matchCdlTargetTableName(cdlTargetTableName);
             return this;
         }
 

@@ -133,12 +133,12 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
 
         String metadataFile = ctx.getProperty(ImportProperty.METADATAFILE, String.class);
         String contents;
-        //CDL import won't update the attribute name to interface name.
+        // CDL import won't update the attribute name to interface name.
         boolean skipUpdate = Boolean.parseBoolean(ctx.getProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, String.class));
 
         if (metadataFile != null) {
             try {
-                contents = FileUtils.readFileToString(new File(metadataFile));
+                contents = FileUtils.readFileToString(new File(metadataFile), "UTF-8");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

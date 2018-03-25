@@ -110,7 +110,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private boolean isEnableDebug = false;
 
-    private Map<String, Long> idToInternalIdMap = new HashMap<>();
+    // private Map<String, Long> idToInternalIdMap = new HashMap<>();
 
     private RTSBulkScoringConfiguration rtsBulkScoringConfig;
 
@@ -319,9 +319,13 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
             String idStr = null;
             if (!useInternalId) {
-                idStr = avroRecord.get(InterfaceName.Id.toString()).toString();
-                idToInternalIdMap.put(idStr,
-                        Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
+                Object obj = avroRecord.get(InterfaceName.Id.toString());
+                if (obj == null) {
+                    obj = avroRecord.get(InterfaceName.AccountId.toString());
+                }
+                idStr = record.toString();
+                // idToInternalIdMap.put(idStr,
+                // Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
             } else {
                 idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
             }
@@ -390,8 +394,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             count++;
             Object idObj = avroRecord.get(InterfaceName.Id.toString());
             if (idObj == null) {
-                idObj = avroRecord.get(InterfaceName.InternalId.toString());
-                useInternalId = true;
+                idObj = avroRecord.get(InterfaceName.AccountId.toString());
+                if (idObj == null) {
+                    idObj = avroRecord.get(InterfaceName.InternalId.toString());
+                    useInternalId = true;
+                }
             }
             if (idObj == null) {
                 throw new LedpException(LedpCode.LEDP_20034);
@@ -558,7 +565,8 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     private void writeToErrorFile(CSVPrinter csvFilePrinter, String id, String errorMessage) throws IOException {
         if (StringUtils.isNotEmpty(errorMessage)) {
             if (!useInternalId) {
-                csvFilePrinter.printRecord(idToInternalIdMap.get(id), id, errorMessage);
+                // csvFilePrinter.printRecord(idToInternalIdMap.get(id), id,
+                // errorMessage);
             } else {
                 csvFilePrinter.printRecord(id, "", errorMessage);
             }

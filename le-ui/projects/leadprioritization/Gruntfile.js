@@ -10,7 +10,7 @@ module.exports = function (grunt) {
         env:  {
             dev:         {
                 url:            'http://localhost:3000',
-                apiUrl:         'http://localhost:8081',
+                apiUrl:         'https://localhost:9081',
                 protractorConf:   sourceDir + 'test/e2e/conf/protractor.conf.dev.js',
                 protractorCcConf: sourceDir + 'test/e2e/conf/protractor.cc.conf.js'
             },

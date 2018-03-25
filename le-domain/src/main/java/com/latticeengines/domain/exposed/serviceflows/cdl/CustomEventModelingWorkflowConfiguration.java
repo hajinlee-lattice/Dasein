@@ -202,10 +202,13 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder targetTableName(String targetTableName) {
+            modelWorkflowBuilder.targetTableName(targetTableName);
+            prepareConfigForScoringBuilder.matchCdlTargetTableName(targetTableName);
+            return this;
+        }
+
         public Builder metadataSegmentExport(MetadataSegmentExport metadataSegmentExport) {
-            if (metadataSegmentExport != null) {
-                modelWorkflowBuilder.targetTableName(metadataSegmentExport.getTableName());
-            }
             prepareConfigForScoringBuilder.metadataSegmentExport(metadataSegmentExport);
             return this;
         }

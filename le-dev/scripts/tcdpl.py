@@ -65,9 +65,9 @@ APP_URL = {
 
 PRESETS = {
     'cdl_pre_checkin': {
-        'apps': ['admin', 'pls', 'microservice', 'matchapi'],
+        'apps': ['admin', 'pls', 'microservice', 'matchapi','scoringapi'],
         'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl',
-                    'objectapi', 'dante', 'sqoop']
+                    'objectapi', 'dante', 'sqoop', 'quartz']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],

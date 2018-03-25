@@ -72,6 +72,12 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder matchCdlTargetTableName(String cdlTargetTableName) {
+            matchCdlAccount.setTargetTableName(cdlTargetTableName);
+            ldcConfigurationBuilder.matchInputTableName(cdlTargetTableName);
+            return this;
+        }
+
         public Builder matchAccountIdColumn(String matchAccountIdColumn) {
             matchCdlAccount.setMatchAccountIdColumn(matchAccountIdColumn);
             return this;

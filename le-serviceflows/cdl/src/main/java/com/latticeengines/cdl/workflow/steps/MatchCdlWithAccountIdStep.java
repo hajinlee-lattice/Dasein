@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -32,8 +33,11 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
     @Override
     public void onConfigurationInitialized() {
         MatchCdlAccountConfiguration configuration = getConfiguration();
-        String targetTableName = NamingUtils.timestamp("MatchCdlWithAccontIdTable");
-        configuration.setTargetTableName(targetTableName);
+        String targetTableName = configuration.getTargetTableName();
+        if (StringUtils.isEmpty(targetTableName)) {
+            targetTableName = NamingUtils.timestamp("MatchCdlWithAccontIdTable");
+            configuration.setTargetTableName(targetTableName);
+        }
         log.info("Target table name: " + targetTableName);
         configuration.setDataFlowParams(createDataFlowParameters());
     }
@@ -71,6 +75,7 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
         Table targetTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(CUSTOM_EVENT_MATCH_ACCOUNT, targetTable);
+        putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, targetTable);
     }
 
 }
