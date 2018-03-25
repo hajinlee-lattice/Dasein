@@ -323,7 +323,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (obj == null) {
                     obj = avroRecord.get(InterfaceName.AccountId.toString());
                 }
-                idStr = record.toString();
+                idStr = obj.toString();
                 // idToInternalIdMap.put(idStr,
                 // Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
             } else {
