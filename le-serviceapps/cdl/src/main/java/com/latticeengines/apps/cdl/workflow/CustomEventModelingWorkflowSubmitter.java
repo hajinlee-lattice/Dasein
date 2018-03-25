@@ -168,8 +168,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
 
-        String tableName = parameters.getFilename();
-        String targetTableName = tableName + "_TargetTable";
         return new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -223,7 +221,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .notesContent(parameters.getNotesContent()) //
                 .metadataSegmentExport(createMetadataSegmentExport(parameters.getRatingEngineId(),
                         parameters.getCustomEventModelingType())) //
-                .targetTableName(targetTableName) //
+                .targetTableName(trainingTableName + "_TargetTable") //
                 .skipLdcAttributesOnly(
                         !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
                 .aiModelId(parameters.getAiModelId()) //
