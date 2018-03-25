@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -74,24 +76,42 @@ public class CloneTableService {
             log.info("There is already " + role + " table in inactive version, skip cloning.");
             return;
         }
-        // TODO: clone needs to change to support multi tables too.
         if (clone) {
-            log.info("Cloning " + role + " from  " + active + " to " + inactive);
-            Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
-            String cloneName = NamingUtils.timestamp(role.name());
-            String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
-            queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
-            Table inactiveTable = TableCloneUtils //
-                    .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
-            metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
-            if (isServingStore(role)) {
-                BusinessEntity entity = servingStoreEntity(role);
-                String prefix = String.join("_", customerSpace.getTenantId(), entity.name());
-                cloneName = NamingUtils.timestamp(prefix);
-                metadataProxy.updateTable(customerSpace.toString(), cloneName, inactiveTable);
-                copyRedshiftTable(activeTableNames.get(0), cloneName);
+            log.info("Cloning role " + role + " from  " + active + " to " + inactive);
+            if (role == TableRoleInCollection.ConsolidatedPeriodTransaction) {  // Clone multi-tables
+                List<Table> activeTables = dataCollectionProxy.getTables(customerSpace.toString(), role, active);
+                List<String> cloneTableNames = new ArrayList<>();
+                for (Table activeTable : activeTables) {
+                    String periodStrategyName = PeriodStrategyUtils
+                            .getPeriodStrategyNameFromPeriodTableName(activeTable.getName(), role);
+                    String cloneName = PeriodStrategyUtils.getTablePrefixFromPeriodStrategyName(periodStrategyName)
+                            + NamingUtils.timestamp(role.name());
+                    String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+                    queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+                    Table inactiveTable = TableCloneUtils //
+                            .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
+                    metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
+                    cloneTableNames.add(inactiveTable.getName());
+                    log.info("Cloned " + activeTable.getName() + " to " + inactiveTable.getName());
+                }
+                dataCollectionProxy.upsertTables(customerSpace.toString(), cloneTableNames, role, inactive);
+            } else {
+                Table activeTable = dataCollectionProxy.getTable(customerSpace.toString(), role, active);
+                String cloneName = NamingUtils.timestamp(role.name());
+                String queue = LedpQueueAssigner.getPropDataQueueNameForSubmission();
+                queue = LedpQueueAssigner.overwriteQueueAssignment(queue, queueScheme);
+                Table inactiveTable = TableCloneUtils //
+                        .cloneDataTable(yarnConfiguration, customerSpace, cloneName, activeTable, queue);
+                metadataProxy.createTable(customerSpace.toString(), cloneName, inactiveTable);
+                if (isServingStore(role)) {
+                    BusinessEntity entity = servingStoreEntity(role);
+                    String prefix = String.join("_", customerSpace.getTenantId(), entity.name());
+                    cloneName = NamingUtils.timestamp(prefix);
+                    metadataProxy.updateTable(customerSpace.toString(), cloneName, inactiveTable);
+                    copyRedshiftTable(activeTableNames.get(0), cloneName);
+                }
+                dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, role, inactive);
             }
-            dataCollectionProxy.upsertTable(customerSpace.toString(), cloneName, role, inactive);
         } else {
             log.info("Linking " + role + " from " + active + " to " + inactive);
             if (role == TableRoleInCollection.ConsolidatedPeriodTransaction) {

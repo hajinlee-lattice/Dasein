@@ -153,9 +153,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find result curated metrics table");
         }
         updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, TABLE_GOING_TO_REDSHIFT,
-                curatedMetricsTableName,
-                String.class);
-        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, APPEND_TO_REDSHIFT_TABLE, true,
+                curatedMetricsTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, APPEND_TO_REDSHIFT_TABLE, false,
                 Boolean.class);
         super.onPostTransformationCompleted();
         generateReport();

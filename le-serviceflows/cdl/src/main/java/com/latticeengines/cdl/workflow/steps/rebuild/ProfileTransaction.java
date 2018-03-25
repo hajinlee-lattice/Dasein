@@ -316,7 +316,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
+        config.setGroupByFields(Arrays.asList( //
+                InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //
@@ -373,7 +374,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         // attributes
         // config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-        config.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), //
+        config.setGroupByFields(Arrays.asList( //
+                InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
                 InterfaceName.TransactionType.name(), //

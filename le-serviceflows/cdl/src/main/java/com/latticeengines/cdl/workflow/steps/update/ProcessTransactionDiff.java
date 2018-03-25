@@ -115,10 +115,10 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         }
         updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName,
                 String.class);
-        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName,
                 String.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
     }
 
     @Override
@@ -155,7 +155,7 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         periodAgrStep = 10;
 
         for (PeriodStrategy strategy : periodStrategies) {
-            periodAdded = addPeriod(dailyAgrStep, null);
+            periodAdded = addPeriod(dailyAgrStep, strategy); // addPeriodStep
             TransformationStepConfig periods = collectPeriods(); // periodsStep
             TransformationStepConfig periodData = collectPeriodData(strategy); // periodDataStep
             TransformationStepConfig periodAgr = aggregatePeriods(strategy); // periodAgrStep
@@ -279,10 +279,10 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         targetTable.setExpandBucketedAttrs(false);
         step.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Collections.singletonList("Amount"));
-        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
-        config.setSumLongFields(Collections.singletonList("Quantity"));
-        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
+        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
+        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
@@ -330,10 +330,10 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setPeriodStrategy(strategy);
-        config.setSumFields(Collections.singletonList("TotalAmount"));
-        config.setSumOutputFields(Collections.singletonList("TotalAmount"));
-        config.setSumLongFields(Collections.singletonList("TotalQuantity"));
-        config.setSumLongOutputFields(Collections.singletonList("TotalQuantity"));
+        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //

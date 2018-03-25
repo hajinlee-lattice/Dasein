@@ -31,7 +31,6 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     static final String CHECK_POINT = "update4";
     private RatingEngine ratingEngine;
 
-    private static final long AGGREGATE_TRANSACTION_SIZE = 30000L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
 
     private static final int EARLIEST_TRANSACTION = 48033;

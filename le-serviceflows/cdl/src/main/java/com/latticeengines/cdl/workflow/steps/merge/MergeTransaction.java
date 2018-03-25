@@ -85,7 +85,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         if (rawTable == null) {
             throw new IllegalStateException("Cannot find raw period store");
         }
-        log.info("Found rawTable " + rawTable.getName());
+        log.info("Found rawTable " + rawTable.getName() + " @version " + inactive);
 
         stringFields = new ArrayList<String>();
         longFields = new ArrayList<String>();
@@ -110,6 +110,8 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
             log.info("Detected schema change. Updating raw table");
             rawTable.setAttributes(rawTemplate.getAttributes());
             metadataProxy.updateTable(customerSpace.toString(), rawTable.getName(), rawTable);
+            dataCollectionProxy.upsertTable(customerSpace.toString(), rawTable.getName(),
+                    TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         }
         
     }
