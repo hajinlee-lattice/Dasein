@@ -241,18 +241,18 @@ public class AMSeedCleanPipelineTestNG
             { 15L, "aa.com", "12", "Name12", "CountryAA", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "12" }, //
             { 16L, "bb.com", "13", "Name13", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "13" }, //
             { 17L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "14" }, //
-            // LatticeID = 18, 19, 21 will be removed
+            // Following LatticeID will be left
             { 18L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, 200000000L, "15" }, //
             { 19L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, "16" }, //
             { 20L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 100000000L, "17" }, //
             { 21L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, 1000L, "18" }, //
             { 22L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, "19" }, //
-            // LatticeID = 23 and 24 will only be left one
+            // Following LatticeID will be left
             { 23L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "20" }, //
             { 24L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, "21" }, //
             /* Test markOrphanRecordsForSmallBusiness */
-            // LatticeID = 25, 27 will be removed
-            { 25L, null, "31", "Name31", null, "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
+            // Following LatticeID will be left
+            { 25L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, 100000000L, "31" }, //
             { 26L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
             { 27L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, 100000000L, "31" }, //
             { 28L, null, "31", "Name31", "Country31", "DnB", "Y", "Y", "0", ">10,000", 100, 100000000L, "31" }, //
@@ -300,14 +300,6 @@ public class AMSeedCleanPipelineTestNG
                         null },
                 { 10L, null, "04", "Name4", "Country4", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L, "04" },
                 { 11L, null, "05", "Name5", "Country5", null, "N", "Y", "0", ">10,000", 100, null, 100000000L, "05" },
-                { 30L, "j.com", "06", "Name6", "Country6", "RTS", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" }, //
-                { 31L, "k.com", "06", "Name6", "Country6", "HG", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" }, //
-                { 32L, "l.com", "06", "Name6", "Country6", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" }, //
-                { 33L, "m.com", "06", "Name6", "Country6", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
-                        "06" }, //
                 /*
                 { 34L, "n.com", "07", "Name7", "Country7", "DnB", "Y", "Y", "0", ">10,000", 100, 1000, 100000000L,
                         "07" }, //
@@ -332,17 +324,31 @@ public class AMSeedCleanPipelineTestNG
                         "13" },
                 { 17L, "bb.com", "14", "Name14", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
                         "14" },
+                { 18L, "bb.com", "15", "Name15", "CountryBB", "DnB", "Y", "Y", "0", ">10,000", 0, null, 200000000L,
+                        "15" },
+                { 19L, "cc.com", "16", "Name16", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "16" },
                 { 20L, "cc.com", "17", "Name17", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 100000000L,
                         "17" },
+                { 21L, "cc.com", "18", "Name18", "CountryCC", "DnB", "Y", "Y", "0", ">10,000", 0, null, 1000L, "18" },
                 { 22L, "dd.com", "19", "Name19", "CountryDD", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "19" },
                 { 23L, "ee.com", "20", "Name20", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "20" },
                 { 24L, "ee.com", "21", "Name21", "CountryEE", "DnB", "Y", "Y", "0", ">10,000", 0, null, null, "21" },
+                { 25L, null, "31", "Name31", null, "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
                 { 26L, "aaa.com", "31", "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
                         "31" },
+                { 27L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", "1-10", 100, null, 100000000L, "31" },
                 { 28L, null, "31", "Name31", "Country31", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
                         "31" },
                 { 29L, "bbb.com", null, "Name31", "Country31", "DnB", "Y", "Y", "0", "1-10", 100, null, 100000000L,
                         null },
+                { 30L, "j.com", "06", "Name6", "Country6", "RTS", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "06" },
+                { 31L, "k.com", "06", "Name6", "Country6", "HG", "Y", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "06" },
+                { 32L, "l.com", "06", "Name6", "Country6", "DnB", "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "06" },
+                { 33L, "m.com", "06", "Name6", "Country6", null, "N", "Y", "0", ">10,000", 100, null, 100000000L,
+                        "06" },
         };
 
         String[] fieldNames = new String[] { //
@@ -380,7 +386,6 @@ public class AMSeedCleanPipelineTestNG
             Long latticeId = (Long) record.get(LATTICEID);
             log.info(String.valueOf(latticeId));
             distinctIds.add(latticeId);
-
             Map<String, Object> data = latticeIdToData.get(latticeId);
 
             List<String> misMatched = new ArrayList<>();
@@ -399,13 +404,14 @@ public class AMSeedCleanPipelineTestNG
             if (hasFieldMismatchInRecord) {
                 log.warn(StringUtils.join(misMatched, ", "));
             }
-
             System.out.println(latticeId + ":" + record);
             numRows++;
         }
-
-        Assert.assertEquals(numRows, 26, "There should be 26 rows in the result.");
-        Assert.assertEquals(distinctIds.size(), 26, "There should be 26 distinct lattice ids.");
+        System.out.println("numRows : "+numRows);
+        System.out.println("distinctIds.size() : "+distinctIds.size());
+        System.out.println("hasFieldMismatchInRecord : "+hasFieldMismatchInRecord);
+        Assert.assertEquals(numRows, 32, "There should be 32 rows in the result.");
+        Assert.assertEquals(distinctIds.size(), 32, "There should be 32 distinct lattice ids.");
         Assert.assertFalse(hasFieldMismatchInRecord, "There are incorrect results, see logs above.");
 
     }

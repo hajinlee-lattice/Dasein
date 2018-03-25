@@ -18,11 +18,10 @@ public class AMSeedCleanup extends AccountMasterBase<AMSeedMarkerConfig> {
     public Node construct(TransformationFlowParameters parameters) {
         Node node = addSource(parameters.getBaseTables().get(0));
 
-        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_SMALL_BUSINESS, FLAG_DROP_INCORRECT_DATA,
-                FLAG_DROP_LESS_POPULAR_DOMAIN, FLAG_DROP_ORPHAN_ENTRY);
+        FieldList fieldList = new FieldList(FLAG_DROP_OOB_ENTRY, FLAG_DROP_INCORRECT_DATA,
+                FLAG_DROP_LESS_POPULAR_DOMAIN);
 
-        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0 && " + FLAG_DROP_SMALL_BUSINESS + " == 0 && "
-                + FLAG_DROP_INCORRECT_DATA + " == 0 && " + FLAG_DROP_ORPHAN_ENTRY + " == 0 ", fieldList);
+        node = node.filter(FLAG_DROP_OOB_ENTRY + " == 0 && " + FLAG_DROP_INCORRECT_DATA + " == 0", fieldList);
 
         node = node.discard(fieldList);
         return node;
