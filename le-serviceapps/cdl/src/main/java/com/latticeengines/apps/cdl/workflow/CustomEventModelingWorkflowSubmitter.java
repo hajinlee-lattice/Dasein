@@ -32,6 +32,7 @@ import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Artifact;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
@@ -190,6 +191,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
+                .matchAccountIdColumn(InterfaceName.AccountId.name())
                 .modelingType(parameters.getCustomEventModelingType()) //
                 .modelName(parameters.getName()) //
                 .displayName(parameters.getDisplayName()) //

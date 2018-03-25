@@ -527,6 +527,15 @@ public class SchemaRepository {
                 .fundamentalType(FundamentalType.ALPHA.name()) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
+        table.addAttribute(attr("Event") //
+                .allowedDisplayNames(Sets.newHashSet("EVENT", "WON", "P1_EVENT")) //
+                .type(Schema.Type.BOOLEAN) //
+                .notNull() //
+                .interfaceName(InterfaceName.Event) //
+                .logicalType(LogicalDataType.Event) //
+                .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
 
         return table;
     }
