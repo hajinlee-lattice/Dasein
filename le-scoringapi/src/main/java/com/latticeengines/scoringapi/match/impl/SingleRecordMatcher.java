@@ -172,4 +172,10 @@ public class SingleRecordMatcher extends AbstractMatcher {
             List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean shouldEnrichOnly) {
         throw new NotImplementedException("matchAndJoin is not implemented");
     }
+
+    @Override
+    public List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space,
+            List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean enrichInternalAttributes) {
+        throw new NotImplementedException("matchAndJoin is not implemented");
+    }
 }

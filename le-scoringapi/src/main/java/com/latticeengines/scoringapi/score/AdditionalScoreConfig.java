@@ -8,7 +8,6 @@ public class AdditionalScoreConfig {
     private boolean isDebug;
     private boolean enrichInternalAttributes;
     private boolean performFetchOnlyForMatching;
-    private boolean skipAnyMatching;
     private boolean enforceFuzzyMatch;
     private boolean skipDnBCache;
     private boolean isCalledViaApiConsole;
@@ -62,15 +61,6 @@ public class AdditionalScoreConfig {
 
     public AdditionalScoreConfig setPerformFetchOnlyForMatching(boolean performFetchOnlyForMatching) {
         this.performFetchOnlyForMatching = performFetchOnlyForMatching;
-        return this;
-    }
-
-    public boolean isSkipAnyMatching() {
-        return skipAnyMatching;
-    }
-
-    public AdditionalScoreConfig setSkipAnyMatching(boolean skipAnyMatching) {
-        this.skipAnyMatching = skipAnyMatching;
         return this;
     }
 

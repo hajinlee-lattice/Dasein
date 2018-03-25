@@ -160,7 +160,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
                 initializeMatchInputMap(additionalScoreConfig.isHomogeneous());
 
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = getEnrichmentMetadata(
-                additionalScoreConfig.getSpace(), bulkMatchingConfig.getPartiallyOrderedParsedRecordWithMatchReqList(),
+                additionalScoreConfig.getSpace(), partiallyOrderedParsedTupleList,
                 additionalScoreConfig.isEnrichInternalAttributes());
 
         for (RecordModelTuple recordModelTuple : partiallyOrderedParsedTupleList) {
@@ -172,7 +172,8 @@ public class BulkRecordMatcher extends AbstractMatcher {
         return matchInputMap;
     }
 
-    private List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space,
+    @Override
+    public List<LeadEnrichmentAttribute> getEnrichmentMetadata(CustomerSpace space,
             List<RecordModelTuple> partiallyOrderedParsedTupleList, boolean enrichInternalAttributes) {
         List<LeadEnrichmentAttribute> selectedLeadEnrichmentAttributes = null;
 

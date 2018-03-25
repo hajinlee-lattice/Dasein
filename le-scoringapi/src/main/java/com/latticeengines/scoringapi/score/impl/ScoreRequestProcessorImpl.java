@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -28,6 +29,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenanceProperty;
@@ -303,7 +305,6 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     private void handleBulkMatchingCases(BulkRecordScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
             BulkMatchingContext bulkMatchingConfig) {
-
         handleBulkMatchAndEnrich(request, additionalScoreConfig, bulkMatchingConfig);
 
         handleBulkEnrichOnly(request, additionalScoreConfig, bulkMatchingConfig);
@@ -427,13 +428,19 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
     protected void extractParsedList(AdditionalScoreConfig additionalScoreConfig,
             BulkMatchingContext bulkMatchingConfig) {
+        Matcher matcher = getMatcher(true);
+        List<LeadEnrichmentAttribute> enrichmentAttributeMetadataList = matcher.getEnrichmentMetadata(
+                additionalScoreConfig.getSpace(), bulkMatchingConfig.getOriginalOrderParsedTupleList(),
+                additionalScoreConfig.isEnrichInternalAttributes());
+
         for (RecordModelTuple tuple : bulkMatchingConfig.getOriginalOrderParsedTupleList()) {
-            extractParsedTuple(additionalScoreConfig, bulkMatchingConfig, tuple);
+            extractParsedTuple(additionalScoreConfig, bulkMatchingConfig, tuple,
+                    CollectionUtils.isEmpty(enrichmentAttributeMetadataList));
         }
     }
 
     private void extractParsedTuple(AdditionalScoreConfig additionalScoreConfig, BulkMatchingContext bulkMatchingConfig,
-            RecordModelTuple tuple) {
+            RecordModelTuple tuple, boolean isEnrichmentMetadataListEmpty) {
         // put this tuple in either partiallyOrderedPmmlParsedRecordList or in
         // partiallyOrderedParsedRecordWithMatchReqList based on model json type
 
@@ -446,7 +453,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 bulkMatchingConfig.getUniqueScoringArtifactsMap().get(tuple.getModelId()).getValue() == null) {
             bulkMatchingConfig.getPartiallyOrderedBadRecordList().add(tuple);
         } else if (shouldSkipMatching) {
-            if (tuple.getRecord().isPerformEnrichment()) {
+            if (!isEnrichmentMetadataListEmpty && tuple.getRecord().isPerformEnrichment()) {
                 bulkMatchingConfig.getPartiallyOrderedParsedRecordWithEnrichButWithoutMatchReqList().add(tuple);
             } else {
                 bulkMatchingConfig.getPartiallyOrderedParsedRecordWithoutMatchReqList().add(tuple);
