@@ -22,7 +22,7 @@ public class ModelingFileMetadataServiceImplUnitTestNG {
         Assert.assertTrue(latticeSchemaFields.size() > 0);
         LatticeSchemaField idField = null;
         for (LatticeSchemaField latticeSchemaField : latticeSchemaFields) {
-            if (latticeSchemaField.getName().equals(InterfaceName.Id.name())) {
+            if (latticeSchemaField.getName().equals(InterfaceName.AccountId.name())) {
                 idField = latticeSchemaField;
                 break;
             }
