@@ -183,10 +183,9 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         String[] excludeList = new String[excludedColumns.size()];
         excludedColumns.toArray(excludeList);
         bldr = bldr.profileExcludeList(excludeList);
-
         bldr = bldr.targets(getTargets(eventTable, currentEvent)) //
                 .metadataTable(getMetadataTableFolderName(eventTable, currentEvent)) //
-                .keyColumn("Id").modelName(configuration.getModelName()).jobId(jobId) //
+                .keyColumn(getKeyColumn(eventTable)).modelName(configuration.getModelName()).jobId(jobId) //
                 .eventTableName(getEventTable().getName()) //
                 .sourceSchemaInterpretation(getConfiguration().getSourceSchemaInterpretation()) //
                 .trainingTableName(getConfiguration().getTrainingTableName()) //
@@ -216,6 +215,18 @@ public abstract class BaseModelStep<T extends ModelStepConfiguration> extends Ba
         }
         ModelingServiceExecutor modelExecutor = new ModelingServiceExecutor(bldr);
         return modelExecutor;
+    }
+
+    private String getKeyColumn(Table eventTable) {
+        String keyColumn = InterfaceName.AccountId.name();
+        String[] attrNames = eventTable.getAttributeNames();
+        for (String attrName : attrNames) {
+            if (attrName.equals(InterfaceName.Id.name())) {
+                keyColumn = InterfaceName.Id.name();
+                break;
+            }
+        }
+        return keyColumn;
     }
 
     private String getDataCompositionContents(Table eventTable) {
