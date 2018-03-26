@@ -161,7 +161,7 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
         }
 
         public Builder targetTableName(String targetTableName) {
-            model.setTrainingTableName(targetTableName);
+            model.setTargetTableName(targetTableName);
             return this;
         }
 
