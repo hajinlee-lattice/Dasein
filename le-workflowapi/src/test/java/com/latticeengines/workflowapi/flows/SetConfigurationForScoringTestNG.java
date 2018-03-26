@@ -9,13 +9,16 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.test.StepRunner;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
@@ -34,16 +37,18 @@ import com.latticeengines.workflowapi.functionalframework.WorkflowApiFunctionalT
 
 public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestNGBase {
 
-    @Autowired
+    private static final Logger log = LoggerFactory.getLogger(SetConfigurationForScoringTestNG.class);
+
+    @Inject
     private JobLauncher jobLauncher;
 
-    @Autowired
+    @Inject
     private JobRepository jobRepository;
 
-    @Autowired
+    @Inject
     private WorkflowService workflowService;
 
-    @Autowired
+    @Inject
     private WorkflowTranslator workflowTranslator;
 
     @Test(groups = "workflow")
@@ -60,7 +65,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         ImportMatchAndModelWorkflowConfiguration config = builder.build();
 
         JobParameters params = workflowService.createJobParams(config);
-        System.out.print(params);
+        log.info(params.toString());
         ExecutionContext executionContext = new ExecutionContext();
 
         Table t1 = new Table();

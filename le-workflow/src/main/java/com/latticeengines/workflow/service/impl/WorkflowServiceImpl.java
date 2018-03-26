@@ -146,26 +146,9 @@ public class WorkflowServiceImpl implements WorkflowService {
             }
             Map<String, String> flatteredConfig = WorkflowUtils.getFlattenedConfig(workflowConfiguration);
             flatteredConfig.entrySet().forEach(e -> parmsBuilder.addString(e.getKey(), e.getValue()));
-            // addConfigParams(workflowConfiguration, parmsBuilder);
         }
 
         return parmsBuilder.toJobParameters();
-    }
-
-    // make sure let's don't have a cycle in workflow config graph
-    @SuppressWarnings("unused")
-    private void addConfigParams(WorkflowConfiguration workflowConfiguration, JobParametersBuilder parmsBuilder) {
-        if (workflowConfiguration == null) {
-            return;
-        }
-        for (String configurationClassName : workflowConfiguration.getStepConfigRegistry().keySet()) {
-            parmsBuilder.addString(configurationClassName,
-                    workflowConfiguration.getStepConfigRegistry().get(configurationClassName));
-        }
-        for (WorkflowConfiguration subWorkflowConfiguration : workflowConfiguration.getSubWorkflowConfigRegistry()
-                .values()) {
-            addConfigParams(subWorkflowConfiguration, parmsBuilder);
-        }
     }
 
     @Override
