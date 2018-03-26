@@ -28,7 +28,7 @@ import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 
 public class HttpClientUtils {
 
-    private static final PoolingHttpClientConnectionManager SSL_BLIND_CONNECTION_MGR = constructPoolingConnectionMgr(
+    public static final PoolingHttpClientConnectionManager SSL_BLIND_CONNECTION_MGR = constructPoolingConnectionMgr(
             SSLUtils.SSL_BLIND_SOCKET_FACTORY);
     private static final HttpComponentsClientHttpRequestFactory SSL_BLIND_HC_FACTORY = constructHttpRequestFactory(
             SSL_BLIND_CONNECTION_MGR);
