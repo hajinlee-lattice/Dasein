@@ -597,10 +597,14 @@ angular.module('lp.import')
                 result,
                 params = params || {};
 
-            params.displayName = params.displayName || FileName,
-            params.source = params.source || 'File',
-            params.entity = params.entity || 'Account',
-            params.feedType = params.feedType || params.entity + 'Schema' || 'AccountSchema';
+            if (Object.keys(params).length != 0) {
+                params.displayName = params.displayName || FileName,
+                params.source = params.source || 'File',
+                params.entity = params.entity || 'Account',
+                params.feedType = params.feedType || params.entity + 'Schema' || 'AccountSchema';
+            } else {
+                params.displayName = FileName;
+            }
 
 	        $http({
 	            method: 'POST',

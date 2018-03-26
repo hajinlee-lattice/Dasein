@@ -60,6 +60,11 @@ angular
         if (vm.fuzzyMatchEnabled) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
+        if (RatingsEngineStore.getCustomEventModelingType()) {
+            vm.standardFieldsList[1] = 'AccountId';
+            delete vm.requiredFieldsMissing['Id'];
+            vm.requiredFieldsMissing['AccountId'] = true;
+        }
 
         vm.UnmappedFields.forEach(function(field) {
             vm.UnmappedFieldsMap[field.name] = field;

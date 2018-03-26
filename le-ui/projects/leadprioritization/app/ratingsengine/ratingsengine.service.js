@@ -54,7 +54,7 @@ angular.module('lp.ratingsengine')
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
         },
-        this.customeEventModelingType = "";
+        this.customEventModelingType = "";
         this.FieldDocument = {};
         this.fileName = "";
 
