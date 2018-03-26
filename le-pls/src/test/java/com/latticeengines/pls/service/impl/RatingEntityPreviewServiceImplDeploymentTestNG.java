@@ -110,6 +110,10 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewSecondTime" })
     public void testEntityPreviewThirdTimeWithDifferentPages() {
+        Set<String> accIds0 = testEntityPreview(0L, 5L);
+        if (accIds0.size() < 2) {
+            return;
+        }
         Set<String> accIds1 = testEntityPreview(0L, 1L);
         Set<String> accIds2 = testEntityPreview(1L, 1L);
 
@@ -122,6 +126,10 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     @Test(groups = "deployment", dependsOnMethods = { "testEntityPreviewThirdTimeWithDifferentPages" })
     public void testEntityPreviewThirdTimeWithPartiallyOverlappingPages() {
+        Set<String> accIds0 = testEntityPreview(0L, 5L);
+        if (accIds0.size() < 2) {
+            return;
+        }
         Set<String> accIds1 = testEntityPreview(0L, 2L);
         Set<String> accIds2 = testEntityPreview(1L, 2L);
 
