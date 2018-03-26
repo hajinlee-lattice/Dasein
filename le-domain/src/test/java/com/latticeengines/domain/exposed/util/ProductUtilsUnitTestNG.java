@@ -27,7 +27,7 @@ public class ProductUtilsUnitTestNG {
     private List<Product> productList;
     private List<Product> loadedProductList;
 
-    @BeforeClass
+    @BeforeClass(groups = "unit")
     public void setup() throws IOException {
         yarnConfiguration = new YarnConfiguration();
 
@@ -97,7 +97,7 @@ public class ProductUtilsUnitTestNG {
                 desktopGadgetsAnalytic, soapSpending, dishwasherSpending);
     }
 
-    @AfterClass
+    @AfterClass(groups = "unit")
     public void cleanup() throws IOException {
         HdfsUtils.rmdir(yarnConfiguration, PATH);
         log.info(String.format("Test artifacts in %s are removed.", PATH));

@@ -92,7 +92,11 @@ public class ProductUtils {
         SchemaRepository.instance().getSchema(BusinessEntity.Product).getAttributes().forEach(attribute -> {
                 columns.add(Pair.of(attribute.getName(), String.class));
         });
-        columns.add(Pair.of(InterfaceName.ProductId.name(), String.class));
+        columns.add(Pair.of(InterfaceName.Id.name(), String.class));
+        columns.add(Pair.of(InterfaceName.ProductBundleId.name(), String.class));
+        columns.add(Pair.of(InterfaceName.ProductLineId.name(), String.class));
+        columns.add(Pair.of(InterfaceName.ProductFamilyId.name(), String.class));
+        columns.add(Pair.of(InterfaceName.ProductCategoryId.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductType.name(), String.class));
         columns.add(Pair.of(InterfaceName.ProductStatus.name(), String.class));
         Schema schema = AvroUtils.constructSchema(BusinessEntity.Product.name(), columns);
