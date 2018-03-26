@@ -216,8 +216,9 @@ public class PlayLaunchProcessor {
 
         log.info("Trying to submit sqoop job for exporting recommendations from " + avroPath);
         DbCreds.Builder credsBldr = new DbCreds.Builder();
+        String connector = dataDbUrl.contains("?")?"&":"?";
         credsBldr.user(dataDbUser).dbType(dataDbType).driverClass(dataDbDriver)
-                .jdbcUrl(dataDbUrl + "?user=" + dataDbUser + "&password=" + dataDbPassword);
+                .jdbcUrl(dataDbUrl + connector + "user=" + dataDbUser + "&password=" + dataDbPassword);
 
         DbCreds dataDbCreds = new DbCreds(credsBldr);
 
