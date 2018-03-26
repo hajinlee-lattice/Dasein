@@ -13,9 +13,9 @@ angular.module('lp.ratingsengine.wizard.attributes', [])
     });
 
     vm.init = function() {
-        if (RatingsEngineStore.getModelingType() == 'LPI') {
+        if (RatingsEngineStore.getCustomEventModelingType() == 'LPI') {
             vm.disableCDLAttributes = true;
-        } else if ( RatingsEngineStore.getModelingType() == 'CDL') {
+        } else if ( RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
             vm.disableTrainingAttributes = true;
         }
         RatingsEngineStore.setValidation("attributes", false);

@@ -141,7 +141,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
 
         RatingsEngineStore.setValidation('segment', true);
     	RatingsEngineStore.setSegment(segment);
-        RatingsEngineStore.setModelingType('CDL');
+        RatingsEngineStore.setCustomEventModelingType('CDL');
     }
 
     vm.selectTrainingFile = function() {
@@ -150,7 +150,7 @@ angular.module('lp.ratingsengine.wizard.segment', [])
             RatingsEngineStore.setSegment(null);
 
             vm.stored.segment_selection = "";
-            RatingsEngineStore.setModelingType('LPI');
+            RatingsEngineStore.setCustomEventModelingType('LPI');
             RatingsEngineStore.setValidation('segment', true);
         } else {
             RatingsEngineStore.setValidation('segment', false);

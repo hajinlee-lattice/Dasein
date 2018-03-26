@@ -1171,8 +1171,8 @@ angular
                     FieldDocument: function($q, RatingsEngineStore, ImportWizardService, ImportWizardStore) {
                         var deferred = $q.defer();
 
-                        var modelingType = RatingsEngineStore.getModelingType();
-                        ImportWizardService.GetFieldDocument(RatingsEngineStore.getCSVFileName(), '', modelingType == 'CDL' ? 'Account' : 'SalesforceAccount').then(function(result) {
+                        var customeEventModelingType = RatingsEngineStore.getCustomEventModelingType();
+                        ImportWizardService.GetFieldDocument(RatingsEngineStore.getCSVFileName(), '', customeEventModelingType == 'CDL' ? 'Account' : 'SalesforceAccount').then(function(result) {
                             RatingsEngineStore.setFieldDocument(result.Result);
                             deferred.resolve(result.Result);
                         });

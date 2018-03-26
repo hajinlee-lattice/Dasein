@@ -42,9 +42,9 @@ angular
     });
 
     vm.init = function() {
-        if (RatingsEngineStore.getModelingType()) {
+        if (RatingsEngineStore.getCustomEventModelingType()) {
             RatingsEngineStore.setValidation("mapping", false);
-            vm.showAdditionalFieldsCDL = RatingsEngineStore.getModelingType() != 'CDL';
+            vm.showAdditionalFieldsCDL = RatingsEngineStore.getCustomEventModelingType() != 'CDL';
         }
         vm.initialized = true;
         vm.csvMetadata = ImportStore.Get($stateParams.csvFileName) || {};

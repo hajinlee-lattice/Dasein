@@ -54,7 +54,7 @@ angular.module('lp.ratingsengine')
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
         },
-        this.modelingType = "";
+        this.customeEventModelingType = "";
         this.FieldDocument = {};
         this.fileName = "";
 
@@ -635,12 +635,12 @@ angular.module('lp.ratingsengine')
         return this.dataStores;
     }
 
-    this.setModelingType = function(modelingType) {
-        this.modelingType = modelingType;
+    this.setCustomEventModelingType = function(customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
-    this.getModelingType = function() {
-        return this.modelingType;
+    this.getCustomEventModelingType = function() {
+        return this.customEventModelingType ;
     }
 
     this.setModelingStrategy = function(modelingStrategy) {
@@ -735,7 +735,7 @@ angular.module('lp.ratingsengine')
             var model = rating.activeModel,
                 predictionType = RatingsEngineStore.getPredictionType(),
                 dataStores = RatingsEngineStore.getDataStores(),
-                modelingType = RatingsEngineStore.getModelingType();
+                customEventModelingType = RatingsEngineStore.getCustomEventModelingType();
                 modelTrainingOptions = RatingsEngineStore.getModelTrainingOptions();
                 fileName = RatingsEngineStore.getCSVFileName();
                 obj = {};
@@ -746,7 +746,7 @@ angular.module('lp.ratingsengine')
                     predictionType: predictionType,
                     advancedModelingConfig: {
                         'custom_event': {
-                            modelingType: modelingType,
+                            customEventModelingType: customEventModelingType,
                             dataStores: dataStores,
                             sourceFileName: fileName,
                             deduplicationType: modelTrainingOptions['deduplicationType'],
@@ -772,7 +772,7 @@ angular.module('lp.ratingsengine')
                 delete fieldMapping.ignored;
             } else if (!fieldMapping.mappedToLatticeField) {
                 // CustomFieldsController handles LPI case
-                if (RatingsEngineStore.getModelingType() == 'CDL') { 
+                if (RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
                     // treat unmapped fields as ignored
                     fieldMapping.mappedField = fieldMapping.userField;
                     fieldMapping.ignored = true;
