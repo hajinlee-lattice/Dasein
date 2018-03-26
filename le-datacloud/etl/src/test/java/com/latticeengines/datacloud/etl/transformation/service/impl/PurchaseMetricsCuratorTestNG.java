@@ -214,11 +214,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         schema.add(Pair.of(InterfaceName.ProductType.name(), String.class));
 
         Object[][] data = new Object[][] { //
-                { "PID1", ProductType.ANALYTIC.name() }, //
-                { "PID2", ProductType.ANALYTIC.name() }, //
-                { "PID3", ProductType.ANALYTIC.name() }, //
-                { "PID4", ProductType.ANALYTIC.name() }, //
-                // { "PID5", ProductType.SPENDING.name() }, //
+                { "PID1", ProductType.Analytic.name() }, //
+                { "PID2", ProductType.Analytic.name() }, //
+                { "PID3", ProductType.Analytic.name() }, //
+                { "PID4", ProductType.Analytic.name() }, //
+                // { "PID5", ProductType.Spending.name() }, //
                 // { "PID6", null }, //
         };
 

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.DateTimeUtils;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -203,7 +204,11 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
-        productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
+//        productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
+        List<Product> productList = new ArrayList<>();
+        productTable.getExtracts().forEach(extract ->
+            productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
+        productMap = ProductUtils.getActiveProductMap(productList);
     }
 
     private TransformationStepConfig collectDailyData() {

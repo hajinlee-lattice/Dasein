@@ -28,10 +28,7 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.period.PeriodBuilder;
 
 public class TimeSeriesUtils {
@@ -260,62 +257,6 @@ public class TimeSeriesUtils {
             log.error("Failed to find earlies period", e);
             return null;
         }
-    }
-
-    public static Map<String, List<Product>> loadProductMap(Configuration yarnConfiguration, Table productTable) {
-        Map<String, List<Product>> productMap = new HashMap<>();
-        for (Extract extract : productTable.getExtracts()) {
-            List<GenericRecord> recordList = AvroUtils.getDataFromGlob(yarnConfiguration, extract.getPath());
-            for (GenericRecord record : recordList) {
-                Product product = new Product();
-                product.setProductId(record.get(InterfaceName.ProductId.name()).toString());
-
-                try {
-                    product.setProductBundle(record.get(InterfaceName.ProductBundle.name()).toString());
-                } catch (Exception e) {
-                    product.setProductBundle(null);
-                }
-
-                try {
-                    product.setProductName(record.get(InterfaceName.ProductName.name()).toString());
-                } catch (Exception e) {
-                    product.setProductName(null);
-                }
-
-                try {
-                    product.setDescription(record.get("Description").toString());
-                } catch (Exception e) {
-                    product.setDescription(null);
-                }
-
-                try {
-                    product.setProductLine(record.get("ProductLine").toString());
-                } catch (Exception e) {
-                    product.setProductLine(null);
-                }
-
-                try {
-                    product.setProductFamily(record.get("ProductFamily").toString());
-                } catch (Exception e) {
-                    product.setProductFamily(null);
-                }
-
-                try {
-                    product.setProductCategory(record.get("ProductCategory").toString());
-                } catch (Exception e) {
-                    product.setProductCategory(null);
-                }
-
-                if (productMap.get(product.getProductId()) != null) {
-                    productMap.get(product.getProductId()).add(product);
-                } else {
-                    List<Product> products = new ArrayList<>();
-                    products.add(product);
-                    productMap.put(product.getProductId(), products);
-                }
-            }
-        }
-        return productMap;
     }
 
     static class PeriodDataCallable implements Callable<Boolean> {

@@ -60,7 +60,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void importData() throws Exception {
-        mockVdbImport(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1, PRODUCT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Product, 0, PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
@@ -102,7 +102,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, (long) TRANSACTION_IMPORT_SIZE_1);
-        expectedCnts.put(TableRoleInCollection.SortedProduct, (long) PRODUCT_IMPORT_SIZE_2);
+        expectedCnts.put(TableRoleInCollection.SortedProduct, (long) (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
                 (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,

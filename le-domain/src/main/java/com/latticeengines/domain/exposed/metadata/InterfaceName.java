@@ -15,6 +15,16 @@ public enum InterfaceName {
     ProductId, //
     ProductType, //
     ProductBundle, //
+    ProductName, //
+    ProductLine, //
+    ProductFamily, //
+    ProductCategory, //
+    Description, //
+    ProductStatus, //
+    ProductBundleId, //
+    ProductLineId, //
+    ProductFamilyId, //
+    ProductCategoryId, //
     TransactionId, //
     PeriodId, //
     PeriodName, //
@@ -65,7 +75,6 @@ public enum InterfaceName {
     TransactionDate, //
     TransactionDayPeriod, //
     TransactionCount, //
-    ProductName, //
     Quantity, //
     TotalQuantity, //
     Amount, //

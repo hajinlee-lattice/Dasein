@@ -79,7 +79,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "12";
+    private static final String S3_CHECKPOINTS_VERSION = "13";
     static final String CHECKPOINT_DATASET_VDB = "vdb";
     static final String CHECKPOINT_DATASET_CSV = "csv";
 
