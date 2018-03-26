@@ -1,11 +1,13 @@
 package com.latticeengines.cdl.workflow.steps.rebuild;
 
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
+import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STANDARDIZATION;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -16,9 +18,13 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
 @Component(ProfileProduct.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -49,15 +55,16 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
         request.setKeepTemp(false);
         request.setEnableSlack(false);
 
+        TransformationStepConfig standardization = standardization();
         TransformationStepConfig sort = sort();
         // -----------
-        List<TransformationStepConfig> steps = Collections.singletonList(sort);
+        List<TransformationStepConfig> steps = Arrays.asList(standardization, sort);
         // -----------
         request.setSteps(steps);
         return request;
     }
 
-    private TransformationStepConfig sort() {
+    private TransformationStepConfig standardization() {
         TransformationStepConfig step = new TransformationStepConfig();
         String tableSourceName = "CustomerUniverse";
         SourceTable sourceTable = new SourceTable(masterTableName, customerSpace);
@@ -66,6 +73,30 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
         Map<String, SourceTable> baseTables = new HashMap<>();
         baseTables.put(tableSourceName, sourceTable);
         step.setBaseTables(baseTables);
+        step.setTransformer(TRANSFORMER_STANDARDIZATION);
+
+        StandardizationTransformerConfig transformerConfig = new StandardizationTransformerConfig();
+        StandardizationTransformerConfig.StandardizationStrategy[] strategies =
+                new StandardizationTransformerConfig.StandardizationStrategy[]{
+                        StandardizationTransformerConfig.StandardizationStrategy.FILTER
+                };
+        transformerConfig.setSequence(strategies);
+        transformerConfig.setFilterFields(new String[] {
+                InterfaceName.ProductType.name(),
+                InterfaceName.ProductStatus.name()
+        });
+        String filterExpression = String.format("%s.equalsIgnoreCase(\"%s\") && !%s.equalsIgnoreCase(\"%s\")",
+                InterfaceName.ProductType.name(), ProductType.Analytic.name(),
+                InterfaceName.ProductStatus.name(), ProductStatus.Obsolete.name());
+        transformerConfig.setFilterExpression(filterExpression);
+        step.setConfiguration(appendEngineConf(transformerConfig, lightEngineConfig()));
+
+        return step;
+    }
+
+    private TransformationStepConfig sort() {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(0));
         step.setTransformer(TRANSFORMER_SORTER);
 
         SorterConfig config = new SorterConfig();

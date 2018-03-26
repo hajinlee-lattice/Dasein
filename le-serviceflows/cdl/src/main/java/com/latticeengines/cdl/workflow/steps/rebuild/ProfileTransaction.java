@@ -50,8 +50,8 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
@@ -268,7 +268,11 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         }
         log.info(String.format("productTableName for customer %s is %s", configuration.getCustomerSpace().toString(),
                 productTable.getName()));
-        productMap = TimeSeriesUtils.loadProductMap(yarnConfiguration, productTable);
+
+        List<Product> productList = new ArrayList<>();
+        productTable.getExtracts().forEach(extract ->
+            productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
+        productMap = ProductUtils.getActiveProductMap(productList);
     }
 
     private TransformationStepConfig rollupProduct(Map<String, List<Product>> productMap) {
@@ -309,13 +313,16 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
-        // todo: add this to daily configuration to derive TransactionCount
-        // attribute
-        // config.setCountField(Collections.singletonList("Amount"));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumFields(Arrays.asList(
+                InterfaceName.Amount.name(),
+                InterfaceName.Cost.name()));
+        config.setSumOutputFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
+        config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
@@ -365,15 +372,17 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setPeriodStrategy(strategy);
-        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name(),
+                InterfaceName.TransactionCount.name()));
+        config.setSumOutputFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name(),
+                InterfaceName.TransactionCount.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
-
-        // todo: add this to period configuration to derive TransactionCount
-        // attributes
-        // config.setSumFields(Collections.singletonList("TotalAmount"));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setPeriodStrategy(strategy);
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //

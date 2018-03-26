@@ -2,6 +2,8 @@ package com.latticeengines.cdl.workflow.choreographers;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.RebuildProductWorkflow;
@@ -17,6 +19,7 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
 public class ProcessProductChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
+    private static final Logger log = LoggerFactory.getLogger(ProcessProductChoreographer.class);
 
     @Inject
     private MergeProduct mergeProduct;
@@ -68,4 +71,23 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
         return BusinessEntity.Product;
     }
 
+    @Override
+    protected boolean shouldRebuild() {
+        if (reset) {
+            log.info("Going to reset " + mainEntity() + ", skipping rebuild.");
+            return false;
+        }
+        if (enforceRebuild) {
+            log.info("Enforced to rebuild " + mainEntity());
+            return true;
+        } else if (hasSchemaChange) {
+            log.info("Detected schema change in " + mainEntity() + ", going to rebuild.");
+            return true;
+        } else if (hasImports) {
+            log.info("Has product imports always rebuild " + mainEntity());
+            return true;
+        }
+        log.info("No reason to rebuild " + mainEntity());
+        return false;
+    }
 }

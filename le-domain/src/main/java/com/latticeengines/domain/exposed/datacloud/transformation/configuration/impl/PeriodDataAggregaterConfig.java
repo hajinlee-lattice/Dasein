@@ -9,16 +9,22 @@ public class PeriodDataAggregaterConfig extends TransformerConfig {
 
     @JsonProperty("SumFields")
     private List<String> sumFields;
+
     @JsonProperty("SumLongFields")
     private List<String> sumLongFields;
+
     @JsonProperty("CountFields")
     private List<String> countFields;
+
     @JsonProperty("SumOutputFields")
     private List<String> sumOutputFields;
+
     @JsonProperty("SumLongOutputFields")
     private List<String> sumLongOutputFields;
+
     @JsonProperty("CountOutputFields")
     private List<String> countOutputFields;
+
     @JsonProperty("GroupByFields")
     private List<String> groupByFields;
     @JsonProperty("PeriodStrategy")

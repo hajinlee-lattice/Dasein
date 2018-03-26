@@ -83,6 +83,7 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_CONTACT_NAME_CONCATENATER = "contactNameConcatenater";
     public static final String TRANSFORMER_PIVOT_RATINGS = "pivotRatingTransformer";
     public static final String TRANSFORMER_MERGE = "MergeTransformer";
+    public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
     public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";

@@ -77,13 +77,13 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
     private static final String SORTED_PERIOD_TABLE_PREFIX = "SortedPeriodTransaction";
     private static final String AGGREGATED_PERIOD_TABLE_PREFIX = "AggregatedPeriodTransaction";
 
-    List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId",
+    private List<String> fieldNames = Arrays.asList("TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId",
             "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1");
-    List<Class<?>> clz = Arrays.asList((Class<?>) String.class, String.class, String.class, String.class, String.class,
+    private List<Class<?>> clz = Arrays.asList((Class<?>) String.class, String.class, String.class, String.class, String.class,
             Double.class, Long.class, String.class, Long.class, String.class);
 
-    List<String> accountFieldNames = Collections.singletonList("AccountId");
-    List<Class<?>> accountClz = Collections.singletonList((Class<?>) String.class);
+    private List<String> accountFieldNames = Collections.singletonList("AccountId");
+    private List<Class<?>> accountClz = Collections.singletonList((Class<?>) String.class);
 
     private static final CustomerSpace customerSpace = CustomerSpace.parse(DataCloudConstants.SERVICE_CUSTOMERSPACE);
     List<TransformationStepConfig> steps = new ArrayList<>();
@@ -907,6 +907,7 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
             columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
         }
         Object[][] data = {
+// "TransactionId", "AccountId", "ContactId", "TransactionType", "ProductId", "Amount", "Quantity", "OrderId", "TransactionTime", "ExtensionAttr1"
                 { "1", "1", null, "PurchaseHistory", "1" /* " Disk" */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
                 { "3", "2", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
                 { "4", "2", null, "PurchaseHistory", "2" /* Monitor */, 10D, 1L, "Order1", 1502755200000L, "Ext1" }, //
@@ -919,7 +920,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         for (int i = 0; i < fieldNames.size(); i++) {
             columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
         }
-        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200000L, "Ext2" }, //
+        Object[][] data = {
+                { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1502755200000L, "Ext2" }, //
                 { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001576000L, "Ext2" }, //
         };
         uploadAndRegisterTableSource(columns, data, tableName2);
@@ -930,7 +932,8 @@ public class PipelineConsolidateTrxDeploymentTestNG extends PipelineTransformati
         for (int i = 0; i < fieldNames.size(); i++) {
             columns.add(Pair.of(fieldNames.get(i), clz.get(i)));
         }
-        Object[][] data = { { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576000L, "Ext3" }, //
+        Object[][] data = {
+                { "4", "2", null, "PurchaseHistory", "2", 10D, 1L, "Order1", 1503001576000L, "Ext3" }, //
                 { "5", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001577000L, "Ext3" }, //
                 { "6", "3", null, "PurchaseHistory", "1", 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
                 { "7", "3", null, "PurchaseHistory", "3" /* Keyboard */, 10D, 1L, "Order1", 1503001578000L, "Ext3" }, //
