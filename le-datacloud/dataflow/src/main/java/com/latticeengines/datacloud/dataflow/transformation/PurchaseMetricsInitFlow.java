@@ -32,7 +32,7 @@ public class PurchaseMetricsInitFlow extends ConfigurableFlowBase<TransformerCon
         String periodName = getPeriodName(periodTable);
 
         if (account.getSchema(InterfaceName.SpendAnalyticsSegment.name()) == null) {
-            account.addColumnWithFixedValue(InterfaceName.SpendAnalyticsSegment.name(), null, String.class);
+            account = account.addColumnWithFixedValue(InterfaceName.SpendAnalyticsSegment.name(), null, String.class);
         }
         
         /* TODO: After Ke checks in his change, this part needs to be uncommented
