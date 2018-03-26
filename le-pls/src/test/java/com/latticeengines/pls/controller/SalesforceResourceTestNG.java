@@ -1,10 +1,8 @@
 package com.latticeengines.pls.controller;
 
-import com.latticeengines.common.exposed.util.SSLUtils;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.ProtocolException;
-import org.apache.http.client.HttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HttpContext;
@@ -21,6 +19,8 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.pls.SalesforceURL;
 import com.latticeengines.pls.entitymanager.SalesforceURLEntityMgr;
 import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBaseDeprecated;
@@ -109,10 +109,14 @@ public class SalesforceResourceTestNG extends PlsFunctionalTestNGBaseDeprecated 
         Assert.assertEquals(redirectionURL, sfdcURLAPSandbox);
     }
 
-    private String getRedirectionURL(String url) throws Exception {
+    private String getRedirectionURL(String url) {
         String redirectionURL;
-        HttpClient noRedirectClient = HttpClientBuilder.create().setRedirectStrategy(new NoRedirectStrategy()).build();
-        RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory(noRedirectClient));
+        HttpComponentsClientHttpRequestFactory reqFac = new HttpComponentsClientHttpRequestFactory( //
+                HttpClientBuilder.create() //
+                        .setConnectionManager(HttpClientUtils.SSL_BLIND_CONNECTION_MGR) //
+                        .setRedirectStrategy(new NoRedirectStrategy()) //
+                        .build());
+        RestTemplate restTemplate = new RestTemplate(reqFac);
         HttpHeaders requestHeaders = new HttpHeaders();
         HttpEntity<String> requestEntity = new HttpEntity<>("", requestHeaders);
         SSLUtils.turnOffSSLNameVerification();
