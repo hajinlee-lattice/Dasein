@@ -337,10 +337,12 @@ class Server {
                         page + (html5mode ? '*' : ''),
                         (req, res) => {
                             var host = req.protocol + '://' + req.get('host');
+                            var origin = req.get('origin');
 
                             if (route.xframe_allow) {
                                 console.log(
                                     'XFRAME-OPTIONS-HOST: ' + host + 
+                                    ', ORIGIN:' + origin +
                                     ', ALLOWED: ' + route.xframe_allow.indexOf(host)
                                 );
 
