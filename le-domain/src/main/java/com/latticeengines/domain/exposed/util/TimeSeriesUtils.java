@@ -195,7 +195,7 @@ public class TimeSeriesUtils {
                 dateRecordMap.get(period).add(record);
                 totalRecords++;
                 pendingRecords++;
-                if (pendingRecords > 128 * 1024) {
+                if (pendingRecords > 2 * 128 * 1024) {
                     log.info("Schedule " + pendingRecords + "records to write");
                     dateRecordMap = writeRecords(yarnConfiguration, executor, pendingWrites, schema, periodFileMap, dateRecordMap);
                     pendingRecords = 0;

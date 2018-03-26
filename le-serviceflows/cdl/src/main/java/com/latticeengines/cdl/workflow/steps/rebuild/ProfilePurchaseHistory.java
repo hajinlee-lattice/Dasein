@@ -68,7 +68,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     private static final Logger log = LoggerFactory.getLogger(ProfilePurchaseHistory.class);
 
-    static final String BEAN_NAME = "profilePurchaseHistory";
+    public static final String BEAN_NAME = "profilePurchaseHistory";
 
     private List<Integer> initSteps;
     private int curateStep, pivotStep, profileStep, bucketStep;

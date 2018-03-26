@@ -31,7 +31,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     static final String CHECK_POINT = "update4";
     private RatingEngine ratingEngine;
 
-    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
+    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 190467L;
 
     private static final int EARLIEST_TRANSACTION = 48033;
     private static final int LATEST_TRANSACTION = 48929;
@@ -104,7 +104,6 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction,
                 (long) (TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
-        expectedCnts.put(TableRoleInCollection.SortedProduct, (long) PRODUCT_IMPORT_SIZE_2);
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
                 (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,

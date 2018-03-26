@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
@@ -138,15 +139,13 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
 
-        boolean skip = isCommonSkip(step, seq);
-        if (isProfilePurchaseHistory(seq)) {
-            if (skip) {
-                skip = !shouldCalculatePurchaseHistory();
-            } else {
-                log.info("Skip rebuild purchase history due to Missing account.");
-                skip = !hasAccounts;
-            }
+        boolean skip;
+        if (isProfilePurchaseHistory(step)) {
+            skip = !shouldCalculatePurchaseHistory();
+        } else {
+            skip = isCommonSkip(step, seq);
         }
+
         return skip;
     }
 
@@ -221,9 +220,8 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         return should;
     }
 
-    private boolean isProfilePurchaseHistory(int seq) {
-        String namespace = getStepNamespace(seq);
-        return namespace.contains("." + profilePurchaseHistoryWrapper.name());
+    private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 
     private boolean shouldCalculatePurchaseHistory() {
@@ -232,7 +230,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 log.info("Need to rebuild purchase history due to Account changes.");
                 return true;
             }
-            if (update) {
+            if (update || rebuild) {
                 log.info("Need to rebuild purchase history due to Transaction changes.");
                 return true;
             }
