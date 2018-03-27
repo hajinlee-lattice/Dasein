@@ -194,14 +194,14 @@ angular.module('lp.ratingsengine')
                         RatingsEngineStore.nextSaveCustomEventRatingModel(nextState);
                     }
                 }, {
-                    label:'Mapping',
+                    label:'Field Mapping',
                     state:'segment.attributes.training.mapping',
                     nextLabel: 'Next',
                     nextFn: function(nextState) {
                         RatingsEngineStore.saveFieldMapping(nextState);
                     }
                 },{
-                    label:'Creation',
+                    label:'Model Creation',
                     state:'segment.attributes.training.mapping.creation',
                     nextLabel: 'Done',
                     nextFn: function(nextState) {
