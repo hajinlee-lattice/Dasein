@@ -63,6 +63,7 @@ angular.module('lp.jobs.import', [
                     { label: "All", action: {} },
                     { label: "Completed", action: { status: 'Completed' } },
                     { label: "Pending", action: { status: 'Pending' } },
+                    { label: "Ready", action: { status: 'Ready' } },
                     { label: "Running", action: { status: 'Running' } },
                     { label: "Failed", action: { status: "Failed" } }
                 ]

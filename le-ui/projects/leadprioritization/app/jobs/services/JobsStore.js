@@ -49,18 +49,18 @@ angular
     }
 
 
-    function isImportSubJob(job){
-        switch (job.jobType) {
-            case 'cdlDataFeedImportWorkflow': 
-            case 'cdlOperationWorkflow':
-            case 'metadataChange':{
-                return true;
-            };
-            default: {
-                return false;
-            }
-        }
-    }
+    // function isImportSubJob(job){
+    //     switch (job.jobType) {
+    //         case 'cdlDataFeedImportWorkflow': 
+    //         case 'cdlOperationWorkflow':
+    //         case 'metadataChange':{
+    //             return true;
+    //         };
+    //         default: {
+    //             return false;
+    //         }
+    //     }
+    // }
 
     function isType(job, type) {
         switch (type) {
@@ -274,7 +274,7 @@ angular
             case 'Failed' : {
                 if(inMap !== undefined){
                     JobsStore.data.subjobsRunning.splice(inMap, 1);
-                    delete JobsStore.subjobsRunnigMap[inMap];
+                    delete JobsStore.subjobsRunnigMap[applicationidJob];
                 }
                 break;
             }

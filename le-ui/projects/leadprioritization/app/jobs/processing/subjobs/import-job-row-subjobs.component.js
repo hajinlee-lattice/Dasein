@@ -6,19 +6,17 @@ angular.module('lp.jobs.row.subjobs', [])
                 // console.log('EXPANDED ======= ',$scope);
             }
             $scope.getActionType = function (subjob) {
+                
                 var type = subjob.jobType;
                 switch (type) {
                     case 'cdlDataFeedImportWorkflow': {
-                        return 'Import';
+                        return 'Import: ';
                     };
                     case 'cdlOperationWorkflow': {
-                        return 'Delete';
-                    };
-                    case 'metadataChange': {
-                        return 'Metadata Change';
+                        return 'Delete: ';
                     };
                     default: {
-                        return 'Unknown';
+                        return subjob.name;
                     }
                 }
             }
@@ -39,6 +37,9 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.getValidation = function (subjob) {
+                if(subjob.jobStatus === 'Completed'){
+                    return subjob.jobStatus;
+                }
                 if(subjob.jobStatus === 'Failed'){
                     return 'Failed';
                 }

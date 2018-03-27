@@ -107,8 +107,6 @@ angular
                     return {
                         id: job.id,
                         applicationId: job.applicationId,
-                        // actions: actions,
-                        // actionsCount: actionsCount,
                         timestamp: job.startTimestamp,
                         note: job.note ? job.note : '',
                         errorCode: job.errorCode,
