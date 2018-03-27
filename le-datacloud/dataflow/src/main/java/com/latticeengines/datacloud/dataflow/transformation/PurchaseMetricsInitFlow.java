@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
 @Component(PurchaseMetricsInitFlow.BEAN_NAME)
 public class PurchaseMetricsInitFlow extends ConfigurableFlowBase<TransformerConfig> {
@@ -34,11 +35,9 @@ public class PurchaseMetricsInitFlow extends ConfigurableFlowBase<TransformerCon
         if (account.getSchema(InterfaceName.SpendAnalyticsSegment.name()) == null) {
             account = account.addColumnWithFixedValue(InterfaceName.SpendAnalyticsSegment.name(), null, String.class);
         }
-        
-        /* TODO: After Ke checks in his change, this part needs to be uncommented
-        product = product.filter(String.format("\"%s\".equalsIgnoreCase(%s)", ProductType.ANALYTIC.name(),
+
+        product = product.filter(String.format("\"%s\".equalsIgnoreCase(%s)", ProductType.Analytic.name(),
                 InterfaceName.ProductType.name()), new FieldList(InterfaceName.ProductType.name()));
-                */
 
         List<String> appendFields = new ArrayList<>();
         appendFields.add(InterfaceName.AccountId.name());
@@ -49,8 +48,7 @@ public class PurchaseMetricsInitFlow extends ConfigurableFlowBase<TransformerCon
         Node base = account.join(new FieldList("_DUMMY_"), product, new FieldList("_DUMMY_"), JoinType.INNER)
                 .retain(new FieldList(appendFields));
 
-        List<String> retainFields = new ArrayList<>();
-        retainFields.addAll(periodTable.getFieldNames());
+        List<String> retainFields = new ArrayList<>(periodTable.getFieldNames());
         retainFields.add(InterfaceName.SpendAnalyticsSegment.name());
 
         periodTable = periodTable.rename(new FieldList(InterfaceName.ProductId.name(), InterfaceName.AccountId.name()),

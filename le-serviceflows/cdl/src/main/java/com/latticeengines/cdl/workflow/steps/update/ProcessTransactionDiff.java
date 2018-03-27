@@ -44,7 +44,6 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
@@ -291,10 +290,16 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         targetTable.setExpandBucketedAttrs(false);
         step.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumFields(Arrays.asList(
+                InterfaceName.Amount.name(),
+                InterfaceName.Cost.name()));
+        config.setSumOutputFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
+        config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
+        config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ContactId.name(), //
@@ -342,8 +347,14 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         step.setTargetTable(targetTable);
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
         config.setPeriodStrategy(strategy);
-        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
-        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
+        config.setSumFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name(),
+                InterfaceName.TransactionCount.name()));
+        config.setSumOutputFields(Arrays.asList(
+                InterfaceName.TotalAmount.name(),
+                InterfaceName.TotalCost.name(),
+                InterfaceName.TransactionCount.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
