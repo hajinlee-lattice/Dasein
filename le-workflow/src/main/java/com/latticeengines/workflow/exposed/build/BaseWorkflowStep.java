@@ -289,8 +289,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
 
     public Map<String, BaseStepConfiguration> getStepConfigMapInWorkflow(String parentNamespace, String workflowName,
             Class<? extends WorkflowConfiguration> workflowConfigClass) {
-        String ns = StringUtils.isEmpty(parentNamespace) ? workflowConfigClass.getSimpleName()
-                : parentNamespace + "." + workflowConfigClass.getSimpleName();
+        String newParentNamespace = StringUtils.isEmpty(parentNamespace) ? "" : parentNamespace + ".";
+        String ns = newParentNamespace + workflowConfigClass.getSimpleName();
         WorkflowConfiguration workflowConfig = getObjectFromContext(ns, workflowConfigClass);
         if (workflowConfig == null) {
             log.warn("There is no workflow configuration of class " + workflowConfigClass.getSimpleName()
@@ -307,11 +307,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         }
         Map<String, String> registry = WorkflowUtils.getFlattenedConfig(workflowConfig);
         Map<String, BaseStepConfiguration> result = registry.entrySet().stream()
-                .collect(Collectors.toMap(e -> parentNamespace + "." + e.getKey(), e -> {
-                    String namespace = e.getKey();
-                    if (StringUtils.isNotEmpty(parentNamespace)) {
-                        namespace = parentNamespace + "." + namespace;
-                    }
+                .collect(Collectors.toMap(e -> newParentNamespace + e.getKey(), e -> {
+                    String namespace = newParentNamespace + e.getKey();
                     BaseStepConfiguration step = getObjectFromContext(namespace, BaseStepConfiguration.class);
                     if (step == null) {
                         step = getConfigurationFromJobParameters(namespace);
