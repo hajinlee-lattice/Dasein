@@ -337,6 +337,7 @@ class Server {
                         page + (html5mode ? '*' : ''),
                         (req, res) => {
                             if (route.xframe_allow && route.xframe_allow === true) {
+                                console.log('! X-Frame-Options !', route.xframe_allow);
                                 res.removeHeader('X-Frame-Options');
                             }
                             /*
