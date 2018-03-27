@@ -140,6 +140,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";
 
+    static final int EARLIEST_TRANSACTION = 48033;
+    static final int LATEST_TRANSACTION = 48929;
+
     int actionsNumber = 0;
 
     @Inject

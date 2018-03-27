@@ -16,6 +16,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
@@ -41,7 +42,11 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.*;
+import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
@@ -51,8 +56,8 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
@@ -173,12 +178,24 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         }
 
         maxTxnDate = findLatestTransactionDate();
+        if (StringUtils.isBlank(maxTxnDate)) {
+            throw new IllegalStateException("Cannot find maximum transaction date");
+        }
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
-        periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        if (CollectionUtils.isEmpty(periodStrategies)) {
+            throw new IllegalStateException("Cannot find period strategies");
+        }
+
+        periodTables = getPeriodTables();
+        if (CollectionUtils.isEmpty(periodTables)) {
+            throw new IllegalStateException("Cannot find period stores");
+        }
 
         purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
+        if (purchaseMetrics == null) {
+            purchaseMetrics = new ArrayList<>();
+        }
         // HasPurchased is the default metrics to calculate
         purchaseMetrics.add(createHasPurchasedMetrics());
 
@@ -213,6 +230,21 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             log.info("Found account batch store in inactive version " + inactive);
         }
         return accountTableName;
+    }
+
+    private List<Table> getPeriodTables() {
+        List<Table> periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
+        if (CollectionUtils.isEmpty(periodTables)) {
+            periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedPeriodTransaction, active);
+            if (CollectionUtils.isNotEmpty(periodTables)) {
+                log.info("Found period stores in active version " + active);
+            }
+        } else {
+            log.info("Found period stores in inactive version " + inactive);
+        }
+        return periodTables;
     }
 
     private String findLatestTransactionDate() {

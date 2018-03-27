@@ -225,9 +225,13 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean shouldCalculatePurchaseHistory() {
-        if (hasRawStore && hasProducts && hasAccounts) {
-            if (accountChoreographer.update || accountChoreographer.rebuild) {
+        if (hasProducts && hasAccounts) {
+            if (hasRawStore && (accountChoreographer.update || accountChoreographer.rebuild)) {
                 log.info("Need to rebuild purchase history due to Account changes.");
+                return true;
+            }
+            if (hasRawStore && (productChoreographer.update || productChoreographer.rebuild)) {
+                log.info("Need to rebuild purchase history due to Product changes.");
                 return true;
             }
             if (update || rebuild) {

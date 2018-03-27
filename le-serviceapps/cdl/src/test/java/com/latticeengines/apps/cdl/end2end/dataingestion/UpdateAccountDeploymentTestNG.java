@@ -27,8 +27,10 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
-
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
+
+        // For the test scenario of non-1st profile purchase history
+        dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
         new Thread(this::createTestSegment1).start();
 
@@ -75,6 +77,10 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private Map<TableRoleInCollection, Long> getExpectedCnts() {
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.BucketedAccount, Long.valueOf(ACCOUNT_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
+                (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
+                (long) ((ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2) * (PRODUCT_IMPORT_SIZE_1)));
         return expectedCnts;
     }
 
