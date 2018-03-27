@@ -19,6 +19,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
@@ -45,7 +46,8 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
 
     private void setupDataFlow() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
-                getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType());
+                getScoreResultTableName(), getInputTableName(), getBucketMetadata(), getModelType(),
+                configuration.getIdColumnName());
         if (configuration.isCdlModel()) {
             setupCdlParameters(params);
         } else if (configuration.isCdlMultiModel()) {
@@ -98,7 +100,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         params.setScoreMultiplierMap(scoreMultiplierMap);
         params.setScoreAvgMap(getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class));
         params.setIdColumn(InterfaceName.__Composite_Key__.toString());
-        params.setModelIdField("Model_GUID");
+        params.setModelIdField(ScoreResultField.ModelId.displayName);
         putObjectInContext(SCORING_SCORE_FIELDS, scoreFieldMap);
         putObjectInContext(PREDICTION_TYPES, predictionTypeMap);
     }

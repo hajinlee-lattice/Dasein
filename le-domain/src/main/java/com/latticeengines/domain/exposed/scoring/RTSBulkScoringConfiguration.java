@@ -10,124 +10,125 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
 
+    @JsonProperty("metadata_table")
     private Table metadataTable;
 
+    @JsonProperty("target_result_dir")
     private String targetResultDir;
 
+    @JsonProperty("enable_lead_enrichment")
     private boolean enableLeadEnrichment;
 
+    @JsonProperty("enable_debug")
     private boolean enableDebug;
 
+    @JsonProperty("enable_matching")
     private boolean enableMatching = Boolean.TRUE;
 
+    @JsonProperty("score_test_file")
     private boolean scoreTestFile;
 
+    @JsonProperty("internal_resource_host_port")
     private String internalResourceHostPort;
 
+    @JsonProperty("model_guids")
     private List<String> modelGuids = new ArrayList<>();
 
+    @JsonProperty("model_type")
     private String modelType;
 
+    @JsonProperty("import_error_path")
     private String importErrorPath;
 
-    @JsonProperty("model_guids")
+    @JsonProperty("id_column_name")
+    private String idColumnName;
+
     public List<String> getModelGuids() {
         return this.modelGuids;
     }
 
-    @JsonProperty("model_guids")
     public void setModelGuids(List<String> modelGuids) {
         this.modelGuids = modelGuids;
     }
 
-    @JsonProperty("metadata_table")
     public Table getMetadataTable() {
         return this.metadataTable;
     }
 
-    @JsonProperty("metadata_table")
     public void setMetadataTable(Table metadataTable) {
         this.metadataTable = metadataTable;
     }
 
-    @JsonProperty("enable_lead_enrichment")
     public boolean isEnableLeadEnrichment() {
         return this.enableLeadEnrichment;
     }
 
-    @JsonProperty("enable_lead_enrichment")
     public void setEnableLeadEnrichment(boolean enableLeadEnrichment) {
         this.enableLeadEnrichment = enableLeadEnrichment;
     }
 
-    @JsonProperty("enable_debug")
     public void setEnableDebug(boolean enableDebug) {
         this.enableDebug = enableDebug;
     }
 
-    @JsonProperty("enable_debug")
     public boolean isEnableDebug() {
         return this.enableDebug;
     }
 
-    @JsonProperty("enable_matching")
     public boolean isEnableMatching() {
         return enableMatching;
     }
 
-    @JsonProperty("enable_matching")
     public void setEnableMatching(boolean enableMatching) {
         this.enableMatching = enableDebug;
     }
 
-    @JsonProperty("target_result_dir")
     public String getTargetResultDir() {
         return targetResultDir;
     }
 
-    @JsonProperty("target_result_dir")
     public void setTargetResultDir(String targetResultDir) {
         this.targetResultDir = targetResultDir;
     }
 
-    @JsonProperty("internal_resource_host_port")
     public void setInternalResourceHostPort(String internalResourceHostPort) {
         this.internalResourceHostPort = internalResourceHostPort;
     }
 
-    @JsonProperty("internal_resource_host_port")
     public String getInternalResourceHostPort() {
         return this.internalResourceHostPort;
     }
 
-    @JsonProperty("import_error_path")
     public String getImportErrorPath() {
         return importErrorPath;
     }
 
-    @JsonProperty("import_error_path")
     public void setImportErrorPath(String importErrorPath) {
         this.importErrorPath = importErrorPath;
     }
 
-    @JsonProperty("model_type")
     public void setModelType(String modelType) {
         this.modelType = modelType;
     }
 
-    @JsonProperty("model_type")
     public String getModelType() {
         return this.modelType;
     }
 
-    @JsonProperty("score_test_file")
     public void setScoreTestFile(boolean scoreTestFile) {
         this.scoreTestFile = scoreTestFile;
     }
 
-    @JsonProperty("score_test_file")
     public boolean getScoreTestFile() {
         return this.scoreTestFile;
+    }
+
+    public String getIdColumnName() {
+        return idColumnName;
+    }
+
+    public void setIdColumnName(String idColumnName) {
+        this.idColumnName = idColumnName;
     }
 
     @Override

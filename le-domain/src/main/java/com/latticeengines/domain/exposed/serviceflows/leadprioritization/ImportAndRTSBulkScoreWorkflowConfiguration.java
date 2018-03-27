@@ -198,5 +198,10 @@ public class ImportAndRTSBulkScoreWorkflowConfiguration extends BaseLPWorkflowCo
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            rtsBulkScoreWorkflowConfigurationBuilder.idColumnName(idColumnName);
+            return this;
+        }
+
     }
 }

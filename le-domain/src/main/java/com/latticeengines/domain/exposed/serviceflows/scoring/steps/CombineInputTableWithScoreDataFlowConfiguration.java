@@ -4,24 +4,37 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 
 public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoringDataFlowStepConfiguration {
 
+    @JsonProperty
     private List<BucketMetadata> bucketMetadata;
+
+    @JsonProperty
     private String modelType;
 
+    @JsonProperty
     private boolean liftChart;
-    private boolean cdlModel; //M19: to be merged into cdlMultiModel mode in future release ~ M20
+
+    @JsonProperty
+    private boolean cdlModel; // M19: to be merged into cdlMultiModel mode in
+                              // future release ~ M20
+    @JsonProperty
     private boolean cdlMultiModel;
+
+    @JsonProperty
     private boolean expectedValue;
+
+    @JsonProperty
+    private String idColumnName = InterfaceName.Id.name();
 
     public CombineInputTableWithScoreDataFlowConfiguration() {
         setBeanName("combineInputTableWithScore");
         setTargetTableName(NamingUtils.uuid("CombineInputTableWithScore"));
     }
 
-    @JsonProperty
     public boolean isCdlModel() {
         return cdlModel;
     }
@@ -30,7 +43,6 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoring
         this.cdlModel = cdlModel;
     }
 
-    @JsonProperty
     public boolean isCdlMultiModel() {
         return cdlMultiModel;
     }
@@ -69,6 +81,14 @@ public class CombineInputTableWithScoreDataFlowConfiguration extends BaseScoring
 
     public void setExpectedValue(boolean expectedValue) {
         this.expectedValue = expectedValue;
+    }
+
+    public String getIdColumnName() {
+        return idColumnName;
+    }
+
+    public void setIdColumnName(String idColumnName) {
+        this.idColumnName = idColumnName;
     }
 
 }

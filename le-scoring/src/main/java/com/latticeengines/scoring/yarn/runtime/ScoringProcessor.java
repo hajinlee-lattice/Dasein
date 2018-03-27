@@ -106,7 +106,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
-    private boolean useInternalId = false;
+    private String idColumnName = InterfaceName.Id.name();
 
     private boolean isEnableDebug = false;
 
@@ -134,6 +134,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Override
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
         this.rtsBulkScoringConfig = rtsBulkScoringConfig;
+        this.idColumnName = rtsBulkScoringConfig.getIdColumnName();
         log.info("Inside the rts bulk scoring processor.");
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
@@ -317,18 +318,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             record.setPerformEnrichment(rtsBulkScoringConfig.isEnableLeadEnrichment());
             record.setIdType(DEFAULT_ID_TYPE);
 
-            String idStr = null;
-            if (!useInternalId) {
-                Object obj = avroRecord.get(InterfaceName.Id.toString());
-                if (obj == null) {
-                    obj = avroRecord.get(InterfaceName.AccountId.toString());
-                }
-                idStr = obj.toString();
-                // idToInternalIdMap.put(idStr,
-                // Long.valueOf(avroRecord.get(InterfaceName.InternalId.toString()).toString()));
-            } else {
-                idStr = avroRecord.get(InterfaceName.InternalId.toString()).toString();
-            }
+            String idStr = avroRecord.get(idColumnName).toString();
 
             Map<String, Object> attributeValues = new HashMap<>();
             if (rtsBulkScoringConfig.getScoreTestFile()) { // Score a test file
@@ -392,14 +382,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         try (FileReader<GenericRecord> prereader = instantiateReaderForBulkScoreRequest(path);) {
             GenericRecord avroRecord = prereader.next();
             count++;
-            Object idObj = avroRecord.get(InterfaceName.Id.toString());
-            if (idObj == null) {
-                idObj = avroRecord.get(InterfaceName.AccountId.toString());
-                if (idObj == null) {
-                    idObj = avroRecord.get(InterfaceName.InternalId.toString());
-                    useInternalId = true;
-                }
-            }
+            Object idObj = avroRecord.get(idColumnName);
             if (idObj == null) {
                 throw new LedpException(LedpCode.LEDP_20034);
             }
@@ -419,15 +402,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
         Table outputTable = new Table();
         outputTable.setName("scoreOutput");
         Attribute idAttr = new Attribute();
-        if (!useInternalId) {
-            idAttr.setName(InterfaceName.Id.toString());
-            idAttr.setDisplayName(InterfaceName.Id.toString());
-            idAttr.setSourceLogicalDataType("");
-            idAttr.setPhysicalDataType(Type.STRING.name());
-        } else {
-            idAttr.setName(InterfaceName.InternalId.toString());
-            idAttr.setDisplayName(InterfaceName.InternalId.toString());
-            idAttr.setSourceLogicalDataType("");
+        idAttr.setName(idColumnName);
+        idAttr.setDisplayName(idColumnName);
+        idAttr.setSourceLogicalDataType("");
+        idAttr.setPhysicalDataType(Type.STRING.name());
+        if (idColumnName.equals(InterfaceName.InternalId.name())) {
             idAttr.setPhysicalDataType(Type.LONG.name());
         }
         Attribute modelIdAttr = new Attribute();
@@ -504,10 +483,10 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                 if (log.isDebugEnabled()) {
                     log.debug("tuple is: " + tuple);
                 }
-                if (!useInternalId) {
-                    builder.set(InterfaceName.Id.toString(), id);
-                } else {
+                if (idColumnName.equals(InterfaceName.InternalId.name())) {
                     builder.set(InterfaceName.InternalId.toString(), Long.valueOf(id));
+                } else {
+                    builder.set(idColumnName, id);
                 }
                 String modelId = tuple.getModelId();
                 if (StringUtils.isBlank(modelId)) {
@@ -564,7 +543,7 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
 
     private void writeToErrorFile(CSVPrinter csvFilePrinter, String id, String errorMessage) throws IOException {
         if (StringUtils.isNotEmpty(errorMessage)) {
-            if (!useInternalId) {
+            if (!idColumnName.equals(InterfaceName.InternalId.name())) {
                 // csvFilePrinter.printRecord(idToInternalIdMap.get(id), id,
                 // errorMessage);
             } else {

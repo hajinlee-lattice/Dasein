@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
@@ -199,6 +200,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder modelingType(CustomEventModelingType customEventModelingType) {
             customEventMatchWorkflowConfigurationBuilder.modelingType(customEventModelingType);
             prepareConfigForScoringBuilder.modelingType(customEventModelingType);
+            if (CustomEventModelingType.LPI == customEventModelingType) {
+                computeLift.setScoreField(InterfaceName.Event.name());
+            } else if (CustomEventModelingType.CDL == customEventModelingType) {
+                computeLift.setScoreField(ScoreResultField.Percentile.displayName);
+            }
             return this;
         }
 
@@ -404,12 +410,17 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            modelWorkflowBuilder.idColumnName(idColumnName);
+            rtsBulkScoreWorkflowBuilder.idColumnName(idColumnName);
+            return this;
+        }
+
         public CustomEventModelingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
             rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
-            computeLift.setScoreField(InterfaceName.Event.name());
 
             configuration.add(importData);
             configuration.add(registerReport);

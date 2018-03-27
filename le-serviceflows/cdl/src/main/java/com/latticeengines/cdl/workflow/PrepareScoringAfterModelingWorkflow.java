@@ -9,8 +9,10 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.SegmentExportInitStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PrepareScoringAfterModelingWorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 
@@ -41,7 +43,18 @@ public class PrepareScoringAfterModelingWorkflow
             return builder.next(setConfigurationForScoring) //
                     .next(segmentExportInitStep) //
                     .next(customEventSimpleMatchWorkflow) //
-                    .build();
+                    .next(new BaseWorkflowStep<BaseStepConfiguration>() {
+                        @Override
+                        public void execute() {
+                            // putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME,
+                            // getObjectFromContext(EVENT_TABLE,
+                            // Table.class).getName());
+                        }
+
+                        public String name() {
+                            return "configureCombineStepInputTable";
+                        }
+                    }).build();
         }
     }
 

@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.scoring.steps;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
@@ -19,6 +20,8 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
     private boolean scoreTestFile;
 
     private String modelType;
+
+    private String idColumnName = InterfaceName.Id.name();
 
     public String getModelId() {
         return modelId;
@@ -84,4 +87,11 @@ public class RTSScoreStepConfiguration extends MicroserviceStepConfiguration {
         return this.scoreTestFile;
     }
 
+    public String getIdColumnName() {
+        return idColumnName;
+    }
+
+    public void setIdColumnName(String idColumnName) {
+        this.idColumnName = idColumnName;
+    }
 }

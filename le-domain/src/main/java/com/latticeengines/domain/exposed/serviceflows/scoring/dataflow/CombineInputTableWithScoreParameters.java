@@ -8,6 +8,7 @@ import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 
@@ -36,7 +37,7 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
     private Double avgScore;
 
     @JsonProperty("id_column")
-    private String idColumn;
+    private String idColumn = InterfaceName.Id.name();
 
     // params for multi model
     @JsonProperty("bucket_metadata_map")
@@ -62,15 +63,16 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
             List<BucketMetadata> bucketMetadata) {
-        this(scoreResultsTable, trainingTable, bucketMetadata, null);
+        this(scoreResultsTable, trainingTable, bucketMetadata, null, InterfaceName.Id.name());
     }
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable,
-            List<BucketMetadata> bucketMetadata, String modelType) {
+            List<BucketMetadata> bucketMetadata, String modelType, String idColumn) {
         setScoreResultsTableName(scoreResultsTable);
         setInputTableName(trainingTable);
         setBucketMetadata(bucketMetadata);
         setModelType(modelType);
+        setIdColumn(idColumn);
     }
 
     /**

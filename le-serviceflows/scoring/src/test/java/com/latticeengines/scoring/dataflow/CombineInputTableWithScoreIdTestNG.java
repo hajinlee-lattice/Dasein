@@ -44,7 +44,7 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
 
     private CombineInputTableWithScoreParameters getParametersWithPMMLModelType() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
-                "InputTable", generateDefaultBucketMetadata(), ModelType.PMML.getModelType());
+                "InputTable", generateDefaultBucketMetadata(), ModelType.PMML.getModelType(), InterfaceName.Id.name());
         return params;
     }
 
@@ -101,7 +101,7 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
         executeDataFlow(getStandardParameters());
 
         List<GenericRecord> outputRecords = readOutput();
-        assertEquals(outputRecords.size(), inputRecords.size());
+        assertEquals(outputRecords.size(), inputRecords.size() - 1);
         boolean foundAplusScore = false;
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.Id.name()));
@@ -124,7 +124,7 @@ public class CombineInputTableWithScoreIdTestNG extends ServiceFlowsDataFlowFunc
         executeDataFlow(getParametersWithPMMLModelType());
 
         List<GenericRecord> outputRecords = readOutput();
-        assertEquals(outputRecords.size(), inputRecords.size());
+        assertEquals(outputRecords.size(), inputRecords.size() - 1);
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.Id.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));

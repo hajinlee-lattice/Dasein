@@ -25,7 +25,7 @@ public class CombineInputTableWithScoreMultiModelTestNG extends ServiceFlowsData
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
                 "InputTable");
         params.setIdColumn(InterfaceName.__Composite_Key__.name());
-        params.setModelIdField("Model_GUID");
+        params.setModelIdField(ScoreResultField.ModelId.displayName);
         params.setBucketMetadataMap(ImmutableMap.of( //
                 "ms__6e6f1ad0-8ca5-4102-8477-0b9c79cca206-ai_6rvlw", getDefaultBucketMetadata(), //
                 "ms__c0b0a2f0-8fd4-4817-aee6-fc47c8e6745b-ai_qr7cx", getDefaultBucketMetadata(), //

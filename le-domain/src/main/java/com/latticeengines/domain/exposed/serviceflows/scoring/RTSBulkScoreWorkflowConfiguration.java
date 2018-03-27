@@ -192,6 +192,12 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            score.setIdColumnName(idColumnName);
+            combineInputWithScores.setIdColumnName(idColumnName);
+            return this;
+        }
+
         public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
             matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;

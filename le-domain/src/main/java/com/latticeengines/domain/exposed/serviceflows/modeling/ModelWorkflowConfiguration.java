@@ -175,6 +175,11 @@ public class ModelWorkflowConfiguration extends BaseModelingWorkflowConfiguratio
             return this;
         }
 
+        public Builder idColumnName(String idColumnName) {
+            model.setIdColumnName(idColumnName);
+            return this;
+        }
+
         public ModelWorkflowConfiguration build() {
             export.setUsingDisplayName(Boolean.FALSE);
 

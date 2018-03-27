@@ -66,14 +66,12 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
         Node combinedResultTable = null;
         String idColumn = InterfaceName.InternalId.name();
         String groupByColumn = InterfaceName.InternalId.name();
-        if (inputTable.getSourceAttribute(InterfaceName.Id.name()) != null) {
-            idColumn = InterfaceName.Id.name();
-        } else if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
-            idColumn = InterfaceName.InternalId.name();
-        }
+
         if (StringUtils.isNotEmpty(parameters.getIdColumn())) {
             idColumn = parameters.getIdColumn();
             groupByColumn = idColumn;
+        } else if (inputTable.getSourceAttribute(InterfaceName.InternalId.name()) != null) {
+            idColumn = InterfaceName.InternalId.name();
         }
 
         List<String> retainFields = new ArrayList<>(inputTable.getFieldNames());

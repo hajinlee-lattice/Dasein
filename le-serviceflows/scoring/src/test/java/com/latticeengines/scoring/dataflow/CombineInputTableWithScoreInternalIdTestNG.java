@@ -11,6 +11,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
@@ -20,7 +21,7 @@ public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsData
 
     private CombineInputTableWithScoreParameters getStandardParameters() {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters("ScoreResult",
-                "InputTable");
+                "InputTable", null, ModelType.PMML.name(), InterfaceName.InternalId.name());
         return params;
     }
 
@@ -44,7 +45,6 @@ public class CombineInputTableWithScoreInternalIdTestNG extends ServiceFlowsData
         for (GenericRecord record : outputRecords) {
             assertNotNull(record.get(InterfaceName.InternalId.name()));
             assertNotNull(record.get(ScoreResultField.Percentile.displayName));
-            assertNotNull(record.get(ScoreResultField.Rating.displayName));
         }
     }
 

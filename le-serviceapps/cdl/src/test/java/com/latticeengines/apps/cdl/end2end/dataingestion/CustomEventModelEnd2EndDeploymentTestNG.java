@@ -109,10 +109,6 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
                 fm.setMappedField("CompanyName");
                 fm.setMappedToLatticeField(true);
             }
-            if (fm.getUserField().equals("Id")) {
-                fm.setMappedField("Id");
-                fm.setMappedToLatticeField(false);
-            }
         }
 
         fileUploadProxy.saveFieldMappingDocument(testSourceFileName, fmDoc);

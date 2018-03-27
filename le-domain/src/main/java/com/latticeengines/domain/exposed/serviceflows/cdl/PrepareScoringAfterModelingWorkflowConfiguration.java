@@ -12,10 +12,10 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.SegmentExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 
 public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -43,22 +43,19 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private SegmentExportStepConfiguration initStepConf = new SegmentExportStepConfiguration();
-        private MicroserviceStepConfiguration prepareSegmentMatching = new MicroserviceStepConfiguration();
-
         private MatchCdlAccountWorkflowConfiguration.Builder matchCdlWorkflowConfBuilder = new MatchCdlAccountWorkflowConfiguration.Builder();
+        private BaseStepConfiguration configureCombineStepInputTable = new BaseStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             initStepConf.setCustomerSpace(customerSpace);
-            prepareSegmentMatching.setCustomerSpace(customerSpace);
             matchCdlWorkflowConfBuilder.customer(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
-            prepareSegmentMatching.setMicroServiceHostPort(microServiceHostPort);
             matchCdlWorkflowConfBuilder.microServiceHostPort(microServiceHostPort);
             return this;
         }
@@ -66,7 +63,7 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
         public Builder internalResourceHostPort(String internalResourceHostPort) {
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
-            prepareSegmentMatching.setInternalResourceHostPort(internalResourceHostPort);
+            configureCombineStepInputTable.setInternalResourceHostPort(internalResourceHostPort);
             matchCdlWorkflowConfBuilder.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -175,7 +172,7 @@ public class PrepareScoringAfterModelingWorkflowConfiguration extends BaseCDLWor
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());
             configuration.add(setConfigForScoring);
             configuration.add(initStepConf);
-            configuration.add(prepareSegmentMatching);
+            configuration.add(configureCombineStepInputTable);
             configuration.add(matchCdlWorkflowConfBuilder.build("customEventSimpleMatchWorkflow"));
             return configuration;
         }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes.Type;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryProvenance;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceSte
 public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     @NotEmptyString
     @NotNull
+    @JsonProperty
     private String modelingServiceHdfsBaseDir;
 
     @NotEmptyString
@@ -71,6 +73,9 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
     private String aiModelId;
 
     private String ratingEngineId;
+
+    @JsonProperty
+    private String idColumnName = InterfaceName.Id.name();
 
     @JsonProperty
     public List<DataRule> getDataRules() {
@@ -302,9 +307,17 @@ public class ModelStepConfiguration extends MicroserviceStepConfiguration {
         return ratingEngineId;
     }
 
-    @JsonProperty
     public void setRatingEngineId(String ratingEngineId) {
         this.ratingEngineId = ratingEngineId;
     }
 
+    @JsonProperty
+    public String getIdColumnName() {
+        return idColumnName;
+    }
+
+    @JsonProperty
+    public void setIdColumnName(String idColumnName) {
+        this.idColumnName = idColumnName;
+    }
 }

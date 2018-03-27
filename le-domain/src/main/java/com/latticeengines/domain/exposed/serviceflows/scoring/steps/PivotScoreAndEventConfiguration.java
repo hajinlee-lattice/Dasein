@@ -33,4 +33,5 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
     public void setLiftChart(boolean liftChart) {
         this.liftChart = liftChart;
     }
+
 }

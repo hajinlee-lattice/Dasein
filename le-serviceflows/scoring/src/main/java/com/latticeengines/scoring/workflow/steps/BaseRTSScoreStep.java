@@ -114,6 +114,7 @@ public abstract class BaseRTSScoreStep<T extends RTSScoreStepConfiguration> exte
         scoringConfig.setScoreTestFile(configuration.getScoreTestFile());
         scoringConfig.setModelGuids(Arrays.asList(modelId));
         scoringConfig.setModelType(getModelType());
+        scoringConfig.setIdColumnName(configuration.getIdColumnName());
         Path targetPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId().toString(),
                 configuration.getCustomerSpace());
         String tableName = String.format("RTSBulkScoreResult_%s_%d", modelId.replaceAll("-", "_"),

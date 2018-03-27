@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
 import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.MatchJoinType;
@@ -20,6 +21,7 @@ import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
@@ -34,7 +36,6 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.proxy.exposed.matchapi.MatchCommandProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component
 public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
@@ -149,6 +150,8 @@ public class ImportAndRTSBulkScoreWorkflowSubmitter extends WorkflowSubmitter {
                 .skipMatchingStep(ModelType.PMML.getModelType().equals(modelType)) //
                 .matchClientDocument(matchClientDocument) //
                 .bucketMetadata(bucketMetadataList) //
+                .idColumnName(ModelType.PMML.getModelType().equals(modelType) ? InterfaceName.InternalId.name()
+                        : InterfaceName.Id.name()) //
                 .build();
     }
 }
