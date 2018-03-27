@@ -1,8 +1,11 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -11,11 +14,12 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public class AwsApsGeneratorUtils {
 
-    public static void setupMetaData(Table apsTable) {
+    public static void setupMetaData(Table apsTable, Map<String, List<Product>> productMap) {
         List<Attribute> attributes = apsTable.getAttributes();
         for (Attribute attribute : attributes) {
             String name = attribute.getName();
@@ -32,55 +36,58 @@ public class AwsApsGeneratorUtils {
                 attribute.setCategory(Category.ACCOUNT_INFORMATION);
                 attribute.setDisplayDiscretizationStrategy("{\"unified\": {}}");
                 attribute.setTags(ModelingMetadata.INTERNAL_TAG);
-                setDisplayNameAndOthers(attribute, name);
+                setDisplayNameAndOthers(attribute, name, productMap);
             }
         }
     }
 
-    private static void setDisplayNameAndOthers(Attribute attribute, String name) {
+    private static void setDisplayNameAndOthers(Attribute attribute, String name,
+            Map<String, List<Product>> productMap) {
         if (name.matches("Product_.*_Revenue")) {
             Pattern pattern = Pattern.compile("Product_(.*)_Revenue");
-            Matcher matcher = pattern.matcher(name);
-            matcher.matches();
-            attribute.setDisplayName("Last Period Spend for " + matcher.group(1));
+            setDisplayName(attribute, name, productMap, pattern, "Last Period Spend for ");
             attribute.setDescription("Product spend in last period");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
         if (name.matches("Product_.*_RevenueRollingSum6")) {
             Pattern pattern = Pattern.compile("Product_(.*)_RevenueRollingSum6");
-            Matcher matcher = pattern.matcher(name);
-            matcher.matches();
-            attribute.setDisplayName("6-Period Spend for " + matcher.group(1));
+            setDisplayName(attribute, name, productMap, pattern, "6-Period Spend for ");
             attribute.setDescription("Product spend for last 6 periods");
             attribute.setFundamentalType(FundamentalType.CURRENCY);
             return;
         }
         if (name.matches("Product_.*_RevenueMomentum3")) {
             Pattern pattern = Pattern.compile("Product_(.*)_RevenueMomentum3");
-            Matcher matcher = pattern.matcher(name);
-            matcher.matches();
-            attribute.setDisplayName("Rate of Change of 3-Period Spend for " + matcher.group(1));
+            setDisplayName(attribute, name, productMap, pattern, "Rate of Change of 3-Period Spend for ");
             attribute.setDescription(
                     "Percent change in the 3 period spend, where values > 0 show increasing spend and < 0 indicate decreasing spend");
             return;
         }
         if (name.matches("Product_.*_Units")) {
             Pattern pattern = Pattern.compile("Product_(.*)_Units");
-            Matcher matcher = pattern.matcher(name);
-            matcher.matches();
-            attribute.setDisplayName("Last Period Units for " + matcher.group(1));
+            setDisplayName(attribute, name, productMap, pattern, "Last Period Units for ");
             attribute.setDescription("Units purchased in last period");
             return;
         }
         if (name.matches("Product_.*_Span")) {
             Pattern pattern = Pattern.compile("Product_(.*)_Span");
-            Matcher matcher = pattern.matcher(name);
-            matcher.matches();
-            attribute.setDisplayName("Purchase Recency for " + matcher.group(1));
+            setDisplayName(attribute, name, productMap, pattern, "Purchase Recency for ");
             attribute.setDescription(
                     "Indicator of how recently a customer purchased, where higher values indicate more recent purchase (e.g. 1 = Last Period  and 0 = Never)");
             return;
+        }
+    }
+
+    private static void setDisplayName(Attribute attribute, String name, Map<String, List<Product>> productMap,
+            Pattern pattern, String descPrefix) {
+        Matcher matcher = pattern.matcher(name);
+        matcher.matches();
+        String productId = matcher.group(1);
+        if (productMap != null && CollectionUtils.isNotEmpty(productMap.get(productId))) {
+            attribute.setDisplayName(descPrefix + productMap.get(productId).get(0).getProductName());
+        } else {
+            attribute.setDisplayName(descPrefix + productId);
         }
     }
 }

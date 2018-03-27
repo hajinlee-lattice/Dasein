@@ -9,7 +9,11 @@ import static org.testng.Assert.assertTrue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
@@ -42,6 +46,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.pls.CloneModelingParameters;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -117,8 +122,8 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         modelingParameters.setDescription("Test");
         modelingParameters.setModuleName("module");
         modelingParameters.setActivateModelSummaryByDefault(true);
-        //modelingParameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
-        //modelingParameters.setExcludePropDataColumns(true);
+        // modelingParameters.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
+        // modelingParameters.setExcludePropDataColumns(true);
 
         modelingParameters.setTrainFilterTableName(trainFilterTableName);
         modelingParameters.setEventFilterTableName(eventFilterTableName);
@@ -218,10 +223,30 @@ public class RatingEngineModelingEndToEndDeploymentTestNG extends PlsDeploymentT
         Table table = MetaDataTableUtils.createTable(yarnConfiguration, tableName, hdfsDir);
         table.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
         if (tableName.equals(apsTableName)) {
-            AwsApsGeneratorUtils.setupMetaData(table);
+            AwsApsGeneratorUtils.setupMetaData(table, loadProductMap(table));
         }
         metadataProxy.updateTable(customerSpace.toString(), tableName, table);
         return table;
+    }
+
+    private Map<String, List<Product>> loadProductMap(Table table) {
+        Map<String, List<Product>> productMap = new HashMap<>();
+
+        for (String name : table.getAttributeNames()) {
+            if (name.matches("Product_.*_.*")) {
+                Pattern pattern = Pattern.compile("Product_(.*)_.*");
+                Matcher matcher = pattern.matcher(name);
+                matcher.matches();
+                String productId = matcher.group(1);
+                productMap.putIfAbsent(productId, new ArrayList<Product>());
+                Product product = new Product();
+                product.setProductId(productId);
+                product.setProductName("Name:" + productId);
+                productMap.get(productId).add(product);
+            }
+
+        }
+        return productMap;
     }
 
     public void createModel() {
