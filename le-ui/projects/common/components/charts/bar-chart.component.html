@@ -12,7 +12,7 @@
                 <div class="flex-item flex-actions text-ellipsis flex-item-left" ng-if="showstatcount">
                     <i class="plus fa fa-plus" ng-if="getStatCount(stat) == 0 && ($index == rowHover)"></i>
                     <i class="plus fa fa-check" ng-if="getStatCount(stat) == 1" ng-style="{'color': color}"></i>
-                    <i class="plus attribute-use-count" ng-if="getStatCount(stat) >= 2">{{ statcount }}</i>
+                    <i class="plus attribute-use-count" ng-if="getStatCount(stat) >= 2">{{ getStatCount(stat) }}</i>
                 </div>
                 <div class="flex-item flex-lable text-ellipsis flex-item-right"><span>{{stat.Lbl}}</span></div>
                 <div class="flex-item flex-graph-container flex-item-left">
