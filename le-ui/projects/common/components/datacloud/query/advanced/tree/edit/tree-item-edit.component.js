@@ -39,7 +39,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         default: {
                             vm.showFromNumerical = false;
                             vm.showToNumerical = false;
-                        };
+                        }
                     }
                 }
 
