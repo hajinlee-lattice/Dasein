@@ -405,43 +405,116 @@ angular
             .state('home.ratingsengine.dashboard.activatescoring', {
                 url: '/activatescoring',
                 resolve: {
-                    Tmp: function($q, $stateParams) {
-                        var deferred = $q.defer();
+                    CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
 
-                        deferred.resolve([]);
+                        ModelRatingsService.MostRecentConfigurationRatingEngine(ratingId).then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    },
+                    RatingsSummary: function($q, $stateParams, ModelRatingsService) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
+
+                        ModelRatingsService.GetBucketedScoresSummaryRatingEngine(ratingId, modelId).then(function(result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    },
+                    HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id,
+                            modelId = $stateParams.modelId;
+
+                        ModelRatingsService.HistoricalABCDBucketsRatingEngine(ratingId).then(function(result) {
+                            deferred.resolve(result);
+                        });
 
                         return deferred.promise;
                     }
                 },
                 params: {
-                    pageIcon: 'ico-model',
-                    pageTitle: 'Activate Scoring',
-                    section: 'dashboard.activatescoring'
+                    pageIcon: 'ico-ratings',
+                    pageTitle: 'Ratings',
+                    section: 'dashboard.scoring'
                 },
                 views: {
-                    "navigation@home": {
-                        controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
-                            $scope.rating_id = $stateParams.rating_id || '';
-                            $scope.modelId = $stateParams.modelId || '';
-                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
-                            $scope.stateName = function () {
-                                return $state.current.name;
-                            }
-                            $rootScope.$broadcast('header-back', {
-                                path: '^home.rating.dashboard',
-                                displayName: Dashboard.summary.displayName,
-                                sref: 'home.ratingsengine'
-                            });
-                        },
-                        templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
-                    },
                     "main@": {
-                        controller: 'RatingsEngineActivateScoring',
+                        controller: 'ModelRatingsController',
                         controllerAs: 'vm',
-                        templateUrl: 'app/ratingsengine/content/activatescoring/activatescoring.component.html'
+                        templateUrl: 'app/models/views/ModelRatingsView.html'
                     }
                 }
             })
+            // .state('home.ratingsengine.dashboard.activatescoring', {
+            //     url: '/activatescoring',
+            //     resolve: {
+            //         CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
+            //             var deferred = $q.defer(),
+            //                 id = $stateParams.modelId;
+
+            //             ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
+            //                 deferred.resolve(result);
+            //             });
+
+            //             return deferred.promise;
+            //         },
+            //         RatingsSummary: function($q, $stateParams, ModelRatingsService) {
+            //             var deferred = $q.defer(),
+            //                 id = $stateParams.modelId;
+
+            //             ModelRatingsService.GetBucketedScoresSummary(id).then(function(result) {
+            //                 deferred.resolve(result);
+            //             });
+
+            //             return deferred.promise;
+            //         },
+            //         HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
+            //             var deferred = $q.defer(),
+            //                 id = $stateParams.modelId;
+
+            //             ModelRatingsService.HistoricalABCDBuckets(id).then(function(result) {
+            //                 deferred.resolve(result);
+            //             });
+
+            //             return deferred.promise;
+            //         }
+            //     },
+            //     params: {
+            //         pageIcon: 'ico-model',
+            //         pageTitle: 'Activate Scoring',
+            //         section: 'dashboard.activatescoring'
+            //     },
+            //     views: {
+            //         "navigation@home": {
+            //             controller: function ($scope, $stateParams, $state, $rootScope, Dashboard, RatingEngine) {
+            //                 $scope.rating_id = $stateParams.rating_id || '';
+            //                 $scope.modelId = $stateParams.modelId || '';
+            //                 $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+            //                 $scope.stateName = function () {
+            //                     return $state.current.name;
+            //                 }
+            //                 $rootScope.$broadcast('header-back', {
+            //                     path: '^home.rating.dashboard',
+            //                     displayName: Dashboard.summary.displayName,
+            //                     sref: 'home.ratingsengine'
+            //                 });
+            //             },
+            //             templateUrl: 'app/ratingsengine/content/dashboard/sidebar/sidebar.component.html'
+            //         },
+            //         "main@": {
+            //             controller: 'RatingsEngineActivateScoring',
+            //             controllerAs: 'vm',
+            //             templateUrl: 'app/ratingsengine/content/activatescoring/activatescoring.component.html'
+            //         }
+            //     }
+            // })
             .state('home.ratingsengine.rulesprospects', {
                 url: '/rules/:rating_id/:wizard_steps',
                 params: {

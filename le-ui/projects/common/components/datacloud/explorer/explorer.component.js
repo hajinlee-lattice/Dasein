@@ -1373,6 +1373,8 @@ angular.module('common.datacloud.explorer', [
                 return true;
             } else if (enrichment.Description && textSearch(enrichment.Description, vm.query)) {
                 return true;
+            } else if (enrichment.Subcategory && textSearch(enrichment.Subcategory, vm.query)) {
+                return true;
             } else {
                 return false;
             }

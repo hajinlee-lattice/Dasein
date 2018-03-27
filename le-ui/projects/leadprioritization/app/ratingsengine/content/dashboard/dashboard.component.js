@@ -94,13 +94,9 @@ angular.module('lp.ratingsengine.dashboard', [
     }
 
     vm.init = function() {
-        // console.log(vm.dashboard);
-        // console.log(vm.ratingEngine);
-
         vm.initModalWindow();
 
         vm.relatedItems = vm.dashboard.plays;
-        vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
         var model = vm.ratingEngine.activeModel;
@@ -120,8 +116,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {
                     vm.hasSettingsInfo = false;
                 }
-
-                console.log(model);
 
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;

@@ -3,28 +3,28 @@ angular.module('lp.ratingsengine.activatescoring', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-.directive('refresher', function() {
-  return {
-    transclude: true,
-    controller: function($scope, $transclude,
-                         $attrs, $element) {
-      var childScope;
+// .directive('refresher', function() {
+//   return {
+//     transclude: true,
+//     controller: function($scope, $transclude,
+//                          $attrs, $element) {
+//       var childScope;
 
-      $scope.$watch($attrs.condition, function(value) {
-        $element.empty();
-        if (childScope) {
-          childScope.$destroy();
-          childScope = null;
-        }
+//       $scope.$watch($attrs.condition, function(value) {
+//         $element.empty();
+//         if (childScope) {
+//           childScope.$destroy();
+//           childScope = null;
+//         }
 
-        $transclude(function(clone, newScope) {
-          childScope = newScope;
-          $element.append(clone);
-        });
-      });
-    }
-  };
-})
+//         $transclude(function(clone, newScope) {
+//           childScope = newScope;
+//           $element.append(clone);
+//         });
+//       });
+//     }
+//   };
+// })
 .controller('RatingsEngineActivateScoring', function(
     $scope, $rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary

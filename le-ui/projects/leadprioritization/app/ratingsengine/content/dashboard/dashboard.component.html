@@ -25,14 +25,14 @@
                     <button
                         class="button orange-button"
                         ng-if="vm.isRulesBased"
-                        ui-sref="home.playbook.wizard.rating({rating_id: vm.rating.summary.id})" 
+                        ui-sref="home.playbook.wizard.rating" 
                         ng-disabled="!vm.status_toggle">
                         Create Play
                     </button>
 
                     <button
                         class="button orange-button"
-                        ui-sref="home.ratingsengine.dashboard.activatescoring"
+                        ui-sref="home.ratingsengine.dashboard.activatescoring({modelId: vm.ratingEngine.activeModel.AI.id})"
                         ng-if="!vm.isRulesBased">
                         Activate Scoring
                     </button>
