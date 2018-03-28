@@ -118,6 +118,16 @@ public final class JobStepDisplayInfoMapping {
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //
@@ -177,6 +187,19 @@ public final class JobStepDisplayInfoMapping {
             "Merging, De-duping & matching to Lattice Data Cloud", //
             "Merging, De-duping & matching to Lattice Data Cloud", //
             "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Merging, De-duping & matching to Lattice Data Cloud", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
+            "Analyzing", //
             "Analyzing", //
             "Analyzing", //
             "Analyzing", //
@@ -218,6 +241,13 @@ public final class JobStepDisplayInfoMapping {
             "Analyzing", //
             "Publishing", //
             "Publishing", //
+            "Publishing", //
+            "Publishing", //
+            "Publishing", //
+            "Publishing", //
+            "Scoring", //
+            "Scoring", //
+            "Scoring", //
             "Scoring", //
             "Scoring", //
             "Scoring", //
@@ -256,9 +286,38 @@ public final class JobStepDisplayInfoMapping {
             "scoring_targeted_accounts", //
             "scoring_targeted_accounts", //
     };
+
     private static final String[] CDL_DATA_FEED_IMPORT_STEPS = {
             "load_data", //
             "load_data" //
+    };
+
+    private static final String[] IMPORT_MATCH_AND_SCORE_STEPS = {
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "score_data", //
+            "score_data", //
+            "score_data", //
+            "score_data", //
+            "score_data"
     };
 
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
@@ -276,6 +335,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_NAME.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
+        DISPLAY_NAME.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
@@ -289,6 +349,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_DESCRIPTION.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
+        DISPLAY_DESCRIPTION.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {
