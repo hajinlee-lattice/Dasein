@@ -238,13 +238,10 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         ratingEngineList = ratingEngineEntityMgr.findAllByTypeAndStatus(null, RatingEngineStatus.INACTIVE.name());
         Assert.assertEquals(ratingEngineList.size(), 0);
 
-        // test soft delete and status transition
+        // Soft Delete should fail since there are Plays associated with Rating
+        // Engine
         Play play = generateDefaultPlay(createdRatingEngine);
         playEntityMgr.createOrUpdatePlay(play);
-        re = new RatingEngine();
-        re.setId(ratingEngine.getId());
-        re.setStatus(RatingEngineStatus.INACTIVE);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
         re = ratingEngineEntityMgr.findById(ratingEngine.getId());
         try {
             ratingEngineEntityMgr.deleteRatingEngine(re, false);
@@ -254,8 +251,23 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18175);
         }
 
+        // Soft Delete should fail since Rating is still active
         play.setPlayStatus(PlayStatus.DELETED);
         playEntityMgr.createOrUpdatePlay(play);
+        try {
+            ratingEngineEntityMgr.deleteRatingEngine(re, false);
+            Assert.fail("Should have thrown exeption due to the transition should fail");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof LedpException);
+            Assert.assertEquals(((LedpException) e).getCode(), LedpCode.LEDP_18181);
+        }
+
+        re = new RatingEngine();
+        re.setId(ratingEngine.getId());
+        re.setStatus(RatingEngineStatus.INACTIVE);
+        ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        re = ratingEngineEntityMgr.findById(ratingEngine.getId());
+        // Soft Delete should now succeed
         ratingEngineEntityMgr.deleteRatingEngine(re, false);
         RatingEngine retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
         Assert.assertNotNull(retrievedRe);
@@ -265,8 +277,16 @@ public class RatingEngineEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(ratingEngineList.get(0).getId(), ratingEngine.getId());
         Assert.assertTrue(ratingEngineList.get(0).getDeleted());
 
-        re.setStatus(RatingEngineStatus.INACTIVE);
-        ratingEngineEntityMgr.createOrUpdateRatingEngine(re, mainTestTenant.getId());
+        // Revert soft delete Rating Engine
+        ratingEngineEntityMgr.revertDelete(ratingEngine.getId());
+        retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
+        Assert.assertNotNull(retrievedRe);
+        Assert.assertFalse(retrievedRe.getDeleted());
+        ratingEngineList = ratingEngineEntityMgr.findAllDeleted();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 0);
+
+        // Soft Delete again
         ratingEngineEntityMgr.deleteById(ratingEngine.getId(), false);
         retrievedRe = ratingEngineEntityMgr.findById(ratingEngine.getId());
         Assert.assertNotNull(retrievedRe);

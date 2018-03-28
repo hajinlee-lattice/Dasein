@@ -290,10 +290,27 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingEngine" })
     public void testDelete() {
+        // update Rating Engine to be inactive for deletion
+        DeactivateRatingEngine(rbRatingEngineId);
+        DeactivateRatingEngine(aiRatingEngineId);
+
+        // Soft Delete Rule Based Rating Engine
+        deleteSoftRatingEngine(rbRatingEngineId);
+        List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 1);
+
+        // Revert Delete Rule Based Rating Engine
+        testRevertDeleteRatingEngine(rbRatingEngineId);
+        ratingEngineList = ratingEngineService.getAllRatingEngines();
+        Assert.assertNotNull(ratingEngineList);
+        Assert.assertEquals(ratingEngineList.size(), 2);
+
+        // Soft Delete Rule Based Rating Engine & Ai Rating Engine
         deleteSoftRatingEngine(rbRatingEngineId);
         deleteSoftRatingEngine(aiRatingEngineId);
 
-        List<RatingEngine> ratingEngineList = ratingEngineService.getAllRatingEngines();
+        ratingEngineList = ratingEngineService.getAllRatingEngines();
         Assert.assertNotNull(ratingEngineList);
         Assert.assertEquals(ratingEngineList.size(), 0);
 
@@ -326,6 +343,13 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
         deleteById(ratingEngineId);
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
         Assert.assertNull(ratingEngine);
+    }
+
+    protected void testRevertDeleteRatingEngine(String ratingEngineId) {
+        revertDelete(ratingEngineId);
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, false);
+        Assert.assertNotNull(ratingEngine);
+        Assert.assertFalse(ratingEngine.getDeleted());
     }
 
     protected List<RatingEngineSummary> getAllRatingEngineSummaries() {
@@ -364,5 +388,16 @@ public class RatingEngineServiceImplDeploymentTestNG extends CDLDeploymentTestNG
 
     protected List<RatingEngine> getAllDeletedRatingEngines() {
         return ratingEngineService.getAllDeletedRatingEngines();
+    }
+
+    protected void revertDelete(String ratingEngineId) {
+        ratingEngineService.revertDelete(ratingEngineId);
+    }
+
+    protected void DeactivateRatingEngine(String ratingEngineId) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setId(ratingEngineId);
+        ratingEngine.setStatus(RatingEngineStatus.INACTIVE);
+        createOrUpdate(ratingEngine, mainTestTenant.getId());
     }
 }

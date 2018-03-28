@@ -16,6 +16,10 @@ public interface BaseDao<T> {
 
     void deleteByPid(Long pid, boolean hardDelete);
 
+    void revertDeleteById(String id);
+
+    void revertDeleteByPid(Long pid);
+
     void deleteAll();
 
     boolean containInSession(T entity);

@@ -141,6 +141,14 @@ public class RatingEngineResource {
         return true;
     }
 
+    @PutMapping(value = "/{ratingEngineId}/revertdelete")
+    @ResponseBody
+    @ApiOperation(value = "Delete a Rating Engine given its id")
+    public Boolean revertDeleteRatingEngine(@PathVariable String customerSpace, @PathVariable String ratingEngineId) {
+        ratingEngineService.revertDelete(ratingEngineId);
+        return true;
+    }
+
     @PutMapping(value = "/{ratingEngineId}/counts")
     @ResponseBody
     @ApiOperation(value = "Update rating engine counts")

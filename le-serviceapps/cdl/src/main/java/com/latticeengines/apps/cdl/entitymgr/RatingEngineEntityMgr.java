@@ -24,6 +24,8 @@ public interface RatingEngineEntityMgr {
 
     void deleteById(String id, boolean hardDelete);
 
+    void revertDelete(String id);
+
     void deleteRatingEngine(RatingEngine ratingEngine);
 
     void deleteRatingEngine(RatingEngine ratingEngine, boolean hardDelete);

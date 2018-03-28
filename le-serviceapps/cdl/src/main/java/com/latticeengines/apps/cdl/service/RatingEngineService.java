@@ -36,6 +36,8 @@ public interface RatingEngineService {
 
     void deleteById(String id, boolean hardDelete);
 
+    void revertDelete(String id);
+
     List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId);
 
     RatingModel getRatingModel(String ratingEngineId, String ratingModelId);

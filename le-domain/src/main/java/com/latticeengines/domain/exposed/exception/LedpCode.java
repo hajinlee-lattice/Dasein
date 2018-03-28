@@ -300,6 +300,7 @@ public enum LedpCode {
     LEDP_18179("Error finding the AI Model for {0}."), //
     LEDP_18180(
             "There is no active Rating Model associated with the current Rating Engine {0} and thus it cannot be activated."), //
+    LEDP_18181("The current Rating Engine {0} is not inactive thus it cannot be deleted."), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //

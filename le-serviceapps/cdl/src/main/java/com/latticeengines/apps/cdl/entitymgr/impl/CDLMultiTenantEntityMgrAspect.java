@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
+import java.lang.reflect.Method;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -7,11 +9,15 @@ import javax.persistence.EntityManager;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
+import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.db.exposed.dao.impl.AbstractBaseDaoImpl;
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
@@ -20,6 +26,8 @@ import com.latticeengines.security.exposed.util.MultiTenantEntityMgrAspect;
 
 @Aspect
 public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
+
+    private static final Logger log = LoggerFactory.getLogger(CDLMultiTenantEntityMgrAspect.class);
 
     @Resource(name = "sessionFactory")
     private SessionFactory sessionFactory;
@@ -34,11 +42,6 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.find*(..))")
     public void find(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
-    }
-
-    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.findAll*(..))"
-            + "&& !@annotation(com.latticeengines.apps.core.annotation.IncludeDeleted)")
-    public void findWithoutDeleted(JoinPoint joinPoint) {
         enableSoftDeleteFilter(joinPoint, sessionFactory, entityManager);
     }
 
@@ -80,12 +83,32 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
         Class entityClass = ((AbstractBaseDaoImpl) ((BaseEntityMgr) joinPoint.getTarget()).getDao())
                 .getEntityClassReference();
         if (SoftDeletable.class.isAssignableFrom(entityClass)) {
-            sessionFactory.getCurrentSession().enableFilter("softDeleteFilter");
-            if (entityManager != null) {
-                entityManager.unwrap(Session.class).enableFilter("softDeleteFilter");
+            SoftDeleteConfiguration softDeleteAnnotation = null;
+            try {
+                softDeleteAnnotation = getSoftDeleteAnnotation(joinPoint);
+            } catch (Exception e) {
+                log.warn("Error getting the softDeleteAnnotation");
+            }
+            // annotation does not present means soft delete filter is enabled
+            if (softDeleteAnnotation == null) {
+                sessionFactory.getCurrentSession().enableFilter("softDeleteFilter");
+                if (entityManager != null) {
+                    entityManager.unwrap(Session.class).enableFilter("softDeleteFilter");
+                }
             }
         }
 
+    }
+
+    private SoftDeleteConfiguration getSoftDeleteAnnotation(JoinPoint joinPoint)
+            throws NoSuchMethodException, SecurityException {
+        final String methodName = joinPoint.getSignature().getName();
+        final MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method method = methodSignature.getMethod();
+        SoftDeleteConfiguration annotation = null;
+        method = joinPoint.getTarget().getClass().getDeclaredMethod(methodName, method.getParameterTypes());
+        annotation = method.getAnnotation(SoftDeleteConfiguration.class);
+        return annotation;
     }
 
 }

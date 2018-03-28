@@ -91,6 +91,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         delete("delete rating engine", url);
     }
 
+    public void revertDeleteRatingEngine(String customerSpace, String ratingEngineId) {
+        String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/revertdelete", shortenCustomerSpace(customerSpace),
+                ratingEngineId);
+        put("revert delete rating engine", url);
+    }
+
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         return post("create rating engine", url, ratingEngine, RatingEngine.class);

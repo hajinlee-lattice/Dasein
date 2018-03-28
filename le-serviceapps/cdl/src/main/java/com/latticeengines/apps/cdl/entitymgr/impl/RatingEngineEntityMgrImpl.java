@@ -27,7 +27,7 @@ import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.RatingEngineEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.RatingEngineRepository;
 import com.latticeengines.apps.cdl.util.ActionContext;
-import com.latticeengines.apps.core.annotation.IncludeDeleted;
+import com.latticeengines.apps.core.annotation.SoftDeleteConfiguration;
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.db.exposed.dao.BaseDao;
@@ -111,7 +111,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     }
 
     @Override
-    @IncludeDeleted
+    @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<RatingEngine> findAllDeleted() {
         return ratingEngineRepository.findByDeletedTrue();
@@ -124,12 +124,14 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     }
 
     @Override
+    @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id) {
         return findById(id, false);
     }
 
     @Override
+    @SoftDeleteConfiguration
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public RatingEngine findById(String id, boolean withActiveModel) {
         RatingEngine ratingEngine = ratingEngineDao.findById(id);
@@ -190,6 +192,15 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             log.error(String.format("Dependency check failed for Rating Engine=%s", ratingEngine.getId()));
             throw new LedpException(LedpCode.LEDP_18175, new String[] { ratingEngine.getDisplayName() });
         }
+        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() != RatingEngineStatus.INACTIVE) {
+            throw new LedpException(LedpCode.LEDP_18181, new String[] { ratingEngine.getDisplayName() });
+        }
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void revertDelete(String id) {
+        ratingEngineDao.revertDeleteById(id);
     }
 
     @Override

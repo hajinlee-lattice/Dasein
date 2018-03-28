@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -161,6 +162,15 @@ public class RatingEngineResource {
             @RequestParam(value = "hard-delete", required = false, defaultValue = "false") Boolean hardDelete) {
         Tenant tenant = MultiTenantContext.getTenant();
         ratingEngineProxy.deleteRatingEngine(tenant.getId(), ratingEngineId, hardDelete);
+        return true;
+    }
+
+    @PutMapping(value = "/{ratingEngineId}/revertdelete")
+    @ResponseBody
+    @ApiOperation(value = "Delete a Rating Engine given its id")
+    public Boolean revertDeleteRatingEngine(@PathVariable String ratingEngineId) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        ratingEngineProxy.revertDeleteRatingEngine(tenant.getId(), ratingEngineId);
         return true;
     }
 

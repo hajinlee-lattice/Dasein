@@ -210,6 +210,10 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         }
     }
 
+    private void softDelete(String field, Object id) {
+        updateDeleted(field, id, true);
+    }
+
     private void hardDelete(String field, Object id) {
         log.info(String.format("Delete entry of %s with %s = %s", getEntityClass().getSimpleName(), field, id));
         Session session = getSessionFactory().getCurrentSession();
@@ -219,12 +223,26 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         query.executeUpdate();
     }
 
-    private void softDelete(String field, Object id) {
+    @Override
+    public void revertDeleteById(String id) {
+        revertDelete("id", id);
+    }
+
+    @Override
+    public void revertDeleteByPid(Long pid) {
+        revertDelete("pid", pid);
+    }
+
+    private void revertDelete(String field, Object id) {
+        updateDeleted(field, id, false);
+    }
+
+    private void updateDeleted(String field, Object id, boolean deleted) {
         Session session = getSessionFactory().getCurrentSession();
         if (SoftDeletable.class.isAssignableFrom(getEntityClass())) {
             Query<?> query = session.createQuery(
-                    "update " + getEntityClass().getSimpleName() + " set DELETED = true where " + field + "= :id")
-                    .setParameter("id", id);
+                    "update " + getEntityClass().getSimpleName() + " set DELETED = :deleted where " + field + "= :id")
+                    .setParameter("id", id).setParameter("deleted", deleted);
             query.executeUpdate();
         } else {
             throw new LedpException(LedpCode.LEDP_50000, new String[] { getEntityClass().getSimpleName() });

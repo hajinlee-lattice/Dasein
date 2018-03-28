@@ -222,6 +222,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         evictRatingMetadataCache();
     }
 
+    @Override
+    public void revertDelete(String id) {
+        ratingEngineEntityMgr.revertDelete(id);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public List<RatingModel> getRatingModelsByRatingEngineId(String ratingEngineId) {
@@ -526,7 +531,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             for (RatingEngine ratingEngine : ratingEngines) {
                 ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
 
-                List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                List<RatingModel> ratingModels = ratingModelService
+                        .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                 if (ratingModels != null) {
                     for (RatingModel ratingModel : ratingModels) {
                         ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
@@ -554,9 +560,10 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             for (RatingEngine ratingEngine : ratingEngines) {
                 ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
 
-                List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                List<RatingModel> ratingModels = ratingModelService
+                        .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                 if (ratingModels != null) {
-                    rm : for (RatingModel ratingModel : ratingModels) {
+                    rm: for (RatingModel ratingModel : ratingModels) {
                         ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
                         for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
                             if (attributes.contains(sanitize(modelAttribute.toString()))) {

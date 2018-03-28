@@ -388,10 +388,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testDelete() {
+        // Soft Delete Rule Based Rating Engine
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId());
-        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId());
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
+        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+
+        // Revert Delete Rule Based Rating Engine
+        restTemplate.put(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/revertdelete", null);
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
+        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+
+        // Soft Delete Rule Based Rating Engine & AI Rating Engine
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId());
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId());
+        ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
         List<RatingEngine> ratingEngineList = restTemplate
