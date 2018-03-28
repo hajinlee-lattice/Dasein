@@ -105,6 +105,8 @@ public class SamlLoginResource {
                 throw new LedpException(LedpCode.LEDP_18170);
             }
             
+            /*
+            //TODO: Commenting part of PLS-7954. Need to be enabled after we fix the allowed domains check/
             // Check whether User already exists in the system and other attributes are up to date too.
             if (StringUtils.isBlank(samlLoginResp.getFirstName())) {
                 //TODO: Anoop. Delete this code after Saml response is parsed with correct values
@@ -116,7 +118,7 @@ public class SamlLoginResource {
                 samlLoginResp.setUserRoles(externalRoles);
             }
             userService.upsertSamlIntegrationUser(samlLoginResp, tenantDeploymentId);
-            
+            */
             String userName = samlLoginResp.getUserId();
             Session session = sessionService.attachSamlUserToTenant(userName, tenantDeploymentId);
 
