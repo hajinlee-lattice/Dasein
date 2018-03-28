@@ -12,6 +12,7 @@ angular.module('common.datacloud.query.builder', [
     angular.extend(this, {
         inModel: $state.current.name.split('.')[1] === 'model',
         mode: RatingEngineModel !== null ? 'rules' : 'segment',
+        inRatingEngine: (CurrentRatingEngine !== null),
         cube: Cube,
         history: QueryStore.history,
         restriction: QueryStore.accountRestriction,
@@ -43,7 +44,8 @@ angular.module('common.datacloud.query.builder', [
     });
 
     vm.init = function() {
-        console.log('[AQB] RatingEngineModel:', RatingEngineModel);
+        // console.log('[AQB] RatingEngineModel:', RatingEngineModel);
+        console.log(vm.mode);
 
         QueryStore.mode = vm.mode;
 

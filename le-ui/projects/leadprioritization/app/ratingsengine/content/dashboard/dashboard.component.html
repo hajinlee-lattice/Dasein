@@ -19,26 +19,30 @@
                         class="button"
                         ng-class="{ 'orange-button': !vm.status_toggle, 'gray-button': vm.status_toggle }"
                         ng-if="vm.isRulesBased"
-                        ng-click="vm.toggleActive()">
+                        ng-click="vm.toggleActive()"
+                        ng-disabled="vm.modelSummary === null">
                         {{ vm.toggleScoringButtonText }}
                     </button>
                     <button
                         class="button orange-button"
                         ng-if="vm.isRulesBased"
                         ui-sref="home.playbook.wizard.rating" 
-                        ng-disabled="!vm.status_toggle">
+                        ng-disabled="!vm.status_toggle"
+                        ng-disabled="vm.modelSummary === null">
                         Create Play
                     </button>
 
                     <button
                         class="button orange-button"
                         ui-sref="home.ratingsengine.dashboard.activatescoring({modelId: vm.ratingEngine.activeModel.AI.id})"
-                        ng-if="!vm.isRulesBased">
+                        ng-if="!vm.isRulesBased"
+                        ng-disabled="vm.modelSummary === null">
                         Activate Scoring
                     </button>
                     <button
                         class="button orange-button"
-                        ng-if="!vm.isRulesBased">
+                        ng-if="!vm.isRulesBased"
+                        ng-disabled="vm.modelSummary === null">
                         Create Play
                     </button>
                 </div>

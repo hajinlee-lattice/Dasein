@@ -354,35 +354,40 @@ angular.module('lp.ratingsengine')
         return this.currentRating;
     }
 
-    this.saveRating = function(opts) {
+    this.saveRating = function(saveOpts) {
         var deferred = $q.defer(),
-            opts = opts || {},
+            opts = saveOpts || {},
             ClientSession = BrowserStorageUtility.getClientSession(),
             rating = RatingsEngineStore.getCurrentRating();
 
+        console.log(opts);
+
         opts = {
-            createdBy: opts.createdBy || ClientSession.EmailAddress,
-            type: opts.type || 'RULE_BASED',
+            createdBy: saveOpts.createdBy || ClientSession.EmailAddress,
+            type: saveOpts.type || 'RULE_BASED',
             segment: rating.segment || RatingsEngineStore.getSegment(),
             displayName: rating.displayName,
             status: rating.status,
             id: rating.id,
             note: rating.note,
-            activeModel: {
+        };
+
+        if (saveOpts.type === 'CROSS_SELL') {
+            opts.activeModel = {
                 AI: {
                     advancedModelingConfig: {
                         cross_sell: {
-                            modelingStrategy: opts.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
+                            modelingStrategy: saveOpts.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
                         }
                     }
                 }
-            },
-            advancedRatingConfig: {
+            };
+            opts.advancedRatingConfig = {
                 cross_sell: {
-                    modelingStrategy: opts.advancedRatingConfig.cross_sell.modelingStrategy
+                    modelingStrategy: saveOpts.advancedRatingConfig.cross_sell.modelingStrategy
                 }
-            }
-        };
+            };
+        }
 
         RatingsEngineService.saveRating(opts).then(function(data){
             RatingsEngineStore.setRating(data);

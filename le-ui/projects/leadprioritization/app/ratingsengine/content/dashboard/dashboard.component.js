@@ -99,14 +99,13 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.relatedItems = vm.dashboard.plays;
         vm.hasBuckets = vm.ratingEngine.counts != null;
         vm.statusIsActive = (vm.ratingEngine.status === 'ACTIVE');
+        vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
+
         var model = vm.ratingEngine.activeModel;
         
         if (vm.isRulesBased) {
 
-            console.log(vm.status_toggle);
-
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
-            console.log(vm.toggleScoringButtonText);
 
         } else {
 
@@ -152,6 +151,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 }
             }
 
+            vm.modelSummary = model.AI.modelSummary;
             vm.predictionType = model.AI.predictionType;
             vm.trainingSegment = model.AI.trainingSegment;
 

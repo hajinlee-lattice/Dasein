@@ -28,7 +28,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
             console.log(model);
 
-            if((Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 0 || (model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 1)) && model.trainingSegment === null && model.advancedModelingConfig.cross_sell.trainingProducts === null) {
+            if((Object.keys(model.advancedModelingConfig.cross_sell.filters) === {} || (model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 1)) && model.trainingSegment === null && model.advancedModelingConfig.cross_sell.trainingProducts === null) {
                 vm.hasSettingsInfo = false;
             }
 
