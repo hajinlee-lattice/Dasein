@@ -18,7 +18,7 @@ angular.module('lp.import.wizard.accountids', [])
             mappedToLatticeField: true
         },
         mappedFieldMap: {
-            account: 'Id',
+            account: 'AccountId',
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),

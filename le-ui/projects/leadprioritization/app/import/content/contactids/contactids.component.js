@@ -13,7 +13,7 @@ angular.module('lp.import.wizard.contactids', [])
         unavailableFields: [],
         idFieldMapping: {"userField":"Id","mappedField":"Id","fieldType":"TEXT","mappedToLatticeField":true},
         mappedFieldMap: {
-            contact: 'Id',
+            contact: 'ContactId',
             account: 'AccountId',
         },
         UnmappedFieldsMappingsMap: {},
