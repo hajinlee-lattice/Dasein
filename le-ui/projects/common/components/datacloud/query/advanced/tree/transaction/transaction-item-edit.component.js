@@ -63,17 +63,17 @@ angular
                     vm.unitPurchasedCmp = tmpUnit !== '' ? tmpUnit : 'ANY';
 
                     if (!reset) {
-                        var fromQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['from'].position, 'Qty');
-                        vm.qtyConf['from'].value = (fromQty != null && fromQty >= 0) ? Number(fromQty) : undefined;
+                        var fromQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf.from.position, 'Qty');
+                        vm.qtyConf.from.value = (fromQty != null && fromQty >= 0) ? Number(fromQty) : undefined;
 
-                        var toQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf['to'].position, 'Qty');
-                        vm.qtyConf['to'].value = (toQty != null && toQty >= 0) ? Number(toQty) : undefined;
+                        var toQty = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.qtyConf.to.position, 'Qty');
+                        vm.qtyConf.to.value = (toQty != null && toQty >= 0) ? Number(toQty) : undefined;
 
                         vm.showFromUnit = vm.showUnitFrom();
                         vm.showToUnit = vm.showUnitTo();
                     } else {
-                        vm.qtyConf['from'].value = undefined;
-                        vm.qtyConf['to'].value = undefined;
+                        vm.qtyConf.from.value = undefined;
+                        vm.qtyConf.to.value = undefined;
                         vm.showFromUnit = false;
                         vm.showToUnit = false;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Qty');
@@ -93,18 +93,18 @@ angular
                     vm.showToAmt = false;
 
                     if (!reset) {
-                        var fromAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['from'].position, 'Amt');
-                        vm.amtConf['from'].value = fromAmt >= 0 ? Number(fromAmt) : undefined;
+                        var fromAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf.from.position, 'Amt');
+                        vm.amtConf.from.value = fromAmt >= 0 ? Number(fromAmt) : undefined;
 
-                        var toAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf['to'].position, 'Amt');
-                        vm.amtConf['to'].value = toAmt >= 0 ? Number(toAmt) : undefined;
+                        var toAmt = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.amtConf.to.position, 'Amt');
+                        vm.amtConf.to.value = toAmt >= 0 ? Number(toAmt) : undefined;
 
                         vm.showFromAmt = vm.showAmtFrom();
                         vm.showToAmt = vm.showAmtTo();
 
                     } else {
-                        vm.amtConf['from'].value = undefined;
-                        vm.amtConf['to'].value = undefined;
+                        vm.amtConf.from.value = undefined;
+                        vm.amtConf.to.value = undefined;
                         QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Amt');
 
                         $timeout(function () {
@@ -119,17 +119,40 @@ angular
                     vm.timeCmp = tmpTimeCmp !== '' ? tmpTimeCmp : 'Month';
                 }
 
+                function setInitialValueNumericalPeriod(){
+                    if(vm.showPeriodFrom() && vm.showPeriodTo()){
+                        vm.periodNumericalConf.from.value = 1;
+                        vm.periodNumericalConf.to.value = 2;
+                        QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.value, vm.periodNumericalConf.from.position, 'Time');
+                        QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.value, vm.periodNumericalConf.to.position, 'Time');
+                    }else if(vm.showPeriodFrom() && !vm.showPeriodTo()){
+                        vm.periodNumericalConf.from.value = 1;
+                        vm.periodNumericalConf.to.value = undefined;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
+                        QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.value, vm.periodNumericalConf.from.position, 'Time');
+                    }else if(!vm.showPeriodFrom() && vm.showPeriodTo()){
+                        vm.periodNumericalConf.from.value = undefined;
+                        vm.periodNumericalConf.to.value = 1;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
+                        QueryTreeService.changeValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.value, vm.periodNumericalConf.to.position, 'Time');
+                    }else{
+                        vm.periodNumericalConf.from.value = undefined;
+                        vm.periodNumericalConf.to.value = undefined;
+                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
+                    }
+                }
+
                 function initTimePeriod(reset) {
                     vm.showFromPeriod = false;
                     vm.showToPeriod = false;
 
 
                     if (!reset) {
-                        var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf['from'].position, 'Time');
-                        vm.periodNumericalConf['from'].value = fromPeriod != 0 ? Number(fromPeriod) : undefined;
+                        var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.position, 'Time');
+                        vm.periodNumericalConf.from.value = fromPeriod != 0 ? Number(fromPeriod) : undefined;
 
-                        var toPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf['to'].position, 'Time');
-                        vm.periodNumericalConf['to'].value = toPeriod != 0 ? Number(toPeriod) : undefined;
+                        var toPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.to.position, 'Time');
+                        vm.periodNumericalConf.to.value = toPeriod != 0 ? Number(toPeriod) : undefined;
 
                         vm.showFromPeriod = vm.showPeriodFrom();
                         vm.showToPeriod = vm.showPeriodTo();
@@ -139,9 +162,7 @@ angular
                         vm.showFromTime = false;
                         vm.showToTime = false;
                         vm.showTimeFrame = false;
-                        vm.periodNumericalConf['from'].value = undefined;
-                        vm.periodNumericalConf['to'].value = undefined;
-                        QueryTreeService.resetBktValues($scope.bucketrestriction, $scope.type, 'Time');
+                        setInitialValueNumericalPeriod();
                         $timeout(function () {
                             vm.showFromPeriod = vm.showPeriodFrom();
                             vm.showToPeriod = vm.showPeriodTo();
