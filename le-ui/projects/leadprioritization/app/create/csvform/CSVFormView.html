@@ -21,6 +21,7 @@
             file-load="vm.fileLoad(headers)"
             file-done="vm.fileDone(result)"
             file-cancel="vm.fileCancel()"
+            tooltip-side="bottom"
             class="form-group file-upload" 
             ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
         </div>

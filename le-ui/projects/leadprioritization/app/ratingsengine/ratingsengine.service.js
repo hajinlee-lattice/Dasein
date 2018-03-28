@@ -57,6 +57,8 @@ angular.module('lp.ratingsengine')
         this.customEventModelingType = "";
         this.FieldDocument = {};
         this.fileName = "";
+        this.applicationId = "";
+        this.displayFileName = "";
 
         this.wizardProgressItems = {
             "rulesprospects": [
@@ -354,7 +356,7 @@ angular.module('lp.ratingsengine')
         return this.currentRating;
     }
 
-    this.saveRating = function(saveOpts) {
+    this.saveRating = function(saveOpts, setNullSegment) {
         var deferred = $q.defer(),
             opts = saveOpts || {},
             ClientSession = BrowserStorageUtility.getClientSession(),
@@ -365,7 +367,7 @@ angular.module('lp.ratingsengine')
         opts = {
             createdBy: saveOpts.createdBy || ClientSession.EmailAddress,
             type: saveOpts.type || 'RULE_BASED',
-            segment: rating.segment || RatingsEngineStore.getSegment(),
+            segment: setNullSegment ? null : rating.segment || RatingsEngineStore.getSegment(),
             displayName: rating.displayName,
             status: rating.status,
             id: rating.id,
@@ -690,7 +692,23 @@ angular.module('lp.ratingsengine')
     this.getCSVFileName = function() {
         return RatingsEngineStore.fileName;
     }
+
+    this.setDisplayFileName = function(fileName) {
+        RatingsEngineStore.displayFileName = fileName;
+    }
+
+    this.getDisplayFileName = function() {
+        return RatingsEngineStore.displayFileName;
+    }
     
+    this.setApplicationId = function(appId) {
+        RatingsEngineStore.applicationId = appId;
+    }
+
+    this.getApplicationId = function() {
+        return RatingsEngineStore.applicationId;
+    }
+
     this.setConfigFilters = function(configFilters) {
         var currentConfig = this.configFilters;
         if(currentConfig != null){
@@ -724,7 +742,7 @@ angular.module('lp.ratingsengine')
           type: "CUSTOM_EVENT"
         };
 
-        RatingsEngineStore.saveRating(opts).then(function(rating) {
+        RatingsEngineStore.saveRating(opts, RatingsEngineStore.getCustomEventModelingType() == 'LPI').then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
         });
     }
@@ -896,6 +914,7 @@ angular.module('lp.ratingsengine')
 
         // console.log('Launching the model', obj);
         RatingsEngineService.createAIModel(currentRating.id, obj.id).then(function(applicationid) {
+            RatingsEngineStore.setApplicationId(applicationid);
             var id = applicationid.Result;
             // console.log('Model Launched', id, nextState);
             $state.go(nextState, { ai_model_job_id: id });

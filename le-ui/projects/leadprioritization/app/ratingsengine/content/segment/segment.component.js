@@ -50,8 +50,12 @@ angular.module('lp.ratingsengine.wizard.segment', [])
         RatingsEngineStore.setValidation('segment', false);
         if($stateParams.rating_id) {
             RatingsEngineStore.getRating($stateParams.rating_id).then(function(rating){
-                vm.stored.segment_selection = rating.segment.name;
-                vm.setSegment(rating.segment);
+                if (rating.segment) {
+                    vm.stored.segment_selection = rating.segment.name;
+                    vm.setSegment(rating.segment);
+                } else if (rating.type == 'CUSTOM_EVENT') { // LPI-version of custom-event modeling
+                    vm.scoreTrainingFile = true;
+                }
                 vm.block_user = false;
                 RatingsEngineStore.setValidation('segment', true);
 

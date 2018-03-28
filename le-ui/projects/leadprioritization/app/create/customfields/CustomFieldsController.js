@@ -60,7 +60,7 @@ angular
         if (vm.fuzzyMatchEnabled) {
             angular.extend(vm.requiredFieldsMissing, vm.requiredFieldsFuzzyMatching);
         }
-        if (RatingsEngineStore.getCustomEventModelingType()) {
+        if (RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
             vm.standardFieldsList[1] = 'AccountId';
             delete vm.requiredFieldsMissing['Id'];
             vm.requiredFieldsMissing['AccountId'] = true;

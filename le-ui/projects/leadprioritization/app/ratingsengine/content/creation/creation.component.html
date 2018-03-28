@@ -11,21 +11,32 @@
                 <dl>
                     <dt>Model Type:</dt>
                     <dd>{{ vm.ratingEngineType }}</dd>
-                    <dt>Segment:</dt>
-                    <dd>{{ vm.ratingEngine.segment.display_name }}</dd>
+
+                    <dt ng-if="vm.showSetting('segment')">Segment:</dt>
+                    <dd ng-if="vm.showSetting('segment')">{{ vm.ratingEngine.segment.display_name }}</dd>
+
+                    <!-- Cross-sell Modeling Settings -->
                     
-                    <dt ng-if="vm.targetProducts.length > 0">Products:</dt>
-                    <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
-                    <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
+                    <dt ng-if="vm.showSetting('products')">Products:</dt>
+                    <dd ng-if="vm.showSetting('products')">{{ vm.targetProducts.length == 1 ? vm.targetProductName : vm.targetProducts.length + ' selected'}} </dd>
 
                     <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
                     <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
 
-                    <dt>Prioritize by:</dt>
-                    <dd>{{ vm.prioritizeBy }}</dd>
+                    <dt ng-if="vm.showSetting('prioritizeBy')">Prioritize by:</dt>
+                    <dd ng-if="vm.showSetting('prioritizeBy')">{{ vm.prioritizeBy }}</dd>
+
+                    <!-- Custom-event Modeling Settings -->
+
+                    <dt ng-if="vm.showSetting('availableAttributes')">Available Attributes: </dt>
+                    <dd ng-if="vm.showSetting('availableAttributes')"> {{vm.availableAttributes}}</dd>
+
+                    <dt ng-if="vm.showSetting('scoreExternalFile')">Score External File:</dt>
+                    <dd ng-if="vm.showSetting('scoreExternalFile')"> {{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.modelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
+
                 </dl>
                 <dl ng-if="vm.hasSettingsInfo">
-                    <dt>Model Settings:</dt>
+                    <dt ng-if="vm.showSetting('modelSettingsTitle')">Model Settings:</dt>
                     <dd>
                         <ul ng-if="vm.type == 'cross_sell'">
                             <li 
@@ -51,9 +62,15 @@
                                 <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
                             </li>
                         </ul>
-                        <ul ng-if="vm.type == 'custom_event'">
+                        <ul ng-if="vm.type == 'custom_event' ">
+                            <li> 
+                                Training File: {{ vm.getTrainingFileName() }}
+                            </li>
                             <li>
-                                Model with {{vm.attributesUsed}} attributes
+                                One record per account: {{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}
+                            </li>
+                            <li>
+                                Include personal email domains: {{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}
                             </li>
                         </ul>
                     </dd>

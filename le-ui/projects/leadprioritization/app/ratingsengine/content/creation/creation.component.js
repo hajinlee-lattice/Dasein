@@ -11,7 +11,25 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         products: Products,
         hasSettingsInfo: true,
         status: 'Preparing Modeling Job',
-        progress: '1%'
+        progress: '1%',
+        modelSettingsSummary: {
+            'cross_sell': {
+                'segment': true,
+                'products': true,
+                'availableAttributes': false,
+                'scoreExternalFile': false,
+                'prioritizeBy': true,
+                'modelSettingsTitle': true
+            },
+            'custom_event': {
+                'segment': RatingsEngineStore.getCustomEventModelingType() == 'CDL',
+                'products': false,
+                'availableAttributes': true,
+                'scoreExternalFile': true,
+                'prioritizeBy': false,
+                'modelSettingsTitle': false
+            }
+        }
     });
 
     vm.init = function() {
@@ -36,6 +54,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             vm.modelingStrategy = model.advancedModelingConfig.cross_sell.modelingStrategy;
             vm.configFilters = model.advancedModelingConfig.cross_sell.filters;
             vm.trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts;
+
+            if (vm.targetProducts.length === 0) {
+                vm.modelSettingsSummary.cross_sell.products = false;
+            }
             
             if (vm.modelingStrategy === 'CROSS_SELL_FIRST_PURCHASE') {
                 vm.ratingEngineType = 'First Purchase Cross-Sell'
@@ -73,20 +95,21 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             }
 
         } else if (vm.type == 'custom_event') {
-
+            vm.hasSettingsInfo = true;
             vm.ratingEngineType = 'Custom Event'
             vm.prioritizeBy = 'Likely to Buy';
 
             var dataStore = model.advancedModelingConfig.custom_event.dataStores;
-            vm.attributesUsed = dataStore.length == 1 ? vm.formatTrainingAttributes(dataStore[0]) : vm.formatTrainingAttributes(dataStore[0]) + ' and ' + vm.formatTrainingAttributes(dataStore[1]);
+            vm.availableAttributes = dataStore.length == 1 ? vm.formatTrainingAttributes(dataStore[0]) : vm.formatTrainingAttributes(dataStore[0]) + ' + ' + vm.formatTrainingAttributes(dataStore[1]);
 
         }
 
     };
 
     vm.checkJobStatus = $interval(function() { 
-        JobsStore.getJobFromApplicationId(vm.ratingEngine.activeModel.AI.modelingJobId).then(function(result) {
-            
+        var appId = vm.ratingEngine.activeModel.AI.modelingJobId ? vm.ratingEngine.activeModel.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
+        JobsStore.getJobFromApplicationId(appId).then(function(result) {
+            console.log(result);
             if(result.id) {
                 vm.status = result.jobStatus;
 
@@ -126,15 +149,24 @@ angular.module('lp.ratingsengine.wizard.creation', [])
         RatingsEngineStore.setValidation(type, validated);
     };
 
+
+    vm.getTrainingFileName = function() {
+        return RatingsEngineStore.getDisplayFileName();
+    }
+
     vm.formatTrainingAttributes = function(type) {
         switch (type) {
             case 'DataCloud':
-                return 'DataCloud';
+                return 'Lattice Data Cloud';
             case 'CDL':
                 return 'Lattice Database';
             case 'CustomFileAttributes':
-                return 'custom';
+                return 'Training File';
         }
+    }
+
+    vm.showSetting = function(setting) {
+        return vm.modelSettingsSummary[vm.type][setting];
     }
 
     vm.init();

@@ -15,7 +15,8 @@ angular
             fileSelect:'&',
             fileLoad:'&',
             fileDone:'&',
-            fileCancel:'&'
+            fileCancel:'&',
+            tooltipSide:'@'
         },
         templateUrl: 'app/create/fileuploader/FileUploaderTemplate.html',
         controllerAs: 'vm_uploader_container',

@@ -5,7 +5,7 @@
       tooltips 
       tooltip-template="{{ vm_uploader_container.infoTemplate }}"
       tooltip-size="large"
-      tooltip-side="top"
+      tooltip-side="{{vm_uploader_container.tooltipSide || 'top'}}"
       tooltip-close-button="true" 
       class="more-info">&#105;</span>
 </label>

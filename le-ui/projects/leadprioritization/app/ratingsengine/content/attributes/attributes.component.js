@@ -6,19 +6,23 @@ angular.module('lp.ratingsengine.wizard.attributes', [])
         disableTrainingAttributes: false,
         disableCDLAttributes: false,
         scoringAttributes: {
-        	'DataCloud': false,
-        	'CDL': false,
-        	'CustomFileAttributes': false
+        	'DataCloud': true,
+        	'CDL': true,
+        	'CustomFileAttributes': true
         },
     });
 
     vm.init = function() {
         if (RatingsEngineStore.getCustomEventModelingType() == 'LPI') {
             vm.disableCDLAttributes = true;
+            vm.scoringAttributes['CDL'] = false;
         } else if ( RatingsEngineStore.getCustomEventModelingType() == 'CDL') {
             vm.disableTrainingAttributes = true;
+            vm.scoringAttributes['CustomFileAttributes'] = false;
         }
-        RatingsEngineStore.setValidation("attributes", false);
+        var dataStores = filterDataStores(vm.scoringAttributes);
+        RatingsEngineStore.setDataStores(dataStores);
+        RatingsEngineStore.setValidation("attributes", true);
     }
 
     vm.setScoringAttributes = function(option) {

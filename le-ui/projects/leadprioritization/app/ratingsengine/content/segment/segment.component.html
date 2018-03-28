@@ -12,6 +12,14 @@
 
             <div class="content-body" ng-if="vm.hasSegments">
 
+                <div ng-if="vm.stateParams.wizard_steps == 'customevent'" class="checkbox-option"> 
+                  <label>
+                    <input type="checkbox" ng-model="vm.scoreTrainingFile"
+                           ng-click="vm.selectTrainingFile()">
+                    Only score the training file
+                   </label><br/>
+                </div>
+
                 <div class="filters">
                     <div class="ng-search">
                         <input type="text" class="form-control" placeholder="Search {{vm.segments.length}} Segments" ng-model="vm.search" ng-disabled="vm.scoreTrainingFile"/>
@@ -20,14 +28,6 @@
                             <span class="fa fa-times" ng-show="vm.search.length"></span>
                         </a>
                     </div>
-                </div>
-
-                <div ng-if="vm.stateParams.wizard_steps == 'customevent'" style="padding-top:15px"> 
-                  <label>
-                    <input type="checkbox" ng-model="vm.scoreTrainingFile"
-                           ng-click="vm.selectTrainingFile()">
-                    Only score the training file
-                   </label><br/>
                 </div>
 
                 <ul class="list">
