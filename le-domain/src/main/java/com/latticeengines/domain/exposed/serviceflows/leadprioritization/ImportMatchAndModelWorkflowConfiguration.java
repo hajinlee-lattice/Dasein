@@ -161,6 +161,7 @@ public class ImportMatchAndModelWorkflowConfiguration extends BaseLPWorkflowConf
         public Builder userId(String userId) {
             pivotScoreAndEvent.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
+            configuration.setUserId(userId);
             return this;
         }
 

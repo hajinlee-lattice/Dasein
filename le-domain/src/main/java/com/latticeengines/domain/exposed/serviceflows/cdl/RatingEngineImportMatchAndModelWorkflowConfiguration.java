@@ -133,6 +133,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder userId(String userId) {
             cdlModelWorkflowBuilder.userId(userId);
             pivotScoreAndEvent.setUserId(userId);
+            configuration.setUserId(userId);
             return this;
         }
 

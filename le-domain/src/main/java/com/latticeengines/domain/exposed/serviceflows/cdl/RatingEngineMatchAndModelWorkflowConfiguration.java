@@ -131,6 +131,7 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
         public Builder userId(String userId) {
             pivotScoreAndEvent.setUserId(userId);
             cdlModelWorkflowBuilder.userId(userId);
+            configuration.setUserId(userId);
             return this;
         }
 

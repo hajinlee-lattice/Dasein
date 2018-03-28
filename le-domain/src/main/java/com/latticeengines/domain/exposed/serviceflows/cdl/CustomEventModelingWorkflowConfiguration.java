@@ -169,6 +169,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public Builder userId(String userId) {
             pivotScoreAndEvent.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
+            configuration.setUserId(userId);
             return this;
         }
 
@@ -421,6 +422,9 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
             rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
+
+            // TODO: Remove this later
+            // rtsBulkScoreWorkflowBuilder.enableDebug(Boolean.TRUE);
 
             configuration.add(importData);
             configuration.add(registerReport);
