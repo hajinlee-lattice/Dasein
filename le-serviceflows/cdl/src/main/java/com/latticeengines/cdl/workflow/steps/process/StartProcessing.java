@@ -168,7 +168,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         stepConfigMap.entrySet().stream().filter(e -> (e.getValue() instanceof BaseProcessEntityStepConfiguration
                 && (rebuildEntities.contains(((BaseProcessEntityStepConfiguration) e.getValue()).getMainEntity()))))
                 .forEach(e -> {
-                    log.info("enabled rebuidling step of:" + e.getKey());
+                    log.info("enabled rebuilding step of:" + e.getKey());
                     ((BaseProcessEntityStepConfiguration) e.getValue()).setRebuild(Boolean.TRUE);
                     putObjectInContext(e.getKey(), e.getValue());
                 });
