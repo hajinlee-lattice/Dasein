@@ -33,7 +33,7 @@
                     vm="vm">
                 </li>
                 <li explorer-category-tile
-                    ng-repeat="category in (vm.categoriesMenu = vm.categories)
+                    ng-repeat="category in (vm.categoriesMenu = vm.removeNullsFromArray(vm.categories))
                         | startFrom: vm.categoryStartFrom()
                         | limitTo: vm.categoryLimitTo()" class="category"
                     ng-if="(count = vm.categoryCount(category)) && (isEnabled = vm.lookupMode ? vm.highlightMetadata.categories[category].enabled : true) || (vm.query ? vm.checkEmptyCategory(category, count, isEnabled) : false)"

@@ -42,7 +42,6 @@ angular
             //     return path + icon;
             // }
 
-
             vm.categoryStartFrom = function() {
                 var size = vm.category ? vm.categorySize : vm.pagesize,
                     current = vm.metadata.currentCategory - 1,

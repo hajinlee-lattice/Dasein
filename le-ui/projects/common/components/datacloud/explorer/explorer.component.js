@@ -846,6 +846,16 @@ angular.module('common.datacloud.explorer', [
         context[j] = temp;
     }
 
+    vm.removeNullsFromArray = function(array) {
+        var ret = [];
+        array.forEach(function(item, index) {
+            if(item) {
+                ret.push(item);
+            }
+        });
+        return ret;
+    }
+
     vm.processCategories = function() {
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment') {
