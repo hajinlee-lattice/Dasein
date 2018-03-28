@@ -37,7 +37,7 @@ public class JobResource {
     public Job find(@PathVariable String jobId, //
             @RequestParam(value = "type", required = false) String type) {
         log.info(String.format("Type of the job is %s", type));
-        return workflowJobService.find(jobId);
+        return workflowJobService.find(jobId, true);
     }
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")

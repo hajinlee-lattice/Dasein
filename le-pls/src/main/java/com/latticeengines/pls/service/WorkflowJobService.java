@@ -23,7 +23,7 @@ public interface WorkflowJobService {
 
     Job findByApplicationId(String applicationId);
 
-    Job find(String jobId);
+    Job find(String jobId, boolean useCustomerSpace);
 
     List<Job> findByJobIds(List<String> jobIds);
 

@@ -94,10 +94,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath = null;
 
-        if (jobId == null || workflowJobService.find(jobId) == null) {
+        if (jobId == null || workflowJobService.find(jobId, false) == null) {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         } else {
-            Job job = workflowJobService.find(jobId);
+            Job job = workflowJobService.find(jobId, false);
             pivotAvroDirPath = job.getOutputs().get(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH);
         }
 

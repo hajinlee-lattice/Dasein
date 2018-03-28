@@ -117,7 +117,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     }
 
     @Override
-    public Job find(String jobId) {
+    public Job find(String jobId, boolean useCustomerSpace) {
         if (jobId == null) {
             throw new NullPointerException("jobId cannot be null.");
         }
@@ -126,10 +126,14 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
-            // TODO going to add back the customer space after making changes to
-            // the Model copy about the workflow artifact
-            log.info("Getting job with id " + jobId);
-            job = workflowProxy.getWorkflowExecution(jobId);
+            if (useCustomerSpace) {
+                String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+                log.info("Getting job with id=" +  jobId + ", customerSpace=" + customerSpace);
+                job = workflowProxy.getWorkflowExecution(jobId, customerSpace);
+            } else {
+                log.info("Getting job with id=" + jobId);
+                job = workflowProxy.getWorkflowExecution(jobId);
+            }
             updateJobWithModelSummary(job);
             updateStepDisplayNameAndNumSteps(job);
             updateJobDisplayNameAndDescription(job);

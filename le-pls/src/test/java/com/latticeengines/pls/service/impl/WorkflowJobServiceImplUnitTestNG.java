@@ -83,7 +83,7 @@ public class WorkflowJobServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testFind() {
-        Job job = workflowJobService.find("1001");
+        Job job = workflowJobService.find("1001", true);
         assertEquals(job.getId(), jobIds[0]);
         assertNotNull(job.getInputs());
         assertEquals(job.getJobStatus(), JobStatus.RUNNING);
