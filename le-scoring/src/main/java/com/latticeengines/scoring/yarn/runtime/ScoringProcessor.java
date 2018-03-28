@@ -134,7 +134,9 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @Override
     public String process(RTSBulkScoringConfiguration rtsBulkScoringConfig) throws Exception {
         this.rtsBulkScoringConfig = rtsBulkScoringConfig;
-        this.idColumnName = rtsBulkScoringConfig.getIdColumnName();
+        if (StringUtils.isNotEmpty(rtsBulkScoringConfig.getIdColumnName())) {
+            this.idColumnName = rtsBulkScoringConfig.getIdColumnName();
+        }
         log.info("Inside the rts bulk scoring processor.");
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(
                 rtsBulkScoringConfig.getInternalResourceHostPort());
