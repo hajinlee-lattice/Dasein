@@ -178,8 +178,7 @@
         <tbody ng-if="!vm.loading">
             <tr 
                 ng-repeat=" account in vm.accounts | 
-                            orderBy:sortType:sortReverse | 
-                            filter:vm.search">
+                            orderBy:sortType:sortReverse ">
                 <td>{{account.LDC_Name}}</td>
                 <td>
                     <span ng-if="account.Website">{{account.Website}}</span>

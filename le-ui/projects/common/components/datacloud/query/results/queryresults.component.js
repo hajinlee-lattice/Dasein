@@ -153,7 +153,7 @@ angular.module('common.datacloud.query.results', [
 
             // Targets page for create Play flow
             var dataQuery = { 
-                    free_form_text_search: '',
+                    freeFormTextSearch: vm.search || '',
                     restrictNotNullSalesforceId: vm.excludeNonSalesForce,
                     entityType: 'Account',
                     bucketFieldName: 'ScoreBucket',

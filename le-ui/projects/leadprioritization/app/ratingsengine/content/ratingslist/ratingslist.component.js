@@ -26,7 +26,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 items: [
                     { label: 'Last Modified', icon: 'numeric', property: 'updated' },
                     { label: 'Creation Date', icon: 'numeric', property: 'created' },
-                    { label: 'Rating Name', icon: 'alpha', property: 'displayName' }
+                    { label: 'Model Name', icon: 'alpha', property: 'displayName' }
                 ]
             },
             filter: {
