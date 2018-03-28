@@ -14,6 +14,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +57,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
@@ -447,16 +449,28 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     private RatingEngine validateRatingEngine(String ratingEngineId) {
-
         RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false);
+        validateRatingEngine(ratingEngineId, ratingEngine);
+
+        return ratingEngine;
+    }
+
+    private RatingEngine validateRatingEngine_PopulateActiveModel(String ratingEngineId) {
+        RatingEngine ratingEngine = getRatingEngineById(ratingEngineId, false, true);
+        validateRatingEngine(ratingEngineId, ratingEngine);
+
+        return ratingEngine;
+    }
+
+    private void validateRatingEngine(String ratingEngineId, RatingEngine ratingEngine) {
         if (ratingEngine == null) {
             throw new NullPointerException(String.format("Rating Engine with id %s is null", ratingEngineId));
         }
+
         RatingEngineType type = ratingEngine.getType();
         if (type == null) {
             throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngineId });
         }
-        return ratingEngine;
     }
 
     private void evictRatingMetadataCache() {
@@ -466,4 +480,102 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AttributeLookup> getDependentAttrsInAllModels(String customerSpace, String ratingEngineId) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
+        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
+                .getRatingModelService(ratingEngine.getType());
+
+        List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId);
+        if (ratingModels != null) {
+            for (RatingModel ratingModel : ratingModels) {
+                ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                attributes.addAll(ratingModel.getRatingModelAttributes());
+            }
+        }
+
+        return new ArrayList<>(attributes);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<AttributeLookup> getDependentAttrsInActiveModel(String customerSpace, String ratingEngineId) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        RatingEngine ratingEngine = validateRatingEngine_PopulateActiveModel(ratingEngineId);
+        RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
+                .getRatingModelService(ratingEngine.getType());
+
+        RatingModel activeRatingModel = ratingEngine.getActiveModel();
+        if (activeRatingModel != null) {
+            ratingModelService.findRatingModelAttributeLookups(customerSpace, activeRatingModel);
+            attributes.addAll(activeRatingModel.getRatingModelAttributes());
+        }
+
+        return new ArrayList<>(attributes);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RatingModel> getDependingRatingModels(String customerSpace, List<String> attributes) {
+        Set<RatingModel> ratingModelSet = new HashSet<>();
+        RatingModelService<RatingModel> ratingModelService;
+        List<RatingEngine> ratingEngines = getAllRatingEngines();
+        if (ratingEngines != null) {
+            for (RatingEngine ratingEngine : ratingEngines) {
+                ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
+
+                List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                if (ratingModels != null) {
+                    for (RatingModel ratingModel : ratingModels) {
+                        ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                        for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
+                            if (attributes.contains(sanitize(modelAttribute.toString()))) {
+                                ratingModelSet.add(ratingModel);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(ratingModelSet);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<RatingEngine> getDependingRatingEngines(String customerSpace, List<String> attributes) {
+        Set<RatingEngine> ratingEngineSet = new HashSet<>();
+        RatingModelService<RatingModel> ratingModelService;
+        List<RatingEngine> ratingEngines = getAllRatingEngines();
+        if (ratingEngines != null) {
+            for (RatingEngine ratingEngine : ratingEngines) {
+                ratingModelService = RatingModelServiceBase.getRatingModelService(ratingEngine.getType());
+
+                List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngine.getId());
+                if (ratingModels != null) {
+                    rm : for (RatingModel ratingModel : ratingModels) {
+                        ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                        for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
+                            if (attributes.contains(sanitize(modelAttribute.toString()))) {
+                                ratingEngineSet.add(ratingEngine);
+                                break rm;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(ratingEngineSet);
+    }
+
+    private String sanitize(String attribute) {
+        if (StringUtils.isNotBlank(attribute)) {
+            attribute = attribute.trim();
+        }
+        return attribute;
+    }
 }

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,6 +18,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -33,6 +35,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 
 @Entity(name = "RATING_MODEL")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -55,6 +58,8 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     private Date updated;
 
     protected RatingEngine ratingEngine;
+
+    private Set<AttributeLookup> ratingModelAttributes;
 
     @Override
     public void setPid(Long pid) {
@@ -131,4 +136,10 @@ public abstract class RatingModel implements HasPid, HasId<String>, HasAuditingF
     public RatingEngine getRatingEngine() {
         return this.ratingEngine;
     }
+
+    @JsonProperty("ratingmodel_attributes")
+    @Transient
+    public Set<AttributeLookup> getRatingModelAttributes() { return this.ratingModelAttributes; }
+
+    public void setRatingModelAttributes(Set<AttributeLookup> attributes) { this.ratingModelAttributes = attributes; }
 }

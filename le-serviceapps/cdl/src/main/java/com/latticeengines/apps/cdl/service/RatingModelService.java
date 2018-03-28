@@ -11,4 +11,6 @@ public interface RatingModelService<RatingModel> {
     RatingModel createOrUpdate(RatingModel ratingModel, String ratingEngineId);
 
     void deleteById(String Id);
+
+    void findRatingModelAttributeLookups(String customerSpace, RatingModel ratingModel);
 }

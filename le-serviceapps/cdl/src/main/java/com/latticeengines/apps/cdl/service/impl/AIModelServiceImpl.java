@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -125,4 +127,11 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public void findRatingModelAttributeLookups(String customerSpace, AIModel ratingModel) {
+        List<MetadataSegment> segments = new ArrayList<>();
+        segments.add(ratingModel.getTrainingSegment());
+        ratingModel.setRatingModelAttributes(new HashSet(segmentProxy.findDependingAttributes(customerSpace, segments)));
+    }
 }

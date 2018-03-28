@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.io.IOException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.RuleBasedModelService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
@@ -27,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQueryConstants;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -48,6 +51,9 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
     @Inject
     private CDLTestDataService cdlTestDataService;
+
+    @Inject
+    private RuleBasedModelService ruleBasedModelService;
 
     private MetadataSegment reTestSegment;
 
@@ -148,6 +154,44 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindAndUpdateRuleBasedModel" })
+    private void testGetDependentAttrsInAllModels() {
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(
+                mainCustomerSpace, rbRatingEngineId);
+        Assert.assertNotNull(attributes);
+        Assert.assertEquals(attributes.size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
+    private void testGetDependentAttrsInActiveModel() {
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(
+                mainCustomerSpace, rbRatingEngineId);
+        Assert.assertNotNull(attributes);
+        Assert.assertEquals(attributes.size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInActiveModel" })
+    private void testGetDependingRatingModels() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Contact.ContactName");
+        attributes.add("Account.Other");
+
+        List<RatingModel> ratingModels = ratingEngineService.getDependingRatingModels(mainCustomerSpace, attributes);
+        Assert.assertNotNull(ratingModels);
+        Assert.assertEquals(ratingModels.size(), 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingModels" })
+    private void testGetDependingRatingEngines() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Contact.ContactName");
+        attributes.add("Account.Other");
+
+        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(mainCustomerSpace, attributes);
+        Assert.assertNotNull(ratingEngines);
+        Assert.assertEquals(ratingEngines.size(), 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
     public void testDelete() {
         deleteRatingEngine(rbRatingEngineId);
 

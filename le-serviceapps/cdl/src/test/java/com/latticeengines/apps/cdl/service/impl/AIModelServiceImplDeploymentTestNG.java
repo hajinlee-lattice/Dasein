@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.LogicalOperator;
@@ -227,6 +228,44 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingModelWithModelSummary" })
+    private void testGetDependentAttrsInAllModels() {
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(
+                mainCustomerSpace, aiRatingEngineId);
+        Assert.assertNotNull(attributes);
+        Assert.assertEquals(attributes.size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
+    private void testGetDependentAttrsInActiveModel() {
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(
+                mainCustomerSpace, aiRatingEngineId);
+        Assert.assertNotNull(attributes);
+        Assert.assertEquals(attributes.size(), 2);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInActiveModel" })
+    private void testGetDependingRatingModels() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Account.LDC_Name");
+        attributes.add("Account.Other");
+
+        List<RatingModel> ratingModels = ratingEngineService.getDependingRatingModels(mainCustomerSpace, attributes);
+        Assert.assertNotNull(ratingModels);
+        Assert.assertEquals(ratingModels.size(), 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingModels" })
+    private void testGetDependingRatingEngines() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Account.LDC_Name");
+        attributes.add("Account.Other");
+
+        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(mainCustomerSpace, attributes);
+        Assert.assertNotNull(ratingEngines);
+        Assert.assertEquals(ratingEngines.size(), 1);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testGetDependingRatingEngines" })
     public void tearDelete() {
         deleteRatingEngine(aiRatingEngineId);
 

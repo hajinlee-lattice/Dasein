@@ -9,6 +9,7 @@ import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 
 public interface RatingEngineService {
@@ -55,4 +56,11 @@ public interface RatingEngineService {
     List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
             Boolean onlyInRedshift);
 
+    List<AttributeLookup> getDependentAttrsInAllModels(String customerSpace, String ratingEngineId);
+
+    List<AttributeLookup> getDependentAttrsInActiveModel(String customerSpace, String ratingEngineId);
+
+    List<RatingModel> getDependingRatingModels(String customerSpace, List<String> attributes);
+
+    List<RatingEngine> getDependingRatingEngines(String customerSpace, List<String> attributes);
 }
