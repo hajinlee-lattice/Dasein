@@ -114,7 +114,7 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
         isna = apState['Revenue', prodID].isnull().tolist()
         apState['RevenueRollingSum6', prodID] = getRollingsum(newacct, amts, isna, winlen=6)
         apState['RevenueMomentum3', prodID] = getMomentum(newacct, amts, isna, winlen=4)
-        apState['Span', prodID] = getSpan(accts, amts, isna)
+        apState['Span', prodID] = getSpan(newacct, amts, isna)
     
     # rename columns to playmaker style
     apState.columns = apState.columns.map('Product_{0[1]}_{0[0]}'.format)
