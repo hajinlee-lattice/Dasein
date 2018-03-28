@@ -87,6 +87,8 @@ public enum InterfaceName {
     TotalSpendOvertime, //
     AvgSpendOvertime, //
     CustomTrxField, //
+    Longitude,
+    Latitude,
 
     // CDL
     VdbAccountId, // account id whose uniqueness is managed by vdb
@@ -109,6 +111,7 @@ public enum InterfaceName {
     CustomerParentAccountID,
     DoNotCall,
     LeadStatus,
+    LeadType,
     Cost,
     TotalCost, //
 

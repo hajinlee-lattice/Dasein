@@ -536,6 +536,20 @@ public class SchemaRepository {
                 .fundamentalType(ModelingMetadata.FT_BOOLEAN) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
+        table.addAttribute(attr(InterfaceName.Longitude.name()) //
+                .allowedDisplayNames(Sets.newHashSet("LONGITUDE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Longitude) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr(InterfaceName.Latitude.name()) //
+                .allowedDisplayNames(Sets.newHashSet("LATITUDE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.Latitude) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
 
         return table;
     }
@@ -652,6 +666,28 @@ public class SchemaRepository {
                 .interfaceName(InterfaceName.LeadStatus) //
                 .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .fundamentalType(FundamentalType.ALPHA.name()) //
+                .build());
+        table.addAttribute(attr(InterfaceName.LeadType.name()) //
+                .allowedDisplayNames(Sets.newHashSet("LEADTYPE", "LEAD_TYPE")) //
+                .type(Schema.Type.STRING) //
+                .interfaceName(InterfaceName.LeadType) //
+                .fundamentalType(FundamentalType.ALPHA.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
+                .type(Schema.Type.LONG) //
+                .interfaceName(InterfaceName.CreatedDate) //
+                .fundamentalType(FundamentalType.DATE.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .build());
+        table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
+                .type(Schema.Type.LONG) //
+                .logicalType(LogicalDataType.Timestamp)
+                .interfaceName(InterfaceName.LastModifiedDate) //
+                .fundamentalType(FundamentalType.DATE.name()) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
                 .build());
         return table;
     }
