@@ -2,7 +2,9 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 
 import javax.annotation.PostConstruct;
@@ -31,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.RatingEngineUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -279,5 +282,45 @@ public class PlayServiceImpl implements PlayService {
         Tenant tenant = MultiTenantContext.getTenant();
         DataFeed dataFeed = dataFeedProxy.getDataFeed(tenant.getId());
         return dataFeed.getLastPublished();
+    }
+
+    @Override
+    public List<AttributeLookup> findDependingAttributes (List<Play> plays) {
+        Set<AttributeLookup> dependingAttributes = new HashSet<>();
+        if (plays != null) {
+            for (Play play : plays) {
+                dependingAttributes.addAll(talkingPointProxy.getAttributesInTalkingPointOfPlay(play.getName()));
+            }
+        }
+
+        return new ArrayList<>(dependingAttributes);
+    }
+
+    @Override
+    public List<Play> findDependingPalys(List<String> attributes) {
+        Set<Play> dependingPlays = new HashSet<>();
+        if (attributes != null) {
+            List<Play> plays = getAllPlays();
+            if (plays != null) {
+                for (Play play : plays) {
+                    List<AttributeLookup> playAttributes = talkingPointProxy.getAttributesInTalkingPointOfPlay(play.getName());
+                    for (AttributeLookup attributeLookup : playAttributes) {
+                        if (attributes.contains(sanitize(attributeLookup.toString()))) {
+                            dependingPlays.add(play);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        return new ArrayList<>(dependingPlays);
+    }
+
+    private String sanitize(String attribute) {
+        if (StringUtils.isNotBlank(attribute)) {
+            attribute = attribute.trim();
+        }
+        return attribute;
     }
 }

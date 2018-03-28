@@ -5,6 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 
 public interface TalkingPointService {
 
@@ -23,4 +24,6 @@ public interface TalkingPointService {
     TalkingPointPreview getPreview(String playName, String customerSpace);
 
     List<TalkingPointDTO> revertToLastPublished(String playName, String customerSpace);
+
+    List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName);
 }

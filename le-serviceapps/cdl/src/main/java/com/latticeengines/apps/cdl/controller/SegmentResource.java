@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.controller;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +26,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 import io.swagger.annotations.Api;
@@ -33,6 +36,8 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}/segments")
 public class SegmentResource {
+
+    private static Logger log = LoggerFactory.getLogger(SegmentResource.class);
 
     @Autowired
     private SegmentService segmentService;
@@ -118,4 +123,11 @@ public class SegmentResource {
         return segmentService.updateSegmentCounts(segmentName);
     }
 
+    @PostMapping(value = "/attributes")
+    @ResponseBody
+    @ApiOperation(value = "get attributes for segments")
+    public List<AttributeLookup> findDependingAttributes (@PathVariable String customerSpace,
+            @RequestBody List<MetadataSegment> metadataSegments) {
+        return segmentService.findDependingAttributes(metadataSegments);
+    }
 }

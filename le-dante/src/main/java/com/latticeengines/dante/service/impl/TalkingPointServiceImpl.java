@@ -1,9 +1,14 @@
 package com.latticeengines.dante.service.impl;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +30,7 @@ import com.latticeengines.domain.exposed.multitenant.TalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
@@ -193,6 +199,38 @@ public class TalkingPointServiceImpl implements TalkingPointService {
         }
 
         return findAllByPlayName(playName);
+    }
+
+    @Override
+    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        List<TalkingPoint> talkingPoints = talkingPointEntityMgr.findAllByPlayName(playName);
+        if (talkingPoints != null) {
+            for (TalkingPoint talkingPoint : talkingPoints) {
+                if (StringUtils.isNotBlank(talkingPoint.getContent())) {
+                    talkingPoint.setTPAttributes(findAttributeLookups(talkingPoint.getContent()));
+                    attributes.addAll(talkingPoint.getTPAttributes());
+                }
+            }
+        }
+
+        return new ArrayList<>(attributes);
+    }
+
+    private Set<AttributeLookup> findAttributeLookups(String content) {
+        Pattern pattern = Pattern.compile("\\{!([A-Za-z0-9_]+)\\.([A-Za-z0-9_]+)}");
+        Matcher matcher = pattern.matcher(content);
+
+        Set<AttributeLookup> attributes = new HashSet<>();
+        while (matcher.find()) {
+            String attributeLookupStr = String.format("%s.%s", matcher.group(1), matcher.group(2));
+            AttributeLookup attributeLookup = AttributeLookup.fromString(attributeLookupStr);
+            if (attributeLookup != null) {
+                attributes.add(attributeLookup);
+            }
+        }
+
+        return attributes;
     }
 
     private TalkingPoint convertFromPublished(PublishedTalkingPoint ptp, Play play) {

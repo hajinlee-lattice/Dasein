@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentAndActionDTO;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -81,5 +82,13 @@ public class SegmentProxy extends MicroserviceRestApiProxy {
         String url = constructUrl("/{customerSpace}/segments/{segmentName}/stats", //
                 shortenCustomerSpace(customerSpace), segmentName);
         return post("upsertStatsToSegment", url, statisticsContainer, SimpleBooleanResponse.class);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public List<AttributeLookup> findDependingAttributes (String customerSpace, List<MetadataSegment> metadataSegments) {
+        String url = constructUrl("/{customerSpace}/segments/attributes", //
+                shortenCustomerSpace(customerSpace));
+        List raw = post("findDependingAttributes", url, metadataSegments, List.class);
+        return JsonUtils.convertList(raw, AttributeLookup.class);
     }
 }

@@ -19,6 +19,7 @@ import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 
 import io.swagger.annotations.Api;
@@ -92,5 +93,12 @@ public class TalkingPointResource implements TalkingPointInterface {
     @ApiOperation(value = "Delete a Talking Point ")
     public void delete(@PathVariable String talkingPointName) {
         talkingPointService.delete(talkingPointName);
+    }
+
+    @RequestMapping(value = "/attributes/{playName}", method = RequestMethod.GET)
+    @ResponseBody
+    @ApiOperation(value = "get all depending attributes in talkingpoint of a play")
+    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(@PathVariable("playName") String playName) {
+        return talkingPointService.getAttributesInTalkingPointOfPlay(playName);
     }
 }

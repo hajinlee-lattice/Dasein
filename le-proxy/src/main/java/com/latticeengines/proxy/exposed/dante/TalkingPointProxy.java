@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dante.DantePreviewResources;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.network.exposed.dante.TalkingPointInterface;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.security.exposed.serviceruntime.exception.PostResponseErrorHandler;
@@ -66,4 +68,10 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         return get("findByName", url, TalkingPointDTO.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public List<AttributeLookup> getAttributesInTalkingPointOfPlay(String playName) {
+        String url = constructUrl("/attributes/" + playName);
+        List<?> list = get("getAttributesInTalkingPointOfPlay", url, List.class);
+        return JsonUtils.convertList(list, AttributeLookup.class);
+    }
 }
