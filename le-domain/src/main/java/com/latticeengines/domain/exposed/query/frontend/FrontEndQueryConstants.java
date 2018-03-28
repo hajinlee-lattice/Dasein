@@ -11,6 +11,8 @@ public class FrontEndQueryConstants {
 
     public static final String PERIOD_COUNT = "period_count";
 
+    public static final String LAGGING_PERIOD_COUNT = "lagging_period_count";
+
     public static final String EVALUATION_PERIOD_ID = "evaluation_period_id";
 
     public static final String CALCULATE_PRODUCT_REVENUE = "calculate_product_revenue";

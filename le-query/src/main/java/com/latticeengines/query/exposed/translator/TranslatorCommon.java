@@ -107,15 +107,6 @@ public class TranslatorCommon {
         ComparisonType cmp = aggregationFilter.getComparisonType();
         List<Object> values = aggregationFilter.getValues();
 
-        /*
-        CaseBuilder caseBuilder = new CaseBuilder();
-        CaseBuilder.Cases<Number, Expression<Number>> cases;
-        NumberExpression zero = Expressions.asNumber(0);
-        cases = caseBuilder.when(stringPath.isNull()).then(zero);
-        NumberPath numberPath = Expressions.numberPath(BigDecimal.class, stringPath.getDecoratedMetadata());
-        cases.otherwise(numberPath);
-        */
-
         BooleanExpression aggrPredicate = null;
         switch (aggregateType) {
         case SUM:
@@ -180,7 +171,7 @@ public class TranslatorCommon {
         } else if (ComparisonType.FOLLOWING == type) {
             return translateBetween(windowAgg,
                                     Integer.valueOf(timeFilter.getValues().get(0).toString()),
-                                    Integer.valueOf(timeFilter.getValues().get(0).toString()),
+                                    Integer.valueOf(timeFilter.getValues().get(1).toString()),
                                     false);
         } else if (ComparisonType.IN_CURRENT_PERIOD == type) {
             return translateBetween(windowAgg, 0, 0, true);

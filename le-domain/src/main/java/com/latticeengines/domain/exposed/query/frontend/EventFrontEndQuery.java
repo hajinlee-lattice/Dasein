@@ -29,6 +29,9 @@ public class EventFrontEndQuery extends FrontEndQuery {
     @JsonProperty(FrontEndQueryConstants.EVALUATION_PERIOD_ID)
     private int evaluationPeriodId = -1;
 
+    @JsonProperty(FrontEndQueryConstants.LAGGING_PERIOD_COUNT)
+    private int laggingPeriodCount = 1;
+
     public String getPeriodName() {
         return periodName;
     }
@@ -43,6 +46,14 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     public void setPeriodCount(int periodCount) {
         this.periodCount = periodCount;
+    }
+
+    public int getLaggingPeriodCount() {
+        return laggingPeriodCount;
+    }
+
+    public void setLaggingPeriodCount(int laggingPeriodCount) {
+        this.laggingPeriodCount = laggingPeriodCount;
     }
 
     public int getEvaluationPeriodId() {
