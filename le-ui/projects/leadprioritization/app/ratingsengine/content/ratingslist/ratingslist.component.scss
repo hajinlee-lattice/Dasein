@@ -1,16 +1,4 @@
 .rating-list {
-	.tile-body {
-		.ai-based {
-			background-image: url('/assets/images/bkg-active-model-account.png');
-			height: 100px;
-			background-size: 120px;
-			background-repeat: no-repeat;
-			background-position: center;
-		}
-	}
-	.tile-header h2 {
-		background-image: url('/assets/images/ico-model-black.png');
-	}
 	.tiles {
 		& > li.CROSS_SELL_FIRST_PURCHASE {
 			.tile-header h2 {
@@ -18,6 +6,11 @@
 			}
 			.stats {
 				background: #4BAEB5;
+			}
+			.active-icon {
+				polygon {
+					fill: #4BAEB5;
+				}
 			}
 		}
 		& > li.CROSS_SELL_REPEAT_PURCHASE {
@@ -27,6 +20,11 @@
 			.stats {
 				background: #218F73;
 			}
+			.active-icon {
+				polygon {
+					fill: #218F73;
+				}
+			}
 		}
 		& > li.CUSTOM_EVENT {
 			.tile-header h2 {
@@ -35,6 +33,11 @@
 			.stats {
 				background: #5EA83D;
 			}
+			.active-icon {
+				polygon {
+					fill: #5EA83D;		
+				}
+			}
 		}
 		& > li.RULE_BASED {
 			.tile-header h2 {
@@ -42,6 +45,11 @@
 			}
 			.stats {
 				background: #8166A3;
+			}
+			.active-icon {
+				polygon {
+					fill: #8166A3;		
+				}
 			}
 		}
 	}

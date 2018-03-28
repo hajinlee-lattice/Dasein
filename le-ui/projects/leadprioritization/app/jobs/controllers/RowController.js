@@ -35,7 +35,6 @@ angular
             $scope.isRatingEngine = (job.inputs.RATING_ENGINE_ID != undefined);
             $scope.isPMML = job.modelType === 'PmmlModel';
 
-
             if ($scope.isRatingEngine) {
                 RatingsEngineStore.getRatingModel($scope.job.rating_id, job.source).then(function(model){
                     var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,

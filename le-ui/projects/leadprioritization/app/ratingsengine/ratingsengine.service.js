@@ -367,7 +367,21 @@ angular.module('lp.ratingsengine')
             displayName: rating.displayName,
             status: rating.status,
             id: rating.id,
-            note: rating.note
+            note: rating.note,
+            activeModel: {
+                AI: {
+                    advancedModelingConfig: {
+                        cross_sell: {
+                            modelingStrategy: opts.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
+                        }
+                    }
+                }
+            },
+            advancedRatingConfig: {
+                cross_sell: {
+                    modelingStrategy: opts.advancedRatingConfig.cross_sell.modelingStrategy
+                }
+            }
         };
 
         RatingsEngineService.saveRating(opts).then(function(data){
@@ -698,25 +712,6 @@ angular.module('lp.ratingsengine')
         return this.trainingProducts;
     }
 
-    this.nextSaveRatingEngineAI = function(nextState){
-        var engineType = RatingsEngineStore.getModelingStrategy(),
-            opts =  {
-                type: "CROSS_SELL",
-                activeModel: {
-                    AI: {
-                        advancedModelingConfig: {
-                            cross_sell: {
-                                modelingStrategy: engineType
-                            }
-                        }
-                    }
-                }
-            };
-
-        RatingsEngineStore.saveRating(opts).then(function(rating) {
-            $state.go(nextState, { rating_id: rating.id });
-        });
-    }
 
     this.nextSaveCustomEventRatingEngine = function(nextState){
 
@@ -787,6 +782,31 @@ angular.module('lp.ratingsengine')
             });
         });
         $state.go(nextState);
+    }
+
+    this.nextSaveRatingEngineAI = function(nextState){
+        var engineType = RatingsEngineStore.getModelingStrategy(),
+            opts =  {
+                type: "CROSS_SELL",
+                activeModel: {
+                    AI: {
+                        advancedModelingConfig: {
+                            cross_sell: {
+                                modelingStrategy: engineType
+                            }
+                        }
+                    }
+                },
+                advancedRatingConfig: {
+                    cross_sell: {
+                        modelingStrategy: engineType
+                    }
+                }
+            };
+
+        RatingsEngineStore.saveRating(opts).then(function(rating) {
+            $state.go(nextState, { rating_id: rating.id });
+        });
     }
 
     this.nextSaveAIRatingModel = function(nextState){
@@ -975,11 +995,15 @@ angular.module('lp.ratingsengine')
     this.saveRating = function(opts) {
         var deferred = $q.defer();
 
+        console.log(opts);
+
         $http({
             method: 'POST',
             url: '/pls/ratingengines',
             data: opts
         }).then(function(response){
+            console.log(response.data);
+
             deferred.resolve(response.data);
         });
 

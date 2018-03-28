@@ -64,7 +64,7 @@
                     ng-click="vm.tileClick($event, rating)"
                     ng-mouseleave="vm.current.tileStates[rating.id].showCustomMenu ? vm.customMenuClick($event, rating) : null"
                     ng-if="vm.current.ratings.length > 0"
-                    class="{{ rating.modelingStrategy }}"
+                    class="{{ rating.tileClass }}"
                     ng-class="{editing: vm.current.tileStates[rating.id].editRating}">
 
                     <div class="tile-header" ng-if="!vm.current.tileStates[rating.id].editRating">
@@ -118,46 +118,51 @@
                                 </span>
                             </li>
                         </ul>
-
                     </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
                         
-                        <div 
-                            ng-class="{'inactive': rating.status === 'INACTIVE'}"
-                            ng-if="rating.type != 'CROSS_SELL' && rating.type != 'CUSTOM_EVENT' ">
-                            <barchart 
-                                header="Account Ratings"	
-                                ratings="true" 
-                                data="vm.current.bucketCountMap[rating.id].bucketCoverageCounts">
-                            </barchart>
-                        </div>
+                        <!-- <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
+                            ng-if="
+                                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+                                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length &&!vm.lookupMode && 
+                                ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1 && 
+                                enrichment.Entity === 'Rating'"
+                            <bar-chart 
+                                vm='vm'
+                                config="vm.getChartConfig(rating.type)" 
+                                bktlist="vm.getData()">
+                            </bar-chart>
+
+                        </div> -->
 
                         <!-- <div ng-if="!rating.hasBuckets && rating.type != 'CROSS_SELL'">
                             <h4>No Ratings Available</h4>
                         </div> -->
 
-                        <div 
-                            ng-if="rating.type === 'CROSS_SELL' || rating.type == 'CUSTOM_EVENT'"
-                            class="ai-based">
-                        </div>
-
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
-
-
                         <span 
                             ng-if="rating.status === 'ACTIVE'"
-                            class="launch-success pull-right">
+                            class="active-icon pull-right">
                             Model is active
-                            <i class="fa fa-check"></i>
+                            <svg 
+                                width="14px" 
+                                height="11px" 
+                                viewBox="0 0 10 7" 
+                                version="1.1" 
+                                xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink">
+                                <g id="data-management" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" transform="translate(-635.000000, -556.000000)">
+                                <polygon 
+                                    points='643.604 555.9997 638.713 560.8907 636.569 558.7457 635 560.3157 637.144 562.4597 638.713 564.0287 640.283 562.4597 645.174 557.5697'></polygon>
+                                </g>
+                            </svg>
                         </span>
-
                         <span 
                             ng-if="rating.status === 'INACTIVE'"
-                            class="launch-success pull-right">
+                            class="inactive pull-right">
                             Model is inactive
                         </span>
-
                         <button 
                             class="launch button blue-button pull-right" 
                             ng-click="vm.launchPlay()"

@@ -188,7 +188,7 @@ angular
                                 $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
                             }
                             $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
-                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary !== null || RatingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
+                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary != null || RatingEngine.activeModel[$scope.typeContext].modelSummary != undefined);
 
                             // console.log(RatingEngine);
 

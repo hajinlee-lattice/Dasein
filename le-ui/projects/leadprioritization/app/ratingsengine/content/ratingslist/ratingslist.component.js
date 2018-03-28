@@ -46,8 +46,8 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.init = function($q, $filter) {
-        
-        // console.log(vm.current.ratings);
+
+        console.log(vm.current.ratings);
 
         RatingsEngineStore.clear();
 
@@ -63,7 +63,155 @@ angular.module('lp.ratingsengine.ratingslist', [
                 vm.isRatingsSet = RatingsEngineStore.ratingsSet;
             };
             vm.header.filter.unfiltered = vm.current.ratings;
+
+            angular.forEach(vm.current.ratings, function(rating, key) {
+                if (rating.type === 'CROSS_SELL') {
+                    rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+                } else {
+                    rating.tileClass = rating.type;
+                }
+            });
         });
+
+    }
+
+    function getBarChartConfig() {
+        if ($scope.barChartConfig === undefined) {
+
+            $scope.barChartConfig = {
+                'data': {
+                    'tosort': true,
+                    'sortBy': '-Cnt',
+                    'trim': true,
+                    'top': 5,
+                },
+                'chart': {
+                    'header':'Attributes Value',
+                    'emptymsg': '',
+                    'usecolor': false,
+                    'color': '#2E6099',
+                    'mousehover': true,
+                    'type': 'integer',
+                    'showstatcount': true,
+                    'maxVLines': 3,
+                    'showVLines': false,
+                },
+                'vlines': {
+                    'suffix': ''
+                },
+                'columns': [{
+                    'field': 'Cnt',
+                    'label': 'Records',
+                    'type': 'number',
+                    'chart': true,
+                }]
+            };
+        }
+        return $scope.barChartConfig;
+    }
+
+    function getBarChartLiftConfig() {
+        if ($scope.barChartLiftConfig === undefined) {
+            $scope.barChartLiftConfig = {
+                'data': {
+                    'tosort': true,
+                    'sortBy': 'Lbl',
+                    'trim': true,
+                    'top': 5,
+                },
+                'chart': {
+                    'header':'Attributes Value',
+                    'emptymsg': '',
+                    'usecolor': false,
+                    'color': '#2E6099',
+                    'mousehover': true,
+                    'type': 'decimal',
+                    'showstatcount': false,
+                    'maxVLines': 3,
+                    'showVLines': true,
+                },
+                'vlines': {
+                    'suffix': 'x'
+                },
+                'columns': [{
+                        'field': 'Lift',
+                        'label': 'Lifts',
+                        'type': 'string',
+                        'suffix': 'x',
+                        'chart': true
+                    }
+                ]
+            };
+        }
+        return $scope.barChartLiftConfig;
+    }
+
+    vm.getChartConfig = function (ratingType) {        
+        if (ratingType === 'CROSS_SELL' || ratingType === 'CUSTOM_EVENT') {
+            return getBarChartLiftConfig();
+        } else {
+            return getBarChartConfig();    
+        }        
+    }
+
+    function getTestData() {
+        return [{
+                "Lbl": "B",
+                "Cnt": 10,
+                "Lift": "1.3",
+                "Id": 2,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "B"
+                ]
+            },
+            {
+                "Lbl": "A",
+                "Cnt": 11,
+                "Lift": "0.3",
+                "Id": 1,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "A"
+                ]
+            },
+            {
+                "Lbl": "F",
+                "Cnt": 14,
+                "Lift": "0.5",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "F"
+                ]
+            },
+            {
+                "Lbl": "C",
+                "Cnt": 16,
+                "Lift": "0.8",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "C"
+                ]
+            },
+            {
+                "Lbl": "D",
+                "Cnt": 18,
+                "Lift": "0.9",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "D"
+                ]
+            }
+        ];
+    }
+
+    vm.getData = function () {
+        var data = getTestData();
+        // console.log('Data ',data);
+        return data;
     }
 
     vm.checkState = function(type) {
@@ -89,7 +237,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             angular.forEach(vm.current.ratings, function(rating, key) {
                 rating.accountCount = vm.current.bucketCountMap[rating.id].accountCount || 0;
                 rating.contactCount = vm.current.bucketCountMap[rating.id].contactCount || 0;
-            })
+            });
             $interval.cancel(checkForBuckets);
         }
     }, 1000);
