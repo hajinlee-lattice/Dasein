@@ -15,7 +15,7 @@ angular.module('lp.marketo.enrichment', [
         required_fields: [],
         selected_fields: {},
         match_fields: {},
-        enrichments: EnrichmentData.data,
+        enrichments: EnrichmentData,
         marketoEnrichments: MarketoCredential.enrichment, // Match Fields, labels
         marketoMatchFields: MarketoMatchFields, // Marketo Fields, dropdowns
         pagesize: 5

@@ -822,9 +822,8 @@ angular
                     resolve: {
                         EnrichmentData: function($q, DataCloudStore) {
                             var deferred = $q.defer();
-//fixme for PLS-6025
-//this isn't rnning on production for some reason
-                            DataCloudStore.getEnrichments({onlySelectedAttributes: true}, null, true).then(function(result) {
+                            
+                            DataCloudStore.getEnrichments({onlySelectedAttributes: true}, null).then(function(result) {
                                 deferred.resolve(result);
                             });
 

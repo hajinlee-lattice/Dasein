@@ -184,15 +184,17 @@ angular.module('common.datacloud')
 
     this.getEnrichments = function(opts, concatEnrichments, nocache){
         var deferred = $q.defer(),
-            nocache = nocache || false;
+            nocache = nocache || false,
+            ret;
 
         if (this.enrichments && !nocache) {
-            deferred.resolve(this.enrichments);
+            ret = (this.enrichments && this.enrichments.data ? this.enrichments.data : this.enrichments);
+            deferred.resolve(ret);
         } else {
             DataCloudService.getEnrichments(opts).then(function(response){
-                DataCloudStore.setEnrichments(response, concatEnrichments || false);
-                
-                deferred.resolve(response);
+                ret = (response && response.data ? response.data : response);
+                DataCloudStore.setEnrichments(ret, concatEnrichments || false);
+                deferred.resolve(ret);
             });
         }
 
@@ -201,7 +203,7 @@ angular.module('common.datacloud')
 
     this.setEnrichments = function(enrichments, concatEnrichments) {
         if (concatEnrichments) {
-            this.enrichments = (this.enrichments || []).concat(enrichments.data);
+            this.enrichments = (this.enrichments || []).concat(enrichments);
         } else {
             this.enrichments = enrichments;
         }
