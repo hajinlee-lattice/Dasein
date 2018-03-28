@@ -30,7 +30,7 @@
                 </a>
             </li-->
             <li class="jobs-nav-container">
-                <a class="jobs-nav-gear" ui-sref="home.jobs.status" title="Jobs [{{RunningJobs.length + RunningImportJobs.length + RunningSubJubsDataCount}} Running]">
+                <a class="jobs-nav-gear" ui-sref="{{getJobSRef()}}" title="Jobs [{{RunningJobs.length + RunningImportJobs.length + RunningSubJubsDataCount}} Running]">
                     <span ng-class="{'fa fa-spin': (RunningJobs = (jobs | filter: statusFilter)).length > 0 || 
                                                     (RunningImportJobs = (importJobs | filter: statusImportFilter)).length > 0 ||
                                                     (RunningSubJubsDataCount =  getRunningSubJobsDataCount()) ||

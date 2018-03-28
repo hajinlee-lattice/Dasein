@@ -14,13 +14,38 @@ angular.module('pd.navigation.header', [
 ])
 .controller('HeaderController', function (
     $scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService,
-    LoginService, NavUtility, JobsStore
+    LoginService, NavUtility, JobsStore, ApiHost
 ) {
 
     $scope.ResourceUtility = ResourceUtility;
     $scope.jobs = JobsStore.data.jobs;
     $scope.importJobs = JobsStore.data.importJobs;
     $scope.exportJobs = JobsStore.data.exportJobs;
+
+    /**
+     * It returns the state to go to for the jobs
+     * If CDL the firts tab is going to be P&A jobs
+     */
+    $scope.getJobSRef = function(){
+        var state = '';
+        // This is the case of refresh where $scope.IsRatingEngine is undefined
+        if($scope.IsRatingEngine === undefined){
+            var flags = FeatureFlagService.Flags();
+            var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+            if(cdl === true){
+                state = 'home.jobs.data';
+            }else {
+                state = 'home.jobs.status';
+            }
+        }else {
+            if($scope.IsRatingEngine === true){
+                state = 'home.jobs.data';
+            }else{
+                state = 'home.jobs.status';
+            }
+        }
+        return state;
+    }
 
     $scope.statusFilter = function (item) {
         return item.jobStatus === 'Running' || item.jobStatus === 'Pending';

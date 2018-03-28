@@ -64,7 +64,7 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
             var name = scope.config['name'] || Date().now();
 
             modalStore.set(name, scope);
-            console.log('Color', scope.config.headerconfig )
+            // console.log('Color', scope.config.headerconfig )
             scope.modalConfig = {
                 "type": scope.config.type || "md",
                 "icon": scope.config.icon || scope.iconSupported.warning,
