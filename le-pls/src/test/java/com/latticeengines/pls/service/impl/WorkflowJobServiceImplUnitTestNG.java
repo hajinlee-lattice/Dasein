@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.joda.time.DateTime;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -25,9 +27,12 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
@@ -40,6 +45,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.ModelSummaryService;
+import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class WorkflowJobServiceImplUnitTestNG {
@@ -59,6 +65,12 @@ public class WorkflowJobServiceImplUnitTestNG {
     @Mock
     private ActionService actionService;
 
+    @Mock
+    private BatonService batonService;
+
+    @Mock
+    private DataFeedProxy dataFeedProxy;
+
     @InjectMocks
     private WorkflowJobServiceImpl workflowJobService;
 
@@ -76,6 +88,7 @@ public class WorkflowJobServiceImplUnitTestNG {
         mockModelSummaryService();
         mockTenantEntityManager();
         mockActionService();
+        mockDataFeedProxy();
 
         Tenant tenant = tenantEntityMgr.findByTenantId("tenant");
         MultiTenantContext.setTenant(tenant);
@@ -119,9 +132,12 @@ public class WorkflowJobServiceImplUnitTestNG {
     @SuppressWarnings("unchecked")
     @Test(groups = "unit", dependsOnMethods = { "testExpandActions" })
     public void testGenerateUnstartedProcessAnalyzeJob() {
+        Date now = new DateTime().toDate();
+        // Auto Schedule is off
+        when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(false);
         Job job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNotNull(job);
-        Assert.assertEquals(job.getNote(), WorkflowJobServiceImpl.CDLNote);
+        Assert.assertNull(job.getNote());
         Assert.assertEquals(job.getName(), "processAnalyzeWorkflow");
         Assert.assertEquals(job.getJobType(), "processAnalyzeWorkflow");
         Assert.assertEquals(job.getJobStatus(), JobStatus.READY);
@@ -132,9 +148,15 @@ public class WorkflowJobServiceImplUnitTestNG {
                 List.class);
         Assert.assertEquals(listObj.size(), 4);
         log.info(String.format("listObj is %s", listObj));
+        Assert.assertTrue(job.getStartTimestamp().after(now));
+
+        // Auto Schedule is on
+        when(batonService.isEnabled(any(CustomerSpace.class), any(LatticeFeatureFlag.class))).thenReturn(true);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(true);
         Assert.assertNotNull(job.getSubJobs());
         Assert.assertEquals(job.getSubJobs().size(), 4);
+        Assert.assertNotNull(job.getNote());
+        log.info("Note is " + job.getNote());
         when(actionService.findByOwnerId(null, null)).thenReturn(Collections.EMPTY_LIST);
         job = workflowJobService.generateUnstartedProcessAnalyzeJob(false);
         Assert.assertNull(job);
@@ -218,6 +240,10 @@ public class WorkflowJobServiceImplUnitTestNG {
     private void mockActionService() {
         when(actionService.findByOwnerId(null, null)).thenReturn(generateActions());
         when(actionService.findByPidIn(anyList())).thenReturn(generateActions());
+    }
+
+    private void mockDataFeedProxy() {
+        when(dataFeedProxy.nextInvokeTime(anyString())).thenReturn(new DateTime().plusDays(1).toDate().getTime());
     }
 
     private List<Action> generateActions() {

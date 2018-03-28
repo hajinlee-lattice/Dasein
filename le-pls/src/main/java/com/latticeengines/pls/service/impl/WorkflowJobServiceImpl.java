@@ -23,9 +23,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.api.AppSubmission;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -49,7 +52,7 @@ import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 @Component("workflowJobService")
 public class WorkflowJobServiceImpl implements WorkflowJobService {
 
-    public static final String CDLNote = "Scheduled at 6:30 PM PST.";
+    public static final String CDLNote = "Scheduled at %s.";
     // Special workflow id for unstarted ProcessAnalyze workflow
     public static final Long UNSTARTED_PROCESS_ANALYZE_ID = 0L;
 
@@ -78,6 +81,9 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private BatonService batonService;
 
     @Override
     public ApplicationId restart(Long jobId) {
@@ -204,7 +210,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         List<Action> actions = actionService.findByOwnerId(null, null);
         if (CollectionUtils.isNotEmpty(actions)) {
             job = new Job();
-            job.setNote(CDLNote);
             job.setId(UNSTARTED_PROCESS_ANALYZE_ID);
             job.setName("processAnalyzeWorkflow");
             job.setJobStatus(JobStatus.READY);
@@ -213,19 +218,37 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             List<Long> unfinishedActionIds = actions.stream().map(Action::getPid).collect(Collectors.toList());
             unfinishedInputContext.put(WorkflowContextConstants.Inputs.ACTION_IDS, unfinishedActionIds.toString());
             job.setInputs(unfinishedInputContext);
-            Date nextInvokeDate = new DateTime().plus(1).toDate();
-            try {
-                nextInvokeDate = new Date(dataFeedProxy.nextInvokeTime(MultiTenantContext.getTenantId()));
-            } catch (Exception e) {
-                log.warn(String.format("Geting next invoke time for tenant %s has error.",
-                        MultiTenantContext.getTenantId()));
-            }
-            job.setStartTimestamp(nextInvokeDate);
+            updateStartTimeStampAndForJob(job);
             if (expandChildrenJobs) {
                 job.setSubJobs(expandActions(actions));
             }
         }
         return job;
+    }
+
+    private void updateStartTimeStampAndForJob(Job job) {
+        Date nextInvokeDate = new DateTime().plusDays(1).toDate();
+        boolean allowAutoSchedule = false;
+        try {
+            allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(MultiTenantContext.getTenant().getId()),
+                    LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
+        } catch (Exception e) {
+            log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
+        }
+        if (allowAutoSchedule) {
+            try {
+                Long nextInvokeTime = dataFeedProxy.nextInvokeTime(MultiTenantContext.getTenantId());
+                if (nextInvokeTime != null) {
+                    nextInvokeDate = new Date(nextInvokeTime);
+                }
+                // Only update note if auto schedule is on
+                job.setNote(String.format(CDLNote, nextInvokeDate));
+            } catch (Exception e) {
+                log.warn(String.format("Geting next invoke time for tenant %s has error.",
+                        MultiTenantContext.getTenantId()));
+            }
+        }
+        job.setStartTimestamp(nextInvokeDate);
     }
 
     @VisibleForTesting
