@@ -44,11 +44,11 @@ public class TimeFilterTranslator {
         Pair<String, String> range = translateRange(timeFilter);
         List<Object> vals;
         if (range == null) {
-            vals = null;
+            return new TimeFilter(ComparisonType.EVER, timeFilter.getPeriod(), null);
         } else {
             vals = Arrays.asList(range.getLeft(), range.getRight());
+            return new TimeFilter(ComparisonType.BETWEEN, TimeFilter.Period.Date.name(), vals);
         }
-        return new TimeFilter(timeFilter.getRelation(), TimeFilter.Period.Date.name(), vals);
     }
 
     public Pair<String, String> translateRange(TimeFilter timeFilter) {
