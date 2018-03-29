@@ -141,7 +141,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
         boolean skip;
         if (isProfilePurchaseHistory(step)) {
-            skip = !shouldCalculatePurchaseHistory();
+            skip = !shouldCalculatePurchaseHistory(step, seq);
         } else {
             skip = isCommonSkip(step, seq);
         }
@@ -221,10 +221,24 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
+        log.info(String.format(
+                "Check whether it is profile purchase history: StepName=%s, ProfilePurchaseHistoryBean=%s", step.name(),
+                ProfilePurchaseHistory.BEAN_NAME));
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 
-    private boolean shouldCalculatePurchaseHistory() {
+    private boolean shouldCalculatePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+        // Temporary log for troubleshooting PLS-7568
+        try {
+            String msg = String.format(
+                    "Check whether to skip step [%d] %s: hasProducts=%b, hasAccounts=%b, hasRawStore=%b, rebuild=%b, update=%b, accountChoreographer.update=%b, accountChoreographer.rebuild=%b, productChoreographer.update=%b, productChoreographer.rebuild=%b",
+                    seq, step.name(), hasProducts, hasAccounts, hasRawStore, rebuild, update,
+                    accountChoreographer.update, accountChoreographer.rebuild, productChoreographer.update,
+                    productChoreographer.rebuild);
+            log.info(msg);
+        } catch (Exception ex) {
+
+        }
         if (hasProducts && hasAccounts) {
             if (hasRawStore && (accountChoreographer.update || accountChoreographer.rebuild)) {
                 log.info("Need to rebuild purchase history due to Account changes.");

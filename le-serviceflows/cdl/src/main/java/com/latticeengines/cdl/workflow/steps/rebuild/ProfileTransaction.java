@@ -161,6 +161,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
             try {
                 log.info("Initialize period store " + hdfsPath + "/" + tableName);
+                if (HdfsUtils.isDirectory(yarnConfiguration, hdfsPath + "/" + tableName)) {
+                    HdfsUtils.rmdir(yarnConfiguration, hdfsPath + "/" + tableName);
+                }
                 HdfsUtils.mkdir(yarnConfiguration, hdfsPath + "/" + tableName);
             } catch (Exception e) {
                 log.error("Failed to initialize period store " + hdfsPath + "/" + tableName);
