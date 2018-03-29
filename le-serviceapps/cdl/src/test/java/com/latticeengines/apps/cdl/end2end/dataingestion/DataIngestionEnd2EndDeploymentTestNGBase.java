@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -81,6 +82,7 @@ import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
@@ -104,6 +106,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String INITIATOR = "test@lattice-engines.com";
     private static final String S3_VDB_DIR = "le-serviceapps/cdl/end2end/vdb";
     private static final String S3_VDB_VERSION = "2";
+
+    private static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
+    private static final String S3_CSV_VERSION = "1";
 
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
@@ -312,6 +317,53 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 importTemplate.getName(), e);
         registerImportAction(dataFeedTask);
         dataFeedProxy.addTablesToQueue(customerSpace.toString(), dataFeedTask.getUniqueId(), tables);
+    }
+
+    void importData(BusinessEntity entity, int offset, int limit) {
+        String templateName = String.format("%s_%d_%d.csv", entity.name(), offset, limit);
+        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(templateName), templateName);
+
+        SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
+        FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
+        for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
+            if (fieldMapping.getMappedField() == null) {
+                fieldMapping.setMappedField(fieldMapping.getUserField());
+                fieldMapping.setMappedToLatticeField(false);
+            }
+        }
+        fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
+        ApplicationId applicationId = plsCDLImportProxy.startImportCSV(template.getName(), template.getName(), "File",
+                entity.name(), entity.name() + "Schema");
+        JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
+        Assert.assertEquals(status, JobStatus.COMPLETED);
+    }
+
+    private InputStream readCSVInputStreamFromS3(String fileName) {
+        return testArtifactService.readTestArtifactAsStream(S3_CSV_DIR, S3_CSV_VERSION, fileName);
+    }
+
+    private class MultipartFileResource extends InputStreamResource {
+
+        private String fileName;
+
+        public MultipartFileResource(InputStream inputStream) {
+            super(inputStream);
+        }
+
+        public MultipartFileResource(InputStream inputStream, String fileName) {
+            super(inputStream);
+            this.fileName = fileName;
+        }
+
+        @Override
+        public String getFilename() {
+            return fileName;
+        }
+
+        @Override
+        public long contentLength() {
+            return -1;
+        }
     }
 
     private Action registerImportAction(DataFeedTask dataFeedTask) {
