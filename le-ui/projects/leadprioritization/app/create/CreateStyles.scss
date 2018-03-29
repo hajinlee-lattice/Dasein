@@ -513,6 +513,10 @@ Create Model: Import Job Status
     }
     table {
         font-size: 1.25em;
+        margin-bottom: 0;
+        tbody {
+            border-top: none;
+        }
         tbody td,
         tbody tr {
             background: none;

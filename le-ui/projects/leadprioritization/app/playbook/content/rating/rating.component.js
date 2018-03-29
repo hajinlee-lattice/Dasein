@@ -31,6 +31,7 @@ angular.module('lp.playbook.wizard.rating', [])
     }
 
     vm.init = function() {
+
         PlaybookWizardStore.setValidation('rating', false);
         if(vm.stored.rating_selection) {
             PlaybookWizardStore.setValidation('rating', true);

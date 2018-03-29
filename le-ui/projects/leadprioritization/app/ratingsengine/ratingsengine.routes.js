@@ -210,65 +210,81 @@ angular
                     }
                 }
             })
+            .state('home.ratingsengine.dashboard.add', {
+                url: '/add',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_attributes',
+                    gotoNonemptyCategory: true
+                },
+                views: {
+                    'wizard_content@home.ratingsengine.rulesprospects': {
+                        controller: 'DataCloudController',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                    }
+                }
+            })
             .state('home.ratingsengine.dashboard.rules', {
                 url: '/rules',
                 resolve: {
-                    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                    // EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    //     var deferred = $q.defer();
 
-                        DataCloudStore.setHost(ApiHost);
+                    //     DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getCount().then(function (result) {
-                            DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                            deferred.resolve(result.data);
-                        });
+                    //     DataCloudStore.getCount().then(function (result) {
+                    //         DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                    //         deferred.resolve(result.data);
+                    //     });
 
-                        return deferred.promise;
-                    }],
-                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                        var deferred = $q.defer();
+                    //     return deferred.promise;
+                    // }],
+                    // Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                    //     var deferred = $q.defer();
 
-                        DataCloudStore.setHost(ApiHost);
+                    //     DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
-                            deferred.resolve(result);
-                        });
+                    //     DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
+                    //         deferred.resolve(result);
+                    //     });
 
-                        return deferred.promise;
-                    }],
-                    EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                    //     return deferred.promise;
+                    // }],
+                    // EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    //     var deferred = $q.defer();
 
-                        DataCloudStore.setHost(ApiHost);
+                    //     DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getAllTopAttributes().then(function (result) {
-                            deferred.resolve(result['Categories'] || result || {});
-                        });
+                    //     DataCloudStore.getAllTopAttributes().then(function (result) {
+                    //         deferred.resolve(result['Categories'] || result || {});
+                    //     });
 
-                        return deferred.promise;
-                    }],
-                    EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                        var deferred = $q.defer();
+                    //     return deferred.promise;
+                    // }],
+                    // EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                    //     var deferred = $q.defer();
 
-                        DataCloudStore.setHost(ApiHost);
+                    //     DataCloudStore.setHost(ApiHost);
 
-                        DataCloudStore.getPremiumSelectMaximum().then(function (result) {
-                            deferred.resolve(result);
-                        });
+                    //     DataCloudStore.getPremiumSelectMaximum().then(function (result) {
+                    //         deferred.resolve(result);
+                    //     });
 
-                        return deferred.promise;
-                    }],
-                    // below resolves are needed. Do not removed
-                    // override at child state when needed
-                    LookupResponse: [function () {
-                        return { attributes: null };
-                    }],
-                    QueryRestriction: [function () {
-                        return null;
-                    }],
-                    CurrentConfiguration: [function () {
-                        return null;
-                    }],
+                    //     return deferred.promise;
+                    // }],
+                    // // below resolves are needed. Do not removed
+                    // // override at child state when needed
+                    // LookupResponse: [function () {
+                    //     return { attributes: null };
+                    // }],
+                    // QueryRestriction: [function () {
+                    //     return null;
+                    // }],
+                    // CurrentConfiguration: [function () {
+                    //     return null;
+                    // }],
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 

@@ -1538,10 +1538,12 @@ angular.module('common.datacloud.explorer', [
 
         var toAdd = entity;
         
-        if (toAdd === 'Rating'){
+        if (toAdd === 'Rating' || toAdd === 'LatticeAccount'){
             toAdd = 'Account';
         }
         
+        console.log(toAdd);
+
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
         QueryStore['add' + toAdd + 'Restriction']({
@@ -1669,6 +1671,7 @@ angular.module('common.datacloud.explorer', [
             RatingsEngineStore.setValidation('add', true);
             vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
         } else {
+
             vm.statusMessage(vm.label.saving_alert, {wait: 0});
 
             var rule = getRatingsEngineRule(RatingsEngineModels);
@@ -1684,6 +1687,7 @@ angular.module('common.datacloud.explorer', [
                     vm.metadata.toggle.show.selected_ratingsengine_attributes = false;
                 }
 
+                RatingsEngineStore.setValidation('attributes', true);
                 vm.statusMessage(vm.label.saved_alert, {type: 'saved'});
             });
         }

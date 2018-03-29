@@ -299,7 +299,7 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveSummary = function(nextState){
-        RatingsEngineStore.saveRating().then(function(result) {
+        RatingsEngineStore.nextSaveRatingEngine().then(function(result) {
             $state.go(nextState, { rating_id: $stateParams.rating_id });
         });
     }
@@ -356,25 +356,22 @@ angular.module('lp.ratingsengine')
         return this.currentRating;
     }
 
-    this.saveRating = function(saveOpts, setNullSegment) {
+    this.saveRating = function(saveOpts) {
         var deferred = $q.defer(),
-            opts = saveOpts || {},
             ClientSession = BrowserStorageUtility.getClientSession(),
             rating = RatingsEngineStore.getCurrentRating();
 
-        console.log(opts);
-
         opts = {
-            createdBy: saveOpts.createdBy || ClientSession.EmailAddress,
-            type: saveOpts.type || 'RULE_BASED',
-            segment: setNullSegment ? null : rating.segment || RatingsEngineStore.getSegment(),
+            createdBy: ((saveOpts.createdBy !== undefined) ? saveOpts.createdBy : ClientSession.EmailAddress),
+            type: ((saveOpts.type !== undefined) ? saveOpts.type : 'RULE_BASED'),
+            segment: rating.segment || RatingsEngineStore.getSegment(),
             displayName: rating.displayName,
             status: rating.status,
             id: rating.id,
-            note: rating.note,
+            note: rating.note
         };
 
-        if (saveOpts.type === 'CROSS_SELL') {
+        if ((saveOpts.type !== undefined) && (saveOpts.type === 'CROSS_SELL')) {
             opts.activeModel = {
                 AI: {
                     advancedModelingConfig: {
@@ -389,7 +386,7 @@ angular.module('lp.ratingsengine')
                     modelingStrategy: saveOpts.advancedRatingConfig.cross_sell.modelingStrategy
                 }
             };
-        }
+        };
 
         RatingsEngineService.saveRating(opts).then(function(data){
             RatingsEngineStore.setRating(data);
@@ -398,6 +395,7 @@ angular.module('lp.ratingsengine')
 
         return deferred.promise;
     }
+
     
     this.setRatings = function(ratings, ignoreGetCoverage) {
         

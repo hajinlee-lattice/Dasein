@@ -18,7 +18,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
 
-        console.log(ratingEngine);
+        // console.log(ratingEngine);
 
         $scope.IsRatingEngine = true;
         $scope.type = ratingEngine.type;
@@ -49,9 +49,6 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
         $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummary != null) || (ratingEngine.activeModel[$scope.typeContext].modelSummary != undefined));
-
-        console.log(ratingEngine.activeModel[$scope.typeContext].modelSummary);
-        console.log($scope.modelIsReady);
 
     } else {
 

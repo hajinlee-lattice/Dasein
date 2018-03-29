@@ -52,9 +52,6 @@ angular.module('mainApp.models.controllers.ModelDetailController', [
         });
     } else {
         $scope.RatingEngine = RatingEngine;
-
-        console.log($scope.RatingEngine);
-
     }
 
     $compile($('#ModelDetailsArea').html('<div data-model-details-widget></div>'))($scope);
