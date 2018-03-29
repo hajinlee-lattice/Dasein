@@ -170,7 +170,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                                 .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()).get("TOTAL").asLong()));
             }
         } catch (Exception e) {
-            log.error("Fail to parse report from job: " + JsonUtils.serialize(latestSuccessJob.get()), e);
+            log.error("Fail to parse report from job: " + JsonUtils.serialize(latestSuccessJob.get()));
         } finally {
             for (BusinessEntity entity : entities) {
                 if (!previousCnts.containsKey(entity)) {
@@ -209,12 +209,28 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     private long countInRedshift(BusinessEntity entity) {
         if (StringUtils.isBlank(
                 dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive))) {
-            log.warn("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
+            log.error("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
             return 0L;
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
-        return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+        int retries = 0;
+        while (retries < 3) {
+            try {
+                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+            } catch (Exception ex) {
+                log.error("Exception in getting count from serving store for entity " + entity.name() + " with version "
+                        + inactive.name(), ex);
+                retries++;
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                }
+            }
+        }
+        log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
+                + inactive.name());
+        return 0L;
     }
 
     private ObjectNode initEntityReport(BusinessEntity entity) {

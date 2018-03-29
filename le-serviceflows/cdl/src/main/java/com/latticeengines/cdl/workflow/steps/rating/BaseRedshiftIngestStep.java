@@ -48,8 +48,8 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndSort;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -198,7 +198,20 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
         private long totalCountInSegment() {
             if (RatingEngineType.RULE_BASED.equals(engineType)) {
                 FrontEndQuery frontEndQuery = segment.toFrontEndQuery(BusinessEntity.Account);
-                return ratingProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery, inactive);
+                int retries = 0;
+                while (retries < 3) {
+                    try {
+                        return ratingProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery, inactive);
+                    } catch (Exception ex) {
+                        log.error("Exception in getting total count in segment for Account", ex);
+                        retries++;
+                        try {
+                            Thread.sleep(2000);
+                        } catch (InterruptedException e) {
+                        }
+                    }
+                }
+                throw new RuntimeException("Fail to get total count in segment for Account");
             } else {
                 return ratingEngineProxy.getModelingQueryCountByRatingId(customerSpace.toString(), engineSummary.getId(),
                         ratingModel.getId(), ModelingQueryType.TARGET);
