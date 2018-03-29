@@ -86,7 +86,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             }
             // CDL import won't update the attribute name to interface name.
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
-            context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
+            context.setProperty(ImportProperty.ID_COLUMN_NAME, config.getBusinessEntity().name() + InterfaceName.Id.name());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
 
             if (dataFeedTask == null) {
