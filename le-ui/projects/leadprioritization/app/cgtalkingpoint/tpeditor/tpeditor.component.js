@@ -38,6 +38,13 @@ angular.module('lp.cg.talkingpoint.editor', [])
                     e.preventDefault()
                 }
             });
+            ed.on('focus', function(e) {
+                var textarea = angular.element(tinymce.activeEditor.getElement()),
+                    name = textarea.data('name'),
+                    talkingPoint = CgTalkingPointStore.getTalkingPoint(name);
+
+                CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+            });
             ed.on('blur', function(e) {
                 $timeout(function(){
                     if(!CgTalkingPointStore.saveOnBlur || CgTalkingPointStore.deleteClicked) {
@@ -51,7 +58,6 @@ angular.module('lp.cg.talkingpoint.editor', [])
                         return false;
                     }
 
-                    CgTalkingPointStore.setEditedTalkingPoint(content, 'description');
                     talkingPoint.content = content;
 
                     if(CgTalkingPointStore.isTalkingPointDirty(talkingPoint) && !CgTalkingPointStore.getSavingFlag()) {
@@ -84,15 +90,20 @@ angular.module('lp.cg.talkingpoint.editor', [])
     vm.CgTalkingPointStore = CgTalkingPointStore;
 
     vm.expand = function(bool) {
-        CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
         vm.expanded = (bool ? bool : !vm.expanded);
+        if(vm.expanded) {
+            CgTalkingPointStore.setEditedTalkingPoint($scope.tp);
+        }
         var tmce = angular.element('iframe');
         tmce.on('focus',function(){
             console.log(focused);
         });
     };
 
-    //console.log(CgTalkingPointStore.getEditedTalkingPoint('name'), $scope.tp.name, CgTalkingPointStore.getEditedTalkingPoint());
+    vm.titleFocus = function(talkingPoint) {
+        CgTalkingPointStore.setEditedTalkingPoint(talkingPoint);
+    }
+
     if((Date.now() - $scope.tp.updated) < 2000) { // if it has been saved but you want to re-open it
         vm.expand(true);
     }

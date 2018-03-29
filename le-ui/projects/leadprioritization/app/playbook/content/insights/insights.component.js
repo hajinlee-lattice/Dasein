@@ -195,6 +195,16 @@ angular.module('lp.playbook.wizard.insights', [])
             $document.off('click', handleDocumentClick);
         }
     };
+
+    vm.allowAddTalkingPoint = function(talkingPoints, valid) {
+        if(!talkingPoints.length) {
+            return true;
+        }
+        if(valid) {
+            return true;
+        }
+        return false;
+    }
     
     function handleDocumentClick(evt) {
         if (vm.revertClicked) {

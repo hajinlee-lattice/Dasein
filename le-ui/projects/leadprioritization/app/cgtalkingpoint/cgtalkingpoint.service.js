@@ -42,6 +42,15 @@ angular.module('lp.cg.talkingpoint.talkingpointservice', [])
         return this.editedTalkingPoint;
     };
 
+    this.getTalkingPoint = function(name) {
+        if(this.talkingPoints) {
+            var talkingPoint = this.talkingPoints.find(function(item) {
+                return (name === item.name);
+            })
+            return talkingPoint;
+        }
+    }
+
     this.isTalkingPointDirty = function(talkingPoint) {
         if(!talkingPoint) {
             return false;

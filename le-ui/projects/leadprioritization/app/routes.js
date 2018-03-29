@@ -314,11 +314,19 @@ angular
             },
             views: {
                 "main@": {
-                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore) {
+                    controller: function($scope, $stateParams, $compile, $rootScope, Model, ModelStore, RatingEngine, StateHistory) {
+                        var IsRatingEngine = Model.ModelDetails.Name.substring(0,2) == 'ai',
+                            lastFrom = StateHistory.lastFrom();
+
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-                    },
+
+                        if(["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
+                            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
+                        } else {
+                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                        }
+                    }, 
                     template: '<div id="modelDetailContainer" class="model-details"></div>'
                 }
             }

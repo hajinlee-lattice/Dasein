@@ -21,16 +21,17 @@ angular
     });
 
     vm.init = function() {
-
-        console.log(vm.ratingEngine);
-
         vm.IsPmml = IsPmml,
         vm.IsRatingEngine = IsRatingEngine,
         vm.sourceType = Model.ModelDetails.SourceSchemaInterpretation;
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
 
-        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        if(IsRatingEngine) {
+            $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
+        } else {
+            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+        }
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {
             vm.HasRatingsAvailable = true;

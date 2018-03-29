@@ -51,7 +51,7 @@
                     </div>
                 </div>
                 <div class="row tp-footer">
-                    <span ng-click="vm.addTalkingPoint()" class="tp-add-container" ng-disabled="vm.saving">
+                    <span ng-click="vm.addTalkingPoint()" class="tp-add-container" ng-disabled="vm.saving || !vm.allowAddTalkingPoint(vm.talkingPoints, vm.valid)">
                         <button class="add-tp-button button white-button"><i class="fa fa-plus"></i></button><span>Add Talking Point</span>
                     </span>
                 </div>

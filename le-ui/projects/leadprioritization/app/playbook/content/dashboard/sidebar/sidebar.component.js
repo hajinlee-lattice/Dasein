@@ -19,8 +19,6 @@ angular
         vm.play_name = $stateParams.play_name || '';
 
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(vm.play);
-        
-        console.log(vm.play);
 
         vm.segment = vm.play.segment;
         vm.targetsDisabled = (vm.play.ratingEngine ? false : true);
