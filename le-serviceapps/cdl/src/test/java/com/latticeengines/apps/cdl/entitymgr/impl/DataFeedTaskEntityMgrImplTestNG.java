@@ -86,7 +86,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "create")
-    public void retrieve() {
+    public void retrieve() throws InterruptedException {
         assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 0);
 
         Table dataTable = new Table();
@@ -94,8 +94,14 @@ public class DataFeedTaskEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         dataTable.setDisplayName(dataTable.getName());
         dataTable.setTenant(MultiTenantContext.getTenant());
         datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
-
-        assertEquals(datafeedTaskTableEntityMgr.countDataFeedTaskTables(task), 1);
+        int count = datafeedTaskTableEntityMgr.countDataFeedTaskTables(task);
+        int retry = 0;
+        while (count == 0 && retry < 2) {
+            Thread.sleep(200);
+            count = datafeedTaskTableEntityMgr.countDataFeedTaskTables(task);
+            retry++;
+        }
+        assertEquals(count, 1);
         assertEquals(datafeedTaskTableEntityMgr.pollFirstDataTable(task).toString(), dataTable.toString());
     }
 
