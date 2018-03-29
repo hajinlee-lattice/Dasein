@@ -797,10 +797,12 @@ angular.module('lp.ratingsengine')
             }
         });
 
-        ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument).then(function(result) {
-            RatingsEngineStore.getRating(ratingId).then(function(rating) {
-                RatingsEngineStore.nextLaunchAIModel(nextState, rating.activeModel);
-            });
+        ImportWizardService.SaveFieldDocuments(RatingsEngineStore.getCSVFileName(), FieldDocument, {
+            excludeCustomFileAttributes: RatingsEngineStore.getCustomEventModelingType() == 'CDL'
+            }, true).then(function(result) {
+                RatingsEngineStore.getRating(ratingId).then(function(rating) {
+                    RatingsEngineStore.nextLaunchAIModel(nextState, rating.activeModel);
+                });
         });
         $state.go(nextState);
     }

@@ -592,18 +592,19 @@ angular.module('lp.import')
 	        return deferred.promise;
 	    };
 
-	    this.SaveFieldDocuments = function(FileName, FieldDocument, params) {
+	    this.SaveFieldDocuments = function(FileName, FieldDocument, params, forModeling) {
             var deferred = $q.defer(),
                 result,
                 params = params || {};
 
-            if (Object.keys(params).length != 0) {
+            if (!forModeling) {
                 params.displayName = params.displayName || FileName,
                 params.source = params.source || 'File',
                 params.entity = params.entity || 'Account',
                 params.feedType = params.feedType || params.entity + 'Schema' || 'AccountSchema';
             } else {
                 params.displayName = FileName;
+                params.excludeCustomFileAttributes = params.excludeCustomFileAttributes;
             }
 
 	        $http({

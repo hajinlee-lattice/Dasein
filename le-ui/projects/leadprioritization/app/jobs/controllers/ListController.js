@@ -124,7 +124,9 @@ angular.module('lp.jobs.model', [
         getAllJobs();
 
         if (modelId) {
-            BULK_SCORING_ID = $interval(getAllJobs, BULK_SCORING_INTERVAL);
+            BULK_SCORING_ID = $interval( function() {
+                getAllJobs();
+                }, BULK_SCORING_INTERVAL);
         }
 
         $scope.$on("JobCompleted", function(evt, data) {
