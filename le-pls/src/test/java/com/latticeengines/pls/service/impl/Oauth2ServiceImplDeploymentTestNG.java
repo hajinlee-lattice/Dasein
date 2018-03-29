@@ -63,10 +63,12 @@ public class Oauth2ServiceImplDeploymentTestNG extends PlsDeploymentTestNGBase {
         assertNotEquals(oauth2AccessTokenEntityMgr.get(tenantId, appId).getAccessToken(), accessToken.getValue());
     }
 
-    @Test (groups = "deployment")
+    @Test(groups = "deployment", dependsOnMethods = { "createAccessAndRefreshToken" })
     public void createAccessIn10SecondsWindow() throws Exception {
         setupSecurityContext(mainTestTenant);
         String appId = "DUMMY_APP";
+        // wait 10 sec to make sure the first token is new
+        Thread.sleep(10 * 1000);
         long time1 = System.currentTimeMillis();
         OAuth2AccessToken accessToken1 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
         OAuth2AccessToken accessToken2 = oauth2Service.createOAuth2AccessToken(tenantId, appId);
