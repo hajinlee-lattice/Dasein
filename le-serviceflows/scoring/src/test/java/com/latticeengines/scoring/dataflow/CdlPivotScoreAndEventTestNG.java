@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
@@ -32,8 +33,11 @@ public class CdlPivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalT
         PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
         String modelguid1 = "ms__71fa73d2-ce4b-483a-ab1a-02e4471cd0fc-RatingEn";
         String modelguid2 = "ms__af81bb1f-a71e-4b3a-89cd-3a9d0c02b0d1-CDLEnd2E";
-        params.setAvgScores(ImmutableMap.of(modelguid1, 0.05, modelguid2, 0.05));
         params.setExpectedValues(ImmutableMap.of(modelguid1, true, modelguid2, false));
+        params.setScoreFieldMap(ImmutableMap.of( //
+                modelguid1, InterfaceName.ExpectedRevenue.name(), //
+                modelguid2, InterfaceName.RawScore.name() //
+        ));
         return params;
     }
 

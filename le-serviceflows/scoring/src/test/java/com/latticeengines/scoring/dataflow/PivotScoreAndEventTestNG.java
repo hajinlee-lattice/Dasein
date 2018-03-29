@@ -16,6 +16,7 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.csv.LECSVFormat;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.serviceflows.functionalframework.ServiceFlowsDataFlowFunctionalTestNGBase;
 
@@ -28,7 +29,9 @@ public class PivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalTest
         PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
         String modelguid = "ms__f7f1eb16-0d26-4aa1-8c4a-3ac696e13d06-PLS_model";
         params.setAvgScores(ImmutableMap.of(modelguid, 0.05));
-        params.setExpectedValues(ImmutableMap.of(modelguid, false));
+        params.setScoreFieldMap(ImmutableMap.of( //
+                modelguid, InterfaceName.Event.name()//
+        ));
         return params;
     }
 

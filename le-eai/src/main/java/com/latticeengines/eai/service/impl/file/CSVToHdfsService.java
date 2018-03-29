@@ -40,10 +40,9 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.eai.runtime.service.EaiRuntimeService;
-import com.latticeengines.eai.service.EaiMetadataService;
 import com.latticeengines.eai.service.ImportService;
-import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.dataplatform.JobProxy;
 
 @Component("csvToHdfsService")
 public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> {
@@ -58,9 +57,6 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
 
     @Autowired
     private DataFeedProxy dataFeedProxy;
-
-    @Autowired
-    private EaiMetadataService eaiMetadataService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -83,12 +79,12 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
             context.setProperty(ImportProperty.MULTIPLE_EXTRACT, new HashMap<String, Boolean>());
             context.setProperty(ImportProperty.EXTRACT_PATH_LIST, new HashMap<String, List<String>>());
             context.setProperty(ImportProperty.EXTRACT_RECORDS_LIST, new HashMap<String, List<Long>>());
-            if(config.getBusinessEntity() != null && config.getBusinessEntity().equals(BusinessEntity.Transaction)) {
+            if (config.getBusinessEntity() != null && config.getBusinessEntity().equals(BusinessEntity.Transaction)) {
                 context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.FALSE.toString());
             } else {
                 context.setProperty(ImportProperty.DEDUP_ENABLE, Boolean.TRUE.toString());
             }
-            //CDL import won't update the attribute name to interface name.
+            // CDL import won't update the attribute name to interface name.
             context.setProperty(ImportProperty.SKIP_UPDATE_ATTR_NAME, Boolean.TRUE.toString());
             context.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
             DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace, config.getJobIdentifier());
@@ -117,8 +113,10 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
                         JsonUtils.serialize(template.getModelingMetadata()));
                 sourceImportConfig.getProperties().put(ImportProperty.HDFSFILE, config.getFilePath());
                 ImportService importService = ImportService.getImportService(sourceImportConfig.getSourceType());
-                ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("", context);
-                List<Table> metadata = importService.importMetadata(sourceImportConfig, context, connectorConfiguration);
+                ConnectorConfiguration connectorConfiguration = importService.generateConnectorConfiguration("",
+                        context);
+                List<Table> metadata = importService.importMetadata(sourceImportConfig, context,
+                        connectorConfiguration);
                 tableMetadata.addAll(metadata);
 
                 sourceImportConfig.setTables(metadata);
@@ -137,7 +135,7 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
 
     @SuppressWarnings("unchecked")
     private void waitAndFinalizeJob(CSVToHdfsConfiguration config, ImportContext context, String templateName,
-                                    Long jobDetailID) {
+            Long jobDetailID) {
         // update csv import processed records.
         ApplicationId appId = context.getProperty(ImportProperty.APPID, ApplicationId.class);
 
@@ -154,11 +152,9 @@ public class CSVToHdfsService extends EaiRuntimeService<CSVToHdfsConfiguration> 
         long ignoredRecords = counters.getCounter(RecordImportCounter.IGNORED_RECORDS).getValue();
         long duplicatedRecords = counters.getCounter(RecordImportCounter.DUPLICATE_RECORDS).getValue();
         long totalRecords = processedRecords + ignoredRecords + duplicatedRecords;
-        updateJobDetailExtractInfo(jobDetailID, templateName,
-                Arrays.asList(targetPathsMap.get(templateName)), Arrays.asList(Long.toString(processedRecords)),
-                totalRecords, ignoredRecords, duplicatedRecords);
+        updateJobDetailExtractInfo(jobDetailID, templateName, Arrays.asList(targetPathsMap.get(templateName)),
+                Arrays.asList(Long.toString(processedRecords)), totalRecords, ignoredRecords, duplicatedRecords);
     }
-
 
     private String createTargetPath(CustomerSpace customerSpace) {
         String targetPath = String.format("%s/%s/DataFeed1/DataFeed1-Account/Extracts/%s",

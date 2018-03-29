@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceflows.scoring.dataflow;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -21,10 +22,13 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
     private String eventColumn;
 
     @JsonProperty("avg_scores")
-    private Map<String, Double> avgScores;
+    private Map<String, Double> avgScores = new HashMap<>();
 
     @JsonProperty("is_expected_value")
-    private Map<String, Boolean> expectedValue;
+    private Map<String, Boolean> expectedValue = new HashMap<>();
+
+    @JsonProperty("score_field_map")
+    private Map<String, String> scoreFieldMap = new HashMap<>();
 
     /**
      * Serialization constructor
@@ -67,6 +71,14 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
 
     public void setExpectedValues(Map<String, Boolean> expectedValue) {
         this.expectedValue = expectedValue;
+    }
+
+    public Map<String, String> getScoreFieldMap() {
+        return scoreFieldMap;
+    }
+
+    public void setScoreFieldMap(Map<String, String> scoreFieldMap) {
+        this.scoreFieldMap = scoreFieldMap;
     }
 
     @Override
