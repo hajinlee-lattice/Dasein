@@ -47,7 +47,8 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.init = function($q, $filter) {
 
-        console.log(vm.current.ratings);
+        var arr = vm.current.ratings;
+        console.log(arr.slice(Math.max(arr.length - 5, 1)));
 
         RatingsEngineStore.clear();
 
@@ -120,7 +121,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     'top': 5,
                 },
                 'chart': {
-                    'header':'Attributes Value',
+                    'header':'Value',
                     'emptymsg': '',
                     'usecolor': false,
                     'color': '#2E6099',
@@ -135,7 +136,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 },
                 'columns': [{
                         'field': 'Lift',
-                        'label': 'Lifts',
+                        'label': 'Lift',
                         'type': 'string',
                         'suffix': 'x',
                         'chart': true
@@ -147,15 +148,17 @@ angular.module('lp.ratingsengine.ratingslist', [
     }
 
     vm.getChartConfig = function (ratingType) {        
-        if (ratingType === 'CROSS_SELL' || ratingType === 'CUSTOM_EVENT') {
-            return getBarChartLiftConfig();
-        } else {
-            return getBarChartConfig();    
-        }        
+        return getBarChartLiftConfig();
+
+        // if (ratingType === 'CROSS_SELL' || ratingType === 'CUSTOM_EVENT') {
+        //     return getBarChartLiftConfig();
+        // } else {
+        //     return getBarChartConfig();    
+        // }        
     }
 
-    function getTestData() {
-        return [{
+    vm.getData = function () {
+        var data = [{
                 "Lbl": "B",
                 "Cnt": 10,
                 "Lift": "1.3",
@@ -206,12 +209,25 @@ angular.module('lp.ratingsengine.ratingslist', [
                 ]
             }
         ];
-    }
-
-    vm.getData = function () {
-        var data = getTestData();
         // console.log('Data ',data);
         return data;
+    }
+    vm.getAttributeRules = function() {
+
+        return 124;
+
+        // var attributes = QueryStore.getDataCloudAttributes(true);
+        
+        // attributes = attributes.filter(function(item) {
+            
+        //     var restriction = item.bucketRestriction,
+        //         isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
+        //         isSameBucket = true,
+        //         bkt = restriction.bkt;
+        //     var ret = QueryTreeService.getAttributeRules(restriction, bkt, bucket, isSameAttribute);
+        //     return ret;
+        // });
+        // return attributes;
     }
 
     vm.checkState = function(type) {
@@ -290,17 +306,9 @@ angular.module('lp.ratingsengine.ratingslist', [
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
                     RatingsEngineStore.setRating(engine);
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
-                        
-                        // console.log(model);
-
                         var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
                             modelingJobId = model.AI.modelingJobId;
 
-                        console.log(modelId);
-                        console.log(modelingJobId);
-
-                        // if (modelId === null && modelingJobId !== null) {
-                        //     $state.go('home.ratingsengine.productpurchase.segment.products.prioritization.training.creation', {rating_id: rating.id, engineType: model.AI.modelingStrategy, fromList: true});
                         if (modelingJobId !== null) {
                             $state.go('home.ratingsengine.dashboard', { 
                                 rating_id: rating.id, 

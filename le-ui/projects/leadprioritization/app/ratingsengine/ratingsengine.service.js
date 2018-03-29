@@ -268,13 +268,9 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngine = function(nextState) {
-        var currentRating = RatingsEngineStore.getCurrentRating();
-        var currentSegment = RatingsEngineStore.getSegment();
-
-        console.log(currentRating);
-        console.log(currentSegment);
-
-        // console.log("save engine", currentRating);
+        var currentRating = RatingsEngineStore.getCurrentRating(),
+            currentSegment = RatingsEngineStore.getSegment();
+        
         if (currentRating.segment != null && currentSegment != null && currentRating.segment.name != currentSegment.name) {
             RatingsEngineStore.setRating({});
         }
@@ -299,8 +295,10 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveSummary = function(nextState){
-        RatingsEngineStore.nextSaveRatingEngine().then(function(result) {
-            $state.go(nextState, { rating_id: $stateParams.rating_id });
+        var rating = RatingsEngineStore.getCurrentRating();
+
+        RatingsEngineStore.saveRating(rating).then(function(result) {
+            $state.go(nextState, { rating_id: rating.id });
         });
     }
 
@@ -356,34 +354,35 @@ angular.module('lp.ratingsengine')
         return this.currentRating;
     }
 
-    this.saveRating = function(saveOpts) {
+    this.saveRating = function(rating) {
         var deferred = $q.defer(),
-            ClientSession = BrowserStorageUtility.getClientSession(),
-            rating = RatingsEngineStore.getCurrentRating();
+            ClientSession = BrowserStorageUtility.getClientSession(); 
+
+        console.log($stateParams.opts);
 
         opts = {
-            createdBy: ((saveOpts.createdBy !== undefined) ? saveOpts.createdBy : ClientSession.EmailAddress),
-            type: ((saveOpts.type !== undefined) ? saveOpts.type : 'RULE_BASED'),
+            createdBy: rating.createdBy !== undefined ? rating.createdBy : ClientSession.EmailAddress,
+            type: rating.type !== undefined ? rating.type : 'RULE_BASED',
             segment: rating.segment || RatingsEngineStore.getSegment(),
-            displayName: rating.displayName,
-            status: rating.status,
+            displayName: $stateParams.opts !== undefined ? $stateParams.opts.displayName : rating.displayName,
+            status: $stateParams.opts !== undefined ? $stateParams.opts.status : rating.status,
             id: rating.id,
-            note: rating.note
+            note: $stateParams.opts !== undefined ? $stateParams.opts.note : rating.note
         };
 
-        if ((saveOpts.type !== undefined) && (saveOpts.type === 'CROSS_SELL')) {
+        if (rating.type !== undefined && rating.type === 'CROSS_SELL') {
             opts.activeModel = {
                 AI: {
                     advancedModelingConfig: {
                         cross_sell: {
-                            modelingStrategy: saveOpts.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
+                            modelingStrategy: rating.activeModel.AI.advancedModelingConfig.cross_sell.modelingStrategy
                         }
                     }
                 }
             };
             opts.advancedRatingConfig = {
                 cross_sell: {
-                    modelingStrategy: saveOpts.advancedRatingConfig.cross_sell.modelingStrategy
+                    modelingStrategy: rating.advancedRatingConfig.cross_sell.modelingStrategy
                 }
             };
         };

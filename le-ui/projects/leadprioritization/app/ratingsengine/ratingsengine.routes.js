@@ -171,6 +171,9 @@ angular
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
 
+                            console.log($scope.rating_id);
+                            console.log(Dashboard);
+
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -210,81 +213,121 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.add', {
-                url: '/add',
+            .state('home.ratingsengine.dashboard.attributes', {
+                url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
+                //resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
+                /**
+                 * for now we're ducplciating these here from datacloud.routes because when minified the resolves fail
+                 */
+                resolve: {
+                    EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getCount().then(function (result) {
+                            DataCloudStore.setMetadata('enrichmentsTotal', result.data);
+                            deferred.resolve(result.data);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getAllTopAttributes().then(function (result) {
+                            deferred.resolve(result['Categories'] || result || {});
+                        });
+
+                        return deferred.promise;
+                    }],
+                    EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.setHost(ApiHost);
+
+                        DataCloudStore.getPremiumSelectMaximum().then(function (result) {
+                            deferred.resolve(result);
+                        });
+
+                        return deferred.promise;
+                    }],
+                    // below resolves are needed. Do not removed
+                    // override at child state when needed
+                    LookupResponse: [function () {
+                        return { attributes: null };
+                    }],
+                    QueryRestriction: [function () {
+                        return null;
+                    }],
+                    CurrentConfiguration: [function () {
+                        return null;
+                    }],
+                    // end duplicates
+                    RatingsEngineModels: function ($q, $stateParams, DataCloudStore, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function (data) {
+                            var model = (data && data[0] ? data[0] : {});
+
+                            if (!model.rule.ratingRule.bucketToRuleMap) {
+                                model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
+                            }
+
+                            // console.log(model);
+
+                            RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
+
+                            deferred.resolve(model);
+                        });
+
+                        return deferred.promise;
+                    }
+                },
                 views: {
-                    'wizard_content@home.ratingsengine.rulesprospects': {
+                    'main@': {
                         controller: 'DataCloudController',
                         controllerAs: 'vm',
                         templateUrl: '/components/datacloud/explorer/explorer.component.html'
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.rules', {
+            .state('home.ratingsengine.dashboard.attributes.add', {
+                url: '/add',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    gotoNonemptyCategory: true
+                },
+                views: {
+                    'main@': {
+                        controller: 'DataCloudController',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/datacloud/explorer/explorer.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.dashboard.attributes.rules', {
                 url: '/rules',
                 resolve: {
-                    // EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                    //     var deferred = $q.defer();
-
-                    //     DataCloudStore.setHost(ApiHost);
-
-                    //     DataCloudStore.getCount().then(function (result) {
-                    //         DataCloudStore.setMetadata('enrichmentsTotal', result.data);
-                    //         deferred.resolve(result.data);
-                    //     });
-
-                    //     return deferred.promise;
-                    // }],
-                    // Enrichments: ['$q', 'DataCloudStore', 'ApiHost', 'EnrichmentCount', function ($q, DataCloudStore, ApiHost, EnrichmentCount) {
-                    //     var deferred = $q.defer();
-
-                    //     DataCloudStore.setHost(ApiHost);
-
-                    //     DataCloudStore.getAllEnrichmentsConcurrently(EnrichmentCount).then(function (result) {
-                    //         deferred.resolve(result);
-                    //     });
-
-                    //     return deferred.promise;
-                    // }],
-                    // EnrichmentTopAttributes: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                    //     var deferred = $q.defer();
-
-                    //     DataCloudStore.setHost(ApiHost);
-
-                    //     DataCloudStore.getAllTopAttributes().then(function (result) {
-                    //         deferred.resolve(result['Categories'] || result || {});
-                    //     });
-
-                    //     return deferred.promise;
-                    // }],
-                    // EnrichmentPremiumSelectMaximum: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
-                    //     var deferred = $q.defer();
-
-                    //     DataCloudStore.setHost(ApiHost);
-
-                    //     DataCloudStore.getPremiumSelectMaximum().then(function (result) {
-                    //         deferred.resolve(result);
-                    //     });
-
-                    //     return deferred.promise;
-                    // }],
-                    // // below resolves are needed. Do not removed
-                    // // override at child state when needed
-                    // LookupResponse: [function () {
-                    //     return { attributes: null };
-                    // }],
-                    // QueryRestriction: [function () {
-                    //     return null;
-                    // }],
-                    // CurrentConfiguration: [function () {
-                    //     return null;
-                    // }],
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
 
@@ -363,6 +406,29 @@ angular
                     }
                 }
             })
+            .state('home.ratingsengine.dashboard.attributes.rules.picker', {
+                url: '/picker/:entity/:fieldname',
+                resolve: {
+                    PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
+                        var deferred = $q.defer();
+                        var entity = $stateParams.entity;
+                        var fieldname = $stateParams.fieldname;
+
+                        QueryTreeService.getPickerCubeData(entity, fieldname).then(function(result) {
+                            deferred.resolve(result.data);
+                        });
+                        
+                        return deferred.promise;
+                    }]
+                },
+                views: {
+                    'main@': {
+                        controller: 'ValuePickerController',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/datacloud/picker/picker.component.html'
+                    }
+                }
+            })
             .state('home.ratingsengine.dashboard.notes', {
                 url: '/notes',
                 resolve: {
@@ -400,6 +466,25 @@ angular
                             $scope.rating_id = $stateParams.rating_id || '';
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
+
+                            $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
+                            $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
+                            if($scope.isRuleBased || $scope.isCustomEvent) {
+                                if($scope.isRuleBased) {
+                                    $scope.typeContext = 'rule';
+                                } else {
+                                    $scope.typeContext = 'AI';
+                                }
+                                $scope.modelingStrategy = RatingEngine.type;
+                            } else {
+                                var type = RatingEngine.type.toLowerCase();
+                                $scope.typeContext = 'AI';
+
+                                $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
+                            }
+                            $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
+                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary != null || RatingEngine.activeModel[$scope.typeContext].modelSummary != undefined);
+
                             $scope.stateName = function () {
                                 return $state.current.name;
                             }

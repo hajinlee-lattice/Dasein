@@ -86,6 +86,9 @@ angular.module('lp.ratingsengine.dashboard', [
                 status: newStatus
             }
             RatingsEngineService.saveRating(newRating).then(function(data){
+                $rootScope.$broadcast('statusChange', { 
+                    activeStatus: data.status
+                });
                 vm.ratingEngine = data;
                 vm.status_toggle = vm.isActive(data.status);
                 vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');

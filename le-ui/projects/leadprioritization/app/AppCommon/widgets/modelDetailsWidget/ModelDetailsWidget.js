@@ -18,18 +18,20 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
     if (data === undefined) {
         var ratingEngine = $scope.RatingEngine;
 
-        // console.log(ratingEngine);
-
         $scope.IsRatingEngine = true;
         $scope.type = ratingEngine.type;
         $scope.displayName = ratingEngine.displayName;
         $scope.createdBy = ratingEngine.createdBy;
         $scope.created = ratingEngine.created;
-
-        $scope.segmentName = ratingEngine.segment.display_name;
-        $scope.totalAccounts = ratingEngine.segment.accounts;
-        $scope.activeStatus = ratingEngine.status;
         $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
+
+        if (ratingEngine.segment) {
+            $scope.segmentName = ratingEngine.segment.display_name;
+            $scope.totalAccounts = ratingEngine.segment.accounts;
+        } else {
+            $scope.segmentName = 'No segment selected';
+            $scope.totalAccounts = '0';
+        }
 
         $scope.IsRuleBased = (ratingEngine.type === 'RULE_BASED') ? true : false;
         $scope.IsCustomEvent = (ratingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -49,6 +51,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
 
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
         $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummary != null) || (ratingEngine.activeModel[$scope.typeContext].modelSummary != undefined));
+        $scope.activeStatus = ratingEngine.status;
+
+        $scope.$on('statusChange', function(event, args) {
+            $scope.activeStatus = args.activeStatus;
+        });
 
     } else {
 
@@ -65,7 +72,9 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 ratingEngine = RatingsEngineStore.getCurrentRating(),
                 type = ratingEngine.type.toLowerCase();
 
-            $scope.RatingEngine = ratingEngine;
+            $scope.$on('statusChange', function(event, args) {
+                $scope.activeStatus = args.activeStatus;
+            });
 
             // console.log(engineId);
             // console.log(ratingEngine);
@@ -91,14 +100,11 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
             }
             $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
             $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummary !== null || ratingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
-
-            // $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
-
             $scope.segmentName = ratingEngine.segment.display_name;
             $scope.totalAccounts = ratingEngine.segment.accounts;
-            $scope.activeStatus = ratingEngine.status;
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;
-            // $scope.activeIteration = ratingEngine.activeModel.AI.iteration;
+            $scope.activeStatus = ratingEngine.status;
+
         }
 
         var isActive = modelDetails[widgetConfig.StatusProperty] == 'Active';
