@@ -1,6 +1,11 @@
 package com.latticeengines.cdl.workflow.steps;
 
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -23,18 +28,18 @@ public class MergeProductFunctionalTestNG {
     private Map<String, Integer> report;
 
     private final List<Product> productGroup1 = Arrays.asList(
-            new Product("1", "sku_g1p1", "g1p1", ProductType.Bundle.name(),
-                    "b1", null, null, null, null, null, null, null, ProductStatus.Active.name()),
-            new Product("2", "sku_g1p2", "g1p2", ProductType.Bundle.name(),
-                    "b2", null, null, null, null, null, null, null, ProductStatus.Active.name()));
+            new Product("1", null, null, null,
+                    "b1", null, null, null, null, null, null, null, null),
+            new Product("2", null, null, null,
+                    "b2", null, null, null, null, null, null, null, null));
 
     private final List<Product> productGroup2 = Arrays.asList(
-            new Product("1", "sku_g2p1", "g2p1", ProductType.Hierarchy.name(),
-                    null, "l1", "f1", "c1", null, null, null, null, ProductStatus.Active.name()),
-            new Product("2", "sku_g2p2", "g2p2", ProductType.Hierarchy.name(),
-                    null, null, "f2", "c2", null, null, null, null, ProductStatus.Active.name()),
-            new Product("3", "sku_g2p3", "g2p3", ProductType.Hierarchy.name(),
-                    null, null, null, "c3", null, null, null, null , ProductStatus.Active.name()));
+            new Product("1", null, null, null,
+                    null, "l1", "f1", "c1", null, null, null, null, null),
+            new Product("2", null, null, null,
+                    null, null, "f2", "c2", null, null, null, null, null),
+            new Product("3", null, null, null,
+                    null, null, null, "c3", null, null, null, null, null));
 
     private final List<Product> productGroup3 = Arrays.asList(
             new Product("1", "sku_g3p1", null, null,
@@ -77,10 +82,16 @@ public class MergeProductFunctionalTestNG {
         });
         Product product = getProductById(result, "1");
         Assert.assertNotNull(product);
-        Assert.assertNotNull(getProductById(result, product.getProductBundleId()));
+        Assert.assertEquals(product.getProductType(), ProductType.Bundle.name());
+        Product bundleProduct = getProductById(result, product.getProductBundleId());
+        Assert.assertNotNull(bundleProduct);
+        Assert.assertEquals(bundleProduct.getProductType(), ProductType.Analytic.name());
         product = getProductById(result, "2");
         Assert.assertNotNull(product);
-        Assert.assertNotNull(getProductById(result, product.getProductBundleId()));
+        Assert.assertEquals(product.getProductType(), ProductType.Bundle.name());
+        bundleProduct = getProductById(result, product.getProductBundleId());
+        Assert.assertNotNull(bundleProduct);
+        Assert.assertEquals(bundleProduct.getProductType(), ProductType.Analytic.name());
     }
 
     @Test(groups = "functional")
@@ -94,19 +105,34 @@ public class MergeProductFunctionalTestNG {
         });
         Product product = getProductById(result, "1");
         Assert.assertNotNull(product);
-        Assert.assertNotNull(getProductById(result, product.getProductLineId()));
-        Assert.assertNotNull(getProductById(result, product.getProductFamilyId()));
-        Assert.assertNotNull(getProductById(result, product.getProductCategoryId()));
+        Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
+        Product spendingProduct = getProductById(result, product.getProductLineId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+        spendingProduct = getProductById(result, product.getProductFamilyId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+        spendingProduct = getProductById(result, product.getProductCategoryId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
         product = getProductById(result, "2");
         Assert.assertNotNull(product);
+        Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
         Assert.assertNull(product.getProductLineId());
-        Assert.assertNotNull(getProductById(result, product.getProductFamilyId()));
-        Assert.assertNotNull(getProductById(result, product.getProductCategoryId()));
+        spendingProduct = getProductById(result, product.getProductFamilyId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
+        spendingProduct = getProductById(result, product.getProductCategoryId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
         product = getProductById(result, "3");
         Assert.assertNotNull(product);
+        Assert.assertEquals(product.getProductType(), ProductType.Hierarchy.name());
         Assert.assertNull(product.getProductLineId());
         Assert.assertNull(product.getProductFamilyId());
-        Assert.assertNotNull(getProductById(result, product.getProductCategoryId()));
+        spendingProduct = getProductById(result, product.getProductCategoryId());
+        Assert.assertNotNull(spendingProduct);
+        Assert.assertEquals(spendingProduct.getProductType(), ProductType.Spending.name());
     }
 
     @Test(groups = "functional")

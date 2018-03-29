@@ -16,4 +16,7 @@ public final class HashUtils {
         }
     }
 
+    public static String getCleanedString(String str) {
+        return str.replaceAll("[^a-zA-Z0-9]+", "");
+    }
 }

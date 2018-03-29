@@ -1,7 +1,6 @@
 package com.latticeengines.common.exposed.util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -46,6 +45,16 @@ public class HashUtilsUnitTestNG {
         Integer maxLength = hashs.stream().map(String::length).max(Comparator.naturalOrder()).orElse(null);
         Assert.assertNotNull(maxLength);
         log.info("Maximum length of hash is " + maxLength);
+    }
+
+    @Test(groups = "unit")
+    public void testCleanedString() {
+        String hashed = HashUtils.getShortHash("a product name supposed to be hashed.");
+        log.info("Hashed string: " + hashed);
+        Assert.assertTrue(HashUtils.getCleanedString(hashed).matches("[a-zA-Z0-9]*"));
+        Assert.assertFalse("abcd_1234/345!gdas?dsgafasd/dasgdsa\\dagdas".matches("[a-zA-Z0-9]*"));
+        Assert.assertTrue(HashUtils.getCleanedString("abcd_1234/345!gdas?dsgafasd/dasgdsa\\dagdas")
+                .matches("[a-zA-Z0-9]*"));
     }
 
     private String getRandomString(int length) {

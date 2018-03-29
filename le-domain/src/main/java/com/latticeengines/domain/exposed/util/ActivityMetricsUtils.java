@@ -86,11 +86,11 @@ public class ActivityMetricsUtils {
     }
 
     public static String getFullName(ActivityMetrics activityMetrics, String activityId) {
-        return HEADER + activityId.replace("_", "") + SEPARATOR + getNameWithPeriod(activityMetrics);
+        return HEADER + activityId + SEPARATOR + getNameWithPeriod(activityMetrics);
     }
 
     public static String getFullName(String nameWithPeriod, String activityId) {
-        return HEADER + activityId.replace("_", "") + SEPARATOR + nameWithPeriod;
+        return HEADER + activityId + SEPARATOR + nameWithPeriod;
     }
 
     public static String getActivityIdFromFullName(String fullName) {

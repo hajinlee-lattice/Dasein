@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.UUID;
 import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
@@ -20,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.util.HashUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -88,6 +88,17 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         Table currentTable = dataCollectionProxy.getTable(customerSpace.toString(), TableRoleInCollection.ConsolidatedProduct, active);
         if (currentTable != null) {
             currentProducts = ProductUtils.loadProducts(yarnConfiguration, currentTable.getExtracts().get(0).getPath());
+            currentProducts.forEach(product -> {
+                if (product.getProductType() == null) {
+                    log.info("Found null product type. ProductId=" + product.getProductId());
+                    product.setProductType(ProductType.Analytic.name());
+                }
+
+                if (product.getProductStatus() == null) {
+                    log.info("Found null product status. ProductId=" + product.getProductId());
+                    product.setProductStatus(ProductStatus.Active.name());
+                }
+            });
         } else {
             currentProducts = new ArrayList<>();
         }
@@ -304,7 +315,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String productId = id;
 
         if (id == null) {
-            productId = createProductId(compositeId, currentProductMap);
+            productId = createProductId(compositeId, currentProductMap, name);
         }
 
         Product product = inputProductMap.get(compositeId);
@@ -330,7 +341,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String name = inputProduct.getProductName();
         String description = inputProduct.getProductDescription();
         String bundle = inputProduct.getProductBundle();
-        String compositeId = ProductUtils.getCompositeId(inputProduct.getProductType(), id, name, bundle);
+        String compositeId = ProductUtils.getCompositeId(ProductType.Bundle.name(), id, name, bundle);
 
         Product newProduct = new Product();
         newProduct.setProductId(id);
@@ -351,7 +362,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String productId = id;
 
         if (id == null) {
-            productId = createProductId(compositeId, currentProductMap);
+            productId = createProductId(compositeId, currentProductMap, name);
         }
 
         Product product = inputProductMap.get(compositeId);
@@ -469,8 +480,10 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         return result;
     }
 
-    private String createProductId(String compositeId, Map<String, Product> currentProductMap) {
+    private String createProductId(String compositeId, Map<String, Product> currentProductMap, String productName) {
         Product currentProduct = currentProductMap.get(compositeId);
-        return (currentProduct != null) ? currentProduct.getProductId() : UUID.randomUUID().toString();
+        return (currentProduct != null) ?
+                currentProduct.getProductId() :
+                HashUtils.getCleanedString(HashUtils.getShortHash(productName));
     }
 }
