@@ -1,5 +1,7 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -15,9 +17,11 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 
@@ -25,6 +29,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     private static final String SEGMENT_NAME = "segment";
     private static final String CREATED_BY = "lattice@lattice-engines.com";
+    private static final String TALKINGPOINT_CONTENT = "<p>Space={!Space}</p> <p>Hello&nbsp;{!PlaySolutionName}, I am&nbsp;{!ExpectedValue}</p> <p>Let's checkout&nbsp;{!Account.Website}, and DUNS={!Account.DUNS},</p> <p>in&nbsp;{!Account.LDC_City},&nbsp;{!Account.LDC_State}, {!Account.LDC_Country}</p>";
 
     private static final Logger log = LoggerFactory.getLogger(PlayServiceImplDeploymentTestNG.class);
 
@@ -43,6 +48,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     private TalkingPointProxy talkingPointProxy;
 
     private Play play;
+    private String playName;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -68,10 +74,10 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
     }
 
     @Test(groups = "deployment")
-    public void testCrud() {
+    public void testCreateAndGet() {
         Play newPlay = playService.createOrUpdate(play, mainTestTenant.getId());
         assertPlay(newPlay);
-        String playName = newPlay.getName();
+        playName = newPlay.getName();
         newPlay = playService.getPlayByName(playName);
         assertPlay(newPlay);
         newPlay = playService.getFullPlayByName(playName);
@@ -80,16 +86,39 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 1);
         try {
-            plays = playService.getAllFullPlays(false, "someRandomString");
+            playService.getAllFullPlays(false, "someRandomString");
             Assert.fail("Should have thrown exception");
         } catch (Exception e) {
             Assert.assertTrue(e instanceof NullPointerException);
         }
+    }
 
+    @Test(groups = "deployment", dependsOnMethods = { "testCreateAndGet" })
+    public void testFindDependingAttributes() {
+        createTalkingPoints();
+        List<AttributeLookup> attributes = playService.findDependingAttributes(playService.getAllPlays());
+
+        Assert.assertNotNull(attributes);
+        Assert.assertEquals(attributes.size(), 5);
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingAttributes" })
+    public void testFindDependingPalys() {
+        List<String> attributes = new ArrayList<>();
+        attributes.add("Account.DUNS");
+        List<Play> plays = playService.findDependingPalys(attributes);
+
+        Assert.assertNotNull(plays);
+        Assert.assertEquals(plays.size(), 1);
+        assertPlay(plays.get(0));
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testFindDependingPalys" })
+    public void testDelete() {
         playService.deleteByName(playName);
-        newPlay = playService.getPlayByName(playName);
+        Play newPlay = playService.getPlayByName(playName);
         Assert.assertNull(newPlay);
-        plays = playService.getAllPlays();
+        List<Play> plays = playService.getAllPlays();
         Assert.assertNotNull(plays);
         Assert.assertEquals(plays.size(), 0);
     }
@@ -119,4 +148,17 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         return play;
     }
 
+    private void createTalkingPoints() {
+        TalkingPointDTO talkingPointDTO = new TalkingPointDTO();
+        talkingPointDTO.setName("TalkingPoint_Name");
+        talkingPointDTO.setPlayName(playName);
+        talkingPointDTO.setTitle("TalkingPoint_Title");
+        talkingPointDTO.setContent(TALKINGPOINT_CONTENT);
+        talkingPointDTO.setOffset(1);
+        talkingPointDTO.setCreated(new Date());
+        talkingPointDTO.setUpdated(new Date());
+        List<TalkingPointDTO> talkingPointDTOS = new ArrayList<>();
+        talkingPointDTOS.add(talkingPointDTO);
+        talkingPointProxy.createOrUpdate(talkingPointDTOS, mainCustomerSpace);
+    }
 }
