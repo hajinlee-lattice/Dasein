@@ -24,9 +24,6 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
     @JsonProperty("avg_scores")
     private Map<String, Double> avgScores = new HashMap<>();
 
-    @JsonProperty("is_expected_value")
-    private Map<String, Boolean> expectedValue = new HashMap<>();
-
     @JsonProperty("score_field_map")
     private Map<String, String> scoreFieldMap = new HashMap<>();
 
@@ -63,14 +60,6 @@ public class PivotScoreAndEventParameters extends DataFlowParameters {
 
     public void setAvgScores(Map<String, Double> avgScores) {
         this.avgScores = avgScores;
-    }
-
-    public Map<String, Boolean> getExpectedValues() {
-        return expectedValue;
-    }
-
-    public void setExpectedValues(Map<String, Boolean> expectedValue) {
-        this.expectedValue = expectedValue;
     }
 
     public Map<String, String> getScoreFieldMap() {

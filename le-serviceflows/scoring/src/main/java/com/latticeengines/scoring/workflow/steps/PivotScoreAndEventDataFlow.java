@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
@@ -55,11 +56,13 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         Map<String, PredictionType> predictionTypes = getMapObjectFromContext(PREDICTION_TYPES, String.class,
                 PredictionType.class);
         if (predictionTypes != null) {
-            dataFlowParams.setExpectedValues(predictionTypes.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> PredictionType.EXPECTED_VALUE == e.getValue())));
+            dataFlowParams.setScoreFieldMap(predictionTypes.entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, e -> PredictionType.EXPECTED_VALUE == e.getValue()
+                            ? InterfaceName.ExpectedRevenue.name() : InterfaceName.RawScore.name())));
         } else {
-            dataFlowParams.setExpectedValues(
-                    ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()));
+            dataFlowParams.setScoreFieldMap(
+                    ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()
+                            ? InterfaceName.ExpectedRevenue.name() : InterfaceName.RawScore.name()));
         }
         configuration.setDataFlowParams(dataFlowParams);
         configuration.setTargetTableName(scoreTableName + "_pivot");

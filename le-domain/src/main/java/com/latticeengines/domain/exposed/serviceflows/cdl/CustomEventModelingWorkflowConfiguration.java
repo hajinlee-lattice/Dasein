@@ -424,7 +424,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
 
             // TODO: Remove this later
-            // rtsBulkScoreWorkflowBuilder.enableDebug(Boolean.TRUE);
+            rtsBulkScoreWorkflowBuilder.enableDebug(Boolean.TRUE);
 
             configuration.add(importData);
             configuration.add(registerReport);

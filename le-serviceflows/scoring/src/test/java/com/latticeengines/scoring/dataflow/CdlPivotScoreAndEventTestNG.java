@@ -33,7 +33,6 @@ public class CdlPivotScoreAndEventTestNG extends ServiceFlowsDataFlowFunctionalT
         PivotScoreAndEventParameters params = new PivotScoreAndEventParameters("InputTable");
         String modelguid1 = "ms__71fa73d2-ce4b-483a-ab1a-02e4471cd0fc-RatingEn";
         String modelguid2 = "ms__af81bb1f-a71e-4b3a-89cd-3a9d0c02b0d1-CDLEnd2E";
-        params.setExpectedValues(ImmutableMap.of(modelguid1, true, modelguid2, false));
         params.setScoreFieldMap(ImmutableMap.of( //
                 modelguid1, InterfaceName.ExpectedRevenue.name(), //
                 modelguid2, InterfaceName.RawScore.name() //

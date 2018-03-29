@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.SegmentExportInitStep;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.serviceflows.cdl.PrepareScoringAfterModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -46,9 +47,8 @@ public class PrepareScoringAfterModelingWorkflow
                     .next(new BaseWorkflowStep<BaseStepConfiguration>() {
                         @Override
                         public void execute() {
-                            // putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME,
-                            // getObjectFromContext(EVENT_TABLE,
-                            // Table.class).getName());
+                            putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME,
+                                    getObjectFromContext(EVENT_TABLE, Table.class).getName());
                         }
 
                         public String name() {

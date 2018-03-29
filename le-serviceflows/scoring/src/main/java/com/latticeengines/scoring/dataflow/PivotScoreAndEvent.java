@@ -41,7 +41,6 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
         Node inputTable = addSource(parameters.getScoreOutputTableName());
 
         Map<String, Double> avgScoresMap = parameters.getAvgScores();
-        Map<String, Boolean> isExpectedValueMap = parameters.getExpectedValues();
         Map<String, String> scoreFieldMap = parameters.getScoreFieldMap();
         Map<String, Node> nodes = splitNodes(inputTable, scoreFieldMap);
 
@@ -53,10 +52,7 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             Double avgScore = avgScoresMap.get(modelGuid);
             String scoreField = scoreFieldMap.getOrDefault(modelGuid, InterfaceName.RawScore.name());
             useEvent = InterfaceName.Event.name().equals(scoreField);
-            isEV = isExpectedValueMap.getOrDefault(modelGuid, false);
-            if (isEV) {
-                scoreField = InterfaceName.ExpectedRevenue.name();
-            }
+            isEV = InterfaceName.ExpectedRevenue.name().equals(scoreField);
 
             total = getTotal(node, modelGuid, scoreField);
             Node aggregatedNode = aggregate(node, scoreField);
