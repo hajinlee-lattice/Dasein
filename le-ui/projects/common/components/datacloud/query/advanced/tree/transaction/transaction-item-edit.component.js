@@ -145,7 +145,7 @@ angular
                 function initTimePeriod(reset) {
                     vm.showFromPeriod = false;
                     vm.showToPeriod = false;
-
+                    vm.showTimeFrame = false;
 
                     if (!reset) {
                         var fromPeriod = QueryTreeService.getValue($scope.bucketrestriction, $scope.type, vm.periodNumericalConf.from.position, 'Time');
@@ -393,7 +393,6 @@ angular
                 }
                 vm.showPeriodTo = function () {
                     switch (vm.timeCmp) {
-                        case 'AFTER':
                         case 'BETWEEN':
                         case 'WITHIN': 
                         case 'PRIOR_ONLY':{
