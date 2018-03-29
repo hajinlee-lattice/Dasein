@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -35,6 +36,11 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
 
     @Inject
     private PlayProxy playProxy;
+
+    @PostConstruct
+    public void init() {
+        initializeInternalResourceRestApiProxy();
+    }
 
     @Override
     public RatingEngineDashboard getRatingsDashboard(String customerSpace, String ratingEngineId) {

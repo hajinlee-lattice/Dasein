@@ -73,12 +73,6 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         ratingProxy = testPlayCreationHelper.initRatingProxy();
 
         play = testPlayCreationHelper.getPlay();
-
-        // ((RatingCoverageServiceImpl)
-        // ratingCoverageService).setEntityProxy(entityProxy);
-        // ((RatingCoverageServiceImpl)
-        // ratingCoverageService).setRatingProxy(ratingProxy);
-
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
                 play.getRatingEngine().getId());
 
