@@ -139,6 +139,8 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         inputProperties.put(WorkflowContextConstants.Inputs.JOB_TYPE, "customEventModelingWorkflow");
         inputProperties.put(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME, parameters.getDisplayName());
         inputProperties.put(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, sourceFile.getDisplayName());
+        inputProperties.put(WorkflowContextConstants.Inputs.RATING_ENGINE_ID, parameters.getRatingEngineId());
+        inputProperties.put(WorkflowContextConstants.Inputs.RATING_MODEL_ID, parameters.getAiModelId());
 
         Predefined predefinedSelection = Predefined.getDefaultSelection();
         String predefinedSelectionName = parameters.getPredefinedSelectionName();
