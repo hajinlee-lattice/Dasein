@@ -25,7 +25,7 @@ public class ImportMatchAndModelWorkflowDeploymentTestNG extends ImportMatchAndM
     @Autowired
     private ModelNoteService modelNoteService;
 
-    @Test(groups = "workflow")
+    @Test(groups = "workflow", enabled = false)
     public void modelSmallAccountData() throws Exception {
         SourceFile sourceFile = uploadFile(RESOURCE_BASE + "/AccountSmallDataUpdated.csv",
                 SchemaInterpretation.SalesforceAccount);
