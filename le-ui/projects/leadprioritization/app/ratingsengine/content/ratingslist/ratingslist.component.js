@@ -66,7 +66,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             vm.header.filter.unfiltered = vm.current.ratings;
 
             angular.forEach(vm.current.ratings, function(rating, key) {
-                if (rating.type === 'CROSS_SELL') {
+                if (rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
                     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
                 } else {
                     rating.tileClass = rating.type;
@@ -89,11 +89,11 @@ angular.module('lp.ratingsengine.ratingslist', [
                 'chart': {
                     'header':'Attributes Value',
                     'emptymsg': '',
-                    'usecolor': false,
+                    'usecolor': true,
                     'color': '#2E6099',
-                    'mousehover': true,
+                    'mousehover': false,
                     'type': 'integer',
-                    'showstatcount': true,
+                    'showstatcount': false,
                     'maxVLines': 3,
                     'showVLines': false,
                 },
@@ -123,9 +123,9 @@ angular.module('lp.ratingsengine.ratingslist', [
                 'chart': {
                     'header':'Value',
                     'emptymsg': '',
-                    'usecolor': false,
+                    'usecolor': true,
                     'color': '#2E6099',
-                    'mousehover': true,
+                    'mousehover': false,
                     'type': 'decimal',
                     'showstatcount': false,
                     'maxVLines': 3,
@@ -157,8 +157,9 @@ angular.module('lp.ratingsengine.ratingslist', [
         // }        
     }
 
-    vm.getData = function () {
-        var data = [{
+    function getTestData() {
+        if(!$scope.test){
+            $scope.test = [{
                 "Lbl": "B",
                 "Cnt": 10,
                 "Lift": "1.3",
@@ -209,6 +210,12 @@ angular.module('lp.ratingsengine.ratingslist', [
                 ]
             }
         ];
+        }
+        return $scope.test;
+    }
+
+    vm.getData = function () {
+        var data = getTestData();
         // console.log('Data ',data);
         return data;
     }

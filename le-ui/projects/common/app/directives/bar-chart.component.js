@@ -6,9 +6,9 @@ angular
             scope: {
                 vm: '=?',
                 bktlist: '=',
-                callback: '&',
+                callback: '&?',
                 config: '=',
-                statcount: '=',
+                statcount: '=?',
                 enrichment:'=?'
 
             },
@@ -280,8 +280,12 @@ angular
                 }
 
                 $scope.getStatCount = function(stat){
-                    var count = $scope.vm.getAttributeRules($scope.enrichment, stat).length;
-                    return count;
+                    if($scope.vm){
+                        var count = $scope.vm.getAttributeRules($scope.enrichment, stat).length;
+                        return count;
+                    }else{
+                        return 0;
+                    }
                 }
 
 

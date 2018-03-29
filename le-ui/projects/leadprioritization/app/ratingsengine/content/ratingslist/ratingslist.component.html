@@ -120,7 +120,14 @@
                         </ul>
                     </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
-                        
+                        <!-- For Jon, uncomment this and you will have the chart -->
+                            <!-- <bar-chart 
+                                config="vm.getChartConfig(rating.type)" 
+                                bktlist="vm.getData()">
+                            </bar-chart> -->
+                            <!--  -->
+
+                            
                         <!-- <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
                             ng-if="
                                 vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
