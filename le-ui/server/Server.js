@@ -345,11 +345,13 @@ class Server {
                                 'PAGE[' + page + ']' +
                                 ', XFRAME-OPTIONS-HOST: ' + domain +' | '+ host +
                                 ', ORIGIN: ' + origin +' | '+ req.headers.origin +
-                                ', ALLOWED: ' + (route.xframe_allow && route.xframe_allow.indexOf(domain) > -1) +' | '+ route.xframe_allow.indexOf(domain)
+                                ', ALLOWED: ' + (route.xframe_allow && route.xframe_allow.indexOf(domain) > -1)
                             );
 
-                            if (route.xframe_allow && route.xframe_allow.indexOf(domain) > -1) {
-                                res.removeHeader('X-Frame-Options');
+                            if (route.xframe_allow) {
+                                if (route.xframe_allow.indexOf(domain) > -1) {
+                                   res.removeHeader('X-Frame-Options');
+                                }
                             }
 
                             res.render(dir + '/' + route.pages[page]);
