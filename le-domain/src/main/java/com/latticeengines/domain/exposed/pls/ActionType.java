@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public enum ActionType {
 
@@ -13,6 +16,8 @@ public enum ActionType {
 
     private String name;
     private String displayName;
+    private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
+            Arrays.asList(METADATA_CHANGE, RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE));
 
     private static Map<String, ActionType> actionTypeMap = new HashMap<>();
 
@@ -41,5 +46,9 @@ public enum ActionType {
 
     public ActionType getActionType(String str) {
         return actionTypeMap.get(str);
+    }
+
+    public static Set<ActionType> getNonWorkflowActions() {
+        return NON_WORKFLOW_JOB_TYPES;
     }
 }

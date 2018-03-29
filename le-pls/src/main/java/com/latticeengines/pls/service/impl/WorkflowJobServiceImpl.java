@@ -64,9 +64,6 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     private static final Set<String> NON_DISPLAYED_JOB_TYPES = new HashSet<>(
             Arrays.asList(NON_DISPLAYED_JOB_TYPE_VALUES));
 
-    private static final Set<ActionType> NON_WORKFLOW_JOB_TYPES = new HashSet<>(
-            Arrays.asList(ActionType.METADATA_CHANGE, ActionType.RATING_ENGINE_CHANGE));
-
     @Inject
     private WorkflowProxy workflowProxy;
 
@@ -134,7 +131,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         } else {
             if (useCustomerSpace) {
                 String customerSpace = MultiTenantContext.getCustomerSpace().toString();
-                log.info("Getting job with id=" +  jobId + ", customerSpace=" + customerSpace);
+                log.info("Getting job with id=" + jobId + ", customerSpace=" + customerSpace);
                 job = workflowProxy.getWorkflowExecution(jobId, customerSpace);
             } else {
                 log.info("Getting job with id=" + jobId);
@@ -267,7 +264,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 job.setUser(action.getActionInitiator());
                 job.setStartTimestamp(action.getCreated());
                 job.setDescription(action.getDescription());
-                if (!NON_WORKFLOW_JOB_TYPES.contains(action.getType())) {
+                if (!ActionType.getNonWorkflowActions().contains(action.getType())) {
                     job.setJobStatus(JobStatus.RUNNING);
                 } else {
                     job.setJobStatus(JobStatus.COMPLETED);
