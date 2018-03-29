@@ -707,13 +707,4 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
         return constructUrl(urlStr.toString());
     }
-
-    public int getInvokeTime(@NotNull CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/plscomponent/invoketime", customerSpace.toString());
-            return restTemplate.getForObject(url, Integer.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getInvokeTime: Remote call failure: " + e.getMessage(), e);
-        }
-    }
 }

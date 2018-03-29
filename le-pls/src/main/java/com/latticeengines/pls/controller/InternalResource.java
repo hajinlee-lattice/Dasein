@@ -1565,29 +1565,4 @@ public class InternalResource extends InternalResourceBase {
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }
-
-    @RequestMapping(value = "/plscomponent/invoketime/"
-            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get actions for a tenant")
-    public int getInvokeTime(@PathVariable("tenantId") String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        log.debug(String.format("Retrieve pls component invoke time for tenant: %s", tenantId));
-        CustomerSpace customer_space = CustomerSpace.parse(tenantId);
-
-        Camille camille = CamilleEnvironment.getCamille();
-        Path contractPath = PathBuilder
-                .buildCustomerSpacePath(CamilleEnvironment.getPodId(), customer_space.getContractId(),
-                        customer_space.getTenantId(), customer_space.getSpaceId())
-                .append(new Path(TenantConfigServiceImpl.SERVICES_ZNODE + TenantConfigServiceImpl.PLS_ZNODE
-                        + TenantConfigServiceImpl.INVOKE_TIME));
-        try {
-            return Integer.parseInt(camille.get(contractPath).getData());
-        } catch (Exception e) {
-            log.error("Get PLS component invoke time failed. ", e);
-            return 0;
-        }
-    }
-
 }
