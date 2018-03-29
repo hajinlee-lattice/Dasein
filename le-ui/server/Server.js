@@ -336,25 +336,21 @@ class Server {
                     this.app.get(
                         page + (html5mode ? '*' : ''),
                         (req, res) => {
-                            if (route.xframe_allow && route.xframe_allow === true) {
-                                console.log('! X-Frame-Options !', route.xframe_allow);
-                                res.removeHeader('X-Frame-Options');
-                            }
-                            /*
                             let host = req.get('host');
                             let origin = req.get('origin');
                             let s = host.split('.');
                             var domain = s.length > 1 ? [ s.pop(), s.pop() ].reverse().join('.') : s[0];
-                                console.log(
-                                    'XFRAME-OPTIONS-HOST: ' + domain +':'+ req.headers.host +
-                                    ', ORIGIN:' + origin +':'+ req.headers.origin +
-                                    ', ALLOWED: ' + (route.xframe_allow.indexOf(host) > -1)
-                                );
 
-                                if (route.xframe_allow.indexOf(domain) > -1) {
-                                }
+                            console.log(
+                                'PAGE[' + page + ']' +
+                                ', XFRAME-OPTIONS-HOST: ' + domain +' | '+ host +
+                                ', ORIGIN: ' + origin +' | '+ req.headers.origin +
+                                ', ALLOWED: ' + (route.xframe_allow && route.xframe_allow.indexOf(domain) > -1) +' | '+ route.xframe_allow.indexOf(domain)
+                            );
+
+                            if (route.xframe_allow && route.xframe_allow.indexOf(domain) > -1) {
+                                res.removeHeader('X-Frame-Options');
                             }
-                            */
 
                             res.render(dir + '/' + route.pages[page]);
                         }
