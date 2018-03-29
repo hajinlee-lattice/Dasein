@@ -29,10 +29,10 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndModelWorkflowConfiguration> {
 
     @Inject
-    private DedupEventTable dedupEventTableDataFlow;
+    private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Inject
-    private MatchDataCloudWorkflow matchDataCloudWorkflow;
+    private DedupEventTable dedupEventTableDataFlow;
 
     @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
