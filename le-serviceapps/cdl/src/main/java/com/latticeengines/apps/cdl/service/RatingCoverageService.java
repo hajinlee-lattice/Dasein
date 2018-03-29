@@ -13,6 +13,6 @@ public interface RatingCoverageService {
 
     String RATING_IDS_ERROR_MAP_KEY = "processRatingIdsErrorMap";
 
-    RatingsCountResponse getCoverageInfo(RatingsCountRequest request);
+    RatingsCountResponse getCoverageInfo(String customeSpace, RatingsCountRequest request);
 
 }

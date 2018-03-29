@@ -4,14 +4,25 @@ import java.util.Date;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 public abstract class RatingEngineTemplate {
+
+    @Value("${common.pls.url}")
+    protected String internalResourceHostPort;
+
+    protected InternalResourceRestApiProxy internalResourceProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -43,6 +54,14 @@ public abstract class RatingEngineTemplate {
             ratingEngineSummary.setContactsInSegment(segment.getContacts());
         }
 
+        if (ratingEngine.getActiveModel() != null && ratingEngine.getActiveModel() instanceof AIModel) {
+            ModelSummary modelSummary = ((AIModel) ratingEngine.getActiveModel()).getModelSummary();
+            if (modelSummary != null) {
+                ratingEngineSummary.setBucketMetadata(internalResourceProxy
+                        .getUpToDateABCDBucketsByRatingEngineId(ratingEngine.getId(), CustomerSpace.parse(tenantId)));
+            }
+        }
+
         Date lastRefreshedDate = findLastRefreshedDate(tenantId);
         ratingEngineSummary.setLastRefreshedDate(lastRefreshedDate);
         return ratingEngineSummary;
@@ -51,5 +70,9 @@ public abstract class RatingEngineTemplate {
     Date findLastRefreshedDate(String tenantId) {
         DataFeed dataFeed = dataFeedProxy.getDataFeed(tenantId);
         return dataFeed.getLastPublished();
+    }
+
+    protected void initializeInternalResourceRestApiProxy() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 }

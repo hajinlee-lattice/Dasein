@@ -83,7 +83,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     @Override
-    public RatingsCountResponse getCoverageInfo(RatingsCountRequest request) {
+    public RatingsCountResponse getCoverageInfo(String customerSpace, RatingsCountRequest request) {
         RatingsCountResponse result = new RatingsCountResponse();
         Map<String, Map<String, String>> uberErrorMap = new ConcurrentHashMap<>();
         result.setErrorMap(uberErrorMap);
@@ -112,7 +112,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {
-        Tenant tenent = MultiTenantContext.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         Map<String, CoverageInfo> ratingEngineIdCoverageMap = new ConcurrentHashMap<>();
         result.setRatingEngineIdCoverageMap(ratingEngineIdCoverageMap);
@@ -125,7 +125,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<String> stream = //
                     request.getRatingEngineIds().stream();
-            ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, errorMap, stream);
+            ratingEngineStreamProcessing(request, tenant, ratingEngineIdCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -134,7 +134,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getRatingEngineIds().stream() //
                                         .parallel();
 
-                        ratingEngineStreamProcessing(request, tenent, ratingEngineIdCoverageMap, errorMap,
+                        ratingEngineStreamProcessing(request, tenant, ratingEngineIdCoverageMap, errorMap,
                                 parallelStream);
                     }) //
                     .join();
@@ -142,7 +142,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private void processSegmentIds(RatingsCountRequest request, RatingsCountResponse result) {
-        Tenant tenent = MultiTenantContext.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         Map<String, CoverageInfo> segmentIdCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdCoverageMap(segmentIdCoverageMap);
@@ -155,7 +155,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<String> stream = //
                     request.getSegmentIds().stream();
-            segmentStreamProcessing(request, tenent, segmentIdCoverageMap, errorMap, stream);
+            segmentStreamProcessing(request, tenant, segmentIdCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -164,14 +164,14 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getSegmentIds().stream() //
                                         .parallel();
 
-                        segmentStreamProcessing(request, tenent, segmentIdCoverageMap, errorMap, parallelStream);
+                        segmentStreamProcessing(request, tenant, segmentIdCoverageMap, errorMap, parallelStream);
                     }) //
                     .join();
         }
     }
 
     private void processSegmentIdModelRules(RatingsCountRequest request, RatingsCountResponse result) {
-        Tenant tenent = MultiTenantContext.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         Map<String, CoverageInfo> segmentIdModelRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdModelRulesCoverageMap(segmentIdModelRulesCoverageMap);
@@ -184,7 +184,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             // requests are not blocked if threadpool is used by bigger requests
             Stream<SegmentIdAndModelRulesPair> stream = //
                     request.getSegmentIdModelRules().stream();
-            segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, errorMap, stream);
+            segmentIdModelRulesStreamProcessing(request, tenant, segmentIdModelRulesCoverageMap, errorMap, stream);
         } else {
             tpForParallelStream.submit(//
                     () -> //
@@ -193,7 +193,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                 request.getSegmentIdModelRules().stream() //
                                         .parallel();
 
-                        segmentIdModelRulesStreamProcessing(request, tenent, segmentIdModelRulesCoverageMap, errorMap,
+                        segmentIdModelRulesStreamProcessing(request, tenant, segmentIdModelRulesCoverageMap, errorMap,
                                 parallelStream);
                     }) //
                     .join();
@@ -201,7 +201,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     private void processSegmentIdSingleRules(RatingsCountRequest request, RatingsCountResponse result) {
-        Tenant tenent = MultiTenantContext.getTenant();
+        Tenant tenant = MultiTenantContext.getTenant();
 
         Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap = new ConcurrentHashMap<>();
         result.setSegmentIdAndSingleRulesCoverageMap(segmentIdAndSingleRulesCoverageMap);
@@ -218,7 +218,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     request.getSegmentIdAndSingleRules().stream();
 
             segmentIdAndSingleRulesStreamProcessing( //
-                    request, tenent, segmentMap, //
+                    request, tenant, segmentMap, //
                     segmentIdAndSingleRulesCoverageMap, //
                     errorMap, stream);
         } else {
@@ -230,7 +230,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                                         .parallel();
 
                         segmentIdAndSingleRulesStreamProcessing( //
-                                request, tenent, segmentMap, //
+                                request, tenant, segmentMap, //
                                 segmentIdAndSingleRulesCoverageMap, //
                                 errorMap, parallelStream);
                     }) //
@@ -264,52 +264,52 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     // this method can accept parallel or sequential stream
-    private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenent,
+    private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenant,
             Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
         stream //
                 .forEach( //
                         ratingEngineId -> //
-                        processSingleRatingId(tenent, ratingEngineIdCoverageMap, errorMap, //
+                        processSingleRatingId(tenant, ratingEngineIdCoverageMap, errorMap, //
                                 ratingEngineId, request.isRestrictNotNullSalesforceId()));
     }
 
     // this method can accept parallel or sequential stream
-    private void segmentStreamProcessing(RatingsCountRequest request, Tenant tenent,
+    private void segmentStreamProcessing(RatingsCountRequest request, Tenant tenant,
             Map<String, CoverageInfo> segmentIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
         stream //
                 .forEach( //
                         segmentId -> //
-                        processSingleSegmentId(tenent, segmentIdCoverageMap, errorMap, //
+                        processSingleSegmentId(tenant, segmentIdCoverageMap, errorMap, //
                                 segmentId, request.isRestrictNotNullSalesforceId()));
     }
 
     // this method can accept parallel or sequential stream
-    private void segmentIdModelRulesStreamProcessing(RatingsCountRequest request, Tenant tenent,
+    private void segmentIdModelRulesStreamProcessing(RatingsCountRequest request, Tenant tenant,
             Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Map<String, String> errorMap,
             Stream<SegmentIdAndModelRulesPair> stream) {
         stream //
                 .forEach( //
                         segmentIdModelRulesPair -> //
-                        processSingleSegmentIdModelRulesPair(tenent, segmentIdModelRulesCoverageMap, errorMap, //
+                        processSingleSegmentIdModelRulesPair(tenant, segmentIdModelRulesCoverageMap, errorMap, //
                                 segmentIdModelRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
     // this method can accept parallel or sequential stream
-    private void segmentIdAndSingleRulesStreamProcessing(RatingsCountRequest request, Tenant tenent,
+    private void segmentIdAndSingleRulesStreamProcessing(RatingsCountRequest request, Tenant tenant,
             Map<String, MetadataSegment> segmentMap, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap,
             Map<String, String> errorMap, Stream<SegmentIdAndSingleRulePair> stream) {
 
         stream //
                 .forEach( //
                         segmentIdSingleRulesPair -> //
-                        processSingleSegmentIdSingleRulesPair(tenent, segmentMap, segmentIdAndSingleRulesCoverageMap, errorMap, //
+                        processSingleSegmentIdSingleRulesPair(tenant, segmentMap, segmentIdAndSingleRulesCoverageMap, errorMap, //
                                 segmentIdSingleRulesPair, request.isRestrictNotNullSalesforceId()));
     }
 
-    private void processSingleSegmentId(Tenant tenent, Map<String, CoverageInfo> segmentIdCoverageMap,
+    private void processSingleSegmentId(Tenant tenant, Map<String, CoverageInfo> segmentIdCoverageMap,
             Map<String, String> errorMap, String segmentId, boolean isRestrictNotNullSalesforceId) {
         try {
-            MultiTenantContext.setTenant(tenent);
+            MultiTenantContext.setTenant(tenant);
 
             MetadataSegment segment = segmentService.findByName(segmentId);
 
@@ -325,18 +325,18 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFronEndQuery(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment);
 
-            loadBasicCoverage(tenent, segmentIdCoverageMap, segmentId, accountFrontEndQuery, contactFrontEndQuery);
+            loadBasicCoverage(tenant, segmentIdCoverageMap, segmentId, accountFrontEndQuery, contactFrontEndQuery);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segment id: " + segmentId, ex);
             logInErrorMap(errorMap, segmentId, ex.getMessage());
         }
     }
 
-    private void processSingleSegmentIdSingleRulesPair(Tenant tenent, Map<String, MetadataSegment> segmentMap,
+    private void processSingleSegmentIdSingleRulesPair(Tenant tenant, Map<String, MetadataSegment> segmentMap,
             Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, Map<String, String> errorMap,
             SegmentIdAndSingleRulePair segmentIdSingleRulePair, boolean isRestrictNotNullSalesforceId) {
         try {
-            MultiTenantContext.setTenant(tenent);
+            MultiTenantContext.setTenant(tenant);
 
             MetadataSegment segment = //
                     segmentMap.get(segmentIdSingleRulePair.getSegmentId());
@@ -353,7 +353,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     createEntityFronEndQueryForSegmentAndRule(BusinessEntity.Contact, //
                             isRestrictNotNullSalesforceId, segment, segmentIdSingleRulePair);
 
-            loadBasicCoverage(tenent, segmentIdAndSingleRulesCoverageMap, segmentIdSingleRulePair.getResponseKeyId(),
+            loadBasicCoverage(tenant, segmentIdAndSingleRulesCoverageMap, segmentIdSingleRulePair.getResponseKeyId(),
                     accountFrontEndQuery, contactFrontEndQuery);
         } catch (Exception ex) {
             log.info("Ignoring exception in getting coverage info for segmentIdSingleRulePair: "
@@ -362,10 +362,10 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
     }
 
-    private void processSingleRatingId(Tenant tenent, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
+    private void processSingleRatingId(Tenant tenant, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
             Map<String, String> errorMap, String ratingEngineId, boolean isRestrictNotNullSalesforceId) {
         try {
-            MultiTenantContext.setTenant(tenent);
+            MultiTenantContext.setTenant(tenant);
 
             RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, true, true);
 
@@ -389,7 +389,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
             Map<String, Long> countInfo = entityProxy.getRatingCount( //
-                    tenent.getId(), //
+                    tenant.getId(), //
                     accountFrontEndQuery);
 
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
@@ -401,7 +401,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setAccountCount(accountCount);
 
             try {
-                Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+                Long contactCount = getContactCount(tenant, contactFrontEndQuery);
                 coverageInfo.setContactCount(contactCount);
             } catch (Exception ex) {
                 log.info("Got error in fetching contact count", ex);
@@ -434,11 +434,11 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     }
 
-    private void processSingleSegmentIdModelRulesPair(Tenant tenent,
+    private void processSingleSegmentIdModelRulesPair(Tenant tenant,
             Map<String, CoverageInfo> segmentIdModelRulesCoverageMap, Map<String, String> errorMap,
             SegmentIdAndModelRulesPair segmentIdModelRulesPair, boolean isRestrictNotNullSalesforceId) {
         try {
-            MultiTenantContext.setTenant(tenent);
+            MultiTenantContext.setTenant(tenant);
 
             MetadataSegment segment = segmentService.findByName(segmentIdModelRulesPair.getSegmentId());
             FrontEndQuery accountFrontEndQuery = //
@@ -459,7 +459,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
             log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
             Map<String, Long> countInfo = ratingProxy.getCoverage( //
-                    tenent.getId(), //
+                    tenant.getId(), //
                     accountFrontEndQuery);
 
             Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
@@ -471,7 +471,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             coverageInfo.setAccountCount(accountCount);
 
             try {
-                Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+                Long contactCount = getContactCount(tenant, contactFrontEndQuery);
                 coverageInfo.setContactCount(contactCount);
             } catch (Exception ex) {
                 log.info("Got error in fetching contact count", ex);
@@ -504,7 +504,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
     }
 
-    void loadBasicCoverage(Tenant tenent, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, String key,
+    void loadBasicCoverage(Tenant tenant, Map<String, CoverageInfo> segmentIdAndSingleRulesCoverageMap, String key,
             FrontEndQuery accountFrontEndQuery, FrontEndQuery contactFrontEndQuery) throws Exception {
         log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
 
@@ -514,7 +514,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
         try {
             Long accountCount = entityProxy.getCount( //
-                    tenent.getId(), //
+                    tenant.getId(), //
                     accountFrontEndQuery);
             coverageInfo.setAccountCount(accountCount);
         } catch (Exception ex) {
@@ -523,7 +523,7 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
 
         try {
-            Long contactCount = getContactCount(tenent, contactFrontEndQuery);
+            Long contactCount = getContactCount(tenant, contactFrontEndQuery);
             coverageInfo.setContactCount(contactCount);
         } catch (Exception ex) {
             contactCountException = ex;
@@ -549,11 +549,11 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         }
     }
 
-    private Long getContactCount(Tenant tenent, FrontEndQuery contactFrontEndQuery) {
+    private Long getContactCount(Tenant tenant, FrontEndQuery contactFrontEndQuery) {
 
         log.info("Front end query for Contact: " + JsonUtils.serialize(contactFrontEndQuery));
         return entityProxy.getCount( //
-                tenent.getId(), //
+                tenant.getId(), //
                 contactFrontEndQuery);
     }
 

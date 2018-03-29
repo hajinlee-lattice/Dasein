@@ -18,7 +18,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -65,7 +64,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import reactor.core.publisher.ParallelFlux;
 
@@ -74,14 +72,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
     @PostConstruct
     public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        initializeInternalResourceRestApiProxy();
     }
 
     @Inject

@@ -27,8 +27,8 @@ import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
-import com.latticeengines.pls.service.RatingCoverageService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
+import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
@@ -40,11 +40,13 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
 
     private static final String RATING_BUCKET_FIELD = "RATING_BUCKET_FIELD";
 
+    private static final String SEGMENT_IDS_ERROR_MAP_KEY = "processSegmentIdsErrorMap";
+
     @Autowired
     private RatingEntityPreviewService ratingEntityPreviewService;
 
     @Autowired
-    private RatingCoverageService ratingCoverageService;
+    private RatingCoverageProxy ratingCoverageProxy;
 
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
@@ -150,7 +152,8 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         RatingsCountRequest request = new RatingsCountRequest();
         List<String> segmentIds = Arrays.asList(play.getRatingEngine().getSegment().getName());
         request.setSegmentIds(segmentIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -162,8 +165,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         for (String segmentId : segmentIds) {
             Assert.assertTrue(response.getSegmentIdCoverageMap().containsKey(segmentId));
             Assert.assertNotNull(response.getSegmentIdCoverageMap().get(segmentId));
-            Assert.assertFalse(
-                    response.getErrorMap().get(RatingCoverageService.SEGMENT_IDS_ERROR_MAP_KEY).containsKey(segmentId));
+            Assert.assertFalse(response.getErrorMap().get(SEGMENT_IDS_ERROR_MAP_KEY).containsKey(segmentId));
             segmentAccountsCount = response.getSegmentIdCoverageMap().get(segmentId).getAccountCount();
         }
     }

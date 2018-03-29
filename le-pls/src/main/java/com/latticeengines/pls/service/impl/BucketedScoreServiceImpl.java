@@ -214,7 +214,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
         AIModel activeModel = (AIModel) ratingEngine.getActiveModel();
         ModelSummary modelSummary = activeModel.getModelSummary();
-        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
+        if (modelSummary != null) {
+            return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelId(Long.toString(modelSummary.getPid()));
+        } else {
+            throw new LedpException(LedpCode.LEDP_40020,
+                    new String[] { activeModel.getId(), ratingEngineId, tenant.getId() });
+        }
     }
 
     @Override

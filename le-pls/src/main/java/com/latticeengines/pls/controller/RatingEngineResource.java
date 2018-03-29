@@ -42,9 +42,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ActionService;
-import com.latticeengines.pls.service.RatingCoverageService;
-import com.latticeengines.pls.service.RatingEngineDashboardService;
 import com.latticeengines.pls.service.RatingEntityPreviewService;
+import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineDashboardProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
 import io.swagger.annotations.Api;
@@ -62,10 +62,10 @@ public class RatingEngineResource {
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
-    private RatingEngineDashboardService ratingEngineDashboardService;
+    private RatingEngineDashboardProxy ratingEngineDashboardProxy;
 
     @Inject
-    private RatingCoverageService ratingCoverageService;
+    private RatingCoverageProxy ratingCoverageProxy;
 
     @Inject
     private RatingEntityPreviewService ratingEntityPreviewService;
@@ -138,7 +138,8 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get dashboard info for Rating Engine given its id")
     public RatingEngineDashboard getRatingsDashboard(@PathVariable String ratingEngineId) {
-        return ratingEngineDashboardService.getRatingsDashboard(ratingEngineId);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineDashboardProxy.getRatingEngineDashboardById(tenant.getId(), ratingEngineId);
     }
 
     @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -178,7 +179,8 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get CoverageInfo for ids in Rating count request")
     public RatingsCountResponse getRatingEngineCoverageInfo(@RequestBody RatingsCountRequest ratingModelSegmentIds) {
-        return ratingCoverageService.getCoverageInfo(ratingModelSegmentIds);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingCoverageProxy.getCoverageInfo(tenant.getId(), ratingModelSegmentIds);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/ratingmodels", method = RequestMethod.GET, headers = "Accept=application/json")

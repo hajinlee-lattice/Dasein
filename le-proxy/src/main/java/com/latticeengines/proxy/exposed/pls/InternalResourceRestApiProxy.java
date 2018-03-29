@@ -356,6 +356,20 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    public List<BucketMetadata> getUpToDateABCDBucketsByRatingEngineId(String ratingEngineId,
+            CustomerSpace customerSpace) {
+        try {
+            String url = constructUrl("pls/internal/abcdbuckets/uptodate/ratingengine", ratingEngineId);
+            url += "?tenantId=" + customerSpace.toString();
+            List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
+            return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
+        } catch (Exception e) {
+            throw new RuntimeException(String.format(
+                    "Remote call failure for getting the up-to-date buckets of the rating engine %s of tenant %s",
+                    ratingEngineId, customerSpace.toString()), e);
+        }
+    }
+
     public void createABCDBuckets(String modelId, CustomerSpace customerSpace,
             List<BucketMetadata> bucketMetadataList) {
         try {

@@ -33,6 +33,7 @@ import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -46,7 +47,7 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
     private static final String DUMMY_ID = "DUMMY_ID";
 
     @Autowired
-    private RatingCoverageService ratingCoverageService;
+    private RatingCoverageProxy ratingCoverageProxy;
 
     @Autowired
     private RatingEngineProxy ratingEngineProxy;
@@ -73,8 +74,10 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
         play = testPlayCreationHelper.getPlay();
 
-        ((RatingCoverageServiceImpl) ratingCoverageService).setEntityProxy(entityProxy);
-        ((RatingCoverageServiceImpl) ratingCoverageService).setRatingProxy(ratingProxy);
+        // ((RatingCoverageServiceImpl)
+        // ratingCoverageService).setEntityProxy(entityProxy);
+        // ((RatingCoverageServiceImpl)
+        // ratingCoverageService).setRatingProxy(ratingProxy);
 
         ratingEngine = ratingEngineProxy.getRatingEngine(testPlayCreationHelper.getTenant().getId(),
                 play.getRatingEngine().getId());
@@ -107,7 +110,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
 
         List<String> ratingEngineIds = Arrays.asList(ratingEngine.getId(), DUMMY_ID);
         request.setRatingEngineIds(ratingEngineIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
         Assert.assertNotNull(response);
         Assert.assertNotNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -146,7 +150,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         List<String> segmentIds = Arrays
                 .asList(new String[] { play.getRatingEngine().getSegment().getName(), DUMMY_ID });
         request.setSegmentIds(segmentIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -184,7 +189,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         p2.setRatingModelId(DUMMY_ID);
         List<RatingModelIdPair> ratingEngineModelIds = Arrays.asList(new RatingModelIdPair[] { p1, p2 });
         request.setRatingEngineModelIds(ratingEngineModelIds);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNotNull(response.getRatingEngineModelIdCoverageMap());
@@ -209,7 +215,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
         r1.setRatingRule(ruleBasedModel.getRatingRule());
         List<SegmentIdAndModelRulesPair> segmentIdModelRules = Arrays.asList(new SegmentIdAndModelRulesPair[] { r1 });
         request.setSegmentIdModelRules(segmentIdModelRules);
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());
         Assert.assertNull(response.getRatingEngineModelIdCoverageMap());
@@ -250,7 +257,8 @@ public class RatingCoverageServiceImplDeploymentTestNG extends AbstractTestNGSpr
                 .asList(new SegmentIdAndSingleRulePair[] { r1, r2 });
         request.setSegmentIdAndSingleRules(segmentIdAndSingleRulePairs);
 
-        RatingsCountResponse response = ratingCoverageService.getCoverageInfo(request);
+        RatingsCountResponse response = ratingCoverageProxy.getCoverageInfo(testPlayCreationHelper.getTenant().getId(),
+                request);
 
         Assert.assertNotNull(response);
         Assert.assertNull(response.getRatingEngineIdCoverageMap());

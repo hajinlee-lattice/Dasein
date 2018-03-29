@@ -1045,6 +1045,16 @@ public class InternalResource extends InternalResourceBase {
         return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
     }
 
+    @RequestMapping(value = "/abcdbuckets/uptodate/ratingengine/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
+    public List<BucketMetadata> getUpToDateABCDBucketsByRatingEngineId(@PathVariable String ratingEngineId,
+            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request) {
+        checkHeader(request);
+        manufactureSecurityContextForInternalAccess(tenantId);
+        return bucketedScoreService.getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngineId);
+    }
+
     @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ApiOperation(value = "Create a group of ABCD buckets")
     public void createABCDBuckets(@PathVariable String modelId,
