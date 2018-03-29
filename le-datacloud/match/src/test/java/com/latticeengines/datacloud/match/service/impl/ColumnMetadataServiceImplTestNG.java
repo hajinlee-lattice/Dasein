@@ -1,13 +1,18 @@
 package com.latticeengines.datacloud.match.service.impl;
 
+import java.util.List;
+
 import org.apache.avro.Schema;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.datacloud.core.service.DataCloudVersionService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.testframework.DataCloudMatchFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
 @Component
@@ -15,6 +20,11 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
 
     @Autowired
     private BeanDispatcherImpl beanDispatcher;
+
+    @Autowired
+    private DataCloudVersionService dataCloudVersionService;
+    private static final String BOMBORA = "Bombora";
+    private static final String HG = "HG";
 
     @Test(groups = "functional")
     public void testAvroSchemaForDerivedColumnsCache() {
@@ -28,11 +38,21 @@ public class ColumnMetadataServiceImplTestNG extends DataCloudMatchFunctionalTes
 
     @Test(groups = "functional")
     public void testAvroSchemaForAccountMaster() {
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService("2.0.0");
+        String latestVersion = dataCloudVersionService.currentApprovedVersion().getVersion();
+        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(latestVersion);
         for (Predefined predefined : Predefined.values()) {
-            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), null);
-            Assert.assertEquals(schema.getFields().size(),
-                    columnMetadataService.fromPredefinedSelection(predefined, null).size());
+            Schema schema = columnMetadataService.getAvroSchema(predefined, predefined.getName(), latestVersion);
+            List<ColumnMetadata> columnMetadatas = columnMetadataService.fromPredefinedSelection(predefined,
+                    latestVersion);
+            for (ColumnMetadata columnMeta : columnMetadatas) {
+                if (columnMeta.getCategory().equals(Category.TECHNOLOGY_PROFILE)) {
+                    Assert.assertEquals(columnMeta.getDataLicense(), HG);
+                }
+                if (columnMeta.getCategory().equals(Category.INTENT)) {
+                    Assert.assertEquals(columnMeta.getDataLicense(), BOMBORA);
+                }
+            }
+            Assert.assertEquals(schema.getFields().size(), columnMetadatas.size());
         }
     }
 
