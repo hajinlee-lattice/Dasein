@@ -320,6 +320,53 @@ public final class JobStepDisplayInfoMapping {
             "score_data"
     };
 
+    private static final String[] CUSTOM_EVENT_MODELING_STEPS = {
+            "load_data",
+            "load_data",
+            "load_data",
+            "load_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "match_data",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "create_global_model",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set",
+            "score_training_set"
+    };
+
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
     private static final Map<String, String[]> DISPLAY_DESCRIPTION = new HashMap<>();
     static {
@@ -336,6 +383,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
         DISPLAY_NAME.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
+        DISPLAY_NAME.put("customEventModelingWorkflow", CUSTOM_EVENT_MODELING_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
@@ -350,6 +398,7 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
+        DISPLAY_DESCRIPTION.put("customEventModelingWorkflow", CUSTOM_EVENT_MODELING_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {
