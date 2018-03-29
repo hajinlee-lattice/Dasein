@@ -42,6 +42,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
     private int selectCount = 0;
     private int premiumSelectCount = 0;
     private int deselectCount = 0;
+    private int depremiumSelectCount = 0;
     private int totalLeadEnrichmentCount;
 
     @BeforeClass(groups = { "deployment" })
@@ -388,7 +389,7 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         String url = getRestAPIHostPort() + "/pls/latticeinsights/insights/selectedpremiumattributes/count";
         Integer count = restTemplate.getForObject(url, Integer.class);
         assertNotNull(count);
-        assertEquals(count.intValue(), 3);
+        assertEquals(count.intValue(), 4 - depremiumSelectCount);
     }
 
     // @Test(groups = "deployment", enabled = true, dependsOnMethods = {
@@ -486,10 +487,14 @@ public class LatticeInsightsResourceDeploymentTestNG extends PlsDeploymentTestNG
         selectCount = 0;
         premiumSelectCount = 0;
         deselectCount = 0;
+        depremiumSelectCount = 0;
 
         for (LeadEnrichmentAttribute attr : combinedAttributeList) {
             if (attr.getIsSelected()) {
                 if (deselectCount < MAX_DESELECT) {
+                    if (attr.getIsPremium()) {
+                        depremiumSelectCount++;
+                    }
                     deselectCount++;
                     attr.setIsSelected(false);
                     deselectedAttributeList.add(attr.getFieldName());
