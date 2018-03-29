@@ -3,6 +3,10 @@
 @import "report/jobreport/jobreport.component.scss";
 @import "export/export.component.scss";
 
+.job-blocked{
+    color: #f47d42;
+}
+
 .jobs-page {
     .table-header {
         width: 100%;

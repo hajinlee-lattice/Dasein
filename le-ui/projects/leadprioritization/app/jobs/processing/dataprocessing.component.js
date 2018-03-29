@@ -159,6 +159,17 @@ angular.module('lp.jobs.import', [
 
         this.init();
 
+        function isLastOneFailed() {
+            if(vm.jobs && vm.jobs.length > 1){
+                if(vm.jobs[vm.jobs.length - 2].jobStatus === 'Failed'){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+        }
 
         function isOneFailed() {
             var isFailed = false;
@@ -184,7 +195,8 @@ angular.module('lp.jobs.import', [
 
         vm.canLastJobRun = function () {
             var canRun = false;
-            var oneFailed = isOneFailed();
+            var oneFailed = isLastOneFailed();//isOneFailed();
+            console.log('Last one failed ==> ', oneFailed);
             var oneRunnig = isOneRunning();
 
             if (!oneFailed && !oneRunnig) {

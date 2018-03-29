@@ -26,7 +26,7 @@
 </div>
 <div class="le-cell le-col-start-6 le-col-span-1">
     <span>
-        {{job.jobStatus}}
+        <span ng-class="isJobBlocked(job)=== true ? 'job-blocked' : ''">{{getJobStatus(job)}}</span>
         <i class="fa fa-spinner fa-spin icon-failed" aria-hidden="true" ng-if="isJobRunning(job)"></i>
         <i class="fa fa-exclamation-triangle icon-failed" aria-hidden="true" ng-if="isJobFailed(job) && !isJobRunning(job)"></i>
     </span>

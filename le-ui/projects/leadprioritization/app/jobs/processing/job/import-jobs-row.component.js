@@ -134,6 +134,27 @@ angular.module('lp.jobs.import.row', [])
                 }
             }
 
+            $scope.getJobStatus = function(job){
+                switch(job.jobStatus){
+                    case 'Ready' : {
+                        var canRun = $scope.vm.canLastJobRun();
+                        if(canRun === false){
+                            return 'Blocked';
+                        }
+                    }
+                    default:
+                        return job.jobStatus;
+                }
+            }
+
+            $scope.isJobBlocked = function(job){
+                if('Blocked' === $scope.getJobStatus(job)){
+                    return true;
+                }else {
+                    return false;
+                }
+            }
+
             $scope.disableRunButton = function (job) {
                 var oneCompleted = $scope.isOneActionCompleted(job);
                 var canRun = $scope.vm.canLastJobRun();
