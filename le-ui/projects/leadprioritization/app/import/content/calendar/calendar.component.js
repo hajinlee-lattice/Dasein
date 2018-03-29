@@ -4,7 +4,7 @@ angular.module('lp.import.calendar', [])
     NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory
 ) {
     var vm = this,
-        debug = true, // goto /import/calendar
+        debug = false, // goto /import/calendar
         preventUnload = !debug,
         year = new Date().getFullYear(),
         months = ['January','February','March','April','May','June','July','August','September','October','November','December'],
