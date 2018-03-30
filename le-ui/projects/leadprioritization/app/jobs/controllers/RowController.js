@@ -44,7 +44,7 @@ angular
 
                     $scope.job.modelId = modelId;
 
-                    console.log(modelId, $scope.job.modelId, modelingJobId);
+                    // console.log(modelId, $scope.job.modelId, modelingJobId);
 
                 });
             } else {
