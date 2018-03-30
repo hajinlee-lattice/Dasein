@@ -124,9 +124,10 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             
                 vm.completedSteps = result.completedTimes;
 
+                var globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
                 vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
-                vm.matchingToDataCloud = vm.completedSteps.load_data && !vm.completedSteps.create_global_target_market;
-                vm.scoringTrainingSet = vm.completedSteps.create_global_target_market && !vm.completedSteps.score_training_set;
+                vm.matchingToDataCloud = vm.completedSteps.load_data && !globalStep;
+                vm.scoringTrainingSet = globalStep && !vm.completedSteps.score_training_set;
                 // Green status bar
                 if(result.stepsCompleted.length > 0){
                     var tmp = ((result.stepsCompleted.length / 2) * 5.5);
@@ -138,6 +139,8 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 // Cancel $interval when completed
                 if(vm.status === 'Completed'){
                     vm.progress = 100 + '%';
+                    $interval.cancel(vm.checkJobStatus);
+                } else if (vm.status == 'Failed') {
                     $interval.cancel(vm.checkJobStatus);
                 }
             }

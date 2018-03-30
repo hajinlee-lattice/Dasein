@@ -101,15 +101,20 @@
                         {{vm.completedSteps.load_data | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
-                <dt ng-class="{ 'started': (vm.matchingToDataCloud || vm.completedSteps.create_global_target_market) }">Matching to Data Cloud</dt>
+                <dt ng-class="{ 'started': (vm.matchingToDataCloud || vm.completedSteps.create_global_target_market || vm.completedSteps.create_global_model) }">Matching to Data Cloud</dt>
                 <dd>
                     <i 
                         class="fa fa-spinner fa-pulse fw"
                         ng-if="vm.matchingToDataCloud"></i>
-                    <span ng-if="vm.completedSteps.create_global_target_market">
+                    <span ng-if="vm.type == 'cross_sell' && vm.completedSteps.create_global_target_market">
                         <i 
                         class="fa fa-check"></i>
                         {{vm.completedSteps.create_global_target_market | date:"MM/dd/yyyy 'at' h:mma"}}
+                    </span>
+                    <span ng-if="vm.type == 'custom_event' && vm.completedSteps.create_global_model">
+                        <i 
+                        class="fa fa-check"></i>
+                        {{vm.completedSteps.create_global_model | date:"MM/dd/yyyy 'at' h:mma"}}
                     </span>
                 </dd>
                 <dt ng-class="{ 'started': (vm.scoringTrainingSet || vm.completedSteps.score_training_set) }">Scoring Training Set</dt>
@@ -126,7 +131,7 @@
             </dl>
 
 
-            <div class="meter bar" ng-if="vm.status !== 'Completed'">
+            <div class="meter bar" ng-if="vm.status !== 'Completed' && vm.status !== 'Failed'">
                 <span class="indeterminate" ng-style="{ 'width': vm.progress }"></span>
             </div>
             <div>
