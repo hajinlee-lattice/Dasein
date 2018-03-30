@@ -65,7 +65,7 @@ angular.module('lp.import.wizard.producthierarchy', [])
                     mappedField: vm.mappedFieldMap[key],
                     originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
                     originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
-                    append: true
+                    append: false
                 };
             mapped.push(map);
             if(userField) {
