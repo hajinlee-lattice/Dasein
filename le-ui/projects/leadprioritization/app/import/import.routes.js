@@ -243,7 +243,7 @@ angular
                         { name: 'AnnualRevenue', displayName: 'Estimated Yearly Revenue' },
                         { name: 'Longitude' },
                         { name: 'AnnualRevenueCurrency', displayName: 'Estimated Yearly Revenue Currency' },
-                        { name: 'Lattitude' }
+                        { name: 'Latitude' }
                         //{ name: 'NumberOfEmployees', displayName: 'Number Of Employees' },
                     ];
                 }
