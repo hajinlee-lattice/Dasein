@@ -88,7 +88,6 @@ angular.module('lp.jobs.import', [
                 property: 'timestamp',
                 items: [
                     { label: 'Timestamp', icon: 'numeric', property: 'timestamp' },
-                    { label: 'File Name', icon: 'alpha', property: 'fileName' },
                     { label: 'Job Status', icon: 'alpha', property: 'status' }
                 ]
             }
