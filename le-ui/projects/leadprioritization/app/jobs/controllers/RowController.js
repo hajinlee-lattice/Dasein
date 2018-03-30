@@ -17,7 +17,7 @@ angular
             admin: '=',
             auth: '='
         },
-        controller: function($scope, JobsStore, JobsService, CancelJobModal, RatingsEngineStore, BrowserStorageUtility) {
+        controller: function($scope, $state, JobsStore, JobsService, CancelJobModal, RatingsEngineStore, BrowserStorageUtility) {
             var job = $scope.job;
 
             // console.log(job);
@@ -36,22 +36,20 @@ angular
             $scope.isPMML = job.modelType === 'PmmlModel';
 
             if ($scope.isRatingEngine) {
-                RatingsEngineStore.getRatingModel($scope.job.rating_id, job.source).then(function(model){
+
+                RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){
+                    
                     var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
                         modelingJobId = model.AI.modelingJobId;
 
-                    if (modelingJobId !== null) {
-                        $scope.job.modelId = modelId;
-                    } else {
-                        $state.go('home.ratingsengine.productpurchase', {rating_id: $scope.job.rating_id, engineType: model.AI.modelingStrategy, fromList: true});
-                    }
-                    
+                    $scope.job.modelId = modelId;
+
+                    console.log(modelId, $scope.job.modelId, modelingJobId);
+
                 });
             } else {
                 $scope.job.modelId = job.source;
             }
-
-            // console.log(job.source);
 
             var clientSession = BrowserStorageUtility.getClientSession();
             $scope.TenantId = clientSession.Tenant.Identifier;
