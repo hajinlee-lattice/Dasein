@@ -44,9 +44,15 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
         if (vm.type === 'cross_sell') {
 
-            console.log(model);
-
-            if((Object.keys(model.advancedModelingConfig.cross_sell.filters) === {} || (model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.advancedModelingConfig.cross_sell.filters).length === 1)) && model.trainingSegment === null && model.advancedModelingConfig.cross_sell.trainingProducts === null) {
+            // console.log(model);
+            var keys = Object.keys(model.advancedModelingConfig.cross_sell.filters);
+            var purchasedBeforePeriod = model.advancedModelingConfig.cross_sell.filters['PURCHASED_BEFORE_PERIOD'];
+            var csFilters = Object.keys(model.advancedModelingConfig.cross_sell.filters).length;
+            var trainingSegment = model.trainingSegment;
+            var trainingProducts = model.advancedModelingConfig.cross_sell.trainingProducts ;
+            if((keys.length === 0 || (purchasedBeforePeriod && csFilters === 1)) && 
+                (trainingSegment === null || trainingSegment === undefined) && 
+                (trainingProducts === null || trainingProducts === undefined)) {
                 vm.hasSettingsInfo = false;
             }
 
@@ -121,13 +127,17 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                 vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
                 vm.matchingToDataCloud = vm.completedSteps.load_data && !vm.completedSteps.create_global_target_market;
                 vm.scoringTrainingSet = vm.completedSteps.create_global_target_market && !vm.completedSteps.score_training_set;
-
                 // Green status bar
                 if(result.stepsCompleted.length > 0){
-                    vm.progress = ((result.stepsCompleted.length / 2) * 7) + '%';
+                    var tmp = ((result.stepsCompleted.length / 2) * 5.5);
+                    if(tmp > 100 && vm.status !== 'Completed'){
+                        tmp = 99;
+                    }
+                    vm.progress = tmp + '%';
                 }
                 // Cancel $interval when completed
                 if(vm.status === 'Completed'){
+                    vm.progress = 100 + '%';
                     $interval.cancel(vm.checkJobStatus);
                 }
             }
@@ -166,6 +176,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
     }
 
     vm.showSetting = function(setting) {
+        // console.log('SETTINGS', setting, vm.modelSettingsSummary[vm.type][setting]);
         return vm.modelSettingsSummary[vm.type][setting];
     }
 
