@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -117,7 +118,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
-            int maxPeriod = periodService.getMaxPeriodId(customerSpace, PeriodStrategy.CalendarMonth);
+            PeriodStrategy strategy = periodService.getPeriodStrategies().stream()
+                    .filter(x -> x.getTemplate() == PeriodStrategy.Template.Month).collect(Collectors.toList()).get(0);
+            int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
                     .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);
             return ratingQueryBuilder.build();
@@ -132,6 +135,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     public void findRatingModelAttributeLookups(String customerSpace, AIModel ratingModel) {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(ratingModel.getTrainingSegment());
-        ratingModel.setRatingModelAttributes(new HashSet(segmentProxy.findDependingAttributes(customerSpace, segments)));
+        ratingModel
+                .setRatingModelAttributes(new HashSet(segmentProxy.findDependingAttributes(customerSpace, segments)));
     }
 }

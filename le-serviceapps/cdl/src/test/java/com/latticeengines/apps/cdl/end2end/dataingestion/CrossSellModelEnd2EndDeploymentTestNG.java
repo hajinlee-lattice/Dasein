@@ -68,6 +68,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
+        setupBusinessCalendar();
         setupTestRatingEngine();
     }
 
@@ -127,10 +128,14 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
 
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TRAINING);
-        Assert.assertEquals(trainingCount, 1186);
+        Assert.assertEquals(trainingCount, 581);
 
         long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
-        Assert.assertEquals(eventCount, 131);
+        Assert.assertEquals(eventCount, 56);
+    }
+
+    private void setupBusinessCalendar() {
+        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
     }
 }

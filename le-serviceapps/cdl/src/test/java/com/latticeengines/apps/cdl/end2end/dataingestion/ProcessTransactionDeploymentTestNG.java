@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 /**
  * Process Transaction imports after ProcessAccountDeploymentTestNG
@@ -89,18 +88,15 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
         Map<BusinessEntity, Long> segment1Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_1_ACCOUNT_1,
-                BusinessEntity.Contact, SEGMENT_1_CONTACT_1);
+                BusinessEntity.Account, SEGMENT_1_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_1_CONTACT_1);
         verifyTestSegment1Counts(segment1Counts);
         Map<BusinessEntity, Long> segment2Counts = ImmutableMap.of( //
-                BusinessEntity.Account, SEGMENT_2_ACCOUNT_1,
-                BusinessEntity.Contact, SEGMENT_2_CONTACT_1);
+                BusinessEntity.Account, SEGMENT_2_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_2_CONTACT_1);
         verifyTestSegment2Counts(segment2Counts);
         Map<RatingBucketName, Long> ratingCounts = ImmutableMap.of( //
                 RatingBucketName.A, RATING_A_COUNT_1, //
                 RatingBucketName.D, 7L, //
-                RatingBucketName.F, RATING_F_COUNT_1
-        );
+                RatingBucketName.F, RATING_F_COUNT_1);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
     }
 
@@ -114,11 +110,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         return expectedCnts;
     }
 
-    private void setupBusinessCalendar() {
-        BusinessCalendar calendar = new BusinessCalendar();
-        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
-        calendar.setStartingDate("JAN-01");
-        calendar.setLongerMonth(1);
-        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), calendar);
+    public void setupBusinessCalendar() {
+        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
     }
 }

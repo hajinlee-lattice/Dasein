@@ -80,6 +80,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -220,6 +221,16 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     @AfterClass(groups = { "end2end", "precheckin" })
     protected void cleanup() throws Exception {
         checkpointService.cleanup();
+    }
+
+    BusinessCalendar getStartingDateBusinessCalendderForTest() {
+        BusinessCalendar calendar = new BusinessCalendar();
+        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
+        calendar.setStartingDate("JAN-01");
+        calendar.setLongerMonth(1);
+        calendar.setCreated(new Date());
+        calendar.setUpdated(new Date());
+        return calendar;
     }
 
     protected void resetCollection() {
