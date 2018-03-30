@@ -136,8 +136,10 @@ public class RatingEngineServiceImplUnitTestNG {
         List<RatingEngine> ratingEngineList;
         RatingEngine r1 = new RatingEngine();
         r1.setId(id1);
+        r1.setType(RatingEngineType.RULE_BASED);
         RatingEngine r2 = new RatingEngine();
         r2.setId(id2);
+        r2.setType(RatingEngineType.RULE_BASED);
         ratingEngineList = Arrays.asList(r1, r2);
         return ratingEngineList;
     }
