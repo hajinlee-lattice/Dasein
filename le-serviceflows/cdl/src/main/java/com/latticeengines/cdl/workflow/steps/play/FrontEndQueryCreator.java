@@ -164,10 +164,10 @@ public class FrontEndQueryCreator {
 
     private FrontEndRestriction createAccountQueryWithAllowedRating(PlayLaunchContext playLaunchContext,
             String ratingId, RatingEngine ratingEngine) {
-        Lookup rhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
+        Lookup lhs = new AttributeLookup(BusinessEntity.Rating, ratingId);
         Collection<Object> allowedRatingsCollection = getAllowedRatingsCollection(
                 playLaunchContext.getPlayLaunch().getBucketsToLaunch());
-        Lookup lhs = new CollectionLookup(allowedRatingsCollection);
+        Lookup rhs = new CollectionLookup(allowedRatingsCollection);
         Restriction allowedRatingRestriction = new ConcreteRestriction(false, lhs, ComparisonType.IN_COLLECTION, rhs);
         Restriction finalAccountRestriction = new LogicalRestriction(LogicalOperator.AND,
                 Arrays.asList(ratingEngine.getSegment().getAccountRestriction(), allowedRatingRestriction));
