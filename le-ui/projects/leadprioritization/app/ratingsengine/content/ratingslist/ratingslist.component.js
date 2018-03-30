@@ -87,10 +87,10 @@ angular.module('lp.ratingsengine.ratingslist', [
                     'top': 5,
                 },
                 'chart': {
-                    'header':'Attributes Value',
+                    'header':'Value',
                     'emptymsg': '',
                     'usecolor': true,
-                    'color': '#2E6099',
+                    'color': '#e8e8e8',
                     'mousehover': false,
                     'type': 'integer',
                     'showstatcount': false,
@@ -124,7 +124,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                     'header':'Value',
                     'emptymsg': '',
                     'usecolor': true,
-                    'color': '#2E6099',
+                    'color': '#e8e8e8',
                     'mousehover': false,
                     'type': 'decimal',
                     'showstatcount': false,
@@ -147,14 +147,12 @@ angular.module('lp.ratingsengine.ratingslist', [
         return $scope.barChartLiftConfig;
     }
 
-    vm.getChartConfig = function (ratingType) {        
-        return getBarChartLiftConfig();
-
-        // if (ratingType === 'CROSS_SELL' || ratingType === 'CUSTOM_EVENT') {
-        //     return getBarChartLiftConfig();
-        // } else {
-        //     return getBarChartConfig();    
-        // }        
+    vm.getChartConfig = function (rating) {        
+        if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
+            return getBarChartLiftConfig();
+        } else {
+            return getBarChartConfig();    
+        }        
     }
 
     function getTestData() {
@@ -218,23 +216,6 @@ angular.module('lp.ratingsengine.ratingslist', [
         var data = getTestData();
         // console.log('Data ',data);
         return data;
-    }
-    vm.getAttributeRules = function() {
-
-        return 124;
-
-        // var attributes = QueryStore.getDataCloudAttributes(true);
-        
-        // attributes = attributes.filter(function(item) {
-            
-        //     var restriction = item.bucketRestriction,
-        //         isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
-        //         isSameBucket = true,
-        //         bkt = restriction.bkt;
-        //     var ret = QueryTreeService.getAttributeRules(restriction, bkt, bucket, isSameAttribute);
-        //     return ret;
-        // });
-        // return attributes;
     }
 
     vm.checkState = function(type) {

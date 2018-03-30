@@ -120,40 +120,14 @@
                         </ul>
                     </div><!-- End .tile-metadata -->
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
-                        <!-- For Jon, uncomment this and you will have the chart -->
-                            <!-- <bar-chart 
-                                config="vm.getChartConfig(rating.type)" 
-                                bktlist="vm.getData()">
-                            </bar-chart> -->
-                            <!--  -->
-
-                            
-                        <!-- <div ng-class="{'inactive': rating.status === 'INACTIVE'}">
-                            ng-if="
-                                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
-                                vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length &&!vm.lookupMode && 
-                                ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1 && 
-                                enrichment.Entity === 'Rating'"
-                            <bar-chart 
-                                vm='vm'
-                                config="vm.getChartConfig(rating.type)" 
-                                bktlist="vm.getData()">
-                            </bar-chart>
-
-                        </div> -->
-
-                        <!-- <bar-chart
-                            vm='vm'    
-                            statcount="vm.getAttributeRules()"
-                            config="vm.getChartConfig()" 
-                            bktlist="vm.getData()"
-                            showstatcount="false">
-                        </bar-chart> -->
+                        <bar-chart 
+                            config="vm.getChartConfig(rating)" 
+                            bktlist="vm.getData()">
+                        </bar-chart>
 
                         <!-- <div ng-if="!rating.hasBuckets && rating.type != 'CROSS_SELL'">
                             <h4>No Ratings Available</h4>
                         </div> -->
-
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
                         <span 

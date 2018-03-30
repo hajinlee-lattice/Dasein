@@ -1,4 +1,24 @@
 .dashboard {
+    &.CROSS_SELL_FIRST_PURCHASE {
+        .bar-graph {
+            background-color: #4BAEB5 !important;   
+        }
+    }
+    &.CROSS_SELL_REPEAT_PURCHASE {
+        .bar-graph {
+            background-color: #218F73 !important;   
+        }           
+    }
+    &.CUSTOM_EVENT {
+        .bar-graph {
+            background-color: #5EA83D !important;   
+        }
+    }
+    &.RULE_BASED {
+        .bar-graph {
+            background-color: #8166A3 !important;   
+        }
+    }
     .header {
         margin-bottom: 20px;
         &:after {
@@ -17,6 +37,7 @@
         }
         h3 {
             font-size: 16px;
+            margin: 12px 0;
         }
         dt, dd {
             font-size: 14px;
@@ -27,5 +48,24 @@
         dd {
             margin-left: 30%;
         }
+        table {
+            th, td {
+                padding: 0px 10px 4px 0;
+            }
+            th {
+                font-weight: normal;
+                text-transform: uppercase;
+                color: #333;
+                font-size: 10px;
+            }
+            td {
+                padding-top: 4px;
+            }
+        }
+    }
+    .attribute-stats .header {
+        background-color: transparent;
+        color: #333;
+        margin-bottom: 4px;
     }
 }

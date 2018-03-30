@@ -105,10 +105,19 @@ angular.module('lp.ratingsengine.dashboard', [
         vm.isRulesBased = (vm.ratingEngine.type === 'RULE_BASED');
 
         var model = vm.ratingEngine.activeModel;
+
+        console.log(vm.ratingEngine);
+
+        // if (rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
+        //     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+        // } else {
+        //     rating.tileClass = rating.type;
+        // }
         
         if (vm.isRulesBased) {
 
             vm.toggleScoringButtonText = (vm.status_toggle ? 'Deactivate Scoring' : 'Activate Scoring');
+            vm.modelingStrategy = 'RULE_BASED';
 
         } else {
 
@@ -152,6 +161,8 @@ angular.module('lp.ratingsengine.dashboard', [
                 } else if (vm.modelingStrategy === 'CROSS_SELL_REPEAT_PURCHASE') {
                     vm.ratingEngineType = 'Repeat Purchase Cross-Sell'
                 }
+            } else {
+                vm.modelingStrategy = 'CUSTOM_EVENT';
             }
 
             vm.modelSummary = model.AI.modelSummary;
@@ -165,6 +176,150 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
 
+        console.log(vm.modelingStrategy);
+
+    }
+
+    function getBarChartConfig() {
+        if ($scope.barChartConfig === undefined) {
+
+            $scope.barChartConfig = {
+                'data': {
+                    'tosort': true,
+                    'sortBy': '-Cnt',
+                    'trim': true,
+                    'top': 5,
+                },
+                'chart': {
+                    'header':'Value',
+                    'emptymsg': '',
+                    'usecolor': true,
+                    'color': '#e8e8e8',
+                    'mousehover': false,
+                    'type': 'integer',
+                    'showstatcount': false,
+                    'maxVLines': 3,
+                    'showVLines': false,
+                },
+                'vlines': {
+                    'suffix': ''
+                },
+                'columns': [{
+                    'field': 'Cnt',
+                    'label': 'Records',
+                    'type': 'number',
+                    'chart': true,
+                }]
+            };
+        }
+        return $scope.barChartConfig;
+    }
+
+    function getBarChartLiftConfig() {
+        if ($scope.barChartLiftConfig === undefined) {
+            $scope.barChartLiftConfig = {
+                'data': {
+                    'tosort': true,
+                    'sortBy': 'Lbl',
+                    'trim': true,
+                    'top': 5,
+                },
+                'chart': {
+                    'header':'Value',
+                    'emptymsg': '',
+                    'usecolor': true,
+                    'color': '#e8e8e8',
+                    'mousehover': false,
+                    'type': 'decimal',
+                    'showstatcount': false,
+                    'maxVLines': 3,
+                    'showVLines': true,
+                },
+                'vlines': {
+                    'suffix': 'x'
+                },
+                'columns': [{
+                        'field': 'Lift',
+                        'label': 'Lift',
+                        'type': 'string',
+                        'suffix': 'x',
+                        'chart': true
+                    }
+                ]
+            };
+        }
+        return $scope.barChartLiftConfig;
+    }
+
+    vm.getChartConfig = function (rating) {        
+        if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
+            return getBarChartLiftConfig();
+        } else {
+            return getBarChartConfig();    
+        }        
+    }
+
+    function getTestData() {
+        if(!$scope.test){
+            $scope.test = [{
+                "Lbl": "B",
+                "Cnt": 10,
+                "Lift": "1.3",
+                "Id": 2,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "B"
+                ]
+            },
+            {
+                "Lbl": "A",
+                "Cnt": 11,
+                "Lift": "0.3",
+                "Id": 1,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "A"
+                ]
+            },
+            {
+                "Lbl": "F",
+                "Cnt": 14,
+                "Lift": "0.5",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "F"
+                ]
+            },
+            {
+                "Lbl": "C",
+                "Cnt": 16,
+                "Lift": "0.8",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "C"
+                ]
+            },
+            {
+                "Lbl": "D",
+                "Cnt": 18,
+                "Lift": "0.9",
+                "Id": 3,
+                "Cmp": "EQUAL",
+                "Vals": [
+                    "D"
+                ]
+            }
+        ];
+        }
+        return $scope.test;
+    }
+
+    vm.getData = function () {
+        var data = getTestData();
+        // console.log('Data ',data);
+        return data;
     }
 
     vm.returnProductNameFromId = function(productId) {

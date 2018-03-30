@@ -12,6 +12,9 @@
 					fill: #4BAEB5;
 				}
 			}
+			.bar-graph {
+				background-color: #4BAEB5 !important;	
+			}
 		}
 		& > li.CROSS_SELL_REPEAT_PURCHASE {
 			.tile-header h2 {
@@ -25,6 +28,9 @@
 					fill: #218F73;
 				}
 			}
+			.bar-graph {
+				background-color: #218F73 !important;	
+			}			
 		}
 		& > li.CUSTOM_EVENT {
 			.tile-header h2 {
@@ -38,6 +44,9 @@
 					fill: #5EA83D;		
 				}
 			}
+			.bar-graph {
+				background-color: #5EA83D !important;	
+			}
 		}
 		& > li.RULE_BASED {
 			.tile-header h2 {
@@ -50,6 +59,9 @@
 				polygon {
 					fill: #8166A3;		
 				}
+			}
+			.bar-graph {
+				background-color: #8166A3 !important;	
 			}
 		}
 	}
