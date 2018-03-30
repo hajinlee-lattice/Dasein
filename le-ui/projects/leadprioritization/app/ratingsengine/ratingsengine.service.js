@@ -358,8 +358,6 @@ angular.module('lp.ratingsengine')
         var deferred = $q.defer(),
             ClientSession = BrowserStorageUtility.getClientSession(); 
 
-        console.log($stateParams.opts);
-
         opts = {
             createdBy: rating.createdBy !== undefined ? rating.createdBy : ClientSession.EmailAddress,
             type: rating.type !== undefined ? rating.type : 'RULE_BASED',
@@ -1018,15 +1016,11 @@ angular.module('lp.ratingsengine')
     this.saveRating = function(opts) {
         var deferred = $q.defer();
 
-        console.log(opts);
-
         $http({
             method: 'POST',
             url: '/pls/ratingengines',
             data: opts
         }).then(function(response){
-            console.log(response.data);
-
             deferred.resolve(response.data);
         });
 

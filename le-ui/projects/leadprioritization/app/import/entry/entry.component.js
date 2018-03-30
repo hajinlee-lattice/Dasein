@@ -36,6 +36,10 @@ angular.module('lp.import.entry', [
         }
     }
 
+    vm.getDefaultMessage = function()  {
+        return "your-" + vm.goState.replace('_','-') + ".csv";
+    }
+
     vm.changeEntityType = function(type, goState) {
         vm.goState = goState || type.toLowerCase();
         ImportWizardStore.setEntityType(type);

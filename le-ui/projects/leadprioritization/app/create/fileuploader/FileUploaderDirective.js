@@ -10,6 +10,7 @@ angular
             inputDisabled:'=',
             infoTemplate:'=',
             defaultMessage:'=',
+            defaultMessageFn:'&',
             fileRequired:'@',
             fileAccept:'@',
             fileSelect:'&',

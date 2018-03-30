@@ -60,6 +60,10 @@ angular.module('common.datacloud')
 
     this.init();
 
+    this.clear = function() {
+        this.init();
+    }
+
     var getObj = function(path, obj) {
         return path.split('.').reduce(function(obj, i) {
             return obj[i];

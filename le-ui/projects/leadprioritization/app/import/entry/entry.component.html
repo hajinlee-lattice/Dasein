@@ -25,7 +25,7 @@
         </div>
 
         <div class="import-additional-info import-additional-info-{{vm.goState}}" ui-view="entry_content"></div>
-
+        [{{vm.getDefaultMessage()}}]
         <div 
             file-uploader-container
             label="Select and Upload File"
@@ -36,6 +36,7 @@
             file-done="vm.fileDone(result)"
             file-cancel="vm.fileCancel()"
             class="form-group file-upload" 
+            default-message-fn="vm.getDefaultMessage()"
             ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }">
         </div>
       </div>

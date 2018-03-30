@@ -11,7 +11,7 @@
 </label>
 <div class="fileUpload button form-control" ng-class="{ 'required': vm_uploader.fileRequired }">
     <span id="csvFileUploadMessage" class="placeholder" ng-if="vm_uploader.showFileIcon()">
-      {{ vm_uploader.defaultMessage }}
+      {{ vm_uploader.defaultMessageFn() || vm_uploader.defaultMessage }}
     </span>
     
     <div 

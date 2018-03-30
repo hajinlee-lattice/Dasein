@@ -831,7 +831,7 @@ angular
                         EnrichmentData: function($q, DataCloudStore) {
                             var deferred = $q.defer();
                             
-                            DataCloudStore.getEnrichments({onlySelectedAttributes: true}, null).then(function(result) {
+                            DataCloudStore.getEnrichments().then(function(result) {
                                 deferred.resolve(result);
                             });
 

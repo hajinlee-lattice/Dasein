@@ -450,7 +450,6 @@ angular.module('common.datacloud.query.service',[
         var deferred = $q.defer();
 
         this.GetEntitiesCountsByQuery(query).then(function(data){
-            console.log('getEntitiesCounts();', data, query);
             if (!data) {
                 deferred.resolve({});
             } else {
