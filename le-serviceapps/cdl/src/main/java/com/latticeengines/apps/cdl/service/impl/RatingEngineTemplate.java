@@ -7,13 +7,14 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
@@ -26,6 +27,9 @@ public abstract class RatingEngineTemplate {
 
     @Inject
     private DataFeedProxy dataFeedProxy;
+
+    @Inject
+    private AIModelEntityMgr aiModelEntityMgr;
 
     @VisibleForTesting
     RatingEngineSummary constructRatingEngineSummary(RatingEngine ratingEngine, String tenantId) {
@@ -54,11 +58,16 @@ public abstract class RatingEngineTemplate {
             ratingEngineSummary.setContactsInSegment(segment.getContacts());
         }
 
-        if (ratingEngine.getActiveModel() != null && ratingEngine.getActiveModel() instanceof AIModel) {
-            ModelSummary modelSummary = ((AIModel) ratingEngine.getActiveModel()).getModelSummary();
-            if (modelSummary != null) {
+        if (!ratingEngine.getType().equals(RatingEngineType.RULE_BASED)) {
+            AIModel aimodel;
+            if (ratingEngine.getActiveModel() == null) {
+                aimodel = aiModelEntityMgr.findByField("pid", ratingEngine.getActiveModelPid());
+            } else {
+                aimodel = (AIModel) ratingEngine.getActiveModel();
+            }
+            if (aimodel.getModelSummary() != null) {
                 ratingEngineSummary.setBucketMetadata(internalResourceProxy
-                        .getUpToDateABCDBucketsByRatingEngineId(ratingEngine.getId(), CustomerSpace.parse(tenantId)));
+                        .getUpToDateABCDBuckets(aimodel.getModelSummary().getId(), CustomerSpace.parse(tenantId)));
             }
         }
 

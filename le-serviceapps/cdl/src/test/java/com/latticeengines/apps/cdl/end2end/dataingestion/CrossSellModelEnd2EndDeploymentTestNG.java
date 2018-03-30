@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -36,8 +35,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1521680290015";
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "JLM1522370380609";
     private static final boolean EV_MODEL = true;
 
     private MetadataSegment testSegment;
@@ -70,15 +69,6 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
         setupTestRatingEngine();
-    }
-
-    @AfterClass(groups = { "end2end" })
-    public void cleanup() {
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
-        segmentProxy.deleteSegmentByName(mainTestTenant.getId(), testSegment.getName());
-        if (trainSegment != null) {
-            segmentProxy.deleteSegmentByName(mainTestTenant.getId(), trainSegment.getName());
-        }
     }
 
     @Test(groups = "end2end")

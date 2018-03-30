@@ -17,7 +17,6 @@ import org.springframework.lang.NonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.validator.annotation.NotNull;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -350,23 +349,9 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
             return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
         } catch (Exception e) {
             throw new RuntimeException(
-                    String.format("Remote call failure for getting the up-to-date bucekts of the model %s of tenant %s",
+                    String.format("Remote call failure for getting the up-to-date buckets of the model %s of tenant %s",
                             modelId, customerSpace.toString()),
                     e);
-        }
-    }
-
-    public List<BucketMetadata> getUpToDateABCDBucketsByRatingEngineId(String ratingEngineId,
-            CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/abcdbuckets/uptodate/ratingengine", ratingEngineId);
-            url += "?tenantId=" + customerSpace.toString();
-            List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
-            return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
-        } catch (Exception e) {
-            throw new RuntimeException(String.format(
-                    "Remote call failure for getting the up-to-date buckets of the rating engine %s of tenant %s",
-                    ratingEngineId, customerSpace.toString()), e);
         }
     }
 

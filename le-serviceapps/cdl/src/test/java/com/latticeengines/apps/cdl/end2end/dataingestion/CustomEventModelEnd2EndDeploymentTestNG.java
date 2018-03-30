@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -35,7 +34,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1521961872915";
+    private static final String EXISTING_TENANT = "JLM1522370380609";
 
     private MetadataSegment testSegment;
     private RatingEngine testRatingEngine;
@@ -51,9 +50,6 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
 
     @Inject
     private SegmentProxy segmentProxy;
-
-    private final String targetProductId = "A74D1222394534E6B450CA006C20D48D";
-    private final String trainingProductId = "A80D4770376C1226C47617C071324C0B";
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
@@ -80,13 +76,6 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
-    }
-
-    @AfterClass(groups = { "end2end" })
-    public void cleanup() {
-        ratingEngineProxy.deleteRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
-        segmentProxy.deleteSegmentByName(mainTestTenant.getId(), testSegment.getName());
-
     }
 
     private void setupTestSegment() {

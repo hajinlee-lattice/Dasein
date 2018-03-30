@@ -107,7 +107,6 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
-import com.latticeengines.pls.service.impl.TenantConfigServiceImpl;
 import com.latticeengines.pls.workflow.RatingEngineBucketBuilder;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
@@ -1043,16 +1042,6 @@ public class InternalResource extends InternalResourceBase {
         checkHeader(request);
         manufactureSecurityContextForInternalAccess(tenantId);
         return bucketedScoreService.getUpToDateModelBucketMetadata(modelId);
-    }
-
-    @RequestMapping(value = "/abcdbuckets/uptodate/ratingengine/{ratingEngineId}", method = RequestMethod.GET, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "Get up-to-date ABCD Buckets info for the model")
-    public List<BucketMetadata> getUpToDateABCDBucketsByRatingEngineId(@PathVariable String ratingEngineId,
-            @RequestParam(value = "tenantId", required = false) String tenantId, HttpServletRequest request) {
-        checkHeader(request);
-        manufactureSecurityContextForInternalAccess(tenantId);
-        return bucketedScoreService.getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngineId);
     }
 
     @RequestMapping(value = "/abcdbuckets/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
