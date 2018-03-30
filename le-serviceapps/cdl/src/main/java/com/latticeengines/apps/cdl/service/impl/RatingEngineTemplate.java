@@ -58,7 +58,7 @@ public abstract class RatingEngineTemplate {
             ratingEngineSummary.setContactsInSegment(segment.getContacts());
         }
 
-        if (!ratingEngine.getType().equals(RatingEngineType.RULE_BASED)) {
+        if (!(RatingEngineType.RULE_BASED).equals(ratingEngine.getType())) {
             AIModel aimodel;
             if (ratingEngine.getActiveModel() == null) {
                 aimodel = aiModelEntityMgr.findByField("pid", ratingEngine.getActiveModelPid());
