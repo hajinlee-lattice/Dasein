@@ -623,7 +623,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 if (paras.getIdAttr() != null) {
                     throw new RuntimeException("Only allow one ID field (LatticeAccountId or LatticeID)");
                 }
-                log.info(String.format("ID attr: %s (unencode)", field.name()));
+                log.debug(String.format("ID attr: %s (unencode)", field.name()));
                 paras.setIdAttr(field.name());
                 return true;
             } else {
@@ -636,7 +636,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return false;
             }
             if (Boolean.FALSE.equals(amAttrConfig.get(field.name()).isProfile)) {
-                log.info(String.format("Discarded attr: %s", field.name()));
+                log.debug(String.format("Discarded attr: %s", field.name()));
                 return true;
             }
             return false;
@@ -651,7 +651,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (Boolean.FALSE.equals(amAttrConfig.get(field.name()).isNoBucket())) {
                 return false;
             }
-            log.info(String.format("Retained attr: %s (unencode)", field.name()));
+            log.debug(String.format("Retained attr: %s (unencode)", field.name()));
             paras.getAttrsToRetain().add(new ProfileParameters.Attribute(field.name(), null, null, null));
             return true;
         }
@@ -676,7 +676,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
                 return true;
             }
             if (encAttrs.contains(field.name())) {
-                log.info(String.format(
+                log.debug(String.format(
                         "Ignore encoded attr: %s (No decoded attrs of it are enabled in profiling)",
                         field.name()));
                 return true;
@@ -689,11 +689,12 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (NUM_TYPES.contains(type)) {
                 switch (config.getStage()) {
                 case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                    log.info(String.format("Interval bucketed attr %s (type %s unencode)", field.name(),
+                    log.debug(String.format("Interval bucketed attr %s (type %s unencode)", field.name(),
                             type.getName()));
                     break;
                 case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                    log.info(String.format("Interval bucketed attr %s (type %s encode)", field.name(), type.getName()));
+                    log.debug(
+                            String.format("Interval bucketed attr %s (type %s encode)", field.name(), type.getName()));
                     break;
                 default:
                     throw new RuntimeException("Unrecognized stage " + config.getStage());
@@ -710,7 +711,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             Schema.Type type = field.schema().getTypes().get(0).getType();
             if (BOOL_TYPES.contains(type)
                     || FundamentalType.BOOLEAN.getName().equalsIgnoreCase(field.getProp(AVRO_PROP_KEY))) {
-                log.info(String.format("Boolean bucketed attr %s (type %s encode)", field.name(), type.getName()));
+                log.debug(String.format("Boolean bucketed attr %s (type %s encode)", field.name(), type.getName()));
                 BucketAlgorithm algo = new BooleanBucket();
                 if (amAttrConfig.containsKey(field.name())) {
                     paras.getAmAttrsToEnc().add(new ProfileParameters.Attribute(field.name(), 2, null, algo));
@@ -727,11 +728,11 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             if (CAT_TYPES.contains(type)) {
                 switch (config.getStage()) {
                 case DataCloudConstants.PROFILE_STAGE_SEGMENT:
-                    log.info(String.format("Categorical bucketed attr %s (type %s unencode)", field.name(),
+                    log.debug(String.format("Categorical bucketed attr %s (type %s unencode)", field.name(),
                             type.getName()));
                     break;
                 case DataCloudConstants.PROFILE_STAGE_ENRICH:
-                    log.info(String.format("Categorical bucketed attr %s (type %s encode)", field.name(),
+                    log.debug(String.format("Categorical bucketed attr %s (type %s encode)", field.name(),
                             type.getName()));
                     break;
                 default:
@@ -745,7 +746,7 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
         }
 
         private static boolean isAttrToRetain(Field field, ProfileParameters paras) {
-            log.info(String.format("Retained attr: %s (unencode)", field.name()));
+            log.debug(String.format("Retained attr: %s (unencode)", field.name()));
             paras.getAttrsToRetain().add(new ProfileParameters.Attribute(field.name(), null, null, null));
             return true;
         }
@@ -756,30 +757,30 @@ public class SourceProfiler extends AbstractDataflowTransformer<ProfileConfig, P
             switch (stage) {
             case DataCloudConstants.PROFILE_STAGE_SEGMENT:
                 if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
-                    log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     amAttrsToEnc.add(attr);
                 } else if (attr.getAlgo() instanceof IntervalBucket) {
-                    log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     numericAttrs.add(attr);
                 } else {
-                    log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     attrsToRetain.add(attr);
                 }
                 break;
             case DataCloudConstants.PROFILE_STAGE_ENRICH:
                 if (attr.getAlgo() instanceof BooleanBucket || attr.getAlgo() instanceof CategoricalBucket) {
-                    log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     amAttrsToEnc.add(attr);
                 } else if (attr.getAlgo() instanceof IntervalBucket) {
-                    log.info(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (encode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     numericAttrs.add(attr);
                 } else {
-                    log.info(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
+                    log.debug(String.format("%s attr %s (unencode)", attr.getAlgo().getClass().getSimpleName(),
                             attr.getAttr()));
                     attrsToRetain.add(attr);
                 }
