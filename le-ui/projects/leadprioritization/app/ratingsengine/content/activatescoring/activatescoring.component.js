@@ -1,4 +1,4 @@
-angular.module('lp.ratingsengine.activatescoring', [
+angular.module('lp.models.ratings', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
@@ -25,13 +25,12 @@ angular.module('lp.ratingsengine.activatescoring', [
 //     }
 //   };
 // })
-.controller('RatingsEngineActivateScoring', function(
-    $scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary
-) {
-    var vm = this;
+.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
 
+    var vm = this;
     angular.extend(vm, {
+        stateParams: $stateParams,
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         model: Model,
@@ -44,7 +43,8 @@ angular.module('lp.ratingsengine.activatescoring', [
         ratingsSummary: RatingsSummary,
         bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
         slidersContainer: document.getElementById("sliders"),
-        barColors: document.getElementById("barColors")
+        barColors: document.getElementById("barColors"),
+        section: ($state.params && $state.params.section ? $state.params.section : '')
     });
 
     vm.init = function() {
@@ -61,8 +61,6 @@ angular.module('lp.ratingsengine.activatescoring', [
 
         renderChart();
     }
-
-
 
     function renderChart(){
         var verticalAxis = document.getElementById("verticalAxis");
@@ -91,7 +89,11 @@ angular.module('lp.ratingsengine.activatescoring', [
             verticalAxis.classList.add('reduceBig');
         }
 
-        vm.getNumber = function(num) {return new Array(num);}
+        vm.getNumber = function(num) {
+            if(!Number.isNaN(num)) {
+                return new Array(num);
+            }
+        }
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
 
         refreshChartData();
@@ -146,12 +148,7 @@ angular.module('lp.ratingsengine.activatescoring', [
             }
 
             vm.buckets[i].bucket_name = vm.bucketNames[i];
-
-
         }
-
-
-        
     }
 
     vm.addBucket = function(ev){
@@ -180,8 +177,6 @@ angular.module('lp.ratingsengine.activatescoring', [
         }
         
     }
-
-
     
     vm.eleMouseDown = function(ev, bucket, index) {
         ev.preventDefault();
@@ -247,7 +242,6 @@ angular.module('lp.ratingsengine.activatescoring', [
                 $scope.$apply();
             }
         }
-
     }
 
     function eleMouseUp(ev, index){
@@ -299,36 +293,49 @@ angular.module('lp.ratingsengine.activatescoring', [
 
     }
 
-
-
     vm.publishConfiguration = function() {
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
+console.log(vm.section, $state.params);
 
-        var modelId = $stateParams.modelId;
 
-        ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
-            
-            if (result != null && result.success === true) {
-                
-                vm.showSuccess = true;
-                vm.chartNotUpdated = true;
-                vm.updateContent = true;
-
-                $timeout( function(){ 
-
-                    vm.updateContent = false;
-                    vm.showSuccess = false;
-                    
-                }, 200);
-
-            } else {
-                vm.savingConfiguration = false;
-                vm.createBucketsErrorMessage = result;
-                vm.showSaveBucketsError = true;
-            }
-        });
-
+        var modelId = $stateParams.modelId,
+            rating_id = $stateParams.rating_id;
+        if(vm.section === 'dashboard.scoring') {
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
+                if (result != null && result.success === true) {
+                    vm.showSuccess = true;
+                    vm.chartNotUpdated = true;
+                    vm.updateContent = true;
+                    $timeout( function(){ 
+                        vm.updateContent = false;
+                        vm.showSuccess = false;
+                        
+                    }, 200);
+                } else {
+                    vm.savingConfiguration = false;
+                    vm.createBucketsErrorMessage = result;
+                    vm.showSaveBucketsError = true;
+                }
+            });
+        } else {
+            ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
+                if (result != null && result.success === true) {
+                    vm.showSuccess = true;
+                    vm.chartNotUpdated = true;
+                    vm.updateContent = true;
+                    $timeout( function(){ 
+                        vm.updateContent = false;
+                        vm.showSuccess = false;
+                        
+                    }, 200);
+                } else {
+                    vm.savingConfiguration = false;
+                    vm.createBucketsErrorMessage = result;
+                    vm.showSaveBucketsError = true;
+                }
+            });
+        }
     }
 
 
@@ -394,5 +401,39 @@ angular.module('lp.ratingsengine.activatescoring', [
     };
 
     vm.init();
-
 });
+// .directive('modelRatingsChart', function() {
+//     return {
+//         restrict: 'EA',
+//         templateUrl: 'app/models/views/ModelRatingsChartView.html',
+//         scope: {
+//             workingBuckets: '=?',
+//             ratingsSummary: '=?',
+
+//             // chartContainerHeight: '=?',
+//             // showRemoveBucketText: '=?',
+//             // showSuccess: '=?',
+//             // dugoutHeight: '=?',
+//             // addBucket: '=?', // function
+//             // canAddBucket: '=?',
+//             // workingBuckets: '=?',
+//             // eleMouseDown: '=?',
+//             // right: '=?',
+//             // getNumber: '=?', // function
+//             // yAxisNumber: '=?',
+//             // axisItemHeight: '=?',
+//             // Math: '=?',
+//             // barMultiplier: '=?',
+//             // bucketHover: '=?', // function
+//             // modelType: '=?'
+//         },
+//         controller: ['$scope', '$rootScope', '$state', '$stateParams', '$timeout', 'ResourceUtility', 'Model', 'ModelStore', 'ModelRatingsService', 'CurrentConfiguration', 'RatingsSummary', function ($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
+//             var vm = $scope;
+//             angular.extend(vm, {
+//                 workingBuckets: $scope.workingBuckets,
+//                 ratingsSummary: $scope.ratingsSummary
+//             });
+
+//         }]
+//     }
+// });
