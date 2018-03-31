@@ -74,7 +74,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
         if (bucketedScoreSummary != null) {
             return bucketedScoreSummary;
@@ -85,7 +85,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId,
             BucketedScoreSummary bucketedScoreSummary) throws Exception {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
         createOrUpdateBucketedScoreSummary(modelSummary, bucketedScoreSummary);
         return bucketedScoreSummary;
     }
@@ -132,7 +132,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
         return getBucketMetadataListBasedModelSummary(modelSummary, modelId);
     }
 
