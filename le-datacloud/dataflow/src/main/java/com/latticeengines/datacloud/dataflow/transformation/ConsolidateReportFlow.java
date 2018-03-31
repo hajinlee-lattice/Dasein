@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -17,6 +19,9 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 @Component(ConsolidateReportFlow.DATAFLOW_BEAN_NAME)
 public class ConsolidateReportFlow
         extends TransformationFlowBase<BasicTransformationConfiguration, ConsolidateReportParameters> {
+
+    private static final Logger log = LoggerFactory.getLogger(ConsolidateReportFlow.class);
+
     public static final String TRANSFORMER_NAME = "ConsolidateReporter";
     public static final String DATAFLOW_BEAN_NAME = "ConsolidateReportFlow";
 
@@ -91,6 +96,8 @@ public class ConsolidateReportFlow
     }
 
     private Node reportNew(Node node, ConsolidateReportParameters parameters) {
+        log.info(String.format("Entity with %s >= %d is treated as new entity", InterfaceName.CDLCreatedTime.name(),
+                parameters.getTimestamp().getTime()));
         node = node.filter(
                 String.format("%s != null && %s >= %dL", InterfaceName.CDLCreatedTime.name(),
                         InterfaceName.CDLCreatedTime.name(), parameters.getTimestamp().getTime()),

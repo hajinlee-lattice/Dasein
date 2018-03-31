@@ -239,7 +239,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         step.setBaseTables(baseTables);
         step.setInputSteps(Collections.singletonList(dailyStep));
         step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(false, false, true));
+        step.setConfiguration(getConsolidateDataConfig(false, false, true, false));
 
         return step;
     }

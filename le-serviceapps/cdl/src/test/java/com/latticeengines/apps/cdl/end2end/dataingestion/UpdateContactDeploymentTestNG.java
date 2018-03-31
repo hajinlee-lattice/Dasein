@@ -1,9 +1,10 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_TOTAL;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_OVERLAP;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_TOTAL;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
@@ -57,7 +58,8 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private void importData() throws Exception {
-        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1, CONTACT_IMPORT_SIZE_2);
+        mockVdbImport(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1 - CONTACT_IMPORT_SIZE_OVERLAP,
+                CONTACT_IMPORT_SIZE_2);
         Thread.sleep(2000);
     }
 
@@ -66,8 +68,8 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
 
-        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
+        long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
         long numProducts = PRODUCT_IMPORT_SIZE_1;
         long numTransactions = TRANSACTION_IMPORT_SIZE_1;
 
@@ -97,11 +99,10 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.SortedContact, (long) CONTACT_IMPORT_SIZE_2);
         // Because Account is enforced to rebuild
-        expectedCnts.put(TableRoleInCollection.BucketedAccount, (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
-        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
+        expectedCnts.put(TableRoleInCollection.BucketedAccount, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
+        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
         expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) ((ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2) * (PRODUCT_IMPORT_SIZE_1)));
+                (long) (ACCOUNT_IMPORT_SIZE_TOTAL * PRODUCT_IMPORT_SIZE_1));
         return expectedCnts;
     }
 

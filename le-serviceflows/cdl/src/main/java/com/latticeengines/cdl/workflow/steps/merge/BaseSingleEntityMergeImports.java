@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
@@ -105,8 +106,8 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(mergeStep));
-        step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(false, false, false));
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        step.setConfiguration(getConsolidateDataConfig(false, false, false, true));
 
         targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -119,7 +120,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
     protected TransformationStepConfig diff(int mergeStep, int upsertMasterStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Arrays.asList(mergeStep, upsertMasterStep));
-        step.setTransformer("consolidateDeltaTransformer");
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DELTA);
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
         config.setMasterIdField(batchStorePrimaryKey);

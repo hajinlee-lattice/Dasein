@@ -84,10 +84,16 @@ public class CheckpointService {
     static final String CHECKPOINT_DATASET_CSV = "csv";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
-    static final int ACCOUNT_IMPORT_SIZE_2 = 300;
+    static final int ACCOUNT_IMPORT_SIZE_2 = 400;
+    static final int ACCOUNT_IMPORT_SIZE_OVERLAP = 100; // To test update
+    static final int ACCOUNT_IMPORT_SIZE_TOTAL = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2
+            - ACCOUNT_IMPORT_SIZE_OVERLAP;
 
     static final int CONTACT_IMPORT_SIZE_1 = 1100;
-    static final int CONTACT_IMPORT_SIZE_2 = 1200;
+    static final int CONTACT_IMPORT_SIZE_OVERLAP = 100; // To test update
+    static final int CONTACT_IMPORT_SIZE_2 = 1300;
+    static final int CONTACT_IMPORT_SIZE_TOTAL = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2
+            - CONTACT_IMPORT_SIZE_OVERLAP;
 
     static final int PRODUCT_IMPORT_SIZE_1 = 100;
     static final int PRODUCT_IMPORT_SIZE_2 = 49;

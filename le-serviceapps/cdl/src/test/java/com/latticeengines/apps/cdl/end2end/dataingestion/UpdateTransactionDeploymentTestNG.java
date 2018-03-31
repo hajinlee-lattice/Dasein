@@ -1,9 +1,7 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_2;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_1;
-import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_2;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.ACCOUNT_IMPORT_SIZE_TOTAL;
+import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.CONTACT_IMPORT_SIZE_TOTAL;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
@@ -41,8 +39,8 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         resumeVdbCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
         dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
-        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
+        long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
         Assert.assertEquals(countInRedshift(BusinessEntity.Contact), numContacts);
 
@@ -70,8 +68,8 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
         verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
 
-        long numAccounts = ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2;
-        long numContacts = CONTACT_IMPORT_SIZE_1 + CONTACT_IMPORT_SIZE_2;
+        long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
+        long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
         long numProducts = PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2;
         long numTransactions = TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2;
 
@@ -105,10 +103,9 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction,
                 (long) (TRANSACTION_IMPORT_SIZE_1 + TRANSACTION_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2));
+                (long) ACCOUNT_IMPORT_SIZE_TOTAL);
         expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) ((ACCOUNT_IMPORT_SIZE_1 + ACCOUNT_IMPORT_SIZE_2)
-                        * (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2)));
+                (long) (ACCOUNT_IMPORT_SIZE_TOTAL * (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2)));
         return expectedCnts;
     }
 }

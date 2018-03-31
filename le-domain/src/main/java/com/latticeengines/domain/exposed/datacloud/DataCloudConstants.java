@@ -85,6 +85,9 @@ public final class DataCloudConstants {
     public static final String TRANSFORMER_MERGE = "MergeTransformer";
     public static final String TRANSFORMER_STANDARDIZATION = "standardizationTransformer";
 
+    public static final String TRANSFORMER_CONSOLIDATE_REPORT = "ConsolidateReporter";
+    public static final String TRANSFORMER_CONSOLIDATE_DATA = "consolidateDataTransformer";
+    public static final String TRANSFORMER_CONSOLIDATE_DELTA = "consolidateDeltaTransformer";
     public static final String TRANSFORMER_CONSOLIDATE_PARTITION = "ConsolidatePartition";
     public static final String TRANSFORMER_CONSOLIDATE_RETAIN = "consolidateRetainFieldTransformer";
     public static final String TRANSFORMER_ATTRIBUTES_DERIVER = "purchaseAttributesDeriver";

@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -90,7 +91,7 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         TransformationStepConfig step = new TransformationStepConfig();
         setupMasterTable(step);
         step.setInputSteps(Collections.singletonList(matchStep));
-        step.setTransformer("consolidateDataTransformer");
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
         step.setConfiguration(getMergeMasterConfig());
 
         targetTable = new TargetTable();

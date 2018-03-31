@@ -221,9 +221,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
-        log.info(String.format(
-                "Check whether it is profile purchase history: StepName=%s, ProfilePurchaseHistoryBean=%s", step.name(),
-                ProfilePurchaseHistory.BEAN_NAME));
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 

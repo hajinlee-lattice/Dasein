@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateReportConfig;
@@ -125,7 +126,7 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
     protected TransformationStepConfig reportDiff(int inputStep) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(inputStep));
-        step.setTransformer("ConsolidateReporter");
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_REPORT);
         ConsolidateReportConfig config = new ConsolidateReportConfig();
         config.setEntity(entity);
         String configStr = appendEngineConf(config, lightEngineConfig());
@@ -148,8 +149,8 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
             baseTables.put(inputTableName, new SourceTable(inputTableName, customerSpace));
         }
         step.setBaseTables(baseTables);
-        step.setTransformer("consolidateDataTransformer");
-        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly));
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA);
+        step.setConfiguration(getConsolidateDataConfig(isDedupeSource, true, mergeOnly, false));
         if (useTargetTable) {
             TargetTable targetTable = new TargetTable();
             targetTable.setCustomerSpace(customerSpace);
@@ -159,13 +160,17 @@ public abstract class BaseMergeImports<T extends BaseProcessEntityStepConfigurat
         return step;
     }
 
-    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly) {
+    protected String getConsolidateDataConfig(boolean isDedupeSource, boolean addTimettamps, boolean isMergeOnly,
+            boolean copyCreateTime) {
         ConsolidateDataTransformerConfig config = new ConsolidateDataTransformerConfig();
         config.setSrcIdField(InterfaceName.Id.name());
         config.setMasterIdField(batchStorePrimaryKey);
         config.setDedupeSource(isDedupeSource);
         config.setMergeOnly(isMergeOnly);
         config.setAddTimestamps(addTimettamps);
+        if (copyCreateTime) {
+            config.setColumnsFromRight(Collections.singleton(InterfaceName.CDLCreatedTime.name()));
+        }
         return appendEngineConf(config, lightEngineConfig());
     }
 
