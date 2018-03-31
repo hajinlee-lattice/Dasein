@@ -152,12 +152,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Transactional(propagation = Propagation.REQUIRED)
     private void createOrUpdateBucketedScoreSummary(ModelSummary modelSummary,
             BucketedScoreSummary bucketedScoreSummary) {
+        bucketedScoreSummary.setModelSummary(modelSummary);
         BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
         if (existing != null) {
             bucketedScoreSummary.setPid(existing.getPid());
             bucketedScoreSummaryEntityMgr.update(bucketedScoreSummary);
         } else {
-            bucketedScoreSummary.setModelSummary(modelSummary);
             bucketedScoreSummaryEntityMgr.create(bucketedScoreSummary);
         }
     }
