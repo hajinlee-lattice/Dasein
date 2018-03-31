@@ -12,9 +12,10 @@
 		color: #fff;
 		background-color: #D22027;
 		border-color: #94060b;
-		font-size: 1.2em;
+		font-size: 1.1em;
 		text-align: center;
-		padding: 1em;
+		padding: 1.2em;
+		line-height: 1.5em;
 	}
 	&.success-messaging {
 	    color: #3c763d;
@@ -22,19 +23,19 @@
 	    border-color: #d6e9c6;
 	}
 	ico {
-		font-size: 1.4em;
-		padding-right: .5em;
+		font-size: 1.3em;
+		padding-right: 0.25em;
 		vertical-align: middle;
 	}
 	.close, .link-button.close-button {
 		position: absolute;
-		top: 13px;
-		right: 13px;
+		top: 2px;
+		right: 3px;
 		border: none;
 		background: transparent;
 		color: white;
-		font-size: 24px;
-    	font-weight: bold;
+		font-size: 17px;
+		font-weight: bold;
 	}
 }
 

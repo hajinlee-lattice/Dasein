@@ -23,8 +23,8 @@ const wsproxy   = require('http-proxy-middleware');
 const DateUtil  = require('./utilities/DateUtil');
 /*
 const proxy     = require('express-http-proxy');
-const session   = require('express-session');
 */
+const session   = require('express-session');
 
 class Server {
     constructor(express, app, options) {
@@ -97,19 +97,19 @@ class Server {
 
         // helmet enables/modifies/removes http headers for security concerns
         // x-frame-options: sameorigin gets set, can be removed with config allow_from
-        this.app.use(helmet());
+        this.app.use(helmet({ frameguard: false }));
 
-        // default cookie behavior - favors security
-        /* don't need this yet
+        // default cookie behavior - httpOnly for googles approval
+        // note: i dont think we have any apps that use cookies :D
         this.app.use(session({
-            name: 'sessionId',
+            //name: 'sessionId',
             secret: 'LEs3Cur1ty',
             cookie: {
+                httpOnly: true,
                 secure: true,
                 expires: new Date(Date.now() + 60 * 60 * 1000) // 1 hour
             }
         }));
-        */
     }
 
     startLogging(log_path) {
@@ -336,6 +336,7 @@ class Server {
                     this.app.get(
                         page + (html5mode ? '*' : ''),
                         (req, res) => {
+                            /*
                             let host = req.get('host');
                             let origin = req.get('origin');
                             let s = host.split('.');
@@ -353,7 +354,7 @@ class Server {
                                    res.removeHeader('X-Frame-Options');
                                 }
                             }
-
+                            */
                             res.render(dir + '/' + route.pages[page]);
                         }
                     );

@@ -18,6 +18,7 @@
     "express": "^4.13.4",
     "express-handlebars": "^3.0.0",
     "express-http-proxy": "0.10.0",
+    "express-session": "1.15.6",
     "graceful-fs": "^4.1.6",
     "grunt-cli": "^1.2.0",
     "helmet": "3.12.0",

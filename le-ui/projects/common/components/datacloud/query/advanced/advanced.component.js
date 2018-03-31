@@ -44,9 +44,7 @@ angular.module('common.datacloud.query.builder', [
     });
 
     vm.init = function() {
-        // console.log('[AQB] RatingEngineModel:', RatingEngineModel);
-        console.log(vm.mode);
-
+        console.log('[AQB] RatingEngineModel:', RatingEngineModel);
         QueryStore.mode = vm.mode;
 
         if (vm.segment != null && vm.segment != "Create"){

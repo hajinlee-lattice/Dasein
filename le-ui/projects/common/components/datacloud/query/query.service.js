@@ -379,10 +379,10 @@ angular.module('common.datacloud.query.service',[
     }
 
     this.removeRestriction = function(type, attribute) {
-        console.log(':remove:', type, attribute);
+        //console.log(':remove:', type, attribute);
         
         attribute = this.setAttributeAttr(type, attribute);
-        console.log(':remove attr:', type, attribute);
+        //console.log(':remove attr:', type, attribute);
 
         var searchTerm = attribute.attr,
             index = -1,
@@ -438,7 +438,7 @@ angular.module('common.datacloud.query.service',[
         var results = [];
 
         for (var i = 0; i < group.length; i++) {
-            console.log(group, "fired");
+            //console.log(group, "fired");
             if (group[i].bucketRestriction.columnName === columnName) {
                 results.push({index: i, bucketRestriction: group[i].bucketRestriction });
             }
@@ -548,7 +548,7 @@ angular.module('common.datacloud.query.service',[
             queryWithRestriction = SegmentStore.sanitizeSegment(queryWithRestriction);
 
             QueryService.GetCountByQuery(resourceType, queryWithRestriction).then(function(data) {
-                console.log('Resource Type', resourceType);
+                //console.log('Resource Type', resourceType);
                 deferred.resolve(data[resourceType == 'account' ? 'Account' : 'Contact']);
             });
 
@@ -582,7 +582,7 @@ angular.module('common.datacloud.query.service',[
     };
 
     this.isValidResourceType = function(resourceType) {
-        console.log('isValidResourceType', resourceType);
+        //console.log('isValidResourceType', resourceType);
         return this.validResourceTypes.indexOf(resourceType) > -1;
     };
 
