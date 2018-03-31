@@ -29,7 +29,7 @@ public interface BucketedScoreService {
 
     List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId);
 
-    BucketedScoreSummary createBucketedScoreSummaryForModelId(String modelId, BucketedScoreSummary bucketedScoreSummary)
+    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId, BucketedScoreSummary bucketedScoreSummary)
             throws Exception;
 
 }

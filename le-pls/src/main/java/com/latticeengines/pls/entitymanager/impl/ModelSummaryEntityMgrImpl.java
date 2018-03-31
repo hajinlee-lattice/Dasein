@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.hibernate.Hibernate;
 import org.hibernate.proxy.HibernateProxy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -19,7 +19,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.db.exposed.dao.KeyValueDao;
+import com.latticeengines.db.exposed.dao.TenantDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrImpl;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
@@ -38,9 +41,6 @@ import com.latticeengines.pls.dao.ModelSummaryProvenancePropertyDao;
 import com.latticeengines.pls.dao.PredictorDao;
 import com.latticeengines.pls.dao.PredictorElementDao;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
-import com.latticeengines.db.exposed.dao.TenantDao;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.db.exposed.dao.KeyValueDao;
 
 @Component("modelSummaryEntityMgr")
 public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> implements ModelSummaryEntityMgr {
@@ -530,9 +530,9 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeframe) {
-    	List<ModelSummary> modelSummaryList =  modelSummaryDao.getModelSummariesModifiedWithinTimeFrame(timeframe);
-    	modelSummaryList.stream().forEach(this::inflateDetails);
-    	return modelSummaryList;
+        List<ModelSummary> modelSummaryList = modelSummaryDao.getModelSummariesModifiedWithinTimeFrame(timeframe);
+        modelSummaryList.stream().forEach(this::inflateDetails);
+        return modelSummaryList;
     }
 
 }

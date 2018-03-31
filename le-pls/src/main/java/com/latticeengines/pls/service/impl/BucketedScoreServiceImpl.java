@@ -10,11 +10,12 @@ import javax.inject.Inject;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -73,7 +74,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
         if (bucketedScoreSummary != null) {
             return bucketedScoreSummary;
@@ -82,10 +83,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
-    public BucketedScoreSummary createBucketedScoreSummaryForModelId(String modelId,
+    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId,
             BucketedScoreSummary bucketedScoreSummary) throws Exception {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
-        createBucketedScoreSummary(modelSummary, bucketedScoreSummary);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
+        createOrUpdateBucketedScoreSummary(modelSummary, bucketedScoreSummary);
         return bucketedScoreSummary;
     }
 
@@ -106,23 +107,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         if (pivotAvroDirPath == null) {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
         }
-        HdfsUtils.HdfsFileFilter hdfsFileFilter = new HdfsUtils.HdfsFileFilter() {
-            @Override
-            public boolean accept(FileStatus file) {
-                if (file == null) {
-                    return false;
-                }
-                String name = file.getPath().getName();
-                return name.matches(".*.avro");
-            }
-        };
-        List<String> filePaths = HdfsUtils.getFilesForDir(yarnConfiguration, pivotAvroDirPath, hdfsFileFilter);
+
+        List<String> filePaths = HdfsUtils.getFilesForDir(yarnConfiguration, pivotAvroDirPath, ".*.avro");
         String pivotAvroFilePath = filePaths.get(0);
         List<GenericRecord> pivotedRecords = AvroUtils.getData(yarnConfiguration, new Path(pivotAvroFilePath));
 
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                 .generateBucketedScoreSummary(pivotedRecords);
-        createBucketedScoreSummary(modelSummary, bucketedScoreSummary);
+        createOrUpdateBucketedScoreSummary(modelSummary, bucketedScoreSummary);
         return bucketedScoreSummary;
     }
 
@@ -140,7 +132,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
-        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
+        ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, true);
         return getBucketMetadataListBasedModelSummary(modelSummary, modelId);
     }
 
@@ -157,9 +149,17 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
     }
 
-    private void createBucketedScoreSummary(ModelSummary modelSummary, BucketedScoreSummary bucketedScoreSummary) {
-        bucketedScoreSummary.setModelSummary(modelSummary);
-        bucketedScoreSummaryEntityMgr.create(bucketedScoreSummary);
+    @Transactional(propagation = Propagation.REQUIRED)
+    private void createOrUpdateBucketedScoreSummary(ModelSummary modelSummary,
+            BucketedScoreSummary bucketedScoreSummary) {
+        BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
+        if (existing != null) {
+            bucketedScoreSummary.setPid(existing.getPid());
+            bucketedScoreSummaryEntityMgr.update(bucketedScoreSummary);
+        } else {
+            bucketedScoreSummary.setModelSummary(modelSummary);
+            bucketedScoreSummaryEntityMgr.create(bucketedScoreSummary);
+        }
     }
 
     @Override
@@ -259,7 +259,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
                 modelId));
         ImmutablePair<RatingEngine, ModelSummary> ReAndMs = getModelSummaryAndRatingEngine(ratingEngineId, modelId);
         ModelSummary modelSummary = ReAndMs.getRight();
-        return getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
+        return getBucketedScoreSummaryForModelId(modelSummary.getId());
     }
 
     private ImmutablePair<RatingEngine, ModelSummary> getModelSummaryAndRatingEngine(String ratingEngineId,

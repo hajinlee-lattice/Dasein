@@ -50,7 +50,6 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
     @BeforeClass(groups = { "functional" })
     public void setup() throws Exception {
         setupTenants();
-        cleanupBucketMetadataDB();
 
         MultiTenantContext.setTenant(tenant1);
         MODEL_ID = UuidUtils.shortenUuid(UUID.randomUUID());
@@ -64,8 +63,13 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
                 .getSystemResourceAsStream("com/latticeengines/pls/BucketedScoreSummary/data/part-00000.avro");
         List<GenericRecord> records = AvroUtils.readFromInputStream(is);
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(records);
-        bucketedScoreService.createBucketedScoreSummaryForModelId(modelSummary.getId(), bucketedScoreSummary);
+        bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
         BucketedScoreSummary retrieved = bucketedScoreService.getBucketedScoreSummaryForModelId(modelSummary.getId());
+        assertEquals(bucketedScoreSummary.getTotalNumConverted(), 878);
+        bucketedScoreSummary.setTotalNumConverted(bucketedScoreSummary.getTotalNumConverted() + 2);
+        bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
+        retrieved = bucketedScoreService.getBucketedScoreSummaryForModelId(modelSummary.getId());
+        assertEquals(bucketedScoreSummary.getTotalNumConverted(), 880);
         System.out.println(bucketedScoreSummary.getBucketedScores()[4]);
         System.out.println(retrieved.getBucketedScores()[4]);
         assertEquals(bucketedScoreSummary.getTotalNumConverted(), retrieved.getTotalNumConverted());

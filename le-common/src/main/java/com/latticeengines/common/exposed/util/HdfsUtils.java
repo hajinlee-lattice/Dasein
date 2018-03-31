@@ -107,8 +107,8 @@ public class HdfsUtils {
         }
     }
 
-    public static void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream,
-            String hdfsPath) throws IOException {
+    public static void copyInputStreamToHdfs(Configuration configuration, InputStream inputStream, String hdfsPath)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             try (OutputStream outputStream = fs.create(new Path(hdfsPath))) {
                 IOUtils.copy(inputStream, outputStream);
@@ -135,16 +135,17 @@ public class HdfsUtils {
         }
     }
 
-    public static void distcp(Configuration configuration, String srcPath, String tgtPath, String queue) throws Exception {
+    public static void distcp(Configuration configuration, String srcPath, String tgtPath, String queue)
+            throws Exception {
         DistCpOptions options = new DistCpOptions(new Path(srcPath), new Path(tgtPath));
         log.info("Running distcp from " + srcPath + " to " + tgtPath + " using queue " + queue);
-        String[] args = new String[]{"-Dmapreduce.job.queuename=" + queue, srcPath, tgtPath};
+        String[] args = new String[] { "-Dmapreduce.job.queuename=" + queue, srcPath, tgtPath };
         EncryptionZone srcZone = getEncryptionZone(configuration, srcPath);
         EncryptionZone dstZone = getEncryptionZone(configuration, tgtPath);
         if (srcZone != null || dstZone != null) {
             log.info("Encryption zone is involved, skipping checksum check.");
             options.setSkipCRC(true);
-            args = new String[]{"-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath};
+            args = new String[] { "-Dmapreduce.job.queuename=" + queue, "-skipcrccheck", "-update", srcPath, tgtPath };
         }
         int exit = ToolRunner.run(new DistCp(configuration, options), args);
         if (exit != 0) {
@@ -185,8 +186,7 @@ public class HdfsUtils {
         }
     }
 
-    public static void writeToFile(Configuration configuration, String hdfsPath, String contents)
-            throws IOException {
+    public static void writeToFile(Configuration configuration, String hdfsPath, String contents) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             Path filePath = new Path(hdfsPath);
 
@@ -254,21 +254,16 @@ public class HdfsUtils {
 
     public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, final String regex)
             throws IOException {
-        HdfsFilenameFilter filter = new HdfsFilenameFilter() {
 
-            @Override
-            public boolean accept(String filename) {
-                Pattern p = Pattern.compile(regex);
-                Matcher matcher = p.matcher(filename.toString());
-                return matcher.matches();
-            }
-        };
-
-        return getFilesForDir(configuration, hdfsDir, filter);
+        return getFilesForDir(configuration, hdfsDir, (HdfsFilenameFilter) filename -> {
+            Pattern p = Pattern.compile(regex);
+            Matcher matcher = p.matcher(filename.toString());
+            return matcher.matches();
+        });
     }
 
-    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir,
-            HdfsFilenameFilter filter) throws IOException {
+    public static List<String> getFilesForDir(Configuration configuration, String hdfsDir, HdfsFilenameFilter filter)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -310,8 +305,8 @@ public class HdfsUtils {
     }
 
     // Only return files. Exclude all the sub directory paths
-    public static List<String> onlyGetFilesForDir(Configuration configuration, String hdfsDir,
-            HdfsFileFilter filter) throws IOException {
+    public static List<String> onlyGetFilesForDir(Configuration configuration, String hdfsDir, HdfsFileFilter filter)
+            throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
             List<String> filePaths = new ArrayList<String>();
@@ -356,11 +351,7 @@ public class HdfsUtils {
         return getFilesForDirRecursive(configuration, hdfsDir, filter, false);
     }
 
-
-    public static List<String> getFilesForDirRecursive(
-            Configuration configuration,
-            String hdfsDir,
-            String regex,
+    public static List<String> getFilesForDirRecursive(Configuration configuration, String hdfsDir, String regex,
             boolean returnFirstMatch) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {
             FileStatus[] statuses = fs.listStatus(new Path(hdfsDir));
@@ -371,12 +362,8 @@ public class HdfsUtils {
                     if (returnFirstMatch && filePaths.size() > 0) {
                         break;
                     }
-                    filePaths.addAll(
-                            getFilesForDirRecursive(
-                                    configuration,
-                                    status.getPath().toString(),
-                                    regex,
-                                    returnFirstMatch));
+                    filePaths.addAll(getFilesForDirRecursive(configuration, status.getPath().toString(), regex,
+                            returnFirstMatch));
                 }
             }
             return new ArrayList<>(filePaths);
@@ -561,7 +548,8 @@ public class HdfsUtils {
         }
     }
 
-    public static boolean inDifferentEncryptionZone(Configuration configuration, String src, String dst) throws IOException {
+    public static boolean inDifferentEncryptionZone(Configuration configuration, String src, String dst)
+            throws IOException {
         EncryptionZone dstZone = getEncryptionZone(configuration, dst);
         if (dstZone != null) {
             EncryptionZone srcZone = getEncryptionZone(configuration, src);

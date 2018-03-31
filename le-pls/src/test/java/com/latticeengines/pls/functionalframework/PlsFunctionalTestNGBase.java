@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.BeforeClass;
 
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.MarketoCredential;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.Predictor;
@@ -281,13 +280,6 @@ public class PlsFunctionalTestNGBase extends PlsAbstractTestNGBase {
                 .findAllProspectDiscoveryOptions();
         for (ProspectDiscoveryOption option : prospectDiscoveryOptions) {
             this.prospectDiscoveryOptionEntityMgr.deleteProspectDiscoveryOption(option.getOption());
-        }
-    }
-
-    protected void cleanupBucketMetadataDB() {
-        List<BucketMetadata> bucketMetadatas = bucketMetadataEntityMgr.findAll();
-        for (BucketMetadata bucketMetadata : bucketMetadatas) {
-            bucketMetadataEntityMgr.delete(bucketMetadata);
         }
     }
 
