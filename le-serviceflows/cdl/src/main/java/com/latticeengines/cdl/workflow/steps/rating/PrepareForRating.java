@@ -50,7 +50,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     public void execute() {
         customerSpace = configuration.getCustomerSpace().toString();
         String rawRatingTableName = NamingUtils.timestamp("RawRating");
-        putObjectInContext(RULE_RAW_RATING_TABLE_NAME, rawRatingTableName);
+        putStringValueInContext(RULE_RAW_RATING_TABLE_NAME, rawRatingTableName);
         readActiveRatingModels();
         removeObjectFromContext(TABLE_GOING_TO_REDSHIFT);
         removeObjectFromContext(APPEND_TO_REDSHIFT_TABLE);
@@ -142,20 +142,20 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
         List<BucketMetadata> buckets = new ArrayList<>();
         switch (predictionType) {
-            case PROPENSITY:
-                buckets.add(addBucket(10, 4, BucketName.A));
-                buckets.add(addBucket(4, 2, BucketName.B));
-                buckets.add(addBucket(2, 1, BucketName.C));
-                buckets.add(addBucket(1, 0, BucketName.D));
-                break;
-            case EXPECTED_VALUE:
-                buckets.add(addBucket(10, 4, BucketName.A));
-                buckets.add(addBucket(4, 2, BucketName.B));
-                buckets.add(addBucket(2, 1, BucketName.C));
-                buckets.add(addBucket(1, 0, BucketName.D));
-                break;
-            default:
-                throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
+        case PROPENSITY:
+            buckets.add(addBucket(10, 4, BucketName.A));
+            buckets.add(addBucket(4, 2, BucketName.B));
+            buckets.add(addBucket(2, 1, BucketName.C));
+            buckets.add(addBucket(1, 0, BucketName.D));
+            break;
+        case EXPECTED_VALUE:
+            buckets.add(addBucket(10, 4, BucketName.A));
+            buckets.add(addBucket(4, 2, BucketName.B));
+            buckets.add(addBucket(2, 1, BucketName.C));
+            buckets.add(addBucket(1, 0, BucketName.D));
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
         }
         return buckets;
     }
