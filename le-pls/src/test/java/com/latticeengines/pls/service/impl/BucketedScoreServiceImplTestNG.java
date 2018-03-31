@@ -65,11 +65,12 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(records);
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
         BucketedScoreSummary retrieved = bucketedScoreService.getBucketedScoreSummaryForModelId(modelSummary.getId());
-        assertEquals(bucketedScoreSummary.getTotalNumConverted(), 878);
+        assertEquals(retrieved.getTotalNumConverted(), 878);
         bucketedScoreSummary.setTotalNumConverted(bucketedScoreSummary.getTotalNumConverted() + 2);
+        bucketedScoreSummary.setModelSummary(null);
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
         retrieved = bucketedScoreService.getBucketedScoreSummaryForModelId(modelSummary.getId());
-        assertEquals(bucketedScoreSummary.getTotalNumConverted(), 880);
+        assertEquals(retrieved.getTotalNumConverted(), 880);
         System.out.println(bucketedScoreSummary.getBucketedScores()[4]);
         System.out.println(retrieved.getBucketedScores()[4]);
         assertEquals(bucketedScoreSummary.getTotalNumConverted(), retrieved.getTotalNumConverted());
