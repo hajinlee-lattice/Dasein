@@ -31,8 +31,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.pls.controller.RatingEngineResourceDeploymentTestNG;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
 import com.latticeengines.pls.service.ActionService;
@@ -119,11 +117,11 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         long oldLastUpdateTime = modelSummary.getLastUpdateTime();
         System.out.println("oldLastUpdateTime is " + oldLastUpdateTime);
         System.out.println("current time  is " + System.currentTimeMillis());
-        bucketedScoreService.createBucketMetadatas(ratingEngine.getId(), aiModel.getId(),
-                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata1), CREATED_BY);
+        createBucketMetadatas(ratingEngine.getId(), aiModel.getId(),
+                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata1));
 
-        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(ratingEngine.getId());
+        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(
+                ratingEngine.getId());
         Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
         modelSummary = modelSummaryService.getModelSummary(modelId);
         long newLastUpdateTime = modelSummary.getLastUpdateTime();
@@ -137,14 +135,14 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
     public void testCreationSecondSetOfBuckets() throws Exception {
         ModelSummary modelSummary = modelSummaryService.getModelSummary(modelId);
         long oldLastUpdateTime = modelSummary.getLastUpdateTime();
-        bucketedScoreService.createBucketMetadatas(ratingEngine.getId(), aiModel.getId(),
-                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata2), CREATED_BY);
+        createBucketMetadatas(ratingEngine.getId(), aiModel.getId(),
+                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata2));
         modelSummary = modelSummaryService.getModelSummary(modelId);
         long newLastUpdateTime = modelSummary.getLastUpdateTime();
         assertTrue(newLastUpdateTime > oldLastUpdateTime);
 
-        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(ratingEngine.getId());
+        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(
+                ratingEngine.getId());
         assertEquals(creationTimeToBucketMetadatas.keySet().size(), 2);
         Long earlierTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0],
                 laterTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[1];
@@ -162,8 +160,7 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
 
     @Test(groups = { "deployment" }, dependsOnMethods = "testCreationSecondSetOfBuckets")
     public void testGetUpToDateModelBucketMetadata() throws Exception {
-        List<BucketMetadata> bucketMetadatas = bucketedScoreService
-                .getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngine.getId());
+        List<BucketMetadata> bucketMetadatas = getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngine.getId());
         BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(bucketMetadatas);
     }
 
@@ -174,7 +171,6 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         Action action = actions.get(0);
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
-        Assert.assertEquals(action.getActionInitiator(), MultiTenantContext.getEmailAddress());
         Assert.assertNotNull(action.getDescription());
         log.info("AI_MODEL_BUCKET_CHANGE description is " + action.getDescription());
 
@@ -189,13 +185,26 @@ public class BucketedScoreServiceImplDeploymentTestNG extends PlsDeploymentTestN
         Action action = actions.get(1);
         Assert.assertNotNull(action);
         Assert.assertEquals(action.getType(), ActionType.RATING_ENGINE_CHANGE);
-        Assert.assertEquals(action.getActionInitiator(), MultiTenantContext.getEmailAddress());
         Assert.assertNotNull(action.getDescription());
         log.info("AI_MODEL_BUCKET_CHANGE description is " + action.getDescription());
 
         RatingEngine retrievedRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(),
                 ratingEngine.getId());
         Assert.assertEquals(retrievedRatingEngine.getStatus(), RatingEngineStatus.ACTIVE);
+    }
+
+    protected void createBucketMetadatas(String ratingEngineId, String ratingModelId,
+            List<BucketMetadata> bucketMetadata) {
+        bucketedScoreService.createBucketMetadatas(ratingEngineId, ratingModelId, bucketMetadata, CREATED_BY);
+    }
+
+    protected Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(
+            String ratingEnigneId) {
+        return bucketedScoreService.getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(ratingEnigneId);
+    }
+
+    protected List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(String ratingEngineId) {
+        return bucketedScoreService.getUpToDateABCDBucketsBasedOnRatingEngineId(ratingEngineId);
     }
 
 }
