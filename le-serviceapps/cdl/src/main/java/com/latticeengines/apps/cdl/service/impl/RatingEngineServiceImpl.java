@@ -134,17 +134,17 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         log.info(String.format(
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
                 tenant.getId(), status, type));
-        List<RatingEngineSummary> result = new ArrayList<>();
-        ratingEngineEntityMgr.findAllByTypeAndStatus(type, status)
-                .forEach(re -> result.add(constructRatingEngineSummary(re, tenant.getId())));
+        List<RatingEngine> list = ratingEngineEntityMgr.findAllByTypeAndStatus(type, status);
+        List<RatingEngine> selectedList = list;
         if (onlyInRedshift != null && onlyInRedshift) {
             Set<String> availableRatingIdInRedshift = engineIdsAvailableInRedshift();
-            return result.stream()
-                    .filter(ratingEngineSummary -> availableRatingIdInRedshift.contains(ratingEngineSummary.getId()))
+            log.info(String.format("Available Rating Ids in Redshift are %s", availableRatingIdInRedshift));
+            selectedList = list.stream()
+                    .filter(ratingEngine -> availableRatingIdInRedshift.contains(ratingEngine.getId()))
                     .collect(Collectors.toList());
-        } else {
-            return result;
         }
+        return selectedList.stream().map(ratingEngine -> constructRatingEngineSummary(ratingEngine, tenant.getId()))
+                .collect(Collectors.toList());
     }
 
     @Override
