@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.AfterClass;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -44,8 +43,4 @@ public class BucketedScoreResourceDeploymentTestNG extends BucketedScoreServiceI
         return returnList;
     }
 
-    @AfterClass(groups = "deployment")
-    public void willDelete() {
-        throw new RuntimeException("error");
-    }
 }
