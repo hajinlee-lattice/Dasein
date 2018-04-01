@@ -8,8 +8,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.core.RedisOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SessionCallback;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -34,31 +32,24 @@ public class RedisCacheService extends CacheServiceBase {
         super(CacheType.Redis);
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void refreshKeysByPattern(String pattern, CacheName... cacheNames) {
         RetryTemplate retry = getRetryTemplate();
         retry.execute(context -> {
-            redisTemplate.execute(new SessionCallback<Long>() {
-                @SuppressWarnings({ "unchecked", "rawtypes" })
-                @Override
-                public Long execute(RedisOperations operations) throws DataAccessException {
-                    List<Object> rawkeys = redisTemplate.executePipelined(new SessionCallback<Object>() {
-
-                        @Override
-                        public Object execute(RedisOperations operations) throws DataAccessException {
-                            for (CacheName cacheName : cacheNames) {
-                                log.info("Getting keys via pattern " + pattern + " from " + cacheName);
-                                operations.keys(String.format("*%s*", pattern));
-                            }
-                            return null;
-                        }
-                    }, new StringRedisSerializer());
-                    Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
-                            .collect(Collectors.toSet());
-                    long cnt = operations.delete(keys);
-                    log.info("Deleted " + cnt);
-                    return cnt;
-                }
+            redisTemplate.execute((SessionCallback) operations -> {
+                List<Object> rawkeys = redisTemplate.executePipelined((SessionCallback) ops -> {
+                    for (CacheName cacheName : cacheNames) {
+                        log.info("Getting keys via pattern " + pattern + " from " + cacheName);
+                        ops.keys(String.format("*%s*", pattern));
+                    }
+                    return null;
+                }, new StringRedisSerializer());
+                Set<String> keys = rawkeys.stream().flatMap(o -> ((Set<String>) o).stream())
+                        .collect(Collectors.toSet());
+                long cnt = operations.delete(keys);
+                log.info("Deleted " + cnt);
+                return cnt;
             });
             return null;
         });
