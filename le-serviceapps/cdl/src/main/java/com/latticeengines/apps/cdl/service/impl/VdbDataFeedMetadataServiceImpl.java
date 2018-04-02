@@ -41,7 +41,7 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
 
     private static final Logger log = LoggerFactory.getLogger(VdbDataFeedMetadataServiceImpl.class);
 
-    public final String DEFAULT_FILE_FORMAT = "%s_%s.csv";
+    public final String DEFAULT_FILE_FORMAT = "%s_%s";
 
     public final String DATE_FORMAT = "MM-dd-yyyy";
 
