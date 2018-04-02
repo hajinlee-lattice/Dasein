@@ -31,7 +31,7 @@
                         orderBy: vm.header.sort.order + vm.header.sort.property |
                         startFrom: (vm.currentPage - 1) * pagesize |
                         limitTo: pagesize"
-                    ng-click="vm.tileClick($event, segment)"
+                    ng-click="vm.tileStates[segment.name].editSegment || vm.tileClick($event, segment)"
                     ng-mouseleave="vm.tileStates[segment.name].showCustomMenu ? vm.customMenuClick($event, segment) : null"
                 >
                     <div class="tile-header" ng-if="!vm.tileStates[segment.name].editSegment">
@@ -127,16 +127,19 @@
                             <label for="segmentDisplayName">Name
                             <input
                                 autofocus
+                                required
                                 type="text"
                                 id="display_name"
                                 name="display_name"
                                 data-ng-model="segment.display_name"
-                                ng-change="vm.nameChanged(segment)"
                                 ng-focus="vm.onInputFocus($event)"
                                 maxlength="50"
                                 ng-trim="false"
                                 class="form-control"
-                                ng-disabled="vm.saveInProgress" />
+                                ng-class="!vm.isValid(segment)? 'invalid-field' : ''"
+                                placeholder="Segment Name"
+                                ng-disabled="vm.saveInProgress"
+                                ng-change="vm.nameChanged(segment)" />
                                 </label>
                             <span>{{50 - segment.display_name.length}} characters remaining</span>
                         </div>
@@ -162,7 +165,7 @@
                             <button
                                 type="button"
                                 class="button blue-button pull-right"
-                                ng-disabled="vm.saveInProgress"
+                                ng-disabled="vm.saveInProgress || editSegmentForm.$invalid || vm.tileStates[segment.name].saveEnabled === false"
                                 ng-click="vm.saveSegmentClicked($event, segment)">
                                 {{vm.saveInProgress ? 'Saving...' : 'Save'}}</button>
                                 <!--ng-disabled="vm.tileStates[segment.name].saveEnabled === false"-->

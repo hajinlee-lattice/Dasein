@@ -84,7 +84,7 @@ angular
             }
 
             vm.checkSelected = function(bucket) {
-                console.log('checkSelected', bucket);
+                // console.log('checkSelected', bucket);
                 if (bucket.Vals && bucket.Vals[0] == vm.range[0] && bucket.Vals[1] == vm.range[1]) {
                     vm.presetOperation = bucket.Lbl;
                 }

@@ -12,6 +12,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
             controller: function ($scope, $timeout, $state, DataCloudStore, QueryStore, QueryTreeService) {
                 var vm = $scope.vm;
                 vm.booleanChanged = false;
+                vm.presetOperation;
                 
 
                 function showNumericalRange() {
@@ -105,8 +106,11 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 vm.clickEditMode = function(value) {
                     vm.editMode = value;
                     if(value !== 'Custom'){
-                        console.log('Preset');
+                        // console.log('Preset');
                         var bucket = vm.getCubeBktList()[0]
+                        if(bucket){
+                            vm.presetOperation = bucket.Lbl;
+                        }
                         vm.changePreset(bucket);
                     }else{
                         QueryTreeService.resetBktValues(vm.tree.bucketRestriction, vm.type);

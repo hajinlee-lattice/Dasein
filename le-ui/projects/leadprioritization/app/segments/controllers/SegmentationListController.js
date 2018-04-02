@@ -149,8 +149,12 @@ angular.module('lp.segments.segments', [
 
     vm.nameChanged = function(segment) {
         var tileState = vm.tileStates[segment.name];
-        
-        tileState.saveEnabled = !!(segment.display_name.length > 0);
+        if(!segment.display_name || segment.display_name.trim().length == 0){
+            tileState.saveEnabled = false;
+        }
+        else{
+            tileState.saveEnabled = !!(segment.display_name.length > 0);
+        }
     };
 
     vm.cancelEditSegmentClicked = function($event, segment) {
@@ -200,6 +204,15 @@ angular.module('lp.segments.segments', [
         DeleteSegmentModal.show(segment, !!vm.modelId);
 
     };
+
+    vm.isValid = function(segment){
+        if(!segment.display_name || segment.display_name.trim().length == 0){
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
 
     vm.displayAttributes = function(segment, n) {
         attrs = [];
