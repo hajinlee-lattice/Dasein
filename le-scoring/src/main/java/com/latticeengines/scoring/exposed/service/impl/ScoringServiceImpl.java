@@ -59,12 +59,12 @@ public class ScoringServiceImpl implements ScoringService {
         appMasterProperties.put(AppMasterProperty.CUSTOMER.name(), customerSpace);
         appMasterProperties.put(AppMasterProperty.QUEUE.name(),
                 LedpQueueAssigner.getRtsBulkScoringQueueNameForSubmission());
+        appMasterProperties.put(AppMasterProperty.VIRTUALCORES.name(), String.valueOf(vcores));
+        appMasterProperties.put(AppMasterProperty.MEMORY.name(), String.valueOf(memory));
+        appMasterProperties.put(AppMasterProperty.PRIORITY.name(), "0");
 
         Properties containerProperties = new Properties();
         containerProperties.put(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG, rtsBulkScoringConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), vcores);
-        containerProperties.put(ContainerProperty.MEMORY.name(), memory);
-        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if (StringUtils.isNotBlank(trustStoreJks)) {
             containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
