@@ -161,7 +161,7 @@ public class ProductUtils {
             data.add(builder.build());
         }
 
-        log.info("Saving products " + JsonUtils.serialize(data));
+        // log.info("Saving products " + JsonUtils.serialize(data));
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data, true);
     }
 
