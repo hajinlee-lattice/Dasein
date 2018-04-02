@@ -37,9 +37,6 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.getValidation = function (subjob) {
-                if(subjob.jobStatus === 'Completed'){
-                    return subjob.jobStatus;
-                }
                 if(subjob.jobStatus === 'Failed'){
                     return 'Failed';
                 }
@@ -47,50 +44,45 @@ angular.module('lp.jobs.row.subjobs', [])
                     return 'In Progress';
                 }
                 
-                var recordFound = $scope.getRecordFound(subjob);
-                var recordUploaded = $scope.getRecordUploaded(subjob);
-                if (recordFound === '-' && recordUploaded === '-') {
-                    return 'In Progress'
+                if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
+                    return 'In Progress';
                 }
-                if (recordFound > 0 && recordUploaded == 0) {
+                if (getPayloadValue(subjob, 'total_failed_rows') ===  getPayloadValue(subjob, 'total_rows') && subjob.jobStatus !== 'Completed') {
                     return 'Failed';
                 }
-                if (recordFound === recordUploaded) {
+                if (getPayloadValue(subjob, 'total_rows') === getPayloadValue(subjob, 'imported_rows') && subjob.jobStatus === 'Completed') {
                     return 'Success';
                 }
-                if (recordFound != recordUploaded) {
+                if (getPayloadValue(subjob, 'imported_rows') <  getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed') {
                     return 'Partial Success';
                 }
                 return subjob.jobStatus;
 
 
             }
-            $scope.getRecordFound = function (subjob) {
+
+            function getPayloadValue(subjob, field){
                 if (subjob.reports && subjob.reports.length > 0) {
                     var json = subjob.reports[0].json.Payload;
                     var obj = JSON.parse(json);
-                    return obj.total_rows;
+                    var ret = obj[field] != undefined ? obj[field] : '-';
+                    return ret;
                 } else {
                     return '-';
                 }
+            }
+
+            $scope.getRecordFound = function (subjob) {
+                return getPayloadValue(subjob, 'total_rows');
+               
             }
             $scope.getRecordFailed = function (subjob) {
-                if (subjob.reports && subjob.reports.length > 0) {
-                    var json = subjob.reports[0].json.Payload;
-                    var obj = JSON.parse(json);
-                    return obj.ignored_rows;
-                } else {
-                    return '-';
-                }
+                return getPayloadValue(subjob, 'total_failed_rows');
+                
             }
             $scope.getRecordUploaded = function (subjob) {
-                if (subjob.reports && subjob.reports.length > 0) {
-                    var json = subjob.reports[0].json.Payload;
-                    var obj = JSON.parse(json);
-                    return obj.imported_rows;
-                } else {
-                    return '-';
-                }
+                return getPayloadValue(subjob, 'imported_rows');
+                
             }
             $scope.getUser = function (subjob) {
                 return subjob.user;

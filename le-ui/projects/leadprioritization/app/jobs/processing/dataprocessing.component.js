@@ -195,7 +195,6 @@ angular.module('lp.jobs.import', [
         vm.canLastJobRun = function () {
             var canRun = false;
             var oneFailed = isLastOneFailed();//isOneFailed();
-            console.log('Last one failed ==> ', oneFailed);
             var oneRunnig = isOneRunning();
 
             if (!oneFailed && !oneRunnig) {
