@@ -32,6 +32,12 @@ public class ScoringServiceImpl implements ScoringService {
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
+    @Value("${scoring.processor.vcores}")
+    private int vcores;
+
+    @Value("${scoring.processor.memory}")
+    private int memory;
+
     @Override
     public ApplicationId submitScoreWorkflow(RTSBulkScoringConfiguration rtsBulkScoringConfig) {
         Job job = createJob(rtsBulkScoringConfig);
@@ -56,8 +62,8 @@ public class ScoringServiceImpl implements ScoringService {
 
         Properties containerProperties = new Properties();
         containerProperties.put(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG, rtsBulkScoringConfig.toString());
-        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
-        containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), vcores);
+        containerProperties.put(ContainerProperty.MEMORY.name(), memory);
         containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if (StringUtils.isNotBlank(trustStoreJks)) {
