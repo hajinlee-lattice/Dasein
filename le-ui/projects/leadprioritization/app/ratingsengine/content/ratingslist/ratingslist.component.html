@@ -122,12 +122,13 @@
                     <div class="tile-body" ng-if="!vm.current.tileStates[rating.id].editRating">
                         <bar-chart 
                             config="vm.getChartConfig(rating)" 
-                            bktlist="vm.getData()">
+                            bktlist="vm.getData()",
+                            ng-if="rating.bucketMetadata.length > 0">
                         </bar-chart>
 
-                        <!-- <div ng-if="!rating.hasBuckets && rating.type != 'CROSS_SELL'">
+                        <div ng-if="!rating.bucketMetadata || rating.bucketMetadata.length === 0">
                             <h4>No Ratings Available</h4>
-                        </div> -->
+                        </div>
                     </div><!-- End .tile-body -->
                     <div class="tile-footer">
                         <span 

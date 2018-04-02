@@ -1,6 +1,6 @@
 .enrichment-wizard-container {
     padding: 0;
-    &.rules {
+    &.dashboardrules {
         padding-top: 40px;
     }
     @media (max-width: 1300px) {
@@ -24,6 +24,15 @@
     @mixin make-background-color($color, $opacity) {
         background-color: $color;
         background-color: rgba($color, $opacity);
+    }
+    .dashboard-rules {
+        &.navigation {
+            &:after {
+                display: table;
+                clear: both;
+                content: "";
+            }
+        }
     }
     .enrichment-wizard-category-pagination {
         .pd-pagination {

@@ -33,7 +33,7 @@
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
                             <span data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</span>
-                            <span data-ng-if="jobStepsRunningStates.load_data || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</span>
+                            <span data-ng-if="jobStepsRunningStates.no_mapped_step_name || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</span>
                         </td>
                         <td>
                             <div class="progress-icon">
@@ -46,7 +46,7 @@
                             </div>
                         </td>
                         <td>
-                            <span data-ng-if="jobStepsRunningStates.load_data">
+                            <span data-ng-if="jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.load_data">
                                 <span class="loading-small"></span>
                             </span>
                             <span data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</span>
@@ -54,7 +54,7 @@
                     </tr>
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data" class="not-started">Matching to Data Cloud</span>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name" class="not-started">Matching to Data Cloud</span>
                             <span data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</span>
                         </td>
                         <td>
@@ -77,7 +77,7 @@
 
                     <tr ng-if="!config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights" class="not-started">Building Model</span>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.generate_insights" class="not-started">Building Model</span>
                             <span data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</span>
                         </td>
                         <td>
@@ -99,7 +99,7 @@
                     </tr>
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</span>
+                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</span>
                             <span data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</span>
                         </td>
                         <td>

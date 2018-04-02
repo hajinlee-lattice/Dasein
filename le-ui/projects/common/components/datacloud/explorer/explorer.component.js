@@ -350,7 +350,7 @@ angular.module('common.datacloud.explorer', [
                 }
             });
 
-            if(vm.section === 'wizard.ratingsengine_segment') {
+            if(vm.section === 'wizard.ratingsengine_segment' || vm.section === 'dashboard.rules') {
                 var SelectedForRatingsEngine = vm.filter(vm.enrichments, 'IsRatingsEngineAttribute', true);
                 DataCloudStore.setMetadata('selectedForRatingsEngine', SelectedForRatingsEngine.length);
                 RatingsEngineStore.setValidation('attributes', (SelectedForRatingsEngine.length > 0));
@@ -859,7 +859,7 @@ angular.module('common.datacloud.explorer', [
     vm.processCategories = function() {
         vm.categories = Object.keys(EnrichmentTopAttributes).sort();
 
-        if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment') {
+        if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
             var topCategories = [
                 'Lattice Rating',
                 'Firmographics',

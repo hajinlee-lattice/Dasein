@@ -205,10 +205,14 @@ angular.module('lp.ratingsengine')
                 },{
                     label:'Model Creation',
                     state:'segment.attributes.training.mapping.creation',
-                    nextLabel: 'Done',
+                    hideBack: true,
+                    secondaryLinkLabel: 'Go to Model List',
+                    secondaryLink: 'home.ratingsengine',
+                    lastRoute: true,
+                    nextLabel: 'Create another Model',
                     nextFn: function(nextState) {
-                        $state.go('home.ratingsengine.list');
-                    }
+                        $state.go('home.ratingsengine.ratingsenginetype');
+                    } 
                 }
 
             ]
@@ -289,8 +293,14 @@ angular.module('lp.ratingsengine')
                 }
             };
 
+        console.log(opts);
+
         RatingsEngineService.saveRules(opts).then(function(rating) {
-            $state.go(nextState, { rating_id: $stateParams.rating_id });
+            if(nextState) {
+                $state.go(nextState, { rating_id: $stateParams.rating_id });
+            } else {
+                console.log('!!!!!!!!!!!!!!!!!',rating);
+            }
         });
     }
 
@@ -885,7 +895,6 @@ angular.module('lp.ratingsengine')
     this.getRatingModel = function(engineId, modelId) {
         var deferred = $q.defer();
 
-        // console.log(engineId, modelId);
         RatingsEngineService.getRatingModel(engineId, modelId).then(function(result) {
             deferred.resolve(result);
         });
@@ -1123,7 +1132,6 @@ angular.module('lp.ratingsengine')
     }
     this.getRatingModel = function(ratingId, modelId){
         var deferred = $q.defer();
-
         $http({
             method: 'GET',
             url:  '/pls/ratingengines/' + ratingId + '/ratingmodels/' + modelId

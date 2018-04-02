@@ -8,6 +8,16 @@
         <i class="close fa fa-times" ng-click="vm.closeStatusMessage()"></i>
     </div>
     <div ng-if="!vm.hidePage()">
+
+        <div class="dashboard-rules navigation" ng-if="vm.section =='dashboard.rules'">
+            <button 
+                type="button"
+                class="button blue-button pull-right"
+                ng-click="">
+                Save Attributes &amp; Set Rules
+            </button>
+        </div>
+
         <explorer-filters class="filters-container" vm="vm"></explorer-filters>
         
         <div class="carousel-container">

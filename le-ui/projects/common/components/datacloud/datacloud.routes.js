@@ -25,8 +25,11 @@ angular
             'home.model.analysis.explorer.builder': 'customer',
             'home.model.analysis.accounts': 'customer',
             'home.model.analysis.contacts': 'customer',
-            'home.ratingsengine.wizard.segment.attributes': 'customer',
-            'home.ratingsengine.wizard.segment.attributes.rules': 'customer',
+            'home.ratingsengine.rulesprospects.segment.attributes': 'customer',
+            'home.ratingsengine.rulesprospects.segment.attributes.rules': 'customer',
+            'home.ratingsengine.dashboard.segment.attributes': 'customer',
+            'home.ratingsengine.dashboard.segment.attributes.add': 'customer',
+            'home.ratingsengine.dashboard.segment.attributes.rules': 'customer',
             'home.datacloud.explorer': 'lattice',
             'home.datacloud.insights': 'lattice',
             'home.datacloud.lookup.form': 'lattice'

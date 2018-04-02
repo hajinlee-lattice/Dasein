@@ -125,10 +125,6 @@ angular
                         var deferred = $q.defer(),
                             id = $stateParams.modelId;
 
-                        // console.log(id);
-                        // console.log(ModelStore.data);
-                        // console.log(RatingEngine);
-
                         if ((RatingEngine.type === 'RULE_BASED') || (id === '')) {
                             deferred.resolve(null);
                         } else if (ModelStore.data != undefined)  {
@@ -171,9 +167,8 @@ angular
                             $scope.modelId = $stateParams.modelId || '';
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED');
 
-                            console.log($scope.rating_id);
-                            console.log(Dashboard);
-
+                            // console.log($scope.rating_id);
+                            // console.log(Dashboard);
 
                             $scope.isRuleBased = (RatingEngine.type === 'RULE_BASED') ? true : false;
                             $scope.isCustomEvent = (RatingEngine.type === 'CUSTOM_EVENT') ? true : false;
@@ -213,17 +208,47 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.attributes', {
+            .state('home.ratingsengine.dashboard.segment', {
+                url: '/segment',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_segment'
+                },
+                resolve: {
+                    Segments: function (SegmentService) {
+                        return SegmentService.GetSegments();
+                    },
+                    CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer();
+
+                        if (!$stateParams.rating_id) {
+                            deferred.resolve(RatingsEngineStore.currentRating);
+                        } else {
+                            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                                deferred.resolve(result);
+                            });
+                        }
+
+                        return deferred.promise;
+                    }
+                },
+                views: {
+                    'main@': {
+                        controller: 'RatingsEngineSegment',
+                        controllerAs: 'vm',
+                        templateUrl: 'app/ratingsengine/content/segment/segment.component.html'
+                    }
+                }
+            })
+            .state('home.ratingsengine.dashboard.segment.attributes', {
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
-                //resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
-                /**
-                 * for now we're ducplciating these here from datacloud.routes because when minified the resolves fail
-                 */
                 resolve: {
                     EnrichmentCount: ['$q', 'DataCloudStore', 'ApiHost', function ($q, DataCloudStore, ApiHost) {
                         var deferred = $q.defer();
@@ -292,8 +317,6 @@ angular
                                 model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
                             }
 
-                            // console.log(model);
-
                             RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
 
                             deferred.resolve(model);
@@ -310,11 +333,12 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.attributes.add', {
+            .state('home.ratingsengine.dashboard.segment.attributes.add', {
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
                 views: {
@@ -325,7 +349,7 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.attributes.rules', {
+            .state('home.ratingsengine.dashboard.segment.attributes.rules', {
                 url: '/rules',
                 resolve: {
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
@@ -341,26 +365,6 @@ angular
 
                         return deferred.promise;
                     },
-                    // end duplicates
-                    RatingsEngineModels: function ($q, $stateParams, DataCloudStore, RatingsEngineStore) {
-                        var deferred = $q.defer();
-
-                        DataCloudStore.getRatingsEngineAttributes($stateParams.rating_id).then(function (data) {
-                            var model = (data && data[0] ? data[0] : {});
-
-                            if (!model.rule.ratingRule.bucketToRuleMap) {
-                                model.rule.ratingRule.bucketToRuleMap = RatingsEngineStore.generateRatingsBuckets();
-                            }
-
-                            // console.log(model);
-
-                            RatingsEngineStore.checkRatingsBuckets(model.rule.ratingRule.bucketToRuleMap);
-
-                            deferred.resolve(model);
-                        });
-
-                        return deferred.promise;
-                    },
                     Cube: function ($q, DataCloudStore) {
                         var deferred = $q.defer();
 
@@ -371,9 +375,8 @@ angular
                         return deferred.promise;
                     },
                     RatingEngineModel: function (DataCloudStore, RatingsEngineModels) {
+                        
                         var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
-
-                        // console.log(RatingsEngineModels);
 
                         if (selectedAttributes) {
                             RatingsEngineModels.rule.selectedAttributes = selectedAttributes;
@@ -406,7 +409,7 @@ angular
                     }
                 }
             })
-            .state('home.ratingsengine.dashboard.attributes.rules.picker', {
+            .state('home.ratingsengine.dashboard.segment.attributes.rules.picker', {
                 url: '/picker/:entity/:fieldname',
                 resolve: {
                     PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
@@ -690,7 +693,7 @@ angular
                         resolve: {
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
-                                    backState: 'home.ratingsengine.ratingsenginetype',
+                                    backState: 'home.ratingsengine',
                                     nextState: 'home.ratingsengine.dashboard'
                                 };
                             }
@@ -1021,7 +1024,7 @@ angular
                         resolve: {
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
-                                    backState: 'home.ratingsengine.ratingsenginetype',
+                                    backState: 'home.ratingsengine',
                                     secondaryLink: true,
                                     nextState: 'home.ratingsengine.dashboard'
                                 };
@@ -1258,7 +1261,8 @@ angular
                         resolve: {
                             WizardControlsOptions: function (RatingsEngineStore) {
                                 return {
-                                    backState: 'home.ratingsengine.ratingsenginetype',
+                                    backState: 'home.ratingsengine',
+                                    secondaryLink: true,
                                     nextState: 'home.ratingsengine.dashboard'
                                 };
                             }
@@ -1392,6 +1396,17 @@ angular
                     }
                 },
                 views: {
+                    'wizard_progress@home.ratingsengine.productpurchase': {
+                        resolve: {
+                            DisableWizardNavOnLastStep: function () {
+                                return true;
+                            }
+                        },
+                        controller: 'ImportWizardProgress',
+                        controllerAs: 'vm',
+                        templateUrl: '/components/wizard/progress/progress.component.html'
+
+                    },
                     'wizard_content@home.ratingsengine.customevent': {
                         controller: 'RatingsEngineCreation',
                         controllerAs: 'vm',

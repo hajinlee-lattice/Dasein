@@ -1,6 +1,15 @@
 <div class="enrichment-wizard-container container advanced-query-builder {{ vm.mode }}">
     <div class="columns twelve">
-        <div class="query-rules-header" ng-if="vm.mode == 'rules'">
+        <div class="query-rules-header" ng-if="vm.mode == 'rules' || vm.mode == 'dashboardrules'">
+            
+            <button
+                ng-if="vm.mode == 'dashboardrules'"
+                class="button blue-button pull-right"
+                ng-click="vm.saveRules()"
+                >
+                Save Changes to Rules
+            </button>
+
             <h2>
                 <i class="fa fa-random"></i> Rules - Define the rules for your targets
             </h2>
@@ -17,9 +26,10 @@
                         ng-options="bkt.bucket as bkt.bucket for bkt in vm.buckets">
                 </select>
             </div>
+
         </div>
         
-        <ul class="query-rules-buckets-container" ng-if="vm.mode == 'rules'">
+        <ul class="query-rules-buckets-container" ng-if="vm.mode == 'rules' || vm.mode == 'dashboardrules'">
             <li     ng-repeat="bucket in vm.buckets" 
                     ng-class="{ 'active': bucket.bucket == vm.bucket }"
                     ng-click="vm.clickBucketTile(bucket)"
@@ -64,7 +74,7 @@
             <div class="query-algorithm-display">
                 <ul class="query-input query-input-root">
                     <li query-input-directive
-                        ng-repeat="tree in (vm.mode == 'rules' ? vm.getRulesInputTree() : vm.getSegmentInputTree())"
+                        ng-repeat="tree in ((vm.mode == 'rules' || vm.mode == 'dashboardrules') ? vm.getRulesInputTree() : vm.getSegmentInputTree())"
                         ng-class="{'input-section-item-box-subtree':tree.logicalRestriction.restrictions}" 
                         class="{{ tree.logicalRestriction.operator ? 'query-input-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
                         items="vm.items" tree="tree" root="vm" parent="vm[vm.state]">
@@ -74,7 +84,7 @@
 
             <button class="query-algorithm-undo button white-button" 
                     ng-click="vm.clickUndo()" 
-                    ng-disabled="vm.history.length == 0 || vm.mode == 'rules'">
+                    ng-disabled="vm.history.length == 0 || vm.mode == 'rules' || vm.mode == 'dashboardrules'">
                 <i class="fa fa-undo"></i> UNDO
             </button>
         </div>
@@ -103,7 +113,7 @@
         <ul class="query-section query-tree-root"
             ng-mouseleave="vm.mouseUp()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
-                    ng-repeat="tree in (vm.mode == 'rules' ? vm.accountRulesTree : vm.getAccountTree())"
+                    ng-repeat="tree in ((vm.mode == 'rules' || vm.mode == 'dashboardrules') ? vm.accountRulesTree : vm.getAccountTree())"
                     ng-mouseup="vm.mouseUp($event)">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 
@@ -121,7 +131,7 @@
         <ul class="query-section query-tree-root"
             ng-mouseleave="vm.mouseUp()">
             <li     ng-class="{'query-section-item-box-subtree':tree.logicalRestriction.operator}" 
-                    ng-repeat="tree in (vm.mode == 'rules' ? vm.contactRulesTree : vm.getContactTree())"
+                    ng-repeat="tree in ((vm.mode == 'rules' || vm.mode == 'dashboardrules') ? vm.contactRulesTree : vm.getContactTree())"
                     ng-mouseup="vm.mouseUp($event)">
                 <query-tree-directive 
                         class="{{ tree.logicalRestriction.operator ? 'query-section-type-' + tree.logicalRestriction.operator.toLowerCase() : '' }}" 

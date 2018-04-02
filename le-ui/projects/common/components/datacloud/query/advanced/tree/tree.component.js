@@ -44,6 +44,8 @@ angular
 
             vm.init = function (type, value) {
                 
+                // console.log(vm.tree);
+
                 vm.tree.collapsed = false;
 
                 DataCloudStore.getEnrichments().then(function(enrichments) {

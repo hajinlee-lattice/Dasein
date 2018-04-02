@@ -25,10 +25,13 @@ angular.module('lp.create.import.job', [
     REFRESH_JOB_INTERVAL_ID = $interval(getJobStatusFromAppIdAndPerformCalc, TIME_BETWEEN_JOB_REFRESH);
 
     var lastKnownStepBeforeCancel = null;
-    var jobSteps = ['load_data', 'generate_insights', 'create_global_target_market', 'score_training_set'];
+    var jobSteps = ['no_mapped_step_name', 'load_data', 'generate_insights', 'create_global_target_market', 'score_training_set'];
 
     $scope.jobStepsRunningStates = jobSteps.reduce(function(state, step) {
         state[step] = false;
+
+        console.log(state);
+
         return state;
     }, {});
 
@@ -57,17 +60,19 @@ angular.module('lp.create.import.job', [
     function performCalc(job) {
         ServiceErrorUtility.process({ data: job });
 
-        if (job.jobStatus == 'Pending') {
+        console.log(job);
+
+        if (job.jobStatus === 'Pending' || job.stepRunning === 'no_mapped_step_name') {
             ceiling = 10;
-        } else if (job.stepRunning == 'load_data'){
+        } else if (job.stepRunning === 'load_data'){
             ceiling = 35;
-        } else if (job.stepRunning == 'generate_insights'){
+        } else if (job.stepRunning === 'generate_insights'){
             ceiling = 60;
-        } else if (job.stepRunning == 'create_global_target_market'){
+        } else if (job.stepRunning === 'create_global_target_market'){
             ceiling = 80;
-        } else if (job.stepRunning == 'score_training_set') {
+        } else if (job.stepRunning === 'score_training_set') {
             ceiling = 90;
-        } else if (job.jobStatus == 'Completed') {
+        } else if (job.jobStatus === 'Completed') {
             ceiling = 100;
         }
 
@@ -113,7 +118,8 @@ angular.module('lp.create.import.job', [
         $scope.stepsCompletedTimes = job.completedTimes;
 
         var stepFailed = lastKnownStepBeforeCancel || job.stepFailed;
-        if ((stepFailed === "load_data" ||
+        if ((stepFailed === "no_mapped_step_name" ||
+            stepFailed === "load_data" ||
             stepFailed === "generate_insights" ||
             stepFailed === "create_global_target_market") &&
             $scope.jobStepsCompletedStates["score_training_set"]) {

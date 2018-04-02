@@ -106,7 +106,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         var model = vm.ratingEngine.activeModel;
 
-        console.log(vm.ratingEngine);
+        // console.log(vm.ratingEngine);
 
         // if (rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
         //     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
@@ -176,7 +176,7 @@ angular.module('lp.ratingsengine.dashboard', [
             }
         }
 
-        console.log(vm.modelingStrategy);
+        // console.log(vm.modelingStrategy);
 
     }
 

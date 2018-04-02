@@ -1,4 +1,4 @@
-angular.module('lp.models.ratings', [
+angular.module('lp.ratingsengine.activatescoring', [
     'mainApp.appCommon.utilities.ResourceUtility',
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'

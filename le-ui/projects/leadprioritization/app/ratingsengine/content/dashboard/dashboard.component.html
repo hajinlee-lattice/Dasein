@@ -27,8 +27,7 @@
                         class="button orange-button"
                         ng-if="vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })" 
-                        ng-disabled="!vm.status_toggle"
-                        ng-disabled="vm.modelSummary === null">
+                        ng-disabled="vm.modelSummary === null && !vm.status_toggle">
                         Create Play
                     </button>
 
@@ -43,7 +42,7 @@
                         class="button orange-button"
                         ng-if="!vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })"
-                        ng-disabled="vm.modelSummary === null">
+                        ng-disabled="vm.modelSummary === null || vm.ratingEngine.status === 'INACTIVE'">
                         Create Play
                     </button>
                 </div>
