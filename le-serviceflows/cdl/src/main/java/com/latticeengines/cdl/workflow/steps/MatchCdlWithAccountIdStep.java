@@ -44,12 +44,14 @@ public class MatchCdlWithAccountIdStep extends RunDataFlow<MatchCdlAccountConfig
 
     private DataFlowParameters createDataFlowParameters() {
         Table inputTable = getInputTable();
+        String[] attributeNames = inputTable.getAttributeNames();
+        putObjectInContext(CUSTOM_EVENT_MATCH_ATTRIBUTES, Arrays.asList(attributeNames));
         Table accountTable = getAccountTable();
         MatchCdlAccountParameters parameters = new MatchCdlAccountParameters(inputTable.getName(),
                 accountTable.getName());
         parameters.setInputMatchFields(Arrays.asList(configuration.getMatchAccountIdColumn()));
         parameters.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
-        parameters.setDedupe(false);
+        parameters.setHasAccountId(true);
         return parameters;
     }
 

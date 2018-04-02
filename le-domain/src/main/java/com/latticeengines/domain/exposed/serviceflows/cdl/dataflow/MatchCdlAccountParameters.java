@@ -16,17 +16,14 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
     @SourceTableName
     public String accountTable;
 
-    @JsonProperty("dedupe")
-    private boolean dedupe;
-
     @JsonProperty("input_match_fields")
     private List<String> inputMatchFields;
 
     @JsonProperty("account_match_fields")
     private List<String> accountMatchFields;
 
-    @JsonProperty("right_join")
-    private boolean rightJoin;
+    @JsonProperty("has_account_id")
+    private boolean hasAccountId;
 
     public MatchCdlAccountParameters() {
     }
@@ -52,19 +49,11 @@ public class MatchCdlAccountParameters extends DataFlowParameters {
         this.accountMatchFields = accountMatchFields;
     }
 
-    public boolean isDedupe() {
-        return dedupe;
+    public boolean isHasAccountId() {
+        return this.hasAccountId;
     }
 
-    public void setDedupe(boolean dedupe) {
-        this.dedupe = dedupe;
-    }
-
-    public boolean isRightJoin() {
-        return this.rightJoin;
-    }
-
-    public void setRightJoin(boolean rightJoin) {
-        this.rightJoin = rightJoin;
+    public void setHasAccountId(boolean hasAccountId) {
+        this.hasAccountId = hasAccountId;
     }
 }

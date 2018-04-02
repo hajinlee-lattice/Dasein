@@ -35,7 +35,6 @@ public class MatchCdlSplitWithAccountIdStep extends RunDataFlow<MatchCdlSplitCon
         MatchCdlSplitParameters parameters = new MatchCdlSplitParameters(inputTable.getName());
         parameters.expression = InterfaceName.LatticeAccountId.name() + " != null";
         parameters.filterField = InterfaceName.LatticeAccountId.name();
-        parameters.dropFields = false;
         return parameters;
     }
 

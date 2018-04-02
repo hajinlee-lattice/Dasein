@@ -45,8 +45,7 @@ public class MatchCdlWithoutAccountIdStep extends RunDataFlow<MatchCdlAccountCon
                 accountTable.getName());
         parameters.setInputMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         parameters.setAccountMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
-        parameters.setDedupe(true);
-        parameters.setRightJoin(true);
+        parameters.setHasAccountId(false);
         return parameters;
     }
 

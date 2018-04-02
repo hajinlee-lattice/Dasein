@@ -13,6 +13,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
+import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.cdl.dataflow.MatchCdlAccountParameters;
 
@@ -30,24 +31,26 @@ public class MatchCdlAccountFlow extends TypesafeDataFlowBuilder<MatchCdlAccount
         FieldList inputMatchFields = new FieldList(parameters.getInputMatchFields());
         FieldList accountMatchFields = new FieldList(parameters.getAccountMatchFields());
         Node result = null;
-        if (!parameters.isRightJoin()) {
+        if (parameters.isHasAccountId()) {
             result = inputTable.join(inputMatchFields, accountTable, accountMatchFields, JoinType.LEFT);
         } else {
-            List<String> inputFields = inputTable.getFieldNames();
             String lidFieldName = parameters.getAccountMatchFields().get(0);
-            FieldList LidField = new FieldList(lidFieldName);
-            Node nullLidNode = inputTable.filter(lidFieldName + " == null", LidField);
-            Node notNullLidNode = inputTable.filter(lidFieldName + " != null", LidField);
-            
-            String newLidField = lidFieldName + "_NEW_";
-            accountTable = accountTable.rename(LidField, new FieldList(newLidField));
-            accountTable = accountTable.retain(new FieldList(accountTable.getFieldNames()));
-            result = accountTable.join(new FieldList(newLidField), notNullLidNode, inputMatchFields, JoinType.RIGHT);
-            result = result.retain(new FieldList(inputFields));
+            FieldList lidField = new FieldList(lidFieldName);
+            FieldMetadata lidMetadata = inputTable.getSchema(lidFieldName);
+            String notExistingLid = "\"-11111\"";
+            result = inputTable.apply(
+                    String.format(lidFieldName + " != null ? " + lidFieldName + " : %s", notExistingLid), lidField,
+                    lidMetadata);
+
+            result = result.join(lidField, accountTable, lidField, JoinType.LEFT);
+            Node notNullLidNode = result.filter(String.format("!" + lidFieldName + ".equals(%s)", notExistingLid),
+                    lidField);
+            Node nullLidNode = result.filter(String.format(lidFieldName + ".equals(%s)", notExistingLid), lidField);
+            result = notNullLidNode.groupByAndLimit(lidField, 1);
             result = result.merge(nullLidNode);
-            if (parameters.isDedupe()) {
-                result = result.groupByAndLimit(accountMatchFields, 1);
-            }
+
+            result = result.apply(String.format(lidFieldName + ".equals(%s) ? null : " + lidFieldName, notExistingLid),
+                    lidField, lidMetadata);
         }
 
         result = result.retain(new FieldList(retainFields));

@@ -25,7 +25,7 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         MatchCdlAccountParameters params = new MatchCdlAccountParameters("inputTable", "accountTable");
         params.setInputMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
         params.setAccountMatchFields(Arrays.asList(InterfaceName.AccountId.name()));
-        params.setDedupe(false);
+        params.setHasAccountId(true);
         return params;
     }
 
@@ -33,8 +33,7 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
         MatchCdlAccountParameters params = new MatchCdlAccountParameters("inputTable", "accountTable");
         params.setInputMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
         params.setAccountMatchFields(Arrays.asList(InterfaceName.LatticeAccountId.name()));
-        params.setDedupe(true);
-        params.setRightJoin(true);
+        params.setHasAccountId(false);
         return params;
     }
 
@@ -86,8 +85,8 @@ public class MatchCdlAccountFlowTestNG extends ServiceFlowsDataFlowFunctionalTes
                 continue;
             }
         }
-        Assert.assertEquals(record0.get("PeriodId").toString(), "0");
-        Assert.assertEquals(record1.get("PeriodId").toString(), "0");
+        Assert.assertEquals(record0.get("PeriodId").toString(), "9");
+        Assert.assertEquals(record1.get("PeriodId").toString(), "10");
     }
 
 }

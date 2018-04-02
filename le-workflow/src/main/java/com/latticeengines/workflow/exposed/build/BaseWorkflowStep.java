@@ -112,6 +112,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String FINAL_RECORDS = "FINAL_RECORDS";
 
     protected static final String CUSTOM_EVENT_IMPORT = "CUSTOM_EVENT_IMPORT";
+    protected static final String CUSTOM_EVENT_MATCH_ATTRIBUTES = "CUSTOM_EVENT_MATCH_ATTRIBUTES";
     protected static final String CUSTOM_EVENT_MATCH_ACCOUNT = "CUSTOM_EVENT_MATCH_ACCOUNT";
     protected static final String CUSTOM_EVENT_MATCH_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_ACCOUNT_ID";
     protected static final String CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID = "CUSTOM_EVENT_MATCH_WITHOUT_ACCOUNT_ID";
