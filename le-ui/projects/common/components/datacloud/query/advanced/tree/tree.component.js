@@ -103,8 +103,7 @@ angular
                 restriction.Id = bkt.Id;
                 restriction.Cnt = bkt.Cnt;
                 restriction.Lbl = bkt.Lbl;
-
-                if (bkt.Vals[0]) {
+                if (bkt.Vals[0] !== undefined) {
                     if (restriction.Vals[0]) {
                         restriction.Vals[0] = bkt.Vals[0];
                     } else {
@@ -115,7 +114,7 @@ angular
                 }
 
 
-                if (bkt.Vals[1]) {
+                if (bkt.Vals[1] !== undefined) {
                     if (restriction.Vals[1]) {
                         restriction.Vals[1] = bkt.Vals[1];
                     } else {
