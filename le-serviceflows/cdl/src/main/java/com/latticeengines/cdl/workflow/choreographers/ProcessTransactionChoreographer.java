@@ -3,11 +3,14 @@ package com.latticeengines.cdl.workflow.choreographers;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,8 +23,12 @@ import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapp
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -55,6 +62,9 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
 
     @Inject
     private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
+
+    @Inject
+    private YarnConfiguration yarnConfiguration;
 
     private boolean hasRawStore = false;
     private boolean hasProducts = false;
@@ -221,10 +231,16 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     }
 
     private boolean isProfilePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step) {
+        log.info(String.format(
+                "Check whether it is profile purchase history: StepName=%s, ProfilePurchaseHistoryBean=%s", step.name(),
+                ProfilePurchaseHistory.BEAN_NAME));
         return step.name().contains(ProfilePurchaseHistory.BEAN_NAME);
     }
 
     private boolean shouldCalculatePurchaseHistory(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+
+        boolean shouldCalc = false;
+
         // Temporary log for troubleshooting PLS-7568
         try {
             String msg = String.format(
@@ -234,23 +250,51 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                     productChoreographer.rebuild);
             log.info(msg);
         } catch (Exception ex) {
-
+            // do nothing
         }
         if (hasProducts && hasAccounts) {
             if (hasRawStore && (accountChoreographer.update || accountChoreographer.rebuild)) {
                 log.info("Need to rebuild purchase history due to Account changes.");
-                return true;
+                shouldCalc = true;
             }
             if (hasRawStore && (productChoreographer.update || productChoreographer.rebuild)) {
                 log.info("Need to rebuild purchase history due to Product changes.");
-                return true;
+                shouldCalc = true;
             }
             if (update || rebuild) {
                 log.info("Need to rebuild purchase history due to Transaction changes.");
-                return true;
+                shouldCalc = true;
+            }
+        }
+
+        if (shouldCalc) {
+            shouldCalc = hasAnalyticProduct(step);
+        }
+        return shouldCalc;
+    }
+
+
+    private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {
+        DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
+        String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
+        Table productTable = dataCollectionProxy.getTable(customerSpace,
+                TableRoleInCollection.ConsolidatedProduct, active.complement());
+        if (productTable == null) {
+            log.info("Did not find product table in inactive version.");
+            productTable = dataCollectionProxy.getTable(customerSpace,
+                    TableRoleInCollection.ConsolidatedProduct, active);
+            if (productTable == null) {
+                throw new IllegalStateException("Cannot find the product table in both versions");
+            }
+        }
+        log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
+        List<Product> productList = new ArrayList<>(
+                ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
+        for (Product product : productList) {
+            if (ProductType.Analytic.name().equals(product.getProductType())) {
+                 return true;
             }
         }
         return false;
     }
-
 }

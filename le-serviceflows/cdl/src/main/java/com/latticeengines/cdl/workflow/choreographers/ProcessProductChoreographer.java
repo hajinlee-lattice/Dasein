@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import java.util.Map;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -9,13 +10,17 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.RebuildProductWorkflow;
 import com.latticeengines.cdl.workflow.UpdateProductWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeProduct;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileProduct;
+import com.latticeengines.cdl.workflow.steps.rebuild.ProfileProductHierarchy;
 import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
 import com.latticeengines.cdl.workflow.steps.update.CloneProduct;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Choreographer;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component
 public class ProcessProductChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
@@ -35,11 +40,6 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
 
     @Inject
     private RebuildProductWorkflow rebuildProductWorkflow;
-
-    @Override
-    public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
-        return isCommonSkip(step, seq);
-    }
 
     @Override
     protected AbstractStep mergeStep() {
@@ -90,4 +90,45 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
         log.info("No reason to rebuild " + mainEntity());
         return false;
     }
+
+    @Override
+    public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
+
+        boolean skip;
+        skip = isCommonSkip(step, seq);
+        if (!skip) {
+            BusinessEntity entity = null;
+            if (isProfileProduct(step)) {
+                entity = BusinessEntity.Product;
+            } else if (isProfileProductHierarchy(step)) {
+                entity = BusinessEntity.ProductHierarchy;
+            }
+
+            if (entity != null) {
+                Map<BusinessEntity, Integer> entityValueMap;
+                try {
+                    entityValueMap = step.getMapObjectFromContext(BaseWorkflowStep.FINAL_RECORDS, BusinessEntity.class, Integer.class);
+                } catch (Exception e) {
+                    entityValueMap = null;
+                }
+                if (entityValueMap == null) {
+                    skip = true;
+                } else {
+                    Integer finalRecords = entityValueMap.get(entity);
+                    skip = ((finalRecords == null) || (finalRecords == 0));
+                }
+            }
+        }
+
+        return skip;
+    }
+
+    private boolean isProfileProduct(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equalsIgnoreCase(ProfileProduct.BEAN_NAME);
+    }
+
+    private boolean isProfileProductHierarchy(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().equalsIgnoreCase(ProfileProductHierarchy.BEAN_NAME);
+    }
+
 }

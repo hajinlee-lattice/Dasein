@@ -62,7 +62,8 @@ public class MergeProductFunctionalTestNG {
 
     @Test(groups = "functional")
     public void testMergeVDBProducts() {
-        List<Product> result = step.mergeProducts(productGroup3, currentProductList, report);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup3, currentProductList, result);
         Assert.assertEquals(result.size(), 3);
         Assert.assertEquals(result.get(0).getProductType(), ProductType.Analytic.name());
         Assert.assertEquals(result.get(1).getProductType(), ProductType.Analytic.name());
@@ -71,7 +72,8 @@ public class MergeProductFunctionalTestNG {
 
     @Test(groups = "functional")
     public void testMergeBundleProducts() {
-        List<Product> result = step.mergeProducts(productGroup1, currentProductList, report);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup1, currentProductList, result);
 //        step.generateReport(report);
 
         Assert.assertEquals(result.size(), 4);
@@ -96,7 +98,8 @@ public class MergeProductFunctionalTestNG {
 
     @Test(groups = "functional")
     public void testMergeHierarchyProducts() {
-        List<Product> result = step.mergeProducts(productGroup2, currentProductList, report);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup2, currentProductList, result);
         Assert.assertEquals(result.size(), 9);
         result.forEach(product -> {
             Assert.assertEquals(product.getProductStatus(), ProductStatus.Active.name());
@@ -137,37 +140,43 @@ public class MergeProductFunctionalTestNG {
 
     @Test(groups = "functional")
     public void testRepeatedMerge() {
-        List<Product> result = step.mergeProducts(productGroup1, currentProductList, report);
-        result = step.mergeProducts(productGroup1, result, new HashMap<>());
-        Assert.assertEquals(result.size(), 4);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup1, currentProductList, result);
+        List<Product> result2 = new ArrayList<>();
+        step.mergeProducts(productGroup1, result, result2);
+        Assert.assertEquals(result2.size(), 4);
 
         currentProductList = Collections.emptyList();
-        result = step.mergeProducts(productGroup2, currentProductList, new HashMap<>());
-        result = step.mergeProducts(productGroup2, result, new HashMap<>());
-        Assert.assertEquals(result.size(), 9);
+        result.clear();
+        step.mergeProducts(productGroup2, currentProductList, result);
+        result2.clear();
+        step.mergeProducts(productGroup2, result, result2);
+        Assert.assertEquals(result2.size(), 9);
     }
 
     @Test(groups = "functional")
     public void testObsoleteBundleMerge() {
-        List<Product> result = step.mergeProducts(productGroup1, currentProductList, report);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup1, currentProductList, result);
         List<Product> copyOfGroup = copyProductList(productGroup1);
         copyOfGroup.get(1).setProductName("sku_g1p3");
         copyOfGroup.get(1).setProductDescription("g1p3");
         copyOfGroup.get(1).setProductBundle("b3");
 
-        result = step.mergeProducts(copyOfGroup, result, report);
-        Assert.assertEquals(result.size(), 6);
-        List<Product> b1Products = getProductByBundle(result, "b3");
+        List<Product> result2 = new ArrayList<>();
+        step.mergeProducts(copyOfGroup, result, result2);
+        Assert.assertEquals(result2.size(), 6);
+        List<Product> b1Products = getProductByBundle(result2, "b3");
         Assert.assertNotNull(b1Products);
         Assert.assertEquals(b1Products.size(), 2);
         Assert.assertEquals(b1Products.get(0).getProductStatus(), ProductStatus.Active.name());
         Assert.assertEquals(b1Products.get(1).getProductStatus(), ProductStatus.Active.name());
-        List<Product> b2Products = getProductByBundle(result, "b2");
+        List<Product> b2Products = getProductByBundle(result2, "b2");
         Assert.assertNotNull(b2Products);
         Assert.assertEquals(b2Products.size(), 2);
         Assert.assertEquals(b2Products.get(0).getProductStatus(), ProductStatus.Obsolete.name());
         Assert.assertEquals(b2Products.get(1).getProductStatus(), ProductStatus.Obsolete.name());
-        List<Product> b3Products = getProductByBundle(result, "b3");
+        List<Product> b3Products = getProductByBundle(result2, "b3");
         Assert.assertNotNull(b3Products);
         Assert.assertEquals(b3Products.size(), 2);
         Assert.assertEquals(b3Products.get(0).getProductStatus(), ProductStatus.Active.name());
@@ -176,26 +185,28 @@ public class MergeProductFunctionalTestNG {
 
     @Test(groups = "functional")
     public void testObsoleteHierarchyMerge() {
-        List<Product> result = step.mergeProducts(productGroup2, currentProductList, report);
+        List<Product> result = new ArrayList<>();
+        step.mergeProducts(productGroup2, currentProductList, result);
         List<Product> copyOfGroup = copyProductList(productGroup2);
         copyOfGroup.get(0).setProductName("sku_g2p4");
         copyOfGroup.get(0).setProductDescription("g2p4");
         copyOfGroup.get(0).setProductCategory("c4");
-        result = step.mergeProducts(copyOfGroup, result, report);
-        Assert.assertEquals(result.size(), 10);
-        List<Product> c4Products = getProductByCategory(result, "c4");
+        List<Product> result2 = new ArrayList<>();
+        step.mergeProducts(copyOfGroup, result, result2);
+        Assert.assertEquals(result2.size(), 10);
+        List<Product> c4Products = getProductByCategory(result2, "c4");
         Assert.assertNotNull(c4Products);
         Assert.assertEquals(c4Products.size(), 4);
         Assert.assertEquals(c4Products.get(0).getProductStatus(), ProductStatus.Active.name());
         Assert.assertEquals(c4Products.get(1).getProductStatus(), ProductStatus.Active.name());
         Assert.assertEquals(c4Products.get(2).getProductStatus(), ProductStatus.Active.name());
         Assert.assertEquals(c4Products.get(3).getProductStatus(), ProductStatus.Active.name());
-        List<Product> c3Products = getProductByCategory(result, "c3");
+        List<Product> c3Products = getProductByCategory(result2, "c3");
         Assert.assertNotNull(c3Products);
         Assert.assertEquals(c3Products.size(), 2);
         Assert.assertEquals(c3Products.get(0).getProductStatus(), ProductStatus.Active.name());
         Assert.assertEquals(c3Products.get(1).getProductStatus(), ProductStatus.Active.name());
-        List<Product> c1Products = getProductByCategory(result, "c1");
+        List<Product> c1Products = getProductByCategory(result2, "c1");
         Assert.assertNotNull(c1Products);
         Assert.assertEquals(c1Products.size(), 1);
         Assert.assertEquals(c1Products.get(0).getProductStatus(), ProductStatus.Obsolete.name());

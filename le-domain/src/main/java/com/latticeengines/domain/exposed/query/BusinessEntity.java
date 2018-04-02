@@ -14,6 +14,7 @@ import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.C
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.PivotedRating;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedContact;
 import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProduct;
+import static com.latticeengines.domain.exposed.metadata.TableRoleInCollection.SortedProductHierarchy;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,7 +46,8 @@ public enum BusinessEntity implements GraphNode {
     Rating, //
 
     // Lattice Data Cloud
-    LatticeAccount;
+    LatticeAccount, //
+     ProductHierarchy;
 
     public static Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
@@ -80,6 +82,9 @@ public enum BusinessEntity implements GraphNode {
 
         LatticeAccount.setServingStore(AccountMaster);
 
+        ProductHierarchy.setBatchStore(ConsolidatedProduct);
+        ProductHierarchy.setServingStore(SortedProductHierarchy);
+
         // Relationships
         Account.addRelationship(Contact, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
@@ -89,6 +94,7 @@ public enum BusinessEntity implements GraphNode {
         Transaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         PeriodTransaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
+        ProductHierarchy.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         PurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         DepivotedPurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
     }

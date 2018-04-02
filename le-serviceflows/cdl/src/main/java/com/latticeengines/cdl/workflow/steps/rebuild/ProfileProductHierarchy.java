@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
@@ -26,11 +27,11 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 
-@Component(ProfileProduct.BEAN_NAME)
+@Component(ProfileProductHierarchy.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductStepConfiguration> {
+public class ProfileProductHierarchy extends BaseSingleEntityProfileStep<ProcessProductStepConfiguration> {
 
-    public static final String BEAN_NAME = "profileProduct";
+    public static final String BEAN_NAME = "profileProductHierarchy";
 
     private String masterTableName;
 
@@ -42,15 +43,17 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
     @Override
     protected void onPostTransformationCompleted() {
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);
-        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        updateEntityValueMapInContext(BusinessEntity.ProductHierarchy, TABLE_GOING_TO_REDSHIFT,
+                servingStoreTableName, String.class);
+        updateEntityValueMapInContext(BusinessEntity.ProductHierarchy, APPEND_TO_REDSHIFT_TABLE, false,
+                Boolean.class);
     }
 
     @Override
     protected PipelineTransformationRequest getTransformRequest() {
         masterTableName = masterTable.getName();
         PipelineTransformationRequest request = new PipelineTransformationRequest();
-        request.setName("ConsolidateProductStep");
+        request.setName("ProfileProductHierarchyStep");
         request.setSubmitter(customerSpace.getTenantId());
         request.setKeepTemp(false);
         request.setEnableSlack(false);
@@ -86,7 +89,7 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
                 InterfaceName.ProductStatus.name()
         });
         String filterExpression = String.format("%s.equalsIgnoreCase(\"%s\") && !%s.equalsIgnoreCase(\"%s\")",
-                InterfaceName.ProductType.name(), ProductType.Analytic.name(),
+                InterfaceName.ProductType.name(), ProductType.Hierarchy.name(),
                 InterfaceName.ProductStatus.name(), ProductStatus.Obsolete.name());
         transformerConfig.setFilterExpression(filterExpression);
         step.setConfiguration(appendEngineConf(transformerConfig, lightEngineConfig()));
@@ -101,7 +104,7 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
 
         SorterConfig config = new SorterConfig();
         config.setPartitions(20);
-        String sortingKey = TableRoleInCollection.SortedProduct.getForeignKeysAsStringList().get(0);
+        String sortingKey = TableRoleInCollection.SortedProductHierarchy.getForeignKeysAsStringList().get(0);
         config.setSortingField(sortingKey);
         config.setCompressResult(true);
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -81,6 +82,7 @@ public class ProductUtils {
             productList.add(product);
         }
 
+        log.info("Loaded products " + JsonUtils.serialize(productList));
         return productList;
     }
 
@@ -159,6 +161,7 @@ public class ProductUtils {
             data.add(builder.build());
         }
 
+        log.info("Saving products " + JsonUtils.serialize(data));
         AvroUtils.writeToHdfsFile(yarnConfiguration, schema, filePath + "/" + FILE_NAME, data, true);
     }
 
