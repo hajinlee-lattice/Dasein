@@ -65,6 +65,9 @@ public class ScoringServiceImpl implements ScoringService {
 
         Properties containerProperties = new Properties();
         containerProperties.put(RTSBulkScoringProperty.RTS_BULK_SCORING_CONFIG, rtsBulkScoringConfig.toString());
+        containerProperties.put(ContainerProperty.VIRTUALCORES.name(), "1");
+        containerProperties.put(ContainerProperty.MEMORY.name(), "2048");
+        containerProperties.put(ContainerProperty.PRIORITY.name(), "0");
 
         if (StringUtils.isNotBlank(trustStoreJks)) {
             containerProperties.put(ContainerProperty.TRUST_STORE.name(), trustStoreJks);
