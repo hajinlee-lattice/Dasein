@@ -99,7 +99,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .skipImport(false) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
-                .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
+                .skipStandardTransform(transformationGroup == TransformationGroup.NONE) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters)) //
@@ -164,7 +164,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
     }
 
     public ApplicationId submit(RatingEngineModelingParameters parameters) {
-        TransformationGroup transformationGroup = TransformationGroup.STANDARD; // TODO:
+        TransformationGroup transformationGroup = TransformationGroup.NONE; // TODO:
                                                                                 // plsFeatureFlagService.getTransformationGroupFromZK();
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
