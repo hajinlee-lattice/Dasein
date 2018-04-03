@@ -8,6 +8,8 @@ public interface RatingEngineEntityMgr {
 
     RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId);
 
+    RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment);
+
     List<RatingEngine> findAll();
 
     List<RatingEngine> findAllDeleted();

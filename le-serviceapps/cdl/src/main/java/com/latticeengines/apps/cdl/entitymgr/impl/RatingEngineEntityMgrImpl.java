@@ -206,6 +206,16 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId) {
+        return createOrUpdateRE(ratingEngine, tenantId, false);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
+        return createOrUpdateRE(ratingEngine, tenantId, unlinkSegment);
+    }
+
+    private RatingEngine createOrUpdateRE(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
         if (ratingEngine.getId() == null) { // create a new Rating Engine
             ratingEngine.setId(RatingEngine.generateIdStr());
             createNewRatingEngine(ratingEngine, tenantId);
@@ -219,14 +229,14 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                 return ratingEngine;
             } else { // update an existing one by updating the delta passed from
                      // front end
-                updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId);
+                updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId, unlinkSegment);
                 return retrievedRatingEngine;
             }
         }
     }
 
     private void updateExistingRatingEngine(RatingEngine retrievedRatingEngine, RatingEngine ratingEngine,
-            String tenantId) {
+            String tenantId, Boolean unlinkSegment) {
         log.info(String.format("Updating existing rating engine with id %s for tenant %s", ratingEngine.getId(),
                 tenantId));
         if (ratingEngine.getDisplayName() != null) {
@@ -269,6 +279,10 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             }
         }
 
+        // PLS-7555 - allow segment to be reset to null for custom event rating
+        if (unlinkSegment == Boolean.TRUE && !retrievedRatingEngine.getType().isTargetSegmentMandatory()) {
+            retrievedRatingEngine.setSegment(null);
+        }
         retrievedRatingEngine.setUpdated(new Date());
         ratingEngineDao.update(retrievedRatingEngine);
     }

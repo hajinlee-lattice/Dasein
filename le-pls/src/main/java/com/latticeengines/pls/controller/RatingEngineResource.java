@@ -128,10 +128,25 @@ public class RatingEngineResource {
         RatingEngine ratingEngine = getRatingEngine(ratingEngineId, null, null);
 
         descending = descending == null ? false : descending;
-        restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
+
         return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
                 descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
                 selectedBuckets);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/entitypreview/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
+    public Long getEntityPreviewCount( //
+            @PathVariable String ratingEngineId, //
+            @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
+            @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
+            @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+        RatingEngine ratingEngine = getRatingEngine(ratingEngineId, null, null);
+
+        return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType, restrictNotNullSalesforceId,
+                freeFormTextSearch, selectedBuckets);
     }
 
     @RequestMapping(value = "/{ratingEngineId}/dashboard", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -146,10 +161,11 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
     @PreAuthorize("hasRole('Create_PLS_RatingEngines')")
-    public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine) {
+    public RatingEngine createOrUpdateRatingEngine(@RequestBody RatingEngine ratingEngine,
+            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
         Tenant tenant = MultiTenantContext.getTenant();
         RatingEngineAndActionDTO ratingEngineAndAction = ratingEngineProxy
-                .createOrUpdateRatingEngineAndActionDTO(tenant.getId(), ratingEngine);
+                .createOrUpdateRatingEngineAndActionDTO(tenant.getId(), ratingEngine, unlinkSegment);
         Action action = ratingEngineAndAction.getAction();
         registerAction(action, tenant);
         return ratingEngineAndAction.getRatingEngine();

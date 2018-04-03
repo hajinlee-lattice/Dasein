@@ -106,10 +106,6 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private Boolean deleted = false;
 
-    @JsonProperty("segment")
-    @ManyToOne(cascade = { CascadeType.MERGE }, fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_SEGMENT_ID", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private MetadataSegment segment;
 
     private Date created;

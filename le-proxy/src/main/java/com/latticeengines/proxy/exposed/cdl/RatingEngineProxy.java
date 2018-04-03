@@ -98,13 +98,25 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine) {
-        String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
+        return createOrUpdateRatingEngine(customerSpace, ratingEngine, false);
+    }
+
+    public RatingEngine createOrUpdateRatingEngine(String customerSpace, RatingEngine ratingEngine,
+            Boolean unlinkSegment) {
+        String url = constructUrl(URL_PREFIX + createUnlinkSegmentSuffix(unlinkSegment),
+                shortenCustomerSpace(customerSpace), unlinkSegment);
         return post("create rating engine", url, ratingEngine, RatingEngine.class);
     }
 
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
             RatingEngine ratingEngine) {
-        String url = constructUrl(URL_PREFIX + "/with-action", shortenCustomerSpace(customerSpace));
+        return createOrUpdateRatingEngineAndActionDTO(customerSpace, ratingEngine, false);
+    }
+
+    public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(String customerSpace,
+            RatingEngine ratingEngine, Boolean unlinkSegment) {
+        String url = constructUrl(URL_PREFIX + "/with-action" + createUnlinkSegmentSuffix(unlinkSegment),
+                shortenCustomerSpace(customerSpace), unlinkSegment);
         return post("create rating engine with action", url, ratingEngine, RatingEngineAndActionDTO.class);
     }
 
@@ -236,4 +248,7 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return post("getCoverage", url, ratingModelSegmentIds, RatingsCountResponse.class);
     }
 
+    private String createUnlinkSegmentSuffix(Boolean unlinkSegment) {
+        return unlinkSegment == Boolean.TRUE ? "?unlink-segment={unlink-segment}" : "";
+    }
 }

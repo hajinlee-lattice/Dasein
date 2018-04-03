@@ -119,14 +119,16 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Register or update a Rating Engine")
     public RatingEngine createOrUpdateRatingEngine(@PathVariable String customerSpace,
-            @RequestBody RatingEngine ratingEngine) {
+            @RequestBody RatingEngine ratingEngine,
+            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
         if (StringUtils.isEmpty(customerSpace)) {
             throw new LedpException(LedpCode.LEDP_39002);
         }
         if (ratingEngine == null) {
             throw new NullPointerException("Rating Engine is null.");
         }
-        return ratingEngineService.createOrUpdate(ratingEngine, CustomerSpace.parse(customerSpace).toString());
+        return ratingEngineService.createOrUpdate(ratingEngine, CustomerSpace.parse(customerSpace).toString(),
+                unlinkSegment);
     }
 
     @PostMapping(value = "/with-action")
@@ -134,8 +136,9 @@ public class RatingEngineResource {
     @Action
     @ApiOperation(value = "Register or update a Rating Engine, returns RatingEngineAndActionDTO")
     public RatingEngineAndActionDTO createOrUpdateRatingEngineAndActionDTO(@PathVariable String customerSpace,
-            @RequestBody RatingEngine ratingEngine) {
-        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine);
+            @RequestBody RatingEngine ratingEngine,
+            @RequestParam(value = "unlink-segment", required = false, defaultValue = "false") Boolean unlinkSegment) {
+        RatingEngine updatedRatingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine, unlinkSegment);
         return new RatingEngineAndActionDTO(updatedRatingEngine, ActionContext.getAction());
     }
 

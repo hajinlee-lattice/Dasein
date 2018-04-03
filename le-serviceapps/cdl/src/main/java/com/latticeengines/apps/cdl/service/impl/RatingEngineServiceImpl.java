@@ -186,6 +186,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId) {
+        return createOrUpdate(ratingEngine, tenantId, false);
+    }
+
+    @Override
+    public RatingEngine createOrUpdate(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
         if (ratingEngine == null) {
             throw new NullPointerException("Entity is null when creating a rating engine.");
         }
@@ -198,7 +203,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             ratingEngine.setSegment(segment);
         }
 
-        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId);
+        ratingEngine = ratingEngineEntityMgr.createOrUpdateRatingEngine(ratingEngine, tenantId, unlinkSegment);
         updateLastRefreshedDate(tenant.getId(), ratingEngine);
         evictRatingMetadataCache();
         return ratingEngine;

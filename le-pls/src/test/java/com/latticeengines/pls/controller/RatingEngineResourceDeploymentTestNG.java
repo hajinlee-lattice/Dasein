@@ -29,6 +29,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CustomEventRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -76,6 +80,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     private RatingEngine re1;
     private RatingEngine re2;
+    private RatingEngine re3;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -91,7 +96,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         log.info(String.format("Created metadata segment with name %s", retrievedSegment.getName()));
 
         re1 = createRuleBasedRatingEngine(retrievedSegment);
-        re2 = createAIRatingEngine(retrievedSegment);
+        re2 = createAIRatingEngine(retrievedSegment, RatingEngineType.CROSS_SELL);
+        re3 = createAIRatingEngine(retrievedSegment, RatingEngineType.CUSTOM_EVENT);
     }
 
     @Test(groups = "deployment")
@@ -103,6 +109,8 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         testRatingEngineNoteCreation(re1, true);
         testCreate(re2);
         testRatingEngineNoteCreation(re2, false);
+        testCreate(re3);
+        testRatingEngineNoteCreation(re3, false);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testCreate" })
@@ -113,17 +121,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         List<RatingEngineSummary> ratingEngineSummaries = JsonUtils.convertList(ratingEngineSummarieObjects,
                 RatingEngineSummary.class);
         Assert.assertNotNull(ratingEngineSummaries);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 3);
         log.info("ratingEngineSummaries is " + ratingEngineSummaries);
         String id1 = re1.getId();
         String id2 = re2.getId();
+        String id3 = re3.getId();
         RatingEngineSummary possibleRatingEngineSummary1 = null;
         RatingEngineSummary possibleRatingEngineSummary2 = null;
+        RatingEngineSummary possibleRatingEngineSummary3 = null;
         for (RatingEngineSummary r : ratingEngineSummaries) {
             if (r.getId().equals(id1)) {
                 possibleRatingEngineSummary1 = r;
             } else if (r.getId().equals(id2)) {
                 possibleRatingEngineSummary2 = r;
+            } else if (r.getId().equals(id3)) {
+                possibleRatingEngineSummary3 = r;
             }
             if (r.getType() != RatingEngineType.RULE_BASED) {
                 Assert.assertNotNull(r.getAdvancedRatingConfig());
@@ -131,14 +143,17 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         }
         Assert.assertNotNull(possibleRatingEngineSummary1);
         Assert.assertNotNull(possibleRatingEngineSummary2);
+        Assert.assertNotNull(possibleRatingEngineSummary3);
         Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(),
                 possibleRatingEngineSummary2.getSegmentDisplayName());
+        Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(),
+                possibleRatingEngineSummary3.getSegmentDisplayName());
         Assert.assertEquals(possibleRatingEngineSummary1.getSegmentDisplayName(), SEGMENT_NAME);
 
         // test get all rating engine summary list filtered by type and status
         ratingEngineSummarieObjects = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=INACTIVE", List.class);
-        Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 2);
         ratingEngineSummarieObjects = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
@@ -150,6 +165,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         ratingEngineSummarieObjects = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
+        ratingEngineSummarieObjects = restTemplate
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CUSTOM_EVENT", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         // test Rating Attribute in Redshift
         ratingEngineSummarieObjects = restTemplate.getForObject(
@@ -165,6 +183,9 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         ratingEngineSummarieObjects = restTemplate.getForObject(
                 getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL&only-in-redshift=true", List.class);
+        Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
+        ratingEngineSummarieObjects = restTemplate.getForObject(
+                getRestAPIHostPort() + "/pls/ratingengines?type=CUSTOM_EVENT&only-in-redshift=true", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
 
         // test get specific rating engine
@@ -209,7 +230,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 3);
 
         ratingEngine = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(),
                 RatingEngine.class);
@@ -224,7 +245,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?status=INACTIVE",
                 List.class);
         Assert.assertNotNull(ratingEngineSummaries);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 3);
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL",
                 List.class);
         Assert.assertNotNull(ratingEngineSummaries);
@@ -239,7 +260,7 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
         ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines?only-in-redshift=false", List.class);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 3);
 
         // test update rule based model
         List<?> ratingModelObjects = restTemplate
@@ -315,11 +336,11 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         return ratingEngine;
     }
 
-    private RatingEngine createAIRatingEngine(MetadataSegment retrievedSegment) {
+    private RatingEngine createAIRatingEngine(MetadataSegment retrievedSegment, RatingEngineType type) {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setSegment(retrievedSegment);
         ratingEngine.setCreatedBy(CREATED_BY);
-        ratingEngine.setType(RatingEngineType.CROSS_SELL);
+        ratingEngine.setType(type);
         if (shouldCreateActionWithRatingEngine2) {
             ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
         }
@@ -347,6 +368,16 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         } else if (retrievedRe.getActiveModel() instanceof AIModel) {
             AIModel aiModel = (AIModel) retrievedRe.getActiveModel();
             Assert.assertNotNull(aiModel);
+            Assert.assertNotNull(retrievedRe.getAdvancedRatingConfig());
+            Assert.assertNotNull(aiModel.getAdvancedModelingConfig());
+
+            if (retrievedRe.getType() == RatingEngineType.CROSS_SELL) {
+                Assert.assertEquals(retrievedRe.getAdvancedRatingConfig().getClass(), CrossSellRatingConfig.class);
+                Assert.assertEquals(aiModel.getAdvancedModelingConfig().getClass(), CrossSellModelingConfig.class);
+            } else if (retrievedRe.getType() == RatingEngineType.CUSTOM_EVENT) {
+                Assert.assertEquals(retrievedRe.getAdvancedRatingConfig().getClass(), CustomEventRatingConfig.class);
+                Assert.assertEquals(aiModel.getAdvancedModelingConfig().getClass(), CustomEventModelingConfig.class);
+            }
         }
     }
 
@@ -387,35 +418,68 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
 
     @SuppressWarnings("unchecked")
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
+    public void testUpdateNullSegment() {
+        re2.setSegment(null);
+        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=false", re2,
+                RatingEngine.class);
+        Assert.assertNotNull(re2);
+        Assert.assertNotNull(re2.getSegment());
+
+        re2.setSegment(null);
+        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=true", re2,
+                RatingEngine.class);
+        Assert.assertNotNull(re2);
+        Assert.assertNotNull(re2.getSegment());
+
+        re3.setSegment(null);
+        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=false", re3,
+                RatingEngine.class);
+        Assert.assertNotNull(re3);
+        Assert.assertNotNull(re3.getSegment());
+
+        re3.setSegment(null);
+        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=true", re3,
+                RatingEngine.class);
+        Assert.assertNotNull(re3);
+        Assert.assertNull(re3.getSegment());
+
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test(groups = "deployment", dependsOnMethods = { "testUpdateNullSegment" })
     public void testDelete() {
         // Soft Delete Rule Based Rating Engine
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId());
         List<RatingEngineSummary> ratingEngineSummaries = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
-        Assert.assertEquals(ratingEngineSummaries.size(), 1);
+        Assert.assertEquals(ratingEngineSummaries.size(), 2);
 
         // Revert Delete Rule Based Rating Engine
         restTemplate.put(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "/revertdelete", null);
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
-        Assert.assertEquals(ratingEngineSummaries.size(), 2);
+        Assert.assertEquals(ratingEngineSummaries.size(), 3);
 
         // Soft Delete Rule Based Rating Engine & AI Rating Engine
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId());
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId());
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re3.getId());
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
         List<RatingEngine> ratingEngineList = restTemplate
                 .getForObject(getRestAPIHostPort() + "/pls/ratingengines/deleted", List.class);
         Assert.assertNotNull(ratingEngineList);
-        Assert.assertEquals(ratingEngineList.size(), 2);
+        Assert.assertEquals(ratingEngineList.size(), 3);
         RatingEngine re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId(),
                 RatingEngine.class);
         Assert.assertTrue(re.getDeleted());
         re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId(), RatingEngine.class);
         Assert.assertTrue(re.getDeleted());
+        re = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines/" + re3.getId(), RatingEngine.class);
+        Assert.assertTrue(re.getDeleted());
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re1.getId() + "?hard-delete=true");
         restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re2.getId() + "?hard-delete=true");
+        restTemplate.delete(getRestAPIHostPort() + "/pls/ratingengines/" + re3.getId() + "?hard-delete=true");
         ratingEngineSummaries = restTemplate.getForObject(getRestAPIHostPort() + "/pls/ratingengines", List.class);
         Assert.assertNotNull(ratingEngineSummaries);
         Assert.assertEquals(ratingEngineSummaries.size(), 0);
