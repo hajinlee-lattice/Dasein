@@ -1,9 +1,13 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
@@ -15,12 +19,17 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScoreAndEventParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.util.BucketedScoreSummaryUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -73,8 +82,10 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         putObjectInContext(EVENT_TABLE, eventTable);
-        putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH,
-                eventTable.getExtracts().get(0).getPath());
+        String targetExtractPath = eventTable.getExtracts().get(0).getPath();
+        // saveBucketedScoreSummary(targetExtractPath,
+        // configuration.getCustomerSpace());
+        putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
 
         putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
         String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
@@ -82,6 +93,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         putStringValueInContext(EXPORT_OUTPUT_PATH, pivotOutputPath);
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
         try {
+            // TODO: remove this in the future
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
             List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
                     getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), false, false, false);
@@ -102,6 +114,30 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             log.warn(String.format("Creating default ABCD buckets for model: %s failed. Proceeding with the workflow",
                     getStringValueFromContext(SCORING_MODEL_ID)));
         }
+    }
+
+    private void saveBucketedScoreSummary(String targetDataPath, CustomerSpace customerSpace) {
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, targetDataPath);
+        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
+        String prevModelGuid = "";
+        List<GenericRecord> pivotedRecords = new ArrayList<>();
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            String modelGuid = record.get(ScoreResultField.ModelId.displayName).toString();
+            if (bucketedScoreSummaryMap.containsKey(modelGuid)) {
+                pivotedRecords.add(record);
+            } else {
+                if (StringUtils.isNotEmpty(prevModelGuid)) {
+                    BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
+                            .generateBucketedScoreSummary(pivotedRecords);
+                    bucketedScoreSummaryMap.put(prevModelGuid, bucketedScoreSummary);
+                }
+                prevModelGuid = modelGuid;
+                pivotedRecords.clear();
+            }
+        }
+        bucketedScoreSummaryMap.entrySet().forEach(
+                e -> internalResourceRestApiProxy.createBucketedScoreSummary(e.getKey(), customerSpace, e.getValue()));
     }
 
 }
