@@ -1300,7 +1300,6 @@ angular.module('common.datacloud.explorer', [
     }
 
     var getExplorerSegments = function(enrichments) {
-        vm.clearExplorerSegments();
 
         if (vm.metadataSegment != undefined) {
             var accountRestrictions = vm.metadataSegments.accountRestrictions,
@@ -1355,15 +1354,6 @@ angular.module('common.datacloud.explorer', [
                 vm.segmentAttributeInputRange[vm.makeSegmentsRangeKey(enrichment, range, label)] = true;
             }
         }
-    }
-
-    vm.clearExplorerSegments = function() {
-        var _enrichments = vm.filter(vm.enrichments, 'SegmentChecked', true);
-
-        vm.segmentAttributeInput = {};
-        _enrichments.forEach(function(enrichment){
-            delete enrichment.SegmentChecked;
-        });
     }
 
     var textSearch = function(haystack, needle, case_insensitive) {
@@ -1513,7 +1503,6 @@ angular.module('common.datacloud.explorer', [
         }
         attribute.SegmentChecked = true;
         if (!attribute.TopBkt) {
-            console.log(attribute);
             vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
             return;
         }
@@ -1585,6 +1574,7 @@ angular.module('common.datacloud.explorer', [
         });
 
         vm.TileTableItems = {};
+
         if (vm.metadataSegments || QueryRestriction) {
             getExplorerSegments(vm.enrichments);
         }
@@ -1712,7 +1702,7 @@ angular.module('common.datacloud.explorer', [
         var label = attribute.TopBkt ? attribute.TopBkt.Lbl : attribute.Value;
 
         if (!vm.cube || !rules || rules.length == 0) {
-            return label;
+            return label ? label : '*';
         }
 
         var cube = vm.cube.data[attribute.Entity].Stats[attribute.Attribute];
@@ -1723,17 +1713,18 @@ angular.module('common.datacloud.explorer', [
             var Lbl = item.bucketRestriction.bkt.Lbl;
 
             cubeLabels.push(Lbl);
-
             return Lbl == label;
         });
 
-        var matches = cube.Bkts.List.filter(function(item) { 
-            if (cubeLabels.indexOf(item.Lbl) >= 0) {
-                cubeMatches.push(item);
-            }
-
-            return item.Lbl == label;
-        });
+        var matches = []
+        if (cube.Bkt) {
+             matches = cube.Bkts.List.filter(function(item) { 
+                if (cubeLabels.indexOf(item.Lbl) >= 0) {
+                    cubeMatches.push(item);
+                }
+                return item.Lbl == label;
+            });
+        }
         
         //console.log(attribute.Entity+'.'+attribute.Attribute, rules.length, filtered.length, matches.length, cubeMatches.length, label, cube, { 'rules':rules, 'filtered':filtered, 'matches':matches, 'cubeLabels':cubeLabels, 'cubeMatches':cubeMatches, 'attribute':attribute });
 

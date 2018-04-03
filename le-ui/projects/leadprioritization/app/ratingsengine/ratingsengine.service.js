@@ -152,6 +152,7 @@ angular.module('lp.ratingsengine')
                     label: 'Training', 
                     state: 'segment.products.prioritization.training', 
                     nextLabel: 'Next',
+                    showNextSpinner: true,
                     nextFn: function(nextState) {
                         RatingsEngineStore.nextSaveAIRatingModel(nextState);
                     } 

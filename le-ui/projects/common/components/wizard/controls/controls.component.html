@@ -22,6 +22,8 @@
             ng-click="vm.click()"
             ng-disabled="!vm.isValid() || vm.nextDisabled">
             {{vm.item.nextLabel || 'Next'}}
+            <i ng-if="vm.item.showNextSpinner && vm.nextDisabled" class="fa fa-spinner fa-pulse fa-fw"></i>
         </button>
+
     </div>
 </div>

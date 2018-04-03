@@ -120,10 +120,10 @@
                         </div>
                     </div>
                     <div class="column label" title="{{attribute.DisplayName}}">{{ attribute.DisplayName }}</div>
-                    <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div>
+                    <!-- <div class="column data loading" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt"><i class="fa fa-spinner fa-pulse fa-fw"></i></div> -->
                     <div    class="column data value" 
                             ng-class="{ 'inherit-color': vm.isSpecialAttributeValue(Value) }"
-                            ng-if="vm.section == 'segment.analysis' && attribute.TopBkt">
+                            ng-if="vm.section == 'segment.analysis'">
                         {{ Value }}
                     </div>
                     <div class="column data lift" ng-if="vm.section == 'segment.analysis' && vm.cube.data[attribute.Entity].Stats && vm.inModel()"><em ng-if="vm.displayAttributeValue(attribute, 'Lift')"><div class="{{vm.categoryClass(category)}} background-color">{{ vm.displayAttributeValue(attribute, 'Lift') }}</div></em></div>
@@ -137,7 +137,7 @@
                                 icon-image="vm.categoryIcon(category)"
                                 category-class="vm.categoryClass(category)"
                                 ng-if="vm.lookupMode && vm.hasCompanyInfo" />
-                                {{ vm.formatAttributeRecords(Value, (attribute.TopBkt.Cnt|number)) }}
+                                {{ attribute.TopBkt ? vm.formatAttributeRecords(Value, (attribute.TopBkt.Cnt|number)) : vm.formatAttributeRecords(Value, (vm.cube.data[attribute.Entity].Stats[attribute.Attribute].Cnt|number))}}
                         </strong>
                         <strong ng-if="vm.section != 'segment.analysis'" class="attribute-feedback-container">
                             <attribute-feedback-button 
