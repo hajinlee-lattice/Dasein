@@ -123,8 +123,13 @@ public class RTSBulkScoreWorkflowConfiguration extends BaseScoringWorkflowConfig
             return this;
         }
 
-        public Builder skipMatching(boolean skipMatchingStep) {
+        public Builder skipBulkMatch(boolean skipMatchingStep) {
             matchDataCloudWorkflowBuilder.skipMatchingStep(skipMatchingStep);
+            return this;
+        }
+
+        public Builder skipMatching(boolean skipMatchingStep) {
+            skipBulkMatch(skipMatchingStep);
             score.setEnableMatching(skipMatchingStep);
             return this;
         }

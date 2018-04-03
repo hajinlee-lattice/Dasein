@@ -340,6 +340,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
                     configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
             computeLift.setScoreField(InterfaceName.Event.name());
+            rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
 
             configuration.add(dedupEventTable);
             configuration.add(matchDataCloudWorkflowBuilder.build());
