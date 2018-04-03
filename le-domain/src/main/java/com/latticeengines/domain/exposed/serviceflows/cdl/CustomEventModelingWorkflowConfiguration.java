@@ -205,6 +205,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
                 computeLift.setScoreField(InterfaceName.Event.name());
             } else if (CustomEventModelingType.CDL == customEventModelingType) {
                 computeLift.setScoreField(ScoreResultField.Percentile.displayName);
+                rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
+                rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
             }
             return this;
         }
@@ -420,11 +422,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         public CustomEventModelingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
-            rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
-
-            // TODO: Remove this later
-            rtsBulkScoreWorkflowBuilder.enableDebug(Boolean.TRUE);
 
             configuration.add(importData);
             configuration.add(registerReport);
