@@ -42,7 +42,7 @@ angular.module('lp.ratingsengine.ratingslist', [
         barChartConfig: {
             'data': {
                 'tosort': true,
-                'sortBy': 'bucket_name',
+                'sortBy': '-num_leads',
                 'trim': true,
                 'top': 5,
             },
@@ -52,22 +52,20 @@ angular.module('lp.ratingsengine.ratingslist', [
                 'usecolor': true,
                 'color': '#e8e8e8',
                 'mousehover': false,
-                'type': 'decimal',
+                'type': 'integer',
                 'showstatcount': false,
                 'maxVLines': 3,
-                'showVLines': true,
+                'showVLines': false,
             },
             'vlines': {
-                'suffix': 'x'
+                'suffix': ''
             },
             'columns': [{
-                    'field': 'lift',
-                    'label': 'Lift',
-                    'type': 'string',
-                    'suffix': 'x',
-                    'chart': true
-                }
-            ]
+                'field': 'num_leads',
+                'label': 'Records',
+                'type': 'number',
+                'chart': true,
+            }]
         },
         barChartLiftConfig: {
             'data': {

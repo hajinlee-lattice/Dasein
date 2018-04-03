@@ -14,7 +14,7 @@
                     <i class="plus fa fa-check" ng-if="getStatCount(stat) == 1" ng-style="{'color': color}"></i>
                     <i class="plus attribute-use-count" ng-if="getStatCount(stat) >= 2">{{ getStatCount(stat) }}</i>
                 </div>
-                <div class="flex-item flex-lable text-ellipsis flex-item-right"><span>{{stat.Lbl}}</span></div>
+                <div class="flex-item flex-lable text-ellipsis flex-item-right"><span>{{stat.Lbl}}{{stat.bucket_name}}</span></div>
                 <div class="flex-item flex-graph-container flex-item-left">
                     <div class="bar-graph" style="width: 0%;" ng-style="{'width': getHorizontalPercentage(stat, 0), 'background-color': getBarColor(stat)}">
                     </div>
