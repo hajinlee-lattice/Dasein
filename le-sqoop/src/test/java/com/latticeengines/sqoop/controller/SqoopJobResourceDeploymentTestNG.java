@@ -279,7 +279,12 @@ public class SqoopJobResourceDeploymentTestNG extends AbstractTestNGSpringContex
     private void constructJdbcUrl() {
         jdbcUrl = dbUrl;
         if (dbDriver.toLowerCase().contains("mysql")) {
-            jdbcUrl += "?user=$$USER$$&password=$$PASSWD$$";
+            if (jdbcUrl.contains("?")) {
+                jdbcUrl += "&";
+            } else {
+                jdbcUrl += "?";
+            }
+            jdbcUrl += "user=$$USER$$&password=$$PASSWD$$";
         } else {
             if (!jdbcUrl.endsWith(";")) {
                 jdbcUrl += ";";
