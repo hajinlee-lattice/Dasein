@@ -1,11 +1,9 @@
 package com.latticeengines.domain.exposed.swlib;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,13 +46,13 @@ public enum SoftwareLibrary {
         Scoring.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
         Scoring.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
-        LeadPrioritization.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));
+        LeadPrioritization.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
         LeadPrioritization.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
 
-        CDL.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));
+        CDL.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
 
         ProspectDiscovery.depdencies.add(new Dependency(Module.workflowapi, DataCloud));
-        ProspectDiscovery.modules = new HashSet<>(Arrays.asList(Module.workflowapi, Module.dataflowapi));
+        ProspectDiscovery.modules = ImmutableSet.of(Module.workflowapi, Module.dataflowapi);
     }
 
     public static SoftwareLibrary fromName(String name) {
@@ -68,7 +66,7 @@ public enum SoftwareLibrary {
     public static List<SoftwareLibrary> getLoadingSequence(Module module, List<SoftwareLibrary> libs) {
         TopologicalTraverse traverse = new TopologicalTraverse();
         List<Dependency> init = libs.stream().map(l -> new Dependency(module, l)).collect(Collectors.toList());
-        List<Dependency> deps = traverse.sort(init, (dep) -> new Dependency(dep.module, dep.lib));
+        List<Dependency> deps = traverse.sort(init, dep -> new Dependency(dep.module, dep.lib));
         List<SoftwareLibrary> depLibs = new ArrayList<>();
         // not use stream, because not sure how it handles ordering, which is
         // important here.
