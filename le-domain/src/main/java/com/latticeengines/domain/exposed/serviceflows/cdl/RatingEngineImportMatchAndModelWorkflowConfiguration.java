@@ -313,6 +313,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
+            ratingEngineScoreWorkflowBuilder.skipStandardTransform(skipTransform);
             return this;
         }
 
