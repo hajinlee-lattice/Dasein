@@ -104,4 +104,6 @@ public final class DataCloudConstants {
     public static final String PURCHASE_METRICS_INITIATOR = "purchaseMetricsInitiator";
 
     public static final String TRANSACTION_STANDARDIZER = "transactionStandardizer";
+
+    public static final String PIPELINE_TEMPSRC_PREFIX = "Pipeline_";
 }

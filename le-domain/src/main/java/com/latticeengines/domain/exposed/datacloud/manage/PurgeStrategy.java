@@ -42,10 +42,10 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "HdfsVersions", nullable = false)
     private Integer hdfsVersions;
 
-    @Column(name = "S3Days", nullable = false)
+    @Column(name = "S3Days")
     private Integer s3Days;
 
-    @Column(name = "GlacierDays", nullable = false)
+    @Column(name = "GlacierDays")
     private Integer glacierDays;
 
     @Override
@@ -111,6 +111,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     }
 
     public enum SourceType {
-        INGESTION_SOURCE, ACCOUNT_MASTER, GENERAL_SOURCE
+        INGESTION_SOURCE, GENERAL_SOURCE, TEMP_SOURCE, ACCOUNT_MASTER, ACCOUNT_MASTER_LOOKUP
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.datacloud.core.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +42,16 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         String majorVersion = parseMajorVersion(version);
         String minorVersion = parseMinorVersion(version);
         return majorVersion + "." + (Integer.valueOf(minorVersion) + 1);
+    }
+
+    public List<String> priorVersions(String version, int num) {
+        List<String> list = new ArrayList<>();
+        String majorVersion = parseMajorVersion(version);
+        int minorVersion = Integer.valueOf(parseMinorVersion(version));
+        for (int i = 0; i < num && i < minorVersion; i++) {
+            list.add(majorVersion + "." + String.valueOf(minorVersion - i));
+        }
+        return list;
     }
 
     private String parseMajorVersion(String version) {

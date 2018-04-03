@@ -37,6 +37,7 @@ import com.latticeengines.datacloud.etl.transformation.service.TransformerServic
 import com.latticeengines.datacloud.etl.transformation.transformer.IterativeStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.TransformStep;
 import com.latticeengines.datacloud.etl.transformation.transformer.Transformer;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PipelineTransformationReportByStep;
 import com.latticeengines.domain.exposed.datacloud.manage.ProgressStatus;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
@@ -94,7 +95,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     @Value("${common.le.stack}")
     private String leStack;
 
-    private final String PIPELINE = "Pipeline_";
+    private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
     private final String VERSION = "_version_";
     private final String STEP = "_step_";
 

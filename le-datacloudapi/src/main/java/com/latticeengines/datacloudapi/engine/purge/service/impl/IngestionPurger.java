@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.core.source.impl.IngestionSource;
@@ -13,10 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 @Component("ingestionPurger")
 public class IngestionPurger extends ConfigurablePurger{
 
-    @Override
-    public boolean isToBak() {
-        return true;
-    }
+    private static Logger log = LoggerFactory.getLogger(IngestionPurger.class);
 
     @Override
     public SourceType getSourceType() {
@@ -24,21 +23,27 @@ public class IngestionPurger extends ConfigurablePurger{
     }
 
     @Override
-    public Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
+    public List<String> findAllVersions(PurgeStrategy strategy) {
+        try {
+            IngestionSource ingestion = new IngestionSource();
+            ingestion.setIngestionName(strategy.getSource());
+            return hdfsSourceEntityMgr.getVersions(ingestion);
+        } catch (Exception ex) {
+            log.error("Fail to get all versions for ingestion " + strategy.getSource(), ex);
+        }
+        return null;
+    }
+
+    protected Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
             List<String> versions) {
         List<String> hdfsPaths = new ArrayList<>();
+        List<String> hiveTables = new ArrayList<>();
         versions.forEach(version -> {
             String hdfsPath = hdfsPathBuilder.constructIngestionDir(strategy.getSource(), version).toString();
             hdfsPaths.add(hdfsPath);
         });
-        return Pair.of(hdfsPaths, null);
-    }
 
-    @Override
-    public List<String> findAllVersions(PurgeStrategy strategy) {
-        IngestionSource ingestion = new IngestionSource();
-        ingestion.setIngestionName(strategy.getSource());
-        return hdfsSourceEntityMgr.getVersions(ingestion);
+        return Pair.of(hdfsPaths, hiveTables);
     }
 
 }

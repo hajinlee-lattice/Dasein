@@ -11,49 +11,57 @@ import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
 import com.latticeengines.datacloud.core.util.HdfsPathBuilder;
+import com.latticeengines.datacloud.etl.purge.entitymgr.PurgeStrategyEntityMgr;
 import com.latticeengines.datacloud.etl.service.HiveTableService;
 import com.latticeengines.datacloudapi.engine.purge.service.SourcePurger;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
+import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 
 /**
  * The entire source will be purged
  */
-public abstract class PatternedPurger implements SourcePurger {
+@Component("permenantPurger")
+public class PermenantPurger implements SourcePurger {
 
-    private static Logger log = LoggerFactory.getLogger(PatternedPurger.class);
-
-    @Autowired
-    HdfsPathBuilder hdfsPathBuilder;
+    private static Logger log = LoggerFactory.getLogger(PermenantPurger.class);
 
     @Autowired
-    protected Configuration yarnConfiguration;
+    private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
     @Autowired
-    HiveTableService hiveTableService;
+    private HdfsPathBuilder hdfsPathBuilder;
 
     @Autowired
-    HdfsSourceEntityMgr hdfsSourceEntityMgr;
+    private Configuration yarnConfiguration;
 
-    long DAY_IN_MS = 1000 * 60 * 60 * 24;
+    @Autowired
+    private HiveTableService hiveTableService;
 
-    public abstract boolean isToBak();
+    @Autowired
+    private HdfsSourceEntityMgr hdfsSourceEntityMgr;
 
-    public abstract String getSourcePrefix();
-
-    public abstract int getRetainDays();
+    private long DAY_IN_MS = 1000 * 60 * 60 * 24;
 
     @Override
     public List<PurgeSource> findSourcesToPurge(final boolean debug) {
-        List<String> srcNames = findSourceNames(debug);
-        return constructPurgeSources(srcNames);
+        List<PurgeStrategy> strategies = purgeStrategyEntityMgr
+                .findStrategiesByType(PurgeStrategy.SourceType.TEMP_SOURCE);
+        List<PurgeSource> list = new ArrayList<>();
+        for (PurgeStrategy strategy : strategies) {
+            List<String> srcNames = findSourceNames(strategy, debug);
+            list.addAll(constructPurgeSources(strategy, srcNames));
+        }
+        return list;
     }
 
-    private List<String> findSourceNames(final boolean debug) {
+    private List<String> findSourceNames(PurgeStrategy strategy, final boolean debug) {
         String basePath = hdfsPathBuilder.constructSourceBaseDir().toString();
 
         HdfsUtils.HdfsFileFilter filter = new HdfsUtils.HdfsFileFilter() {
@@ -63,14 +71,16 @@ public abstract class PatternedPurger implements SourcePurger {
                     return false;
                 }
                 String name = file.getPath().getName().toString();
-                if (!name.startsWith(getSourcePrefix())) {
+                if (!name.startsWith(strategy.getSource())) {
                     return false;
                 }
                 if (debug) {
                     return true;
                 }
                 long lastModifiedTime = file.getModificationTime();
-                if (System.currentTimeMillis() - lastModifiedTime <= getRetainDays() * DAY_IN_MS) {
+                // Here HdfsVersion represents how many days we want to retain
+                // this temp source in hdfs
+                if (System.currentTimeMillis() - lastModifiedTime <= strategy.getHdfsVersions() * DAY_IN_MS) {
                     return false;
                 }
                 return true;
@@ -92,24 +102,26 @@ public abstract class PatternedPurger implements SourcePurger {
         return sourceNames;
     }
 
-    private List<PurgeSource> constructPurgeSources(List<String> srcNames) {
+    private List<PurgeSource> constructPurgeSources(PurgeStrategy strategy, List<String> srcNames) {
         List<PurgeSource> toPurge = new ArrayList<>();
         srcNames.forEach(srcName -> {
             String hdfsPath = hdfsPathBuilder.constructSourceDir(srcName).toString();
             List<String> hdfsPaths = Collections.singletonList(hdfsPath);
             List<String> hiveTables = null;
-            try {
-                List<String> versions = hdfsSourceEntityMgr.getVersions(new GeneralSource(srcName));
-                if (!CollectionUtils.isEmpty(versions)) {
-                    hiveTables = new ArrayList<>();
-                    for (String version : versions) {
-                        hiveTables.add(hiveTableService.tableName(srcName, version));
+            if (!srcName.startsWith(DataCloudConstants.PIPELINE_TEMPSRC_PREFIX)) {
+                try {
+                    List<String> versions = hdfsSourceEntityMgr.getVersions(new GeneralSource(srcName));
+                    if (!CollectionUtils.isEmpty(versions)) {
+                        hiveTables = new ArrayList<>();
+                        for (String version : versions) {
+                            hiveTables.add(hiveTableService.tableName(srcName, version));
+                        }
                     }
+                } catch (Exception ex) {
+                    log.warn("Fail to find versions for source " + srcName, ex);
                 }
-            } catch (Exception ex) {
-                log.warn("Fail to find versions for source " + srcName, ex);
             }
-            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, isToBak());
+            PurgeSource purgeSource = new PurgeSource(srcName, hdfsPaths, hiveTables, false);
             toPurge.add(purgeSource);
         });
         return toPurge;

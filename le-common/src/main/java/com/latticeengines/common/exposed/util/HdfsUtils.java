@@ -326,6 +326,12 @@ public class HdfsUtils {
         }
     }
 
+    public static FileStatus getFileStatus(Configuration configuration, String hdfsDir) throws IOException {
+        try (FileSystem fs = FileSystem.newInstance(configuration)) {
+            return fs.getFileStatus(new Path(hdfsDir));
+        }
+    }
+
     public static List<FileStatus> getFileStatusesForDir(Configuration configuration, String hdfsDir,
             HdfsFileFilter filter) throws IOException {
         try (FileSystem fs = FileSystem.newInstance(configuration)) {

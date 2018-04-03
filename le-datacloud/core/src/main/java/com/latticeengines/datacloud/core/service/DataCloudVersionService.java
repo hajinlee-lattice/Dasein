@@ -12,4 +12,6 @@ public interface DataCloudVersionService {
     DataCloudVersion currentApprovedVersion();
 
     String nextMinorVersion(String version);
+
+    List<String> priorVersions(String version, int num);
 }
