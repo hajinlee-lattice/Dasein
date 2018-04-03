@@ -32,7 +32,8 @@ public interface ModelJsonTypeHandler {
 
     DataComposition getDataScienceDataComposition(String hdfsScoreArtifactBaseDir, String localPathToPersist);
 
-    ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord);
+    ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, Map<String, Object> transformedRecord,
+            boolean isCalledViaInternalResource);
 
     DebugScoreResponse generateDebugScoreResponse(ScoringArtifacts scoringArtifacts,
             Map<String, Object> transformedRecord, Map<String, Object> matchedRecord, List<String> matchLogs,

@@ -206,12 +206,18 @@ public class DefaultModelJsonTypeHandler implements ModelJsonTypeHandler {
 
     @Override
     public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
-            Map<String, Object> transformedRecord) {
-        ScoreResponse scoreResponse = new ScoreResponse();
+            Map<String, Object> transformedRecord, boolean isCalledViaInternalResource) {
+        ScoreResponse scoreResponse = isCalledViaInternalResource ? new DebugScoreResponse() : new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         scoreResponse.setScore(scoreEvaluation.getPercentile());
         scoreResponse
                 .setBucket(scoreEvaluation.getBucketName() == null ? null : scoreEvaluation.getBucketName().toValue());
+
+        // PLS-7570 - we need to make sure to always return probability score if
+        // call was made via internal resource
+        if (isCalledViaInternalResource) {
+            ((DebugScoreResponse) scoreResponse).setProbability(scoreEvaluation.getProbabilityOrValue());
+        }
         return scoreResponse;
     }
 

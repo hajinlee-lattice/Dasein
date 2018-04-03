@@ -102,7 +102,7 @@ public class InternalScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
     }
 
     @RequestMapping(value = "/records", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -122,7 +122,7 @@ public class InternalScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scorePercentileRecords(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
     }
 
     @RequestMapping(value = "/records/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -142,7 +142,7 @@ public class InternalScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreRecordsDebug(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
     }
 
     @RequestMapping(value = "/record/debug", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -162,7 +162,7 @@ public class InternalScoreResource extends BaseScoring {
         String requestId = RequestLogInterceptor.getRequestIdentifierId(request);
         boolean forceSkipMatching = !enableMatching;
         return scoreProbabilityRecord(request, scoreRequest, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, true);
     }
 
     @RequestMapping(value = "/record/apiconsole/debug", method = RequestMethod.POST, headers = "Accept=application/json")

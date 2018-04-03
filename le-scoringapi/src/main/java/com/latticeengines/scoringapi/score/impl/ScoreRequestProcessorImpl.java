@@ -90,59 +90,17 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         requestInfo.put("Rule", Strings.nullToEmpty(request.getRule()));
         requestInfo.put("Source", Strings.nullToEmpty(request.getSource()));
 
-        boolean shouldSkipMatching = false;
-
         SingleMatchingContext singleMatchingConfig = SingleMatchingContext.instance();
 
         boolean shouldSkipScoring = false;
 
-        if (!additionalScoreConfig.isCalledViaApiConsole()
-                || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
-            if (StringUtils.isBlank(request.getModelId())) {
-                throw new ScoringApiException(LedpCode.LEDP_31101);
-            }
+        boolean shouldHandleModel = !additionalScoreConfig.isCalledViaApiConsole()
+                || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId());
 
-            singleMatchingConfig.setScoringArtifacts( //
-                    modelRetriever.getModelArtifacts(additionalScoreConfig.getSpace(), request.getModelId()));
+        boolean shouldSkipMatching = !shouldHandleModel;
 
-            requestInfo.put("ModelId", singleMatchingConfig.getScoringArtifacts().getModelSummary().getId());
-            requestInfo.put("ModelName", singleMatchingConfig.getScoringArtifacts().getModelSummary().getDisplayName());
-
-            if (singleMatchingConfig.getScoringArtifacts().getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
-                throw new ScoringApiException(LedpCode.LEDP_31114,
-                        new String[] { singleMatchingConfig.getScoringArtifacts().getModelSummary().getId() });
-            }
-            requestInfo.put("ModelType", (singleMatchingConfig.getScoringArtifacts().getModelType() == null ? ""
-                    : singleMatchingConfig.getScoringArtifacts().getModelType().name()));
-            shouldSkipMatching = shouldSkipMatching(singleMatchingConfig.getScoringArtifacts(),
-                    additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.isForceSkipMatching());
-
-            singleMatchingConfig.setFieldSchemas(singleMatchingConfig.getScoringArtifacts().getFieldSchemas());
-
-            split("retrieveModelArtifacts");
-
-            singleMatchingConfig.setModelJsonTypeHandler( //
-                    getModelJsonTypeHandler(singleMatchingConfig.getScoringArtifacts().getModelJsonType()));
-
-            if (!shouldSkipMatching) {
-                ScoringApiException missingEssentialFieldsException = checkForMissingFields(
-                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getFieldSchemas(),
-                        request.getRecord(), singleMatchingConfig.getModelJsonTypeHandler(),
-                        additionalScoreConfig.getRequestId());
-                if (missingEssentialFieldsException != null) {
-                    if (!additionalScoreConfig.isPerformFetchOnlyForMatching()
-                            || StringStandardizationUtils.objectIsNullOrEmptyString(
-                                    request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
-                        throw missingEssentialFieldsException;
-                    }
-                }
-            }
-        } else {
-            shouldSkipScoring = true;
-            singleMatchingConfig.setFieldSchemas(new HashMap<>());
-            singleMatchingConfig
-                    .setModelJsonTypeHandler(getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL));
-        }
+        shouldSkipMatching = performModelHandling(request, additionalScoreConfig, singleMatchingConfig,
+                shouldHandleModel, shouldSkipMatching);
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
                 singleMatchingConfig.getFieldSchemas(), request.getRecord(),
@@ -152,98 +110,23 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         requestInfo.put("RecordId", recordId);
         split("parseRecord");
 
-        if (shouldSkipMatching) {
-            if (request.isPerformEnrichment()) {
-                // pass null model summary for performing matching for
-                // enrichment only
-                Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
-                        additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
-                        parsedRecordAndInterpretedFields.getKey(), true);
-                Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
-                addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
-
-                singleMatchingConfig //
-                        .setReadyToTransformRecord(matchedRecord)
-                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
-
-            } else {
-                Map<String, Object> formattedRecord = parsedRecordAndInterpretedFields.getKey();
-                addMissingFields(singleMatchingConfig.getFieldSchemas(), formattedRecord);
-                singleMatchingConfig //
-                        .setReadyToTransformRecord(formattedRecord);
-            }
-        } else {
-            if (!shouldSkipScoring) {
-                singleMatchingConfig.setModelSummary(singleMatchingConfig.getScoringArtifacts().getModelSummary());
-            }
-
-            Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
-                    additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
-                    parsedRecordAndInterpretedFields.getKey(), request.isPerformEnrichment());
-            Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
-            addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
-
-            singleMatchingConfig //
-                    .setReadyToTransformRecord(matchedRecord);
-
-            if (request.isPerformEnrichment()) {
-                singleMatchingConfig //
-                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
-            }
-        }
+        performMatch(request, additionalScoreConfig, shouldSkipMatching, singleMatchingConfig, shouldSkipScoring,
+                parsedRecordAndInterpretedFields);
 
         split("matchRecord");
 
-        if (!shouldSkipScoring) {
-            singleMatchingConfig.setTransformedRecord(transform(singleMatchingConfig.getScoringArtifacts(),
-                    singleMatchingConfig.getReadyToTransformRecord()));
-        }
+        performTransform(singleMatchingConfig, shouldSkipScoring);
 
         split("transformRecord");
 
-        ScoreResponse scoreResponse = null;
-
-        if (shouldSkipScoring) {
-            if (additionalScoreConfig.isDebug()) {
-                DebugScoreResponse nonScoreResponse = new DebugScoreResponse();
-                nonScoreResponse.setMatchLogs(singleMatchingConfig.getMatchLogs());
-                nonScoreResponse.setMatchErrorMessages(singleMatchingConfig.getMatchErrorLogs());
-                scoreResponse = nonScoreResponse;
-            } else {
-                scoreResponse = new ScoreResponse();
-            }
-        } else {
-            if (additionalScoreConfig.isDebug()) {
-                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateDebugScoreResponse(
-                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord(),
-                        singleMatchingConfig.getReadyToTransformRecord(), singleMatchingConfig.getMatchLogs(),
-                        singleMatchingConfig.getMatchErrorLogs());
-            } else {
-                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateScoreResponse(
-                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord());
-            }
-        }
-
-        scoreResponse.setEnrichmentAttributeValues(singleMatchingConfig.getEnrichmentAttributes());
-        scoreResponse.setId(recordId);
-        scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+        ScoreResponse scoreResponse = performScoring(additionalScoreConfig, singleMatchingConfig, shouldSkipScoring,
+                recordId);
 
         split("scoreRecord");
-        if (shouldPublish) {
-            scoreHistoryEntityMgr.publish(additionalScoreConfig.getSpace().getTenantId(), request, scoreResponse);
-            split("publishScoreHistory");
-        }
+
+        performaPublish(request, additionalScoreConfig, scoreResponse);
 
         return scoreResponse;
-    }
-
-    private ModelJsonTypeHandler getModelJsonTypeHandler(String modelJsonType) {
-        for (ModelJsonTypeHandler handler : modelJsonTypeHandlers) {
-            if (handler.accept(modelJsonType)) {
-                return handler;
-            }
-        }
-        throw new LedpException(LedpCode.LEDP_31107, new String[] { modelJsonType });
     }
 
     @Override
@@ -555,7 +438,8 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                                 null, bulkMatchingConfig.getUnorderedMatchLogMap().get(tuple),
                                 bulkMatchingConfig.getUnorderedMatchErrorLogMap().get(tuple));
                     } else {
-                        resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+                        resp = ModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord,
+                                additionalScoreConfig.isCalledViaInternalResource());
                     }
                 } else {
                     if (log.isInfoEnabled()) {
@@ -589,7 +473,7 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             if (exception == null) {
                 score.setScore(resp.getScore());
                 score.setBucket(resp.getBucket());
-                if (additionalScoreConfig.isDebug()) {
+                if (additionalScoreConfig.isDebug() || additionalScoreConfig.isCalledViaInternalResource()) {
                     score.setProbability(((DebugScoreResponse) resp).getProbability());
                 }
             } else {
@@ -917,5 +801,162 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
             shouldSkipMatching = shouldSkipMatching || isPmmlModel;
         }
         return shouldSkipMatching;
+    }
+
+    private boolean performModelHandling(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            SingleMatchingContext singleMatchingConfig, boolean shouldHandleModel, boolean shouldSkipMatching) {
+        if (shouldHandleModel) {
+            shouldSkipMatching = performModelArtifactRetrieval(request, additionalScoreConfig, singleMatchingConfig);
+
+            split("retrieveModelArtifacts");
+
+            singleMatchingConfig.setModelJsonTypeHandler( //
+                    getModelJsonTypeHandler(singleMatchingConfig.getScoringArtifacts().getModelJsonType()));
+
+            if (!shouldSkipMatching) {
+                ScoringApiException missingEssentialFieldsException = checkForMissingFields(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getFieldSchemas(),
+                        request.getRecord(), singleMatchingConfig.getModelJsonTypeHandler(),
+                        additionalScoreConfig.getRequestId());
+                if (missingEssentialFieldsException != null) {
+                    if (!additionalScoreConfig.isPerformFetchOnlyForMatching()
+                            || StringStandardizationUtils.objectIsNullOrEmptyString(
+                                    request.getRecord().get(FieldInterpretation.LatticeAccountId.toString()))) {
+                        throw missingEssentialFieldsException;
+                    }
+                }
+            }
+        } else {
+            singleMatchingConfig.setFieldSchemas(new HashMap<>());
+            singleMatchingConfig
+                    .setModelJsonTypeHandler(getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL));
+        }
+        return shouldSkipMatching;
+    }
+
+    private boolean performModelArtifactRetrieval(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            SingleMatchingContext singleMatchingConfig) {
+        boolean shouldSkipMatching;
+        if (StringUtils.isBlank(request.getModelId())) {
+            throw new ScoringApiException(LedpCode.LEDP_31101);
+        }
+
+        singleMatchingConfig.setScoringArtifacts( //
+                modelRetriever.getModelArtifacts(additionalScoreConfig.getSpace(), request.getModelId()));
+
+        requestInfo.put("ModelId", singleMatchingConfig.getScoringArtifacts().getModelSummary().getId());
+        requestInfo.put("ModelName", singleMatchingConfig.getScoringArtifacts().getModelSummary().getDisplayName());
+
+        if (singleMatchingConfig.getScoringArtifacts().getModelSummary().getStatus() != ModelSummaryStatus.ACTIVE) {
+            throw new ScoringApiException(LedpCode.LEDP_31114,
+                    new String[] { singleMatchingConfig.getScoringArtifacts().getModelSummary().getId() });
+        }
+        requestInfo.put("ModelType", (singleMatchingConfig.getScoringArtifacts().getModelType() == null ? ""
+                : singleMatchingConfig.getScoringArtifacts().getModelType().name()));
+        shouldSkipMatching = shouldSkipMatching(singleMatchingConfig.getScoringArtifacts(),
+                additionalScoreConfig.isPerformFetchOnlyForMatching(), additionalScoreConfig.isForceSkipMatching());
+
+        singleMatchingConfig.setFieldSchemas(singleMatchingConfig.getScoringArtifacts().getFieldSchemas());
+        return shouldSkipMatching;
+    }
+
+    private void performaPublish(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            ScoreResponse scoreResponse) {
+        if (shouldPublish) {
+            scoreHistoryEntityMgr.publish(additionalScoreConfig.getSpace().getTenantId(), request, scoreResponse);
+            split("publishScoreHistory");
+        }
+    }
+
+    private void performTransform(SingleMatchingContext singleMatchingConfig, boolean shouldSkipScoring) {
+        if (!shouldSkipScoring) {
+            singleMatchingConfig.setTransformedRecord(transform(singleMatchingConfig.getScoringArtifacts(),
+                    singleMatchingConfig.getReadyToTransformRecord()));
+        }
+    }
+
+    private void performMatch(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
+            boolean shouldSkipMatching, SingleMatchingContext singleMatchingConfig, boolean shouldSkipScoring,
+            AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields) {
+        if (shouldSkipMatching) {
+            if (request.isPerformEnrichment()) {
+                // pass null model summary for performing matching for
+                // enrichment only
+                Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
+                        additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
+                        parsedRecordAndInterpretedFields.getKey(), true);
+                Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
+                addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
+
+                singleMatchingConfig //
+                        .setReadyToTransformRecord(matchedRecord)
+                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
+
+            } else {
+                Map<String, Object> formattedRecord = parsedRecordAndInterpretedFields.getKey();
+                addMissingFields(singleMatchingConfig.getFieldSchemas(), formattedRecord);
+                singleMatchingConfig //
+                        .setReadyToTransformRecord(formattedRecord);
+            }
+        } else {
+            if (!shouldSkipScoring) {
+                singleMatchingConfig.setModelSummary(singleMatchingConfig.getScoringArtifacts().getModelSummary());
+            }
+
+            Map<String, Map<String, Object>> matchedRecordEnrichmentMap = getMatcher(false).matchAndJoin(
+                    additionalScoreConfig, singleMatchingConfig, parsedRecordAndInterpretedFields.getValue(),
+                    parsedRecordAndInterpretedFields.getKey(), request.isPerformEnrichment());
+            Map<String, Object> matchedRecord = extractMap(matchedRecordEnrichmentMap, Matcher.RESULT);
+            addMissingFields(singleMatchingConfig.getFieldSchemas(), matchedRecord);
+
+            singleMatchingConfig //
+                    .setReadyToTransformRecord(matchedRecord);
+
+            if (request.isPerformEnrichment()) {
+                singleMatchingConfig //
+                        .setEnrichmentAttributes(extractMap(matchedRecordEnrichmentMap, Matcher.ENRICHMENT));
+            }
+        }
+    }
+
+    private ScoreResponse performScoring(AdditionalScoreConfig additionalScoreConfig,
+            SingleMatchingContext singleMatchingConfig, boolean shouldSkipScoring, String recordId) {
+        ScoreResponse scoreResponse = null;
+
+        if (shouldSkipScoring) {
+            if (additionalScoreConfig.isDebug()) {
+                DebugScoreResponse nonScoreResponse = new DebugScoreResponse();
+                nonScoreResponse.setMatchLogs(singleMatchingConfig.getMatchLogs());
+                nonScoreResponse.setMatchErrorMessages(singleMatchingConfig.getMatchErrorLogs());
+                scoreResponse = nonScoreResponse;
+            } else {
+                scoreResponse = new ScoreResponse();
+            }
+        } else {
+            if (additionalScoreConfig.isDebug()) {
+                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateDebugScoreResponse(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord(),
+                        singleMatchingConfig.getReadyToTransformRecord(), singleMatchingConfig.getMatchLogs(),
+                        singleMatchingConfig.getMatchErrorLogs());
+            } else {
+                scoreResponse = singleMatchingConfig.getModelJsonTypeHandler().generateScoreResponse(
+                        singleMatchingConfig.getScoringArtifacts(), singleMatchingConfig.getTransformedRecord(),
+                        additionalScoreConfig.isCalledViaInternalResource());
+            }
+        }
+
+        scoreResponse.setEnrichmentAttributeValues(singleMatchingConfig.getEnrichmentAttributes());
+        scoreResponse.setId(recordId);
+        scoreResponse.setTimestamp(timestampFormatter.print(DateTime.now(DateTimeZone.UTC)));
+        return scoreResponse;
+    }
+
+    private ModelJsonTypeHandler getModelJsonTypeHandler(String modelJsonType) {
+        for (ModelJsonTypeHandler handler : modelJsonTypeHandlers) {
+            if (handler.accept(modelJsonType)) {
+                return handler;
+            }
+        }
+        throw new LedpException(LedpCode.LEDP_31107, new String[] { modelJsonType });
     }
 }

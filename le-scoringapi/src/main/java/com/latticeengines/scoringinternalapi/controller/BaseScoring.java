@@ -125,50 +125,53 @@ public abstract class BaseScoring extends CommonBase {
 
     protected ScoreResponse scorePercentileRecord(HttpServletRequest request, ScoreRequest scoreRequest,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
-            String requestId, boolean forceSkipMatching) {
+            String requestId, boolean forceSkipMatching, boolean isCalledViaInternalResource) {
         return scoreRecord(request, scoreRequest, false, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, isCalledViaInternalResource);
     }
 
     protected List<RecordScoreResponse> scorePercentileRecords(HttpServletRequest request,
             BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes,
-            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching) {
+            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching,
+            boolean isCalledViaInternalResource) {
         return scoreRecords(request, scoreRequest, false, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, isCalledViaInternalResource);
     }
 
     protected List<RecordScoreResponse> scoreRecordsDebug(HttpServletRequest request,
             BulkRecordScoreRequest scoreRequest, CustomerSpace customerSpace, boolean enrichInternalAttributes,
-            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching) {
+            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching,
+            boolean isCalledViaInternalResource) {
         return scoreRecords(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, isCalledViaInternalResource);
     }
 
     protected DebugScoreResponse scoreProbabilityRecord(HttpServletRequest request, ScoreRequest scoreRequest,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
-            String requestId, boolean forceSkipMatching) {
+            String requestId, boolean forceSkipMatching, boolean isCalledViaInternalResource) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, forceSkipMatching, isCalledViaInternalResource);
     }
 
     protected DebugScoreResponse scoreAndEnrichRecordApiConsole(HttpServletRequest request, ScoreRequest scoreRequest,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, String requestId, boolean enforceFuzzyMatch,
             boolean skipDnBCache, boolean forceSkipMatching) {
         return (DebugScoreResponse) scoreRecord(request, scoreRequest, true, customerSpace, enrichInternalAttributes,
-                false, requestId, true, enforceFuzzyMatch, skipDnBCache, forceSkipMatching);
+                false, requestId, true, enforceFuzzyMatch, skipDnBCache, forceSkipMatching, true);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
-            String requestId, boolean forceSkipMatching) {
+            String requestId, boolean forceSkipMatching, boolean isCalledViaInternalResource) {
         return scoreRecord(request, scoreRequest, isDebug, customerSpace, enrichInternalAttributes,
-                performFetchOnlyForMatching, requestId, false, false, false, forceSkipMatching);
+                performFetchOnlyForMatching, requestId, false, false, false, forceSkipMatching,
+                isCalledViaInternalResource);
     }
 
     private ScoreResponse scoreRecord(HttpServletRequest request, ScoreRequest scoreRequest, boolean isDebug,
             CustomerSpace customerSpace, boolean enrichInternalAttributes, boolean performFetchOnlyForMatching,
             String requestId, boolean isCalledViaApiConsole, boolean enforceFuzzyMatch, boolean skipDnBCache,
-            boolean forceSkipMatching) {
+            boolean forceSkipMatching, boolean isCalledViaInternalResource) {
         requestInfo.put(RequestInfo.TENANT, customerSpace.toString());
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
@@ -185,7 +188,8 @@ public abstract class BaseScoring extends CommonBase {
                     .setShouldReturnAllEnrichment(isCalledViaApiConsole) //
                     .setEnforceFuzzyMatch(enforceFuzzyMatch) //
                     .setSkipDnBCache(skipDnBCache) //
-                    .setForceSkipMatching(forceSkipMatching);
+                    .setForceSkipMatching(forceSkipMatching) //
+                    .setCalledViaInternalResource(isCalledViaInternalResource);
 
             ScoreResponse response = scoreRequestProcessor.process(scoreRequest, additionalScoreConfig);
             if (warnings.hasWarnings(requestId)) {
@@ -263,7 +267,8 @@ public abstract class BaseScoring extends CommonBase {
 
     private List<RecordScoreResponse> scoreRecords(HttpServletRequest request, BulkRecordScoreRequest scoreRequests,
             boolean isDebug, CustomerSpace customerSpace, boolean enrichInternalAttributes,
-            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching) {
+            boolean performFetchOnlyForMatching, String requestId, boolean forceSkipMatching,
+            boolean isCalledViaInternalResource) {
         if (scoreRequests.getRecords().size() > MAX_ALLOWED_RECORDS) {
             throw new LedpException(LedpCode.LEDP_20027, //
                     new String[] { //
@@ -286,7 +291,8 @@ public abstract class BaseScoring extends CommonBase {
                     .setPerformFetchOnlyForMatching(performFetchOnlyForMatching) //
                     .setRequestId(requestId) //
                     .setHomogeneous(scoreRequests.isHomogeneous()) //
-                    .setForceSkipMatching(forceSkipMatching);
+                    .setForceSkipMatching(forceSkipMatching) //
+                    .setCalledViaInternalResource(isCalledViaInternalResource);
 
             response = scoreRequestProcessor.process(scoreRequests, additionalScoreConfig);
 

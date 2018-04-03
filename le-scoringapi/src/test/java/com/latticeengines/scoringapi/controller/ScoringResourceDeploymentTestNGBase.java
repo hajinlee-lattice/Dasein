@@ -190,6 +190,11 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
                 for (int j = 0; j < RECORD_MODEL_CARDINALITY; j++) {
                     Assert.assertEquals(result.getScores().get(j).getScore().intValue(), EXPECTED_SCORE_99);
+                    if (isInternalScoring) {
+                        Assert.assertNotNull(result.getScores().get(j).getProbability());
+                    } else {
+                        Assert.assertNull(result.getScores().get(j).getProbability());
+                    }
                     String modelId = result.getScores().get(j).getModelId();
                     Assert.assertTrue(modelsSubset.contains(modelId));
                     modelsSubset.remove(modelId);

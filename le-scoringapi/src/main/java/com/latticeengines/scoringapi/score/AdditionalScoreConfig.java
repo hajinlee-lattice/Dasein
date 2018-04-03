@@ -14,6 +14,7 @@ public class AdditionalScoreConfig {
     private boolean isHomogeneous;
     private boolean shouldReturnAllEnrichment;
     private boolean forceSkipMatching;
+    private boolean isCalledViaInternalResource;
 
     public static AdditionalScoreConfig instance() {
         return new AdditionalScoreConfig();
@@ -115,6 +116,15 @@ public class AdditionalScoreConfig {
 
     public AdditionalScoreConfig setForceSkipMatching(boolean forceSkipMatching) {
         this.forceSkipMatching = forceSkipMatching;
+        return this;
+    }
+
+    public boolean isCalledViaInternalResource() {
+        return isCalledViaInternalResource;
+    }
+
+    public AdditionalScoreConfig setCalledViaInternalResource(boolean isCalledViaInternalResource) {
+        this.isCalledViaInternalResource = isCalledViaInternalResource;
         return this;
     }
 

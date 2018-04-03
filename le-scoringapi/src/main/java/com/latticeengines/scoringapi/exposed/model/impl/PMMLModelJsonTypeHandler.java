@@ -69,7 +69,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
 
     @Override
     public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
-            Map<String, Object> transformedRecord) {
+            Map<String, Object> transformedRecord, boolean isCalledViaInternalResource) {
         ScoreResponse scoreResponse = new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         scoreResponse.setClassification(scoreEvaluation.getClassification());

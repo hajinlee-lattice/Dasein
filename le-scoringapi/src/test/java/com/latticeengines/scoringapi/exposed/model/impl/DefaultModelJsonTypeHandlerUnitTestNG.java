@@ -1,6 +1,6 @@
 package com.latticeengines.scoringapi.exposed.model.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
 import java.util.ArrayList;
@@ -9,9 +9,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,7 +40,10 @@ public class DefaultModelJsonTypeHandlerUnitTestNG {
         ScoringArtifacts scoringArtifacts = new ScoringArtifacts(null, null, null, null, null, null, null, null, null,
                 generateDefaultBucketMetadataList());
         Map<String, Object> transformedRecord = new HashMap<String, Object>();
-        ScoreResponse sr = defaultModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord);
+        ScoreResponse sr = defaultModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord,
+                false);
+        Assert.assertEquals(sr.getBucket(), BucketName.A_PLUS.toValue());
+        sr = defaultModelJsonTypeHandler.generateScoreResponse(scoringArtifacts, transformedRecord, true);
         Assert.assertEquals(sr.getBucket(), BucketName.A_PLUS.toValue());
     }
 
