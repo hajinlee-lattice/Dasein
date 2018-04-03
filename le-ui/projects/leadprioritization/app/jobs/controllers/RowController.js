@@ -36,18 +36,14 @@ angular
             $scope.isPMML = job.modelType === 'PmmlModel';
 
             if ($scope.isRatingEngine) {
-
-                RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){
-                    
+                RatingsEngineStore.getRatingModel(job.inputs.RATING_ENGINE_ID, job.inputs.RATING_MODEL_ID).then(function(model){                    
                     var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
                         modelingJobId = model.AI.modelingJobId;
 
                     $scope.job.modelId = modelId;
-
-                    // console.log(modelId, $scope.job.modelId, modelingJobId);
-
                 });
             } else {
+                console.log(job);
                 $scope.job.modelId = job.source;
             }
 

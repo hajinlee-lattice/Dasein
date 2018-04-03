@@ -5,7 +5,7 @@ angular.module('lp.ratingsengine.ratingslist', [
 ])
 .controller('RatingsEngineListController', function (
     $scope, $timeout, $location, $element, $state, $stateParams, $filter, $interval, $rootScope,
-    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory
+    RatingsEngineStore, RatingsEngineService, DeleteRatingModal, NavUtility, StateHistory, JobsStore
 ) {
     var vm = this;
 
@@ -38,6 +38,66 @@ angular.module('lp.ratingsengine.ratingslist', [
                     { label: "Inactive", action: { status: 'INACTIVE' }, total: vm.inactiveCount }
                 ]
             }
+        },
+        barChartConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'decimal',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': true,
+            },
+            'vlines': {
+                'suffix': 'x'
+            },
+            'columns': [{
+                    'field': 'lift',
+                    'label': 'Lift',
+                    'type': 'string',
+                    'suffix': 'x',
+                    'chart': true
+                }
+            ]
+        },
+        barChartLiftConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'decimal',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': true,
+            },
+            'vlines': {
+                'suffix': 'x'
+            },
+            'columns': [{
+                    'field': 'lift',
+                    'label': 'Lift',
+                    'type': 'string',
+                    'suffix': 'x',
+                    'chart': true
+                }
+            ]
         }
     });
 
@@ -48,6 +108,7 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.init = function($q, $filter) {
 
         var arr = vm.current.ratings;
+        
         // console.log(arr.slice(Math.max(arr.length - 10, 1)));
 
         RatingsEngineStore.clear();
@@ -66,156 +127,59 @@ angular.module('lp.ratingsengine.ratingslist', [
             vm.header.filter.unfiltered = vm.current.ratings;
 
             angular.forEach(vm.current.ratings, function(rating, key) {
-                if (rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
+                if(rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
                     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
                 } else {
                     rating.tileClass = rating.type;
                 }
+
+                if(rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
+                    rating.chartConfig = vm.barChartLiftConfig;
+                } else {
+                    rating.chartConfig = vm.barChartConfig;
+                }        
+
+                var newBucketMetadata = [];
+                if(rating.bucketMetadata) {
+                    angular.forEach(rating.bucketMetadata, function(rating, key) {
+                        rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                        if(rating.lift !== '0'){
+                            newBucketMetadata.push(rating);
+                        }
+                    });
+                } else {
+                    newBucketMetadata = [{
+                        "bucket_name": "B",
+                        "num_leads": 10,
+                        "lift": "1.3"
+                    },
+                    {
+                        "bucket_name": "A",
+                        "num_leads": 11,
+                        "lift": "0.3"
+                    },
+                    {
+                        "bucket_name": "F",
+                        "num_leads": 14,
+                        "lift": "0.5"
+                    },
+                    {
+                        "bucket_name": "C",
+                        "num_leads": 16,
+                        "lift": "0.8"
+                    },
+                    {
+                        "bucket_name": "D",
+                        "num_leads": 18,
+                        "lift": "0.9"
+                    }];
+                }
+
+                rating.newBucketMetadata = newBucketMetadata;
+
             });
         });
 
-    }
-
-    function getBarChartConfig() {
-        if ($scope.barChartConfig === undefined) {
-
-            $scope.barChartConfig = {
-                'data': {
-                    'tosort': true,
-                    'sortBy': '-Cnt',
-                    'trim': true,
-                    'top': 5,
-                },
-                'chart': {
-                    'header':'Value',
-                    'emptymsg': '',
-                    'usecolor': true,
-                    'color': '#e8e8e8',
-                    'mousehover': false,
-                    'type': 'integer',
-                    'showstatcount': false,
-                    'maxVLines': 3,
-                    'showVLines': false,
-                },
-                'vlines': {
-                    'suffix': ''
-                },
-                'columns': [{
-                    'field': 'Cnt',
-                    'label': 'Records',
-                    'type': 'number',
-                    'chart': true,
-                }]
-            };
-        }
-        return $scope.barChartConfig;
-    }
-
-    function getBarChartLiftConfig() {
-        if ($scope.barChartLiftConfig === undefined) {
-            $scope.barChartLiftConfig = {
-                'data': {
-                    'tosort': true,
-                    'sortBy': 'Lbl',
-                    'trim': true,
-                    'top': 5,
-                },
-                'chart': {
-                    'header':'Value',
-                    'emptymsg': '',
-                    'usecolor': true,
-                    'color': '#e8e8e8',
-                    'mousehover': false,
-                    'type': 'decimal',
-                    'showstatcount': false,
-                    'maxVLines': 3,
-                    'showVLines': true,
-                },
-                'vlines': {
-                    'suffix': 'x'
-                },
-                'columns': [{
-                        'field': 'Lift',
-                        'label': 'Lift',
-                        'type': 'string',
-                        'suffix': 'x',
-                        'chart': true
-                    }
-                ]
-            };
-        }
-        return $scope.barChartLiftConfig;
-    }
-
-    vm.getChartConfig = function (rating) {        
-        if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
-            return getBarChartLiftConfig();
-        } else {
-            return getBarChartConfig();    
-        }        
-    }
-
-    function getTestData() {
-        if(!$scope.test){
-            $scope.test = [{
-                "Lbl": "B",
-                "Cnt": 10,
-                "Lift": "1.3",
-                "Id": 2,
-                "Cmp": "EQUAL",
-                "Vals": [
-                    "B"
-                ]
-            },
-            {
-                "Lbl": "A",
-                "Cnt": 11,
-                "Lift": "0.3",
-                "Id": 1,
-                "Cmp": "EQUAL",
-                "Vals": [
-                    "A"
-                ]
-            },
-            {
-                "Lbl": "F",
-                "Cnt": 14,
-                "Lift": "0.5",
-                "Id": 3,
-                "Cmp": "EQUAL",
-                "Vals": [
-                    "F"
-                ]
-            },
-            {
-                "Lbl": "C",
-                "Cnt": 16,
-                "Lift": "0.8",
-                "Id": 3,
-                "Cmp": "EQUAL",
-                "Vals": [
-                    "C"
-                ]
-            },
-            {
-                "Lbl": "D",
-                "Cnt": 18,
-                "Lift": "0.9",
-                "Id": 3,
-                "Cmp": "EQUAL",
-                "Vals": [
-                    "D"
-                ]
-            }
-        ];
-        }
-        return $scope.test;
-    }
-
-    vm.getData = function () {
-        var data = getTestData();
-        // console.log('Data ',data);
-        return data;
     }
 
     vm.checkState = function(type) {
@@ -335,6 +299,8 @@ angular.module('lp.ratingsengine.ratingslist', [
 
     vm.editStatusClick = function($event, rating, disable){
         $event.stopPropagation();
+
+        console.log(rating, disable);
         
         if (disable && !vm.isAIRating(rating)) {
             return false;
@@ -345,6 +311,9 @@ angular.module('lp.ratingsengine.ratingslist', [
                 id: rating.id,
                 status: newStatus,
             }
+
+        console.log(updatedRating);
+
         updateRating(rating, updatedRating);
         RatingsEngineStore.setRatings(vm.current.ratings, true);
 

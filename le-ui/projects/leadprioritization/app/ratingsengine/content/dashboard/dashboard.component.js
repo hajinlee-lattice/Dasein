@@ -11,7 +11,65 @@ angular.module('lp.ratingsengine.dashboard', [
     angular.extend(vm, {
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
-        products: Products
+        products: Products,
+        barChartConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': '-num_leads',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'integer',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': false,
+            },
+            'vlines': {
+                'suffix': ''
+            },
+            'columns': [{
+                'field': 'num_leads',
+                'label': 'Records',
+                'type': 'number',
+                'chart': true,
+            }]
+        },
+        barChartLiftConfig: {
+            'data': {
+                'tosort': true,
+                'sortBy': 'bucket_name',
+                'trim': true,
+                'top': 5,
+            },
+            'chart': {
+                'header':'Value',
+                'emptymsg': '',
+                'usecolor': true,
+                'color': '#e8e8e8',
+                'mousehover': false,
+                'type': 'decimal',
+                'showstatcount': false,
+                'maxVLines': 3,
+                'showVLines': true,
+            },
+            'vlines': {
+                'suffix': 'x'
+            },
+            'columns': [{
+                    'field': 'lift',
+                    'label': 'Lift',
+                    'type': 'string',
+                    'suffix': 'x',
+                    'chart': true
+                }
+            ]
+        }
     });
 
     vm.initModalWindow = function() {
@@ -107,6 +165,51 @@ angular.module('lp.ratingsengine.dashboard', [
         var model = vm.ratingEngine.activeModel;
 
         // console.log(vm.ratingEngine);
+        // console.log(vm.dashboard);
+
+        if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
+            vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
+        } else {
+            vm.ratingEngine.chartConfig = vm.barChartConfig;
+        }        
+
+        var newBucketMetadata = [];
+        if(vm.dashboard.summary.bucketMetadata) {
+            angular.forEach(vm.dashboard.summary.bucketMetadata, function(rating, key) {
+                rating.lift = (Math.round( rating.lift * 10) / 10).toString();
+                if(rating.lift !== '0'){
+                    newBucketMetadata.push(rating);
+                }
+            });
+        } else {
+            newBucketMetadata = [{
+                "bucket_name": "B",
+                "num_leads": 10,
+                "lift": "1.3"
+            },
+            {
+                "bucket_name": "A",
+                "num_leads": 11,
+                "lift": "0.3"
+            },
+            {
+                "bucket_name": "F",
+                "num_leads": 14,
+                "lift": "0.5"
+            },
+            {
+                "bucket_name": "C",
+                "num_leads": 16,
+                "lift": "0.8"
+            },
+            {
+                "bucket_name": "D",
+                "num_leads": 18,
+                "lift": "0.9"
+            }];
+        }
+
+        vm.ratingEngine.newBucketMetadata = newBucketMetadata;
 
         // if (rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
         //     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;

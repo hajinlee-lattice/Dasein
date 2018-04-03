@@ -97,9 +97,14 @@
                 </div>
                 <div>
                     <h3>Ratings</h3>
-                    <bar-chart 
-                        config="vm.getChartConfig(vm.ratingEngine)" 
-                        bktlist="vm.getData()">
+                    <div 
+                        class="no-ratings"
+                        ng-if="!vm.dashboard.summary.bucketMetadata || vm.dashboard.summary.bucketMetadata.length === 0">
+                        <h4>No Ratings Available</h4>
+                    </div>
+                    <bar-chart
+                        config="vm.ratingEngine.chartConfig" 
+                        bktlist="vm.ratingEngine.newBucketMetadata">
                     </bar-chart>
                 </div>
                 <div>

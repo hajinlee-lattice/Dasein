@@ -32,8 +32,8 @@
                     </tr>
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending'" class="not-started">Processing File</span>
-                            <span data-ng-if="jobStepsRunningStates.no_mapped_step_name || jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</span>
+                            <span data-ng-if="jobStepsRunningStates.load_data || jobStatus === 'Pending'" class="not-started">Processing File</span>
+                            <span data-ng-if="jobStepsCompletedStates.load_data || stepFailed == 'load_data'">Processing File</span>
                         </td>
                         <td>
                             <div class="progress-icon">
@@ -46,7 +46,7 @@
                             </div>
                         </td>
                         <td>
-                            <span data-ng-if="jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.load_data">
+                            <span data-ng-if="jobStepsRunningStates.load_data">
                                 <span class="loading-small"></span>
                             </span>
                             <span data-ng-if="jobStepsCompletedStates.load_data">{{stepsCompletedTimes.load_data | date: 'MM/dd/yyyy h:mma'}}</span>
@@ -54,53 +54,53 @@
                     </tr>
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name" class="not-started">Matching to Data Cloud</span>
-                            <span data-ng-if="jobStepsRunningStates.generate_insights || jobStepsCompletedStates.generate_insights || stepFailed == 'generate_insights'">Matching to Data Cloud</span>
+                            <span data-ng-if="jobStepsRunningStates.match_data || jobStepsRunningStates.load_data || jobStatus === 'Pending'" class="not-started">Matching to Data Cloud</span>
+                            <span data-ng-if="jobStepsCompletedStates.match_data || stepFailed == 'match_data'">Matching to Data Cloud</span>
                         </td>
                         <td>
                             <div class="progress-icon">
-                                <span data-ng-if="jobStepsCompletedStates.generate_insights">
+                                <span data-ng-if="jobStepsCompletedStates.match_data">
                                     <i class="fa fa-check"></i>
                                 </span>
-                                <span data-ng-if="stepFailed == 'generate_insights'">
+                                <span data-ng-if="stepFailed == 'match_data'">
                                     <i class="fa fa-warning"></i>
                                 </span>
                             </div>
                         </td>
                         <td>
-                            <span data-ng-if="jobStepsRunningStates.generate_insights">
+                            <span data-ng-if="jobStepsRunningStates.match_data">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="jobStepsCompletedStates.generate_insights">{{stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma'}}</span>
+                            <span data-ng-if="jobStepsCompletedStates.match_data">{{stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma'}}</span>
                         </td>
                     </tr>
 
                     <tr ng-if="!config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.generate_insights" class="not-started">Building Model</span>
-                            <span data-ng-if="jobStepsRunningStates.create_global_target_market || jobStepsCompletedStates.create_global_target_market || stepFailed == 'create_global_target_market'">Building Model</span>
+                            <span data-ng-if="jobStepsRunningStates.create_global_model || jobStepsRunningStates.match_data || jobStepsRunningStates.load_data || jobStatus === 'Pending'" class="not-started">Building Model</span>
+                            <span data-ng-if="jobStepsCompletedStates.create_global_model || stepFailed == 'create_global_model'">Building Model</span>
                         </td>
                         <td>
                             <div class="progress-icon">
-                                <span data-ng-if="jobStepsCompletedStates.create_global_target_market">
+                                <span data-ng-if="jobStepsCompletedStates.create_global_model">
                                     <i class="fa fa-check"></i>
                                 </span>
-                                <span data-ng-if="stepFailed == 'create_global_target_market'">
+                                <span data-ng-if="stepFailed == 'create_global_model'">
                                     <i class="fa fa-warning"></i>
                                 </span>
                             </div>
                         </td>
                         <td>
-                            <span data-ng-if="jobStepsRunningStates.create_global_target_market">
+                            <span data-ng-if="jobStepsRunningStates.create_global_model">
                                 <span class="loading-small"></span>
                             </span>
-                            <span data-ng-if="jobStepsCompletedStates.create_global_target_market">{{stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma'}}</span>
+                            <span data-ng-if="jobStepsCompletedStates.create_global_model">{{stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma'}}</span>
                         </td>
                     </tr>
                     <tr ng-if="!isPMMLJob && !config.disable_steps">
                         <td>
-                            <span data-ng-if="jobStatus == 'Pending' || jobStepsRunningStates.load_data || jobStepsRunningStates.no_mapped_step_name || jobStepsRunningStates.generate_insights || jobStepsRunningStates.create_global_target_market" class="not-started">Scoring Training Set</span>
-                            <span data-ng-if="jobStepsRunningStates.score_training_set || jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</span>
+                            <span data-ng-if="jobStepsRunningStates.score_training_set || jobStepsRunningStates.create_global_model || jobStepsRunningStates.match_data || jobStepsRunningStates.load_data || jobStatus === 'Pending'" class="not-started">Scoring Training Set</span>
+                            <span data-ng-if="jobStepsCompletedStates.score_training_set || stepFailed == 'score_training_set'">Scoring Training Set</span>
                         </td>
                         <td>
                             <div class="progress-icon">

@@ -26,7 +26,7 @@ angular
                 }
 
                 function getHorizontalPercentage(stat, field, limit) {
-                    var number = stat.Cnt;
+                    var number = stat[field];
 
                     if (number && $scope.highest) {
                         percentage = ((number / $scope.highest) * 100);
@@ -42,7 +42,7 @@ angular
                 function getHorizontalPercentageSubDec(stat, field, limit) {
                     // var max = Math.ceil($scope.highest);
                     var max = Math.round($scope.highest * 2) / 2;
-                    var val = stat.Lift;
+                    var val = stat[field];
                     if (max && val) {
                         var percentage = (val * 100) / max;
                         return percentage + '%';

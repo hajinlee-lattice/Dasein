@@ -29,9 +29,6 @@ angular.module('lp.create.import.job', [
 
     $scope.jobStepsRunningStates = jobSteps.reduce(function(state, step) {
         state[step] = false;
-
-        console.log(state);
-
         return state;
     }, {});
 
