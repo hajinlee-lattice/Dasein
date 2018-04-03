@@ -7,8 +7,8 @@ DB=$2
 DB=${DB:=PLS_MultiTenant}
 
 if [ "${ENV}" = "prod" ]; then
-    AURORA_URL="lpi-encrypted.c6q8lwiagbkt.us-east-1.rds.amazonaws.com"
-    PASSWORD="@uu5r3Ds!n=W"
+    AURORA_URL="lpi-encrypted-cluster.cluster-c6q8lwiagbkt.us-east-1.rds.amazonaws.com"
+    PASSWORD="3e!P@i8v|1"
 elif [ "${ENV}" = "qa" ]; then
     AURORA_URL="lpi-encrypted-cluster.cluster-ctigbumfbvzz.us-east-1.rds.amazonaws.com"
     PASSWORD="Lattice123"
@@ -21,7 +21,7 @@ popd
 
 echo "using mysqldiff to find db diff in ${DB} ..."
 mysqldiff \
-    --server1=root:${PASSWORD}@${AURORA_URL} \
+    --server1=LPI:${PASSWORD}@${AURORA_URL} \
     --server2=root:welcome@127.0.0.1 \
     --skip-table-options \
     --compact \
