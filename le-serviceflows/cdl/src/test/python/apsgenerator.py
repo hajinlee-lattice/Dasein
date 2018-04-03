@@ -31,15 +31,18 @@ def getMomentum(newacct,
                 winlen):
     mmtm = [np.nan] * len(amts)
     dq = deque(maxlen=winlen)
+    j = 0
     for i, a in enumerate(amts):
         if newacct[i]:
             dq.clear()
+            j = 0
         dq.append(0 if isna[i] else a)
         dqsum = sum(dq)
         d = dqsum - dq[-1]
         n = dqsum - dq[0]
-        if i > (winlen - 2) and n!=0 and d!=0:
+        if j > (winlen - 2) and n!=0 and d!=0:
             mmtm[i] = n / d - 1
+        j = j + 1
     return mmtm
 
 def getSpan(newacct, 
