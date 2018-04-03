@@ -252,14 +252,14 @@ angular.module('lp.ratingsengine.ratingslist', [
         var tileState = vm.current.tileStates[rating.id];
 
         if(tileState.editRating !== true){
-            if (rating.type === 'CROSS_SELL') {
+            if (rating.type === 'CROSS_SELL' || rating.type === 'CUSTOM_EVENT') {
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
                     RatingsEngineStore.setRating(engine);
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
                         var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
-                            modelingJobId = model.AI.modelingJobId;
+                            modelSummary = model.AI.modelSummary;
 
-                        if (modelingJobId !== null) {
+                        if (modelSummary !== null) {
                             $state.go('home.ratingsengine.dashboard', { 
                                 rating_id: rating.id, 
                                 modelId: modelId
@@ -270,7 +270,10 @@ angular.module('lp.ratingsengine.ratingslist', [
                     });
                 });                
             } else {
-                $state.go('home.ratingsengine.dashboard', { rating_id: rating.id, modelId: '' });
+                $state.go('home.ratingsengine.dashboard', { 
+                    rating_id: rating.id, 
+                    modelId: '' 
+                });
             } 
         }
     };
