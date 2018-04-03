@@ -20,6 +20,9 @@ fi
 #The following are required env variables set by caller. Here's samples for testing purpose.
 #export StepflowConfig="{\"inputPaths\":[\"/Pods/Aps/input/*.avro\"], \"outputPath\":\"/Pods/Aps/output\"}"
 #export PYTHON_APP="./apsgenerator.py"
+if [ "${SHDP_HD_FSWEB}" = 'http://webhdfs.lattice.local:14000/webhdfs/v1' ]; then
+    export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'
+fi
 #export SHDP_HD_FSWEB='http://10.41.1.183:14000/webhdfs/v1'
 ##export SHDP_HD_FSWEB='http://webhdfs.lattice.local:14000/webhdfs/v1'
 ##export SHDP_HD_FSWEB='http://webhdfs.prod.lattice.local:14000/webhdfs/v1'
