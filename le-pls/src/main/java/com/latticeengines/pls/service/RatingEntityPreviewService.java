@@ -13,5 +13,8 @@ public interface RatingEntityPreviewService {
 
     DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets);
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets);
+
+    Long getEntityPreviewCount(RatingEngine ratingEngine, BusinessEntity entityType,
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets);
 }

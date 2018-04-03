@@ -1,11 +1,14 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -19,6 +22,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
@@ -59,6 +63,10 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
     private RatingEngine ratingEngine;
 
     private Long segmentAccountsCount = null;
+
+    private Set<String> actualRatingBucketsInSegment = new HashSet<>();
+
+    private String actualNameInOneOfTheAccounts = null;
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
@@ -170,9 +178,74 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         }
     }
 
+    @Test(groups = "deployment", dependsOnMethods = { "testGetSegmentAccountCount" })
+    public void testEntityPreviewCount() {
+        List<String> allRatingBuckets = Arrays.asList(RatingBucketName.values()).stream().map(b -> b.getName())
+                .collect(Collectors.toList());
+        List<String> partialRatingBuckets = new ArrayList<>();
+        boolean removedOneBucket = false;
+        for (String ratingBucket : allRatingBuckets) {
+            if (!removedOneBucket && actualRatingBucketsInSegment.contains(ratingBucket)) {
+                // deliberating removing one valid bucket so that we can use
+                // remaining list of buckets in our count query
+                removedOneBucket = true;
+                continue;
+            }
+
+            partialRatingBuckets.add(ratingBucket);
+        }
+
+        Long count1 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+                null);
+        Long count2 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+                allRatingBuckets);
+        Long count3 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null, null,
+                partialRatingBuckets);
+        Long count4 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, null,
+                actualNameInOneOfTheAccounts, partialRatingBuckets);
+
+        Long count5 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+                null, null);
+        Long count6 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+                null, allRatingBuckets);
+        Long count7 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+                null, partialRatingBuckets);
+        Long count8 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, false,
+                actualNameInOneOfTheAccounts, partialRatingBuckets);
+
+        Long count9 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true, null,
+                null);
+        Long count10 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+                null, allRatingBuckets);
+        Long count11 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+                null, partialRatingBuckets);
+        Long count12 = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Account, true,
+                actualNameInOneOfTheAccounts, partialRatingBuckets);
+
+        Assert.assertTrue(count1 == count2);
+        Assert.assertTrue(count2 >= count3);
+        Assert.assertTrue(count3 >= count4);
+
+        Assert.assertTrue(count5 == count6);
+        Assert.assertTrue(count6 >= count7);
+        Assert.assertTrue(count7 >= count8);
+
+        Assert.assertTrue(count9 == count10);
+        Assert.assertTrue(count10 >= count11);
+        Assert.assertTrue(count11 >= count12);
+
+        Assert.assertTrue(count1 >= count5);
+        Assert.assertTrue(count1 >= count9);
+
+        Long contactCount = ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, BusinessEntity.Contact, null,
+                null, null);
+        Assert.assertNotNull(contactCount);
+        Assert.assertTrue(contactCount >= 0L);
+    }
+
     // disabled it for now as mock rating has only 2 accounts with non-null
     // rating
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "testGetSegmentAccountCount" })
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = { "testEntityPreviewCount" })
     public void testEntityPreviewFourthTimeToTestEdgeCase() {
         Set<String> accIds1 = testEntityPreview(segmentAccountsCount - 3L, 6L);
         Assert.assertEquals(accIds1.size(), 3);
@@ -203,10 +276,16 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         response.getData() //
                 .stream() //
                 .forEach(row -> {
-                    Assert.assertNotNull(row.get(RATING_BUCKET_FIELD));
+                    String rating = (String) row.get(RATING_BUCKET_FIELD);
+                    Assert.assertNotNull(rating);
                     Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
                     Assert.assertFalse(accIds.contains(row.get(InterfaceName.AccountId.name()).toString()));
                     accIds.add(row.get(InterfaceName.AccountId.name()).toString());
+                    actualRatingBucketsInSegment.add(rating);
+                    String accountName = (String) row.get(InterfaceName.CompanyName.name());
+                    if (actualNameInOneOfTheAccounts == null && StringUtils.isNotBlank(accountName)) {
+                        actualNameInOneOfTheAccounts = accountName.trim();
+                    }
                 });
         return accIds;
     }

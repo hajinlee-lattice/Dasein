@@ -19,6 +19,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -71,21 +72,19 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
     @Override
     public DataPage getEntityPreview(RatingEngine ratingEngine, long offset, long maximum, BusinessEntity entityType,
             String sortBy, boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
         Tenant tenant = MultiTenantContext.getTenant();
+        String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
+        restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
 
-        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
-        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch);
+        FrontEndQuery entityFrontEndQuery = createBasicFronEndQuery(ratingEngine, entityType,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField);
 
         entityFrontEndQuery.setPageFilter(new PageFilter(offset, maximum));
 
         setSortField(entityType, sortBy, descending, entityFrontEndQuery);
 
-        String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
-
         setLookups(entityType, entityFrontEndQuery, ratingField, lookupFieldNames);
-
-        setSelectedBuckets(entityFrontEndQuery, selectedBuckets, ratingField);
 
         log.info(String.format("Entity query => %s", JsonUtils.serialize(entityFrontEndQuery)));
 
@@ -102,6 +101,38 @@ public class RatingEntityPreviewServiceImpl implements RatingEntityPreviewServic
         log.info(String.format("Got # %d elements", resultDataPage.getData().size()));
         return resultDataPage;
 
+    }
+
+    @Override
+    public Long getEntityPreviewCount(RatingEngine ratingEngine, BusinessEntity entityType,
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+        restrictNotNullSalesforceId = restrictNotNullSalesforceId == null ? false : restrictNotNullSalesforceId;
+        selectedBuckets = selectedBuckets == null
+                ? Arrays.asList(RatingBucketName.values()).stream().map(b -> b.getName()).collect(Collectors.toList())
+                : selectedBuckets;
+
+        Tenant tenant = MultiTenantContext.getTenant();
+        String ratingField = RatingEngine.toRatingAttrName(ratingEngine.getId(), RatingEngine.ScoreType.Rating);
+
+        FrontEndQuery entityFrontEndQuery = createBasicFronEndQuery(ratingEngine, entityType,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets, ratingField);
+
+        Long count = entityProxy.getCount( //
+                tenant.getId(), //
+                entityFrontEndQuery);
+
+        log.info(String.format("Entity query => %s, count = %s", JsonUtils.serialize(entityFrontEndQuery), count));
+
+        return count == null ? 0L : count;
+    }
+
+    private FrontEndQuery createBasicFronEndQuery(RatingEngine ratingEngine, BusinessEntity entityType,
+            boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets,
+            String ratingField) {
+        FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
+        setBasicInfo(ratingEngine, entityType, entityFrontEndQuery, restrictNotNullSalesforceId, freeFormTextSearch);
+        setSelectedBuckets(entityFrontEndQuery, selectedBuckets, ratingField);
+        return entityFrontEndQuery;
     }
 
     @VisibleForTesting

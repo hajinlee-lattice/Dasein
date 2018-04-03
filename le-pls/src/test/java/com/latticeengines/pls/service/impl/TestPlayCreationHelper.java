@@ -282,7 +282,7 @@ public class TestPlayCreationHelper {
                 ComparisonType.GT_AND_LT, BusinessEntity.Account, "LDC_Name", "A", "O");
         populateBucketInfo(bucketToRuleMap, false, RatingBucketName.D, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
-        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
+        populateBucketInfo(bucketToRuleMap, false, RatingBucketName.E, FrontEndQueryConstants.ACCOUNT_RESTRICTION, null,
                 null, null, null, null);
         populateBucketInfo(bucketToRuleMap, false, RatingBucketName.F, FrontEndQueryConstants.CONTACT_RESTRICTION, null,
                 null, null, null, null);
