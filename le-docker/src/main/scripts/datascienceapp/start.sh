@@ -18,7 +18,7 @@ source activate ledatascience
 #export HDFS_PORT="57000"
 #export HDFS_USER="bross"
 
-echo "datasciencelauncher.py" $CLIENT_ID $ZK_SERVER $ZK_PORT $HDFS_SERVER $HDFS_PORT $HDFS_USER
+echo "datasciencelauncher.py" 
 
-python /ledatascience/modelquality/datasciencelauncher.py $CLIENT_ID $ZK_SERVER $ZK_PORT $HDFS_SERVER $HDFS_PORT $HDFS_USER
+python /ledatascience/modelquality/datasciencelauncher.py 
 

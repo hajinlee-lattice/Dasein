@@ -10,6 +10,7 @@ WORKDIR /
 
 COPY start.sh /
 COPY ledatascience.tar.gz /
+COPY conf/latticeengines.properties /
 RUN tar -xvzf ledatascience.tar.gz
 
 ENV PYTHON_PATH /opt/conda/bin:/:/ledatascience/modelquality:$PYTHON_PATH
