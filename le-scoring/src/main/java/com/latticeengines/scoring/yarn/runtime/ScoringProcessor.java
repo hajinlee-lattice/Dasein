@@ -498,13 +498,11 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
                     String bucketName = tuple.getBucket() == null ? "" : tuple.getBucket();
                     builder.set(ScoreResultField.Rating.displayName, bucketName);
                 }
-                if (isEnableDebug) {
-                    Double rawScore = tuple.getProbability();
-                    if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
-                        throw new LedpException(LedpCode.LEDP_20038);
-                    }
-                    builder.set(ScoreResultField.RawScore.displayName, rawScore);
+                Double rawScore = tuple.getProbability();
+                if (rawScore != null && (rawScore > 1 || rawScore < 0)) {
+                    throw new LedpException(LedpCode.LEDP_20038);
                 }
+                builder.set(ScoreResultField.RawScore.displayName, rawScore);
                 builder.set(ScoreResultField.ModelId.displayName, modelId);
                 builder.set(ScoreResultField.Percentile.displayName, score);
 
