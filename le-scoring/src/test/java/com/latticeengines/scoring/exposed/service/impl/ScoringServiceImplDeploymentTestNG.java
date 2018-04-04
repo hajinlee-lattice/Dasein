@@ -157,7 +157,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
             Assert.assertNotNull(record.get(ScoreResultField.ModelId.displayName));
             Assert.assertNotNull(record.get(ScoreResultField.Percentile.displayName));
             Assert.assertNotNull(record.get(ScoreResultField.Rating.displayName));
-            Assert.assertNull(record.get(ScoreResultField.RawScore.displayName));
+            Assert.assertNotNull(record.get(ScoreResultField.RawScore.displayName));
         }
         Assert.assertEquals(list.size(), 20);
 
