@@ -169,7 +169,8 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertEquals(fields.get(1).name(), ScoreResultField.ModelId.displayName);
         Assert.assertEquals(fields.get(2).name(), ScoreResultField.Percentile.displayName);
         Assert.assertEquals(fields.get(3).name(), ScoreResultField.Rating.displayName);
-        Assert.assertEquals(fields.size(), 7);
+        Assert.assertEquals(fields.get(4).name(), ScoreResultField.RawScore.displayName);
+        Assert.assertEquals(fields.size(), 8);
 
         List<String> csvfiles = HdfsUtils.getFilesForDir(yarnConfiguration, targetDir, ".*.csv$");
         Assert.assertNotNull(csvfiles);
