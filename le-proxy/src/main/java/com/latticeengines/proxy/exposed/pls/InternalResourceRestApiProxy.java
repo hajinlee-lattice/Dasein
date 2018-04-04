@@ -409,6 +409,25 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
+    @SuppressWarnings({ "deprecation", "unchecked" })
+    public Map<Long, List<BucketMetadata>> getABCDBucketsBasedOnRatingEngineId(String customerSpace,
+            String ratingEngineId) {
+        try {
+            String url = constructUrlForGetABCDBucketsForCDL(customerSpace, ratingEngineId);
+            Map<?, List<?>> abcdBuckets = restTemplate.getForObject(url, Map.class);
+            return JsonUtils.convertMapWithListValue(abcdBuckets, Long.class, BucketMetadata.class);
+        } catch (Exception e) {
+            throw new RuntimeException("getABCDBucketsBasedOnRatingEngineId: Remote call failure", e);
+        }
+    }
+
+    @VisibleForTesting
+    String constructUrlForGetABCDBucketsForCDL(String customerSpace, String ratingEngineId) {
+        String url = constructUrl("pls/internal/bucketmetadata/ratingengine/" + ratingEngineId + "/" + customerSpace);
+        log.info("constructUrlForGetABCDBucketsForCDL is " + url);
+        return url;
+    }
+
     @SuppressWarnings("deprecation")
     public List<BucketMetadata> createDefaultABCDBuckets(String customerSpace, String ratingEngineId, String modelId,
             String userId, boolean expectedValue, boolean liftChart) {
@@ -425,9 +444,9 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     @SuppressWarnings("deprecation")
     @VisibleForTesting
     String constructUrlForDefaultABCDBucketsForCDL(String customerSpace, String ratingEngineId, String modelId) {
-        String url = constructUrl("pls/internal/bucketmetadata/ratingengine" + ratingEngineId + "/model/" + modelId
+        String url = constructUrl("pls/internal/bucketmetadata/ratingengine/" + ratingEngineId + "/model/" + modelId
                 + "/" + customerSpace);
-        log.info("url is " + url);
+        log.info("constructUrlForDefaultABCDBucketsForCDL is " + url);
         return url;
     }
 

@@ -42,12 +42,21 @@ public class InternalResourceRestApiProxyUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testUrl() {
+    public void testConstructUrlForDefaultABCDBucketsForCDL() {
         String url = internalProxy.constructUrlForDefaultABCDBucketsForCDL(CustomerSpace.parse(tenantId).toString(),
                 ratingEngineId, modelId);
         log.info("url is " + url);
         Assert.assertEquals(url,
                 "http://localhost:8081/pls/internal/bucketmetadata/ratingengine/ratingEngineId/model/modelId/tenant.tenant.Production");
+    }
+
+    @Test(groups = "unit")
+    public void testConstructUrlForGetABCDBucketsForCDL() {
+        String url = internalProxy.constructUrlForGetABCDBucketsForCDL(CustomerSpace.parse(tenantId).toString(),
+                ratingEngineId);
+        log.info("url is " + url);
+        Assert.assertEquals(url,
+                "http://localhost:8081/pls/internal/bucketmetadata/ratingengine/ratingEngineId/tenant.tenant.Production");
     }
 
 }
