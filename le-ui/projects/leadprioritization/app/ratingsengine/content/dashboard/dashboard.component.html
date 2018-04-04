@@ -5,7 +5,8 @@
 </le-modal-window>
 
 <section 
-    class="rating-engine dashboard {{ vm.modelingStrategy }}">
+    class="rating-engine dashboard {{ vm.modelingStrategy }}"
+    ng-class="{noRatings: !vm.dashboard.summary.bucketMetadata}">
     <div class="container row">
         <div class="ten columns offset-one">
 
@@ -27,7 +28,7 @@
                         class="button orange-button"
                         ng-if="vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })" 
-                        ng-disabled="vm.modelSummary === null && !vm.status_toggle">
+                        ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata && !vm.status_toggle">
                         Create Play
                     </button>
 
@@ -42,7 +43,7 @@
                         class="button orange-button"
                         ng-if="!vm.isRulesBased"
                         ui-sref="home.playbook.create.rating({ rating_id: vm.ratingEngine.id })"
-                        ng-disabled="vm.modelSummary === null || vm.ratingEngine.status === 'INACTIVE'">
+                        ng-disabled="vm.modelSummary === null || !vm.dashboard.summary.bucketMetadata || vm.ratingEngine.status === 'INACTIVE'">
                         Create Play
                     </button>
                 </div>
@@ -56,15 +57,28 @@
                         <dt ng-if="vm.ratingEngine.segment">Segment:</dt>
                         <dd ng-if="vm.ratingEngine.segment" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
                         
-                        <dt>Products:</dt>
-                        <dd ng-if="vm.targetProducts.length === 1">{{ vm.targetProductName }}</dd>
-                        <dd ng-if="vm.targetProducts.length > 1">{{ vm.targetProducts.length }} selected</dd>
+                        <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Products:</dt>
+                        <dd ng-if="vm.targetProducts.length === 1 || vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProductName }}</dd>
+                        <dd ng-if="vm.targetProducts.length > 1 || vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProducts.length }} selected</dd>
 
                         <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
                         <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>
 
-                        <dt>Prioritize by:</dt>
-                        <dd>{{ vm.prioritizeBy }}</dd>
+                        <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Prioritize by:</dt>
+                        <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
+
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Available Attributes:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Training File:</dt>
+                        <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.sourceFileName}}</dd>
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">One record per account:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
 
                         <dt ng-if="vm.hasSettingsInfo">Model Settings:</dt>
                         <dd ng-if="vm.hasSettingsInfo">

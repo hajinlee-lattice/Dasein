@@ -351,6 +351,12 @@ angular
             })
             .state('home.ratingsengine.dashboard.segment.attributes.rules', {
                 url: '/rules',
+                params: {
+                    pageIcon: 'ico-model',
+                    pageTitle: 'Models',
+                    section: 'wizard.ratingsengine_attributes',
+                    gotoNonemptyCategory: true
+                },
                 resolve: {
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();

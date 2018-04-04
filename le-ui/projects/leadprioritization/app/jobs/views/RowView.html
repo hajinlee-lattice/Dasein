@@ -97,7 +97,7 @@
             <div class="twelve columns">
 
 
-                <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow' || jobType == 'modelAndEmailWorkflow'">
+                <ol class="wizard job-status" data-ng-show="jobType == 'fitModelWorkflow' || jobType == 'importMatchAndModelWorkflow' || jobType == 'modelAndEmailWorkflow' || jobType == 'customEventModelingWorkflow'">
                     <li ng-class="{success : jobStepsCompletedStates.load_data, error : (stepFailed == 'load_data')}">
                         <div>
 
@@ -117,40 +117,42 @@
 
                         </div>
                     </li>
-                    <li ng-class="{success : jobStepsCompletedStates.generate_insights, error : (stepFailed == 'generate_insights')}">
+                    <li ng-class="{success : jobStepsCompletedStates.generate_insights, success: jobStepsCompletedStates.match_data, error: (stepFailed == 'generate_insights'), error: (stepFailed == 'match_data')}">
                         <div>
 
                             <span class="match-cloud">
                                 <p>Matching to Data Cloud</p>
-                                <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.generate_insights | date: 'MM/dd/yyyy h:mma' }}
+                                {{ stepsCompletedTimes.match_data | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
                                 <span
                                     class="loading-small"
                                     data-ng-if="
-                                    jobStepsRunningStates.generate_insights ||
-                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights"></span>
-                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights"></i>
-                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights'"></i>
+                                    jobStepsRunningStates.generate_insights || jobStepsRunningStates.match_data ||
+                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights || !jobStepsCompletedStates.match_data"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights || jobStepsCompletedStates.match_data"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights' || stepFailed == 'match_data'"></i>
                             </span>
 
                         </div>
                     </li>
-                    <li ng-class="{success : jobStepsCompletedStates.create_global_target_market, error : (stepFailed == 'create_global_target_market')}">
+                    <li ng-class="{success: jobStepsCompletedStates.create_global_target_market, success: jobStepsCompletedStates.create_global_model, error: (stepFailed == 'create_global_target_market'), error: (stepFailed == 'create_global_model')}">
                         <div>
 
                             <span class="building-model">
                                 <p>Building Model</p>
-                                <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}</p>
+                                <p class="completion-times">{{ stepsCompletedTimes.create_global_target_market | date: 'MM/dd/yyyy h:mma' }}
+                                {{ stepsCompletedTimes.create_global_model | date: 'MM/dd/yyyy h:mma' }}</p>
                             </span>
                             <span>
                                 <span
                                     class="loading-small"
                                     data-ng-if="
-                                    jobStepsRunningStates.create_global_target_market ||
-                                    jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market"></span>
-                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market"></i>
-                                <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'create_global_target_market'"></i>
+                                    jobStepsRunningStates.create_global_target_market || jobStepsRunningStates.create_global_model ||
+                                    jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market || !jobStepsCompletedStates.create_global_model"></span>
+                                <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market || jobStepsCompletedStates.create_global_model"></i>
+                                <i class="fa fa-exclamation-triangle"  data-ng-if="(stepFailed == 'create_global_target_market') || (stepFailed == 'create_global_model')"></i>
                             </span>
 
                         </div>
@@ -167,7 +169,7 @@
                                     class="loading-small"
                                     data-ng-if="
                                     jobStepsRunningStates.score_training_set ||
-                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market &&
+                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.create_global_target_market || jobStepsCompletedStates.create_global_model &&
                                     job.status === 'Running'
                                     "></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.score_training_set"></i>

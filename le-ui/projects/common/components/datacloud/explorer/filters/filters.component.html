@@ -67,6 +67,15 @@
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
+    <li>
+        <button
+            type="button"
+            ng-click="vm.goBackToModelRules()"
+            class="button blue-button"
+            ng-if="vm.mode === 'dashboardrules'">
+            Back to Rules
+        </button>
+    </li>
     <!--
      <li class="download-link dropdown-container" ng-if="vm.section == 'segment.analysis'">
         <a ng-href="/files/latticeinsights/segments/downloadcsv?Authorization={{vm.authToken}}&state={{vm.QueryStore.getUiState().name}}"

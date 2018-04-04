@@ -13,7 +13,7 @@
                     <dd>{{ vm.ratingEngineType }}</dd>
 
                     <dt ng-if="vm.showSetting('segment')">Segment:</dt>
-                    <dd ng-if="vm.showSetting('segment')">{{ vm.ratingEngine.segment.display_name }}</dd>
+                    <dd ng-if="vm.showSetting('segment')" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
 
                     <!-- Cross-sell Modeling Settings -->
                     

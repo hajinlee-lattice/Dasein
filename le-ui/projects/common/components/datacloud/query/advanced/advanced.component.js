@@ -238,6 +238,7 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.saveRules = function() {
+        vm.saved = true;
         RatingsEngineStore.nextSaveRules();
     }
 

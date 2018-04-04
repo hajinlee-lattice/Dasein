@@ -1,5 +1,12 @@
 <div class="enrichment-wizard-container container advanced-query-builder {{ vm.mode }}">
-    <div class="columns twelve">
+
+    <div class="">
+        <div class="success-message" ng-if="vm.saved === true">
+            <h3>Rules were saved successfully!</h3>
+        </div>
+    </div>
+
+    <div class="">
         <div class="query-rules-header" ng-if="vm.mode == 'rules' || vm.mode == 'dashboardrules'">
             
             <button

@@ -39,7 +39,7 @@
                     {{ Rules = vm.getAttributeRules(attribute); "" }}
                     {{ Value = vm.formatAttributeValue(attribute, Rules); "" }}
 
-                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis'">
+                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis' || vm.mode == 'dashboardrules'">
                         <!--input  type="checkbox" 
                                 id="{{attribute.Attribute || attribute.ColumnId}}" 
                                 name="{{attribute.Attribute || attribute.ColumnId}}" 

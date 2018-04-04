@@ -74,7 +74,7 @@
                     {{ Value = vm.formatAttributeValue(attribute, Rules); "" }}
 
                     <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
-                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis'">
+                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis' || vm.mode == 'dashboardrules'">
                         <!--input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 

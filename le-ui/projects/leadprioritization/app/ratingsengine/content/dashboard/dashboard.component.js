@@ -164,8 +164,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
         var model = vm.ratingEngine.activeModel;
 
-        // console.log(vm.ratingEngine);
-        // console.log(vm.dashboard);
+        console.log(vm.ratingEngine);
+        console.log(vm.dashboard);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
@@ -231,6 +231,8 @@ angular.module('lp.ratingsengine.dashboard', [
                     vm.hasSettingsInfo = false;
                 }
 
+                console.log(vm.hasSettingsInfo);
+
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;
                 vm.configFilters = model.AI.advancedModelingConfig[type].filters;
@@ -266,6 +268,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 }
             } else {
                 vm.modelingStrategy = 'CUSTOM_EVENT';
+                vm.ratingEngineType = 'Custom Event';
             }
 
             vm.modelSummary = model.AI.modelSummary;
@@ -273,9 +276,9 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.trainingSegment = model.AI.trainingSegment;
 
             if (vm.predictionType === 'PROPENSITY') {
-                vm.prioritizeBy = 'Likely to buy';
+                vm.prioritizeBy = 'Likely to Buy';
             } else if (vm.predictionType === 'EXPECTED_VALUE') {
-                vm.prioritizeBy = 'Likely to spend';
+                vm.prioritizeBy = 'Likely Amount of Spend';
             }
         }
 

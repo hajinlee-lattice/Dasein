@@ -7,8 +7,10 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
+        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
             var vm = $scope.vm;
+
+            console.log($stateParams);
 
             angular.extend(vm, {
                 orders: {
@@ -282,6 +284,11 @@ angular
                     count = vm.subcategoryCount(category, subcategory);
 
                 return (count ? true : false);
+            }
+
+            vm.goBackToModelRules = function() {
+                console.log($stateParams.rating_id);
+                $state.go('home.ratingsengine.dashboard.segment.attributes.rules', {reload: true});
             }
 
 

@@ -106,8 +106,9 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.init = function($q, $filter) {
 
         var arr = vm.current.ratings;
-        
         // console.log(arr.slice(Math.max(arr.length - 10, 1)));
+
+        console.log(vm.current.ratings);
 
         RatingsEngineStore.clear();
 
