@@ -4,7 +4,7 @@
             <div class="lookup-back" ui-sref="home.datacloud.lookup.form"><ico class="fa fa-arrow-left"></ico>NEW LOOKUP</div>
             <ul class="lookup-tabs noselect">
                 <li ui-sref="home.datacloud.lookup.tabs.attr" ui-sref-active-eq="active">
-                    Attributes <span ng-if="vm.store.count > 0">( {{ vm.store.count | number }} )</span>
+                    Attributes <span ng-if="vm.store.count > 0">({{ vm.hideLookupAttributesCount ? 0 : vm.store.count | number }})</span>
                 </li>
                 <!--li ui-sref="home.lookup.tabs.response" ui-sref-active-eq="active">
                     API Response

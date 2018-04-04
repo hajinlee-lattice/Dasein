@@ -175,7 +175,7 @@
                 </th>
             </tr>
         </thead>
-        <tbody ng-if="!vm.loading">
+        <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
             <tr 
                 ng-repeat=" account in vm.accounts | 
                             orderBy:sortType:sortReverse ">
@@ -234,8 +234,8 @@
     <div class="loading" ng-if="vm.loading">
          Loading {{vm.page}}...
     </div>
-    <div ng-if="(vm.accounts.length === 0 || vm.contacts.length === 0) && !vm.loading">
-        <p>No {{vm.page}} Found<p>
+    <div ng-if="(vm.counts.accounts.value === 0 || vm.counts.contacts.value === 0) && !vm.loading">
+        <p>No {{vm.page != 'Playbook' && vm.page != 'Play Overview' ? vm.page : 'Targets'}} Found<p>
     </div>
 
     <ul class="filters pull-right" ng-if="vm.showAccountPagination">

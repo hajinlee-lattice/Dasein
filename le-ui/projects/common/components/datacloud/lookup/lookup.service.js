@@ -21,6 +21,10 @@ angular
         this.Authentication = '';
     }
 
+    this.hideLookupResponse = function(response) {
+        return Object.keys(response.companyInfo).length == 1 && 'IsMatched' in response.companyInfo && response.companyInfo.IsMatched == 'false';
+    }
+
     this.setParam = function(property, value) {
         this.params[property] = value;
     }

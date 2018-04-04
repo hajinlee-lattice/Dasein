@@ -642,4 +642,16 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
+    this.getTargetCount = function(engineId, query) {
+        var deferred = $q.defer();
+        $http({
+            method: 'GET',
+            url: this.host + '/ratingengines/' + engineId + '/entitypreview/count',
+            params: query
+        }).then(function(response) {
+            deferred.resolve(response.data);
+        });
+        return deferred.promise;
+    }
+
 });

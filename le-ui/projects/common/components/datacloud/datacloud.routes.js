@@ -273,6 +273,8 @@ angular
                             ? LookupResponse.companyInfo.LDC_Name
                             : '';
 
+                        this.hideLookupAttributesCount = LookupStore.hideLookupResponse(LookupResponse);
+
                         this.elapsedTime = LookupStore.get('elapsedTime');
 
                         this.isInternalUser = false;

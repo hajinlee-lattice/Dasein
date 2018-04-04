@@ -130,7 +130,7 @@ angular.module('common.datacloud.explorer', [
         vm.processEnrichments(Enrichments, true);
         vm.generateTree(true);
 
-        if (vm.lookupMode && typeof vm.lookupFiltered === 'object' && Object.keys(vm.lookupFiltered).length < 1) {
+        if (vm.lookupMode && typeof vm.lookupFiltered === 'object' && (Object.keys(vm.lookupFiltered).length < 1 || LookupStore.hideLookupResponse(LookupResponse))) {
             vm.no_lookup_results_message = true;
         }
 
@@ -1688,7 +1688,6 @@ angular.module('common.datacloud.explorer', [
         var attributes = QueryStore.getDataCloudAttributes(true);
         
         attributes = attributes.filter(function(item) {
-            
             var restriction = item.bucketRestriction,
                 isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
                 isSameBucket = true,
@@ -1760,6 +1759,10 @@ angular.module('common.datacloud.explorer', [
     vm.isSpecialAttributeValue = function(value) {
         var map = ['SELECTED', 'CUSTOMIZED', 'MULTIPLE USES'];
         return map.indexOf(value) >= 0;
+    }
+
+    vm.hideLookupResponse = function() {
+        return LookupStore.hideLookupResponse(LookupResponse);
     }
 
     vm.init();

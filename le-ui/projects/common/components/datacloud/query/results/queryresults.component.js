@@ -176,6 +176,7 @@ angular.module('common.datacloud.query.results', [
                     vm.accounts = PlaybookWizardStore.getTargetData();
                 });
 
+
                 // -----------------------------------------
                 // Uncomment this when backend supports 
                 // the checkbox 'Exclude non SalesForce accounts' 
@@ -193,50 +194,78 @@ angular.module('common.datacloud.query.results', [
                 // -----------------------------------------
 
                 // Get Account Counts for Pagination
-                PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
-                    var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
-                    
-                    var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
-                          return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
-                        });
+                if (!vm.search) {
+                    PlaybookWizardStore.getRatingsCounts(engineIdObject).then(function(data){
+                        var accountsCoverage = (data.ratingEngineIdCoverageMap && data.ratingEngineIdCoverageMap[engineId] ? data.ratingEngineIdCoverageMap[engineId] : null);
+                        
+                        var filteredAccountsCoverage = accountsCoverage.bucketCoverageCounts.filter(function (bucket) {
+                              return vm.selectedBuckets.indexOf(bucket.bucket) >= 0; 
+                            });
 
-                    var calculateCountsFromFiltered = function(array) {
-                        var accounts = 0,
-                            count;
-                        for (var i = 0; i < array.length; i++) {
-                            accounts += filteredAccountsCoverage[i].count;
+                        var calculateCountsFromFiltered = function(array) {
+                            var accounts = 0,
+                                count;
+                            for (var i = 0; i < array.length; i++) {
+                                accounts += filteredAccountsCoverage[i].count;
+                            }
+                            count = accounts;
+                            return count;
+                        };
+
+                        if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
+                            vm.counts = { 
+                                accounts: { 
+                                    value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                },
+                                contacts: {
+                                    value: vm.accountsCoverage.contactCount
+                                }
+                            };
+
+                        } else {
+                            vm.counts = { 
+                                accounts: { 
+                                    value: calculateCountsFromFiltered(filteredAccountsCoverage) 
+                                },
+                                contacts: {
+                                    value: vm.accountsCoverage.contactCount
+                                }
+                            };
                         }
-                        count = accounts;
-                        return count;
-                    };
+                        
+                        if(vm.counts.accounts.value > 10){
+                            vm.showAccountPagination = true;
+                            vm.showContactPagination = false;
+                        }
 
-                    if (vm.section === 'create.targets' || vm.section === 'dashboard.targets') {
-                        vm.counts = { 
-                            accounts: { 
-                                value: calculateCountsFromFiltered(filteredAccountsCoverage) 
-                            },
-                            contacts: {
-                                value: vm.accountsCoverage.contactCount
-                            }
+                        if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
+                            vm.showAccountPagination = false;
+                        }
+
+                        vm.ratedTargetsLimit = vm.counts.accounts.value;
+
+                    });
+                } else if (vm.search) { 
+                    var countsQuery = { 
+                            freeFormTextSearch: vm.search || '',
+                            restrictNotNullSalesforceId: vm.excludeNonSalesForce,
+                            entityType: 'Account',
+                            selectedBuckets: vm.selectedBuckets
                         };
 
-                    } else {
-                        vm.counts = { 
-                            accounts: { 
-                                value: calculateCountsFromFiltered(filteredAccountsCoverage) 
-                            },
-                            contacts: {
-                                value: vm.accountsCoverage.contactCount
-                            }
-                        };
-                    }
-                    if(vm.counts.accounts.value > 10){
-                        vm.showAccountPagination = true;
+                    PlaybookWizardService.getTargetCount(engineId, countsQuery).then(function(data){
+
+                        vm.counts.accounts.value = data;
+                        
+                        vm.showAccountPagination = vm.counts.accounts.value > 10;
                         vm.showContactPagination = false;
-                    }
-                    vm.ratedTargetsLimit = vm.counts.accounts.value;
 
-                });
+                        if (vm.section == 'wizard.targets' && vm.selectedBuckets.length == 0) {
+                            vm.counts.accounts.value = 0;
+                            vm.showAccountPagination = false;
+                        }
+                    });
+                }
 
                 QueryStore.setBucketsToLaunch(vm.selectedBuckets);
 
