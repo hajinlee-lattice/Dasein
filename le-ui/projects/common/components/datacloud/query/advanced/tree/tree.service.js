@@ -17,7 +17,16 @@ angular.module('common.datacloud.query.builder.tree.service', [
 
 
         };
-
+        this.transactionMap = {
+            'EVER': 'Ever',
+            'IN_CURRENT_PERIOD': 'Current',
+            'WITHIN': 'Previous',
+            'PRIOR_ONLY': 'Only Prior to Last',
+            'BETWEEN': 'Between Last',
+            'BETWEEN_DATE':'Between',
+            'BEFORE': 'Before',
+            'AFTER': 'After' 
+        };
         this.cmpMap = {
             "Yes": "is",
             "No": "is",
@@ -50,8 +59,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
             'AFTER': 'After',
             'BETWEEN_LT': 'Between Last',
             'PREVIOUS': 'Previous',
-            'PRIOR_OLY_LT': 'Only Prior to Last',
-            'ENDS_WITH': 'ends with'
+            'PRIOR_ONLY_LT': 'Only Prior to Last',
+            'ENDS_WITH': 'ends with',
+            'WITHIN': 'Previous',
+            'PRIOR_ONLY': 'Only Prior to Last',
+            'BETWEEN_DATE': 'Between'
         };
 
         this.numerical_operations = {

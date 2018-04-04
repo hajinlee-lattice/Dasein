@@ -44,7 +44,7 @@ angular
                     var ret = QueryTreeService.getCmp($scope.bucketrestriction, $scope.type, subType);
                     switch (subType) {
                         case 'Time': {
-                            var cmp = ret === '' ? 'Ever' : QueryTreeService.cmpMap[ret];
+                            var cmp = ret === '' ? 'Ever' : QueryTreeService.transactionMap[ret];
                             return cmp;
                         }
                         case 'Amt':
