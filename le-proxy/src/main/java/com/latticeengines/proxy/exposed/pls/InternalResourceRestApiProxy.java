@@ -410,18 +410,24 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     }
 
     @SuppressWarnings("deprecation")
-    public List<BucketMetadata> createDefaultABCDBuckets(String customerSpace, String ratingEnigneId, String modelId,
+    public List<BucketMetadata> createDefaultABCDBuckets(String customerSpace, String ratingEngineId, String modelId,
             String userId, boolean expectedValue, boolean liftChart) {
         try {
-            String url = constructUrl(
-                    "pls/internal/bucketmetadata/ratingengine/{ratingEngineId}/model/{modelId}" + customerSpace,
-                    ratingEnigneId, modelId);
+            String url = constructUrlForDefaultABCDBucketsForCDL(customerSpace, ratingEngineId, modelId);
             url = url + String.format("?expectedValue=%b&liftChart=%b", expectedValue, liftChart);
             List<?> abcdBuckets = restTemplate.postForObject(url, userId, List.class);
             return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
         } catch (Exception e) {
             throw new RuntimeException("create default abcd buckets: Remote call failure", e);
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    @VisibleForTesting
+    String constructUrlForDefaultABCDBucketsForCDL(String customerSpace, String ratingEngineId, String modelId) {
+        String url = constructUrl("pls/internal/bucketmetadata/ratingengine" + ratingEngineId + "/model/" + modelId
+                + "/" + customerSpace);
+        return url;
     }
 
     public void createSourceFile(SourceFile sourceFile, String tenantId) {
