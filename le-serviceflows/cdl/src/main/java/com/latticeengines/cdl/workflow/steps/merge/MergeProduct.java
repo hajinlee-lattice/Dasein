@@ -50,7 +50,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         try {
             PipelineTransformationRequest request = new PipelineTransformationRequest();
             request.setName("MergeProduct");
-            TransformationStepConfig merge = mergeInputs(true, true, false);
+            TransformationStepConfig merge = mergeInputs(true, false, true);
             List<TransformationStepConfig> steps = Collections.singletonList(merge);
             request.setSteps(steps);
             return request;
