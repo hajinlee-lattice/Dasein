@@ -66,7 +66,9 @@ public class CleanupAllDeploymentTestNG extends DataIngestionEnd2EndDeploymentTe
         status = waitForWorkflowStatus(appId.toString(), false);
         assertEquals(status, JobStatus.COMPLETED);
         List<DataFeedTask> dfTasks = dataFeedProxy.getDataFeedTaskWithSameEntity(customerSpace, entity.name());
-        assertNull(dfTasks);
+        if (dfTasks != null) {
+            assertEquals(dfTasks.size(), 0);
+        }
         verifyActionRegistration();
     }
 
