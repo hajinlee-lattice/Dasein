@@ -427,6 +427,7 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
     String constructUrlForDefaultABCDBucketsForCDL(String customerSpace, String ratingEngineId, String modelId) {
         String url = constructUrl("pls/internal/bucketmetadata/ratingengine" + ratingEngineId + "/model/" + modelId
                 + "/" + customerSpace);
+        log.info("url is " + url);
         return url;
     }
 
