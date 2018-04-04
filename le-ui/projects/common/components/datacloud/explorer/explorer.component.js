@@ -869,7 +869,8 @@ angular.module('common.datacloud.explorer', [
                 'Intent',
                 'Technology Profile',
                 'Website Profile',
-                'Online Presence'
+                'Online Presence',
+                'Growth Trends'
             ];
 
             topCategories.forEach(function(category, index) {
