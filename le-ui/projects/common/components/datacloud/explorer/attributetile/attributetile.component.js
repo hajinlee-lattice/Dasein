@@ -47,8 +47,8 @@ angular
 
                         $scope.barChartConfig = {
                             'data': {
-                                'tosort': true,
-                                'sortBy': '-Cnt',
+                                'tosort': false,
+                                'sortBy': 'Cnt',
                                 'trim': true,
                                 'top': 5,
                             },
@@ -81,8 +81,8 @@ angular
                     if ($scope.barChartLiftConfig === undefined) {
                         $scope.barChartLiftConfig = {
                             'data': {
-                                'tosort': true,
-                                'sortBy': 'Lbl',
+                                'tosort': false,
+                                'sortBy': 'Cnt',
                                 'trim': true,
                                 'top': 5,
                             },
@@ -128,6 +128,7 @@ angular
                 }
 
                 vm.getData = function (entity, columnId) {
+                    
                     var data = vm.cube.data[entity].Stats[columnId].Bkts.List;
                     // console.log('Data ',data);
                     return data;
