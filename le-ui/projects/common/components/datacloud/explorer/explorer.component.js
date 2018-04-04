@@ -1532,7 +1532,7 @@ angular.module('common.datacloud.explorer', [
             toAdd = 'Account';
         }
         
-        console.log(toAdd);
+        // console.log(toAdd);
 
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
