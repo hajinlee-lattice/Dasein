@@ -433,14 +433,12 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
             outputTable.addAttribute(bucketAttr);
         }
 
-        if (isEnableDebug) {
-            Attribute rawScoreAttr = new Attribute();
-            rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
-            rawScoreAttr.setDisplayName(ScoreResultField.RawScore.displayName);
-            rawScoreAttr.setSourceLogicalDataType("");
-            rawScoreAttr.setPhysicalDataType(Type.DOUBLE.name());
-            outputTable.addAttribute(rawScoreAttr);
-        }
+        Attribute rawScoreAttr = new Attribute();
+        rawScoreAttr.setName(ScoreResultField.RawScore.displayName);
+        rawScoreAttr.setDisplayName(ScoreResultField.RawScore.displayName);
+        rawScoreAttr.setSourceLogicalDataType("");
+        rawScoreAttr.setPhysicalDataType(Type.DOUBLE.name());
+        outputTable.addAttribute(rawScoreAttr);
 
         if (leadEnrichmentAttributeMap != null) {
             Iterator<Entry<String, Type>> it = leadEnrichmentAttributeMap.entrySet().iterator();
