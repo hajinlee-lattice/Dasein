@@ -800,7 +800,7 @@ public class InternalResource extends InternalResourceBase {
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelId, bucketedScoreSummary);
     }
 
-    @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/model/{modelId}"
+    @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/model/{modelId}/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create default abcd scored buckets given Rating Engine Id and Model Id")
@@ -812,7 +812,8 @@ public class InternalResource extends InternalResourceBase {
             @RequestBody String userId, //
             HttpServletRequest request) throws Exception {
         checkHeader(request);
-        log.debug(String.format("create Default ABCD Buckets for tenant: %s", customerSpace));
+        log.debug(String.format("create Default ABCD Buckets for tenant: %s, rating engine %s, rating model %s",
+                customerSpace, ratingengineId, modelId));
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         List<BucketMetadata> metaDatas = new RatingEngineBucketBuilder().build(expectedValue, liftChart);
         BucketName bucketNameA = metaDatas.get(0).getBucket();
