@@ -42,9 +42,6 @@ angular
 
                     $scope.job.modelId = modelId;
                 });
-            } else {
-                console.log(job);
-                $scope.job.modelId = job.source;
             }
 
             var clientSession = BrowserStorageUtility.getClientSession();
