@@ -201,7 +201,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected RatingEngine ratingEngine;
 
-    @BeforeClass(groups = { "end2end", "precheckin", "deployment" })
+    @BeforeClass(groups = { "end2end", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 
