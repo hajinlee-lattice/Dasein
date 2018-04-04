@@ -5,6 +5,8 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
     private String eventColumn;
     private boolean expectedValue;
     private boolean liftChart;
+    private String ratingEngineId;
+    private String modelId;
 
     public PivotScoreAndEventConfiguration() {
         setBeanName("pivotScoreAndEvent");
@@ -32,6 +34,22 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
 
     public void setLiftChart(boolean liftChart) {
         this.liftChart = liftChart;
+    }
+
+    public void setRatingEngineId(String ratingEngineId) {
+        this.ratingEngineId = ratingEngineId;
+    }
+
+    public String getRatingEngineId() {
+        return this.ratingEngineId;
+    }
+
+    public void setModelId(String modelId) {
+        this.modelId = modelId;
+    }
+
+    public String getModelId() {
+        return this.modelId;
     }
 
 }

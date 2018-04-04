@@ -108,6 +108,7 @@ import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
 import com.latticeengines.pls.workflow.RatingEngineBucketBuilder;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -215,6 +216,9 @@ public class InternalResource extends InternalResourceBase {
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Value("${pls.test.contract}")
     protected String contractId;
@@ -796,6 +800,43 @@ public class InternalResource extends InternalResourceBase {
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelId, bucketedScoreSummary);
     }
 
+    @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/model/{modelId}"
+            + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "create default abcd scored buckets given Rating Engine Id and Model Id")
+    public List<BucketMetadata> createDefaultABCDBuckets(@PathVariable String ratingengineId, //
+            @PathVariable String modelId, //
+            @RequestParam(value = "expectedValue", required = false, defaultValue = "false") boolean expectedValue, //
+            @RequestParam(value = "liftChart", required = false, defaultValue = "false") boolean liftChart, //
+            @PathVariable("tenantId") String customerSpace, //
+            @RequestBody String userId, //
+            HttpServletRequest request) throws Exception {
+        checkHeader(request);
+        log.debug(String.format("create Default ABCD Buckets for tenant: %s", customerSpace));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        List<BucketMetadata> metaDatas = new RatingEngineBucketBuilder().build(expectedValue, liftChart);
+        BucketName bucketNameA = metaDatas.get(0).getBucket();
+        BucketName bucketNameB = metaDatas.get(1).getBucket();
+        BucketName bucketNameC = metaDatas.get(2).getBucket();
+        BucketName bucketNameD = metaDatas.get(3).getBucket();
+        Integer bucket0 = metaDatas.get(0).getLeftBoundScore();
+        Integer bucket1 = metaDatas.get(1).getLeftBoundScore();
+        Integer bucket2 = metaDatas.get(2).getLeftBoundScore();
+        Integer bucket3 = metaDatas.get(3).getLeftBoundScore();
+        Integer bucket4 = metaDatas.get(3).getRightBoundScore();
+
+        BucketedScoreSummary bucketedScoreSummary = bucketedScoreService
+                .getBuckedScoresSummaryBasedOnRatingEngineAndRatingModel(ratingengineId, modelId);
+        log.info(String.format("Creating abcd buckets for rating engine: %s model: %s bucketed score summary: %s",
+                ratingengineId, modelId, JsonUtils.serialize(bucketedScoreSummary)));
+
+        List<BucketMetadata> result = generateDefaultBucketMetadatas(
+                Arrays.asList(bucketNameA, bucketNameB, bucketNameC, bucketNameD),
+                Arrays.asList(bucket0, bucket1, bucket2, bucket3, bucket4), bucketedScoreSummary, userId);
+        bucketedScoreService.createBucketMetadatas(ratingengineId, modelId, result, userId);
+        return result;
+    }
+
     @RequestMapping(value = "/bucketmetadata/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "create default abcd scored buckets")
@@ -828,20 +869,39 @@ public class InternalResource extends InternalResourceBase {
             log.info("Creating abcd buckets for Cdl.");
         }
 
-        BucketMetadata bucketMetadata1 = new BucketMetadata();
-        BucketMetadata bucketMetadata2 = new BucketMetadata();
-        BucketMetadata bucketMetadata3 = new BucketMetadata();
-        BucketMetadata bucketMetadata4 = new BucketMetadata();
-
         checkHeader(request);
         ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
         manufactureSecurityContextForInternalAccess(modelSummary.getTenant());
         BucketedScoreSummary bucketedScoreSummary = bucketedScoreService.getBucketedScoreSummaryForModelId(modelId);
         log.info(String.format("Creating abcd buckets for model: %s bucketed score summary: %s", modelId,
                 JsonUtils.serialize(bucketedScoreSummary)));
+
+        List<BucketMetadata> result = generateDefaultBucketMetadatas(
+                Arrays.asList(bucketNameA, bucketNameB, bucketNameC, bucketNameD),
+                Arrays.asList(bucket0, bucket1, bucket2, bucket3, bucket4), bucketedScoreSummary, userId);
+        bucketedScoreService.createBucketMetadatas(modelId, result);
+        return result;
+    }
+
+    private List<BucketMetadata> generateDefaultBucketMetadatas(List<BucketName> bucketNameList,
+            List<Integer> bucketList, BucketedScoreSummary bucketedScoreSummary, String userId) {
+
+        BucketName bucketNameA = bucketNameList.get(0);
+        BucketName bucketNameB = bucketNameList.get(1);
+        BucketName bucketNameC = bucketNameList.get(2);
+        BucketName bucketNameD = bucketNameList.get(3);
+        Integer bucket0 = bucketList.get(0);
+        Integer bucket1 = bucketList.get(1);
+        Integer bucket2 = bucketList.get(2);
+        Integer bucket3 = bucketList.get(3);
+        Integer bucket4 = bucketList.get(4);
         BucketedScore[] bucketedScores = bucketedScoreSummary.getBucketedScores();
         Double overallLift = bucketedScoreSummary.getOverallLift();
 
+        BucketMetadata bucketMetadata1 = new BucketMetadata();
+        BucketMetadata bucketMetadata2 = new BucketMetadata();
+        BucketMetadata bucketMetadata3 = new BucketMetadata();
+        BucketMetadata bucketMetadata4 = new BucketMetadata();
         bucketMetadata1.setBucket(bucketNameA);
         bucketMetadata1.setLeftBoundScore(bucket0);
         bucketMetadata1.setRightBoundScore(bucket1);
@@ -898,8 +958,6 @@ public class InternalResource extends InternalResourceBase {
                     / overallLift);
         }
 
-        bucketedScoreService.createBucketMetadatas(modelId,
-                Arrays.asList(bucketMetadata1, bucketMetadata2, bucketMetadata3, bucketMetadata4));
         return Arrays.asList(bucketMetadata1, bucketMetadata2, bucketMetadata3, bucketMetadata4);
     }
 

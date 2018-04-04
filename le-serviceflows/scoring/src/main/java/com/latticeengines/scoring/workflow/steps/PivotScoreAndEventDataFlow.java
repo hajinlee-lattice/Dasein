@@ -95,8 +95,18 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         try {
             // TODO: remove this in the future
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-            List<BucketMetadata> bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
-                    getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), false, false, false);
+            List<BucketMetadata> bucketMetadatas = null;
+            if (configuration.getRatingEngineId() != null && configuration.getModelId() != null) {
+                log.info("Creating CDL bucket metadata.");
+                bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
+                        CustomerSpace.parse(configuration.getCustomerSpace().toString()).toString(),
+                        configuration.getRatingEngineId(), configuration.getModelId(), configuration.getUserId(), false,
+                        false);
+            } else {
+                log.info("Creating LPI bucket metadata.");
+                bucketMetadatas = internalResourceRestApiProxy.createDefaultABCDBuckets(
+                        getStringValueFromContext(SCORING_MODEL_ID), configuration.getUserId(), false, false, false);
+            }
 
             log.info(String.format("Created A bucket (%s - %s) with %s leads and %s lift,"
                     + "B bucket (%s - %s) with %s leads and %s lift," + "C bucket (%s - %s) with %s leads and %s lift,"

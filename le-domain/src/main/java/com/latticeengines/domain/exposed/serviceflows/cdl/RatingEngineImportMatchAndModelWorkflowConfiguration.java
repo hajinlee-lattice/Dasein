@@ -335,11 +335,13 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder aiModelId(String aiModelId) {
             cdlModelWorkflowBuilder.aiModelId(aiModelId);
+            pivotScoreAndEvent.setModelId(aiModelId);
             return this;
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
             cdlModelWorkflowBuilder.ratingEngineId(ratingEngineId);
+            pivotScoreAndEvent.setRatingEngineId(ratingEngineId);
             return this;
         }
 
