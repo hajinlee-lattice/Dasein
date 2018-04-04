@@ -47,7 +47,7 @@ public class InternalResourceRestApiProxyUnitTestNG {
                 ratingEngineId, modelId);
         log.info("url is " + url);
         Assert.assertEquals(url,
-                "http://localhost:8081/pls/internal/bucketmetadata/ratingengineratingEngineId/model/modelId/tenant.tenant.Production");
+                "http://localhost:8081/pls/internal/bucketmetadata/ratingengine/ratingEngineId/model/modelId/tenant.tenant.Production");
     }
 
 }
