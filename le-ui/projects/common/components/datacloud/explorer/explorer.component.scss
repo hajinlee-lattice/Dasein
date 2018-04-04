@@ -1,10 +1,13 @@
 .enrichment-wizard-container {
     padding: 0;
-    &.dashboardrules {
-        padding-top: 40px;
-    }
     @media (max-width: 1300px) {
         padding: 0 2.12766%;
+    }
+    &.dashboardrules {
+        padding-top: 40px;
+        .success-message {
+            width: auto;
+        }
     }
     .loading {
         background: none; // override _progress.scss
@@ -13,6 +16,28 @@
 .open-nav .enrichment-wizard-container {
     @media (max-width: 1491px) {
         padding: 0 2.12766%;
+    }
+    &.dashboard-rules {
+        padding-top: 40px;
+        &.navigation {
+            &:after {
+                display: table;
+                clear: both;
+                content: "";
+            }
+        }
+    }
+}
+.open-nav .enrichment-wizard-container.dashboardrules {
+    @media (max-width: 1491px) {
+        padding-top: 40px;
+        &.navigation {
+            &:after {
+                display: table;
+                clear: both;
+                content: "";
+            }
+        }
     }
 }
 .enrichment-wizard-container {
@@ -25,7 +50,7 @@
         background-color: $color;
         background-color: rgba($color, $opacity);
     }
-    .dashboard-rules {
+    &.dashboard-rules {
         &.navigation {
             &:after {
                 display: table;
