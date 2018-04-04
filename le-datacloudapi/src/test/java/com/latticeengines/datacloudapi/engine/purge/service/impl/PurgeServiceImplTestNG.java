@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.testng.Assert;
+import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -70,7 +71,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         prepareValidationMap();
     }
 
-    @BeforeClass(groups = "functional")
+    @AfterClass(groups = "functional")
     public void destroy() {
         purgeStrategyEntityMgr.deleteAll();
     }
