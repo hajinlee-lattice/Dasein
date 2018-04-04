@@ -7,12 +7,17 @@
 
                 <a ui-sref="home.models" ng-if="isModelDetailsPage && !IsRatingEngine" class="model-name">{{ modelDisplayName }}</a>
 
-                <a ui-sref="home.ratingsengine" ng-if="isModelDetailsPage && IsRatingEngine" class="model-name">{{ modelDisplayName }}</a>
+                <!-- <a ui-sref="home.ratingsengine" ng-if="isModelDetailsPage && IsRatingEngine" class="model-name">{{ modelDisplayName }}</a> -->
 
             </li>
-            <li ng-if="headerBack" class="header-back-name-container" title="{{headerBack.displayName}}">
+            
+            <!-- <li ng-if="headerBack || (IsRatingEngine === true) || (isModelDetailsPage === true)" class="header-back-name-container" title="{{headerBack.displayName}}">
+                <a ui-sref="{{headerBack.sref}}" class="header-back-name">{{ headerBack.displayName }}</a>
+            </li> -->
+            <li ng-if="headerBack && ((IsRatingEngine === true) || (isModelDetailsPage === true))" class="header-back-name-container" title="{{headerBack.displayName}}">
                 <a ui-sref="{{headerBack.sref}}" class="header-back-name">{{ headerBack.displayName }}</a>
             </li>
+
             <li class="page-icon-container">
                 <span ng-if="pageDisplayIcon" class="page-icon ico-container">
                     <span class="ico {{ pageDisplayIcon }}"></span>
