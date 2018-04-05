@@ -25,12 +25,75 @@ def bytes_to_int(bytes):
 def int_to_bytes(value):
     return str(value)
 
-class DataScienceLauncher(object):
+class PropertiesFileReader(object):
+    def __init__(self, propertiesFilePath):
+        self.propertiesFilePath = propertiesFilePath
+        self.properties = self.readPropertiesFile()
 
-    def __init__(self, clientID, zookeeperServer, zookeeperPort, hdfsServer, hdfsPort, hdfsUser):
+    def readPropertiesFile(self):
+        toReturn = {}
+        try:
+            for line in open(self.propertiesFilePath):
+                toParse = line.strip()
+                if toParse == "":
+                    continue
+
+                if line.startswith("#"):
+                    continue
+
+                entries = line.split("=")
+                if len(entries) < 2:
+                    continue
+
+                toReturn[entries[0].strip()] = entries[1].strip()
+
+        except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            lines = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            logger.error( ''.join('!! ' + line for line in lines))
+
+        return toReturn
+
+    def getProperty(self, key):
+        if key is None or key == "":
+            return None
+
+        toReturn = self.properties.get(key, None)
+        if toReturn is not None:
+            if toReturn.startswith("$"):
+                variable = toReturn.replace("[{,}]", "")
+                return os.environ.get(variable, "")
+
+        return toReturn
+
+    def getZookeeperConnectionString(self):
+        return self.getProperty("camille.zk.connectionString")
+
+    def getWebHDFSString(self):
+        toReturn = self.getProperty("hadoop.fs.web.webhdfs")
+        if toReturn is None:
+            return None
+
+        return toReturn.replace("webhdfs://","")
+
+    def getHDFSServer(self):
+        toReturn = self.getWebHDFSString()
+        if toReturn is None:
+            return None
+
+        return toReturn.split(":")[0]
+
+    def getHDFSPort(self):
+        toReturn = self.getWebHDFSString()
+        if toReturn is None:
+            return None
+
+        return toReturn.split(":")[1]
+
+class DataScienceLauncher(object):
+    def __init__(self, clientID, zookeeperConnectionString, hdfsServer, hdfsPort, hdfsUser):
         logger.info("Initialized Data Science Launcher")
-        self.zookeeperServer = zookeeperServer
-        self.zookeeperPort = zookeeperPort
+        self.zookeeperConnectionString = zookeeperConnectionString
         self.hdfsServer = hdfsServer
         self.hdfsPort = hdfsPort
         self.hdfsUser = hdfsUser
@@ -130,7 +193,7 @@ class DataScienceLauncher(object):
                 zk.set(self.compose_paths(child, self.tryNumAttribute), int_to_bytes(tryNum + 1))
 
     def process_one(self):
-        hostsString = self.zookeeperServer + ":" + self.zookeeperPort
+        hostsString = self.zookeeperConnectionString
         zkClient = KazooClient(hosts=hostsString)
         try:
             logger.info("Checking for Zookeeper Datascience Request")
@@ -166,25 +229,49 @@ class DataScienceLauncher(object):
 if __name__ == "__main__":
     """
     Transform the inputs into a Zookeeper System to follow
-
+    
+    Arguments:
+    sys.argv[1]: hdfsUser
+    sys.argv[2]: propertiesFilePath=
+    
      Arguments:
-    sys.argv[1] -- clientID, zookeeperServer, zookeeperPort, hdfsServer, hdfsPort, hdfsUser
-    sys.argv[2] -- zookeeperServer
-    sys.argv[3] -- zookeeperPort
-    sys.argv[4] -- hdfsServer
-    sys.argv[5] -- hdfsPort
-    sys.argv[6] -- hdfsUser
+    sys.argv[1] -- clientID
+    sys.argv[2] -- zookeeperConnectionString
+    sys.argv[3] -- hdfsServer
+    sys.argv[4] -- hdfsPort
+    sys.argv[5] -- hdfsUser
     """
     argNum = 0
     for arg in sys.argv:
         logger.info("Call Parameter " + str(argNum) + ": " + arg)
 
+    if len(sys.argv) < 3:
+        propertiesFile = "/latticeengines.properties"
+    else:
+        propertiesFile = sys.argv[2]
+
+    if len(sys.argv) < 2:
+        hdfsUser = "bross"
+    else:
+        hdfsUser = sys.argv[1]
+
+    properties = PropertiesFileReader(propertiesFile)
+
+    runID = str(uuid.uuid4())
 
     configDir = "/app/dataplatform/config/datascience"
-    ModelingEnvironment.initialize(sys.argv[4], sys.argv[5], sys.argv[6], str(uuid.uuid4()))
+    ModelingEnvironment.initialize(properties.getHDFSServer(),
+                                   properties.getHDFSPort(),
+                                   hdfsUser,
+                                   runID)
 
     # Will eventually pass this in to determine whether to loop indefinitely
     numRepeats = -1
-    dsl = DataScienceLauncher(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5], sys.argv[6])
+    dsl = DataScienceLauncher(runID,
+                              properties.getZookeeperConnectionString(),
+                              properties.getHDFSServer(),
+                              properties.getHDFSPort(),
+                              hdfsUser)
+
     dsl.main(numRepeats)
 
