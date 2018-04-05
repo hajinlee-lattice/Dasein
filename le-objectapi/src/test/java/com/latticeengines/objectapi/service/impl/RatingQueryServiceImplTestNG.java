@@ -1,12 +1,12 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.sql.Time;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
@@ -14,6 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -59,7 +60,8 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
-        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
         frontEndQuery.setRatingModels(Collections.singletonList(model));
         frontEndQuery.setPageFilter(new PageFilter(0, 10));
@@ -75,7 +77,8 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
             Assert.assertTrue(row.containsKey("Score"));
             String score = (String) row.get("Score");
             Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
+            Assert.assertTrue(
+                    Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
         frontEndQuery.setLookups(Arrays.asList(new AttributeLookup(BusinessEntity.Account, "AccountId"),
@@ -89,7 +92,8 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
             Assert.assertTrue(row.containsKey(model.getId()));
             String score = (String) row.get(model.getId());
             Assert.assertNotNull(score);
-            Assert.assertTrue(Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
+            Assert.assertTrue(
+                    Arrays.asList(RatingBucketName.A.getName(), RatingBucketName.C.getName()).contains(score));
         });
 
         // only get scores for A, B and FStatsCubeUtils
@@ -118,12 +122,14 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setEvaluationDateStr(maxTransactionDate);
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
-        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A").build();
+        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
         frontEndRestriction.setRestriction(accountRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
 
         Bucket contactBkt = Bucket.valueBkt(ComparisonType.CONTAINS, Collections.singletonList("Manager"));
-        Restriction contactRestriction = new BucketRestriction(new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
+        Restriction contactRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Contact, ATTR_CONTACT_TITLE), contactBkt);
         frontEndQuery.setContactRestriction(new FrontEndRestriction(contactRestriction));
 
         frontEndQuery.setRatingModels(Collections.singletonList(model));
@@ -136,11 +142,42 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 533L);
+                Assert.assertEquals((long) count, 533L, JsonUtils.pprint(ratingCounts));
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 49L);
+                Assert.assertEquals((long) count, 49L, JsonUtils.pprint(ratingCounts));
             }
         });
+    }
+
+    @Test(groups = "functional")
+    public void testScoreCountSummation() {
+        RatingModel model = ruleBasedModel();
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction accountRestriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("A")
+                .build();
+        frontEndRestriction.setRestriction(accountRestriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        long totalCount = queryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
+
+        Map<String, Long> ratingCounts = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(ratingCounts);
+        Assert.assertFalse(ratingCounts.isEmpty());
+        AtomicLong sumAgg = new AtomicLong(0L);
+        ratingCounts.values().forEach(sumAgg::addAndGet);
+        long sum = sumAgg.get();
+
+        Assert.assertEquals(sum, totalCount,
+                String.format("Sum of rating coverage %d does not equals to the segment count %d", sum, totalCount));
     }
 
     @Test(groups = "functional")

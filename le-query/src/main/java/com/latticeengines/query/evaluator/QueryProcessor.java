@@ -2,9 +2,7 @@ package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -157,9 +155,16 @@ public class QueryProcessor {
                     .orElseThrow(() -> new QueryEvaluationException(
                             "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
                                     + " to entity " + target + "."));
+            BusinessEntity.Cardinality cardinality = relationship.getCardinality();
             // JOIN T1
             EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
-            sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
+            switch (cardinality) {
+                case ONE_TO_MANY:
+                    sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
+                    break;
+                default:
+                    sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
+            }
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
         }

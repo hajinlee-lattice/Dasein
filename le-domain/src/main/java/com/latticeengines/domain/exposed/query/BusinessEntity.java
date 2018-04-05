@@ -90,7 +90,9 @@ public enum BusinessEntity implements GraphNode {
         Account.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
         Account.addRelationship(Rating, Cardinality.ONE_TO_ONE, InterfaceName.AccountId);
         Account.addRelationship(DepivotedPurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.AccountId);
+
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
+
         Transaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         PeriodTransaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
@@ -183,6 +185,10 @@ public enum BusinessEntity implements GraphNode {
 
         public List<Pair<InterfaceName, InterfaceName>> getJoinKeys() {
             return joinKeys;
+        }
+
+        public Cardinality getCardinality() {
+            return cardinality;
         }
     }
 
