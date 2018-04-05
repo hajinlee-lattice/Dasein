@@ -80,7 +80,7 @@ public class RTSBulkScoringConfiguration extends BasePayloadConfiguration {
     }
 
     public void setEnableMatching(boolean enableMatching) {
-        this.enableMatching = enableDebug;
+        this.enableMatching = enableMatching;
     }
 
     public String getTargetResultDir() {
