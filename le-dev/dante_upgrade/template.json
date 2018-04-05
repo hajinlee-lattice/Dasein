@@ -33,6 +33,28 @@
           "Data": "-1"
         }
       ]
+    },
+    {
+      "RootPath": "/DataCloud",
+      "Nodes": [
+        {
+          "Node": "BypassDnBCache",
+          "Data": "false"
+        }
+      ]
+    },
+    {
+      "RootPath": "/CDL",
+      "Nodes": [
+        {
+          "Node": "FakeCurrentDate",
+          "Data": ""
+        },
+        {
+          "Node": "InvokeTime",
+          "Data": "{% InvokeTime %}"
+        }
+      ]
     }
   ],
   "CustomerSpaceInfo": {

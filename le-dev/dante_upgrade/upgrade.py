@@ -2,6 +2,7 @@ import argparse
 import httplib2
 import json
 import logging
+import random
 import time
 import zc.zk
 
@@ -46,11 +47,16 @@ def main():
         flags["EnableTalkingPoints"] = True
         logger.info("Feature Flags are:\n%s" % json.dumps(flags, indent=2))
 
+        random.seed()
+        invoke_time = random.randint(0, 23)
+        logger.info("Generate random invoke time: %d" % invoke_time)
+
         template = post_body_template()
         template = template.replace('{% LatticeAdminEmails %}', pls_lattice_admins().replace('"', '\\\"'))
         template = template.replace('{% SuperAdminEmails %}', pls_super_admins().replace('"', '\\\"'))
         template = template.replace('{% TenantName %}', args.tenant)
         template = template.replace('{% FeatureFlags %}', json.dumps(flags).replace('"', '\\\"'))
+        template = template.replace('{% InvokeTime %}', str(invoke_time))
         admin_create_tenant(args.tenant, template)
         fake_dante_status(template)
         wait_bootstrap_ok(args.tenant)
