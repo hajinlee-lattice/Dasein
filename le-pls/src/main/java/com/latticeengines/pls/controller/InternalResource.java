@@ -800,6 +800,22 @@ public class InternalResource extends InternalResourceBase {
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelId, bucketedScoreSummary);
     }
 
+    @SuppressWarnings("deprecation")
+    @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/"
+            + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get ABCD Buckets history info given Rating Engine Id")
+    public Map<Long, List<BucketMetadata>> getABCDBucketsBasedOnRatingEngineId(@PathVariable String ratingengineId, //
+            @PathVariable("tenantId") String customerSpace, //
+            HttpServletRequest request) {
+        checkHeader(request);
+        log.debug(String.format("Get ABCD Buckets history for tenant: %s, rating engine %s", customerSpace,
+                ratingengineId));
+        manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
+        return bucketedScoreService.getModelBucketMetadataGroupedByCreationTimesBasedOnRatingEngineId(ratingengineId);
+    }
+
+    @SuppressWarnings("deprecation")
     @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/model/{modelId}/"
             + TENANT_ID_PATH, method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody

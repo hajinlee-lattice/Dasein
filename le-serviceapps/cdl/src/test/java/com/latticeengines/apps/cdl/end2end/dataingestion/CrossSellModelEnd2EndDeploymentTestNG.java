@@ -3,21 +3,25 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -27,6 +31,7 @@ import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 /**
@@ -53,6 +58,11 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     @Inject
     private SegmentProxy segmentProxy;
 
+    @Value("${common.test.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
     private final String targetProductId = "A74D1222394534E6B450CA006C20D48D";
     private final String trainingProductId = "A80D4770376C1226C47617C071324C0B";
 
@@ -70,17 +80,36 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         attachProtectedProxy(modelSummaryProxy);
         setupBusinessCalendar();
         setupTestRatingEngine();
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @Test(groups = "end2end")
     public void runTest() {
         log.info("Start modeling ...");
+        verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), "bnguyen@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyBucketMetadataGenerated();
+    }
+
+    private void verifyBucketMetadataNotGenerated() {
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
+                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                        testRatingEngine.getId());
+        Assert.assertTrue(bucketMetadataHistory.isEmpty());
+    }
+
+    private void verifyBucketMetadataGenerated() {
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
+                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                        testRatingEngine.getId());
+        Assert.assertNotNull(bucketMetadataHistory);
+        Assert.assertEquals(bucketMetadataHistory.size(), 1);
+        log.info("time is " + bucketMetadataHistory.keySet().toString());
     }
 
     private void setupTestSegment() {

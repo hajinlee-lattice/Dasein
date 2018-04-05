@@ -3,21 +3,26 @@ package com.latticeengines.apps.cdl.end2end.dataingestion;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
@@ -28,6 +33,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -51,6 +57,11 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
     @Inject
     private SegmentProxy segmentProxy;
 
+    @Value("${common.test.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
         if (USE_EXISTING_TENANT) {
@@ -65,17 +76,36 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         attachProtectedProxy(modelSummaryProxy);
         attachProtectedProxy(fileUploadProxy);
         setupTestRatingEngine();
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @Test(groups = "end2end")
     public void runTest() {
         log.info("Start modeling ...");
+        verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), "bnguyen@lattice-engines.com");
         log.info(String.format("Workflow application id is %s", modelingWorkflowApplicationId));
         testRatingEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId());
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
+        verifyBucketMetadataGenerated();
+    }
+
+    private void verifyBucketMetadataNotGenerated() {
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
+                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                        testRatingEngine.getId());
+        Assert.assertTrue(bucketMetadataHistory.isEmpty());
+    }
+
+    private void verifyBucketMetadataGenerated() {
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
+                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+                        testRatingEngine.getId());
+        Assert.assertNotNull(bucketMetadataHistory);
+        Assert.assertEquals(bucketMetadataHistory.size(), 1);
+        log.info("time is " + bucketMetadataHistory.keySet().toString());
     }
 
     private void setupTestSegment() {
