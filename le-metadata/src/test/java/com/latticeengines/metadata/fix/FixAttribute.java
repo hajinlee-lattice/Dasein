@@ -20,9 +20,9 @@ public class FixAttribute extends MetadataFunctionalTestNGBase {
 
     @Test(groups = "manual")
     public void test() {
-        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse("Halladay").toString());
+        Tenant tenant = tenantEntityMgr.findByTenantId(CustomerSpace.parse("SmartBearSoftware").toString());
         MultiTenantContext.setTenant(tenant);
-        Table t = tableEntityMgr.findByName("copy_52e61053_d618_4b7c_8a0a_02dd805fffdb");
+        Table t = tableEntityMgr.findByName("copy_68d4c341_c94e_473c_bd82_3de26b6c6e9f");
         Attribute a = t.getAttribute("State");
         System.out.println(a.getPid());
         a.setInterfaceName(InterfaceName.State);

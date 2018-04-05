@@ -15,7 +15,7 @@ public class CacheServiceTestNG extends AbstractTestNGSpringContextTests {
 
     @Test(groups = "manual")
     private void clearCache() {
-        CacheServiceBase.getCacheService().refreshKeysByPattern("LETest1517445531180", CacheName.values());
+        CacheServiceBase.getCacheService().refreshKeysByPattern("*simon*", CacheName.values());
     }
 
 }

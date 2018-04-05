@@ -70,7 +70,11 @@ public enum SoftwareLibrary {
         List<SoftwareLibrary> depLibs = new ArrayList<>();
         // not use stream, because not sure how it handles ordering, which is
         // important here.
-        deps.forEach(d -> depLibs.add(d.lib));
+        deps.forEach(d -> {
+            if (!depLibs.contains(d.lib)) {
+                depLibs.add(d.lib);
+            }
+        });
         return depLibs;
     }
 
