@@ -163,7 +163,7 @@ public class QueryProcessor {
                     sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
                     break;
                 default:
-                    sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
+                    sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
             }
             joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
             joinedEntities.add(target);
