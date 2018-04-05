@@ -101,9 +101,6 @@ public class CheckpointService {
     static final int TRANSACTION_IMPORT_SIZE_1 = 30000;
     static final int TRANSACTION_IMPORT_SIZE_2 = 30000;
 
-    private static final int NUM_PURCHASE_HISTORY_1 = 500;
-    private static final int NUM_PURCHASE_HISTORY_2 = 800;
-
     @Inject
     private DataCollectionProxy dataCollectionProxy;
 

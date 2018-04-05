@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsCuratorConfig extends TransformerConfig {
@@ -18,6 +19,9 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
 
     @JsonProperty("CurrentDate")
     private String currentDate;
+
+    @JsonProperty("ActivityType")
+    private ActivityType type;
 
     public List<ActivityMetrics> getMetrics() {
         return metrics;
@@ -49,5 +53,13 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
 
     public void setCurrentDate(String currentDate) {
         this.currentDate = currentDate;
+    }
+
+    public ActivityType getType() {
+        return type;
+    }
+
+    public void setType(ActivityType type) {
+        this.type = type;
     }
 }

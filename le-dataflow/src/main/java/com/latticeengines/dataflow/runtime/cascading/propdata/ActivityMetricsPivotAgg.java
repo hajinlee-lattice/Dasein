@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
@@ -70,8 +69,9 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         pivotValues.forEach(pivotVal -> {
             metricsFields.forEach(metrics -> {
                 String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
-                if (activityType == ActivityType.PurchaseHistory && context.pivotData.get(field) == null
-                        && field.endsWith(InterfaceName.HasPurchased.name())) {
+                if (activityType == ActivityType.PurchaseHistory
+                        && field.endsWith(ActivityMetricsUtils.getHasPurchasedAbbr())
+                        && context.pivotData.get(field) == null) {
                     result.set(namePositionMap.get(field), false);
                 } else {
                     result.set(namePositionMap.get(field), context.pivotData.get(field));

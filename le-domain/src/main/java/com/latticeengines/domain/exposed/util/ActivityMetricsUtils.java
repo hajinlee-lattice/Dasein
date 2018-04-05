@@ -24,11 +24,11 @@ public class ActivityMetricsUtils {
     @SuppressWarnings("serial")
     private static Map<InterfaceName, String> metricsDisplayNames = new HashMap<InterfaceName, String>() {
         {
-            put(InterfaceName.Margin, "% margin");
-            put(InterfaceName.SpendChange, "% spend change");
-            put(InterfaceName.ShareOfWallet, "% share of wallet");
-            put(InterfaceName.AvgSpendOvertime, "Average spend");
-            put(InterfaceName.TotalSpendOvertime, "Total spend");
+            put(InterfaceName.Margin, "% Margin");
+            put(InterfaceName.SpendChange, "% Spend Change");
+            put(InterfaceName.ShareOfWallet, "% Share of Wallet");
+            put(InterfaceName.AvgSpendOvertime, "Average Spend");
+            put(InterfaceName.TotalSpendOvertime, "Total Spend");
             put(InterfaceName.HasPurchased, "Has Purchased");
         }
     };

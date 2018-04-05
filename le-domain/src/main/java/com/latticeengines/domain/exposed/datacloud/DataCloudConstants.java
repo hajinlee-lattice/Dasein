@@ -101,7 +101,6 @@ public final class DataCloudConstants {
     public static final String PRODUCT_MAPPER = "productMapper";
     public static final String ACTIVITY_METRICS_CURATOR = "activityMetricsCurator";
     public static final String ACTIVITY_METRICS_PIVOT = "activityMetricsPivot";
-    public static final String PURCHASE_METRICS_INITIATOR = "purchaseMetricsInitiator";
 
     public static final String TRANSACTION_STANDARDIZER = "transactionStandardizer";
 

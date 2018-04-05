@@ -72,13 +72,12 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     public static final String BEAN_NAME = "profilePurchaseHistory";
 
-    private List<Integer> initSteps;
     private int curateStep, pivotStep, profileStep, bucketStep;
     private Map<String, List<Product>> productMap;
     private String dailyTableName;
     private String accountTableName;
     private String productTableName;
-    private List<Table> periodTables;
+    private List<String> periodTableNames;
     private List<PeriodStrategy> periodStrategies;
     private List<ActivityMetrics> purchaseMetrics;
     private String maxTxnDate;
@@ -117,18 +116,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<>();
 
-        // TODO: Should have more abstract way to support such multi-period tables
-        initSteps = new ArrayList<>();
-        curateStep = periodTables.size();
-        pivotStep = periodTables.size() + 1;
-        profileStep = periodTables.size() + 2;
-        bucketStep = periodTables.size() + 3;
-
-        for (int i = 0; i < periodTables.size(); i++) {
-            TransformationStepConfig init = init(periodTables.get(i));
-            steps.add(init);
-            initSteps.add(i);
-        }
+        curateStep = 0;
+        pivotStep = 1;
+        profileStep = 2;
+        bucketStep = 3;
 
         TransformationStepConfig curate = curate();
         TransformationStepConfig pivot = pivot();
@@ -187,8 +178,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find period strategies");
         }
 
-        periodTables = getPeriodTables();
-        if (CollectionUtils.isEmpty(periodTables)) {
+        periodTableNames = getPeriodTableNames();
+        if (CollectionUtils.isEmpty(periodTableNames)) {
             throw new IllegalStateException("Cannot find period stores");
         }
 
@@ -232,11 +223,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         return accountTableName;
     }
 
-    private List<Table> getPeriodTables() {
-        List<Table> periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+    private List<String> getPeriodTableNames() {
+        List<String> periodTables = dataCollectionProxy.getTableNames(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedPeriodTransaction, inactive);
         if (CollectionUtils.isEmpty(periodTables)) {
-            periodTables = dataCollectionProxy.getTables(customerSpace.toString(),
+            periodTables = dataCollectionProxy.getTableNames(customerSpace.toString(),
                     TableRoleInCollection.ConsolidatedPeriodTransaction, active);
             if (CollectionUtils.isNotEmpty(periodTables)) {
                 log.info("Found period stores in active version " + active);
@@ -274,26 +265,22 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         productTableName = productTable.getName();
     }
 
-    private TransformationStepConfig init(Table periodTable) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        List<String> baseSources = Arrays.asList(periodTable.getName(), accountTableName, productTableName);
-        step.setBaseSources(baseSources);
-        SourceTable periodSourceTable = new SourceTable(periodTable.getName(), customerSpace);
-        SourceTable accountSourceTable = new SourceTable(accountTableName, customerSpace);
-        SourceTable productSourceTable = new SourceTable(productTableName, customerSpace);
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(periodTable.getName(), periodSourceTable);
-        baseTables.put(productTableName, productSourceTable);
-        baseTables.put(accountTableName, accountSourceTable);
-        step.setBaseTables(baseTables);
-        step.setTransformer(DataCloudConstants.PURCHASE_METRICS_INITIATOR);
-        step.setConfiguration("{}");
-        return step;
-    }
-
     private TransformationStepConfig curate() {
         TransformationStepConfig step = new TransformationStepConfig();
-        step.setInputSteps(initSteps);
+        List<String> baseSources = new ArrayList<>(periodTableNames);
+        baseSources.add(accountTableName);
+        baseSources.add(productTableName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        SourceTable accountSourceTable = new SourceTable(accountTableName, customerSpace);
+        SourceTable productSourceTable = new SourceTable(productTableName, customerSpace);
+        baseTables.put(productTableName, productSourceTable);
+        baseTables.put(accountTableName, accountSourceTable);
+        for (String periodTableName : periodTableNames) {
+            SourceTable periodSourceTable = new SourceTable(periodTableName, customerSpace);
+            baseTables.put(periodTableName, periodSourceTable);
+        }
+        step.setBaseTables(baseTables);
         step.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -306,6 +293,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setCurrentDate(maxTxnDate);
         conf.setMetrics(purchaseMetrics);
         conf.setPeriodStrategies(periodStrategies);
+        conf.setType(ActivityType.PurchaseHistory);
 
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
