@@ -22,6 +22,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -52,6 +53,46 @@ public class StatsCubeUtilsUnitTestNG {
 
         cube.getStatistics().forEach((attrName, attrStats) -> //
         Assert.assertTrue(attrStats.getNonNullCount() <= maxCount, attrName + JsonUtils.pprint(attrStats)));
+    }
+
+    @Test(groups = "unit")
+    public void testSortRating() throws Exception {
+        StatsCube cube = new StatsCube();
+        Map<String, AttributeStats> attrStats = new HashMap<>();
+
+        AttributeStats stats = new AttributeStats();
+        Buckets buckets = new Buckets();
+        buckets.setType(BucketType.Enum);
+        List<Bucket> bucketList = new ArrayList<>();
+        Bucket bktB = Bucket.valueBkt("B");
+        bktB.setId(1L);
+        bucketList.add(bktB);
+
+        Bucket bktC = Bucket.valueBkt("C");
+        bktC.setId(2L);
+        bucketList.add(bktC);
+
+        Bucket bktA = Bucket.valueBkt("A");
+        bktA.setId(3L);
+        bucketList.add(bktA);
+
+        buckets.setBucketList(bucketList);
+        stats.setBuckets(buckets);
+
+        attrStats.put("Attr", stats);
+        cube.setStatistics(attrStats);
+
+        List<Bucket> unsortedList = cube.getStatistics().get("Attr").getBuckets().getBucketList();
+        Assert.assertEquals(unsortedList.get(0).getLabel(), "B");
+        Assert.assertEquals(unsortedList.get(1).getLabel(), "C");
+        Assert.assertEquals(unsortedList.get(2).getLabel(), "A");
+
+        StatsCubeUtils.sortRatingBuckets(stats);
+
+        List<Bucket> sortedList = cube.getStatistics().get("Attr").getBuckets().getBucketList();
+        Assert.assertEquals(sortedList.get(0).getLabel(), "A");
+        Assert.assertEquals(sortedList.get(1).getLabel(), "B");
+        Assert.assertEquals(sortedList.get(2).getLabel(), "C");
     }
 
     @Test(groups = "unit")
@@ -204,21 +245,6 @@ public class StatsCubeUtilsUnitTestNG {
         Bucket expectedTopBkt = attributeStats.getBuckets().getBucketList().stream().sorted(comparator).findFirst()
                 .orElse(null);
         assertSameBucket(topBkt, expectedTopBkt);
-    }
-
-    private List<ColumnMetadata> prepareMockMetadata() {
-        List<ColumnMetadata> cms = new ArrayList<>();
-        ColumnMetadata cm1 = new ColumnMetadata();
-        cm1.setColumnId("AlexaOnlineSince");
-        cm1.setFundamentalType(FundamentalType.DATE);
-        cm1.setCategory(Category.ONLINE_PRESENCE);
-        ColumnMetadata cm2 = new ColumnMetadata();
-        cm2.setColumnId("LastModifiedDate");
-        cm2.setLogicalDataType(LogicalDataType.Date);
-        cm2.setCategory(Category.ACCOUNT_ATTRIBUTES);
-        cms.add(cm1);
-        cms.add(cm2);
-        return cms;
     }
 
     private void verifyDateAttrInTopN(TopNTree topNTree, Map<String, List<ColumnMetadata>> cmMap) {

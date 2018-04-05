@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.sql.Time;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -156,9 +157,9 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Assert.assertFalse(ratingCounts.isEmpty());
         ratingCounts.forEach((score, count) -> {
             if (RatingBucketName.A.getName().equals(score)) {
-                Assert.assertEquals((long) count, 832L);
+                Assert.assertEquals((long) count, 322L);
             } else if (RatingBucketName.C.getName().equals(score)) {
-                Assert.assertEquals((long) count, 2338L);
+                Assert.assertEquals((long) count, 2848L);
             }
         });
     }
@@ -196,7 +197,8 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
 
         Map<String, Restriction> ruleA = new HashMap<>();
         String prodId = "6368494B622E0CB60F9C80FEB1D0F95F";
-        Bucket.Transaction txn = new Bucket.Transaction(prodId, TimeFilter.ever(), null, null, false);
+        TimeFilter timeFilter = TimeFilter.within(2, "Month");
+        Bucket.Transaction txn = new Bucket.Transaction(prodId, timeFilter, null, null, false);
         ruleA.put(FrontEndQueryConstants.ACCOUNT_RESTRICTION,
                 new BucketRestriction(BusinessEntity.PurchaseHistory, "HasPurchased", Bucket.txnBkt(txn)));
         rule.getBucketToRuleMap().put(RatingBucketName.A.getName(), ruleA);

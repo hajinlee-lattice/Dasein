@@ -79,7 +79,7 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         String engineId = summary.getId();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
         RatingModel ratingModel = engine.getActiveModel();
-        if (ratingModel != null) {
+        if (ratingModel != null && !Boolean.TRUE.equals(engine.getDeleted())) {
             boolean isValid = false;
             if (RatingEngineType.CROSS_SELL.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
@@ -137,35 +137,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             return false;
         }
         return true;
-    }
-
-    private List<BucketMetadata> getDefaultBucketMetadata(PredictionType predictionType) {
-        List<BucketMetadata> buckets = new ArrayList<>();
-        switch (predictionType) {
-        case PROPENSITY:
-            buckets.add(addBucket(10, 4, BucketName.A));
-            buckets.add(addBucket(4, 2, BucketName.B));
-            buckets.add(addBucket(2, 1, BucketName.C));
-            buckets.add(addBucket(1, 0, BucketName.D));
-            break;
-        case EXPECTED_VALUE:
-            buckets.add(addBucket(10, 4, BucketName.A));
-            buckets.add(addBucket(4, 2, BucketName.B));
-            buckets.add(addBucket(2, 1, BucketName.C));
-            buckets.add(addBucket(1, 0, BucketName.D));
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
-        }
-        return buckets;
-    }
-
-    private BucketMetadata addBucket(int leftBoundScore, int rightBoundScore, BucketName bucketName) {
-        BucketMetadata bucket = new BucketMetadata();
-        bucket.setLeftBoundScore(leftBoundScore);
-        bucket.setRightBoundScore(rightBoundScore);
-        bucket.setBucket(bucketName);
-        return bucket;
     }
 
 }

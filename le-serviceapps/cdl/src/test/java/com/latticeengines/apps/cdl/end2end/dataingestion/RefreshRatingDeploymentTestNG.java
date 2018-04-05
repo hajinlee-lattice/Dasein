@@ -79,6 +79,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             createTestSegment2();
             rule1 = createRuleBasedRatingEngine();
             rule2 = createRuleBasedRatingEngine();
+            createAndDeleteRatingEngine();
         }).start();
 
         if (ENABLE_AI_RATINGS) {
@@ -100,7 +101,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary,
-            PredictionType predictionType) throws InterruptedException {
+                                        PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = new RatingEngine();
         ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
         ratingEngine.setSegment(segment);
@@ -146,13 +147,18 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private void verifyDecoratedMetadata() {
         List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
-         Assert.assertEquals(ratingMetadata.size(), 10);
+        Assert.assertEquals(ratingMetadata.size(), 10);
     }
 
     private ProcessAnalyzeRequest constructRequest() {
         ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
         request.setRebuildEntities(Collections.singleton(BusinessEntity.Rating));
         return request;
+    }
+
+    private void createAndDeleteRatingEngine() {
+        RatingEngine engine = createRuleBasedRatingEngine();
+        ratingEngineProxy.deleteRatingEngine(mainCustomerSpace, engine.getId());
     }
 
 }

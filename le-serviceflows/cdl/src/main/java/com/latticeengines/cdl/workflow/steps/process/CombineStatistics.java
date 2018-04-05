@@ -183,6 +183,7 @@ public class CombineStatistics extends BaseWorkflowStep<CombineStatisticsConfigu
             statsCube.getStatistics().forEach((attrName, attrStats) -> {
                 if (isRatingAttr(attrName)) {
                     StatsCubeUtils.sortRatingBuckets(attrStats);
+                    log.info("Sorted rating buckets for " + attrName + " : " + JsonUtils.serialize(attrStats) );
                 }
                 if (liftMap.containsKey(attrName)) {
                     Map<String, Double> lifts = JsonUtils.convertMap(liftMap.get(attrName), String.class, Double.class);
