@@ -420,25 +420,25 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
     @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
     public void testUpdateNullSegment() {
         re2.setSegment(null);
-        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=false", re2,
+        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlink-segment=false", re2,
                 RatingEngine.class);
         Assert.assertNotNull(re2);
         Assert.assertNotNull(re2.getSegment());
 
         re2.setSegment(null);
-        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=true", re2,
+        re2 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlink-segment=true", re2,
                 RatingEngine.class);
         Assert.assertNotNull(re2);
         Assert.assertNotNull(re2.getSegment());
 
         re3.setSegment(null);
-        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=false", re3,
+        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlink-segment=false", re3,
                 RatingEngine.class);
         Assert.assertNotNull(re3);
         Assert.assertNotNull(re3.getSegment());
 
         re3.setSegment(null);
-        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlinkSegment=true", re3,
+        re3 = restTemplate.postForObject(getRestAPIHostPort() + "/pls/ratingengines?unlink-segment=true", re3,
                 RatingEngine.class);
         Assert.assertNotNull(re3);
         Assert.assertNull(re3.getSegment());
