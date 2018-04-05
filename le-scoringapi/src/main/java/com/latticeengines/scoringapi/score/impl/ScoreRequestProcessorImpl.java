@@ -14,6 +14,8 @@ import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -92,15 +94,10 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
 
         SingleMatchingContext singleMatchingConfig = SingleMatchingContext.instance();
 
-        boolean shouldSkipScoring = false;
+        Pair<Boolean, Boolean> skipFlags = performModelHandling(request, additionalScoreConfig, singleMatchingConfig);
 
-        boolean shouldHandleModel = !additionalScoreConfig.isCalledViaApiConsole()
-                || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId());
-
-        boolean shouldSkipMatching = !shouldHandleModel;
-
-        shouldSkipMatching = performModelHandling(request, additionalScoreConfig, singleMatchingConfig,
-                shouldHandleModel, shouldSkipMatching);
+        boolean shouldSkipMatching = skipFlags.getLeft();
+        boolean shouldSkipScoring = skipFlags.getRight();
 
         AbstractMap.SimpleEntry<Map<String, Object>, InterpretedFields> parsedRecordAndInterpretedFields = parseRecord(
                 singleMatchingConfig.getFieldSchemas(), request.getRecord(),
@@ -803,9 +800,12 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
         return shouldSkipMatching;
     }
 
-    private boolean performModelHandling(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
-            SingleMatchingContext singleMatchingConfig, boolean shouldHandleModel, boolean shouldSkipMatching) {
-        if (shouldHandleModel) {
+    private Pair<Boolean, Boolean> performModelHandling(ScoreRequest request,
+            AdditionalScoreConfig additionalScoreConfig, SingleMatchingContext singleMatchingConfig) {
+        Boolean shouldSkipMatching = false;
+        Boolean shouldSkipScoring = false;
+        if (!additionalScoreConfig.isCalledViaApiConsole()
+                || !StringStandardizationUtils.objectIsNullOrEmptyString(request.getModelId())) {
             shouldSkipMatching = performModelArtifactRetrieval(request, additionalScoreConfig, singleMatchingConfig);
 
             split("retrieveModelArtifacts");
@@ -827,16 +827,17 @@ public class ScoreRequestProcessorImpl extends BaseRequestProcessorImpl implemen
                 }
             }
         } else {
+            shouldSkipScoring = true;
             singleMatchingConfig.setFieldSchemas(new HashMap<>());
             singleMatchingConfig
                     .setModelJsonTypeHandler(getModelJsonTypeHandler("NOT" + ModelJsonTypeHandler.PMML_MODEL));
         }
-        return shouldSkipMatching;
+        return new ImmutablePair<Boolean, Boolean>(shouldSkipMatching, shouldSkipScoring);
     }
 
     private boolean performModelArtifactRetrieval(ScoreRequest request, AdditionalScoreConfig additionalScoreConfig,
             SingleMatchingContext singleMatchingConfig) {
-        boolean shouldSkipMatching;
+        boolean shouldSkipMatching = false;
         if (StringUtils.isBlank(request.getModelId())) {
             throw new ScoringApiException(LedpCode.LEDP_31101);
         }

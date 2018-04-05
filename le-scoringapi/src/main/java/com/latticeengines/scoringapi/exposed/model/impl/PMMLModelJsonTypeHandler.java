@@ -7,12 +7,13 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.fs.FSDataInputStream;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.domain.exposed.scoringapi.DebugScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.FieldType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.scoringapi.exposed.ScoreEvaluation;
@@ -70,7 +71,7 @@ public class PMMLModelJsonTypeHandler extends DefaultModelJsonTypeHandler {
     @Override
     public ScoreResponse generateScoreResponse(ScoringArtifacts scoringArtifacts, //
             Map<String, Object> transformedRecord, boolean isCalledViaInternalResource) {
-        ScoreResponse scoreResponse = new ScoreResponse();
+        ScoreResponse scoreResponse = isCalledViaInternalResource ? new DebugScoreResponse() : new ScoreResponse();
         ScoreEvaluation scoreEvaluation = score(scoringArtifacts, transformedRecord);
         scoreResponse.setClassification(scoreEvaluation.getClassification());
         scoreResponse.setScore(scoreEvaluation.getPercentile());
