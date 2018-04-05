@@ -1,6 +1,8 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +14,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -69,6 +73,12 @@ public abstract class RatingEngineTemplate {
                 ratingEngineSummary.setBucketMetadata(internalResourceProxy
                         .getUpToDateABCDBuckets(aimodel.getModelSummary().getId(), CustomerSpace.parse(tenantId)));
             }
+        } else {
+            Map<String, Long> counts = ratingEngine.getCountsAsMap();
+            if (counts != null)
+                ratingEngineSummary.setBucketMetadata(counts.keySet().stream()
+                        .map(c -> new BucketMetadata(BucketName.fromValue(c), counts.get(c).intValue()))
+                        .collect(Collectors.toList()));
         }
 
         Date lastRefreshedDate = findLastRefreshedDate(tenantId);

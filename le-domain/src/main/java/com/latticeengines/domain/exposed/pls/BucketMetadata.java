@@ -179,4 +179,12 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
         return JsonUtils.serialize(this);
     }
 
+    public BucketMetadata() {
+    }
+
+    public BucketMetadata(BucketName bucketName, int numleads) {
+        this.bucketName = bucketName;
+        this.numLeads = numleads;
+    }
+
 }
