@@ -379,6 +379,8 @@ angular.module('lp.ratingsengine')
             note: $stateParams.opts !== undefined ? $stateParams.opts.note : rating.note
         };
 
+        var params = {};
+
         if (rating.type !== undefined && rating.type === 'CROSS_SELL') {
             opts.activeModel = {
                 AI: {
@@ -394,9 +396,15 @@ angular.module('lp.ratingsengine')
                     modelingStrategy: rating.advancedRatingConfig.cross_sell.modelingStrategy
                 }
             };
-        };
+        } else if (rating.type != undefined && rating.type == 'CUSTOM_EVENT') {
+            if ($stateParams.rating_id && RatingsEngineStore.getCustomEventModelingType() == 'LPI') {
+                params = {
+                    'unlink-segment': true
+                }
+            }
+        }
 
-        RatingsEngineService.saveRating(opts).then(function(data){
+        RatingsEngineService.saveRating(opts, params).then(function(data){
             RatingsEngineStore.setRating(data);
             deferred.resolve(data);
         });
@@ -745,7 +753,8 @@ angular.module('lp.ratingsengine')
     this.nextSaveCustomEventRatingEngine = function(nextState){
 
         var opts = {
-          type: "CUSTOM_EVENT"
+          type: "CUSTOM_EVENT",
+          id: $stateParams.rating_id ? $stateParams.rating_id : null
         };
 
         RatingsEngineStore.saveRating(opts, RatingsEngineStore.getCustomEventModelingType() == 'LPI').then(function(rating) {
@@ -1023,13 +1032,14 @@ angular.module('lp.ratingsengine')
         return deferred.promise;
     }
 
-    this.saveRating = function(opts) {
+    this.saveRating = function(opts, params) {
         var deferred = $q.defer();
 
         $http({
             method: 'POST',
             url: '/pls/ratingengines',
-            data: opts
+            data: opts,
+            params: params || {}
         }).then(function(response){
             deferred.resolve(response.data);
         });

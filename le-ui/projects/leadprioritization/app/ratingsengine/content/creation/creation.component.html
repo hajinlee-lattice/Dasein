@@ -32,7 +32,7 @@
                     <dd ng-if="vm.showSetting('availableAttributes')"> {{vm.availableAttributes}}</dd>
 
                     <dt ng-if="vm.showSetting('scoreExternalFile')">Score External File:</dt>
-                    <dd ng-if="vm.showSetting('scoreExternalFile')"> {{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.modelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
+                    <dd ng-if="vm.showSetting('scoreExternalFile')"> {{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
 
                 </dl>
                 <dl ng-if="vm.hasSettingsInfo">
