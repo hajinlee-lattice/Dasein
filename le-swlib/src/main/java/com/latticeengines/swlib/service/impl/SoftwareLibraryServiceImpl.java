@@ -182,15 +182,18 @@ public class SoftwareLibraryServiceImpl implements SoftwareLibraryService, Initi
     public ApplicationContext loadSoftwarePackages(String module, ApplicationContext context,
             VersionManager versionManager) {
         log.info("Did not specify a pkg name, loading all libraries.");
-        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(SoftwareLibrary.Module.valueOf(module),
-                Arrays.asList(SoftwareLibrary.values()));
-        return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
+        return loadSoftwarePackages(module, Arrays.asList(SoftwareLibrary.values()), context, versionManager);
     }
 
     public ApplicationContext loadSoftwarePackages(String module, Collection<String> names, ApplicationContext context,
             VersionManager versionManager) {
-        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(SoftwareLibrary.Module.valueOf(module),
-                names.stream().map(SoftwareLibrary::fromName).collect(Collectors.toList()));
+        return loadSoftwarePackages(module, names.stream().map(SoftwareLibrary::fromName).collect(Collectors.toList()),
+                context, versionManager);
+    }
+
+    private ApplicationContext loadSoftwarePackages(String module, List<SoftwareLibrary> swlibs,
+            ApplicationContext context, VersionManager versionManager) {
+        List<SoftwareLibrary> deps = SoftwareLibrary.getLoadingSequence(SoftwareLibrary.Module.valueOf(module), swlibs);
         return loadSoftwarePackagesInSequence(module, deps, context, versionManager.getCurrentVersion());
     }
 
