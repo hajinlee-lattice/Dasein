@@ -284,59 +284,6 @@ public class StatsCubeUtils {
         return bucket;
     }
 
-    /* Respect to @Yunfeng's code. R.I.P
-    private static Bucket convertTxnBucket(String productId, NamedPeriod namedPeriod, TransactionMetrics metric,
-            Bucket bucket) {
-        TimeFilter timeFilter = null;
-        AggregationFilter spentFilter = null, unitFilter = null;
-
-        String period = null;
-        ComparisonType comparator = null;
-        List<Object> values = null;
-        switch (namedPeriod) {
-        case HASEVER:
-            timeFilter = TimeFilter.ever();
-            break;
-        case LASTQUARTER:
-            period = TimeFilter.Period.Quarter.name();
-            comparator = ComparisonType.EQUAL;
-            values = Collections.singletonList(1);
-            timeFilter = new TimeFilter(comparator, period, values);
-            break;
-        default:
-            break;
-        }
-
-        Boolean negate = null;
-        boolean isAmount = false;
-        switch (metric) {
-        case PURCHASED:
-            negate = "No".equalsIgnoreCase(bucket.getLabel());
-            break;
-        case AMOUNT:
-            isAmount = true;
-        case QUANTITY:
-            AggregationFilter aggFilter = new AggregationFilter(null, null, bucket.getComparisonType(),
-                    bucket.getValues());
-            if (isAmount) {
-                spentFilter = aggFilter;
-            } else {
-                unitFilter = aggFilter;
-            }
-            break;
-        default:
-            break;
-        }
-        
-
-        Bucket.Transaction transaction = new Bucket.Transaction(productId, timeFilter, spentFilter, unitFilter, negate);
-        bucket.setComparisonType(null);
-        bucket.setValues(null);
-        bucket.setTransaction(transaction);
-        return bucket;
-    }
-    */
-
     public static StatsCube retainTop5Bkts(StatsCube cube) {
         Map<String, AttributeStats> newStats = new HashMap<>();
         cube.getStatistics().forEach((attrName, attrStats) -> newStats.put(attrName, retainTop5Bkts(attrStats)));
