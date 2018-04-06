@@ -10,6 +10,8 @@
     <import resource="classpath:monitor-metric-context.xml"/>
 
     <import resource="classpath:common-webapp-env-context.xml"/>
+    <import resource="classpath:common-webapp-oauth2-env-context.xml"/>
+    
     <bean class="com.latticeengines.ulysses.swagger.SwaggerConfig" />
 
     <bean id="ulyssesHealthCheck" class="com.latticeengines.monitor.exposed.metric.stats.impl.HealthInspection">

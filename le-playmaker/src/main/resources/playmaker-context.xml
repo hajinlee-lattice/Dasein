@@ -20,7 +20,8 @@
     <import resource="classpath:playmakercore-context.xml" />
     <import resource="classpath:oauth2db-context.xml" />
     <import resource="classpath:monitor-metric-context.xml"/>
-
+    <import resource="classpath:common-webapp-oauth2-env-context.xml"/>
+    
     <bean id="batonService" 
         class="com.latticeengines.baton.exposed.service.impl.BatonServiceImpl"/>
 </beans>

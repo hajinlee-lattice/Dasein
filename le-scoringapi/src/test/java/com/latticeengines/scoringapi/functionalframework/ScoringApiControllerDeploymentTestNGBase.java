@@ -54,6 +54,8 @@ import com.latticeengines.testframework.service.impl.GlobalAuthDeploymentTestBed
 @Listeners({ GlobalAuthCleanupTestListener.class })
 public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunctionalTestNGBase {
 
+    private static final Logger log = LoggerFactory.getLogger(ScoringApiControllerDeploymentTestNGBase.class);
+
     protected static final String TEST_MODEL_FOLDERNAME = "3MulesoftAllRows20160314_112802";
     protected static final String MODEL_NAME = TEST_MODEL_FOLDERNAME;
     protected static final String LOCAL_MODEL_PATH = "com/latticeengines/scoringapi/model/" + TEST_MODEL_FOLDERNAME
@@ -64,9 +66,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     protected static final String EVENT_TABLE = TEST_MODEL_FOLDERNAME;
     protected static final String SOURCE_INTERPRETATION = "SalesforceLead";
     protected static final String MODELSUMMARYJSON_LOCALPATH = LOCAL_MODEL_PATH + ModelRetrieverImpl.MODEL_JSON;
-    private static final Logger log = LoggerFactory.getLogger(ScoringApiControllerDeploymentTestNGBase.class);
+    protected static final String CLIENT_ID_LP = "lp";
+    protected static final String CLIENT_ID_PLAYMAKER = "playmaker";
 
-    private static final String CLIENT_ID_LP = "lp";
     private static final String DUMMY_APP_ID = "DUMMY_APP";
     public CustomerSpace customerSpace;
     protected String MODEL_ID;
@@ -122,24 +124,31 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
             userEntityMgr = applicationContext.getBean(OAuthUserEntityMgr.class);
             oAuthUser = getOAuthUser(tenant.getId());
 
-            if (shouldUseAppId()) {
-                System.out.println("Requesting access token for appi id: " + getAppIdForOauth2());
-                oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, CLIENT_ID_LP,
-                        getAppIdForOauth2(), authHostPort);
-            } else {
-                oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
-                        oAuthUser.getPassword(), CLIENT_ID_LP);
-            }
-            OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
-            log.info(accessToken.getValue());
-
-            System.out.println(accessToken.getValue());
+            oAuth2RestTemplate = createOAuth2RestTemplate(CLIENT_ID_LP);
         }
 
         if (shouldSelectAttributeBeforeTest()) {
             internalResourceRestApiProxy = new InternalResourceRestApiProxy(plsApiHostPort);
             saveAttributeSelectionBeforeTest(customerSpace);
         }
+    }
+
+    protected OAuth2RestTemplate createOAuth2RestTemplate(String clientId) {
+        OAuth2RestTemplate oAuth2RestTemplate = null;
+        if (shouldUseAppId()) {
+            log.info(String.format("Requesting access token for app id = %s, user id = %s, password = %s, client id = %s", getAppIdForOauth2(),oAuthUser.getUserId(),
+                    oAuthUser.getPassword(),
+                    clientId));
+            oAuth2RestTemplate = latticeOAuth2RestTemplateFactory.getOAuth2RestTemplate(oAuthUser, clientId,
+                    getAppIdForOauth2(), authHostPort);
+        } else {
+            oAuth2RestTemplate = OAuth2Utils.getOauthTemplate(authHostPort, oAuthUser.getUserId(),
+                    oAuthUser.getPassword(), clientId);
+        }
+        OAuth2AccessToken accessToken = OAuth2Utils.getAccessToken(oAuth2RestTemplate);
+        log.info(String.format("Oauth access token = %s", accessToken.getValue()));
+
+        return oAuth2RestTemplate;
     }
 
     protected boolean shouldInit() {

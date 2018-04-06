@@ -258,9 +258,6 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         String url = apiHostPort + "/score/enrichment/selectedpremiumattributes/count";
         Integer count = oAuth2RestTemplate.getForObject(url, Integer.class);
         Assert.assertNotNull(count);
-        if(count.intValue() !=  MAX_PREMIUM_SELECT){
-            System.exit(1);
-        }
         Assert.assertEquals(count.intValue(), MAX_PREMIUM_SELECT);
     }
 
@@ -334,7 +331,8 @@ public class EnrichmentResourceDeploymentTestNG extends ScoringApiControllerDepl
         Assert.assertEquals(count.intValue(), 3);
     }
 
-    @Test(groups = "deployment", enabled = false, dependsOnMethods = {"testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
+    @Test(groups = "deployment", enabled = false, dependsOnMethods = {
+            "testGetLeadEnrichmentSelectedAttributeCountAfterSecondSave" })
     public void testGetLeadEnrichmentAttributesWithParamsAfterSecondSave() throws IOException {
         List<LeadEnrichmentAttribute> combinedAttributeList = getLeadEnrichmentAttributeList(false,
                 SEARCH_DISPLAY_NAME_STR1, Category.TECHNOLOGY_PROFILE);

@@ -6,6 +6,7 @@
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
     <import resource="classpath:common-webapp-env-context.xml"/>
+    <import resource="classpath:common-webapp-oauth2-env-context.xml"/>
     <import resource="classpath:db-context.xml" />
     <import resource="classpath:scoringapi-yarn-config-context.xml" />
     <import resource="classpath:datafabric-context.xml" />

@@ -14,8 +14,9 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
+import com.latticeengines.common.exposed.web.oauth2.LatticeOauth2AuthenticationManager;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 
 @Configuration
 @EnableResourceServer
@@ -28,7 +29,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
     private DataSource dataSource;
 
     @Autowired
-    private UlyssesOauth2AuthenticationManager ulyssesAuthenticationManager;
+    private LatticeOauth2AuthenticationManager latticeAuthenticationManager;
 
     @Bean
     public JdbcTokenStore tokenStore() {
@@ -43,7 +44,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
         authenticationEntryPoint.setExceptionTranslator(translator);
         resources.authenticationEntryPoint(authenticationEntryPoint);
-        resources.authenticationManager(ulyssesAuthenticationManager);
+        resources.authenticationManager(latticeAuthenticationManager);
     }
 
     @Override
@@ -69,8 +70,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/ulysses/datacollection/attributes/**", //
                         "/ulysses/datacollection/accounts/**", //
                         "/ulysses/recommendations/**", //
-                        "/ulysses/talkingpoints/**",
-                        "/ulysses/api-gateway/**") //
+                        "/ulysses/talkingpoints/**", "/ulysses/api-gateway/**") //
                 .access("#oauth2.hasScope('read') or (!#oauth2.isOAuth() and hasRole('LP_CLIENT'))")
                 .antMatchers("/ulysses/**").denyAll();
 

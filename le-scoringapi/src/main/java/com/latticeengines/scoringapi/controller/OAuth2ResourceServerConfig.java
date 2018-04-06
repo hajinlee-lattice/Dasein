@@ -3,6 +3,7 @@ package com.latticeengines.scoringapi.controller;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,6 +14,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
+import com.latticeengines.common.exposed.web.oauth2.LatticeOauth2AuthenticationManager;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.scoringapi.exposed.exception.ExceptionEncodingTranslator;
 
@@ -25,6 +27,9 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
+
+    @Autowired
+    private LatticeOauth2AuthenticationManager latticeAuthenticationManager;
 
     @Bean
     public JdbcTokenStore tokenStore() {
@@ -39,6 +44,8 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
         authenticationEntryPoint.setExceptionTranslator(translator);
         resources.authenticationEntryPoint(authenticationEntryPoint);
+        resources.authenticationManager(latticeAuthenticationManager);
+
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.latticeengines.playmaker.controller;
 import javax.annotation.Resource;
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,6 +15,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
+import com.latticeengines.common.exposed.web.oauth2.LatticeOauth2AuthenticationManager;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
@@ -26,6 +28,9 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
 
     @Resource(name = "dataSourceOauth2")
     private DataSource dataSource;
+
+    @Autowired
+    private LatticeOauth2AuthenticationManager latticeAuthenticationManager;
 
     @Bean
     public JdbcTokenStore tokenStore() {
@@ -40,6 +45,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
         ExceptionEncodingTranslator translator = new ExceptionEncodingTranslator();
         authenticationEntryPoint.setExceptionTranslator(translator);
         resources.authenticationEntryPoint(authenticationEntryPoint);
+        resources.authenticationManager(latticeAuthenticationManager);
     }
 
     @Override
@@ -60,14 +66,16 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                         "/playmaker/swagger-ui.html", //
                         "/playmaker/webjars/**", //
                         "/playmaker/swagger-resources", //
+                        "/playmaker/quartzjob", //
                         "/playmaker/configuration/**")
                 .and().authorizeRequests() //
-                .antMatchers(
-                        "/health", //
+                .antMatchers("/health", //
+                        "/playmaker/quartzjob", //
                         "/playmaker/health", //
                         "/playmaker/v2/api-docs/**", //
                         "/**/favicon.ico", //
-                        "/swagger-resources/**").permitAll() //
+                        "/swagger-resources/**")
+                .permitAll() //
                 .antMatchers(HttpMethod.POST, "/tenants", "/playmaker/tenants").permitAll() //
                 .antMatchers("/tenants/**", "/playmaker/tenants/**")
                 .access("#oauth2.hasScope('write') or (!#oauth2.isOAuth() and hasRole('PLAYMAKER_ADMIN'))") //
