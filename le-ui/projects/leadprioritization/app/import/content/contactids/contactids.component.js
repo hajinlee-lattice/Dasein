@@ -29,9 +29,13 @@ angular.module('lp.import.wizard.contactids', [])
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);
 
+        var userFields = [];
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-            vm.AvailableFields.push(fieldMapping);
+            if(userFields.indexOf(fieldMapping.userField) === -1) {
+                userFields.push(fieldMapping.userField);
+                vm.AvailableFields.push(fieldMapping);
+            }
             for(var i in vm.mappedFieldMap) {
                 if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
                     vm.fieldMapping[i] = fieldMapping.userField;
@@ -43,7 +47,10 @@ angular.module('lp.import.wizard.contactids', [])
                 vm.saveMap[fieldMapping.originalMappedField] = fieldMapping;
 
                 vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-                vm.AvailableFields.push(fieldMapping);
+                if(userFields.indexOf(fieldMapping.userField) === -1) {
+                    userFields.push(fieldMapping.userField);
+                    vm.AvailableFields.push(fieldMapping);
+                }
                 for(var i in vm.mappedFieldMap) {
                     if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
                         vm.fieldMapping[i] = fieldMapping.userField

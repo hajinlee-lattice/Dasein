@@ -1,7 +1,7 @@
 angular.module('lp.import.calendar', [])
 .controller('ImportWizardCalendar', function(
     $state, $stateParams, $scope, $timeout, $sce, $window,
-    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory
+    NumberUtility, ResourceUtility, ImportWizardStore, ImportWizardService, Calendar, FieldDocument, StateHistory, ModalStore
 ) {
     var vm = this,
         debug = false, // goto /import/calendar
@@ -142,20 +142,65 @@ angular.module('lp.import.calendar', [])
     }
 
     vm.saveCalendar = function() {
-        vm.saving = true;
         vm.calendar.longerMonth = vm.selectedQuarter;
         ImportWizardService.validateCalendar(vm.calendar).then(function(result) {
             if(!result.errorCode) {
+                vm.toggleModal();
+            }
+        });
+    }
+
+    vm.initModalWindow = function () {
+        vm.modalConfig = {
+            'name': "import_calendar",
+            'type': 'sm',
+            'title': 'Warning',
+            'titlelength': 100,
+            'dischargetext': 'Cancel',
+            'dischargeaction': 'cancel',
+            'confirmtext': 'Yes, Update',
+            'confirmaction': 'proceed',
+            'icon': 'fa fa-exclamation-triangle',
+            'iconstyle': {'color': 'white'},
+            'confirmcolor': 'blue-button',
+            'showclose': true,
+            'headerconfig': {'background-color':'#FDC151', 'color':'white'},
+            'confirmstyle' : {'background-color':'#FDC151'}
+        };
+
+        vm.modalCallback = function (args) {
+            console.log(args);
+            if (vm.modalConfig.dischargeaction === args) {
+                vm.toggleModal();
+            } else if (vm.modalConfig.confirmaction === args) {
+                vm.toggleModal();
+            }
+            if(args === 'proceed') {
                 if(debug) {
                     console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
                 } else {
+                    vm.saving = true;
                     ImportWizardService.saveCalendar(vm.calendar).then(function(result) {
                         $state.go(vm.lastFrom.name);
                     });
                 }
             }
+        }
+
+        vm.toggleModal = function () {
+            var modal = ModalStore.get(vm.modalConfig.name);
+            if (modal) {
+                modal.toggle();
+            }
+        }
+
+        $scope.$on("$destroy", function () {
+            ModalStore.remove(vm.modalConfig.name);
         });
     }
+
+    vm.initModalWindow();
+
 
     vm.init();
 });

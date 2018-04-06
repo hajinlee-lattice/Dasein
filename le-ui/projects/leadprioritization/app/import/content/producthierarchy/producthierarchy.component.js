@@ -19,6 +19,7 @@ angular.module('lp.import.wizard.producthierarchy', [])
         },
         UnmappedFieldsMappingsMap: {},
         savedFields: ImportWizardStore.getSaveObjects($state.current.name),
+        allSavedFields: ImportWizardStore.getSaveObjects(),
         initialMapping: {},
         keyMap: {},
         saveMap: {}
@@ -49,6 +50,23 @@ angular.module('lp.import.wizard.producthierarchy', [])
                     if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
                         vm.fieldMapping[i] = fieldMapping.userField
                     }
+                }
+            });
+        }
+        if(vm.allSavedFields && Object.keys(vm.allSavedFields).length) {
+            for(var i in vm.allSavedFields) {
+                var fieldMappings = vm.allSavedFields[i];
+
+                fieldMappings.forEach(function(fieldMapping, index) {
+                    if(fieldMapping.mappedField) {
+                        vm.unavailableFields.push(fieldMapping.userField);
+                    }
+                });
+            }
+        } else {
+            vm.fieldMappings.forEach(function(fieldMapping, index) {
+                if(fieldMapping.mappedField) {
+                    vm.unavailableFields.push(fieldMapping.userField);
                 }
             });
         }
