@@ -31,13 +31,15 @@
                 </div>
 
                 <div class="row">
-<!--                     <label id="includePersonalEmailDomainsCheckbox"><input type="checkbox" id="cbox2" data-ng-model="vm.includePersonalEmailDomains" data-ng-checked="vm.includePersonalEmailDomains" ng-click="vm.setTrainingOptions('excludePublicDomains')"> Include personal email domains </label><br /> -->
                     <label id="oneLeadPerDomainCheckbox">
                         <input type="checkbox" id="cbox1" data-ng-checked="vm.modelTrainingOptions.deduplicationType == 'ONELEADPERDOMAIN'" ng-click="vm.setTrainingOptions('deduplicationType')"> One record per account
                     </label><br />
                     <label id="includePersonalEmailDomainsCheckbox">
                         <input type="checkbox" id="cbox2" data-ng-checked="!vm.modelTrainingOptions.excludePublicDomains" ng-click="vm.setTrainingOptions('excludePublicDomains')"> Include personal email domains 
                     </label><br />
+<!--                     <label id="transformationGroup">
+                        <input type="checkbox" id="cbox3" data-ng-checked="!vm.modelTrainingOptions.transformationGroup" ng-click="vm.setTrainingOptions('transformationGroup')"> Use curated attributes 
+                    </label><br /> -->
                 </div>
             </form>
         </div>

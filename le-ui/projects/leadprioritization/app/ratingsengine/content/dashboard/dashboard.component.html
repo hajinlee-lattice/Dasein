@@ -68,17 +68,17 @@
                         <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.prioritizeBy }}</dd>
 
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Available Attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.getCustomEventAvailableAttributes(vm.ratingEngine.activeModel.AI)}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Score External File:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.customEventModelingType == 'LPI' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Training File:</dt>
                         <dd class="text-ellipsis" ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.sourceFileName}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">One record per account:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.deduplicationType == 'ONELEADPERDOMAIN' ? 'Yes' : 'No'}}</dd>
                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Include personal email domains:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
-                        <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
-                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Yes</dd>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.excludePublicDomains ? 'No' : 'Yes'}}</dd>
+<!--                         <dt ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">Use curated attributes:</dt>
+                        <dd ng-if="vm.modelingStrategy === 'CUSTOM_EVENT'">{{ vm.ratingEngine.activeModel.AI.advancedModelingConfig.custom_event.transformationGroup ? 'No' : 'Yes'}}</dd> -->
 
                         <dt ng-if="vm.hasSettingsInfo">Model Settings:</dt>
                         <dd ng-if="vm.hasSettingsInfo">

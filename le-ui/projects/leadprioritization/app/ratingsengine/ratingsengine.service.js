@@ -53,6 +53,7 @@ angular.module('lp.ratingsengine')
         this.modelTrainingOptions = {
             "deduplicationType": "ONELEADPERDOMAIN",
             "excludePublicDomains": false,
+            "transformationGroup": null
         },
         this.customEventModelingType = "";
         this.FieldDocument = {};
@@ -784,6 +785,7 @@ angular.module('lp.ratingsengine')
                             sourceFileName: fileName,
                             deduplicationType: modelTrainingOptions['deduplicationType'],
                             excludePublicDomains: modelTrainingOptions['excludePublicDomains']
+                            // transformationGroup: modelTrainingOptions['transformationGroup']
                         }
                     }
                 }
@@ -935,6 +937,17 @@ angular.module('lp.ratingsengine')
             // console.log('Model Launched', id, nextState);
             $state.go(nextState, { ai_model_job_id: id });
         });
+    }
+
+    this.formatTrainingAttributes = function(type) {
+        switch (type) {
+            case 'DataCloud':
+                return 'Lattice Data Cloud';
+            case 'CDL':
+                return 'Lattice Database';
+            case 'CustomFileAttributes':
+                return 'Training File';
+        }
     }
 
 })

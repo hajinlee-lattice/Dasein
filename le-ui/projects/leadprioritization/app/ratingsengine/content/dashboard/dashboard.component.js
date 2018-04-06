@@ -435,5 +435,11 @@ angular.module('lp.ratingsengine.dashboard', [
         return product.ProductName;
     };
 
+    vm.getCustomEventAvailableAttributes = function(model) {
+        var dataStore = model.advancedModelingConfig.custom_event.dataStores;
+        return dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : 
+                RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
+    };
+
     vm.init();
 });

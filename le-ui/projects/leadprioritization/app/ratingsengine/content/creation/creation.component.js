@@ -106,7 +106,7 @@ angular.module('lp.ratingsengine.wizard.creation', [])
             vm.prioritizeBy = 'Likely to Buy';
 
             var dataStore = model.advancedModelingConfig.custom_event.dataStores;
-            vm.availableAttributes = dataStore.length == 1 ? vm.formatTrainingAttributes(dataStore[0]) : vm.formatTrainingAttributes(dataStore[0]) + ' + ' + vm.formatTrainingAttributes(dataStore[1]);
+            vm.availableAttributes = dataStore.length == 1 ? RatingsEngineStore.formatTrainingAttributes(dataStore[0]) : RatingsEngineStore.formatTrainingAttributes(dataStore[0]) + ' + ' + RatingsEngineStore.formatTrainingAttributes(dataStore[1]);
 
         }
 
@@ -116,37 +116,39 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     vm.checkJobStatus = $interval(function() { 
         var appId = vm.ratingEngine.activeModel.AI.modelingJobId ? vm.ratingEngine.activeModel.AI.modelingJobId : RatingsEngineStore.getApplicationId(); // update once backend sets modelingjobId for CE
-        JobsStore.getJobFromApplicationId(appId).then(function(result) {
-            // console.log(result);
-            if(result.id) {
-                vm.status = result.jobStatus;
+        if (appId) {
+            JobsStore.getJobFromApplicationId(appId).then(function(result) {
+                // console.log(result);
+                if(result.id) {
+                    vm.status = result.jobStatus;
 
-                vm.jobStarted = true;
-                vm.startTimestamp = result.startTimestamp;
-            
-                vm.completedSteps = result.completedTimes;
+                    vm.jobStarted = true;
+                    vm.startTimestamp = result.startTimestamp;
+                
+                    vm.completedSteps = result.completedTimes;
 
-                var globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
-                vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
-                vm.matchingToDataCloud = vm.completedSteps.load_data && !globalStep;
-                vm.scoringTrainingSet = globalStep && !vm.completedSteps.score_training_set;
-                // Green status bar
-                if(result.stepsCompleted.length > 0){
-                    var tmp = ((result.stepsCompleted.length / 2) * 5.5);
-                    if(tmp > 100 && vm.status !== 'Completed'){
-                        tmp = 99;
+                    var globalStep = vm.type == 'cross_sell' ? vm.completedSteps.create_global_target_market : vm.completedSteps.create_global_model;
+                    vm.loadingData = vm.startTimestamp && !vm.completedSteps.load_data;
+                    vm.matchingToDataCloud = vm.completedSteps.load_data && !globalStep;
+                    vm.scoringTrainingSet = globalStep && !vm.completedSteps.score_training_set;
+                    // Green status bar
+                    if(result.stepsCompleted.length > 0){
+                        var tmp = ((result.stepsCompleted.length / 2) * 5.5);
+                        if(tmp > 100 && vm.status !== 'Completed'){
+                            tmp = 99;
+                        }
+                        vm.progress = tmp + '%';
                     }
-                    vm.progress = tmp + '%';
+                    // Cancel $interval when completed
+                    if(vm.status === 'Completed'){
+                        vm.progress = 100 + '%';
+                        $interval.cancel(vm.checkJobStatus);
+                    } else if (vm.status == 'Failed') {
+                        $interval.cancel(vm.checkJobStatus);
+                    }
                 }
-                // Cancel $interval when completed
-                if(vm.status === 'Completed'){
-                    vm.progress = 100 + '%';
-                    $interval.cancel(vm.checkJobStatus);
-                } else if (vm.status == 'Failed') {
-                    $interval.cancel(vm.checkJobStatus);
-                }
-            }
-        });
+            });
+        }
     }, 10 * 1000);
 
     $scope.$on('$destroy', function(){
@@ -167,17 +169,6 @@ angular.module('lp.ratingsengine.wizard.creation', [])
 
     vm.getTrainingFileName = function() {
         return RatingsEngineStore.getDisplayFileName();
-    }
-
-    vm.formatTrainingAttributes = function(type) {
-        switch (type) {
-            case 'DataCloud':
-                return 'Lattice Data Cloud';
-            case 'CDL':
-                return 'Lattice Database';
-            case 'CustomFileAttributes':
-                return 'Training File';
-        }
     }
 
     vm.showSetting = function(setting) {

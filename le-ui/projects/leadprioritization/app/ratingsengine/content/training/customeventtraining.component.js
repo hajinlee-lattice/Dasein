@@ -90,6 +90,9 @@ angular.module('lp.ratingsengine.wizard.training')
                 case 'excludePublicDomains':
                     RatingsEngineStore.modelTrainingOptions[trainingOption] = !current;
                     return;
+                case 'transformationGroup':
+                    RatingsEngineStore.modelTrainingOptions[trainingOption] = current == 'NONE' ? null : 'NONE';
+                    return;
             }
             
 
