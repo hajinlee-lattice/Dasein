@@ -381,7 +381,7 @@ class ECSInstance(EC2Instance):
             },
             "CreationPolicy": {
                 "ResourceSignal": {
-                    "Timeout": "PT60M"
+                    "Timeout": "PT10M"
                 }
             }
         }
