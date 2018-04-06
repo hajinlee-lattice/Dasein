@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/customerspaces/{customerSpace}/attrconfig")
 public class CDLAttrConfigResource {
     @Inject
-    private CDLAttrConfigServiceImpl cdlAttrConfigSevice;
+    private CDLAttrConfigServiceImpl cdlAttrConfigService;
 
     @GetMapping(value = "")
     @ResponseBody
@@ -32,7 +32,7 @@ public class CDLAttrConfigResource {
     public AttrConfigRequest getAttrConfig(@PathVariable String customerSpace,
             @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         AttrConfigRequest request = new AttrConfigRequest();
-        List<AttrConfig> attrConfigs = cdlAttrConfigSevice.getRenderedList(customerSpace, entity);
+        List<AttrConfig> attrConfigs = cdlAttrConfigService.getRenderedList(customerSpace, entity);
         request.setAttrConfigs(attrConfigs);
         return request;
     }
