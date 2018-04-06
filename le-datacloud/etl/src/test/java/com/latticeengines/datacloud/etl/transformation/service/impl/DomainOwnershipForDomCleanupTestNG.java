@@ -8,9 +8,9 @@ import java.util.Map;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -97,12 +97,12 @@ public class DomainOwnershipForDomCleanupTestNG
                 { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211 },
                 { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212 },
                 { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213 },
-                { "velocity.com", "DUNS26", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
+                { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
                 // domains present in OwnershipTable : rootDuns match
                 { "karlDuns2.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 215 },
                 { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216 },
                 // domains present in OwnershipTable : rootDuns doesnt match
-                { "karlDuns1.com", "DUNS26", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
+                { "karlDuns1.com", "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
                 { "karlDuns2.com", "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218 },
                 { "netappDuns2.com", "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", 219 },
                 { "unicef.org", "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", 220 },
@@ -254,16 +254,16 @@ public class DomainOwnershipForDomCleanupTestNG
     }
 
     Object[][] expectedDataValues = new Object[][] { //
+            // Domain, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE, IS_NON_PROFITABLE
             { "karlDuns1.com", "DUNS33", "DUNS", 2, "HIGHER_SALES_VOLUME", "false" }, //
-            { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "sbiDuns2.com", "DUNS10", "GU", 3, "HIGHER_NUM_OF_LOC", "false" }, //
+            { "karlDuns2.com", "DUNS28", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "amazon.com", null, null, 3, "MULTIPLE_LARGE_COMPANY", "false" }, //
             { "netappDuns2.com", "DUNS17", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "sbiDuns1.com", null, null, 6, "FRANCHISE", "false" }, //
             { "unicef.org", "DUNS39", "GU", 2, "HIGHER_NUM_OF_LOC", "true" }, //
             { "goodwill.com", "DUNS54", "DUNS", 3, "HIGHER_EMP_TOTAL", "true" }, //
             { "tesla.com", null, null, 3, "OTHER", "false" }, //
-            { "rubrik.com", "DUNS75", "GU", 3, "HIGHER_SALES_VOLUME", "false" }, //
             { "paypal.com", "DUNS75", "GU", 2, "HIGHER_SALES_VOLUME", "false" }, //
             { "netappDuns1.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
             { "goodWillOrg.com", "DUNS59", "GU", 1, "SINGLE_TREE", "false" }, //
@@ -275,17 +275,23 @@ public class DomainOwnershipForDomCleanupTestNG
             { "amazonGu.com", "DUNS36", "GU", 1, "SINGLE_TREE", "false" }, //
             { "regalGoodWill.com", "DUNS55", "GU", 1, "SINGLE_TREE", "false" }, //
             { "karlDu.com", "DUNS24", "DU", 1, "SINGLE_TREE", "false" }, //
-            { "velocity.com", "DUNS8", "GU", 1, "SINGLE_TREE", "false" }, //
             { "craigslist.com", "DUNS28", "GU", 1, "SINGLE_TREE", "false" }, //
             { "sbiGu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
             { "mongodbDu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
             { "mongodbGu.com", "DUNS17", "GU", 1, "SINGLE_TREE", "false" }, //
             { "sbiDu.com", "DUNS10", "GU", 1, "SINGLE_TREE", "false" }, //
             { "socialorg.com", "DUNS54", "DUNS", 1, "SINGLE_TREE", "true" }, //
-            { "netsuite.com", "DUNS900", "GU", 1, "SINGLE_TREE", "false" }, //
+            // missing root DUNS entry case (in single or multiple trees)
+            // rootDuns = DUNS900
+            { "netsuite.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
+            // rootDuns = 900
+            { "rubrik.com", null, null, 3, "MISSING_ROOT_DUNS", "false" }, //
+            // rootDuns = DUNS8
+            { "velocity.com", null, null, 1, "MISSING_ROOT_DUNS", "false" }, //
     };
 
     Object[][] amSeedCleanedUpValues = new Object[][] { //
+            // Domain, DUNS, GU, DU, SalesVolume, EmpTotal, NumOfLoc, PrimInd, AlexaRank
             // domains not present in OwnershipTable : result = domain not
             // cleaned up
             { "sbiGu.com", "DUNS10", "DUNS10", "DUNS11", 21100024L, "50000", 60, "Food Production", 200 },
@@ -302,20 +308,17 @@ public class DomainOwnershipForDomCleanupTestNG
             { "worldwildlife.org", "DUNS06", "DUNS39", null, 204500L, "1500", 1, "Government", 211 },
             { "wordwildlifeGu.org", "DUNS39", "DUNS39", "DUNS38", 304500L, "3700", 3, "Education", 212 },
             { "socialorg.com", "DUNS54", null, null, 94500L, "98924", 2, "Education", 213 },
-            { "velocity.com", "DUNS26", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
-            // domains present in OwnershipTable (rootDuns match) : result =
-            // domain not cleaned up
-            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83 }, // example domain replaced by amSeedCleanup 
-            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216 },
-            // domains present in OwnershipTable (rootDuns doesn't match) :
-            // result = domain cleaned up
-            { null, "DUNS26", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
+            { "velocity.com", "DUNS96", "DUNS8", null, 131314L, "232", 1, "Media", 214 },
+            // domains present in OwnershipTable (rootDuns match) : result = domain not cleaned up
+            { "netappDuns1.com", "DUNS34", "DUNS28", null, 304500L, "2200", 1, "Media", 83 }, // example domain replaced by amSeedCleanup
+            // domains present in OwnershipTable (rootDuns doesn't match) : result = domain cleaned up
+            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223 },
+            { null, "DUNS97", null, "DUNS24", 30191910L, "1001", 1, "Accounting", 217 },
             { null, "DUNS27", null, "DUNS24", 30450010L, "220", 2, "Research", 218 },
             { null, "DUNS33", null, null, 30450010L, "8000", 3, "Biotechnology", 219 },
             { null, "DUNS22", null, null, 104500L, "3700", 2, "Non-profit", 220 },
             { null, "DUNS53", "DUNS55", null, 8502491L, "1232", 2, "Media", 221 },
             { null, "DUNS79", null, "DUNS59", 9502492L, "2714", 2, "Media", 222 },
-            { null, "DUNS01", null, "DUNS01", 21100024L, "50000", null, null, 223 },
             // domains present in OwnershipTable with reasons multiple large
             // company, franchise : result = not cleaned up
             { "amazon.com", "DUNS37", "DUNS36", null, null, "2200", 1, "Media", 224 },
@@ -335,18 +338,18 @@ public class DomainOwnershipForDomCleanupTestNG
             { null, "DUNS69", null, "DUNS69", 231131L, "1313", 2, "Non-profit", 235 },
             // added entries for orb cleanup for category
             { "paypal.com", "DUNS75", "DUNS75", null, 37875812L, "2425", 341, "Legal", 238 },
-            // rubrik.com entry replaced by paypal.com and alexa rank replaced
-            { "paypal.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 700 },
-            { null, "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241 },
             { "netsuite.com", "DUNS890", "DUNS900", null, 32847L, "4547", 13, "Media", 236 },
             { "paypalHQ.com", "DUNS891", "DUNS891", null, 23284781L, "447", 3, "Media", 237 },
             { null, "DUNS76", "DUNS891", null, 3787581L, "2425", 341, "Legal", 239 },
+            // dont cleanup to avoid missing root duns
+            { "sbiDuns2.com", "DUNS14", "DUNS10", "DUNS11", 500002499L, "6500", 3, "Legal", 216 },
+            { "rubrik.com", "DUNS89", "DUNS900", null, 126612L, "4547", 13, "Media", 241 },
+            { "rubrik.com", "DUNS70", "DUNS75", null, 128312L, "2133", 22, "Legal", 240 },
     };
 
     Object[][] orbSecSrcCleanedupValues = new Object[][] { //
-            // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             // PrimaryDomain, SecondaryDomain
-            { "paypal.com", "rubrik.com" },
+            // PriRootDuns != null, SecRootDuns != null, PriRootDuns == SecRootDuns
             { "netappDuns1.com", "karlDuns2.com" }, { "netappDuns1.com", "craigslist.com" },
             { "mongoDbDuns1.com", "netappDuns2.com" }, { "worldwildlife.org", "unicef.org" },
             { "socialorg.com", "goodwill.com" }
@@ -394,7 +397,7 @@ public class DomainOwnershipForDomCleanupTestNG
                     Assert.assertTrue(isObjEquals(priDomain, expected[1]));
                     rowCount++;
                 }
-                Assert.assertEquals(rowCount, 6);
+                Assert.assertEquals(rowCount, 5);
                 break;
         }
     }

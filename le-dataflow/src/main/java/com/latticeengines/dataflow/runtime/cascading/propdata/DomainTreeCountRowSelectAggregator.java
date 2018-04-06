@@ -17,6 +17,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     private String groupbyField;
     private String domainField;
     private String rootDunsField;
+    private String treeRootDunsField;
     private String dunsTypeField;
     private String salesVolField;
     private String totalEmpField;
@@ -29,6 +30,7 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     private final static String MULTIPLE_LARGE_COMPANY = "MULTIPLE_LARGE_COMPANY";
     private final static String HIGHER_EMP_TOTAL = "HIGHER_EMP_TOTAL";
     private final static String HIGHER_NUM_OF_LOC = "HIGHER_NUM_OF_LOC";
+    private final static String MISSING_ROOT_DUNS = "MISSING_ROOT_DUNS";
     private final static String SINGLE_TREE = "SINGLE_TREE";
     private final static String OTHER = "OTHER";
     public final static String GOVERNMENT = "Government";
@@ -38,12 +40,14 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     public final static Integer NON_PROFIT_TOTAL_EMP = 200;
 
     public DomainTreeCountRowSelectAggregator(Fields fieldDeclaration, String groupbyField, String domainField,
-            String rootDunsField, String dunsTypeField, String salesVolField, String totalEmpField,
+            String rootDunsField, String treeRootDunsField, String dunsTypeField, String salesVolField,
+            String totalEmpField,
             String numOfLocField, String primIndustryField, Long multLargeCompThreshold, int franchiseThreshold) {
         super(fieldDeclaration);
         this.groupbyField = groupbyField;
         this.domainField = domainField;
         this.rootDunsField = rootDunsField;
+        this.treeRootDunsField = treeRootDunsField;
         this.dunsTypeField = dunsTypeField;
         this.salesVolField = salesVolField;
         this.totalEmpField = totalEmpField;
@@ -93,8 +97,11 @@ public class DomainTreeCountRowSelectAggregator extends BaseAggregator<DomainTre
     @Override
     protected Context updateContext(Context context, TupleEntry arguments) {
         Long salesVolVal = (Long) arguments.getObject(salesVolField);
+        String treeRootDunsVal = arguments.getString(treeRootDunsField);
         context.numOfTrees += 1;
-
+        if (treeRootDunsVal == null) {
+            return cleanup(context, MISSING_ROOT_DUNS);
+        }
         if (salesVolVal != null && salesVolVal > multLargeCompThreshold) {
             context.numOfLargeComp += 1;
         }

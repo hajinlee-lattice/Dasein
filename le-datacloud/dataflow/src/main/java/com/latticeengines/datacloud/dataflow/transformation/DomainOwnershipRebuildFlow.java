@@ -24,6 +24,7 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
     public final static String DATAFLOW_BEAN_NAME = "FormDomainOwnershipTableFlow";
     public final static String TRANSFORMER_NAME = "FormDomOwnershipTableTransformer";
     private final static String ROOT_DUNS = "ROOT_DUNS";
+    private final static String TREE_ROOT_DUNS = "TREE_ROOT_DUNS";
     private final static String DUNS_TYPE = "DUNS_TYPE";
     private final static String TREE_NUMBER = "TREE_NUMBER";
     private final static String REASON_TYPE = "REASON_TYPE";
@@ -68,18 +69,17 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
                 .retain(new FieldList(ORB_SRC_SEC_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS)) //
                 .rename(new FieldList(ORB_SRC_SEC_DOMAIN), new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN)) //
                 .retain(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS));
+        Node rootTypePopulated = populateRootDuns(config, amSeedFilteredNull);
         // merge nodes : orbSecSrc and amSeed, then dedup the result
         Node mergedDomDuns = amSeedDomDuns //
                 .merge(orbSecJoinedResult) //
                 .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DUNS),
                         1);
-        Node rootTypePopulated = populateRootDuns(config, amSeedFilteredNull);
         // join merged list with rootTypePopulated
         Node mergDomDunsWithRootTypePop = mergedDomDuns //
                 .join(DataCloudConstants.AMS_ATTR_DUNS, rootTypePopulated, DataCloudConstants.AMS_ATTR_DUNS,
                         JoinType.INNER) //
                 .groupByAndLimit(new FieldList(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS), 1);
-
         Node domOwnershipTable = constructDomOwnershipTable(mergDomDunsWithRootTypePop, config);
         return domOwnershipTable;
     }
@@ -107,19 +107,20 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
                 .apply(computeRootDuns,
                         new FieldList(DataCloudConstants.ATTR_GU_DUNS, DataCloudConstants.ATTR_DU_DUNS,
                                 DataCloudConstants.AMS_ATTR_DUNS),
-                        fms,
-                        new FieldList(fieldList));
+                        fms, new FieldList(fieldList));
         Node rootOfTrees = rootTypePopulated
                 .filter(rootDunsFirmo, new FieldList(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS)) //
-                .retain(new FieldList(ROOT_DUNS, DataCloudConstants.ATTR_SALES_VOL_US,
+                .rename(new FieldList(ROOT_DUNS), new FieldList(TREE_ROOT_DUNS)) //
+                .retain(new FieldList(TREE_ROOT_DUNS, DataCloudConstants.ATTR_SALES_VOL_US,
                         DataCloudConstants.ATTR_EMPLOYEE_TOTAL, DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS,
                         DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY)) //
                 .renamePipe("RootOfTrees");
         fieldList.remove(DataCloudConstants.ATTR_GU_DUNS);
         fieldList.remove(DataCloudConstants.ATTR_DU_DUNS);
+        fieldList.add(TREE_ROOT_DUNS);
         Node rootFirmoAdd = rootTypePopulated //
                 .retain(DataCloudConstants.AMS_ATTR_DUNS, ROOT_DUNS, DUNS_TYPE) //
-                .join(ROOT_DUNS, rootOfTrees, ROOT_DUNS, JoinType.LEFT) //
+                .join(ROOT_DUNS, rootOfTrees, TREE_ROOT_DUNS, JoinType.LEFT) //
                 .retain(new FieldList(fieldList));
         return rootFirmoAdd;
     }
@@ -139,10 +140,10 @@ public class DomainOwnershipRebuildFlow extends ConfigurableFlowBase<FormDomOwne
     private static Node constructDomOwnershipTable(Node mergDomDunsWithRootTypePop,
             FormDomOwnershipTableConfig config) {
         DomainTreeCountRowSelectAggregator agg = new DomainTreeCountRowSelectAggregator(
-                new Fields(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER, REASON_TYPE,
-                        IS_NON_PROFITABLE),
-                DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE,
-                DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
+                new Fields(DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, DUNS_TYPE, TREE_NUMBER,
+                        REASON_TYPE, IS_NON_PROFITABLE),
+                DataCloudConstants.AMS_ATTR_DOMAIN, DataCloudConstants.AMS_ATTR_DOMAIN, ROOT_DUNS, TREE_ROOT_DUNS,
+                DUNS_TYPE, DataCloudConstants.ATTR_SALES_VOL_US, DataCloudConstants.ATTR_EMPLOYEE_TOTAL,
                 DataCloudConstants.ATTR_LE_NUMBER_OF_LOCATIONS, DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY,
                 config.getMultLargeCompThreshold(), config.getFranchiseThreshold());
 
