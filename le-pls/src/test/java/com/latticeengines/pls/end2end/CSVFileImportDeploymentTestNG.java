@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -20,7 +22,6 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -31,6 +32,7 @@ import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePoo
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
@@ -56,12 +58,11 @@ import com.latticeengines.pls.service.FileUploadService;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
 import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.util.ValidateFileHeaderUtils;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     private static final Logger log = LoggerFactory.getLogger(CSVFileImportDeploymentTestNG.class);
@@ -102,13 +103,11 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
+    @Inject
+    private ActionProxy actionProxy;
+
     @Autowired
     private CDLExternalSystemProxy cdlExternalSystemProxy;
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
 
     @Autowired
     private Configuration yarnConfiguration;
@@ -132,7 +131,6 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         setupTestEnvironmentWithOneTenantForProduct(LatticeProduct.CG);
         MultiTenantContext.setTenant(mainTestTenant);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @Test(groups = "deployment")
@@ -167,7 +165,7 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, applicationId.toString(), false);
         assertEquals(completedStatus, JobStatus.COMPLETED);
 
-        List<Action> actions = internalResourceProxy.findAllActions(customerSpace);
+        List<Action> actions = actionProxy.getActions(customerSpace);
         validateImportAction(actions);
         validateJobsPage();
 

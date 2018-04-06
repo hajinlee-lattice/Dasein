@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -54,7 +55,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
     // Special owner id for actions whose actual owner Id is not known yet
-    public static final Long UNKNOWN_OWNER_ID = 0L;
+    private static final Long UNKNOWN_OWNER_ID = 0L;
 
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
@@ -70,13 +71,16 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final ColumnMetadataProxy columnMetadataProxy;
 
+    private final ActionService actionService;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy) {
+            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
+        this.actionService = actionService;
     }
 
     @Value("${common.pls.url}")
@@ -127,7 +131,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @VisibleForTesting
     Pair<List<Long>, List<Long>> getActionAndJobIds(String customerSpace) {
-        List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace, null);
+        List<Action> actions = actionService.findByOwnerId(null);
         log.info(String.format("Actions are %s for tenant=%s", Arrays.toString(actions.toArray()), customerSpace));
         Set<ActionType> importAndDeleteTypes = Stream
                 .of(ActionType.CDL_DATAFEED_IMPORT_WORKFLOW, ActionType.CDL_OPERATION_WORKFLOW)
@@ -169,7 +173,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         log.info(String.format("Updating actions=%s with place holder ownerId=%d", Arrays.toString(actionIds.toArray()),
                 UNKNOWN_OWNER_ID));
         if (CollectionUtils.isNotEmpty(actionIds)) {
-            internalResourceProxy.updateOwnerIdIn(customerSpace, UNKNOWN_OWNER_ID, actionIds);
+            actionService.patchOwnerIdByPids(UNKNOWN_OWNER_ID, actionIds);
         }
     }
 

@@ -86,6 +86,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -121,7 +122,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_1_ACCOUNT_4 = 58;
     static final long SEGMENT_1_CONTACT_4 = 68;
 
-    static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
+    private static final String SEGMENT_NAME_2 = NamingUtils.timestamp("E2ESegment2");
     static final long SEGMENT_2_ACCOUNT_1 = 14;
     static final long SEGMENT_2_CONTACT_1 = 15;
     static final long SEGMENT_2_ACCOUNT_2 = 45;
@@ -129,8 +130,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_2_ACCOUNT_2_REBUILD = 53;
     static final long SEGMENT_2_CONTACT_2_REBUILD = 60;
 
-    protected static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
-    protected static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentModeling");
+    static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
+    static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentModeling");
 
     static final long RATING_A_COUNT_1 = 6;
     static final long RATING_D_COUNT_1 = 4;
@@ -189,6 +190,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @Inject
     protected PeriodProxy periodProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Value("${camille.zk.pod.id}")
     private String podId;
@@ -377,16 +381,14 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
     }
 
-    private Action registerImportAction(DataFeedTask dataFeedTask) {
+    private void registerImportAction(DataFeedTask dataFeedTask) {
         logger.info(String.format("Regsitering action for dataFeedTask=%s", dataFeedTask));
         Action action = new Action();
         action.setType(ActionType.METADATA_CHANGE);
         action.setActionInitiator(INITIATOR);
-        action.setTenant(mainTestTenant);
         action.setDescription(dataFeedTask.getUniqueId());
         action.setTrackingId(null);
-
-        return internalResourceProxy.createAction(mainTestTenant.getId(), action);
+        actionProxy.createAction(mainCustomerSpace, action);
     }
 
     private String uploadMockDataWithModifiedSchema(BusinessEntity entity, int offset, int limit) {
@@ -444,7 +446,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     protected void verifyActionRegistration() {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
-        List<Action> actions = internalResourceProxy.getActionsByOwnerId(customerSpace.toString(), null);
+        List<Action> actions = actionProxy.getActionsByOwnerId(customerSpace.toString(), null);
         // Assert.assertEquals(actions.size(), ++actionsNumber);
     }
 
@@ -844,7 +846,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     void verifyUpdateActions() {
-        List<Action> actions = internalResourceProxy.findAllActions(mainTestTenant.getId());
+        List<Action> actions = actionProxy.getActions(mainTestTenant.getId());
         logger.info(String.format("actions=%s", actions));
         Assert.assertTrue(CollectionUtils.isNotEmpty(actions));
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));

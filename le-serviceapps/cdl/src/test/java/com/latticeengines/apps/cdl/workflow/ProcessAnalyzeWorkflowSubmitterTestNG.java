@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,11 +23,11 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 
 public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBase {
@@ -48,7 +47,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
     private static final Long COMPLETE_ACTION_2_TRACKING_ID = 104L;
 
     @Mock
-    private InternalResourceRestApiProxy internalResourceProxy;
+    private ActionService actionService;
 
     @Mock
     private WorkflowProxy workflowProxy;
@@ -63,7 +62,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void testGetEmptyActionAndJobIds() {
-        when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
+        when(actionService.findByOwnerId(nullable(Long.class)))
                 .thenReturn(generateEmptyActions());
         Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
         Assert.assertNotNull(pair);
@@ -73,7 +72,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional")
     public void testGetMetadataOnlyActionAndJobIds() {
-        when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
+        when(actionService.findByOwnerId(nullable(Long.class)))
                 .thenReturn(generateMetadataChangeActions());
         Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
         Assert.assertNotNull(pair);
@@ -87,7 +86,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional", dependsOnMethods = { "testGetMetadataOnlyActionAndJobIds" })
     public void testGetFullActionAndJobIds() {
-        when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
+        when(actionService.findByOwnerId(nullable(Long.class)))
                 .thenReturn(generateFullActions());
         when(workflowProxy.getWorkflowExecutionsByJobIds(anyList(), anyString())).thenReturn(generateJobs());
         Pair<List<Long>, List<Long>> pair = processAnalyzeWorkflowSubmitter.getActionAndJobIds(customerSpace);
@@ -107,7 +106,7 @@ public class ProcessAnalyzeWorkflowSubmitterTestNG extends CDLFunctionalTestNGBa
 
     @Test(groups = "functional", dependsOnMethods = { "testGetFullActionAndJobIds" })
     public void testGetProblematicActionWithoutTrackingId() {
-        when(internalResourceProxy.getActionsByOwnerId(anyString(), nullable(Long.class)))
+        when(actionService.findByOwnerId(nullable(Long.class)))
                 .thenReturn(generateActionWithoutTrackingId());
         List<String> workflowIdStr = Stream.of(RUNNING_ACTION_1_TRACKING_ID, RUNNING_ACTION_2_TRACKING_ID,
                 COMPLETE_ACTION_1_TRACKING_ID, COMPLETE_ACTION_2_TRACKING_ID).map(Object::toString)

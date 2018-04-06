@@ -2,12 +2,20 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:p="http://www.springframework.org/schema/p"
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+  http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
 
 	<context:annotation-config />
 	<context:component-scan base-package="com.latticeengines.db" />
 
     <import resource="classpath:db-persistence-context.xml" />
+
+	<jpa:repositories base-package="com.latticeengines.db.repository"
+					  base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+					  entity-manager-factory-ref="entityManagerFactory"
+					  transaction-manager-ref="transactionManager"  />
+
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" p:dataSource-ref="dataSource" />
 
 </beans>

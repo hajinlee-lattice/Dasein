@@ -1,4 +1,4 @@
-package com.latticeengines.pls.controller;
+package com.latticeengines.apps.cdl.controller;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,23 +16,27 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
+import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.workflow.Job;
-import com.latticeengines.pls.entitymanager.ActionEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
-public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
+public class ActionResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
-    private static final Logger log = LoggerFactory.getLogger(ActionInternalResourceDeploymentTestNG.class);
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
+    private static final Logger log = LoggerFactory.getLogger(ActionResourceDeploymentTestNG.class);
 
     @Inject
     private ActionEntityMgr actionEntityMgr;
+
+    @Inject
+    private ActionProxy actionProxy;
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
@@ -46,10 +50,11 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
 
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
-        System.out.println("internalResourceHostPort is " + internalResourceHostPort);
+        setupTestEnvironment();
+
+        log.info("internalResourceHostPort is " + internalResourceHostPort);
         internalResourceRestApiProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-        setupTestEnvironmentWithOneTenant();
-        setupSecurityContext(mainTestTenant);
+
         actions = new ArrayList<>();
         Action actionWithOwner = generateCDLImportAction();
         actionWithOwner.setOwnerId(OWNER_ID);
@@ -90,7 +95,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         Assert.assertEquals(actionsWithoutOwner.size(), 2);
 
         // test internal proxy for getting jobs
-        List<Long> actionPids = findAll().stream().map(action -> action.getPid()).collect(Collectors.toList());
+        List<Long> actionPids = findAll().stream().map(Action::getPid).collect(Collectors.toList());
         List<Job> retrievedJobs = findJobsBasedOnActionIdsAndType(actionPids, ActionType.CDL_DATAFEED_IMPORT_WORKFLOW);
         Assert.assertTrue(CollectionUtils.isEmpty(retrievedJobs));
     }
@@ -105,7 +110,7 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         List<Action> actionsWithoutOwner = findByOwnerId(null);
         Assert.assertEquals(actionsWithoutOwner.size(), 1);
 
-        List<Long> allActionIds = findAll().stream().map(action -> action.getPid()).collect(Collectors.toList());
+        List<Long> allActionIds = findAll().stream().map(Action::getPid).collect(Collectors.toList());
         updateOwnerIdIn(NEW_OWNER_ID, allActionIds);
         actions = findByOwnerId(NEW_OWNER_ID);
         Assert.assertEquals(actions.size(), 3);
@@ -114,54 +119,38 @@ public class ActionInternalResourceDeploymentTestNG extends PlsDeploymentTestNGB
         log.info(String.format("All actions are %s", Arrays.toString(actions.toArray())));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = { "testUpdate" })
-    public void testDelete() {
-        List<Action> retrievedActions = findAll();
-        for (Action action : retrievedActions) {
-            log.info("delete action with pid " + action.getPid());
-            delete(action);
-        }
-        retrievedActions = findAll();
-        Assert.assertEquals(retrievedActions.size(), 0);
+    private void createAction(Action action) {
+        actionProxy.createAction(CustomerSpace.parse(mainTestTenant.getId()).toString(), action);
     }
 
-    protected void createAction(Action action) {
-        internalResourceRestApiProxy.createAction(CustomerSpace.parse(mainTestTenant.getId()).toString(), action);
+    private List<Action> findAll() {
+        return actionProxy.getActions(CustomerSpace.parse(mainTestTenant.getId()).toString());
     }
 
-    protected List<Action> findAll() {
-        return internalResourceRestApiProxy.findAllActions(CustomerSpace.parse(mainTestTenant.getId()).toString());
-    }
-
-    protected List<Action> findByOwnerId(Long ownerId) {
-        return internalResourceRestApiProxy.getActionsByOwnerId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+    private List<Action> findByOwnerId(Long ownerId) {
+        return actionProxy.getActionsByOwnerId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
                 ownerId);
     }
 
-    protected void update(Action action) {
-        internalResourceRestApiProxy.updateAction(CustomerSpace.parse(mainTestTenant.getId()).toString(), action);
+    private void update(Action action) {
+        actionProxy.updateAction(CustomerSpace.parse(mainTestTenant.getId()).toString(), action);
     }
 
-    protected void delete(Action action) {
-        internalResourceRestApiProxy.deleteAction(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                action.getPid());
-    }
-
-    protected Action findByPid(Long pid) {
+    private Action findByPid(Long pid) {
         return actionEntityMgr.findByPid(pid);
     }
 
-    protected void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
-        internalResourceRestApiProxy.updateOwnerIdIn(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId,
+    private void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
+        actionProxy.patchOwnerIdByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(), ownerId,
                 actionPids);
     }
 
-    protected List<Action> findByPidIn(List<Long> actionPids) {
-        return internalResourceRestApiProxy.findByPidIn(CustomerSpace.parse(mainTestTenant.getId()).toString(),
+    private List<Action> findByPidIn(List<Long> actionPids) {
+        return actionProxy.getActionsByPids(CustomerSpace.parse(mainTestTenant.getId()).toString(),
                 actionPids);
     }
 
-    protected List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
+    private List<Job> findJobsBasedOnActionIdsAndType(List<Long> actionPids, ActionType actionType) {
         return internalResourceRestApiProxy.findJobsBasedOnActionIdsAndType(
                 CustomerSpace.parse(mainTestTenant.getId()).toString(), actionPids, actionType);
     }

@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.workflow;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
@@ -21,7 +21,6 @@ import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLDataFeedImportWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
@@ -32,20 +31,11 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private TenantService tenantService;
 
+    @Inject
+    private ActionService actionService;
+
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
-
-    @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceProxy) {
-        this.internalResourceProxy = internalResourceProxy;
-    }
 
     public ApplicationId submit(CustomerSpace customerSpace, DataFeedTask dataFeedTask, String connectorConfig,
             CSVImportFileInfo csvImportFileInfo) {
@@ -71,7 +61,7 @@ public class CDLDataFeedImportWorkflowSubmitter extends WorkflowSubmitter {
         }
         action.setTenant(tenant);
         log.info(String.format("Action=%s", action));
-        return internalResourceProxy.createAction(tenant.getId(), action);
+        return actionService.create(action);
     }
 
     private CDLDataFeedImportWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,

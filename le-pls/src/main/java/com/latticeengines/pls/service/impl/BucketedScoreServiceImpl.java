@@ -150,7 +150,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    private void createOrUpdateBucketedScoreSummary(ModelSummary modelSummary,
+    public void createOrUpdateBucketedScoreSummary(ModelSummary modelSummary,
             BucketedScoreSummary bucketedScoreSummary) {
         bucketedScoreSummary.setModelSummary(modelSummary);
         BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.findByModelSummary(modelSummary);
@@ -244,7 +244,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             if (!creationTimesToBucketMetadatas.containsKey(bucketMetadata.getCreationTimestamp())) {
                 creationTimesToBucketMetadatas.put(bucketMetadata.getCreationTimestamp(),
-                        new ArrayList<BucketMetadata>());
+                        new ArrayList<>());
             }
             creationTimesToBucketMetadatas.get(bucketMetadata.getCreationTimestamp()).add(bucketMetadata);
         }

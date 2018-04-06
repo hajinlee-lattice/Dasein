@@ -3,17 +3,16 @@ package com.latticeengines.apps.cdl.workflow;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupAllConfiguration;
@@ -31,7 +30,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CDLOperationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 @Component
@@ -41,18 +39,11 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
     @Inject
     private TenantService tenantService;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
     @Inject
     private DataFeedProxy dataFeedProxy;
 
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private ActionService actionService;
 
     public ApplicationId submit(CustomerSpace customerSpace,
             MaintenanceOperationConfiguration maintenanceOperationConfiguration) {
@@ -88,7 +79,7 @@ public class CDLOperationWorkflowSubmitter extends WorkflowSubmitter {
                     String.format("Tenant with id=%s cannot be found", customerSpace.toString()));
         }
         action.setTenant(tenant);
-        return internalResourceProxy.createAction(tenant.getId(), action);
+        return actionService.create(action);
     }
 
     private CDLOperationWorkflowConfiguration generateConfiguration(CustomerSpace customerSpace,

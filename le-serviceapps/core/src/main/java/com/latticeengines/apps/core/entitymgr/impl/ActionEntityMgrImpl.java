@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.core.entitymgr.impl;
 
 import java.util.List;
 
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.latticeengines.apps.core.dao.ActionDao;
+import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
+import com.latticeengines.apps.core.repository.writer.ActionRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.pls.dao.ActionDao;
-import com.latticeengines.pls.entitymanager.ActionEntityMgr;
-import com.latticeengines.pls.repository.ActionRepository;
 
 @Component("actionEntityMgr")
 public class ActionEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Action, Long> implements ActionEntityMgr {

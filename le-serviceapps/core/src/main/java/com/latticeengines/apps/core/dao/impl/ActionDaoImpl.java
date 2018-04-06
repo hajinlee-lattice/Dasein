@@ -1,4 +1,4 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.apps.core.dao.impl;
 
 import java.util.Collections;
 import java.util.List;
@@ -7,9 +7,9 @@ import org.hibernate.Session;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.core.dao.ActionDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.pls.dao.ActionDao;
 
 @Component("actionDao")
 public class ActionDaoImpl extends BaseDaoImpl<Action> implements ActionDao {

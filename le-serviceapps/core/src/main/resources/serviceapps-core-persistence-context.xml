@@ -17,4 +17,9 @@
                       entity-manager-factory-ref="documentEntityManagerFactoryReader"
                       transaction-manager-ref="documentTransactionManagerReader"  />
 
+    <jpa:repositories base-package="com.latticeengines.apps.core.repository.writer"
+                      base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
+                      entity-manager-factory-ref="entityManagerFactory"
+                      transaction-manager-ref="transactionManager"  />
+
 </beans>

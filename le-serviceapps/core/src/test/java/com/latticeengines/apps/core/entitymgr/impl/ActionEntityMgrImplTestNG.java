@@ -1,4 +1,4 @@
-package com.latticeengines.pls.entitymanager.impl;
+package com.latticeengines.apps.core.entitymgr.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,12 +14,13 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
+import com.latticeengines.apps.core.testframework.ServiceAppsFunctionalTestNGBase;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
-import com.latticeengines.pls.entitymanager.ActionEntityMgr;
-import com.latticeengines.pls.functionalframework.PlsFunctionalTestNGBase;
 
-public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
+public class ActionEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(ActionEntityMgrImplTestNG.class);
 
@@ -35,9 +36,8 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     private List<Action> actions;
 
     @BeforeClass(groups = "functional")
-    public void setup() throws Exception {
-        setupTestEnvironmentWithOneGATenant();
-        setupSecurityContext(mainTestTenant);
+    public void setup() {
+        setupTestEnvironment();
         actions = new ArrayList<>();
         Action actionWithOwner = generateCDLImportAction();
         actionWithOwner.setOwnerId(OWNER_ID);
@@ -62,6 +62,7 @@ public class ActionEntityMgrImplTestNG extends PlsFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testCreate() {
         for (Action action : actions) {
+            System.out.println(JsonUtils.serialize(action));
             createAction(action);
         }
         List<Action> retrievedActions = findAll();

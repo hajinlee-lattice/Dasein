@@ -17,20 +17,20 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.security.exposed.service.TenantService;
 
 public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
     private static final Logger log = LoggerFactory.getLogger(CDLDataFeedImportWorkflowSubmitterUnitTestNG.class);
 
     @Mock
-    private InternalResourceRestApiProxy internalResourceProxy;
+    private ActionService actionService;
 
     @Mock
     private TenantService tenantService;
@@ -55,7 +55,7 @@ public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
     @BeforeClass(groups = "unit")
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mockInternalProxy();
+        mockActionService();
         mockActionInfo();
     }
 
@@ -70,13 +70,13 @@ public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
         when(tenantService.findByTenantId(anyString())).thenReturn(tenant);
     }
 
-    private void mockInternalProxy() {
-        when(internalResourceProxy.createAction(anyString(), any(Action.class))).thenAnswer(new Answer<Action>() {
+    private void mockActionService() {
+        when(actionService.create(any(Action.class))).thenAnswer(new Answer<Action>() {
             @Override
             public Action answer(InvocationOnMock invocation) throws Throwable {
                 Object[] arguments = invocation.getArguments();
-                if (arguments != null && arguments.length == 2) {
-                    Action action = (Action) arguments[1];
+                if (arguments != null && arguments.length == 1) {
+                    Action action = (Action) arguments[0];
                     action.setCreated(new Date());
                     action.setUpdated(new Date());
                     return action;
@@ -84,7 +84,6 @@ public class CDLDataFeedImportWorkflowSubmitterUnitTestNG {
                 return null;
             }
         });
-        cdlDataFeedImportWorkflowSubmitter.setInternalResourceRestApiProxy(internalResourceProxy);
     }
 
     @Test(groups = "unit")

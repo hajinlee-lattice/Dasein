@@ -1,12 +1,12 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.core.service.impl;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
+import com.latticeengines.apps.core.entitymgr.impl.ActionEntityMgrImplTestNG;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.pls.entitymanager.impl.ActionEntityMgrImplTestNG;
-import com.latticeengines.pls.service.ActionService;
 
 public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
 
@@ -25,7 +25,7 @@ public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
 
     @Override
     protected List<Action> findByOwnerId(Long ownerId) {
-        return actionService.findByOwnerId(ownerId, null);
+        return actionService.findByOwnerId(ownerId);
     }
 
     @Override
@@ -40,12 +40,12 @@ public class ActionServiceImplTestNG extends ActionEntityMgrImplTestNG {
 
     @Override
     protected void delete(Action action) {
-        actionService.delete(action);
+        actionService.delete(action.getPid());
     }
 
     @Override
     protected void updateOwnerIdIn(Long ownerId, List<Long> actionPids) {
-        actionService.updateOwnerIdIn(ownerId, actionPids);
+        actionService.patchOwnerIdByPids(ownerId, actionPids);
     }
 
     @Override

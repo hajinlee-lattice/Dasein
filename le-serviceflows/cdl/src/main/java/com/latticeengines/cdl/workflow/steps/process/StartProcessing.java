@@ -46,6 +46,7 @@ import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration.P
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
@@ -70,6 +71,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private PeriodProxy periodProxy;
+
+    @Inject
+    private ActionProxy actionProxy;
 
     @Inject
     private RedshiftPublishWorkflow redshiftPublishWorkflow;
@@ -208,7 +212,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         List<Long> actionIds = configuration.getActionIds();
         log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
         if (CollectionUtils.isNotEmpty(actionIds)) {
-            internalResourceProxy.updateOwnerIdIn(configuration.getCustomerSpace().toString(), jobId, actionIds);
+            actionProxy.patchOwnerIdByPids(configuration.getCustomerSpace().toString(), jobId, actionIds);
         }
     }
 

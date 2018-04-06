@@ -2,24 +2,22 @@ package com.latticeengines.cdl.workflow.listeners;
 
 import java.util.Collections;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
 
@@ -34,15 +32,8 @@ public class MaintenanceOperationListener extends LEJobListener {
     @Autowired
     private DataFeedProxy dataFeedProxy;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private ActionProxy actionProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -86,12 +77,12 @@ public class MaintenanceOperationListener extends LEJobListener {
         if (ActionPidStr != null) {
             Long pid = Long.parseLong(ActionPidStr);
             log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
-            Action action = internalResourceProxy.findByPidIn(job.getTenant().getId(), Collections.singletonList(pid))
+            Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
                     .get(0);
             if (action != null) {
                 log.info(String.format("Action=%s", action));
                 action.setTrackingId(job.getWorkflowId());
-                internalResourceProxy.updateAction(job.getTenant().getId(), action);
+                actionProxy.updateAction(job.getTenant().getId(), action);
             } else {
                 log.warn(String.format("Action with pid=%d cannot be found", pid));
             }

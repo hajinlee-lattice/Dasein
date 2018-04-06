@@ -5,18 +5,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -27,9 +24,9 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.VdbLoadTableStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
-import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
+import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.eai.EaiJobDetailProxy;
 import com.latticeengines.remote.exposed.service.DataLoaderService;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -39,27 +36,20 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     private final static Logger log = LoggerFactory.getLogger(DataFeedTaskImportListener.class);
 
-    @Autowired
+    @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
-    @Autowired
+    @Inject
     private WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    @Autowired
+    @Inject
     private DataFeedProxy dataFeedProxy;
 
-    @Autowired
+    @Inject
     private DataLoaderService dataLoaderService;
 
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
-    }
+    @Inject
+    private ActionProxy actionProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -171,12 +161,12 @@ public class DataFeedTaskImportListener extends LEJobListener {
         if (ActionPidStr != null) {
             Long pid = Long.parseLong(ActionPidStr);
             log.info(String.format("Updating an actionPid=%d for job=%d", pid, job.getWorkflowId()));
-            Action action = internalResourceProxy.findByPidIn(job.getTenant().getId(), Collections.singletonList(pid))
+            Action action = actionProxy.getActionsByPids(job.getTenant().getId(), Collections.singletonList(pid))
                     .get(0);
             if (action != null) {
                 log.info(String.format("Action=%s", action));
                 action.setTrackingId(job.getWorkflowId());
-                internalResourceProxy.updateAction(job.getTenant().getId(), action);
+                actionProxy.updateAction(job.getTenant().getId(), action);
             } else {
                 log.warn(String.format("Action with pid=%d cannot be found", pid));
             }
@@ -210,10 +200,5 @@ public class DataFeedTaskImportListener extends LEJobListener {
             throw new RuntimeException(ex);
         }
         return e;
-    }
-
-    @VisibleForTesting
-    void setInternalResourceRestApiProxy(InternalResourceRestApiProxy internalResourceRestApiProxy) {
-        this.internalResourceProxy = internalResourceRestApiProxy;
     }
 }
