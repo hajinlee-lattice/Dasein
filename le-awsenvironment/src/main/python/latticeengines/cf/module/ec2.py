@@ -89,6 +89,13 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "group":"root",
                         "authentication":"S3AccessCreds"
                     },
+                    "/etc/ledp/lattice.pem":{
+                        "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/" + cert + "/lattice.pem",
+                        "mode":"000600",
+                        "owner":"root",
+                        "group":"root",
+                        "authentication":"S3AccessCreds"
+                    },
                     "/etc/ledp/ledp_keystore.jks":{
                         "source":"http://" + config.s3_endpoint() + "/" + chefbucket + "/tls/ledp_keystore.jks",
                         "mode":"000600",
@@ -222,14 +229,6 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                             "bash /etc/ledp/createSSHAccounts.sh %s || true" % ssh_group
                         ] ] }
                     },
-                    "07_concat_tls" : {
-                        "command" : { "Fn::Join": [ "\n", [
-                            "#!/bin/bash",
-                            "cd /etc/ledp",
-                            "cat lattice.crt lattice.key > lattice.pem",
-                            "chmod 600 lattice.pem"
-                        ] ] }
-                    },
                     "10_add_instance_to_cluster" : {
                         "command" : { "Fn::Join": [ "", [
                             "#!/bin/bash\n",
@@ -244,15 +243,15 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "command" : { "Fn::Join": [ "", [
                             "start ecs\n"
                             "for i in {1..100}; do\n",
-                            "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
-                            "    if [ ! -z \"${instance_arn}\" ]; then\n",
+                            "    instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`\n",
+                            "    if [ ! -z \"${instance_id}\" ]; then\n",
                             "        break;\n",
                             "    fi;\n",
-                            "    echo \"did not find instance arn, retry after 1 second\"\n",
+                            "    echo \"did not find instance id, retry after 1 second\"\n",
                             "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_arn} --region ${region}\n"
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_id} --region ${region}\n"
                         ] ] }
                     },
                     "30_mount_efs" : {
