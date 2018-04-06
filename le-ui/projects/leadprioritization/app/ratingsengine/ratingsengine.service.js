@@ -784,8 +784,8 @@ angular.module('lp.ratingsengine')
                             dataStores: dataStores,
                             sourceFileName: fileName,
                             deduplicationType: modelTrainingOptions['deduplicationType'],
-                            excludePublicDomains: modelTrainingOptions['excludePublicDomains']
-                            // transformationGroup: modelTrainingOptions['transformationGroup']
+                            excludePublicDomains: modelTrainingOptions['excludePublicDomains'],
+                            transformationGroup: modelTrainingOptions['transformationGroup']
                         }
                     }
                 }

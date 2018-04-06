@@ -749,13 +749,14 @@ angular
         .state('home.model.analysis.contacts', getState('contacts'))
         .state('home.segment', getState('main', {
             url: '/segment/:segment',
-            onExit: ['DataCloudStore', function(DataCloudStore) {
+            onExit: ['DataCloudStore', 'QueryStore', function(DataCloudStore, QueryStore) {
                 var enrichments = DataCloudStore.enrichments.filter(function (item) {
                     return item.SegmentChecked;
                 });
                 enrichments.forEach(function(item) {
                     delete item.SegmentChecked;
                 })
+                QueryStore.clear();
             }],
             params: {
                 section: 'segment.analysis'

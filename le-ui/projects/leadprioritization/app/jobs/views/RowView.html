@@ -3,11 +3,10 @@
         <span class="columns two">{{job.timestamp | date : 'MM/dd/yyyy h:mma'}}</span>
         <span class="columns three" ng-if="state != 'model'" ng-attr-data-stooltip="{{job.modelName}}">
             
-            <a ng-if="isRatingEngine && job.modelId && job.modelName && !isPMML && job.rating_id && !job.isDeleted && (job.status !== 'Failed') && !jobRunning"
-               class="model-name"
-               ui-sref="home.ratingsengine.dashboard({ modelId: '{{ job.modelId }}', rating_id: '{{ job.rating_id }}' })">
+            <span ng-if="isRatingEngine && job.modelId && job.modelName && !isPMML && job.rating_id && !job.isDeleted && (job.status !== 'Failed') && !jobRunning"
+               class="model-name" >
                     {{job.modelName}}
-            </a>
+            </span>
             <a ng-if="job.modelId && job.modelName && !isPMML && !job.isDeleted && !isRatingEngine && (job.status !== 'Failed') &&  !jobRunning"
                class="model-name"
                ui-sref="home.model.attributes({ modelId: '{{ job.modelId | escape }}' })">
