@@ -125,6 +125,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         }
         log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
         dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
+        clearTableRoleCache(customerSpace, role);
     }
 
     @Override
@@ -165,6 +166,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             log.info("Add table " + tableName + " to collection " + collectionName + " as " + role);
             dataCollectionEntityMgr.upsertTableToCollection(collectionName, tableName, role, version);
         }
+        clearTableRoleCache(customerSpace, role);
     }
 
     @Override
@@ -192,6 +194,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName, version);
             }
         }
+        clearTableRoleCache(customerSpace, role);
     }
 
     @Override
@@ -208,6 +211,7 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             dataCollectionEntityMgr.removeTableFromCollection(collectionName, existingTableName, null);
             tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
         }
+        clearTableRoleCache(customerSpace, role);
     }
 
     @Override
@@ -376,6 +380,13 @@ public class DataCollectionServiceImpl implements DataCollectionService {
         CacheService cacheService = CacheServiceBase.getCacheService();
         cacheService.refreshKeysByPattern(tenantId, CacheName.getCdlCacheGroup());
         localCacheService.refreshKeysByPattern(tenantId, CacheName.getCdlLocalCacheGroup());
+    }
+
+    private void clearTableRoleCache(String customerSpace, TableRoleInCollection role) {
+        String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
+        String keyPrefix = String.format("%s|%s", tenantId, role);
+        CacheService cacheService = CacheServiceBase.getCacheService();
+        cacheService.refreshKeysByPattern(keyPrefix, CacheName.TableRoleMetadataCache);
     }
 
 }

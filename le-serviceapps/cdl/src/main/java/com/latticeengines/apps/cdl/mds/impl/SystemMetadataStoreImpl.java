@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import com.latticeengines.apps.cdl.mds.RatingDisplayMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.TableRoleTemplate;
 import com.latticeengines.apps.cdl.service.CDLNamespaceService;
+import com.latticeengines.apps.cdl.service.DataCollectionService;
 import com.latticeengines.apps.core.mds.AMMetadataStore;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
@@ -45,16 +47,16 @@ public class SystemMetadataStoreImpl extends
     private static final Logger log = LoggerFactory.getLogger(SystemMetadataStoreImpl.class);
 
     @Inject
-    public SystemMetadataStoreImpl(TableRoleTemplate tableRoleTemplate, AMMetadataStore amMetadataStore,
+    public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate, AMMetadataStore amMetadataStore,
             CDLNamespaceService cdlNamespaceService, RatingDisplayMetadataStore ratingDisplayMetadataStore,
             ExternalSystemMetadataStore externalSystemMetadataStore) {
-        super(getBaseMds(tableRoleTemplate, amMetadataStore, cdlNamespaceService),
+        super(getBaseMds(dataCollectionService, tableRoleTemplate, amMetadataStore, cdlNamespaceService),
                 getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
     }
 
     private static MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>> getBaseMds(
-            TableRoleTemplate tableRoleTemplate, AMMetadataStore amMetadataStore,
-            CDLNamespaceService cdlNamespaceService) {
+            DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
+            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService) {
 
         return new MetadataStore<Namespace2<BusinessEntity, DataCollection.Version>>() {
 
@@ -67,40 +69,52 @@ public class SystemMetadataStoreImpl extends
             public ParallelFlux<ColumnMetadata> getMetadataInParallel(
                     Namespace2<BusinessEntity, DataCollection.Version> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
-                Category category = getEntityCategory(entity);
-                Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(entity.getServingStore(),
-                        namespace.getCoord2());
-                ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
-                ParallelFlux<ColumnMetadata> servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
-                        .map(cm -> {
-                            if (cm.getCategory() == null) {
-                                cm.setCategory(category);
-                            }
-                            cm.setEntity(entity);
-                            cm.enableGroup(ColumnSelection.Predefined.Segment);
-                            if (BusinessEntity.Account.equals(entity)) {
-                                cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-                                cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
-                                // TODO: should be handled by AM metadata
-                                if (Category.INTENT.equals(cm.getCategory()) || Category.TECHNOLOGY_PROFILE.equals(cm.getCategory())) {
-                                    cm.setAttrState(AttrState.Inactive);
+                TableRoleInCollection role = entity.getServingStore();
+                DataCollection.Version version = namespace.getCoord2();
+                String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+                List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
+
+                ParallelFlux<ColumnMetadata> servingStore;
+                if (CollectionUtils.isNotEmpty(tableNames)) {
+                    Category category = getEntityCategory(entity);
+                    Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
+                    ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
+                    servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
+                            .map(cm -> {
+                                if (cm.getCategory() == null) {
+                                    cm.setCategory(category);
                                 }
-                            }
-                            return cm;
-                        }) //
-                        .doOnNext(cm -> {
-                            if (counter.get() == null) {
-                                counter.set(new AtomicLong(0));
-                            }
-                            counter.get().getAndIncrement();
-                        }) //
-                        .doOnComplete(() -> {
-                            long count = 0;
-                            if (counter.get() != null) {
-                                count = counter.get().get();
-                            }
-                            log.info("Retrieved " + count + " " + entity + " attributes.");
-                        });
+                                cm.setEntity(entity);
+                                cm.enableGroup(ColumnSelection.Predefined.Segment);
+                                if (BusinessEntity.Account.equals(entity)) {
+                                    cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+                                    cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+                                    // TODO: should be handled by AM metadata
+                                    if (Category.INTENT.equals(cm.getCategory())
+                                            || Category.TECHNOLOGY_PROFILE.equals(cm.getCategory())) {
+                                        cm.setAttrState(AttrState.Inactive);
+                                    }
+                                }
+                                return cm;
+                            }) //
+                            .doOnNext(cm -> {
+                                if (counter.get() == null) {
+                                    counter.set(new AtomicLong(0));
+                                }
+                                counter.get().getAndIncrement();
+                            }) //
+                            .doOnComplete(() -> {
+                                long count = 0;
+                                if (counter.get() != null) {
+                                    count = counter.get().get();
+                                }
+                                log.info("Retrieved " + count + " " + entity + " attributes.");
+                            });
+                } else {
+                    log.info("There is not table for " + role + " at version " + version + " in  " + customerSpace
+                            + ", using empty schema");
+                    servingStore = Flux.<ColumnMetadata> empty().parallel().runOn(scheduler);
+                }
                 ThreadLocal<AtomicLong> amCounter = new ThreadLocal<>();
                 if (BusinessEntity.Account.equals(entity)) {
                     // merge serving store and AM, for Account
