@@ -207,8 +207,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
                 .getMatchingAttributes(getSchemaInterpretation(modelId));
         matchingAttributes
                 .removeIf(matchingAttr -> fieldMappingDocument.getIgnoredFields().contains(matchingAttr.getName())
-                        || requiredAttributes.stream().anyMatch(
-                                requiredAttr -> requiredAttr.getInterfaceName() == matchingAttr.getInterfaceName()));
+                        || requiredAttributes.stream()
+                                .anyMatch(requiredAttr -> requiredAttr.getName().equals(matchingAttr.getName())));
 
         List<Attribute> modelAttributes = new ArrayList<>(matchingAttributes);
         modelAttributes.addAll(requiredAttributes);
@@ -361,7 +361,7 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
             }
         }
 
-        if (modelAttribute.getDisplayName().equalsIgnoreCase(scoringField)
+        if (modelAttribute.getDisplayName() != null && (modelAttribute.getDisplayName().equalsIgnoreCase(scoringField))
                 || modelAttribute.getName().equalsIgnoreCase(scoringField)) {
             return true;
         }

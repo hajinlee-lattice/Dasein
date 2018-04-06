@@ -1,5 +1,9 @@
 package com.latticeengines.pls.service.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,19 +13,32 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
+import com.latticeengines.pls.service.ModelMetadataService;
+import com.latticeengines.pls.service.PlsFeatureFlagService;
+import com.latticeengines.pls.service.SourceFileService;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.mchange.io.FileUtils;
 
 public class ScoringFileMetadataServiceImplUnitTestNG {
@@ -58,15 +75,14 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testMapRequiredFieldPLS_7102() throws IOException {
-        URL csvFileUrl = ClassLoader.getSystemResource(
+        URL tableFileUrl = ClassLoader.getSystemResource(
                 "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/tablePLS_7102.json");
-        Table t = JsonUtils.deserialize(new FileInputStream(new File(csvFileUrl.getPath())), Table.class);
-        PythonScriptModelService pythonScriptModelService = new PythonScriptModelService();
-        List<Attribute> attrs = pythonScriptModelService.getRequiredColumns(t);
-        ScoringFileMetadataServiceImpl scoringFileMetadataService = new ScoringFileMetadataServiceImpl();
+        List<?> list = JsonUtils.deserialize(new FileInputStream(new File(tableFileUrl.getPath())), List.class);
+        List<Attribute> attrs = JsonUtils.convertList(list, Attribute.class);
 
+        ScoringFileMetadataServiceImpl scoringFileMetadataService = new ScoringFileMetadataServiceImpl();
         FieldMappingDocument fieldMappingDocument = scoringFileMetadataService.getFieldMapping(
-                Sets.newHashSet("Id", "Company", "Country", "Email", "City", "State"), attrs,
+                Sets.newHashSet("Company", "Country", "Id", "Email", "City", "State"), attrs,
                 SchemaRepository.instance().getMatchingAttributes(SchemaInterpretation.SalesforceLead));
 
         String expected = FileUtils.getContentsAsString(new File(ClassLoader
@@ -74,6 +90,56 @@ public class ScoringFileMetadataServiceImplUnitTestNG {
                         "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedfieldmappingPLS_7102.json")
                 .getPath()));
         Assert.assertEquals(fieldMappingDocument.getFieldMappings().toString(), expected);
+
+        ModelMetadataService modelMetadataService = Mockito.mock(ModelMetadataService.class);
+        attrs = JsonUtils.convertList(list, Attribute.class);
+        when(modelMetadataService.getRequiredColumns(anyString())).thenReturn(attrs);
+
+        SourceFileService sourceFileService = Mockito.mock(SourceFileService.class);
+        SourceFile sourceFile = new SourceFile();
+        sourceFile.setName("mockfile");
+        sourceFile.setPath(ClassLoader
+                .getSystemResource(
+                        "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/SOapuUI.Test3.csv")
+                .getPath());
+        when(sourceFileService.findByName(anyString())).thenReturn(sourceFile);
+        Mockito.doNothing().when(sourceFileService).update(any(SourceFile.class));
+
+        MetadataProxy metadataProxy = Mockito.mock(MetadataProxy.class);
+        Mockito.doNothing().when(metadataProxy).createTable(anyString(), anyString(), any(Table.class));
+
+        ModelSummaryEntityMgr modelSummaryEntityMgr = Mockito.mock(ModelSummaryEntityMgr.class);
+        ModelSummary summary = new ModelSummary();
+        summary.setId("modelid");
+        summary.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceLead.name());
+        when(modelSummaryEntityMgr.findValidByModelId(anyString())).thenReturn(summary);
+
+        PlsFeatureFlagService plsFeatureFlagService = Mockito.mock(PlsFeatureFlagService.class);
+        when(plsFeatureFlagService.isFuzzyMatchEnabled()).thenReturn(Boolean.FALSE);
+
+        Configuration localFileSystemConfig = new Configuration();
+        localFileSystemConfig.set(FileSystem.FS_DEFAULT_NAME_KEY, FileSystem.DEFAULT_FS);
+
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelMetadataService", modelMetadataService);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "sourceFileService", sourceFileService);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "metadataProxy", metadataProxy);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "modelSummaryEntityMgr", modelSummaryEntityMgr);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "yarnConfiguration", localFileSystemConfig);
+        ReflectionTestUtils.setField(scoringFileMetadataService, "plsFeatureFlagService", plsFeatureFlagService);
+
+        Tenant tenant = new Tenant();
+        tenant.setPid(1L);
+        tenant.setId("2");
+        MultiTenantContext.setTenant(tenant);
+        Table t = scoringFileMetadataService.saveFieldMappingDocument(sourceFile.getName(), summary.getId(),
+                fieldMappingDocument);
+        System.out.print(t);
+        expected = FileUtils.getContentsAsString(new File(ClassLoader
+                .getSystemResource(
+                        "com/latticeengines/pls/service/impl/scoringfilemetadataserviceimpl/expectedsavedtablePLS_7102.json")
+                .getPath()));
+        Assert.assertEquals(t.toString(), expected);
+
     }
 
     @Test(groups = "unit")
