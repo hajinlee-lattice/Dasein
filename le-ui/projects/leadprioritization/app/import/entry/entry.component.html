@@ -1,5 +1,9 @@
 <section class="container setup-import data-import" ng-controller="ImportEntry as vm">
   <div class="row">
+    <div class="global-error local-error" data-ng-show="vm.showImportError">
+        <i data-ng-click="vm.showImportError = false;" class="fa fa-times fa-inverse close"></i>
+        {{vm.importErrorMsg}}
+    </div>
     <div class="columns eight offset-two box-outline">
       <div class="section-header">
         <h4>Import</h4>

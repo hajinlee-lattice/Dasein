@@ -53,8 +53,8 @@ angular.module('lp.import.calendar', [])
             },
             onSelect: function(date) {
                 var dateParams = {
-                    monthNumber: date.getMonth() + 1,
-                    month: months[(date.getMonth() + 1)].substring(0,3).toUpperCase(),
+                    monthNumber: date.getMonth() + 1, // starts at 0 for some reason
+                    month: months[date.getMonth()].substring(0,3).toUpperCase(), // just use date.getMonth because of array 0 is good place to start
                     day: NumberUtility.PadNumber(date.getDate(),2),
                     year: date.getFullYear()
                 }

@@ -1,4 +1,13 @@
 .setup-import.data-import {
+    .local-error {
+        position: relative;
+        margin-bottom: 20px;
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    }
     .columns.box-outline .section-body.with-padding {
         margin: 1.5em 3em;
     }
