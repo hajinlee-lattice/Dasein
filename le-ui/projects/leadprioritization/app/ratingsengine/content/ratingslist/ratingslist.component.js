@@ -108,8 +108,6 @@ angular.module('lp.ratingsengine.ratingslist', [
         var arr = vm.current.ratings;
         // console.log(arr.slice(Math.max(arr.length - 10, 1)));
 
-        console.log(vm.current.ratings);
-
         RatingsEngineStore.clear();
 
         vm.totalLength = vm.count();
@@ -257,10 +255,12 @@ angular.module('lp.ratingsengine.ratingslist', [
                 RatingsEngineStore.getRating(rating.id).then(function(engine){
                     RatingsEngineStore.setRating(engine);
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
-                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
-                            modelSummary = model.AI.modelSummary;
 
-                        if (modelSummary !== null) {
+                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
+                            modelSummary = model.AI.modelSummary,
+                            modelJobId = model.AI.modelingJobId;
+
+                        if ((modelSummary !== null) || (modelJobId !== null)) {
                             $state.go('home.ratingsengine.dashboard', { 
                                 rating_id: rating.id, 
                                 modelId: modelId

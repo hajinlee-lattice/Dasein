@@ -23,7 +23,7 @@ angular.module('common.datacloud.query.builder', [
         items: [],
         enrichments: [],
         labelIncrementor: 0,
-        bucket: 'A',
+        bucket: QueryStore.getSelectedBucket(),
         buckets: [],
         bucketsMap: {'A':0,'B':1,'C':2,'D':3,'E':4,'F':5},
         bucketLabels: ['A','B','C','D','E','F'],
@@ -404,8 +404,14 @@ angular.module('common.datacloud.query.builder', [
         vm.labelIncrementor = 0;
         vm.bucket = bucket.bucket;
         // vm.tree = vm.getTree();
+
+        vm.setSelectedBucket(vm.bucket);
         vm.setRulesTree();
         vm.resetRulesInputTree();
+    }
+
+    vm.setSelectedBucket = function(bucket) {
+        QueryStore.setSelectedBucket(bucket);
     }
 
     vm.getRuleCount = function(bkt, entity) {

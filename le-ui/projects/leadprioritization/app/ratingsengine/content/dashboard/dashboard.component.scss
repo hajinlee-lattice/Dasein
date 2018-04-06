@@ -41,6 +41,7 @@
             }
             .no-ratings {
                 position: absolute;
+                text-align: center;
                 z-index: 2;
                 display: block;
                 left: 50%;
@@ -72,6 +73,7 @@
         & > div {
             width: 49%;
             margin-bottom: 20px;
+            position: relative;
         }
         h3 {
             font-size: 16px;

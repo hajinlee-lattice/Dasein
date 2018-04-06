@@ -43,6 +43,7 @@ angular.module('common.datacloud.query.service',[
 
     this.bucketsToLaunch = null;
     this.ratedTargetsLimit = null;
+    this.selectedBucket = 'A';
 
     this.init = function() {
         this.initRestrictions();
@@ -70,6 +71,7 @@ angular.module('common.datacloud.query.service',[
         this.accounts = [];
         this.contacts = [];
         this.initRestrictions();
+        this.selectedBucket = 'A';
     };
 
     this.initRestrictions = function() {
@@ -102,6 +104,13 @@ angular.module('common.datacloud.query.service',[
         });
 
         this.getEntitiesCounts();
+    }
+
+    this.setSelectedBucket = function(bucket) {
+        this.selectedBucket = bucket;
+    }
+    this.getSelectedBucket = function() {
+        return this.selectedBucket;
     }
 
     this.setEntitiesProperty = function(property, value) {

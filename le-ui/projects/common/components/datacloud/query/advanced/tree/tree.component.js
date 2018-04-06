@@ -44,7 +44,7 @@ angular
 
             vm.init = function (type, value) {
                 
-                // console.log(vm.tree);
+                console.log(vm.tree);
 
                 vm.tree.collapsed = false;
 

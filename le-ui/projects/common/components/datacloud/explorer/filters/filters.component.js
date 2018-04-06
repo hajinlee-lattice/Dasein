@@ -10,7 +10,7 @@ angular
         controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
             var vm = $scope.vm;
 
-            console.log($stateParams);
+            console.log(vm.bucket);
 
             angular.extend(vm, {
                 orders: {
@@ -287,8 +287,7 @@ angular
             }
 
             vm.goBackToModelRules = function() {
-                console.log($stateParams.rating_id);
-                $state.go('home.ratingsengine.dashboard.segment.attributes.rules', {reload: true});
+                $state.go('home.ratingsengine.dashboard.segment.attributes.rules');
             }
 
 

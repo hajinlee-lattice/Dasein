@@ -94,6 +94,13 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
+
+        console.log($state);
+
+        if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add') {
+            vm.mode = 'dashboardrules';
+        }
+
         if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
             vm.section = 'segment.analysis';
             vm.inWizard = true;

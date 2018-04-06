@@ -129,7 +129,7 @@
                                     class="loading-small"
                                     data-ng-if="
                                     jobStepsRunningStates.generate_insights || jobStepsRunningStates.match_data ||
-                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && !jobStepsCompletedStates.generate_insights || !jobStepsCompletedStates.match_data"></span>
+                                    jobStepsRunningStates.undefined && jobStepsCompletedStates.load_data && (!jobStepsCompletedStates.generate_insights || !jobStepsCompletedStates.match_data)"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.generate_insights || jobStepsCompletedStates.match_data"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="stepFailed == 'generate_insights' || stepFailed == 'match_data'"></i>
                             </span>
@@ -149,7 +149,7 @@
                                     class="loading-small"
                                     data-ng-if="
                                     jobStepsRunningStates.create_global_target_market || jobStepsRunningStates.create_global_model ||
-                                    jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && !jobStepsCompletedStates.create_global_target_market || !jobStepsCompletedStates.create_global_model"></span>
+                                    jobStepsCompletedStates.generate_insights && jobStepsRunningStates.undefined && (!jobStepsCompletedStates.create_global_target_market || !jobStepsCompletedStates.create_global_model)"></span>
                                 <i class="fa fa-check" data-ng-if="jobStepsCompletedStates.create_global_target_market || jobStepsCompletedStates.create_global_model"></i>
                                 <i class="fa fa-exclamation-triangle"  data-ng-if="(stepFailed == 'create_global_target_market') || (stepFailed == 'create_global_model')"></i>
                             </span>
