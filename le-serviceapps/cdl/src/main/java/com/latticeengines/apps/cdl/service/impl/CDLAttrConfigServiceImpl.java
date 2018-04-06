@@ -51,7 +51,7 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
                 renderedList = new ArrayList<>();
                 BusinessEntity.SEGMENT_ENTITIES.forEach(e -> {
                     List<AttrConfig> list = getRenderedList(tenantId, e);
-                    if (list != null && list.size() != 0) {
+                    if (CollectionUtils.isNotEmpty(list)) {
                         renderedList.addAll(list);
                     }
                 });
@@ -59,8 +59,8 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);
-            return renderedList;
         }
+        return renderedList;
     }
 
 }
