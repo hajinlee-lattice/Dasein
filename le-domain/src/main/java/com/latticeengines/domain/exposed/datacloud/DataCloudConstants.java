@@ -37,6 +37,7 @@ public final class DataCloudConstants {
     public static final String ATTR_IS_ST_PRIMARY_LOCATION = "IsStatePrimaryLocation";
     public static final String ATTR_IS_ZIP_PRIMARY_LOCATION = "IsZipPrimaryLocation";
     public static final String ATTR_ALEXA_RANK = "AlexaRank";
+    public static final String ATTR_ALEXA_DOMAIN = "URL";
 
     public static final String AMS_ATTR_DOMAIN = "Domain";
     public static final String AMS_ATTR_DUNS = "DUNS";

@@ -74,7 +74,7 @@ public class CleanupAmSeedSrcFlow extends ConfigurableFlowBase<FormDomOwnershipT
 
         // Add alexa rank of primary domain to orb secondary domain
         Node orbWithAlexaRank = cleanedOrb //
-                .join(ORB_SEC_PRI_DOMAIN, alexaMostRecent, DataCloudConstants.AMS_ATTR_DOMAIN, JoinType.LEFT) //
+                .join(ORB_SEC_PRI_DOMAIN, alexaMostRecent, DataCloudConstants.ATTR_ALEXA_DOMAIN, JoinType.LEFT) //
                 .rename(new FieldList(ALEXA_RANK), new FieldList(PRIM_DOM_ALEXA_RANK)) //
                 .retain(new FieldList(ORB_SEC_PRI_DOMAIN, ORB_SRC_SEC_DOMAIN, PRIM_DOM_ALEXA_RANK));
 

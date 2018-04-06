@@ -55,7 +55,7 @@ public class DomainOwnershipForDomCleanupTestNG
 
     private void prepareAlexaData() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
-        schema.add(Pair.of("Domain", String.class));
+        schema.add(Pair.of("URL", String.class));
         schema.add(Pair.of("Rank", Integer.class));
         Object[][] data = new Object[][] { { "paypal.com", 700 }, { "rubrik.com", 701 }, { "sbiGu.com", 32 },
                 { "sbiDu.com", 36 }, { "karlDu.com", 326 }, { "netappGu.com", 24 }, { "amazonGu.com", 252 },
