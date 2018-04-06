@@ -1,4 +1,4 @@
-package com.latticeengines.common.exposed.web.oauth2;
+package com.latticeengines.oauth2db.exposed.web;
 
 import java.util.Arrays;
 import java.util.Collection;

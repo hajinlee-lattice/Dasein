@@ -15,7 +15,7 @@ import org.springframework.security.oauth2.config.annotation.web.configurers.Res
 import org.springframework.security.oauth2.provider.error.OAuth2AuthenticationEntryPoint;
 import org.springframework.security.oauth2.provider.token.store.JdbcTokenStore;
 
-import com.latticeengines.common.exposed.web.oauth2.LatticeOauth2AuthenticationManager;
+import com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager;
 import com.latticeengines.oauth2db.exposed.tokenstore.JsonJdbcTokenStore;
 import com.latticeengines.playmaker.exception.ExceptionEncodingTranslator;
 
