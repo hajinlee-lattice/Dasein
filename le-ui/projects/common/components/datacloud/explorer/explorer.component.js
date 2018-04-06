@@ -861,7 +861,7 @@ angular.module('common.datacloud.explorer', [
 
         if ((vm.show_segmentation && vm.section == 'segment.analysis') || vm.section == 'wizard.ratingsengine_segment' || vm.section == 'dashboard.rules') {
             var topCategories = [
-                'Lattice Rating',
+                'Lattice Ratings',
                 'Firmographics',
                 'My Attributes',
                 'Contact Attributes',
