@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 @JsonIgnoreProperties
 public class CustomEventModelingConfig implements AdvancedModelingConfig {
@@ -19,6 +20,8 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
     private DedupType deduplicationType = DedupType.ONELEADPERDOMAIN;
 
     private boolean excludePublicDomains;
+
+    private String transformationGroup;
 
     public CustomEventModelingType getCustomEventModelingType() {
         return customEventModelingType;
@@ -58,6 +61,22 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
 
     public void setExcludePublicDomains(boolean excludePublicDomains) {
         this.excludePublicDomains = excludePublicDomains;
+    }
+
+    public TransformationGroup getCovertedTransformationGroup() {
+        try {
+            return TransformationGroup.fromName(transformationGroup);
+        } catch (Exception e) {
+            return TransformationGroup.NONE;
+        }
+    }
+
+    public String getTransformationGroup() {
+        return transformationGroup;
+    }
+
+    public void setTransformationGroup(String transformationGroup) {
+        this.transformationGroup = transformationGroup;
     }
 
     public enum DataStore {
