@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls.cdl.rating.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
@@ -63,7 +64,8 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         this.excludePublicDomains = excludePublicDomains;
     }
 
-    public TransformationGroup getCovertedTransformationGroup() {
+    @JsonIgnore
+    public TransformationGroup getConvertedTransformationGroup() {
         try {
             return TransformationGroup.fromName(transformationGroup);
         } catch (Exception e) {
@@ -94,6 +96,7 @@ public class CustomEventModelingConfig implements AdvancedModelingConfig {
         advancedConfInRetrievedAIModel.setDataStores(advancedConfInAIModel.getDataStores());
         advancedConfInRetrievedAIModel.setDeduplicationType(advancedConfInAIModel.getDeduplicationType());
         advancedConfInRetrievedAIModel.setExcludePublicDomains(advancedConfInAIModel.isExcludePublicDomains());
+        advancedConfInRetrievedAIModel.setTransformationGroup(advancedConfInAIModel.getTransformationGroup());
     }
 
     public static CustomEventModelingConfig getAdvancedModelingConfig(AIModel aiModel) {
