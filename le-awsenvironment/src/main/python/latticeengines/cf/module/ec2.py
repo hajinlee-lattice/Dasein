@@ -243,15 +243,15 @@ def ecs_metadata(ec2, ecscluster, efs, env, instance_role_name):
                         "command" : { "Fn::Join": [ "", [
                             "start ecs\n"
                             "for i in {1..100}; do\n",
-                            "    instance_id=`curl http://169.254.169.254/latest/meta-data/instance-id`\n",
-                            "    if [ ! -z \"${instance_id}\" ]; then\n",
+                            "    instance_arn=`curl -s http://localhost:51678/v1/metadata | jq -r '. | .ContainerInstanceArn' | awk -F/ '{print $NF}'`\n",
+                            "    if [ ! -z \"${instance_arn}\" ]; then\n",
                             "        break;\n",
                             "    fi;\n",
-                            "    echo \"did not find instance id, retry after 1 second\"\n",
+                            "    echo \"did not find instance arn, retry after 1 second\"\n",
                             "    sleep 1;\n",
                             "done;\n",
                             "region=", { "Ref" : "AWS::Region" }, "\n",
-                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_id} --region ${region}\n"
+                            "aws ecs start-task --cluster ", ecscluster.ref(), " --task-definition telegraf --container-instances ${instance_arn} --region ${region}\n"
                         ] ] }
                     },
                     "30_mount_efs" : {
