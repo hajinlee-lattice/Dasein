@@ -5,10 +5,6 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
-    <import resource="classpath:oauth2db-persistence-context.xml" />
-    
-    <context:component-scan base-package="com.latticeengines.oauth2db">
-        <context:exclude-filter type="assignable" expression="com.latticeengines.oauth2db.exposed.web.LatticeOauth2AuthenticationManager"/>
-    </context:component-scan>
+    <context:component-scan base-package="com.latticeengines.oauth2db.exposed.web"/>
 
 </beans>

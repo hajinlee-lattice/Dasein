@@ -9,6 +9,7 @@
     <import resource="classpath:ulysses-context.xml"/>
     <import resource="classpath:monitor-metric-context.xml"/>
     <import resource="classpath:oauth2db-context.xml" />
+    <import resource="classpath:oauth2db-auth-mgr-context.xml"/>
     
     <import resource="classpath:common-webapp-env-context.xml"/>
     
