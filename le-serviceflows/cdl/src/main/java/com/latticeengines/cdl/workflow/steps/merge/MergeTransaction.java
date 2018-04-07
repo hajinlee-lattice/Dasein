@@ -176,7 +176,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         TransformationStepConfig dayPeriods = collectDays();
         TransformationStepConfig rawCleanup = cleanupRaw(rawTable);
         TransformationStepConfig dailyPartition = partitionDaily();
-        TransformationStepConfig report = reportDiff(dayPeriodStep);
+        TransformationStepConfig report = reportDiff(mergeStep);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(inputMerge);
@@ -201,7 +201,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         TransformationStepConfig standardize = standardizeTrx(dailyStep);
         TransformationStepConfig dayPeriods = collectDays();
         TransformationStepConfig dailyPartition = partitionDaily();
-        TransformationStepConfig report = reportDiff(dayPeriodStep);
+        TransformationStepConfig report = reportDiff(mergeStep);
 
         List<TransformationStepConfig> steps = new ArrayList<>();
         steps.add(inputMerge);

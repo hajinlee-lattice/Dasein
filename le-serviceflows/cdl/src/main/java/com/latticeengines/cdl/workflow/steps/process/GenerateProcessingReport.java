@@ -9,10 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -20,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.cdl.workflow.steps.CloneTableService;
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -41,6 +45,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("generateProcessingReport")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfiguration> {
+
+    protected static final Logger log = LoggerFactory.getLogger(GenerateProcessingReport.class);
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
@@ -124,8 +130,8 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
 
         ObjectNode entitiesSummaryNode = (ObjectNode) report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
-            log.info("No entity summary reports found.");
-            return;
+            log.info("No entity summary reports found. Create it.");
+            entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
         }
         BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
                 BusinessEntity.Transaction };
@@ -136,8 +142,10 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             long newCnt = consolidateSummaryNode.get("NEW").asLong();
             long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
+            log.info(String.format(
+                    "For entity %s, previous total count: %d, current total count: %d, new count: %s, delete count: %d",
+                    entity.name(), previousCnts.get(entity), currentCnts.get(entity), newCnt, deleteCnt));
             consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
-
             ObjectNode entityNumberNode = JsonUtils.createObjectNode();
             entityNumberNode.put("TOTAL", String.valueOf(currentCnts.get(entity)));
             entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
@@ -156,10 +164,9 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 BusinessEntity.Transaction };
         try {
             if (latestSuccessJob.isPresent()) {
-                Report report = latestSuccessJob.get().getReports().get(0); // 0:
-                                                                            // EntitySummaryReport,
-                                                                            // 1:
-                                                                            // PublishSummaryReport
+                Report report = latestSuccessJob.get().getReports().stream()
+                        .filter(r -> r.getPurpose() == ReportPurpose.ENTITIES_SUMMARY)
+                        .collect(Collectors.toList()).get(0);
                 ObjectMapper om = JsonUtils.getObjectMapper();
                 ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
                 ObjectNode entitiesSummaryNode = (ObjectNode) jsonReport.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
@@ -168,12 +175,16 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                                 .get(entity.name()).get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()) != null)
                         .forEach(entity -> previousCnts.put(entity, entitiesSummaryNode.get(entity.name())
                                 .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()).get("TOTAL").asLong()));
+            } else {
+                log.info("Cannot find previous successful processAnalyzeWorkflow job");
             }
         } catch (Exception e) {
             log.error("Fail to parse report from job: " + JsonUtils.serialize(latestSuccessJob.get()));
         } finally {
             for (BusinessEntity entity : entities) {
                 if (!previousCnts.containsKey(entity)) {
+                    log.info(String.format("Cannot find previous count for entity %s in previous job report. Set as 0.",
+                            entity.name()));
                     previousCnts.put(entity, 0L);
                 }
             }
@@ -194,33 +205,56 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedRawTransaction, inactive);
         if (StringUtils.isBlank(rawTableName)) {
-            log.warn("Cannot find raw transaction table.");
-            return 0L;
+            log.info("Cannot find raw transaction table in version " + inactive);
+            rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedRawTransaction, active);
+            if (StringUtils.isBlank(rawTableName)) {
+                log.info("Cannot find raw transaction table in version " + active);
+                return 0L;
+            }
         }
-        log.info(String.format("Found raw transaction table %s in inactive version %s", rawTableName, inactive));
         Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
         if (rawTable == null) {
-            log.warn("Cannot find raw transaction table.");
+            log.error("Cannot find raw transaction table " + rawTableName);
             return 0L;
         }
-        return rawTable.getExtracts().get(0).getProcessedRecords();
+        try {
+            String hdfsPath = rawTable.getExtracts().get(0).getPath();
+            if (!hdfsPath.endsWith("*.avro")) {
+                if (hdfsPath.endsWith("/")) {
+                    hdfsPath += "*.avro";
+                } else {
+                    hdfsPath += "/*.avro";
+                }
+            }
+            return AvroUtils.count(yarnConfiguration, hdfsPath);
+        } catch (Exception ex) {
+            log.error(String.format("Fail to count raw transaction table %s", rawTableName), ex);
+            return 0L;
+        }
     }
 
     private long countInRedshift(BusinessEntity entity) {
+        DataCollection.Version version = inactive;
         if (StringUtils.isBlank(
-                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive))) {
-            log.error("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
-            return 0L;
+                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), version))) {
+            log.info("Cannot find serving store for entity " + entity.name() + " with version " + version.name());
+            version = active;
+            if (StringUtils.isBlank(
+                    dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), version))) {
+                log.info("Cannot find serving store for entity " + entity.name() + " with version " + version.name());
+                return 0L;
+            }
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
         int retries = 0;
         while (retries < 3) {
             try {
-                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
+                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, version);
             } catch (Exception ex) {
                 log.error("Exception in getting count from serving store for entity " + entity.name() + " with version "
-                        + inactive.name(), ex);
+                        + version.name(), ex);
                 retries++;
                 try {
                     Thread.sleep(2000);
@@ -229,7 +263,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             }
         }
         log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
-                + inactive.name());
+                + version.name());
         return 0L;
     }
 
