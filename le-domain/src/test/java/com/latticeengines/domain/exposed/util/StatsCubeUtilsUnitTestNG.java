@@ -114,6 +114,8 @@ public class StatsCubeUtilsUnitTestNG {
             cmMap.put(entity.name(), table.getColumnMetadata());
         }
 
+        cubes = StatsCubeUtils.filterStatsCube(cubes, cmMap);
+
         is = readResource("productData.json");
         DataPage dataPage = JsonUtils.deserialize(is, DataPage.class);
         Map<String, String> productMap = new HashMap<>();

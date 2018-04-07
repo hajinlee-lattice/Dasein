@@ -284,6 +284,30 @@ public class StatsCubeUtils {
         return bucket;
     }
 
+    public static Map<String, StatsCube> filterStatsCube(Map<String, StatsCube> cubes,
+            Map<String, List<ColumnMetadata>> cmMap) {
+        for (Map.Entry<String, StatsCube> cubeEntry : cubes.entrySet()) {
+            String key = cubeEntry.getKey();
+            StatsCube cube = cubeEntry.getValue();
+            if (MapUtils.isNotEmpty(cube.getStatistics()) && cmMap.containsKey(key)) {
+                List<ColumnMetadata> cmList = cmMap.get(key);
+                cmList.forEach(cm -> {
+                    if (isNumericalAttribute(cm) || isBooleanAttribute(cm)) {
+                        AttributeStats stats = cube.getStatistics().get(cm.getAttrName());
+                        if (stats != null && stats.getNonNullCount() == 0L) {
+                            cube.getStatistics().remove(cm.getAttrName());
+                        }
+                    }
+                });
+
+            } else {
+                log.warn("Did not provide column metadata for " + key //
+                        + ", skipping the stats for the whole cube.");
+            }
+        }
+        return cubes;
+    }
+
     public static StatsCube retainTop5Bkts(StatsCube cube) {
         Map<String, AttributeStats> newStats = new HashMap<>();
         cube.getStatistics().forEach((attrName, attrStats) -> newStats.put(attrName, retainTop5Bkts(attrStats)));
@@ -305,6 +329,14 @@ public class StatsCubeUtils {
 
     private static boolean isSystemAttribute(ColumnMetadata cm) {
         return SYSTEM_ATTRS.contains(cm.getAttrName());
+    }
+
+    private static boolean isNumericalAttribute(ColumnMetadata cm) {
+        return FundamentalType.NUMERIC.equals(cm.getFundamentalType());
+    }
+
+    private static boolean isBooleanAttribute(ColumnMetadata cm) {
+        return FundamentalType.BOOLEAN.equals(cm.getFundamentalType());
     }
 
     private static AttributeStats retainTop5Bkts(AttributeStats attributeStats) {

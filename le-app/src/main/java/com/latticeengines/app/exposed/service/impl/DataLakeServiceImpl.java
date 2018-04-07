@@ -207,15 +207,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (MapUtils.isEmpty(cubes)) {
             return null;
         }
-        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
-        cubes.keySet().forEach(key -> {
-            BusinessEntity entity = BusinessEntity.valueOf(key);
-            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
-            List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
-            if (CollectionUtils.isNotEmpty(cms)) {
-                cmMap.put(key, cms);
-            }
-        });
+        Map<String, List<ColumnMetadata>> cmMap = getColumnMetadataMap(customerSpace, cubes);
         if (MapUtils.isEmpty(cmMap)) {
             return null;
         }
@@ -229,9 +221,24 @@ public class DataLakeServiceImpl implements DataLakeService {
     public Map<String, StatsCube> getStatsCubes(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
-            return container.getStatsCubes();
+            Map<String, StatsCube> cubes = container.getStatsCubes();
+            Map<String, List<ColumnMetadata>> cmMap = getColumnMetadataMap(customerSpace, cubes);
+            return StatsCubeUtils.filterStatsCube(cubes, cmMap);
         }
         return null;
+    }
+
+    private Map<String, List<ColumnMetadata>> getColumnMetadataMap(String customerSpace, Map<String, StatsCube> cubes) {
+        Map<String, List<ColumnMetadata>> cmMap = new HashMap<>();
+        cubes.keySet().forEach(key -> {
+            BusinessEntity entity = BusinessEntity.valueOf(key);
+            String tenantId = CustomerSpace.shortenCustomerSpace(customerSpace);
+            List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, entity);
+            if (CollectionUtils.isNotEmpty(cms)) {
+                cmMap.put(key, cms);
+            }
+        });
+        return cmMap;
     }
 
     @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|metadata\", #customerSpace, #entity)", sync = true)
