@@ -76,7 +76,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
             params.add("max=" + max);
         }
         if (StringUtils.isNotBlank(sortby)) {
-            params.add("sortby" + sortby);
+            params.add("sortby=" + sortby);
         }
         if (descending != null) {
             params.add("descending=" + descending);
