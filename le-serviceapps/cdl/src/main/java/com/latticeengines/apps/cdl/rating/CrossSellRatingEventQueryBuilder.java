@@ -85,9 +85,10 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
 
-            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(new Bucket.Transaction(productIds,
-                    TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()), null, null,
-                    false)));
+            productTxnRestriction = new BucketRestriction(attrLookup,
+                    Bucket.txnBkt(new Bucket.Transaction(productIds,
+                            TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()),
+                            null, null, false)));
             break;
         case CROSS_SELL_FIRST_PURCHASE:
             if (unitsFilter == null && spentFilter == null) {
@@ -97,7 +98,8 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                 Bucket txnBkt1 = Bucket.txnBkt(new Bucket.Transaction(productIds,
                         TimeFilter.priorOnly(1, PeriodStrategy.Template.Month.name()), null, null, true));
                 Bucket txnBkt2 = Bucket.txnBkt(new Bucket.Transaction(productIds,
-                        new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, null), spentFilter, unitsFilter, false));
+                        new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, PeriodStrategy.Template.Month.name(), null),
+                        spentFilter, unitsFilter, false));
                 productTxnRestriction = Restriction.builder()
                         .and(new BucketRestriction(attrLookup, txnBkt1), new BucketRestriction(attrLookup, txnBkt2))
                         .build();
