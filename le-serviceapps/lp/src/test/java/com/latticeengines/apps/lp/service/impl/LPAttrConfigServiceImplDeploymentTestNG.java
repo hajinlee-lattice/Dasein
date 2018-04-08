@@ -23,15 +23,18 @@ public class LPAttrConfigServiceImplDeploymentTestNG extends LPDeploymentTestNGB
     void testRenderAndTrim() {
         List<ColumnMetadata> systemMetadata = lpAttrConfigService.getSystemMetadata(BusinessEntity.LatticeAccount);
 
-        ArrayList<AttrConfig> customConfig = new ArrayList<>();
+        List<AttrConfig> customConfig = new ArrayList<>();
         List<AttrConfig> renderConfig = lpAttrConfigService.render(systemMetadata, customConfig);
+        List<AttrConfig> copiedList = new ArrayList<AttrConfig>();
+        renderConfig.forEach(e -> copiedList.add(e.clone()));
+
         List<AttrConfig> trimConfig = lpAttrConfigService.trim(renderConfig);
         List<AttrConfig> renderConfig2 = lpAttrConfigService.render(systemMetadata, trimConfig);
 
         Assert.assertEquals(renderConfig.size(), renderConfig2.size());
-        // Assert.assertEquals(renderConfig, renderConfig2);
-        List<AttrConfig> trimConfig2 = lpAttrConfigService.trim(renderConfig2);
+        Assert.assertEquals(copiedList, renderConfig2);
 
+        List<AttrConfig> trimConfig2 = lpAttrConfigService.trim(renderConfig2);
         Assert.assertEquals(trimConfig.size(), trimConfig2.size());
         Assert.assertEquals(trimConfig, trimConfig2);
     }

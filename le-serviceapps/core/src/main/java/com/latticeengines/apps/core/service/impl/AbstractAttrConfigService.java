@@ -19,6 +19,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 
 public abstract class AbstractAttrConfigService {
 
@@ -44,11 +46,18 @@ public abstract class AbstractAttrConfigService {
             map.put(config.getAttrName(), config);
         }
         for (ColumnMetadata metadata : systemMetadata) {
+            AttrType type = AttrTypeResolver.resolveType(metadata);
+            AttrSubType subType = AttrTypeResolver.resolveSubType(metadata);
+            if (AttrType.Internal.equals(type)) {
+                continue;
+            }
             AttrConfig mergeConfig = map.get(metadata.getAttrName());
             if (mergeConfig == null) {
                 mergeConfig = new AttrConfig();
                 mergeConfig.setAttrName(metadata.getAttrName());
-                mergeConfig.setAttrType(AttrTypeResolver.resolveType(metadata));
+                mergeConfig.setAttrType(type);
+                mergeConfig.setAttrSubType(subType);
+                mergeConfig.setEntity(metadata.getEntity());
                 mergeConfig.setAttrProps(new HashMap<>());
             }
             Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
@@ -59,11 +68,13 @@ public abstract class AbstractAttrConfigService {
             AttrConfigProp<Category> cateProp = (AttrConfigProp<Category>) attrProps
                     .getOrDefault(ColumnMetadataKey.Category, new AttrConfigProp<Category>());
             cateProp.setSystemValue(metadata.getCategory());
+            cateProp.setAllowCustomization(resolveAllowCategOrSubCate(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
 
             AttrConfigProp<String> subCateProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.Subcategory, new AttrConfigProp<String>());
             subCateProp.setSystemValue(metadata.getSubcategory());
+            subCateProp.setAllowCustomization(resolveAllowCategOrSubCate(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.Subcategory, subCateProp);
 
             AttrConfigProp<AttrState> statsProp = (AttrConfigProp<AttrState>) attrProps.getOrDefault(
@@ -74,42 +85,50 @@ public abstract class AbstractAttrConfigService {
                 state = AttrState.Active;
             }
             statsProp.setSystemValue(state);
+            statsProp.setAllowCustomization(resolveAllowStateOrDisplayName(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.State, statsProp);
 
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
             displayNameProp.setSystemValue(metadata.getDisplayName());
+            displayNameProp.setAllowCustomization(resolveAllowStateOrDisplayName(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.DisplayName, displayNameProp);
 
             AttrConfigProp<String> descriptionProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.Description, new AttrConfigProp<String>());
             descriptionProp.setSystemValue(metadata.getDescription());
+            descriptionProp.setAllowCustomization(resolveAllowDesc(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
 
             AttrConfigProp<Boolean> companyProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(AttrConfig.CompanyProfile, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.CompanyProfile, new AttrConfigProp<Boolean>());
             companyProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.CompanyProfile));
-            mergeConfig.putProperty(AttrConfig.CompanyProfile, companyProp);
+            companyProp.setAllowCustomization(resolveAllowCompanyProfileOrEnrichment());
+            mergeConfig.putProperty(ColumnSelection.Predefined.CompanyProfile.name(), companyProp);
 
             AttrConfigProp<Boolean> enrichProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(AttrConfig.Enrichment, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Enrichment, new AttrConfigProp<Boolean>());
             enrichProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment));
-            mergeConfig.putProperty(AttrConfig.Enrichment, enrichProp);
+            enrichProp.setAllowCustomization(resolveAllowCompanyProfileOrEnrichment());
+            mergeConfig.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
 
             AttrConfigProp<Boolean> modelProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(AttrConfig.Model, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Model, new AttrConfigProp<Boolean>());
             modelProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Model));
-            mergeConfig.putProperty(AttrConfig.Model, modelProp);
+            modelProp.setAllowCustomization(resolveAllowModel(type, subType));
+            mergeConfig.putProperty(ColumnSelection.Predefined.Model.name(), modelProp);
 
             AttrConfigProp<Boolean> segProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(AttrConfig.Segment, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Segment, new AttrConfigProp<Boolean>());
             segProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Segment));
-            mergeConfig.putProperty(AttrConfig.Segment, segProp);
+            segProp.setAllowCustomization(resolveAllowSegmentOrTalkingPoint(type, subType));
+            mergeConfig.putProperty(ColumnSelection.Predefined.Segment.name(), segProp);
 
             AttrConfigProp<Boolean> talkingPointProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(AttrConfig.TalkingPoint, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.TalkingPoint.name(), new AttrConfigProp<Boolean>());
             talkingPointProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.TalkingPoint));
-            mergeConfig.putProperty(AttrConfig.TalkingPoint, talkingPointProp);
+            talkingPointProp.setAllowCustomization(resolveAllowSegmentOrTalkingPoint(type, subType));
+            mergeConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.name(), talkingPointProp);
             map.put(metadata.getAttrName(), mergeConfig);
         }
         return map.values().stream().collect(Collectors.toList());
@@ -128,5 +147,32 @@ public abstract class AbstractAttrConfigService {
             }
         }
         return results;
+    }
+
+    private boolean resolveAllowCategOrSubCate(AttrType type, AttrSubType subType) {
+        return !((AttrType.Curated.equals(type) && AttrSubType.ProductBundle.equals(subType))
+                || (AttrType.Custom.equals(type) && AttrSubType.Standard.equals(subType)));
+    }
+
+    private boolean resolveAllowDesc(AttrType type, AttrSubType subType) {
+        return (AttrType.Custom.equals(type) && !AttrSubType.Standard.equals(subType))
+                || (AttrType.Curated.equals(type) && !AttrSubType.Rating.equals(subType));
+    }
+
+    private boolean resolveAllowStateOrDisplayName(AttrType type, AttrSubType subType) {
+        return false;
+    }
+
+    private boolean resolveAllowCompanyProfileOrEnrichment() {
+        return true;
+    }
+
+    private boolean resolveAllowModel(AttrType type, AttrSubType subType) {
+        return AttrType.DataCloud.equals(type)
+                || (AttrType.Custom.equals(type) && !AttrSubType.LookupId.equals(subType));
+    }
+
+    private boolean resolveAllowSegmentOrTalkingPoint(AttrType type, AttrSubType subType) {
+        return !(AttrType.DataCloud.equals(type) && AttrSubType.InternalEnrich.equals(subType));
     }
 }

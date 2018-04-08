@@ -19,21 +19,18 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class AttrConfig implements IsColumnMetadata {
+public class AttrConfig implements IsColumnMetadata, Cloneable {
 
     private static final long serialVersionUID = -118514979620559934L;
-
-    public static final String Segment = "Segment";
-    public static final String Model = "Model";
-    public static final String Enrichment = "Enrichment";
-    public static final String CompanyProfile = "CompanyProfile";
-    public static final String TalkingPoint = "TalkingPoint";
 
     @JsonProperty(ColumnMetadataKey.AttrName)
     private String attrName;
 
     @JsonProperty("Type")
     private AttrType attrType;
+
+    @JsonProperty("SubType")
+    private AttrSubType attrSubType;
 
     @JsonProperty("Entity")
     private BusinessEntity entity;
@@ -61,6 +58,14 @@ public class AttrConfig implements IsColumnMetadata {
 
     public void setAttrType(AttrType attrType) {
         this.attrType = attrType;
+    }
+
+    public AttrSubType getAttrSubType() {
+        return attrSubType;
+    }
+
+    public void setAttrSubType(AttrSubType attrSubType) {
+        this.attrSubType = attrSubType;
     }
 
     public BusinessEntity getEntity() {
@@ -153,7 +158,8 @@ public class AttrConfig implements IsColumnMetadata {
             return false;
         }
         AttrConfig config = (AttrConfig) o;
-        boolean flag1 = StringUtils.equals(attrName, config.getAttrName()) && attrType == config.getAttrType();
+        boolean flag1 = StringUtils.equals(attrName, config.getAttrName()) && attrType == config.getAttrType()
+                && attrSubType == config.getAttrSubType() && entity == config.getEntity();
         if (!flag1) {
             return false;
         }
@@ -161,9 +167,8 @@ public class AttrConfig implements IsColumnMetadata {
         Map<String, AttrConfigProp<?>> attrProps2 = config.getAttrProps();
         if (attrProps == attrProps2) {
             flag2 = true;
-        }
-        else if (attrProps != null && attrProps2 != null) {
-            if (attrProps.keySet().size() != attrProps2.keySet().size()) {
+        } else if (attrProps != null && attrProps2 != null) {
+            if (attrProps.size() != attrProps2.size()) {
                 flag2 = false;
             } else {
                 for (Map.Entry<String, AttrConfigProp<?>> entry : attrProps.entrySet()) {
@@ -181,4 +186,20 @@ public class AttrConfig implements IsColumnMetadata {
         return flag2;
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public AttrConfig clone() {
+        AttrConfig obj = null;
+        try {
+            obj = (AttrConfig) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        HashMap<String, AttrConfigProp<?>> map = null;
+        if (this.attrProps instanceof HashMap) {
+            map = (HashMap<String, AttrConfigProp<?>>) this.attrProps;
+            obj.attrProps = (Map<String, AttrConfigProp<?>>) map.clone();
+        }
+        return obj;
+    }
 }
