@@ -33,7 +33,9 @@ public class GlobalAuthRetryAspect {
                 } catch (Throwable ex) {
                     log.warn(String.format("There's exception happening! retries=%s", retry), ex);
                 }
-                Thread.sleep(200);
+                if (retry > 1) {
+                    Thread.sleep(200);
+                }
                 retry--;
             }
         } catch (Exception e) {
