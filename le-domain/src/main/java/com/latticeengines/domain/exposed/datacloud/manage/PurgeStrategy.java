@@ -51,7 +51,7 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "GlacierDays")
     private Integer glacierDays;
 
-    @Column(name = "NoBak")
+    @Column(name = "NoBak", nullable = false)
     private boolean noBak;
 
     @Override

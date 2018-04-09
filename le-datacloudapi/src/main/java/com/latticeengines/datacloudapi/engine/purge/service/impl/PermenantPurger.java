@@ -78,9 +78,7 @@ public class PermenantPurger implements SourcePurger {
                     return true;
                 }
                 long lastModifiedTime = file.getModificationTime();
-                // Here HdfsVersion represents how many days we want to retain
-                // this temp source in hdfs
-                if (System.currentTimeMillis() - lastModifiedTime <= strategy.getHdfsVersions() * DAY_IN_MS) {
+                if (System.currentTimeMillis() - lastModifiedTime <= strategy.getHdfsDays() * DAY_IN_MS) {
                     return false;
                 }
                 return true;

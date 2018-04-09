@@ -108,7 +108,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource("Pipeline_");
         strategy.setSourceType(SourceType.TEMP_SOURCE);
-        strategy.setHdfsVersions(7);
+        strategy.setHdfsDays(7);
+        strategy.setNoBak(true);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
@@ -123,7 +124,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         PurgeStrategy strategy = new PurgeStrategy();
         strategy.setSource("LDCDEV_");
         strategy.setSourceType(SourceType.TEMP_SOURCE);
-        strategy.setHdfsVersions(14);
+        strategy.setHdfsDays(14);
+        strategy.setNoBak(true);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
@@ -143,6 +145,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setHdfsVersions(2);
         strategy.setS3Days(100);
         strategy.setGlacierDays(100);
+        strategy.setNoBak(false);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
@@ -170,6 +173,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategyToBak.setHdfsVersions(2);
         strategyToBak.setS3Days(100);
         strategyToBak.setGlacierDays(100);
+        strategyToBak.setNoBak(false);
 
         sourceName = "TestGeneralSourceToDelete";
         hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
@@ -235,6 +239,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setHdfsDays(90);
         strategy.setS3Days(100);
         strategy.setGlacierDays(100);
+        strategy.setNoBak(false);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
 
         sourceName = "TestAccountMasterLookup";
@@ -272,6 +277,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setHdfsDays(90);
         strategy.setS3Days(100);
         strategy.setGlacierDays(100);
+        strategy.setNoBak(false);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
