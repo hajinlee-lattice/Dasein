@@ -84,7 +84,7 @@ public class CleanupAllDeploymentTestNG extends DataIngestionEnd2EndDeploymentTe
         verifyFailedToCountTableRole(TableRoleInCollection.ConsolidatedRawTransaction);
 
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), numAccounts);
-        Assert.assertEquals(countInRedshift(BusinessEntity.Contact), 0);
+        Assert.assertNull(getTableName(BusinessEntity.Contact.getBatchStore()));
 
         verifyStatsCubes();
     }

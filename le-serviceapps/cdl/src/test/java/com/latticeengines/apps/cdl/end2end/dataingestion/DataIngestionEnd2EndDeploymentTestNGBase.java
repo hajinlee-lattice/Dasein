@@ -532,6 +532,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return checkpointService.countInRedshift(entity);
     }
 
+    String getTableName(TableRoleInCollection role) {
+        CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
+        return dataCollectionProxy.getTableName(customerSpace.toString(), role);
+    }
+
     void resumeVdbCheckpoint(String checkpoint) throws IOException {
         checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_VDB);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
