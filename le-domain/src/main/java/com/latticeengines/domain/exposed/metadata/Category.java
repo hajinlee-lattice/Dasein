@@ -8,6 +8,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -55,7 +57,7 @@ public enum Category {
     }
 
     public static Category fromName(String name) {
-        if (name == null) {
+        if (StringUtils.isBlank(name)) {
             return null;
         }
         if (values.contains(name)) {

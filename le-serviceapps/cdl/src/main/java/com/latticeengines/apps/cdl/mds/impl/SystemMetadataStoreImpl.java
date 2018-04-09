@@ -34,7 +34,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -70,13 +70,17 @@ public class SystemMetadataStoreImpl extends
                     Namespace2<BusinessEntity, DataCollection.Version> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
                 TableRoleInCollection role = entity.getServingStore();
+                if (BusinessEntity.Account.equals(entity)) {
+                    // only account uses batch store
+                    role = BusinessEntity.Account.getBatchStore();
+                }
                 DataCollection.Version version = namespace.getCoord2();
                 String customerSpace = MultiTenantContext.getCustomerSpace().toString();
                 List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
 
                 ParallelFlux<ColumnMetadata> servingStore;
                 if (CollectionUtils.isNotEmpty(tableNames)) {
-                    Category category = getEntityCategory(entity);
+                    Category category = CategoryUtils.getEntityCategory(entity);
                     Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
                     ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
                     servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
@@ -85,15 +89,12 @@ public class SystemMetadataStoreImpl extends
                                     cm.setCategory(category);
                                 }
                                 cm.setEntity(entity);
-                                cm.enableGroup(ColumnSelection.Predefined.Segment);
+                                if (!cm.getGroups().containsKey(ColumnSelection.Predefined.Segment)) {
+                                    cm.enableGroup(ColumnSelection.Predefined.Segment);
+                                }
                                 if (BusinessEntity.Account.equals(entity)) {
                                     cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
                                     cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
-                                    // TODO: should be handled by AM metadata
-                                    if (Category.INTENT.equals(cm.getCategory())
-                                            || Category.TECHNOLOGY_PROFILE.equals(cm.getCategory())) {
-                                        cm.setAttrState(AttrState.Inactive);
-                                    }
                                 }
                                 return cm;
                             }) //
@@ -121,7 +122,10 @@ public class SystemMetadataStoreImpl extends
                     Namespace1<String> amNs = cdlNamespaceService.resolveDataCloudVersion();
                     ParallelFlux<ColumnMetadata> amFlux = amMetadataStore.getMetadataInParallel(amNs) //
                             .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
-                            .filter(cm -> !cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
+                            .map(cm -> {
+                                cm.setEntity(BusinessEntity.Account);
+                                return cm;
+                            })
                             .doOnNext(cm -> {
                                 if (amCounter.get() == null) {
                                     amCounter.set(new AtomicLong(0));
@@ -187,27 +191,6 @@ public class SystemMetadataStoreImpl extends
     protected Namespace1<BusinessEntity> projectDecoratorNamespace(
             Namespace2<BusinessEntity, DataCollection.Version> namespace) {
         return Namespace.as(namespace.getCoord1());
-    }
-
-    private static Category getEntityCategory(BusinessEntity entity) {
-        Category category;
-        switch (entity) {
-        case Account:
-            category = Category.ACCOUNT_ATTRIBUTES;
-            break;
-        case Contact:
-            category = Category.CONTACT_ATTRIBUTES;
-            break;
-        case PurchaseHistory:
-            category = Category.PRODUCT_SPEND;
-            break;
-        case Rating:
-            category = Category.RATING;
-            break;
-        default:
-            category = Category.DEFAULT;
-        }
-        return category;
     }
 
 }

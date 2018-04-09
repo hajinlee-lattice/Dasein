@@ -21,11 +21,11 @@ public class LPAttrConfigServiceImplDeploymentTestNG extends LPDeploymentTestNGB
 
     @Test(groups = "deployment")
     void testRenderAndTrim() {
-        List<ColumnMetadata> systemMetadata = lpAttrConfigService.getSystemMetadata(BusinessEntity.LatticeAccount);
+        List<ColumnMetadata> systemMetadata = lpAttrConfigService.getSystemMetadata(BusinessEntity.Account);
 
         List<AttrConfig> customConfig = new ArrayList<>();
         List<AttrConfig> renderConfig = lpAttrConfigService.render(systemMetadata, customConfig);
-        List<AttrConfig> copiedList = new ArrayList<AttrConfig>();
+        List<AttrConfig> copiedList = new ArrayList<>();
         renderConfig.forEach(e -> copiedList.add(e.clone()));
 
         List<AttrConfig> trimConfig = lpAttrConfigService.trim(renderConfig);

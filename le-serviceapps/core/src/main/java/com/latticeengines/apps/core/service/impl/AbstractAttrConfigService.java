@@ -4,34 +4,167 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
+import com.latticeengines.domain.exposed.util.CategoryUtils;
+import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 
-public abstract class AbstractAttrConfigService {
+public abstract class AbstractAttrConfigService implements AttrConfigService {
+
+    private static final Logger log = LoggerFactory.getLogger(AbstractAttrConfigService.class);
 
     @Inject
-    private AttrConfigEntityMgr entityMgr;
+    private AttrConfigEntityMgr attrConfigEntityMgr;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
-    protected List<AttrConfig> getCustomConfig(BusinessEntity entity) {
+    protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
+
+    @Override
+    public List<AttrConfig> getRenderedList(BusinessEntity entity) {
         String tenantId = MultiTenantContext.getTenantId();
-        return entityMgr.findAllForEntity(tenantId, entity);
+        List<AttrConfig> renderedList;
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            List<ColumnMetadata> columns = getSystemMetadata(entity);
+            renderedList = render(columns, customConfig);
+            int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
+            String msg = String.format("Rendered %d attr configs", count);
+            timer.setTimerMessage(msg);
+        }
+        return renderedList;
+    }
+
+    @Override
+    public List<AttrConfig> getRenderedList(Category category) {
+        List<AttrConfig> renderedList;
+        String tenantId = MultiTenantContext.getTenantId();
+        BusinessEntity entity = CategoryUtils.getEntity(category);
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            List<ColumnMetadata> columns = getSystemMetadata(category);
+            renderedList = render(columns, customConfig);
+            int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
+            String msg = String.format("Rendered %d attr configs", count);
+            timer.setTimerMessage(msg);
+        }
+        return renderedList;
+    }
+
+    @Override
+    public AttrConfigRequest validateRequest(AttrConfigRequest request) {
+        return request;
+    }
+
+    @Override
+    public AttrConfigRequest saveRequest(AttrConfigRequest request) {
+        AttrConfigRequest toReturn;
+
+        // split by entity
+        List<AttrConfig> attrConfigs = request.getAttrConfigs();
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrps = new HashMap<>();
+        attrConfigs.forEach(attrConfig -> {
+            BusinessEntity entity = attrConfig.getEntity();
+            if (!attrConfigGrps.containsKey(entity)) {
+                attrConfigGrps.put(entity, new ArrayList<>());
+            }
+            attrConfigGrps.get(entity).add(attrConfig);
+        });
+
+        List<AttrConfig> renderedList;
+        if (MapUtils.isEmpty(attrConfigGrps)) {
+            toReturn = request;
+        } else {
+            if (attrConfigGrps.size() == 1) {
+                BusinessEntity entity = new ArrayList<>(attrConfigGrps.keySet()).get(0);
+                renderedList = renderForEntity(attrConfigs, entity);
+            } else {
+                log.info("Saving attr configs for " + attrConfigGrps.size() + " entities in parallel.");
+                // distribute to tasklets
+                final Tenant tenant = MultiTenantContext.getTenant();
+                List<Callable<List<AttrConfig>>> callables = new ArrayList<>();
+                attrConfigGrps.forEach((entity, configList) -> {
+                    Callable<List<AttrConfig>> callable =
+                            () -> {
+                                MultiTenantContext.setTenant(tenant);
+                                return renderForEntity(configList, entity);
+                            };
+                    callables.add(callable);
+                });
+
+                // fork join execution
+                ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config", 4);
+                List<List<AttrConfig>> lists = ThreadPoolUtils.runOnThreadPool(threadPool, callables);
+                new Thread(threadPool::shutdown).run();
+                renderedList = lists.stream().flatMap(list -> {
+                    if (CollectionUtils.isNotEmpty(list)) {
+                        return list.stream();
+                    } else {
+                        return Stream.empty();
+                    }
+                }).collect(Collectors.toList());
+            }
+
+            toReturn = new AttrConfigRequest();
+            toReturn.setAttrConfigs(renderedList);
+            AttrConfigRequest validated = validateRequest(toReturn);
+            if (validated.hasError()) {
+                throw new IllegalArgumentException(
+                        "Request has validation errors, cannot be saved: " + JsonUtils.serialize(validated.getDetails()));
+            }
+
+            //TODO: save renderedList: trim -> save ?
+        }
+
+        return toReturn;
+    }
+
+    /**
+     * Input AttrConfig may only have partial AttrProps
+     */
+    private List<AttrConfig> renderForEntity(List<AttrConfig> configList, BusinessEntity entity) {
+        List<AttrConfig> renderedList;
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            Set<String> attrNames = configList.stream().map(AttrConfig::getAttrName).collect(Collectors.toSet());
+            List<ColumnMetadata> systemMds = getSystemMetadata(entity);
+            List<ColumnMetadata> columns = systemMds.stream() //
+                    .filter(cm -> attrNames.contains(cm.getAttrName())) //
+                    .collect(Collectors.toList());
+            renderedList = render(columns, configList);
+            int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
+            String msg = String.format("Rendered %d attr configs in entity %s for saving", count, entity);
+            timer.setTimerMessage(msg);
+        }
+        return renderedList;
     }
 
     @SuppressWarnings("unchecked")
@@ -41,7 +174,7 @@ public abstract class AbstractAttrConfigService {
         } else if (customConfig == null) {
             customConfig = new ArrayList<>();
         }
-        Map<String, AttrConfig> map = new HashMap<String, AttrConfig>();
+        Map<String, AttrConfig> map = new HashMap<>();
         for (AttrConfig config : customConfig) {
             map.put(config.getAttrName(), config);
         }
@@ -77,9 +210,8 @@ public abstract class AbstractAttrConfigService {
             subCateProp.setAllowCustomization(resolveAllowCategOrSubCate(type, subType));
             mergeConfig.putProperty(ColumnMetadataKey.Subcategory, subCateProp);
 
-            AttrConfigProp<AttrState> statsProp = (AttrConfigProp<AttrState>) attrProps.getOrDefault(
-                    ColumnMetadataKey.State,
-                    new AttrConfigProp<AttrState>());
+            AttrConfigProp<AttrState> statsProp = (AttrConfigProp<AttrState>) attrProps
+                    .getOrDefault(ColumnMetadataKey.State, new AttrConfigProp<AttrState>());
             AttrState state = AttrState.Deprecated;
             if (metadata.getAttrState() == null || AttrState.Active.equals(metadata.getAttrState())) {
                 state = AttrState.Active;
@@ -101,25 +233,25 @@ public abstract class AbstractAttrConfigService {
             mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
 
             AttrConfigProp<Boolean> companyProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(ColumnSelection.Predefined.CompanyProfile, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.CompanyProfile.name(), new AttrConfigProp<Boolean>());
             companyProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.CompanyProfile));
             companyProp.setAllowCustomization(resolveAllowCompanyProfileOrEnrichment());
             mergeConfig.putProperty(ColumnSelection.Predefined.CompanyProfile.name(), companyProp);
 
             AttrConfigProp<Boolean> enrichProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(ColumnSelection.Predefined.Enrichment, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Enrichment.name(), new AttrConfigProp<Boolean>());
             enrichProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment));
             enrichProp.setAllowCustomization(resolveAllowCompanyProfileOrEnrichment());
             mergeConfig.putProperty(ColumnSelection.Predefined.Enrichment.name(), enrichProp);
 
             AttrConfigProp<Boolean> modelProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(ColumnSelection.Predefined.Model, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Model.name(), new AttrConfigProp<Boolean>());
             modelProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Model));
             modelProp.setAllowCustomization(resolveAllowModel(type, subType));
             mergeConfig.putProperty(ColumnSelection.Predefined.Model.name(), modelProp);
 
             AttrConfigProp<Boolean> segProp = (AttrConfigProp<Boolean>) attrProps
-                    .getOrDefault(ColumnSelection.Predefined.Segment, new AttrConfigProp<Boolean>());
+                    .getOrDefault(ColumnSelection.Predefined.Segment.name(), new AttrConfigProp<Boolean>());
             segProp.setSystemValue(metadata.isEnabledFor(ColumnSelection.Predefined.Segment));
             segProp.setAllowCustomization(resolveAllowSegmentOrTalkingPoint(type, subType));
             mergeConfig.putProperty(ColumnSelection.Predefined.Segment.name(), segProp);
@@ -131,7 +263,7 @@ public abstract class AbstractAttrConfigService {
             mergeConfig.putProperty(ColumnSelection.Predefined.TalkingPoint.name(), talkingPointProp);
             map.put(metadata.getAttrName(), mergeConfig);
         }
-        return map.values().stream().collect(Collectors.toList());
+        return new ArrayList<>(map.values());
     }
 
     public List<AttrConfig> trim(List<AttrConfig> customConfig) {

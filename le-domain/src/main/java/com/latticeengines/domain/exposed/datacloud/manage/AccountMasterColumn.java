@@ -388,6 +388,13 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
             metadata.setAttrState(AttrState.Deprecated);
         }
 
+        if (Category.INTENT.equals(metadata.getCategory())
+                || Category.TECHNOLOGY_PROFILE.equals(metadata.getCategory())) {
+            metadata.setAttrState(AttrState.Inactive);
+        }
+        metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+        metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+
         // deprecated properties
         metadata.setMatchDestination(getMatchDestination());
         metadata.setColumnName(getAmColumnId());

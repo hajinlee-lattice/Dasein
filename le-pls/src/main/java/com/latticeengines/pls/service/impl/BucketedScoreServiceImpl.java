@@ -14,8 +14,6 @@ import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -149,7 +147,6 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRED)
     private void createOrUpdateBucketedScoreSummary(ModelSummary modelSummary,
             BucketedScoreSummary bucketedScoreSummary) {
         bucketedScoreSummary.setModelSummary(modelSummary);

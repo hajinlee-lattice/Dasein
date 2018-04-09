@@ -28,6 +28,8 @@ public class AttrConfigRequest {
         this.details = details;
     }
 
-
+    public boolean hasError() {
+        return details != null && details.hasError();
+    }
 
 }

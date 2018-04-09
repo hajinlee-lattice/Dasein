@@ -3,9 +3,12 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.collections4.MapUtils;
 
 public class ValidationDetails {
 
@@ -26,6 +29,15 @@ public class ValidationDetails {
             validations = new ArrayList<>();
         }
         validations.add(validation);
+    }
+
+    public boolean hasError() {
+        boolean hasError = false;
+        if (CollectionUtils.isNotEmpty(validations)) {
+            hasError = validations.stream().anyMatch(validation -> //
+            validation.validationErrors != null && MapUtils.isNotEmpty(validation.validationErrors.getErrors()));
+        }
+        return hasError;
     }
 
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
