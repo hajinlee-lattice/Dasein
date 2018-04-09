@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -264,8 +265,10 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
             }
         } else {
             MetadataSegmentExport metadataSegmentExport = new MetadataSegmentExport();
-            metadataSegmentExport.setAccountFrontEndRestriction(segment.getAccountFrontEndRestriction());
-            metadataSegmentExport.setContactFrontEndRestriction(segment.getContactFrontEndRestriction());
+            metadataSegmentExport
+                    .setAccountFrontEndRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
+            metadataSegmentExport
+                    .setContactFrontEndRestriction(new FrontEndRestriction(segment.getContactRestriction()));
 
             metadataSegmentExport.setType(MetadataSegmentExportType.ACCOUNT_ID);
             String exportedFileName = SegmentExportUtil.constructFileName(metadataSegmentExport.getExportPrefix(), null,
