@@ -2,8 +2,11 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -74,6 +77,33 @@ public class PeriodServiceImpl implements PeriodService {
             log.info("Using faked current date for " + customerSpace.getTenantId() + " in ZK: " + evaluationDate);
         }
         return evaluationDate;
+    }
+
+    @Override
+    public Map<PeriodStrategy.Template, Integer> getPeriodId(String date, PeriodStrategy periodStrategy) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        if (StringUtils.isBlank(date)) {
+            date = transactionProxy.getMaxTransactionDate(customerSpace.getTenantId(),
+                    dataCollectionService.getActiveVersion(customerSpace.getTenantId()));
+        }
+        if (StringUtils.isBlank(date)) {
+            throw new RuntimeException(
+                    String.format("Tenant %s does not have max transaction date saved. Please provide date.",
+                            customerSpace.getTenantId()));
+        }
+
+        List<PeriodStrategy> strategies = new ArrayList<>();
+        if (periodStrategy != null) {
+            strategies.add(periodStrategy);
+        } else {
+            strategies = getPeriodStrategies();
+        }
+
+        Map<PeriodStrategy.Template, Integer> ids = new HashMap<>();
+        for (PeriodStrategy strategy : strategies) {
+            ids.put(strategy.getTemplate(), PeriodBuilderFactory.build(periodStrategy).toPeriodId(date));
+        }
+        return ids;
     }
 
     @Override

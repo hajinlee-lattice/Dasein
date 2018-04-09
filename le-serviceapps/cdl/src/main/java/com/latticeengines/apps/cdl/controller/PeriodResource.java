@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -70,6 +71,13 @@ public class PeriodResource {
     public String validateBusinessCalendar(@PathVariable String customerSpace,
             @RequestBody BusinessCalendar businessCalendar) {
         return businessCalendarService.validate(businessCalendar);
+    }
+
+    @PostMapping(value = "/periodid/{date}")
+    @ApiOperation(value = "Convert date string to period id based on period strategy; If date is empty, use max transaction date; If period strategy is empty, return all the period strategies")
+    public Map<PeriodStrategy.Template, Integer> getPeriodId(@PathVariable String customerSpace,
+            @PathVariable String date, @RequestBody PeriodStrategy periodStrategy) {
+        return periodService.getPeriodId(date, periodStrategy);
     }
 
     @PostMapping(value = "/maxperiodid")
