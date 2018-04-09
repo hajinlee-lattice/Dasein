@@ -50,7 +50,7 @@ public class BucketedScoreSummary implements HasPid {
 
     @JsonProperty("total_num_converted")
     @Column(name = "TOTAL_NUM_CONVERTED", nullable = false)
-    private int totalNumConverted;
+    private double totalNumConverted;
 
     @JsonProperty("overall_lift")
     @Column(name = "OVERAL_LIFT", nullable = false)
@@ -84,11 +84,11 @@ public class BucketedScoreSummary implements HasPid {
         this.totalNumLeads = totalNumLeads;
     }
 
-    public int getTotalNumConverted() {
+    public double getTotalNumConverted() {
         return totalNumConverted;
     }
 
-    public void setTotalNumConverted(int totalNumConverted) {
+    public void setTotalNumConverted(double totalNumConverted) {
         this.totalNumConverted = totalNumConverted;
     }
 

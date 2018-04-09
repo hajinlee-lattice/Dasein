@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
@@ -20,19 +22,20 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
 @Component("pivotScoreAndEvent")
 public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEventParameters> {
 
-    private static final String AVG_SCORE = "AverageScore";
-    private static final String AVG_SUM = "AverageSum";
+    private static final Logger log = LoggerFactory.getLogger(PivotScoreAndEvent.class);
 
-    private static final String TOTAL_EVENTS = "TotalEvents";
-    private static final String TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
-    private static final String LIFT = "Lift";
+    private static final String BUCKET_AVG_SCORE = "BucketAverageScore";
+    private static final String BUCKET_SUM = "BucketSum";
+
+    private static final String BUCKET_TOTAL_EVENTS = "TotalEvents";
+    private static final String BUCKET_TOTAL_POSITIVE_EVENTS = "TotalPositiveEvents";
+    private static final String BUCKET_LIFT = "Lift";
     private static final String MODEL_GUID = ScoreResultField.ModelId.displayName;
 
     public static final String MODEL_AVG = "ModelAvg";
     private static final String MODEL_SUM = "ModelSum";
 
     private Node total;
-    // private Node totalSum;
     private boolean useEvent;
     private boolean isEV;
 
@@ -53,6 +56,7 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             String scoreField = scoreFieldMap.getOrDefault(modelGuid, InterfaceName.RawScore.name());
             useEvent = InterfaceName.Event.name().equals(scoreField);
             isEV = InterfaceName.ExpectedRevenue.name().equals(scoreField);
+            log.info("useEvent=" + useEvent + " isEV=" + isEV + " ModeId=" + modelGuid);
 
             total = getTotal(node, modelGuid, scoreField);
             Node aggregatedNode = aggregate(node, scoreField);
@@ -98,16 +102,15 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
 
     private Node aggregate(Node inputTable, String scoreField) {
         List<Aggregation> aggregations = new ArrayList<>();
-        aggregations.add(new Aggregation(ScoreResultField.Percentile.displayName, TOTAL_EVENTS, AggregationType.COUNT));
+        aggregations.add(
+                new Aggregation(ScoreResultField.Percentile.displayName, BUCKET_TOTAL_EVENTS, AggregationType.COUNT));
         if (useEvent) {
             inputTable = inputTable.apply(String.format("Boolean.TRUE.equals(%s) ? 1 : 0", InterfaceName.Event.name()),
                     new FieldList(InterfaceName.Event.name()), new FieldMetadata("IsPositiveEvent", Integer.class));
-            aggregations.add(new Aggregation("IsPositiveEvent", TOTAL_POSITIVE_EVENTS, AggregationType.SUM));
+            aggregations.add(new Aggregation("IsPositiveEvent", BUCKET_TOTAL_POSITIVE_EVENTS, AggregationType.SUM));
         } else {
-            aggregations.add(new Aggregation(scoreField, AVG_SCORE, AggregationType.AVG));
-            if (isEV) {
-                aggregations.add(new Aggregation(scoreField, AVG_SUM, AggregationType.SUM));
-            }
+            aggregations.add(new Aggregation(scoreField, BUCKET_AVG_SCORE, AggregationType.AVG));
+            aggregations.add(new Aggregation(scoreField, BUCKET_SUM, AggregationType.SUM));
         }
         Node aggregatedNode = inputTable.groupBy(
                 new FieldList(ScoreResultField.Percentile.displayName, ScoreResultField.ModelId.displayName),
@@ -120,29 +123,33 @@ public class PivotScoreAndEvent extends TypesafeDataFlowBuilder<PivotScoreAndEve
             double modelAvgProbability = avgScore;
             String expression = String.format("%s / %f", "ConversionRate", modelAvgProbability);
             aggregatedNode = aggregatedNode.apply(
-                    String.format("%1$s == 0 ? 0 : %2$s / %1$s", TOTAL_EVENTS, TOTAL_POSITIVE_EVENTS),
-                    new FieldList(TOTAL_POSITIVE_EVENTS, TOTAL_EVENTS),
+                    String.format("%1$s == 0 ? 0 : %2$s / %1$s", BUCKET_TOTAL_EVENTS, BUCKET_TOTAL_POSITIVE_EVENTS),
+                    new FieldList(BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS),
                     new FieldMetadata("ConversionRate", Double.class));
             aggregatedNode = aggregatedNode.apply(expression, new FieldList("ConversionRate"),
-                    new FieldMetadata(LIFT, Double.class));
+                    new FieldMetadata(BUCKET_LIFT, Double.class));
         } else {
             aggregatedNode = aggregatedNode.innerJoin(MODEL_GUID, total, MODEL_GUID);
-            aggregatedNode = aggregatedNode.apply(String.format("%1$s > 0 ? %2$s / %1$s : 0.0", MODEL_AVG, AVG_SCORE),
-                    new FieldList(AVG_SCORE, MODEL_AVG), new FieldMetadata(LIFT, Double.class));
+            aggregatedNode = aggregatedNode.apply(
+                    String.format("%1$s > 0 ? %2$s / %1$s : 0.0", MODEL_AVG, BUCKET_AVG_SCORE),
+                    new FieldList(BUCKET_AVG_SCORE, MODEL_AVG), new FieldMetadata(BUCKET_LIFT, Double.class));
 
             if (!isEV) {
-                String expression = String.format("%1$s == 0 ? 0 : (%2$s * %1$s)", TOTAL_EVENTS, AVG_SCORE);
-                aggregatedNode = aggregatedNode.apply(expression, new FieldList(AVG_SCORE, TOTAL_EVENTS),
-                        new FieldMetadata(TOTAL_POSITIVE_EVENTS, Double.class));
+                String expression = String.format("%1$s == 0 ? 0 : (%2$s * %1$s)", BUCKET_TOTAL_EVENTS,
+                        BUCKET_AVG_SCORE);
+                aggregatedNode = aggregatedNode.apply(expression, new FieldList(BUCKET_AVG_SCORE, BUCKET_TOTAL_EVENTS),
+                        new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
             } else {
-                String expression = String.format("%1$s == 0 ? 0 : (%1$s * %2$s / %3$s)", TOTAL_EVENTS, AVG_SUM,
-                        MODEL_SUM);
-                aggregatedNode = aggregatedNode.apply(expression, new FieldList(AVG_SUM, TOTAL_EVENTS, MODEL_SUM),
-                        new FieldMetadata(TOTAL_POSITIVE_EVENTS, Double.class));
+                String expression = String.format("%1$s == 0 ? 0 : (%1$s * %2$s / %3$s)", BUCKET_TOTAL_EVENTS,
+                        BUCKET_SUM, MODEL_SUM);
+                aggregatedNode = aggregatedNode.apply(expression,
+                        new FieldList(BUCKET_SUM, BUCKET_TOTAL_EVENTS, MODEL_SUM),
+                        new FieldMetadata(BUCKET_TOTAL_POSITIVE_EVENTS, Double.class));
             }
         }
         aggregatedNode = aggregatedNode.retain(ScoreResultField.ModelId.displayName,
-                ScoreResultField.Percentile.displayName, TOTAL_POSITIVE_EVENTS, TOTAL_EVENTS, LIFT);
+                ScoreResultField.Percentile.displayName, BUCKET_TOTAL_POSITIVE_EVENTS, BUCKET_TOTAL_EVENTS,
+                BUCKET_LIFT);
         return aggregatedNode;
     }
 

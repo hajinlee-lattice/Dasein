@@ -10,14 +10,14 @@ public class BucketedScore implements Serializable {
     private static final long serialVersionUID = -6994756387548943771L;
     private int score;
     private int numLeads;
-    private int numConverted;
+    private double numConverted;
     private int leftNumLeads;
-    private int leftNumConverted;
+    private double leftNumConverted;
 
     public BucketedScore() {
     }
 
-    public BucketedScore(int score, int numLeads, int numConverted, int leftNumLeads, int leftNumConverted) {
+    public BucketedScore(int score, int numLeads, double numConverted, int leftNumLeads, double leftNumConverted) {
         this.score = score;
         this.numLeads = numLeads;
         this.numConverted = numConverted;
@@ -44,7 +44,7 @@ public class BucketedScore implements Serializable {
     }
 
     @JsonProperty("num_converted")
-    public int getNumConverted() {
+    public double getNumConverted() {
         return numConverted;
     }
 
@@ -62,7 +62,7 @@ public class BucketedScore implements Serializable {
     }
 
     @JsonProperty("left_num_converted")
-    public int getLeftNumConverted() {
+    public double getLeftNumConverted() {
         return leftNumConverted;
     }
 

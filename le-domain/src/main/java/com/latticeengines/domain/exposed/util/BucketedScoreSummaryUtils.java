@@ -17,7 +17,7 @@ public class BucketedScoreSummaryUtils {
 
     public static BucketedScoreSummary generateBucketedScoreSummary(List<GenericRecord> pivotedRecords) {
         int cumulativeNumLeads = 0;
-        int cumulativeNumConverted = 0;
+        double cumulativeNumConverted = 0;
 
         int idx = pivotedRecords.size() - 1;
         int currentScore = MAX_SCORE;
@@ -35,10 +35,10 @@ public class BucketedScoreSummaryUtils {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
                         Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()).intValue(),
+                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()).doubleValue(),
                         cumulativeNumLeads, cumulativeNumConverted);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
-                cumulativeNumConverted += new Double((double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).intValue();
+                cumulativeNumConverted += new Double((double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).doubleValue();
                 idx--;
             } else {
                 bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
@@ -60,7 +60,7 @@ public class BucketedScoreSummaryUtils {
         for (int i = bucketedScoreSummary.getBarLifts().length; i > 0; i--) {
             int totalLeadsInBar = bucketedScores[i * 3 + 1].getNumLeads() + bucketedScores[i * 3 + 2].getNumLeads()
                     + bucketedScores[i * 3 + 3].getNumLeads();
-            int totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
+            double totalLeadsConvertedInBar = bucketedScores[i * 3 + 1].getNumConverted()
                     + bucketedScores[i * 3 + 2].getNumConverted() + bucketedScores[i * 3 + 3].getNumConverted();
             if (totalLeadsInBar == 0) {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;

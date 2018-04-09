@@ -34,6 +34,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.KeyValue;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.entitymanager.SourceFileEntityMgr;
+import com.latticeengines.pls.service.BucketedScoreService;
 import com.latticeengines.pls.service.ModelSummaryService;
 
 @DisallowConcurrentExecution
@@ -70,7 +71,7 @@ public class ModelSummaryServiceImpl implements ModelSummaryService {
     private SourceFileEntityMgr sourceFileEntityMgr;
 
     @Autowired
-    private BucketedScoreServiceImpl bucketedScoreService;
+    private BucketedScoreService bucketedScoreService;
 
     @Override
     public ModelSummary createModelSummary(String rawModelSummary, String tenantId) {
