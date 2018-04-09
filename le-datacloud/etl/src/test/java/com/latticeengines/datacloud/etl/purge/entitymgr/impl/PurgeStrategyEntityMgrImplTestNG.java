@@ -25,6 +25,9 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
     @Autowired
     private PurgeStrategyEntityMgr purgeStrategyEntityMgr;
 
+    private final static String TEST_SRC1 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc1";
+    private final static String TEST_SRC2 = PurgeStrategyEntityMgrImplTestNG.class.getSimpleName() + "_TestSrc2";
+
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         prepareStrategies();
@@ -38,22 +41,23 @@ public class PurgeStrategyEntityMgrImplTestNG extends DataCloudEtlFunctionalTest
 
     @AfterClass(groups = "functional")
     public void destroy() throws Exception {
-        purgeStrategyEntityMgr.deleteAll();
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(TEST_SRC1));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(TEST_SRC2));
     }
 
     private void prepareStrategies() {
         List<PurgeStrategy> list = new ArrayList<>();
         PurgeStrategy ps1 = new PurgeStrategy();
-        ps1.setSource("AccountMaster");
+        ps1.setSource(TEST_SRC1);
         ps1.setSourceType(SourceType.ACCOUNT_MASTER);
         ps1.setHdfsVersions(2);
         ps1.setS3Days(200);
         ps1.setGlacierDays(1000);
         list.add(ps1);
         PurgeStrategy ps2 = new PurgeStrategy();
-        ps2.setSource("HGDataPivoted");
+        ps2.setSource(TEST_SRC2);
         ps2.setSourceType(SourceType.GENERAL_SOURCE);
-        ps2.setHdfsVersions(2);
+        ps2.setHdfsDays(30);
         ps2.setS3Days(200);
         ps2.setGlacierDays(200);
         list.add(ps2);

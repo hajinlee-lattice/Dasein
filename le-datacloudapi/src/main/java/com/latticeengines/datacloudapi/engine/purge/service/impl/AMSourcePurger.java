@@ -21,7 +21,7 @@ public abstract class AMSourcePurger extends ConfigurablePurger {
     protected abstract String getHdfsVersionFromDCVersion(DataCloudVersion dcVersion);
 
     /*
-     * Delete versions which are not used in prod and were created 90 days ago
+     * Delete versions which are not used in prod
      */
     @Override
     protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> currentVersions,
@@ -43,11 +43,11 @@ public abstract class AMSourcePurger extends ConfigurablePurger {
             String hdfsPath = hdfsPathBuilder.constructSnapshotDir(strategy.getSource(), version).toString();
             try {
                 FileStatus status = HdfsUtils.getFileStatus(yarnConfiguration, hdfsPath);
-                if (System.currentTimeMillis() - status.getModificationTime() > 90 * DAY_IN_MS) {
+                if (System.currentTimeMillis() - status.getModificationTime() > strategy.getHdfsDays() * DAY_IN_MS) {
                     toDelete.add(version);
                 }
             } catch (IOException e) {
-                log.error("Fail to get file status for hdfs path " + hdfsPath, e);
+                throw new RuntimeException("Fail to get file status for hdfs path " + hdfsPath, e);
             }
         }
         return toDelete;
@@ -58,11 +58,6 @@ public abstract class AMSourcePurger extends ConfigurablePurger {
      */
     protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> currentVersions,
             final boolean debug) {
-        if (strategy.getHdfsVersions() <= 0) {
-            throw new RuntimeException(
-                    "HDFS version for source " + strategy.getSource() + " is set as 0 or invalid");
-        }
-
         List<DataCloudVersion> dcVersions = dataCloudVersionEntityMgr.allVerions();
         String latestDCVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
         List<String> recentDCVersions = dataCloudVersionService.priorVersions(latestDCVersion,

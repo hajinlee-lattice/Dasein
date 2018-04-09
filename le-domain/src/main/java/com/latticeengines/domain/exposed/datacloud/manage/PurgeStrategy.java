@@ -39,14 +39,20 @@ public class PurgeStrategy implements HasPid, Serializable {
     @Column(name = "SourceType", nullable = false, length = 100)
     private SourceType sourceType;
 
-    @Column(name = "HdfsVersions", nullable = false)
+    @Column(name = "HdfsVersions")
     private Integer hdfsVersions;
+
+    @Column(name = "HdfsDays")
+    private Integer hdfsDays;
 
     @Column(name = "S3Days")
     private Integer s3Days;
 
     @Column(name = "GlacierDays")
     private Integer glacierDays;
+
+    @Column(name = "NoBak")
+    private boolean noBak;
 
     @Override
     @JsonProperty("PID")
@@ -90,6 +96,16 @@ public class PurgeStrategy implements HasPid, Serializable {
         this.hdfsVersions = hdfsVersions;
     }
 
+    @JsonProperty("HdfsDays")
+    public Integer getHdfsDays() {
+        return hdfsDays;
+    }
+
+    @JsonProperty("HdfsDays")
+    public void setHdfsDays(Integer hdfsDays) {
+        this.hdfsDays = hdfsDays;
+    }
+
     @JsonProperty("S3Days")
     public Integer getS3Days() {
         return s3Days;
@@ -108,6 +124,16 @@ public class PurgeStrategy implements HasPid, Serializable {
     @JsonProperty("GlacierDays")
     public void setGlacierDays(Integer glacierDays) {
         this.glacierDays = glacierDays;
+    }
+
+    @JsonProperty("NoBak")
+    public boolean isNoBak() {
+        return noBak;
+    }
+
+    @JsonProperty("NoBak")
+    public void setNoBak(boolean noBak) {
+        this.noBak = noBak;
     }
 
     public enum SourceType {

@@ -51,7 +51,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private PurgeSource pipelineTempSourceToPurge;
     private PurgeSource operationalSourceToPurge;
     private PurgeSource ingestionToPurge;
-    private PurgeSource generalSourceToPurge;
+    private PurgeSource generalSourceToBak;
+    private PurgeSource generalSourceToDelete;
     private PurgeSource amToDelete;
     private PurgeSource amToBak;
     private PurgeSource amLookupToDelete;
@@ -73,9 +74,22 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     @AfterClass(groups = "functional")
     public void destroy() {
-        purgeStrategyEntityMgr.deleteAll();
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("Pipeline_"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource("LDCDEV_"));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(ingestionToPurge.getSourceName()));
+        purgeStrategyEntityMgr
+                .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToBak.getSourceName()));
+        purgeStrategyEntityMgr
+                .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amLookupToDelete.getSourceName()));
     }
 
+    /**
+     * Such exception is by design in the scan
+     * java.lang.RuntimeException: Failed to get all versions for Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1
+     * Caused by: java.io.FileNotFoundException: File /Pods/PurgeServiceImplTestNG/Services/PropData/Sources/Pipeline_AccountMasterSeedClean_version_2018-01-10_05-41-36_UTC_step_1/Snapshot does not exist.
+     */
     @Test(groups = "functional")
     public void testScan() throws IOException {
         List<PurgeSource> toPurge = purgeService.scan(POD_ID, false);
@@ -114,7 +128,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void prepareIngestionToPurge() throws IOException {
-        String ingestionName = "IngestionToPurge";
+        String ingestionName = "TestIngestionToPurge";
         String hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestionName, "2018-02-25_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
         hdfsPath = hdfsPathBuilder.constructIngestionDir(ingestionName, "2018-02-18_00-00-00_UTC").toString();
@@ -133,7 +147,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void prepareGeneralSourceToPurge() throws IOException {
-        String sourceName = "TestGeneralSource";
+        String sourceName = "TestGeneralSourceToBak";
         String hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
         String schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
         HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
@@ -149,14 +163,40 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         List<String> hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
         String hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
         List<String> hiveTables = Collections.singletonList(hiveTable);
-        generalSourceToPurge = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
-        PurgeStrategy strategy = new PurgeStrategy();
-        strategy.setSource(sourceName);
-        strategy.setSourceType(SourceType.GENERAL_SOURCE);
-        strategy.setHdfsVersions(2);
-        strategy.setS3Days(100);
-        strategy.setGlacierDays(100);
-        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
+        generalSourceToBak = new PurgeSource(sourceName, hdfsPaths, hiveTables, true);
+        PurgeStrategy strategyToBak = new PurgeStrategy();
+        strategyToBak.setSource(sourceName);
+        strategyToBak.setSourceType(SourceType.GENERAL_SOURCE);
+        strategyToBak.setHdfsVersions(2);
+        strategyToBak.setS3Days(100);
+        strategyToBak.setGlacierDays(100);
+
+        sourceName = "TestGeneralSourceToDelete";
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-25_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-18_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        hdfsPath = hdfsPathBuilder.constructSnapshotDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
+        schemaPath = hdfsPathBuilder.constructSchemaDir(sourceName, "2018-02-11_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        HdfsUtils.mkdir(yarnConfiguration, schemaPath);
+        hdfsPaths = Arrays.asList(hdfsPath, schemaPath);
+        hiveTable = hiveTableService.tableName(sourceName, "2018-02-11_00-00-00_UTC");
+        hiveTables = Collections.singletonList(hiveTable);
+        generalSourceToDelete = new PurgeSource(sourceName, hdfsPaths, hiveTables, false);
+        PurgeStrategy strategyToDelete = new PurgeStrategy();
+        strategyToDelete.setSource(sourceName);
+        strategyToDelete.setSourceType(SourceType.GENERAL_SOURCE);
+        strategyToDelete.setHdfsDays(90);
+        strategyToDelete.setS3Days(100);
+        strategyToDelete.setGlacierDays(100);
+        strategyToDelete.setNoBak(true);
+
+        purgeStrategyEntityMgr.insertAll(Arrays.asList(strategyToBak, strategyToDelete));
     }
 
     private void prepareAMSourceToPurge() throws IOException {
@@ -192,6 +232,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setSource(sourceName);
         strategy.setSourceType(SourceType.ACCOUNT_MASTER);
         strategy.setHdfsVersions(3);
+        strategy.setHdfsDays(90);
         strategy.setS3Days(100);
         strategy.setGlacierDays(100);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
@@ -228,6 +269,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setSource(sourceName);
         strategy.setSourceType(SourceType.ACCOUNT_MASTER_LOOKUP);
         strategy.setHdfsVersions(3);
+        strategy.setHdfsDays(90);
         strategy.setS3Days(100);
         strategy.setGlacierDays(100);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
@@ -236,7 +278,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private void prepareValidationMap() {
         validationMapNonDebugMode = new HashMap<>();
         validationMapNonDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
-        validationMapNonDebugMode.put(getValidationKey(generalSourceToPurge), generalSourceToPurge);
+        validationMapNonDebugMode.put(getValidationKey(generalSourceToBak), generalSourceToBak);
         validationMapNonDebugMode.put(getValidationKey(amToBak), amToBak);
         validationMapNonDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
 
@@ -244,11 +286,14 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         validationMapDebugMode.put(getValidationKey(pipelineTempSourceToPurge), pipelineTempSourceToPurge);
         validationMapDebugMode.put(getValidationKey(operationalSourceToPurge), operationalSourceToPurge);
         validationMapDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
-        validationMapDebugMode.put(getValidationKey(generalSourceToPurge), generalSourceToPurge);
+        validationMapDebugMode.put(getValidationKey(generalSourceToBak), generalSourceToBak);
         validationMapDebugMode.put(getValidationKey(amToBak), amToBak);
         validationMapDebugMode.put(getValidationKey(amToDelete), amToDelete);
         validationMapDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
         validationMapDebugMode.put(getValidationKey(amLookupToDelete), amLookupToDelete);
+
+        // generalSourceToDelete should not be any of these map because upload
+        // days is not old enough based on HdfsDays
     }
 
     private String getValidationKey(PurgeSource purgeSource) {
@@ -256,32 +301,36 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     }
 
     private void validatePurgeSourcesNonDebugMode(List<PurgeSource> toPurge) {
-        Assert.assertEquals(toPurge.size(), 4);
+        log.info("Validating purge sources in non-debug mode");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
         toPurge.forEach(purgeSource -> {
             log.info("Validating " + JsonUtils.serialize(purgeSource));
             PurgeSource expected = validationMapNonDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
             log.info("Expecting " + JsonUtils.serialize(expected));
-            Assert.assertTrue(isValidatedList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-            Assert.assertTrue(isValidatedList(expected.getHiveTables(), purgeSource.getHiveTables()));
+            Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
+            Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
         });
+        Assert.assertEquals(toPurge.size(), validationMapNonDebugMode.size());
     }
 
     private void validatePurgeSourcesDebugMode(List<PurgeSource> toPurge) {
-        Assert.assertEquals(toPurge.size(), 8);
+        log.info("Validating purge sources in debug mode");
+        Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
         toPurge.forEach(purgeSource -> {
             log.info("Validating " + JsonUtils.serialize(purgeSource));
             PurgeSource expected = validationMapDebugMode.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
             log.info("Expecting " + JsonUtils.serialize(expected));
-            Assert.assertTrue(isValidatedList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-            Assert.assertTrue(isValidatedList(expected.getHiveTables(), purgeSource.getHiveTables()));
+            Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
+            Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
         });
+        Assert.assertEquals(toPurge.size(), validationMapDebugMode.size());
     }
 
-    private boolean isValidatedList(List<String> expected, List<String> actual) {
+    private boolean isIdenticalList(List<String> expected, List<String> actual) {
         if (CollectionUtils.isEmpty(expected) && CollectionUtils.isEmpty(actual)) {
             return true;
         }

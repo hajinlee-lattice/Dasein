@@ -2,6 +2,7 @@ package com.latticeengines.datacloud.etl.purge.entitymgr.impl;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +26,17 @@ public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
     }
 
     @Override
+    @Transactional(value = "propDataManage", readOnly = true)
+    public PurgeStrategy findStrategiesBySource(String source) {
+        List<PurgeStrategy> list = purgeStrategyDao.findAllByField("source", source);
+        if (CollectionUtils.isEmpty(list)) {
+            return null;
+        } else {
+            return list.get(0);
+        }
+    }
+
+    @Override
     @VisibleForTesting
     @Transactional(value = "propDataManage")
     public void insertAll(List<PurgeStrategy> strategies) {
@@ -36,7 +48,7 @@ public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
     @Override
     @VisibleForTesting
     @Transactional(value = "propDataManage")
-    public void deleteAll() {
-        purgeStrategyDao.deleteAll();
+    public void delete(PurgeStrategy strategy) {
+        purgeStrategyDao.delete(strategy);
     }
 }

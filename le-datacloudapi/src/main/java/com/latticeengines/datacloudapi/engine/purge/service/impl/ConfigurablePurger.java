@@ -1,16 +1,21 @@
 package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.datacloud.core.entitymgr.DataCloudVersionEntityMgr;
 import com.latticeengines.datacloud.core.entitymgr.HdfsSourceEntityMgr;
 import com.latticeengines.datacloud.core.service.DataCloudVersionService;
@@ -60,7 +65,10 @@ public abstract class ConfigurablePurger implements SourcePurger {
      */
     protected List<String> findVersionsToDelete(PurgeStrategy strategy, List<String> currentVersions,
             final boolean debug) {
-        return null;
+        if (!strategy.isNoBak()) {
+            return null;
+        }
+        return findVersionsToPurge(strategy, currentVersions, debug);
     }
 
 
@@ -69,14 +77,10 @@ public abstract class ConfigurablePurger implements SourcePurger {
      */
     protected List<String> findVersionsToBak(PurgeStrategy strategy, List<String> currentVersions,
             final boolean debug) {
-        Collections.sort(currentVersions);
-        if (currentVersions.size() <= strategy.getHdfsVersions()) {
+        if (strategy.isNoBak()) {
             return null;
         }
-        for (int i = 0; i < strategy.getHdfsVersions(); i++) {
-            currentVersions.remove(currentVersions.size() - 1); // Retain latest versions
-        }
-        return currentVersions;
+        return findVersionsToPurge(strategy, currentVersions, debug);
     }
 
     /**
@@ -102,7 +106,7 @@ public abstract class ConfigurablePurger implements SourcePurger {
     public List<PurgeSource> findSourcesToPurge(final boolean debug) {
         List<PurgeStrategy> strategies = purgeStrategyEntityMgr.findStrategiesByType(getSourceType());
         if (CollectionUtils.isEmpty(strategies)) {
-            return Collections.<PurgeSource> emptyList();
+            return null;
         }
         List<PurgeSource> toPurge = new ArrayList<>();
         strategies.forEach(strategy -> {
@@ -149,9 +153,11 @@ public abstract class ConfigurablePurger implements SourcePurger {
         if (CollectionUtils.isEmpty(currentVersions)) {
             return null;
         }
-        if (strategy.getHdfsVersions() <= 0) {
+        if ((strategy.getHdfsVersions() == null && strategy.getHdfsDays() == null)
+                || (strategy.getHdfsVersions() != null && strategy.getHdfsVersions() <= 0)
+                || (strategy.getHdfsDays() != null && strategy.getHdfsDays() <= 0)) {
             throw new RuntimeException(
-                    "HDFS version for source " + strategy.getSource() + " is set as 0 or invalid.");
+                    "HDFS versions/days for source " + strategy.getSource() + " is set as 0 or invalid.");
         }
         List<String> versionsToDelete = findVersionsToDelete(strategy, currentVersions, debug);
         if (CollectionUtils.isEmpty(versionsToDelete)) {
@@ -165,14 +171,49 @@ public abstract class ConfigurablePurger implements SourcePurger {
         if (CollectionUtils.isEmpty(currentVersions)) {
             return null;
         }
-        if (strategy.getHdfsVersions() == 0) {
+        if ((strategy.getHdfsVersions() == null && strategy.getHdfsDays() == null)
+                || (strategy.getHdfsVersions() != null && strategy.getHdfsVersions() <= 0)
+                || (strategy.getHdfsDays() != null && strategy.getHdfsDays() <= 0)) {
             throw new RuntimeException(
-                    "HDFS version for source " + strategy.getSource() + " is set as 0. Too dangerous");
+                    "HDFS versions/days for source " + strategy.getSource() + " is set as 0 or invalid.");
         }
         List<String> versionsToBak = findVersionsToBak(strategy, currentVersions, debug);
         if (CollectionUtils.isEmpty(versionsToBak)) {
             return null;
         }
         return constructHdfsPathsHiveTables(strategy, versionsToBak);
+    }
+
+    private List<String> findVersionsToPurge(PurgeStrategy strategy, List<String> currentVersions,
+            final boolean debug) {
+        Collections.sort(currentVersions);
+
+        if (strategy.getHdfsVersions() != null) {
+            if (currentVersions.size() <= strategy.getHdfsVersions()) {
+                return null;
+            }
+            for (int i = 0; i < strategy.getHdfsVersions(); i++) {
+                currentVersions.remove(currentVersions.size() - 1);
+            }
+        }
+
+        if (strategy.getHdfsDays() != null) {
+            Set<String> versionSet = new HashSet<>(currentVersions);
+            String sourcePath = hdfsPathBuilder.constructSnapshotRootDir(strategy.getSource()).toString();
+            try {
+                List<FileStatus> versionStatus = HdfsUtils.getFileStatusesForDir(yarnConfiguration, sourcePath, null);
+                versionStatus.forEach(status -> {
+                    if (status.isDirectory() && versionSet.contains(status.getPath().getName())
+                            && System.currentTimeMillis() - status.getModificationTime() <= strategy.getHdfsDays()
+                                    * DAY_IN_MS) {
+                        currentVersions.remove(status.getPath().getName());
+                    }
+                });
+            } catch (IOException e) {
+                throw new RuntimeException("Fail to get file status for hdfs path " + sourcePath, e);
+            }
+        }
+
+        return currentVersions;
     }
 }

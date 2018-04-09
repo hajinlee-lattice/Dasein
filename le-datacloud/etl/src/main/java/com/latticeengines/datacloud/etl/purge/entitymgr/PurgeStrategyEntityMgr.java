@@ -8,7 +8,9 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceTy
 public interface PurgeStrategyEntityMgr {
     List<PurgeStrategy> findStrategiesByType(SourceType sourceType);
 
+    PurgeStrategy findStrategiesBySource(String source);
+
     void insertAll(List<PurgeStrategy> strategies);
 
-    void deleteAll();
+    void delete(PurgeStrategy strategy);
 }
