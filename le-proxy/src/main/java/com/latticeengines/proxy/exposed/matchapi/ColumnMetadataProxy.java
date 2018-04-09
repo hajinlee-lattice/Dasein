@@ -94,7 +94,11 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             compatibleVersion = DEFAULT;
         }
         initializeLatestVersionCache();
-        return latestDataCloudVersionCache.getWatcherCache().get(KEY_PREFIX + "|" + compatibleVersion);
+        DataCloudVersion version = latestDataCloudVersionCache.getWatcherCache().get(KEY_PREFIX + "|" + compatibleVersion);
+        if (version == null) {
+            throw new NullPointerException("Cannot find latest version compatible with " + compatibleVersion);
+        }
+        return version;
     }
 
     public List<ColumnMetadata> getAllColumns() {
