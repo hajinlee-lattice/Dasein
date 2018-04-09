@@ -24,5 +24,6 @@
         <module>le-scoring</module>
         <module>le-quartzclient</module>
         <module>le-metadata</module>
+        <module>le-ldc-collectiondb</module>
     </modules>
 </project>

@@ -36,6 +36,7 @@ source $WSHOME/le-dev/scripts/setupdb_parameters.sh
 . $WSHOME/le-dev/scripts/setupdb_oauth2.sh
 . $WSHOME/le-dev/scripts/setupdb_quartzdb.sh
 . $WSHOME/le-dev/scripts/setupdb_documentdb.sh
+. $WSHOME/le-dev/scripts/setupdb_ldc_collectiondb.sh
 
 # Expand aliases
 echo "Expanding aliases."
