@@ -18,4 +18,7 @@ public class ParseMatchResultParameters extends DataFlowParameters {
     @JsonProperty
     public boolean excludeDataCloudAttrs;
 
+    @JsonProperty
+    public boolean keepLid;
+
 }

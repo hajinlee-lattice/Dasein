@@ -138,6 +138,11 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             return this;
         }
 
+        public Builder keepMatchLid(boolean keepLid) {
+            ldcConfigurationBuilder.keepMatchLid(keepLid);
+            return this;
+        }
+
         public Builder skipDedupStep(boolean skipDedupStep) {
             ldcConfigurationBuilder.skipDedupStep(skipDedupStep);
             return this;

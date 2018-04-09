@@ -308,6 +308,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder keepMatchLid(boolean keepLid) {
+            customEventMatchWorkflowConfigurationBuilder.keepMatchLid(keepLid);
+            return this;
+        }
+
         public Builder skipDedupStep(boolean skipDedupStep) {
             customEventMatchWorkflowConfigurationBuilder.skipDedupStep(skipDedupStep);
             dedupEventTable.setSkipStep(skipDedupStep);

@@ -7,11 +7,11 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
     @JsonProperty("data_cloud_version")
     private String dataCloudVersion;
 
-    @JsonProperty("skip_dedupe")
-    private boolean skipDedupe;
-
     @JsonProperty("exclude_dc_attrs")
     private boolean excludeDataCloudAttrs;
+
+    @JsonProperty("keep_lid")
+    private boolean keepLid;
 
     public ProcessMatchResultConfiguration() {
         setBeanName("parseMatchResult");
@@ -25,14 +25,6 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
         this.dataCloudVersion = dataCloudVersion;
     }
 
-    public boolean isSkipDedupe() {
-        return skipDedupe;
-    }
-
-    public void setSkipDedupe(boolean skipDedupe) {
-        this.skipDedupe = skipDedupe;
-    }
-
     public boolean isExcludeDataCloudAttrs() {
         return excludeDataCloudAttrs;
     }
@@ -40,4 +32,13 @@ public class ProcessMatchResultConfiguration extends BaseCoreDataFlowStepConfigu
     public void setExcludeDataCloudAttrs(boolean excludeDataCloudAttrs) {
         this.excludeDataCloudAttrs = excludeDataCloudAttrs;
     }
+
+    public boolean isKeepLid() {
+        return keepLid;
+    }
+
+    public void setKeepLid(boolean keepLid) {
+        this.keepLid = keepLid;
+    }
+
 }

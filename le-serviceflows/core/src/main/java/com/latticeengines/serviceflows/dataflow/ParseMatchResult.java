@@ -18,8 +18,9 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
-import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.serviceflows.core.dataflow.ParseMatchResultParameters;
 
 @Component("parseMatchResult")
 public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultParameters> {
@@ -36,7 +37,7 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
 
         if (parameters.excludeDataCloudAttrs) {
             List<String> fieldFilter = new ArrayList<>(sourceCols);
-            addDedupeAttrs(fieldFilter, source);
+            addExtraAttrs(fieldFilter, source, parameters);
             List<String> fieldsToRetain = new ArrayList<>(source.getFieldNames());
             fieldsToRetain.retainAll(fieldFilter);
             source = source.retain(new FieldList(fieldsToRetain));
@@ -84,9 +85,12 @@ public class ParseMatchResult extends TypesafeDataFlowBuilder<ParseMatchResultPa
         return new FieldList[] { fieldsWithPrefix, fieldsWithOutPrefix };
     }
 
-    private void addDedupeAttrs(List<String> fieldFilter, Node node) {
+    private void addExtraAttrs(List<String> fieldFilter, Node node, ParseMatchResultParameters parameters) {
         // Only modeling has these dedupe fields
         List<String> fieldNames = node.getFieldNames();
+        if (parameters.keepLid && fieldNames.contains(InterfaceName.LatticeAccountId.name())) {
+            fieldFilter.add(InterfaceName.LatticeAccountId.name());
+        }
         if (fieldNames.contains(INT_LDC_DEDUPE_ID)) {
             fieldFilter.add(INT_LDC_LID);
             fieldFilter.add(INT_LDC_DEDUPE_ID);

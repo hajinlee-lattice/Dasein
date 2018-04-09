@@ -178,6 +178,11 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder keepMatchLid(boolean keepLid) {
+            matchAccountWithoutIdBuilder.keepMatchLid(keepLid);
+            return this;
+        }
+
         public Builder skipDedupStep(boolean skipDedupStep) {
             matchAccountWithIdBuilder.skipDedupStep(skipDedupStep);
             matchAccountWithoutIdBuilder.skipDedupStep(skipDedupStep);

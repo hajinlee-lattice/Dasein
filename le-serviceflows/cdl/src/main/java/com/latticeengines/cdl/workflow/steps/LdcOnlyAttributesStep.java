@@ -30,6 +30,7 @@ public class LdcOnlyAttributesStep extends BaseWorkflowStep<LdcOnlyAttributesCon
                 attribute.setApprovedUsage(ApprovedUsage.NONE);
         }
 
+        putObjectInContext(EVENT_TABLE, eventTable);
         metadataProxy.updateTable(configuration.getCustomerSpace().toString(), eventTable.getName(), eventTable);
     }
 

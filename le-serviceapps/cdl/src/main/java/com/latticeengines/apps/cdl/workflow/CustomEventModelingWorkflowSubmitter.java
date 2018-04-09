@@ -183,6 +183,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .dedupType(parameters.getDeduplicationType()) //
                 .modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir) //
                 .excludeDataCloudAttrs(parameters.getExcludePropDataColumns()) //
+                .keepMatchLid(true) //
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
                 .matchDebugEnabled(
                         !parameters.getExcludePropDataColumns() && FeatureFlagUtils.isMatchDebugEnabled(flags)) //

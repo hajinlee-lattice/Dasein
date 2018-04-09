@@ -122,9 +122,13 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             return this;
         }
 
+        public Builder keepMatchLid(boolean keepLid) {
+            matchResult.setKeepLid(keepLid);
+            return this;
+        }
+
         public Builder skipDedupStep(boolean skipDedupStep) {
             match.setSkipDedupe(skipDedupStep);
-            matchResult.setSkipDedupe(skipDedupStep);
             return this;
         }
 
