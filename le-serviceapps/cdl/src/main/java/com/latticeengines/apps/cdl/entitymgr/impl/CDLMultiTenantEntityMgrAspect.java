@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.entitymgr.impl;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -39,20 +40,24 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Qualifier(value = "entityManagerFactory")
     private EntityManager entityManager;
 
+    @Autowired
+    @Qualifier(value = "entityManagerFactoryReader")
+    private EntityManager entityManagerReader;
+
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.find*(..))")
     public void find(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
         enableSoftDeleteFilter(joinPoint, sessionFactory, entityManager);
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayLaunchEntityMgrImpl.delete*(..))")
     public void deletePlayLaunch(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayEntityMgrImpl.delete*(..))")
     public void deletePlay(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.*(..)) && "

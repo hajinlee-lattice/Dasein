@@ -2,12 +2,9 @@ package com.latticeengines.pls.service.impl;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import org.apache.avro.generic.GenericRecord;
@@ -18,7 +15,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -82,64 +78,7 @@ public class BucketedScoreServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertNotNull(retrieved.getBucketedScores());
     }
 
-    @Test(groups = { "functional" })
-    public void createGroupOfBucketMetadataForModel_assertCreated() throws Exception {
-        ModelSummary modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long oldLastUpdateTime = modelSummary.getLastUpdateTime();
-        bucketedScoreService.createBucketMetadatas(MODEL_ID,
-                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata1));
-
-        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
-        Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
-        modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long newLastUpdateTime = modelSummary.getLastUpdateTime();
-        System.out.println("newLastUpdateTime is " + newLastUpdateTime);
-        assertTrue(newLastUpdateTime > oldLastUpdateTime);
-        BucketedScoreServiceTestUtils.testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(timestamp));
-    }
-
-    @Test(groups = { "functional" }, dependsOnMethods = "createGroupOfBucketMetadataForModel_assertCreated")
-    public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
-        ModelSummary modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long oldLastUpdateTime = modelSummary.getLastUpdateTime();
-        bucketedScoreService.createBucketMetadatas(MODEL_ID,
-                Arrays.asList(BucketedScoreServiceTestUtils.bucketMetadata2));
-        modelSummary = modelSummaryService.getModelSummary(MODEL_ID);
-        long newLastUpdateTime = modelSummary.getLastUpdateTime();
-        assertTrue(newLastUpdateTime > oldLastUpdateTime);
-
-        Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getModelBucketMetadataGroupedByCreationTimes(MODEL_ID);
-        assertEquals(creationTimeToBucketMetadatas.keySet().size(), 2);
-        Long earlierTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0],
-                laterTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[1];
-        Long placeHolderTimestamp;
-        if (earlierTimestamp > laterTimestamp) {
-            placeHolderTimestamp = earlierTimestamp;
-            earlierTimestamp = laterTimestamp;
-            laterTimestamp = placeHolderTimestamp;
-        }
-
-        BucketedScoreServiceTestUtils.testFirstGroupBucketMetadata(creationTimeToBucketMetadatas.get(earlierTimestamp));
-        BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(creationTimeToBucketMetadatas.get(laterTimestamp));
-    }
-
-    @Test(groups = { "functional" }, dependsOnMethods = "createAnotherGroupsOfBucketMetadata_assertCreated")
-    public void testGetUpToDateModelBucketMetadata() throws Exception {
-        List<BucketMetadata> bucketMetadatas = bucketedScoreService.getUpToDateModelBucketMetadata(MODEL_ID);
-        BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(bucketMetadatas);
-    }
-
-    @Test(groups = { "functional" }, dependsOnMethods = "testGetUpToDateModelBucketMetadata")
-    public void testGetUpToDateModelBucketMetadataAcrossTenants() throws Exception {
-        setupSecurityContext(tenant2);
-        List<BucketMetadata> bucketMetadatas = bucketedScoreService
-                .getUpToDateModelBucketMetadataAcrossTenants(MODEL_ID);
-        BucketedScoreServiceTestUtils.testSecondGroupBucketMetadata(bucketMetadatas);
-    }
-
-    private void setupTenants() throws Exception {
+    private void setupTenants() {
         if (tenantService.findByTenantId(TENANT1) != null) {
             tenantService.discardTenant(tenantService.findByTenantId(TENANT1));
         }

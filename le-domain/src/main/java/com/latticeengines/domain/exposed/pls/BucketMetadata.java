@@ -14,7 +14,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -27,7 +26,6 @@ import com.latticeengines.domain.exposed.db.IsUserModifiable;
 
 @Table(name = "BUCKET_METADATA")
 @Entity
-@Filter(name = "tenantFilter", condition = "TENANT_ID = :tenantFilterId")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
 
@@ -47,7 +45,7 @@ public class BucketMetadata implements HasPid, IsUserModifiable, Serializable {
     private ModelSummary modelSummary;
 
     @ManyToOne
-    @JoinColumn(name = "RATING_ENGINE_ID", nullable = true)
+    @JoinColumn(name = "RATING_ENGINE_ID")
     @JsonIgnore
     @OnDelete(action = OnDeleteAction.CASCADE)
     private RatingEngine ratingEngine;

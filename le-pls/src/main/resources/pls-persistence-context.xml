@@ -69,8 +69,6 @@
     </bean>
 
     <tx:annotation-driven transaction-manager="transactionManagerAccountMaster"/>
-    <jpa:repositories base-package="com.latticeengines.pls.repository" base-class="com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl"
-        entity-manager-factory-ref="entityManagerFactory" transaction-manager-ref="transactionManager"  />
 
     <!--  DAOs for AccountMaster database  -->
     <bean id="companyDao" class="com.latticeengines.pls.dao.impl.CompanyDaoImpl">

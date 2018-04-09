@@ -16,17 +16,14 @@ public class CreateBucketMetadataRequest {
     @JsonProperty("BucketMetadataList")
     List<BucketMetadata> bucketMetadataList;
 
-    @JsonProperty("CreatedBy")
-    String createdBy;
+    @JsonProperty("LastModifiedBy")
+    String lastModifiedBy;
 
     @JsonProperty("ModelGUID")
     String modelGuid;
 
     @JsonProperty("RatingEngineId")
     String ratingEngineId;
-
-    @JsonProperty("RatingModelId")
-    String ratingModelId;
 
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
@@ -36,12 +33,12 @@ public class CreateBucketMetadataRequest {
         this.bucketMetadataList = bucketMetadataList;
     }
 
-    public String getCreatedBy() {
-        return createdBy;
+    public String getLastModifiedBy() {
+        return lastModifiedBy;
     }
 
-    public void setCreatedBy(String createdBy) {
-        this.createdBy = createdBy;
+    public void setLastModifiedBy(String lastModifiedBy) {
+        this.lastModifiedBy = lastModifiedBy;
     }
 
     public String getModelGuid() {
@@ -58,13 +55,5 @@ public class CreateBucketMetadataRequest {
 
     public void setRatingEngineId(String ratingEngineId) {
         this.ratingEngineId = ratingEngineId;
-    }
-
-    public String getRatingModelId() {
-        return ratingModelId;
-    }
-
-    public void setRatingModelId(String ratingModelId) {
-        this.ratingModelId = ratingModelId;
     }
 }

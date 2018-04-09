@@ -1,0 +1,8 @@
+package com.latticeengines.apps.lp.dao;
+
+import com.latticeengines.db.exposed.dao.BaseDao;
+import com.latticeengines.domain.exposed.pls.PredictorElement;
+
+public interface PredictorElementDao extends BaseDao<PredictorElement> {
+
+}

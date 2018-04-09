@@ -1,5 +1,7 @@
 package com.latticeengines.apps.core.aspect;
 
+import java.util.Arrays;
+
 import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
@@ -28,19 +30,23 @@ public class ServiceAppsMultiTenantEntityMgrAspect extends MultiTenantEntityMgrA
     @Qualifier(value = "entityManagerFactory")
     private EntityManager entityManager;
 
-    @Before("execution(* com.latticeengines.apps.core.entitymgr.impl.*.find*(..))")
+    @Autowired
+    @Qualifier(value = "entityManagerFactoryReader")
+    private EntityManager entityManagerReader;
+
+    @Before("execution(* com.latticeengines.apps.*.entitymgr.impl.*.find*(..))")
     public void find(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.core.entitymgr.impl.ActionEntityMgrImpl.update*(..))")
     public void udpateAction(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.core.entitymgr.impl.ActionEntityMgrImpl.delete*(..))")
     public void deleteAction(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, entityManager);
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
     }
 
 }

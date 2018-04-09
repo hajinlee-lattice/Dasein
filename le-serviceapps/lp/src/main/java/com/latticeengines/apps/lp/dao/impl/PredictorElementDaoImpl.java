@@ -1,13 +1,13 @@
-package com.latticeengines.pls.dao.impl;
+package com.latticeengines.apps.lp.dao.impl;
 
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.apps.lp.dao.PredictorElementDao;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.PredictorElement;
-import com.latticeengines.pls.dao.PredictorElementDao;
 
 /**
- * Change to this dao should also be made to le-seviceapps/lp
+ * Change to this dao should also be made to le-pls
  */
 @Component("predictorElementDao")
 public class PredictorElementDaoImpl extends BaseDaoImpl<PredictorElement> implements PredictorElementDao {
