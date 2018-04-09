@@ -1,39 +1,28 @@
-<!-- 
-<section 
-    class="rating-engine activatescoring">
-    <div class="container row">
-        <div class="ten columns offset-one">
-            <div class="header">
-                <h2 class="pull-left">Activate Scoring</h2>
-            </div>
-
-            <div class="content">
-            </div>
-        </div>
-    </div>
-</section>
- -->
 <section id="ModelRatingsView" class="model-ratings container">
+
     <div class="row">
         <div class="ten columns offset-one">
-
-            <ul class="tabs_">
-                <li class="active">Rating Setup</li>
-                <li ui-sref="home.model.ratings.history({ modelId: '{{ vm.modelId | escape }}' })"  ui-sref-opts="{reload: true}">History</li>
-            </ul>
 
             <div class="chart-header">
                 <div class="list-data pull-left">All {{vm.modelType}}: <strong>{{vm.ratingsSummary.total_num_leads | number}}</strong></div>
                 <div class="actions pull-right">
                     <button 
                         type="button" 
+                        class="button white-button"
+                        ui-sref="home.ratingsengine.dashboard({rating_id: vm.stateParams.rating_id, modelId: vm.stateParams.modelId})">
+                        Back to Dashboard</button>
+                    <button 
+                        type="button" 
                         class="button orange-button"
                         data-ng-click="vm.publishConfiguration($event)"
-                        ng-disabled="vm.chartNotUpdated"
-                    >Publish Configuration</button>
+                        ng-disabled="vm.chartNotUpdated">
+                        Publish Configuration</button>
                 </div>
             </div><!-- End .chart-header -->
 
+            <!--
+            <model-ratings-chart workingBuckets="vm.workingBuckets" ratingsSummary="vm.ratingsSummary" />
+            -->
 
             <div 
                 id="ratingsChart"
@@ -146,27 +135,8 @@
                     </dl>
                 </li>
             </ul><!-- End .bucket-tiles -->
-
-            <hr/>
-
-            <h3>Currently published configuration</h3>
-
-            <refresher condition="vm.updateContent">
-            <ul class="bucket-tiles published buckets-{{::vm.currentConfiguration.length}}">
-                <li ng-repeat="bucket in ::vm.currentConfiguration">
-                    <div class="bucket-label" ng-class="bucket.bucket_name === 'A+' ? 'aplus' : ''">{{::bucket.bucket_name}}</div>
-                    <dl>
-                        <dt>Lift</dt>
-                        <dd class="lift">{{::vm.Math.max(bucket.lift).toFixed(1);}}x</dd>
-                        <dt>{{vm.modelType}} %</dt>
-                        <dd>{{::vm.Math.round(100*bucket.num_leads/vm.ratingsSummary.total_num_leads)}}%</dd>
-                        <dt>{{vm.modelType}}</dt>
-                        <dd>{{::bucket.num_leads | number}}</dd>
-                    </dl>
-                </li>
-            </ul><!-- End .bucket-tiles -->
-            </refresher>
             
         </div><!-- End .twelve.columns -->
     </div><!-- End .row -->
+
 </section>

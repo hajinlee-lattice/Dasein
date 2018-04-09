@@ -296,8 +296,6 @@ angular.module('lp.models.ratings', [
     vm.publishConfiguration = function() {
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
-console.log(vm.section, $state.params);
-
 
         var modelId = $stateParams.modelId,
             rating_id = $stateParams.rating_id;

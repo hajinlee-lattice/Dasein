@@ -3,29 +3,7 @@ angular.module('lp.ratingsengine.activatescoring', [
     'mainApp.appCommon.widgets.ModelDetailsWidget',
     'mainApp.models.services.ModelService'
 ])
-// .directive('refresher', function() {
-//   return {
-//     transclude: true,
-//     controller: function($scope, $transclude,
-//                          $attrs, $element) {
-//       var childScope;
-
-//       $scope.$watch($attrs.condition, function(value) {
-//         $element.empty();
-//         if (childScope) {
-//           childScope.$destroy();
-//           childScope = null;
-//         }
-
-//         $transclude(function(clone, newScope) {
-//           childScope = newScope;
-//           $element.append(clone);
-//         });
-//       });
-//     }
-//   };
-// })
-.controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
+.controller('RatingsEngineActivateScoring', function ($scope, $rootScope, $state, $stateParams, $timeout, 
     ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
 
     var vm = this;
@@ -296,144 +274,27 @@ angular.module('lp.ratingsengine.activatescoring', [
     vm.publishConfiguration = function() {
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
-console.log(vm.section, $state.params);
-
 
         var modelId = $stateParams.modelId,
             rating_id = $stateParams.rating_id;
-        if(vm.section === 'dashboard.scoring') {
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
-                if (result != null && result.success === true) {
-                    vm.showSuccess = true;
-                    vm.chartNotUpdated = true;
-                    vm.updateContent = true;
-                    $timeout( function(){ 
-                        vm.updateContent = false;
-                        vm.showSuccess = false;
-                        
-                    }, 200);
-                } else {
-                    vm.savingConfiguration = false;
-                    vm.createBucketsErrorMessage = result;
-                    vm.showSaveBucketsError = true;
-                }
-            });
-        } else {
-            ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
-                if (result != null && result.success === true) {
-                    vm.showSuccess = true;
-                    vm.chartNotUpdated = true;
-                    vm.updateContent = true;
-                    $timeout( function(){ 
-                        vm.updateContent = false;
-                        vm.showSuccess = false;
-                        
-                    }, 200);
-                } else {
-                    vm.savingConfiguration = false;
-                    vm.createBucketsErrorMessage = result;
-                    vm.showSaveBucketsError = true;
-                }
-            });
-        }
+            
+        ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
+            if (result != null && result.success === true) {
+                vm.showSuccess = true;
+                vm.chartNotUpdated = true;
+                vm.updateContent = true;
+                $timeout( function(){ 
+                    vm.updateContent = false;
+                    vm.showSuccess = false;
+                    
+                }, 200);
+            } else {
+                vm.savingConfiguration = false;
+                vm.createBucketsErrorMessage = result;
+                vm.showSaveBucketsError = true;
+            }
+        });
     }
-
-
-    vm.init();
-
-})
-.controller('ModelRatingsHistoryController', function ($scope, $rootScope, $stateParams,
-    ResourceUtility, Model, ModelStore, ModelRatingsService, HistoricalABCDBuckets) {
-
-    var vm = this;
-    angular.extend(vm, {
-        model: Model,
-        modelId: $stateParams.modelId,
-        tenantName: $stateParams.tenantName,
-        data: ModelStore,
-        bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
-        ResourceUtility: ResourceUtility,
-        historicalBuckets: HistoricalABCDBuckets
-    });
-
-    vm.init = function() {
-        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-        vm.Math = window.Math;
-
-        vm.getModelJobNumber = vm.model.ModelDetails.ModelSummaryProvenanceProperties[5].ModelSummaryProvenanceProperty.value;
-
-        if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
-            vm.modelType = "Leads";
-        } else {
-            vm.modelType = "Accounts";
-        }
-
-        angular.forEach(vm.historicalBuckets, function(value, key) {
-            if (value.length === 6) {
-                vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
-            } else if (value.length < 6) {
-                vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
-            };
-        });
-
-        const ordered = {};
-        Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {
-          ordered[key] = vm.historicalBuckets[key];
-        });
-
-        vm.historicalBuckets = ordered;
-
-        
-        // Set value for total leads in set
-        // This will need to get changed when we're saving configurations
-        vm.historyTotalLeads = pluckDeepKey("num_leads", vm.historicalBuckets);
-
-        // Add values for a specific key in object
-        function pluckDeepKey(key, obj) {
-          if (_.has(obj, key)) {
-            return obj[key];
-          }
-          return _.reduce(_.flatten(_.map(obj, function(v) {
-            return _.isObject(v) ? pluckDeepKey(key, v) : [];
-          }), false), function(a,b) { return a + b });
-        }
-
-    };
 
     vm.init();
 });
-// .directive('modelRatingsChart', function() {
-//     return {
-//         restrict: 'EA',
-//         templateUrl: 'app/models/views/ModelRatingsChartView.html',
-//         scope: {
-//             workingBuckets: '=?',
-//             ratingsSummary: '=?',
-
-//             // chartContainerHeight: '=?',
-//             // showRemoveBucketText: '=?',
-//             // showSuccess: '=?',
-//             // dugoutHeight: '=?',
-//             // addBucket: '=?', // function
-//             // canAddBucket: '=?',
-//             // workingBuckets: '=?',
-//             // eleMouseDown: '=?',
-//             // right: '=?',
-//             // getNumber: '=?', // function
-//             // yAxisNumber: '=?',
-//             // axisItemHeight: '=?',
-//             // Math: '=?',
-//             // barMultiplier: '=?',
-//             // bucketHover: '=?', // function
-//             // modelType: '=?'
-//         },
-//         controller: ['$scope', '$rootScope', '$state', '$stateParams', '$timeout', 'ResourceUtility', 'Model', 'ModelStore', 'ModelRatingsService', 'CurrentConfiguration', 'RatingsSummary', function ($scope, $rootScope, $state, $stateParams, $timeout, ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
-//             var vm = $scope;
-//             angular.extend(vm, {
-//                 workingBuckets: $scope.workingBuckets,
-//                 ratingsSummary: $scope.ratingsSummary
-//             });
-
-//         }]
-//     }
-// });
