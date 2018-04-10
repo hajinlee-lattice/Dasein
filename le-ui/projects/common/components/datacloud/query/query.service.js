@@ -615,7 +615,7 @@ angular.module('common.datacloud.query.service',[
         //var treeRoot = QueryStore.getAddBucketTreeRoot();
         var restrictions = [];
 
-        if (QueryStore.mode == 'rules') {
+        if (QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules') {
             this.getAllBuckets(QueryStore.accountBucketTreeRoot.logicalRestriction.restrictions, restrictions);
             this.getAllBuckets(QueryStore.contactBucketTreeRoot.logicalRestriction.restrictions, restrictions);
             // this.getAllBuckets(this.treeRoot.logicalRestriction.restrictions, restrictions);

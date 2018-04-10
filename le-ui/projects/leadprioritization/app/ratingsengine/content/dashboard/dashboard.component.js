@@ -15,7 +15,7 @@ angular.module('lp.ratingsengine.dashboard', [
         barChartConfig: {
             'data': {
                 'tosort': true,
-                'sortBy': '-num_leads',
+                'sortBy': 'bucket_name',
                 'trim': true,
                 'top': 5,
             },
@@ -173,40 +173,47 @@ angular.module('lp.ratingsengine.dashboard', [
             vm.ratingEngine.chartConfig = vm.barChartConfig;
         }        
 
-        var newBucketMetadata = [];
+        var newBucketMetadata = [],
+            dummyNewBucketData = [{
+                "bucket_name": "A",
+                "num_leads": 11,
+                "lift": "0.3",
+                "dummy": true
+            },{
+                "bucket_name": "B",
+                "num_leads": 10,
+                "lift": "1.3",
+                "dummy": true
+            },{
+                "bucket_name": "C",
+                "num_leads": 16,
+                "lift": "0.8",
+                "dummy": true
+            },{
+                "bucket_name": "D",
+                "num_leads": 18,
+                "lift": "0.9",
+                "dummy": true
+            },{
+                "bucket_name": "F",
+                "num_leads": 14,
+                "lift": "0.5",
+                "dummy": true
+            }];
+
         if(vm.dashboard.summary.bucketMetadata) {
             angular.forEach(vm.dashboard.summary.bucketMetadata, function(rating, key) {
                 rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                newBucketMetadata.push(rating);
+                if(rating.lift > 0 && rating.num_leads > 0) {
+                    newBucketMetadata.push(rating);
+                };
+                if(newBucketMetadata.length === 0) {
+                    newBucketMetadata = dummyNewBucketData;
+                }
             });
         } else {
-            newBucketMetadata = [{
-                "bucket_name": "B",
-                "num_leads": 10,
-                "lift": "1.3"
-            },
-            {
-                "bucket_name": "A",
-                "num_leads": 11,
-                "lift": "0.3"
-            },
-            {
-                "bucket_name": "F",
-                "num_leads": 14,
-                "lift": "0.5"
-            },
-            {
-                "bucket_name": "C",
-                "num_leads": 16,
-                "lift": "0.8"
-            },
-            {
-                "bucket_name": "D",
-                "num_leads": 18,
-                "lift": "0.9"
-            }];
+            newBucketMetadata = dummyNewBucketData;
         }
-
         vm.ratingEngine.newBucketMetadata = newBucketMetadata;
         
         if (vm.isRulesBased) {

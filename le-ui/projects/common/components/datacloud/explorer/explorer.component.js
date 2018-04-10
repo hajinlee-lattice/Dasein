@@ -1506,6 +1506,9 @@ angular.module('common.datacloud.explorer', [
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
 
+        console.log(attribute);
+        console.log(vm.getAttributeRules(attribute));
+
         if (!vm.cube) {
             return alert('Cube data not yet loaded. \nOne moment please.');
         }
@@ -1532,6 +1535,7 @@ angular.module('common.datacloud.explorer', [
         if (attributeRangeKey) {
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
+        
 
         var toAdd = entity;
         
@@ -1693,7 +1697,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.getAttributeRules = function(attribute, bucket) {
         var attributes = QueryStore.getDataCloudAttributes(true);
-        
+
         attributes = attributes.filter(function(item) {
             var restriction = item.bucketRestriction,
                 isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),

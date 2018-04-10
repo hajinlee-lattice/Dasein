@@ -70,11 +70,11 @@
                         ng-style="{'pointer-events': (vm.section == 'segment.analysis' ? 'all' : 'none')}"
                         title="{{vm.getTitleTooltip(attribute)}}">
                     
-                    {{ Rules = vm.getAttributeRules(attribute); "" }}
+                    {{ Rules = vm.getAttributeRules(attribute, attribute.TopBkt); "" }}
                     {{ Value = vm.formatAttributeValue(attribute, Rules); "" }}
 
                     <!--input  type="checkbox" ng-if="vm.section == 'segment.analysis' && !attribute.TopBkt" ng-disabled="true" /-->
-                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis' || vm.mode == 'dashboardrules'">
+                    <div class="column checkspace show-tooltip delay top left" ng-if="vm.section == 'segment.analysis'">
                         <!--input  type="checkbox" 
                                 ng-model="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId]"
                                 ng-checked="vm.segmentAttributeInput[attribute.Attribute || attribute.ColumnId] || attribute.SegmentChecked" 
@@ -82,6 +82,7 @@
                                 id="{{attribute.Attribute || attribute.ColumnId}}"
                                 ng-show="false"
                                 ng-if="vm.section == 'segment.analysis' && attribute.TopBkt" /-->
+
                         <i class="plus fa fa-plus" ng-if="Rules.length == 0"></i>
                         <i class="plus fa fa-check" ng-if="Rules.length == 1"></i>
                         <i class="plus attribute-use-count" ng-if="Rules.length >= 2">{{ Rules.length }}</i>
