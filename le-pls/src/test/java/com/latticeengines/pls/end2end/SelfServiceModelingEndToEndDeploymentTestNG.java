@@ -314,7 +314,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         List<BucketMetadata> bucketMetadatas = JsonUtils.convertList(creationTimeToBucketMetadatas.get(timestamp),
                 BucketMetadata.class);
         Set<BucketName> bucketNames = new HashSet<>(
-                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D, BucketName.F));
+                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             switch (bucketMetadata.getBucket()) {
             case A:
@@ -336,11 +336,6 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 bucketNames.remove(bucketMetadata.getBucket());
                 assertEquals(bucketMetadata.getLeftBoundScore(), 49);
                 assertEquals(bucketMetadata.getRightBoundScore(), 5);
-                break;
-            case F:
-                bucketNames.remove(bucketMetadata.getBucket());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 5);
-                assertEquals(bucketMetadata.getRightBoundScore(), 0);
                 break;
             default:
                 Assert.fail("Should not see the bucket name " + bucketMetadata.getBucket());
