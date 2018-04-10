@@ -377,6 +377,18 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         }
     }
 
+    public void enableGroupIfPresent(ColumnSelection.Predefined group) {
+        if (MapUtils.isNotEmpty(groups) && groups.containsKey(group)) {
+            groups.put(group, true);
+        }
+    }
+
+    public void disableGroupIfPresent(ColumnSelection.Predefined group) {
+        if (MapUtils.isNotEmpty(groups) && groups.containsKey(group)) {
+            groups.put(group, false);
+        }
+    }
+
     public void enableGroup(ColumnSelection.Predefined group) {
         if (groups == null) {
             groups = new HashMap<>();
