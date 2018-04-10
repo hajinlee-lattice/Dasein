@@ -47,8 +47,9 @@ public class SystemMetadataStoreImpl extends
     private static final Logger log = LoggerFactory.getLogger(SystemMetadataStoreImpl.class);
 
     @Inject
-    public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate, AMMetadataStore amMetadataStore,
-            CDLNamespaceService cdlNamespaceService, RatingDisplayMetadataStore ratingDisplayMetadataStore,
+    public SystemMetadataStoreImpl(DataCollectionService dataCollectionService, TableRoleTemplate tableRoleTemplate,
+            AMMetadataStore amMetadataStore, CDLNamespaceService cdlNamespaceService,
+            RatingDisplayMetadataStore ratingDisplayMetadataStore,
             ExternalSystemMetadataStore externalSystemMetadataStore) {
         super(getBaseMds(dataCollectionService, tableRoleTemplate, amMetadataStore, cdlNamespaceService),
                 getDecoratorChain(ratingDisplayMetadataStore, externalSystemMetadataStore));
@@ -77,6 +78,11 @@ public class SystemMetadataStoreImpl extends
                 DataCollection.Version version = namespace.getCoord2();
                 String customerSpace = MultiTenantContext.getCustomerSpace().toString();
                 List<String> tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
+                if (BusinessEntity.Account.equals(entity) && CollectionUtils.isEmpty(tableNames)) {
+                    // for account try serving store
+                    role = BusinessEntity.Account.getServingStore();
+                    tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
+                }
 
                 ParallelFlux<ColumnMetadata> servingStore;
                 if (CollectionUtils.isNotEmpty(tableNames)) {
@@ -84,6 +90,8 @@ public class SystemMetadataStoreImpl extends
                     Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
                     ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
                     servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
+                            .filter(cm -> !(BusinessEntity.Account.equals(entity)
+                                    && !Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()))) //
                             .map(cm -> {
                                 if (cm.getCategory() == null) {
                                     cm.setCategory(category);
@@ -93,8 +101,12 @@ public class SystemMetadataStoreImpl extends
                                     cm.enableGroup(ColumnSelection.Predefined.Segment);
                                 }
                                 if (BusinessEntity.Account.equals(entity)) {
-                                    cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-                                    cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+                                    if (!cm.getGroups().containsKey(ColumnSelection.Predefined.TalkingPoint)) {
+                                        cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+                                    }
+                                    if (!cm.getGroups().containsKey(ColumnSelection.Predefined.CompanyProfile)) {
+                                        cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+                                    }
                                 }
                                 return cm;
                             }) //
@@ -125,8 +137,7 @@ public class SystemMetadataStoreImpl extends
                             .map(cm -> {
                                 cm.setEntity(BusinessEntity.Account);
                                 return cm;
-                            })
-                            .doOnNext(cm -> {
+                            }).doOnNext(cm -> {
                                 if (amCounter.get() == null) {
                                     amCounter.set(new AtomicLong(0));
                                 }
