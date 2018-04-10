@@ -13,7 +13,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "name")
 @JsonSubTypes({
         @Type(value = ImportAndRTSBulkScoreWorkflowConfiguration.class, name = "ImportAndRTSBulkScoreWorkflowConfiguration"),
-        @Type(value = ImportMatchAndModelWorkflowConfiguration.class, name = "ImportMatchAndModelWorkflowConfiguration"),
         @Type(value = ImportMatchAndScoreWorkflowConfiguration.class, name = "ImportMatchAndScoreWorkflowConfiguration"),
         @Type(value = ImportVdbTableAndPublishWorkflowConfiguration.class, name = "ImportVdbTableAndPublishWorkflowConfiguration"),
         @Type(value = RatingEngineMatchAndModelWorkflowConfiguration.class, name = "RatingEngineMatchAndModelWorkflowConfiguration"),

@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -60,6 +61,9 @@ public class RatingEngineImportMatchAndModelWorkflow
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
+    @Inject
+    private ActivateRatingEngineListener activateRatingEngineListener;
+
     @Override
     public Workflow defineWorkflow(RatingEngineImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -73,6 +77,7 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(scoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
+                .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

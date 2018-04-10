@@ -228,11 +228,11 @@ public abstract class BaseRestApiProxy {
     }
 
     protected <T, B> T postKryo(final String method, final String url, final B body, final Class<T> returnValueClazz) {
-        return post(method, url, body, returnValueClazz, false, true);
+        return post(method, url, body, returnValueClazz, true, true);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz) {
-        return post(method, url, body, returnValueClazz, false, false);
+        return post(method, url, body, returnValueClazz, true, false);
     }
 
     protected <T, B> T post(final String method, final String url, final B body, final Class<T> returnValueClazz,

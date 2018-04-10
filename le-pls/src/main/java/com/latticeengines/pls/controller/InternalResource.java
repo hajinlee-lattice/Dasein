@@ -779,17 +779,6 @@ public class InternalResource extends InternalResourceBase {
         }
     }
 
-    @RequestMapping(value = "/bucketedscoresummary/{modelId}", method = RequestMethod.POST, headers = "Accept=application/json")
-    @ResponseBody
-    @ApiOperation(value = "create or update bucketed score summary")
-    public void createOrUpdateBucketedScoreSummary(@PathVariable String modelId,
-            @RequestBody BucketedScoreSummary bucketedScoreSummary, HttpServletRequest request) throws Exception {
-        checkHeader(request);
-        ModelSummary modelSummary = modelSummaryService.getModelSummaryByModelId(modelId);
-        manufactureSecurityContextForInternalAccess(modelSummary.getTenant());
-        bucketedScoreService.createOrUpdateBucketedScoreSummary(modelId, bucketedScoreSummary);
-    }
-
     @SuppressWarnings("deprecation")
     @RequestMapping(value = "/bucketmetadata/ratingengine/{ratingengineId}/"
             + TENANT_ID_PATH, method = RequestMethod.GET, headers = "Accept=application/json")

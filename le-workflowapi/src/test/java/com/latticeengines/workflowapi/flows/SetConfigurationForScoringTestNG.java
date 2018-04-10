@@ -25,7 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
@@ -57,12 +57,12 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
         StepRunner runner = new StepRunner(jobLauncher, jobRepository);
 
-        ImportMatchAndModelWorkflowConfiguration.Builder builder = new ImportMatchAndModelWorkflowConfiguration.Builder();
+        RatingEngineImportMatchAndModelWorkflowConfiguration.Builder builder = new RatingEngineImportMatchAndModelWorkflowConfiguration.Builder();
         builder.customer(CustomerSpace.parse("Workflow_Tenant"));
         builder.modelingServiceHdfsBaseDir("abc");
         builder.microServiceHostPort("123");
         builder.inputProperties(ImmutableMap.of(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME, "abc.csv"));
-        ImportMatchAndModelWorkflowConfiguration config = builder.build();
+        RatingEngineImportMatchAndModelWorkflowConfiguration config = builder.build();
 
         JobParameters params = workflowService.createJobParams(config);
         log.info(params.toString());
@@ -84,7 +84,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         when(workflowJobEntityMgr.findByWorkflowId(anyLong())).thenReturn(job);
         doNothing().when(workflowJobEntityMgr).updateWorkflowJob(any(WorkflowJob.class));
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
-        setConfigurationForScoring.setNamespace("importMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
+        setConfigurationForScoring.setNamespace("ratingEngineImportMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
         JobExecution execution = runner.launchStep(
                 workflowTranslator.step(setConfigurationForScoring, choreographer, 0, null), params, executionContext);

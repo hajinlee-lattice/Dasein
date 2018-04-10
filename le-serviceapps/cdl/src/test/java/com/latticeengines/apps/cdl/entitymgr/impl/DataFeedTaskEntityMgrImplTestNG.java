@@ -96,7 +96,7 @@ public class DataFeedTaskEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         datafeedTaskEntityMgr.addTableToQueue(task, dataTable);
         int count = datafeedTaskTableEntityMgr.countDataFeedTaskTables(task);
         int retry = 0;
-        while (count == 0 && retry < 2) {
+        while (count == 0 && retry < 5) {
             Thread.sleep(200);
             count = datafeedTaskTableEntityMgr.countDataFeedTaskTables(task);
             retry++;

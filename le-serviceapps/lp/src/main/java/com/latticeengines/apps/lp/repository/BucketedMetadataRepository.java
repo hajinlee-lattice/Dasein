@@ -14,5 +14,6 @@ public interface BucketedMetadataRepository extends BaseJpaRepository<BucketMeta
     List<BucketMetadata> findByCreationTimestampAndModelSummary_Id(long creationTimestamp, String modelGuid);
 
     BucketMetadata findFirstByModelSummary_IdOrderByCreationTimestampDesc(String modelGuid);
+    BucketMetadata findFirstByRatingEngine_IdOrderByCreationTimestampDesc(String engineId);
 
 }

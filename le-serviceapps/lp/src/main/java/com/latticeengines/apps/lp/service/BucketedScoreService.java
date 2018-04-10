@@ -9,7 +9,9 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 
 public interface BucketedScoreService {
 
-    Map<Long, List<BucketMetadata>> getBucketMetadataGroupedByCreationTimes(String modelGuid);
+    Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelGuid);
+
+    Map<Long, List<BucketMetadata>> getRatingEngineBucketMetadataGroupedByCreationTimes(String ratingEngineId);
 
     List<BucketMetadata> getABCDBucketsByModelGuid(String modelGuid);
 

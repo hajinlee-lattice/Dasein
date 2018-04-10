@@ -13,10 +13,14 @@ public interface BucketedScoreProxy {
 
     Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String modelGuid);
 
+    Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String engineId);
+
     List<BucketMetadata> getLatestABCDBucketsByModelGuid(String modelGuid);
 
-    List<BucketMetadata> getABCDBucketsByEngineId(String engineId);
+    List<BucketMetadata> getLatestABCDBucketsByEngineId(String engineId);
 
     BucketedScoreSummary getBucketedScoreSummary(String modelGuid);
+
+    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid, BucketedScoreSummary summary);
 
 }

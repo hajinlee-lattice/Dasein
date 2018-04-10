@@ -40,13 +40,13 @@ public class BucketedScoreSummaryEntityMgrImpl extends BaseEntityMgrRepositoryIm
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public BucketedScoreSummary findByModelGuid(String modelGuid) {
+    public BucketedScoreSummary getByModelGuid(String modelGuid) {
         return repository.findByModelSummary_Id(modelGuid);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public BucketedScoreSummary findByModelGuidFromReader(String modelGuid) {
+    public BucketedScoreSummary getByModelGuidFromReader(String modelGuid) {
         return readerRepository.findByModelSummary_Id(modelGuid);
     }
 

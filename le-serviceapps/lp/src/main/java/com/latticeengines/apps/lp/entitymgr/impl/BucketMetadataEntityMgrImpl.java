@@ -87,4 +87,15 @@ public class BucketMetadataEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Buc
         }
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<BucketMetadata> getUpToDateBucketMetadatasForEngineFromReader(String engineId) {
+        BucketMetadata bm = readerRepository.findFirstByRatingEngine_IdOrderByCreationTimestampDesc(engineId);
+        if (bm == null) {
+            return Collections.emptyList();
+        } else {
+            return readerRepository.findByCreationTimestampAndRatingEngine_Id(bm.getCreationTimestamp(), engineId);
+        }
+    }
+
 }

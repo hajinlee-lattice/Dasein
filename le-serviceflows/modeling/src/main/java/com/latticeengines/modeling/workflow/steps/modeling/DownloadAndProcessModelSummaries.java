@@ -2,8 +2,9 @@ package com.latticeengines.modeling.workflow.steps.modeling;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,12 @@ import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStepConfiguration> {
 
-    @Autowired
+    @Inject
     private WaitForDownloadedModelSummaries waitForDownloadedModelSummaries;
 
     private InternalResourceRestApiProxy proxy = null;
 
-    @Autowired
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     @SuppressWarnings("unchecked")

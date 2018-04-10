@@ -230,6 +230,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                         !parameters.isExcludeCDLAttributes() || !parameters.isExcludeCustomFileAttributes()) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
+                .saveBucketMetadata() //
                 .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0)) //
                 .build();
     }

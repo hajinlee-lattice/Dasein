@@ -167,7 +167,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder userId(String userId) {
-            pivotScoreAndEvent.setUserId(userId);
+            computeLift.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
             return this;
@@ -229,6 +229,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
+            computeLift.setRatingEngineId(ratingEngineId);
             modelWorkflowBuilder.ratingEngineId(ratingEngineId);
             pivotScoreAndEvent.setRatingEngineId(ratingEngineId);
             return this;
@@ -400,6 +401,11 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
+        public Builder saveBucketMetadata(){
+            computeLift.setSaveBucketMetadata(Boolean.TRUE);
+            return this;
+        }
+
         public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
             rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
             return this;
@@ -430,6 +436,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
+
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());

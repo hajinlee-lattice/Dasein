@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -71,6 +72,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
+    @Inject
+    private ActivateRatingEngineListener activateRatingEngineListener;
+
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -87,6 +91,7 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(computeLift) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
+                .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

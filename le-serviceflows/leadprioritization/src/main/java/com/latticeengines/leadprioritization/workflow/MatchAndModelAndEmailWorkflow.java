@@ -2,7 +2,6 @@ package com.latticeengines.leadprioritization.workflow;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -14,6 +13,7 @@ import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelComplet
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
 import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
+import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
@@ -43,11 +43,14 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
     @Inject
     private ModelWorkflow modelWorkflow;
 
-    @Autowired
+    @Inject
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
     private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
+
+    @Inject
+    private ComputeLiftDataFlow computeLift;
 
     @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
@@ -68,6 +71,7 @@ public class MatchAndModelAndEmailWorkflow extends AbstractWorkflow<MatchAndMode
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(rtsBulkScoreWorkflow) //
+                .next(computeLift) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(sendEmailAfterModelCompletionListener) //

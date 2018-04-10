@@ -21,7 +21,7 @@ import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements BucketedScoreProxy {
 
     protected BucketedScoreProxyImpl() {
-        super("lp/bucktedscore");
+        super("lp/bucketedscore");
     }
 
     @Override
@@ -38,6 +38,13 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
+    public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String engineId) {
+        String url = constructUrl("/abcdbuckets/engine/{engineId}", engineId);
+        Map map = get("get bucket metadata history for engine", url, Map.class);
+        return parseABCDBucketsHistory(map);
+    }
+
+    @Override
     public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String modelGuid) {
         String url = constructUrl("/uptodateabcdbuckets/model/{modelGuid}", modelGuid);
         List list = get("get up-to-date bucket metadata history for model", url, List.class);
@@ -45,9 +52,9 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     }
 
     @Override
-    public List<BucketMetadata> getABCDBucketsByEngineId(String engineId) {
-        String url = constructUrl("/abcdbuckets/engine/{engineId}", engineId);
-        List list = get("get bucket metadata for engine", url, List.class);
+    public List<BucketMetadata> getLatestABCDBucketsByEngineId(String engineId) {
+        String url = constructUrl("/uptodateabcdbuckets/engine/{engineId}", engineId);
+        List list = get("get up-to-date bucket metadata for engine", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
@@ -55,6 +62,12 @@ public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements 
     public BucketedScoreSummary getBucketedScoreSummary(String modelGuid) {
         String url = constructUrl("/summary/model/{modelGuid}", modelGuid);
         return get("get bucketed score summary", url, BucketedScoreSummary.class);
+    }
+
+    @Override
+    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid, BucketedScoreSummary summary) {
+        String url = constructUrl("/summary/model/{modelGuid}", modelGuid);
+        return post("create bucketed score summary", url, summary, BucketedScoreSummary.class);
     }
 
     private Map<Long, List<BucketMetadata>> parseABCDBucketsHistory(Map map) {

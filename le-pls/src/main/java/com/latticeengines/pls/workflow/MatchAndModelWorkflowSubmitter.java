@@ -54,7 +54,7 @@ public class MatchAndModelWorkflowSubmitter extends BaseModelWorkflowSubmitter {
     private ColumnMetadataProxy columnMetadataProxy;
 
     @SuppressWarnings("unused")
-    private static final Logger log = LoggerFactory.getLogger(ImportMatchAndModelWorkflowSubmitter.class);
+    private static final Logger log = LoggerFactory.getLogger(MatchAndModelWorkflowSubmitter.class);
 
     public ApplicationId submit(String cloneTableName, CloneModelingParameters parameters,
             List<Attribute> userRefinedAttributes, ModelSummary modelSummary) {

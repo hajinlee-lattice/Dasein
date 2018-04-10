@@ -48,8 +48,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private ActionService actionService;
 
     @Override
-    public Map<Long, List<BucketMetadata>> getBucketMetadataGroupedByCreationTimes(String modelId) {
+    public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
         List<BucketMetadata> list = bucketMetadataEntityMgr.getBucketMetadatasForModelFromReader(modelId);
+        return groupByCreationTime(list);
+    }
+
+    @Override
+    public Map<Long, List<BucketMetadata>> getRatingEngineBucketMetadataGroupedByCreationTimes(String ratingEngineId) {
+        List<BucketMetadata> list = bucketMetadataEntityMgr.getBucketMetadatasForEngineFromReader(ratingEngineId);
         return groupByCreationTime(list);
     }
 
@@ -60,7 +66,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId) {
-        return bucketMetadataEntityMgr.getBucketMetadatasForEngineFromReader(ratingEngineId);
+        return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForEngineFromReader(ratingEngineId);
     }
 
     @Override
@@ -86,7 +92,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryByModelGuid(String modelGuid) {
-        return bucketedScoreSummaryEntityMgr.findByModelGuidFromReader(modelGuid);
+        return bucketedScoreSummaryEntityMgr.getByModelGuidFromReader(modelGuid);
     }
 
     @Override
@@ -94,7 +100,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
                                                             BucketedScoreSummary bucketedScoreSummary) {
         ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
         bucketedScoreSummary.setModelSummary(modelSummary);
-        BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.findByModelGuid(modelGuid);
+        BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.getByModelGuid(modelGuid);
         if (existing != null) {
             bucketedScoreSummary.setPid(existing.getPid());
             bucketedScoreSummaryEntityMgr.update(bucketedScoreSummary);

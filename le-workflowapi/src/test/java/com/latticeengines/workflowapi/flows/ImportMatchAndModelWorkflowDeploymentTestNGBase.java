@@ -1,8 +1,5 @@
 package com.latticeengines.workflowapi.flows;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -25,20 +22,16 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.UserDefinedType;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
-import com.latticeengines.domain.exposed.pls.ModelingParameters;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceflows.leadprioritization.ImportMatchAndModelWorkflowConfiguration;
-import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
-import com.latticeengines.pls.workflow.ImportMatchAndModelWorkflowSubmitter;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
@@ -63,9 +56,6 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private ModelSummaryParser modelSummaryParser;
-
-    @Autowired
-    private ImportMatchAndModelWorkflowSubmitter importMatchAndModelWorkflowSubmitter;
 
     SourceFile uploadFile(String resourcePath, SchemaInterpretation schema) {
         try {
@@ -105,48 +95,8 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
         }
     }
 
-    protected void model(ModelingParameters parameters) throws Exception {
-        ImportMatchAndModelWorkflowConfiguration workflowConfig = importMatchAndModelWorkflowSubmitter
-                .generateConfiguration(parameters);
-
-        workflowService.registerJob(workflowConfig, applicationContext);
-        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
-
-        waitForCompletion(workflowId);
-    }
-
     void createModelSummary(ModelSummary model, String tenantId) {
         modelSummaryService.createModelSummary(model, tenantId);
-    }
-
-    String getModelSummary(String name) {
-        List<ModelSummary> summaries = modelSummaryEntityMgr.findAllValid();
-        String lookupId = null;
-        for (ModelSummary summary : summaries) {
-            if (summary.getName().startsWith(name)) {
-                lookupId = summary.getLookupId();
-                // assertEquals(summary.getStatus(),
-                // ModelSummaryStatus.INACTIVE);
-            }
-        }
-
-        String[] tokens = lookupId.split("\\|");
-        String path = "/user/s-analytics/customers/%s/models/%s/%s";
-        path = String.format(path, tokens[0], tokens[1], tokens[2]);
-
-        assertNotNull(lookupId,
-                String.format("Could not find active model summary created with provided name %s", name));
-
-        try {
-            List<String> modelPaths = HdfsUtils.getFilesForDirRecursive(yarnConfiguration, path,
-                    file -> file.getPath().getName().contains("_model.json"));
-            assertEquals(modelPaths.size(), 1);
-            String modelPath = modelPaths.get(0);
-            return HdfsUtils.getHdfsFileContents(yarnConfiguration, modelPath);
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     ModelSummary locateModelSummary(String name, CustomerSpace space) {

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -27,8 +29,10 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.serviceflows.workflow.dataflow.RunDataFlow;
 
 @Component("computeLiftDataFlow")
@@ -42,6 +46,9 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private static final String liftField = InterfaceName.Lift.name();
 
     private boolean multiModel = false;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     @Override
     public void execute() {
@@ -90,8 +97,15 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             boolean isRatingEngine = !modelGuid.equals(engineId);
             log.info("Updating bucket metadata for " + (isRatingEngine ? "engine " : "model ") + engineId + " to "
                     + JsonUtils.pprint(bucketMetadata));
-            if (!multiModel) {
-                putObjectInContext(SCORING_BUCKET_METADATA, bucketMetadata);
+            if (!multiModel && Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
+                String ratingEngineId = configuration.getRatingEngineId();
+                CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+                request.setModelGuid(modelGuid);
+                request.setRatingEngineId(ratingEngineId);
+                request.setLastModifiedBy(configuration.getUserId());
+                request.setBucketMetadataList(bucketMetadata);
+                log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId);
+                bucketedScoreProxy.createABCDBuckets(request);
             }
         });
 

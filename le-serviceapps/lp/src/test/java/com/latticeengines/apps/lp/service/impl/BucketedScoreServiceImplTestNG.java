@@ -60,7 +60,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
         Thread.sleep(500);
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getBucketMetadataGroupedByCreationTimes(modelGuid);
+                .getModelBucketMetadataGroupedByCreationTimes(modelGuid);
         Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
         modelSummary = modelSummaryReaderRepository.findById(modelGuid);
         long newLastUpdateTime = modelSummary.getLastUpdateTime();
@@ -82,7 +82,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
         assertTrue(newLastUpdateTime > oldLastUpdateTime);
 
         Map<Long, List<BucketMetadata>> creationTimeToBucketMetadatas = bucketedScoreService
-                .getBucketMetadataGroupedByCreationTimes(modelGuid);
+                .getModelBucketMetadataGroupedByCreationTimes(modelGuid);
         assertEquals(creationTimeToBucketMetadatas.keySet().size(), 2);
         Long earlierTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0],
                 laterTimestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[1];

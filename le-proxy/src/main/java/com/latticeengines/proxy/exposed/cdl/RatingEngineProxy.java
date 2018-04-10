@@ -16,6 +16,7 @@ import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
 import com.latticeengines.domain.exposed.pls.RatingEngineNote;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
@@ -32,6 +33,17 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     protected RatingEngineProxy() {
         super("cdl");
+    }
+
+    public RatingEngine activateRatingEngine(String customerSpace, String engineId) {
+        RatingEngine ratingEngine = getRatingEngine(customerSpace, engineId);
+        if (ratingEngine != null) {
+            if (ratingEngine.getStatus() == RatingEngineStatus.INACTIVE) {
+                ratingEngine.setStatus(RatingEngineStatus.ACTIVE);
+                ratingEngine = createOrUpdateRatingEngine(customerSpace, ratingEngine);
+            }
+        }
+        return ratingEngine;
     }
 
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace) {

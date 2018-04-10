@@ -51,9 +51,6 @@ public class ModelResource {
     private InternalResourceRestApiProxy internalResourceProxy;
 
     @Autowired
-    private MetadataProxy metadataProxy;
-
-    @Autowired
     private CdlModelMetadataService cdlModelMetadataService;
 
     @Inject

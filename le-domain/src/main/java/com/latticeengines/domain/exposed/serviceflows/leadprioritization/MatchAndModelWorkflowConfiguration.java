@@ -130,7 +130,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
         }
 
         public Builder userId(String userId) {
-            pivotScoreAndEvent.setUserId(userId);
+            computeLift.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
             return this;
         }
@@ -340,6 +340,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
                     configuration.getClass().getSimpleName());
             export.setUsingDisplayName(Boolean.FALSE);
             computeLift.setScoreField(InterfaceName.Event.name());
+            computeLift.setSaveBucketMetadata(Boolean.TRUE);
             rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
 
             configuration.add(dedupEventTable);

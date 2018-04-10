@@ -470,21 +470,16 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         List<Object> rawFields = restTemplate.getForObject(
                 String.format("%s/pls/modelsummaries/metadata/%s", getRestAPIHostPort(), clonedModelSummary.getId()),
                 List.class);
-        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
-            @Override
-            public boolean apply(@Nullable Object raw) {
-                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
-                return metadataField.getColumnName().equals("Industry_Group")
-                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
-            }
+        Assert.assertNotNull(rawFields);
+        assertTrue(rawFields.stream().anyMatch(raw -> {
+            VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+            return metadataField.getColumnName().equals("Industry_Group")
+                    && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
         }));
-        assertTrue(Iterables.any(rawFields, new Predicate<Object>() {
-            @Override
-            public boolean apply(@Nullable Object raw) {
-                VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
-                return metadataField.getColumnName().equals("Activity_Count_Click_Email")
-                        && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
-            }
+        assertTrue(rawFields.stream().anyMatch(raw -> {
+            VdbMetadataField metadataField = new ObjectMapper().convertValue(raw, VdbMetadataField.class);
+            return metadataField.getColumnName().equals("Activity_Count_Click_Email")
+                    && metadataField.getApprovedUsage().equals(ModelingMetadata.NONE_APPROVED_USAGE);
         }));
 
         compareRtsScoreWithModeling(clonedModelSummary, 730, secondTenant.getId());
