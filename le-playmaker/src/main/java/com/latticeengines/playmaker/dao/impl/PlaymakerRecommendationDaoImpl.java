@@ -269,13 +269,16 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private List<Map<String, Object>> getAccountExtensions(Long start, int offset, int maximum, String filterBy,
             Long recStart, String columns, boolean hasSfdcContactId, List<Integer> accountIds) {
-        List<String> additionalColumnsList = new ArrayList<>();
-        String additionalColumns = getAccountExtensionColumns(columns, additionalColumnsList);
+
+        String additionalColumns = getAccountExtensionColumns(columns);
+        String additionalColumnsOriginal = additionalColumns;
         if (!StringUtils.isBlank(additionalColumns)) {
             additionalColumns = additionalColumns.trim();
-            if (additionalColumns.endsWith(",")) {
-                additionalColumns = additionalColumns.substring(0, additionalColumns.lastIndexOf(","));
+            if (!additionalColumns.endsWith(",")) {
+                additionalColumns = additionalColumns + ",";
             }
+        } else {
+            additionalColumns = "";
         }
 
         String sqlStr = //
@@ -312,12 +315,12 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         + "     SET @rowcount = (@endrow - @startrow) + 1; " //
                         + "     SET ROWCOUNT @rowcount; " //
                         + "     SELECT " //
-                        + "     E.Item_ID AS " + ID_KEY + ", " //
-                        + " " + getSfdcAccountContactIds(hasSfdcContactId) //
                         + "     A.External_ID AS LEAccountExternalID, " //
-                        + "     DATEDIFF(s, '19700101 00:00:00:000', A.[Last_Modification_Date]) AS "
-                        + LAST_MODIFIED_TIME_KEY + ", " //
+                        + "     E.Item_ID AS " + ID_KEY + ", " //
                         + " " + additionalColumns //
+                        + " " + getSfdcAccountContactIds(hasSfdcContactId) //
+                        + "     DATEDIFF(s, '19700101 00:00:00:000', A.[Last_Modification_Date]) AS " //
+                        + " " + LAST_MODIFIED_TIME_KEY //
                         + " "
                         + getAccountExtensionFromWhereClause(accountIds, filterBy, //
                                 false, start == null)
@@ -363,12 +366,11 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         }
     }
 
-    private String getAccountExtensionColumns(String columns, List<String> addToColumnList) {
-        if (columns != null) {
+    private String getAccountExtensionColumns(String columns) {
+        if (StringUtils.isBlank(columns)) {
+            columns = null;
+        } else {
             columns = StringUtils.strip(columns);
-            if ("".equals(columns)) {
-                return "";
-            }
         }
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
@@ -376,18 +378,15 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         for (Map<String, Object> field : schema) {
             builder.append("E.").append(field.get("Field")).append(" as ").append(field.get("Field")).append(", ");
             columnsInDb.add(field.get("Field").toString());
-            if (columns == null) {
-                addToColumnList.add(field.get("Field").toString());
-            }
         }
         if (columns == null) {
             return builder.toString();
         }
-        return getSelectedColumns(columns, columnsInDb, addToColumnList);
+        return getSelectedColumns(columns, columnsInDb);
 
     }
 
-    private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb, List<String> addToColumnList) {
+    private String getSelectedColumns(String selectedColumns, Set<String> columnsInDb) {
         StringBuilder builder = new StringBuilder();
         if (StringUtils.isNotEmpty(selectedColumns)) {
             selectedColumns = selectedColumns.trim();
@@ -396,7 +395,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                 column = column.trim();
                 if (StringUtils.isNotEmpty(column) && columnsInDb.contains(column)) {
                     builder.append("E.").append(column).append(" as ").append(column).append(", ");
-                    addToColumnList.add(column);
                 }
             }
         }

@@ -72,8 +72,24 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
 
     @Test(groups = "deployment")
     public void getAccountExtensions() {
+        getAccountExtensions(false, null);
+        getAccountExtensions(true, null);
+        getAccountExtensions(false, "BAD_COLUMN");
+        getAccountExtensions(false, "CrmRefreshDate");
+        getAccountExtensions(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN");
+    }
+
+    public void getAccountExtensions(boolean shouldSendEmptyColumnMapping, String columns) {
         int offset = 1;
         String url = apiHostPort + "/playmaker/accountextensions?start=1&offset=" + offset + "&maximum=100";
+        if (columns == null) {
+            if (shouldSendEmptyColumnMapping) {
+                url += "&columns=";
+            }
+        } else {
+            url += "&columns=" + columns;
+        }
+
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);

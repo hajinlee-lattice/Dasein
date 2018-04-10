@@ -144,6 +144,15 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
     @Test(groups = "functional", enabled = true)
     public void getAccountExtensionsWithDetailedPaging() throws Exception {
+        getAccountExtensionsWithDetailedPaging(false, null);
+        getAccountExtensionsWithDetailedPaging(true, null);
+        getAccountExtensionsWithDetailedPaging(false, "BAD_COLUMN");
+        getAccountExtensionsWithDetailedPaging(false, "CrmRefreshDate");
+        getAccountExtensionsWithDetailedPaging(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN");
+    }
+
+    public void getAccountExtensionsWithDetailedPaging(boolean shouldSendEmptyColumnMapping, String columns)
+            throws Exception {
         List<String> someAccountIds = new ArrayList<>();
         Map<String, Object> countResult = playMakerRecommendationEntityMgr
                 .getAccountextExsionCount(tenant.getTenantName(), null, 0L, null, null, 0L);
@@ -164,12 +173,12 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
         for (int idx = 0; idx < totalLoopsNeeded; idx++) {
             Long lastUpdatedTime = loopForAccExt(totalAccExtCount, ids, idsList, idsTimestampTupleInOrder, offset, max,
-                    startTime, someAccountIds);
+                    startTime, someAccountIds, shouldSendEmptyColumnMapping, columns);
             offset += max;
             if (idx == 0) {
                 lastUpdatedTimeForFirstIteration = lastUpdatedTime;
             }
-            log.info("idx=" + idx + ", idsList=" + idsList);
+            log.info(String.format("idx=%d, idsList=%s", idx, idsList));
         }
 
         lastUpdatedTimeForFirstIteration++;
@@ -206,7 +215,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
         for (int idx = 0; idx < totalLoopsNeeded; idx++) {
             Long lastUpdatedTime = loopForAccExt(totalAccExtCount2, ids, idsList, idsTimestampTupleInOrder, offset, max,
-                    startTime, someAccountIds);
+                    startTime, someAccountIds, shouldSendEmptyColumnMapping, columns);
             offset += max;
             if (idx == 0) {
                 lastUpdatedTimeForFirstIteration = lastUpdatedTime;
@@ -219,9 +228,9 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
     private Long loopForAccExt(Long totalAccExtCount, Set<Integer> ids, List<Object> idsList,
             List<Pair<Object, Object>> idsTimestampTupleInOrder, int offset, int max, long startTime,
-            List<String> someAccountIds) {
+            List<String> someAccountIds, boolean shouldSendEmptyColumnMapping, String columns) {
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                startTime, offset, max, null, null, 0L, null, false);
+                startTime, offset, max, null, null, 0L, shouldSendEmptyColumnMapping ? "" : columns, false);
 
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
