@@ -43,12 +43,28 @@ angular
                     templateUrl: 'app/navigation/summary/OneLineView.html'
                 },
                 "main@": {
-                    controller: function($scope, $rootScope, Model, IsPmml) {
-                        $scope.IsPmml = IsPmml || false;
+                    resolve: {
+                        ModelConfig: function($q, $rootScope, Model, JobsStore, IsPmml){
+                            $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
+                            var config = {};
+                            ModelId = Model.ModelId;
+                            IsPmml = IsPmml || false; 
+                            config.ModelId = ModelId;
+                            config.IsPmml = IsPmml;
+                            return config;
+                        },
 
-                        $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
-
+                        InitJobs: function($q, Model, JobsStore){
+                            var deferred = $q.defer();
+                            console.log('Fetching ModelId');
+                            JobsStore.getJobs(false, Model.ModelId).then(function(res){
+                                deferred.resolve();
+                            });
+                            return deferred.promise;
+                        }
+                       
                     },
+                    controller: 'JobsListCtrl',
                     templateUrl: 'app/jobs/views/ListView.html'
                 }
             }
@@ -75,26 +91,33 @@ angular
                     });
                     return deferred.promise;
                 },
-                // InitJobs: function(JobsStore){
-                //     JobsStore.getJobs(false).then(function(result) {
-                //     });
-                // }
+
+                InitJobs: function($q, JobsStore){
+                    var deferred = $q.defer();
+                    if(JobsStore.isJobsEverFetched() == false){
+                        console.log('Fetching jobs');
+                        JobsStore.getJobs(false).then(function(res){
+                            deferred.resolve();
+                        });
+                    }else{
+                        deferred.resolve();
+                    }
+
+                    return deferred.promise;
+                },
+                ModelConfig: function() {
+                    return {};
+                }
             },
             views: {
                 "main@": {
+                    controller: 'JobsListCtrl',
                     templateUrl: 'app/jobs/views/ListView.html'
                 }
             }
         })
         .state('home.jobs.data', {
             url: '/status/data',
-            // resolve: {
-            //     InitJobs: function(JobsStore){
-            //         JobsStore.getJobs(false).then(function(result) {
-            //             console.log(result);
-            //         });
-            //     }
-            // },
             params: {
                 pageIcon: 'ico-cog',
                 pageTitle: 'Jobs',
@@ -102,6 +125,20 @@ angular
             },
             views: {
                 "main@": {
+                    resolve: {
+                        InitJobs: function($q, JobsStore){
+                            var deferred = $q.defer();
+                            if(JobsStore.isJobsEverFetched() == false){                               
+                                console.log('Fetching import');
+                                JobsStore.getJobs(false).then(function(res){
+                                    deferred.resolve();
+                                });
+                            }else{
+                                deferred.resolve();
+                            }
+                            return deferred.promise;
+                        },
+                    },
                     controller: 'DataProcessingComponent',
                     controllerAs: 'vm',
                     templateUrl: 'app/jobs/processing/dataprocessing.component.html'
@@ -117,6 +154,20 @@ angular
             },
             views: {
                 "main@": {
+                     resolve: {
+                        InitJobs: function($q, JobsStore){
+                            var deferred = $q.defer();
+                            if(JobsStore.isJobsEverFetched() == false){
+                                console.log('Fetching export');
+                                JobsStore.getJobs(false).then(function(res){
+                                    deferred.resolve();
+                                });
+                            }else{
+                                deferred.resolve();
+                            }
+                            return deferred.promise;
+                        },
+                    },
                     controller: 'ExportJobsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/jobs/export/export.component.html'
@@ -131,23 +182,21 @@ angular
             },
             views: {
                 "main@": {
+                    resolve: {
+                        InitJob: function($q, $stateParams, JobsStore){
+                            var deferred = $q.defer();
+                            console.log('Fetching Summary');
+                            JobsStore.getJob($stateParams.jobId).then(function(result) {
+                                deferred.resolve(result);
+                            });
+                            return deferred.promise;
+                        }
+                    },
                     controller: 'JobsSummaryController',
                     controllerAs: 'vm',
                     templateUrl: 'app/jobs/report/jobreport/jobreport.component.html'
                 }
             }
-            ,
-            resolve: {
-                InitJob: function($q, $stateParams, JobsStore){
-                    var deferred = $q.defer();
-
-                    JobsStore.getJob($stateParams.jobId).then(function(result) {
-                        deferred.resolve(result);
-                    });
-                    return deferred.promise;
-                }
-            }
-
         })
         /*
         .state('home.jobs.status.ready', {
@@ -175,7 +224,7 @@ angular
             resolve: {
                 JobResult: function($q, $stateParams, JobsStore, ServiceErrorUtility) {
                     var deferred = $q.defer();
-
+                    console.log('Fetching Report');
                     JobsStore.getJob($stateParams.jobId).then(function(result) {
                         ServiceErrorUtility.check({ data: result, config: { headers: { ErrorDisplayMethod: 'banner' } } });
                         deferred.resolve(result);

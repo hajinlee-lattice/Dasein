@@ -43,11 +43,11 @@ angular.module('lp.jobs.export', [])
 
         vm.init = function () {
 
-            vm.loading = true;
-            JobsStore.getJobs(false).then(function (result) {
+            // vm.loading = true;
+            // JobsStore.getJobs(false).then(function (result) {
                 vm.jobs = JobsStore.getList('export');
-                vm.loading = false;
-            });
+            //     vm.loading = false;
+            // });
 
         }
 

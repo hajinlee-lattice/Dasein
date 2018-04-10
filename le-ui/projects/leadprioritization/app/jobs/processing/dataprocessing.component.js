@@ -57,8 +57,8 @@ angular.module('lp.jobs.import', [
         vm.header = {
             filter: {
                 label: 'Filter By',
-                unfiltered: JobsStore.data.importJobs,
-                filtered: JobsStore.data.importJobs,
+                unfiltered: JobsStore.getList('import'),
+                filtered: JobsStore.getList('import'),
                 items: [
                     { label: "All", action: {} },
                     { label: "Completed", action: { status: 'Completed' } },
@@ -143,16 +143,7 @@ angular.module('lp.jobs.import', [
         }
 
         vm.init = function () {
-
-            vm.loading = true;
-            JobsStore.getJobs(false).then(function (result) {
-                vm.jobs = JobsStore.data.importJobs;
-                vm.header.filter.unfiltered = JobsStore.data.importJobs;
-                vm.header.filter.filtered = JobsStore.data.importJobs;
-                vm.loading = false;
-            });
-
-
+            vm.jobs = JobsStore.getList('import');
             vm.initModalWindow();
         }
 

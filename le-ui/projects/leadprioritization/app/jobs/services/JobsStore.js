@@ -71,6 +71,14 @@ angular
         }
     }
 
+    this.isJobsEverFetched = function(){
+        if(this.data.jobs.length === 0 && this.data.importJobs.length === 0 && this.data.exportJobs.length === 0){
+            return false;
+        }else{
+            return true;
+        }
+    }
+
     this.getJob = function(jobId) {
         var deferred = $q.defer();
 

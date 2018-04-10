@@ -6,14 +6,15 @@ angular.module('lp.jobs.model', [
     '720kb.tooltips'
 ])
 .controller('JobsListCtrl', function($scope, $state, $stateParams, $http, $timeout, $interval, $filter,
-    JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService) {
+    JobsStore, JobsService, BrowserStorageUtility, ScoreLeadEnrichmentModal, HealthService, 
+    ModelConfig) {
     $scope.expanded = {};
     $scope.statuses = {};
     $scope.cancelling = {};
     $scope.showEmptyJobsMessage = false;
     $scope.hideCreationMessage = true;
     $scope.state = $state.current.name == 'home.model.jobs' ? 'model' : 'all';
-    $scope.jobs = [];
+    $scope.jobs = JobsStore.data.jobs;
     $scope.isInternalAdmin = false;
     $scope.auth = BrowserStorageUtility.getTokenDocument();
     $scope.pagesize = 10;
@@ -32,16 +33,16 @@ angular.module('lp.jobs.model', [
             }
         }
 
-        var modelId = $scope.state == 'model' ? $stateParams.modelId : null;
+        var modelId = ModelConfig.ModelId;//$scope.state == 'model' ? $stateParams.modelId : null;
 
-        if (modelId) {
+        if (modelId && modelId !== '') {
             if (!JobsStore.data.models[modelId]) {
                 JobsStore.data.models[modelId] = [];
             }
 
             $scope.jobs = JobsStore.data.models[modelId];
         } else {
-            $scope.jobs = $scope.jobs = JobsStore.data.jobs;//$filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);//JobsStore.data.dataModelJobs;
+            $scope.jobs = JobsStore.data.jobs;//$filter('filter')(JobsStore.data.jobs, { jobType: '!processAnalyzeWorkflow' }, true);//JobsStore.data.dataModelJobs;
             if (JobsStore.data.isModelState) {
                 $scope.jobs = [];
             }
