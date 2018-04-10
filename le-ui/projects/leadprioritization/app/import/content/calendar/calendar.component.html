@@ -82,18 +82,18 @@
 
                 <div class="mode starting-date" ng-click="vm.changeMode('STARTING_DATE'); " ng-class="{active: vm.mode == 'STARTING_DATE'}">
                     <ul class="month-picker">
-                        <li><div ng-click="vm.selectDate('01-01')" ng-class="{active: vm.dateParams.monthNumber == '1', selected: vm.selectedDate == '01-01'}">Jan</div></li>
-                        <li><div ng-click="vm.selectDate('02-01')" ng-class="{active: vm.dateParams.monthNumber == '2', selected: vm.selectedDate == '02-01'}">Feb</div></li>
-                        <li><div ng-click="vm.selectDate('03-01')" ng-class="{active: vm.dateParams.monthNumber == '3', selected: vm.selectedDate == '03-01'}">Mar</div></li>
-                        <li><div ng-click="vm.selectDate('04-01')" ng-class="{active: vm.dateParams.monthNumber == '4', selected: vm.selectedDate == '04-01'}">Apr</div></li>
-                        <li><div ng-click="vm.selectDate('05-01')" ng-class="{active: vm.dateParams.monthNumber == '5', selected: vm.selectedDate == '05-01'}">May</div></li>
-                        <li><div ng-click="vm.selectDate('06-01')" ng-class="{active: vm.dateParams.monthNumber == '6', selected: vm.selectedDate == '06-01'}">Jun</div></li>
-                        <li><div ng-click="vm.selectDate('07-01')" ng-class="{active: vm.dateParams.monthNumber == '7', selected: vm.selectedDate == '07-01'}">Jul</div></li>
-                        <li><div ng-click="vm.selectDate('08-01')" ng-class="{active: vm.dateParams.monthNumber == '8', selected: vm.selectedDate == '08-01'}">Aug</div></li>
-                        <li><div ng-click="vm.selectDate('09-01')" ng-class="{active: vm.dateParams.monthNumber == '9', selected: vm.selectedDate == '09-01'}">Sep</div></li>
-                        <li><div ng-click="vm.selectDate('10-01')" ng-class="{active: vm.dateParams.monthNumber == '10', selected: vm.selectedDate == '10-01'}">Oct</div></li>
-                        <li><div ng-click="vm.selectDate('11-01')" ng-class="{active: vm.dateParams.monthNumber == '11', selected: vm.selectedDate == '11-01'}">Nov</div></li>
-                        <li><div ng-click="vm.selectDate('12-01')" ng-class="{active: vm.dateParams.monthNumber == '12', selected: vm.selectedDate == '12-01'}">Dec</div></li>
+                        <li><div ng-click="vm.selectMonth(1)" ng-class="{active: vm.dateParams.monthNumber == '1', selected: vm.selectedMonth == 1}">Jan</div></li>
+                        <li><div ng-click="vm.selectMonth(2)" ng-class="{active: vm.dateParams.monthNumber == '2', selected: vm.selectedMonth == 2}">Feb</div></li>
+                        <li><div ng-click="vm.selectMonth(3)" ng-class="{active: vm.dateParams.monthNumber == '3', selected: vm.selectedMonth == 3}">Mar</div></li>
+                        <li><div ng-click="vm.selectMonth(4)" ng-class="{active: vm.dateParams.monthNumber == '4', selected: vm.selectedMonth == 4}">Apr</div></li>
+                        <li><div ng-click="vm.selectMonth(5)" ng-class="{active: vm.dateParams.monthNumber == '5', selected: vm.selectedMonth == 5}">May</div></li>
+                        <li><div ng-click="vm.selectMonth(6)" ng-class="{active: vm.dateParams.monthNumber == '6', selected: vm.selectedMonth == 6}">Jun</div></li>
+                        <li><div ng-click="vm.selectMonth(7)" ng-class="{active: vm.dateParams.monthNumber == '7', selected: vm.selectedMonth == 7}">Jul</div></li>
+                        <li><div ng-click="vm.selectMonth(8)" ng-class="{active: vm.dateParams.monthNumber == '8', selected: vm.selectedMonth == 8}">Aug</div></li>
+                        <li><div ng-click="vm.selectMonth(9)" ng-class="{active: vm.dateParams.monthNumber == '9', selected: vm.selectedMonth == 9}">Sep</div></li>
+                        <li><div ng-click="vm.selectMonth(10)" ng-class="{active: vm.dateParams.monthNumber == '10', selected: vm.selectedMonth == 10}">Oct</div></li>
+                        <li><div ng-click="vm.selectMonth(11)" ng-class="{active: vm.dateParams.monthNumber == '11', selected: vm.selectedMonth == 11}">Nov</div></li>
+                        <li><div ng-click="vm.selectMonth(12)" ng-class="{active: vm.dateParams.monthNumber == '12', selected: vm.selectedMonth == 12}">Dec</div></li>
                     </ul>
 
                     <div id="datepicker"></div>

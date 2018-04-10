@@ -27,7 +27,7 @@ angular.module('lp.import.calendar', [])
         lastFrom: StateHistory.lastFrom(),
         saving: false,
         calendar: Calendar,
-        selectedDate: '01-01',
+        selectedMonth: 1,
         selectedQuarter: '1',
         mode: '',
         calendarStore: {},
@@ -71,6 +71,7 @@ angular.module('lp.import.calendar', [])
         });
         field.parentNode.insertBefore(picker.el, field.nextSibling);
         picker.setDate('01-01-'+year, true); // second param prevents onSelect callback
+        picker.gotoDate(new Date(year, 0));
     }
 
     vm.init = function() {
@@ -81,9 +82,9 @@ angular.module('lp.import.calendar', [])
         $timeout(initDatePicker, 0);
     };
 
-    vm.selectDate = function(date) {
-        vm.selectedDate = date;
-        picker.gotoDate(new Date(date+'-'+year)); 
+    vm.selectMonth = function(date) {
+        vm.selectedMonth = date;
+        picker.gotoDate(new Date(year, date - 1));
     }
 
     vm.selectQuarter = function(quarter) { 
