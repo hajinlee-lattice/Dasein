@@ -377,15 +377,15 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         }
     }
 
-    public void enableGroupIfPresent(ColumnSelection.Predefined group) {
-        if (MapUtils.isNotEmpty(groups) && groups.containsKey(group)) {
-            groups.put(group, true);
+    public void enableGroupIfNotPresent(ColumnSelection.Predefined group) {
+        if (MapUtils.isEmpty(groups) || !groups.containsKey(group)) {
+            enableGroup(group);
         }
     }
 
-    public void disableGroupIfPresent(ColumnSelection.Predefined group) {
-        if (MapUtils.isNotEmpty(groups) && groups.containsKey(group)) {
-            groups.put(group, false);
+    public void disableGroupIfNotPresent(ColumnSelection.Predefined group) {
+        if (MapUtils.isEmpty(groups) || !groups.containsKey(group)) {
+            disableGroup(group);
         }
     }
 
