@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -16,11 +18,14 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
-import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
@@ -56,6 +61,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     protected void removeTimeWindowRestrictions() {
+        replaceTransactionRestrictionsWithBucketRestrictions();
         DepthFirstSearch dfs = new DepthFirstSearch();
         if (baseSegment.getAccountRestriction() != null) {
             dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
@@ -70,6 +76,43 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         }
     }
 
+    private void replaceTransactionRestrictionsWithBucketRestrictions() {
+        DepthFirstSearch dfs = new DepthFirstSearch();
+        if (baseSegment.getAccountRestriction() != null) {
+            Restriction accRestriction = baseSegment.getAccountRestriction();
+            dfs.run(accRestriction, (object, ctx) -> {
+                if (object instanceof LogicalRestriction
+                        && CollectionUtils.isNotEmpty(((LogicalRestriction) object).getChildren()) //
+                        && ((LogicalRestriction) object).getChildren().stream()
+                                .anyMatch(c -> c instanceof TransactionRestriction)) {
+                    LogicalRestriction node = (LogicalRestriction) object;
+                    List<Restriction> newList = new ArrayList<>();
+                    boolean anyChildUpdated = false;
+                    for (GraphNode child : node.getChildren()) {
+                        if (child instanceof TransactionRestriction) {
+                            TransactionRestriction trxChild = (TransactionRestriction) child;
+                            Bucket bkt = Bucket
+                                    .txnBkt(new Bucket.Transaction(trxChild.getProductId(), trxChild.getTimeFilter(),
+                                            trxChild.getSpentFilter(), trxChild.getUnitFilter(), trxChild.isNegate()));
+                            BucketRestriction bktRestriction = new BucketRestriction(
+                                    new AttributeLookup(BusinessEntity.Transaction, trxChild.getProductId()), bkt);
+                            bktRestriction.setIgnored(true);
+                            newList.add(bktRestriction);
+                            anyChildUpdated = true;
+                        } else {
+                            newList.add((Restriction) child);
+                        }
+                    }
+                    if (anyChildUpdated) {
+                        node.setRestrictions(newList);
+                    }
+                }
+            });
+            baseSegment.setAccountRestriction(accRestriction);
+
+        }
+    }
+
     private void buildRatingFrontEndQuery() {
         RestrictionBuilder restrictionBuilder = Restriction.builder();
 
@@ -81,7 +124,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         querySegment.setAccountRestriction(finalQueryRestriction);
 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
-        ratingFrontEndQuery.setPeriodName(TimeFilter.Period.Month.name());
+        ratingFrontEndQuery.setPeriodName(PeriodStrategy.Template.Month.name());
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
         ratingFrontEndQuery.setEvaluationPeriodId(queryEvaluationId);
     }

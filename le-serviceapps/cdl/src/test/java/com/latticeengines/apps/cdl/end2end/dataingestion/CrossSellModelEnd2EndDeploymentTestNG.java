@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -18,7 +19,9 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -27,7 +30,17 @@ import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AggregationSelector;
+import com.latticeengines.domain.exposed.query.AggregationType;
+import com.latticeengines.domain.exposed.query.AttributeLookup;
+import com.latticeengines.domain.exposed.query.BucketRestriction;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
+import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -41,8 +54,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1522370380609";
-    private static final boolean EV_MODEL = true;
+    private static final String EXISTING_TENANT = "JLM1522915861547";
 
     private MetadataSegment testSegment;
     private MetadataSegment trainSegment;
@@ -162,6 +174,30 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         long eventCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.EVENT);
         Assert.assertEquals(eventCount, 56);
+    }
+
+    @Override
+    protected MetadataSegment constructTargetSegment() {
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
+
+        TransactionRestriction trxRes = new TransactionRestriction("1E26CD1E01559048FF7B51ADA27EA7AB",
+                new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(), Arrays.asList("2018-04-09")),
+                false,
+                new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, ComparisonType.GREATER_THAN,
+                        Arrays.asList(1)),
+                new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
+                        Arrays.asList(1)));
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_MODELING);
+        segment.setDisplayName("End2End Segment Modeling");
+        segment.setDescription("A test segment for CDL end2end modeling test.");
+        segment.setAccountFrontEndRestriction(
+                new FrontEndRestriction(Restriction.builder().and(accountRestriction, trxRes).build()));
+        segment.setAccountRestriction(Restriction.builder().and(accountRestriction, trxRes).build());
+        return segment;
     }
 
     private void setupBusinessCalendar() {
