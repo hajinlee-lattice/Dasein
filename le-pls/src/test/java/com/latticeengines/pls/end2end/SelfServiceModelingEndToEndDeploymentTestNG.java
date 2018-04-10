@@ -336,9 +336,13 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 assertEquals(bucketMetadata.getLeftBoundScore(), 49);
                 assertEquals(bucketMetadata.getRightBoundScore(), 5);
                 break;
-            default:
-                assertTrue(false);
+            case F:
+                bucketNames.remove(bucketMetadata.getBucket());
+                assertEquals(bucketMetadata.getLeftBoundScore(), 5);
+                assertEquals(bucketMetadata.getRightBoundScore(), 0);
                 break;
+            default:
+                Assert.fail("Should not see the bucket name " + bucketMetadata.getBucket());
             }
         }
         assertTrue(bucketNames.isEmpty());
