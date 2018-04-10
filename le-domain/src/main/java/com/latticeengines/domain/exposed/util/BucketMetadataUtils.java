@@ -40,7 +40,7 @@ public class BucketMetadataUtils {
         buckets.add(addBucket(95, 85, BucketName.B));
         buckets.add(addBucket(85, 50, BucketName.C));
         buckets.add(addBucket(50, 5, BucketName.D));
-        buckets.add(addBucket(5, 0, BucketName.F));
+        // buckets.add(addBucket(5, 0, BucketName.F));
         return buckets;
     }
 
