@@ -70,6 +70,7 @@ public class SystemMetadataStoreImpl extends
             public ParallelFlux<ColumnMetadata> getMetadataInParallel(
                     Namespace2<BusinessEntity, DataCollection.Version> namespace) {
                 BusinessEntity entity = namespace.getCoord1();
+                boolean usingAccountServingStore = false;
                 TableRoleInCollection role = entity.getServingStore();
                 if (BusinessEntity.Account.equals(entity)) {
                     // only account uses batch store
@@ -82,6 +83,8 @@ public class SystemMetadataStoreImpl extends
                     // for account try serving store
                     role = BusinessEntity.Account.getServingStore();
                     tableNames = dataCollectionService.getTableNames(customerSpace, "", role, version);
+                    usingAccountServingStore = true;
+                    log.info("Cannot find Account batch store, using Account serving store instead.");
                 }
 
                 ParallelFlux<ColumnMetadata> servingStore;
@@ -89,9 +92,11 @@ public class SystemMetadataStoreImpl extends
                     Category category = CategoryUtils.getEntityCategory(entity);
                     Namespace2<TableRoleInCollection, DataCollection.Version> trNs = Namespace.as(role, version);
                     ThreadLocal<AtomicLong> counter = new ThreadLocal<>();
-                    servingStore = tableRoleTemplate.getUnorderedSchema(trNs) //
-                            .filter(cm -> !(BusinessEntity.Account.equals(entity)
-                                    && !Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()))) //
+                    servingStore = tableRoleTemplate.getUnorderedSchema(trNs);
+                    if (usingAccountServingStore) {
+                        servingStore = servingStore.filter(cm -> Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()));
+                    }
+                    servingStore = servingStore //
                             .map(cm -> {
                                 if (cm.getCategory() == null) {
                                     cm.setCategory(category);
