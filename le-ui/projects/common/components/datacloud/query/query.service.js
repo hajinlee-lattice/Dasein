@@ -333,7 +333,7 @@ angular.module('common.datacloud.query.service',[
                 return restriction.logicalRestriction;
             });
 
-            //console.log(':buh:', sameAttributes, '\n', logicalRestrictions);
+            console.log(':add:', sameAttributes, '\n', logicalRestrictions);
 
             var newHome = null;
 
@@ -350,14 +350,12 @@ angular.module('common.datacloud.query.service',[
                 }
             });
 
-            //console.log(':newHome:', newHome);
-
             if (newHome) {
-                restrictions = newHome;
+                restrictions = sameAttributes.length > 0 ? restrictions : newHome;
             } 
 
             if (sameAttributes.length > 0) {
-                if (!newHome) {
+                if (!newHome || (newHome && sameAttributes.length > 0)) {
                     var newLogicalRestriction = {
                         logicalRestriction: {
                             operator: 'OR',
