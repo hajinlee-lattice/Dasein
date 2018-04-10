@@ -303,17 +303,18 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         log.info(String.format("Retrieving ABCD Buckets for model: %s", modelId));
         Map<?, ?> bucketMetadataRaw = restTemplate.getForObject(
                 String.format("%s/pls/bucketedscore/abcdbuckets/%s", getRestAPIHostPort(), modelId), Map.class);
-        log.info(String.format("The bucket creation time to buckets are: " + JsonUtils.serialize(bucketMetadataRaw)));
+        Assert.assertNotNull(bucketMetadataRaw);
+        log.info("The bucket creation time to buckets are: " + JsonUtils.serialize(bucketMetadataRaw));
         log.info(String.format("The timestamps are: %s", JsonUtils.serialize(bucketMetadataRaw.keySet())));
         @SuppressWarnings("rawtypes")
         Map<Long, List> creationTimeToBucketMetadatas = JsonUtils.convertMap(bucketMetadataRaw, Long.class, List.class);
 
-        Set<BucketName> bucketNames = new HashSet<>(
-                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D));
         assertEquals(creationTimeToBucketMetadatas.keySet().size(), 1);
         Long timestamp = (Long) creationTimeToBucketMetadatas.keySet().toArray()[0];
         List<BucketMetadata> bucketMetadatas = JsonUtils.convertList(creationTimeToBucketMetadatas.get(timestamp),
                 BucketMetadata.class);
+        Set<BucketName> bucketNames = new HashSet<>(
+                Arrays.asList(BucketName.A, BucketName.B, BucketName.C, BucketName.D, BucketName.F));
         for (BucketMetadata bucketMetadata : bucketMetadatas) {
             switch (bucketMetadata.getBucket()) {
             case A:
