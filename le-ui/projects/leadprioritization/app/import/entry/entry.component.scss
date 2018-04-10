@@ -33,6 +33,11 @@
             height: auto;
             line-height: normal;
             border-radius: 8px;
+            span {
+                @include text-ellipsis;
+                display: block;
+                text-align: center;
+            }
             &.account {
                 background-image: url('/assets/images/ico-accounts-dark.png');
             }
