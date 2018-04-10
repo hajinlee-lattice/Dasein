@@ -181,7 +181,7 @@ angular.module('lp.ratingsengine.ratingslist', [
             });
         });
 
-        console.log(arr.slice(Math.max(arr.length - 10, 1)));
+        // console.log(arr.slice(Math.max(arr.length - 10, 1)));
 
     }
 

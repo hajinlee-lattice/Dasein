@@ -318,7 +318,7 @@ angular.module('common.datacloud.query.service',[
 
         if (forceTreeRoot || (treeRoot && type == this.addBucketTreeType)) {
             restrictions = forceTreeRoot ? forceTreeRoot : treeRoot.logicalRestriction.restrictions;
-        } else if (QueryStore.mode == 'rules') {
+        } else if (QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules') {
             restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
         } else {
             restrictions = this[type + 'Restriction'].restriction.logicalRestriction.restrictions;

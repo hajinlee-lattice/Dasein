@@ -1507,7 +1507,6 @@ angular.module('common.datacloud.explorer', [
     vm.selectSegmentAttribute = function(attribute) {
 
         console.log(attribute);
-        console.log(vm.getAttributeRules(attribute));
 
         if (!vm.cube) {
             return alert('Cube data not yet loaded. \nOne moment please.');
@@ -1542,8 +1541,6 @@ angular.module('common.datacloud.explorer', [
         if (toAdd === 'Rating' || toAdd === 'LatticeAccount'){
             toAdd = 'Account';
         }
-        
-        // console.log(toAdd);
 
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
