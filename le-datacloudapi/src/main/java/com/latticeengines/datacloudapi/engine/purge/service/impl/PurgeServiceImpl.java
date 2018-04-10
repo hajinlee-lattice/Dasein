@@ -3,6 +3,7 @@ package com.latticeengines.datacloudapi.engine.purge.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,10 @@ public class PurgeServiceImpl implements PurgeService {
 
         List<PurgeSource> toPurge = new ArrayList<>();
         sourcePurgers.forEach(srcPurger -> {
-            toPurge.addAll(srcPurger.findSourcesToPurge(debug));
+            List<PurgeSource> list = srcPurger.findSourcesToPurge(debug);
+            if (CollectionUtils.isNotEmpty(list)) {
+                toPurge.addAll(list);
+            }
         });
         return toPurge;
     }

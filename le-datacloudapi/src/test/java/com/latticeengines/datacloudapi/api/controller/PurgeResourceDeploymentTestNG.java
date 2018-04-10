@@ -22,11 +22,15 @@ public class PurgeResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
 
     /**
      * Just a simple test to see if API works fine
-     * Complete test scenarios are in functional tests
+     * Complete test scenarios are covered in functional tests
      */
     @Test(groups = "deployment")
     public void testGetPurgeSources() {
-        List<PurgeSource> list = purgeProxy.getPurgeSources(POD_ID);
+        List<PurgeSource> list = purgeProxy.getPurgeSources(null);
+        for (PurgeSource src : list) {
+            log.info(JsonUtils.serialize(src));
+        }
+        list = purgeProxy.getPurgeSources(POD_ID); // Test empty pod
         for (PurgeSource src : list) {
             log.info(JsonUtils.serialize(src));
         }
