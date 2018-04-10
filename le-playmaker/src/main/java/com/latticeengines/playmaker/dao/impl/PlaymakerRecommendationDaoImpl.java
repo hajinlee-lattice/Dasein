@@ -312,8 +312,9 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         + "     SET @rowcount = (@endrow - @startrow) + 1; " //
                         + "     SET ROWCOUNT @rowcount; " //
                         + "     SELECT " //
-                        + "       E.Item_ID AS " + ID_KEY + ", " //
+                        + "     E.Item_ID AS " + ID_KEY + ", " //
                         + " " + getSfdcAccountContactIds(hasSfdcContactId) //
+                        + "     A.External_ID AS LEAccountExternalID, " //
                         + "     DATEDIFF(s, '19700101 00:00:00:000', A.[Last_Modification_Date]) AS "
                         + LAST_MODIFIED_TIME_KEY + ", " //
                         + " " + additionalColumns //
@@ -339,13 +340,15 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             source.addValue("accountIds", accountIds);
         }
 
-        List<String> allColumns = new ArrayList<>();
-        allColumns.addAll(Arrays.asList(ID_KEY, SFDC_ACC_ID_KEY, SFDC_CONT_ID_KEY, LAST_MODIFIED_TIME_KEY));
-        if (CollectionUtils.isNotEmpty(additionalColumnsList)) {
-            allColumns.addAll(additionalColumnsList);
-        }
+        List<Map<String, Object>> result = queryNativeSql(sqlStr, source);
 
-        return queryNativeSql(sqlStr, source, allColumns);
+        if (CollectionUtils.isNotEmpty(result)) {
+            int rowNum = 1;
+            for (Map<String, Object> res : result) {
+                res.put("RowNum", offset + rowNum++);
+            }
+        }
+        return result;
     }
 
     private String getSfdcAccountContactIds(boolean hasSfdcContactId) {
@@ -428,10 +431,19 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             boolean isIntegerTimestamp) {
         String fromAndWhereClause = null;
         if (StringUtils.isNotEmpty(filterBy)) {
-            fromAndWhereClause = getAccountExtensionFromWhereClauseWithFilterBy(filterBy);
+            filterBy = filterBy.trim().toUpperCase();
+        }
+
+        if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")
+                || filterBy.toUpperCase().equals("NORECOMMENDATIONS"))) {
+            fromAndWhereClause = getAccountExtensionFromWhereClauseWithFilterBy(filterBy, accountIds);
             fromAndWhereClause = String.format(fromAndWhereClause, getAndClauseForAccountIds(accountIds));
         } else {
             fromAndWhereClause = getAccountExtensionFromClause();
+            if (!CollectionUtils.isEmpty(accountIds)) {
+                fromAndWhereClause += " WHERE %s ";
+                fromAndWhereClause = String.format(fromAndWhereClause, getAndClauseForAccountIds(accountIds));
+            }
         }
 
         fromAndWhereClause += " %s ";
@@ -451,7 +463,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     private String getAndClauseForAccountIds(List<Integer> accountIds) {
         if (!CollectionUtils.isEmpty(accountIds)) {
-            return "AND A.[LEAccount_ID] IN (:accountIds) ";
+            return " A.[LEAccount_ID] IN (:accountIds) ";
         }
         return "";
     }
@@ -460,16 +472,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
         return "FROM [LEAccount_Extensions] E WITH (NOLOCK) JOIN [LEAccount] A WITH (NOLOCK) ON E.Item_ID = A.LEAccount_ID AND A.IsActive = 1 ";
     }
 
-    private String getAccountExtensionFromWhereClauseWithFilterBy(String filterBy) {
-        filterBy = filterBy.trim().toUpperCase();
-        String whereClause = null;
-        if (filterBy.toUpperCase().equals("RECOMMENDATIONS") || filterBy.toUpperCase().equals("NORECOMMENDATIONS")) {
-            whereClause = " WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND "
-                    + DATEDIFF_1970 + " L.[Last_Modification_Date]) >= :recStart) ";
-            String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
-            whereClause = String.format(whereClause, oper);
-        } else { // ALL or other
-            whereClause = " WHERE %s ";
+    private String getAccountExtensionFromWhereClauseWithFilterBy(String filterBy, List<Integer> accountIds) {
+        String whereClause = " WHERE E.Item_ID %s (SELECT L.Account_ID FROM [Prelead] L WHERE L.Status = 2800 AND L.IsActive = 1 AND "
+                + DATEDIFF_1970 + " L.[Last_Modification_Date]) >= :recStart) ";
+        String oper = filterBy.equals("RECOMMENDATIONS") ? "IN" : "NOT IN";
+        whereClause = String.format(whereClause, oper);
+        if (CollectionUtils.isNotEmpty(accountIds)) {
+            whereClause += " AND %s ";
         }
         return getAccountExtensionFromClause() + whereClause;
     }

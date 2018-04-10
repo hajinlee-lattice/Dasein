@@ -1,5 +1,6 @@
 package com.latticeengines.playmaker.controller;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -71,10 +72,38 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
 
     @Test(groups = "deployment")
     public void getAccountExtensions() {
-        String url = apiHostPort + "/playmaker/accountextensions?start=1&offset=1&maximum=100";
+        int offset = 1;
+        String url = apiHostPort + "/playmaker/accountextensions?start=1&offset=" + offset + "&maximum=100";
         @SuppressWarnings("unchecked")
         Map<String, Object> result = restTemplate.getForObject(url, Map.class);
         Assert.assertNotNull(result);
+        Assert.assertTrue(result.containsKey("startDatetime"));
+        Assert.assertTrue(result.containsKey("endDatetime"));
+        Assert.assertTrue(result.containsKey("records"));
+        @SuppressWarnings("unchecked")
+        List<Map<String, String>> records = (List<Map<String, String>>) result.get("records");
+        Assert.assertNotNull(records);
+        List<String> impFields = Arrays.asList("ID", "SfdcAccountID", "LEAccountExternalID", "LastModificationDate",
+                "RowNum");
+        List<Class<?>> impFieldTypes = Arrays.asList(Long.class, String.class, String.class, Long.class, Long.class);
+
+        int rowCount = 0;
+        for (Map<String, String> rec : records) {
+            rowCount++;
+            int idx = 0;
+            for (String field : impFields) {
+                Class<?> type = impFieldTypes.get(idx++);
+                Assert.assertTrue(rec.containsKey(field));
+                Assert.assertNotNull(rec.get(field));
+                if (type == Long.class) {
+                    Object valObj = rec.get(field);
+                    Long val = Long.parseLong(valObj.toString());
+                    if (field.equals("RowNum")) {
+                        Assert.assertEquals(val, new Long((rowCount + offset)));
+                    }
+                }
+            }
+        }
     }
 
     @Test(groups = "deployment")

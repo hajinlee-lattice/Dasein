@@ -46,7 +46,7 @@ public class BaseGenericDaoImpl implements GenericDao {
     }
 
     @Override
-    public List<Map<String, Object>> queryNativeSql(String sql, MapSqlParameterSource source, List<String> columns) {
+    public List<Map<String, Object>> queryNativeSql(String sql, MapSqlParameterSource source) {
         List<Map<String, Object>> result = new ArrayList<>();
         try {
             PreparedStatementCreator creator = getPreparedStatementCreator(sql, source);
@@ -58,8 +58,8 @@ public class BaseGenericDaoImpl implements GenericDao {
                             Map<String, Object> row = new HashMap<>();
                             result.add(row);
 
-                            for (int i = 0; i < columns.size(); i++) {
-                                row.put(columns.get(i), rs.getObject(i + 1));
+                            for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
+                                row.put(rs.getMetaData().getColumnName(i), rs.getObject(i));
                             }
                         }
                     }

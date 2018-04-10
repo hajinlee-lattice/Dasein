@@ -13,5 +13,5 @@ public interface GenericDao {
 
     void update(String sql, MapSqlParameterSource parameters);
 
-    List<Map<String, Object>> queryNativeSql(String sql, MapSqlParameterSource source, List<String> columns);
+    List<Map<String, Object>> queryNativeSql(String sql, MapSqlParameterSource source);
 }
