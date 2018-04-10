@@ -14,7 +14,8 @@
                     <button 
                         type="button" 
                         class="button white-button"
-                        ui-sref="home.ratingsengine.dashboard({rating_id: vm.stateParams.rating_id, modelId: vm.stateParams.modelId})">
+                        ui-sref="home.ratingsengine.dashboard({ rating_id: vm.stateParams.rating_id, modelId: vm.modelId })"
+                        ng-if="vm.section === 'dashboard.scoring'">
                         Back to Dashboard</button>
                 	<button 
                 		type="button" 

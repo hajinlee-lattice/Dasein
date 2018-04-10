@@ -7,12 +7,13 @@ angular
     'mainApp.core.services.FeatureFlagService',
     'common.datacloud'
 ])
-.controller('SidebarController', function($rootScope) {
+.controller('SidebarController', function($rootScope, $stateParams) {
     var vm = this;
 
     angular.extend(vm, {});
 
     vm.init = function() {
+
         if (typeof(sessionStorage) !== 'undefined') {
             if (sessionStorage.getItem('open-nav') === 'true' || !sessionStorage.getItem('open-nav')) {
                 $("body").addClass('open-nav');

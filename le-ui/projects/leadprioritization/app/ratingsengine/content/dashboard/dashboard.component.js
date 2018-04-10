@@ -164,8 +164,8 @@ angular.module('lp.ratingsengine.dashboard', [
 
         var model = vm.ratingEngine.activeModel;
 
-        console.log(vm.ratingEngine);
-        console.log(vm.dashboard);
+        // console.log(vm.ratingEngine);
+        // console.log(vm.dashboard);
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
@@ -177,9 +177,7 @@ angular.module('lp.ratingsengine.dashboard', [
         if(vm.dashboard.summary.bucketMetadata) {
             angular.forEach(vm.dashboard.summary.bucketMetadata, function(rating, key) {
                 rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                if(rating.lift !== '0'){
-                    newBucketMetadata.push(rating);
-                }
+                newBucketMetadata.push(rating);
             });
         } else {
             newBucketMetadata = [{
@@ -230,8 +228,6 @@ angular.module('lp.ratingsengine.dashboard', [
                 if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {
                     vm.hasSettingsInfo = false;
                 }
-
-                console.log(vm.hasSettingsInfo);
 
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
                 vm.modelingStrategy = model.AI.advancedModelingConfig[type].modelingStrategy;

@@ -28,6 +28,8 @@ angular.module('lp.ratingsengine.activatescoring', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
+
+        console.log($stateParams);
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
@@ -294,6 +296,9 @@ angular.module('lp.ratingsengine.activatescoring', [
                 vm.showSaveBucketsError = true;
             }
         });
+
+        console.log($stateParams);
+
     }
 
     vm.init();

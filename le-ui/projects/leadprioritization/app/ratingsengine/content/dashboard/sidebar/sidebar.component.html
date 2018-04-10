@@ -45,7 +45,7 @@
     </li>
     <!-- <li ng-if="!vm.IsPmml && vm.HasRatingsAvailable" role="rating" ui-sref-active="active"> -->
     <li ng-if="!isRuleBased" role="rating" ui-sref-active="active">
-        <a ng-if="modelIsReady" ui-sref="home.model.ratings({ rating_id: rating_id, modelId: modelId })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
+        <a ng-if="modelIsReady" ui-sref="home.model.ratings({ rating_id: rating_id, modelId: modelId, section: 'dashboard.ratings', ratingEngine: ratingEngine })" analytics-on="click" analytics-event="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
             <span class="ico-container" data-stooltip="{{::vm.ResourceUtility.getString('NAVIGATION_SIDEBAR_LP_RATINGS')}}">
                 <span class="ico ico-ratings ico-light-gray"></span>
             </span>

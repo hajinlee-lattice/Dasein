@@ -35,7 +35,7 @@
 
                     <button
                         class="button orange-button"
-                        ui-sref="home.ratingsengine.dashboard.activatescoring({modelId: vm.ratingEngine.activeModel.AI.id})"
+                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummary.Id, ratingEngine: vm.ratingEngine })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.modelSummary === null">
                         Activate Scoring
@@ -60,8 +60,7 @@
                         <dd ng-if="vm.ratingEngine.segment" class="text-ellipsis">{{ vm.ratingEngine.segment.display_name }}</dd>
                         
                         <dt ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">Products:</dt>
-                        <dd ng-if="vm.targetProducts.length === 1 || vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProductName }}</dd>
-                        <dd ng-if="vm.targetProducts.length > 1 || vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProducts.length }} selected</dd>
+                        <dd ng-if="vm.modelingStrategy !== 'CUSTOM_EVENT'">{{ vm.targetProducts.length == 1 ? vm.targetProductName : vm.targetProducts.length + ' selected'}}</dd>
 
                         <dt ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">Time range:</dt>
                         <dd ng-if="vm.configFilters['PURCHASED_BEFORE_PERIOD']">More than {{ vm.configFilters['PURCHASED_BEFORE_PERIOD'].value }} months</dd>

@@ -386,7 +386,8 @@ angular
             },
             params: {
                 pageIcon: 'ico-ratings',
-                pageTitle: 'Ratings'
+                pageTitle: 'Ratings',
+                section: null
             },
             views: {
                 "main@": {

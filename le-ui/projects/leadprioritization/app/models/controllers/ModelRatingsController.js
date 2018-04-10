@@ -26,7 +26,7 @@ angular.module('lp.models.ratings', [
   };
 })
 .controller('ModelRatingsController', function ($scope, $rootScope, $state, $stateParams, $timeout, 
-    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary) {
+    ResourceUtility, Model, ModelStore, ModelRatingsService, CurrentConfiguration, RatingsSummary, RatingsEngineStore) {
 
     var vm = this;
     angular.extend(vm, {
@@ -41,7 +41,7 @@ angular.module('lp.models.ratings', [
         currentConfiguration: CurrentConfiguration,
         workingBuckets: CurrentConfiguration,
         ratingsSummary: RatingsSummary,
-        bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
+        bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         slidersContainer: document.getElementById("sliders"),
         barColors: document.getElementById("barColors"),
         section: ($state.params && $state.params.section ? $state.params.section : '')
@@ -50,6 +50,14 @@ angular.module('lp.models.ratings', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
+
+        if(vm.section === 'dashboard.scoring') {
+            vm.ratingModelId = $stateParams.ratingEngine.activeModel.AI.id;
+        } else if (vm.section === 'dashboard.ratings') {
+            RatingsEngineStore.getRating($stateParams.rating_id).then(function (result) {
+                vm.ratingModelId = result.activeModel.AI.id;
+            });
+        }
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
@@ -95,9 +103,7 @@ angular.module('lp.models.ratings', [
             }
         }
         vm.axisItemHeight = vm.chartContainerHeight / vm.yAxisNumber;
-
         refreshChartData();
-   
     }
 
     function refreshChartData(){
@@ -105,7 +111,7 @@ angular.module('lp.models.ratings', [
         vm.updateContent = false;
 
         if (vm.buckets.length === 6) {
-            vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
+            vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
             vm.canAddBucket = false;
         } else if (vm.buckets.length < 6) {
             vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
@@ -297,14 +303,18 @@ angular.module('lp.models.ratings', [
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
 
-        var modelId = $stateParams.modelId,
-            rating_id = $stateParams.rating_id;
-        if(vm.section === 'dashboard.scoring') {
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
+        var rating_id = $stateParams.rating_id;
+        if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, vm.ratingModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     vm.showSuccess = true;
                     vm.chartNotUpdated = true;
                     vm.updateContent = true;
+
+                    $rootScope.$broadcast('statusChange', { 
+                        activeStatus: 'ACTIVE'
+                    });
+
                     $timeout( function(){ 
                         vm.updateContent = false;
                         vm.showSuccess = false;
@@ -317,7 +327,7 @@ angular.module('lp.models.ratings', [
                 }
             });
         } else {
-            ModelRatingsService.CreateABCDBuckets(modelId, vm.workingBuckets).then(function(result){
+            ModelRatingsService.CreateABCDBuckets(vm.modelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     vm.showSuccess = true;
                     vm.chartNotUpdated = true;
@@ -334,6 +344,9 @@ angular.module('lp.models.ratings', [
                 }
             });
         }
+
+        console.log($stateParams);
+
     }
 
 
@@ -349,7 +362,7 @@ angular.module('lp.models.ratings', [
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
         data: ModelStore,
-        bucketNames: ['A+', 'A', 'B', 'C', 'D', 'F'],
+        bucketNames: ['A', 'B', 'C', 'D', 'E', 'F'],
         ResourceUtility: ResourceUtility,
         historicalBuckets: HistoricalABCDBuckets
     });
@@ -365,14 +378,6 @@ angular.module('lp.models.ratings', [
         } else {
             vm.modelType = "Accounts";
         }
-
-        angular.forEach(vm.historicalBuckets, function(value, key) {
-            if (value.length === 6) {
-                vm.bucketNames = ['A+', 'A', 'B', 'C', 'D', 'F'];
-            } else if (value.length < 6) {
-                vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
-            };
-        });
 
         const ordered = {};
         Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {

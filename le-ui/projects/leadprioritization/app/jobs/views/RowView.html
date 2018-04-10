@@ -116,7 +116,7 @@
 
                         </div>
                     </li>
-                    <li ng-class="{success : jobStepsCompletedStates.generate_insights, success: jobStepsCompletedStates.match_data, error: (stepFailed == 'generate_insights'), error: (stepFailed == 'match_data')}">
+                    <li ng-class="{success : (jobStepsCompletedStates.generate_insights || jobStepsCompletedStates.match_data), error: (stepFailed == 'generate_insights' || stepFailed == 'match_data')}">
                         <div>
 
                             <span class="match-cloud">
@@ -136,7 +136,7 @@
 
                         </div>
                     </li>
-                    <li ng-class="{success: jobStepsCompletedStates.create_global_target_market, success: jobStepsCompletedStates.create_global_model, error: (stepFailed == 'create_global_target_market'), error: (stepFailed == 'create_global_model')}">
+                    <li ng-class="{success: (jobStepsCompletedStates.create_global_target_market || jobStepsCompletedStates.create_global_model), error: (stepFailed == 'create_global_target_market' || stepFailed == 'create_global_model')}">
                         <div>
 
                             <span class="building-model">

@@ -28,6 +28,8 @@ angular
         vm.Uploaded = Model.ModelDetails.Uploaded;
         vm.HasRatingsAvailable = HasRatingsAvailable;
 
+        // console.log(vm.ratingEngine);
+
         $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
 
         if (JSON.stringify(vm.HasRatingsAvailable) != "{}") {

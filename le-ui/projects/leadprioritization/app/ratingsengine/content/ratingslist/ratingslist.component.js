@@ -106,7 +106,6 @@ angular.module('lp.ratingsengine.ratingslist', [
     vm.init = function($q, $filter) {
 
         var arr = vm.current.ratings;
-        // console.log(arr.slice(Math.max(arr.length - 10, 1)));
 
         RatingsEngineStore.clear();
 
@@ -140,9 +139,7 @@ angular.module('lp.ratingsengine.ratingslist', [
                 if(rating.bucketMetadata) {
                     angular.forEach(rating.bucketMetadata, function(rating, key) {
                         rating.lift = (Math.round( rating.lift * 10) / 10).toString();
-                        if(rating.lift !== '0'){
-                            newBucketMetadata.push(rating);
-                        }
+                        newBucketMetadata.push(rating);
                     });
                 } else {
                     newBucketMetadata = [{
@@ -176,6 +173,8 @@ angular.module('lp.ratingsengine.ratingslist', [
 
             });
         });
+
+        console.log(arr.slice(Math.max(arr.length - 10, 1)));
 
     }
 

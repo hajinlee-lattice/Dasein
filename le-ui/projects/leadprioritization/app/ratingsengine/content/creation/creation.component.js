@@ -138,10 +138,13 @@ angular.module('lp.ratingsengine.wizard.creation', [])
                             tmp = 99;
                         }
                         vm.progress = tmp + '%';
+
+                        console.log(vm.progress);
                     }
                     // Cancel $interval when completed
                     if(vm.status === 'Completed'){
                         vm.progress = 100 + '%';
+                        console.log(vm.progress);
                         $interval.cancel(vm.checkJobStatus);
                     } else if (vm.status == 'Failed') {
                         $interval.cancel(vm.checkJobStatus);

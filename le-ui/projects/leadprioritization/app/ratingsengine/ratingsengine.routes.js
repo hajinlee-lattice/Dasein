@@ -517,8 +517,7 @@ angular
                 resolve: {
                     CurrentConfiguration: function($q, $stateParams, ModelRatingsService) {
                         var deferred = $q.defer(),
-                            ratingId = $stateParams.rating_id,
-                            modelId = $stateParams.modelId;
+                            ratingId = $stateParams.rating_id;
 
                         ModelRatingsService.MostRecentConfigurationRatingEngine(ratingId).then(function(result) {
                             deferred.resolve(result);
@@ -529,7 +528,7 @@ angular
                     RatingsSummary: function($q, $stateParams, ModelRatingsService) {
                         var deferred = $q.defer(),
                             ratingId = $stateParams.rating_id,
-                            modelId = $stateParams.modelId;
+                            modelId = $stateParams.ratingEngine.activeModel.AI.id;
 
                         ModelRatingsService.GetBucketedScoresSummaryRatingEngine(ratingId, modelId).then(function(result) {
                             deferred.resolve(result);
@@ -539,8 +538,7 @@ angular
                     },
                     HistoricalABCDBuckets: function($q, $stateParams, ModelRatingsService) {
                         var deferred = $q.defer(),
-                            ratingId = $stateParams.rating_id,
-                            modelId = $stateParams.modelId;
+                            ratingId = $stateParams.rating_id;
 
                         ModelRatingsService.HistoricalABCDBucketsRatingEngine(ratingId).then(function(result) {
                             deferred.resolve(result);
@@ -552,7 +550,8 @@ angular
                 params: {
                     pageIcon: 'ico-ratings',
                     pageTitle: 'Ratings',
-                    section: 'dashboard.scoring'
+                    section: 'dashboard.scoring',
+                    ratingEngine: null
                 },
                 views: {
                     "main@": {
