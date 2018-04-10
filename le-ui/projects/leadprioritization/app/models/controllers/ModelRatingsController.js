@@ -379,6 +379,14 @@ angular.module('lp.models.ratings', [
             vm.modelType = "Accounts";
         }
 
+        angular.forEach(vm.historicalBuckets, function(value, key) {
+            if (value.length === 6) {
+                vm.bucketNames = ['A', 'B', 'C', 'D', 'E', 'F'];
+            } else if (value.length < 6) {
+                vm.bucketNames = ['A', 'B', 'C', 'D', 'F'];
+            };
+        });
+
         const ordered = {};
         Object.keys(vm.historicalBuckets).sort().reverse().forEach(function(key) {
           ordered[key] = vm.historicalBuckets[key];
