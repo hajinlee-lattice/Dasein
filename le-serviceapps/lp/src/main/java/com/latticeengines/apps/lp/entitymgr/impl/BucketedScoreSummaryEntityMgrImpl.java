@@ -2,14 +2,13 @@ package com.latticeengines.apps.lp.entitymgr.impl;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.latticeengines.apps.lp.dao.BucketedScoreSummaryDao;
 import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
+import com.latticeengines.apps.lp.repository.reader.BucketedScoreSummaryReaderRepository;
 import com.latticeengines.apps.lp.repository.writer.BucketedScoreSummaryWriterRepository;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
@@ -20,10 +19,11 @@ import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 public class BucketedScoreSummaryEntityMgrImpl extends BaseEntityMgrRepositoryImpl<BucketedScoreSummary, Long>
         implements BucketedScoreSummaryEntityMgr {
 
-    private static final Logger log = LoggerFactory.getLogger(BucketedScoreSummary.class);
-
     @Inject
     private BucketedScoreSummaryWriterRepository repository;
+
+    @Inject
+    private BucketedScoreSummaryReaderRepository readerRepository;
 
     @Inject
     private BucketedScoreSummaryDao dao;
@@ -41,8 +41,13 @@ public class BucketedScoreSummaryEntityMgrImpl extends BaseEntityMgrRepositoryIm
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public BucketedScoreSummary findByModelGuid(String modelGuid) {
-        log.info("retrying to retrieve BucketedScoreSummary via model GUID {}", modelGuid);
         return repository.findByModelSummary_Id(modelGuid);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public BucketedScoreSummary findByModelGuidFromReader(String modelGuid) {
+        return readerRepository.findByModelSummary_Id(modelGuid);
     }
 
 }

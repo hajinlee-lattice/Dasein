@@ -35,10 +35,10 @@ public class BucketedScoreSummaryUtils {
                 bucketedScoreSummary.getBucketedScores()[currentScore] = new BucketedScore(
                         Double.valueOf(pivotedRecord.get(SCORE).toString()).intValue(),
                         Double.valueOf(pivotedRecord.get(TOTAL_EVENTS).toString()).intValue(),
-                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()).doubleValue(),
+                        Double.valueOf(pivotedRecord.get(TOTAL_POSITIVE_EVENTS).toString()),
                         cumulativeNumLeads, cumulativeNumConverted);
                 cumulativeNumLeads += new Long((long) pivotedRecord.get(TOTAL_EVENTS)).intValue();
-                cumulativeNumConverted += new Double((double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS)).doubleValue();
+                cumulativeNumConverted += (double) pivotedRecord.get(TOTAL_POSITIVE_EVENTS);
                 idx--;
             } else {
                 bucketedScores[currentScore] = new BucketedScore(currentScore, 0, 0, cumulativeNumLeads,
@@ -51,7 +51,7 @@ public class BucketedScoreSummaryUtils {
                     cumulativeNumConverted);
         }
 
-        double totalLift = (double) cumulativeNumConverted / cumulativeNumLeads;
+        double totalLift = cumulativeNumConverted / cumulativeNumLeads;
 
         bucketedScoreSummary.setTotalNumLeads(cumulativeNumLeads);
         bucketedScoreSummary.setTotalNumConverted(cumulativeNumConverted);
@@ -65,7 +65,7 @@ public class BucketedScoreSummaryUtils {
             if (totalLeadsInBar == 0) {
                 bucketedScoreSummary.getBarLifts()[32 - i] = 0;
             } else {
-                bucketedScoreSummary.getBarLifts()[32 - i] = ((double) totalLeadsConvertedInBar / totalLeadsInBar)
+                bucketedScoreSummary.getBarLifts()[32 - i] = (totalLeadsConvertedInBar / totalLeadsInBar)
                         / totalLift;
             }
         }

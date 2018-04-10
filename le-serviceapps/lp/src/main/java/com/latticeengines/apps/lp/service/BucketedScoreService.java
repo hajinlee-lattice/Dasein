@@ -4,15 +4,21 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 
 public interface BucketedScoreService {
 
-    Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId);
+    Map<Long, List<BucketMetadata>> getBucketMetadataGroupedByCreationTimes(String modelGuid);
 
-    List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId);
+    List<BucketMetadata> getABCDBucketsByModelGuid(String modelGuid);
 
-    List<BucketMetadata> getABCDBucketsByRatingEngine(String ratingEngineId);
+    List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId);
 
-    void createABCDBucketsForModel(CreateBucketMetadataRequest request);
+    void createABCDBuckets(CreateBucketMetadataRequest request);
+
+    BucketedScoreSummary getBucketedScoreSummaryByModelGuid(String modelGuid);
+
+    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
+            BucketedScoreSummary bucketedScoreSummary);
 }

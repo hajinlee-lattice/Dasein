@@ -14,13 +14,16 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.lp.entitymgr.BucketMetadataEntityMgr;
+import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
+import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
+import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 
@@ -33,29 +36,35 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     private BucketMetadataEntityMgr bucketMetadataEntityMgr;
 
     @Inject
+    private BucketedScoreSummaryEntityMgr bucketedScoreSummaryEntityMgr;
+
+    @Inject
     private ModelSummaryEntityMgr modelSummaryEntityMgr;
+
+    @Inject
+    private ModelSummaryWriterRepository modelSummaryRepository;
 
     @Inject
     private ActionService actionService;
 
     @Override
-    public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
+    public Map<Long, List<BucketMetadata>> getBucketMetadataGroupedByCreationTimes(String modelId) {
         List<BucketMetadata> list = bucketMetadataEntityMgr.getBucketMetadatasForModelFromReader(modelId);
         return groupByCreationTime(list);
     }
 
     @Override
-    public List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId) {
+    public List<BucketMetadata> getABCDBucketsByModelGuid(String modelId) {
         return bucketMetadataEntityMgr.getUpToDateBucketMetadatasForModelFromReader(modelId);
     }
 
     @Override
-    public List<BucketMetadata> getABCDBucketsByRatingEngine(String ratingEngineId) {
+    public List<BucketMetadata> getABCDBucketsByRatingEngineId(String ratingEngineId) {
         return bucketMetadataEntityMgr.getBucketMetadatasForEngineFromReader(ratingEngineId);
     }
 
     @Override
-    public void createABCDBucketsForModel(CreateBucketMetadataRequest request) {
+    public void createABCDBuckets(CreateBucketMetadataRequest request) {
         if (StringUtils.isBlank(request.getModelGuid())) {
             throw new IllegalArgumentException("Must specify model GUID");
         }
@@ -71,8 +80,28 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             modelSummaryEntityMgr.updateLastUpdateTime(request.getModelGuid());
         }
         if (StringUtils.isNotBlank(request.getRatingEngineId())) {
-            registerAction(request.getRatingEngineId(), request.getModelGuid());
+            registerAction(request.getRatingEngineId(), request.getModelGuid(), request.getLastModifiedBy());
         }
+    }
+
+    @Override
+    public BucketedScoreSummary getBucketedScoreSummaryByModelGuid(String modelGuid) {
+        return bucketedScoreSummaryEntityMgr.findByModelGuidFromReader(modelGuid);
+    }
+
+    @Override
+    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid,
+                                                            BucketedScoreSummary bucketedScoreSummary) {
+        ModelSummary modelSummary = modelSummaryRepository.findById(modelGuid);
+        bucketedScoreSummary.setModelSummary(modelSummary);
+        BucketedScoreSummary existing = bucketedScoreSummaryEntityMgr.findByModelGuid(modelGuid);
+        if (existing != null) {
+            bucketedScoreSummary.setPid(existing.getPid());
+            bucketedScoreSummaryEntityMgr.update(bucketedScoreSummary);
+        } else {
+            bucketedScoreSummaryEntityMgr.create(bucketedScoreSummary);
+        }
+        return bucketedScoreSummary;
     }
 
     private Map<Long, List<BucketMetadata>> groupByCreationTime(List<BucketMetadata> bucketMetadatas) {
@@ -88,12 +117,12 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         return creationTimesToBucketMetadatas;
     }
 
-    private void registerAction(String ratingEngineId, String modelGuid) {
+    private void registerAction(String ratingEngineId, String modelGuid, String userId) {
         log.info(String.format("Register AI_MODEL_BUCKET_CHANGE creation Action for RatingEngine %s, Model GUID %s",
                 ratingEngineId, modelGuid));
         Action action = new Action();
         action.setType(ActionType.RATING_ENGINE_CHANGE);
-        action.setActionInitiator(MultiTenantContext.getEmailAddress());
+        action.setActionInitiator(userId);
         ActionConfiguration actionConfiguration = new RatingEngineActionConfiguration();
         ((RatingEngineActionConfiguration) actionConfiguration)
                 .setSubType(RatingEngineActionConfiguration.SubType.AI_MODEL_BUCKET_CHANGE);

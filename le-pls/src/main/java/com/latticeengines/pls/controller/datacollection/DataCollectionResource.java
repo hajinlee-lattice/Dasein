@@ -32,6 +32,7 @@ public class DataCollectionResource {
 
     @Inject
     private CDLProxy cdlProxy;
+
     @RequestMapping(value = ATTR_CONFIG_PATH, //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")

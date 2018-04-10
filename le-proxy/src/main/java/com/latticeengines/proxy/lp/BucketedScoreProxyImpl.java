@@ -1,7 +1,5 @@
 package com.latticeengines.proxy.lp;
 
-import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
@@ -22,37 +21,40 @@ import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements BucketedScoreProxy {
 
     protected BucketedScoreProxyImpl() {
-        super("lp");
+        super("lp/bucktedscore");
     }
 
     @Override
-    public void createABCDBuckets(String customerSpace, CreateBucketMetadataRequest request) {
-        String url = constructUrl("/customerspaces/{customerSpace}/bucktedscore", shortenCustomerSpace(customerSpace));
+    public void createABCDBuckets(CreateBucketMetadataRequest request) {
+        String url = constructUrl("/abcdbuckets");
         post("create bucket metadata", url, request, SimpleBooleanResponse.class);
     }
 
     @Override
-    public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
-        String url = constructUrl("/customerspaces/{customerSpace}/bucktedscore/abcdbuckets/model/{modelGuid}", //
-                shortenCustomerSpace(customerSpace), modelGuid);
+    public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String modelGuid) {
+        String url = constructUrl("/abcdbuckets/model/{modelGuid}", modelGuid);
         Map map = get("get bucket metadata history for model", url, Map.class);
         return parseABCDBucketsHistory(map);
     }
 
     @Override
-    public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
-        String url = constructUrl("/customerspaces/{customerSpace}/bucktedscore/uptodateabcdbuckets/model/{modelGuid}", //
-                shortenCustomerSpace(customerSpace), modelGuid);
+    public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String modelGuid) {
+        String url = constructUrl("/uptodateabcdbuckets/model/{modelGuid}", modelGuid);
         List list = get("get up-to-date bucket metadata history for model", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
     @Override
-    public List<BucketMetadata> getABCDBucketsByEngineId(String customerSpace, String engineId) {
-        String url = constructUrl("/customerspaces/{customerSpace}/bucktedscore/abcdbuckets/engine/{engineId}", //
-                shortenCustomerSpace(customerSpace), engineId);
+    public List<BucketMetadata> getABCDBucketsByEngineId(String engineId) {
+        String url = constructUrl("/abcdbuckets/engine/{engineId}", engineId);
         List list = get("get bucket metadata for engine", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
+    }
+
+    @Override
+    public BucketedScoreSummary getBucketedScoreSummary(String modelGuid) {
+        String url = constructUrl("/summary/model/{modelGuid}", modelGuid);
+        return get("get bucketed score summary", url, BucketedScoreSummary.class);
     }
 
     private Map<Long, List<BucketMetadata>> parseABCDBucketsHistory(Map map) {
