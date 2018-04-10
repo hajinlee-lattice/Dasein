@@ -22,6 +22,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
         validatorList.add(GenericValidator.VALIDATOR_NAME);
         validatorList.add(LifecycleValidator.VALIDATOR_NAME);
         validatorList.add(LimitationValidator.VALIDATOR_NAME);
+        validatorList.add(UsageValidator.VALIDATOR_NAME);
     }
 
 

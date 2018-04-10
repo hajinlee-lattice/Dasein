@@ -69,6 +69,15 @@ public class LifecycleValidator extends AttrValidator {
                             }
                         }
                     }
+                } else if (systemState.equals(AttrState.Deprecated)) {
+                    if (stateProp.getCustomValue() != null) {
+                        AttrState customState = AttrState.class.cast(stateProp.getCustomValue());
+                        if (customState.equals(AttrState.Active)) {
+                            addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,
+                                    String.format(ValidationMsg.Errors.FORBID_SET_ACTIVE, attrConfig.getAttrName()),
+                                    attrConfig);
+                        }
+                    }
                 }
             }
         }
