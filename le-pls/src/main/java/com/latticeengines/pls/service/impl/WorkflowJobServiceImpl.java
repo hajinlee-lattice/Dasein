@@ -250,7 +250,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     List<Job> expandActions(List<Action> actions) {
-        log.info(String.format("Expand actions...actions=%s", actions));
+        log.debug(String.format("Expand actions...actions=%s", actions));
         List<Job> jobList = new ArrayList<>();
         List<String> workflowJobIds = new ArrayList<>();
         for (Action action : actions) {
