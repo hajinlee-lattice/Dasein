@@ -66,7 +66,7 @@ public class CSVExportMapper extends AvroExportMapper implements AvroRowHandler 
                 if (exportUsingDisplayName) {
                     header = table.getAttribute(field.name()).getDisplayName();
                     if (headers.contains(header)) {
-                        header += "_" + field.name();
+                        header += "_" + System.currentTimeMillis();
                     }
                 } else {
                     header = field.name();
