@@ -102,16 +102,10 @@ public class SystemMetadataStoreImpl extends
                                     cm.setCategory(category);
                                 }
                                 cm.setEntity(entity);
-                                if (!cm.getGroups().containsKey(ColumnSelection.Predefined.Segment)) {
-                                    cm.enableGroup(ColumnSelection.Predefined.Segment);
-                                }
+                                cm.enableGroupIfNotPresent(ColumnSelection.Predefined.Segment);
                                 if (BusinessEntity.Account.equals(entity)) {
-                                    if (!cm.getGroups().containsKey(ColumnSelection.Predefined.TalkingPoint)) {
-                                        cm.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-                                    }
-                                    if (!cm.getGroups().containsKey(ColumnSelection.Predefined.CompanyProfile)) {
-                                        cm.enableGroup(ColumnSelection.Predefined.CompanyProfile);
-                                    }
+                                    cm.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
+                                    cm.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);
                                 }
                                 return cm;
                             }) //
