@@ -1,5 +1,7 @@
 package com.latticeengines.proxy.lp;
 
+import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,57 +18,64 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 
-
 @Component("bucketedScoreProxy")
 public class BucketedScoreProxyImpl extends MicroserviceRestApiProxy implements BucketedScoreProxy {
 
     protected BucketedScoreProxyImpl() {
-        super("lp/bucketedscore");
+        super("lp");
     }
 
     @Override
-    public void createABCDBuckets(CreateBucketMetadataRequest request) {
-        String url = constructUrl("/abcdbuckets");
+    public void createABCDBuckets(String customerSpace, CreateBucketMetadataRequest request) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets",
+                shortenCustomerSpace(customerSpace));
         post("create bucket metadata", url, request, SimpleBooleanResponse.class);
     }
 
     @Override
-    public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String modelGuid) {
-        String url = constructUrl("/abcdbuckets/model/{modelGuid}", modelGuid);
+    public Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/model/{modelGuid}",
+                shortenCustomerSpace(customerSpace), modelGuid);
         Map map = get("get bucket metadata history for model", url, Map.class);
         return parseABCDBucketsHistory(map);
     }
 
     @Override
-    public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String engineId) {
-        String url = constructUrl("/abcdbuckets/engine/{engineId}", engineId);
+    public Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String customerSpace, String engineId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/abcdbuckets/engine/{engineId}",
+                shortenCustomerSpace(customerSpace), engineId);
         Map map = get("get bucket metadata history for engine", url, Map.class);
         return parseABCDBucketsHistory(map);
     }
 
     @Override
-    public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String modelGuid) {
-        String url = constructUrl("/uptodateabcdbuckets/model/{modelGuid}", modelGuid);
+    public List<BucketMetadata> getLatestABCDBucketsByModelGuid(String customerSpace, String modelGuid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/model/{modelGuid}",
+                shortenCustomerSpace(customerSpace), modelGuid);
         List list = get("get up-to-date bucket metadata history for model", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
     @Override
-    public List<BucketMetadata> getLatestABCDBucketsByEngineId(String engineId) {
-        String url = constructUrl("/uptodateabcdbuckets/engine/{engineId}", engineId);
+    public List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/uptodateabcdbuckets/engine/{engineId}",
+                shortenCustomerSpace(customerSpace), engineId);
         List list = get("get up-to-date bucket metadata for engine", url, List.class);
         return JsonUtils.convertList(list, BucketMetadata.class);
     }
 
     @Override
-    public BucketedScoreSummary getBucketedScoreSummary(String modelGuid) {
-        String url = constructUrl("/summary/model/{modelGuid}", modelGuid);
+    public BucketedScoreSummary getBucketedScoreSummary(String customerSpace, String modelGuid) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/summary/model/{modelGuid}",
+                shortenCustomerSpace(customerSpace), modelGuid);
         return get("get bucketed score summary", url, BucketedScoreSummary.class);
     }
 
     @Override
-    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid, BucketedScoreSummary summary) {
-        String url = constructUrl("/summary/model/{modelGuid}", modelGuid);
+    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String customerSpace, String modelGuid,
+            BucketedScoreSummary summary) {
+        String url = constructUrl("/customerspaces/{customerSpace}/bucketedscore/summary/model/{modelGuid}",
+                shortenCustomerSpace(customerSpace), modelGuid);
         return post("create bucketed score summary", url, summary, BucketedScoreSummary.class);
     }
 

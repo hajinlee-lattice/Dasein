@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -19,9 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -30,20 +27,11 @@ import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationSelector;
-import com.latticeengines.domain.exposed.query.AggregationType;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
@@ -55,6 +43,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1522915861547";
+
+    private static final PredictionType PREDICTION_TYPE = PredictionType.EXPECTED_VALUE;
 
     private MetadataSegment testSegment;
     private MetadataSegment trainSegment;
@@ -74,6 +64,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private String internalResourceHostPort;
 
     private InternalResourceRestApiProxy internalResourceProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private final String targetProductId = "A74D1222394534E6B450CA006C20D48D";
     private final String trainingProductId = "A80D4770376C1226C47617C071324C0B";
@@ -109,9 +102,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     }
 
     private void verifyBucketMetadataNotGenerated() {
-        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
-                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                        testRatingEngine.getId());
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
+                .getABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
         Assert.assertTrue(bucketMetadataHistory.isEmpty());
     }
 
@@ -155,7 +147,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
                 CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
         config.setFilters(myMap);
-        testAIModel.setPredictionType(PredictionType.EXPECTED_VALUE);
+        testAIModel.setPredictionType(PREDICTION_TYPE);
         config.setTargetProducts(Collections.singletonList(targetProductId));
         config.setTrainingProducts(Collections.singletonList(trainingProductId));
         testAIModel.setTrainingSegment(trainSegment);
@@ -176,29 +168,37 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         Assert.assertEquals(eventCount, 56);
     }
 
-    @Override
-    protected MetadataSegment constructTargetSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
-        BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
-
-        TransactionRestriction trxRes = new TransactionRestriction("1E26CD1E01559048FF7B51ADA27EA7AB",
-                new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(), Arrays.asList("2018-04-09")),
-                false,
-                new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Arrays.asList(1)),
-                new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Arrays.asList(1)));
-
-        MetadataSegment segment = new MetadataSegment();
-        segment.setName(SEGMENT_NAME_MODELING);
-        segment.setDisplayName("End2End Segment Modeling");
-        segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountFrontEndRestriction(
-                new FrontEndRestriction(Restriction.builder().and(accountRestriction, trxRes).build()));
-        segment.setAccountRestriction(Restriction.builder().and(accountRestriction, trxRes).build());
-        return segment;
-    }
+    // @Override
+    // protected MetadataSegment constructTargetSegment() {
+    // Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL,
+    // Collections.singletonList("No"));
+    // BucketRestriction accountRestriction = new BucketRestriction(
+    // new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"),
+    // stateBkt);
+    //
+    // TransactionRestriction trxRes = new
+    // TransactionRestriction("1E26CD1E01559048FF7B51ADA27EA7AB",
+    // new TimeFilter(ComparisonType.BEFORE,
+    // PeriodStrategy.Template.Date.name(),
+    // Collections.singletonList("2018-04-09")), false,
+    // new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM,
+    // ComparisonType.GREATER_THAN,
+    // Collections.singletonList(1)),
+    // new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM,
+    // ComparisonType.GREATER_THAN,
+    // Collections.singletonList(1)));
+    //
+    // MetadataSegment segment = new MetadataSegment();
+    // segment.setName(SEGMENT_NAME_MODELING);
+    // segment.setDisplayName("End2End Segment Modeling");
+    // segment.setDescription("A test segment for CDL end2end modeling test.");
+    // segment.setAccountFrontEndRestriction(
+    // new FrontEndRestriction(Restriction.builder().and(accountRestriction,
+    // trxRes).build()));
+    // segment.setAccountRestriction(Restriction.builder().and(accountRestriction,
+    // trxRes).build());
+    // return segment;
+    // }
 
     private void setupBusinessCalendar() {
         periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());

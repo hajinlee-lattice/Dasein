@@ -9,18 +9,18 @@ import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequ
 
 public interface BucketedScoreProxy {
 
-    void createABCDBuckets(CreateBucketMetadataRequest request);
+    void createABCDBuckets(String customerSpace, CreateBucketMetadataRequest request);
 
-    Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String modelGuid);
+    Map<Long, List<BucketMetadata>> getABCDBucketsByModelGuid(String customerSpace, String modelGuid);
 
-    Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String engineId);
+    Map<Long, List<BucketMetadata>> getABCDBucketsByEngineId(String customerSpace, String engineId);
 
-    List<BucketMetadata> getLatestABCDBucketsByModelGuid(String modelGuid);
+    List<BucketMetadata> getLatestABCDBucketsByModelGuid(String customerSpace, String modelGuid);
 
-    List<BucketMetadata> getLatestABCDBucketsByEngineId(String engineId);
+    List<BucketMetadata> getLatestABCDBucketsByEngineId(String customerSpace, String engineId);
 
-    BucketedScoreSummary getBucketedScoreSummary(String modelGuid);
+    BucketedScoreSummary getBucketedScoreSummary(String customerSpace, String modelGuid);
 
-    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelGuid, BucketedScoreSummary summary);
+    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String customerSpace, String modelGuid, BucketedScoreSummary summary);
 
 }

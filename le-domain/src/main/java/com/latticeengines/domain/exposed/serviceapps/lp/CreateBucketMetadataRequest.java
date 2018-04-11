@@ -13,9 +13,6 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CreateBucketMetadataRequest {
 
-    @JsonProperty("TenantId")
-    private String tenantId;
-
     @JsonProperty("BucketMetadataList")
     private List<BucketMetadata> bucketMetadataList;
 
@@ -27,14 +24,6 @@ public class CreateBucketMetadataRequest {
 
     @JsonProperty("RatingEngineId")
     private String ratingEngineId;
-
-    public String getTenantId() {
-        return tenantId;
-    }
-
-    public void setTenantId(String tenant) {
-        this.tenantId = tenant;
-    }
 
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;

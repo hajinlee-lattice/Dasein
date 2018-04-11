@@ -47,7 +47,7 @@ public enum BusinessEntity implements GraphNode {
 
     // Lattice Data Cloud
     LatticeAccount, //
-     ProductHierarchy;
+    ProductHierarchy;
 
     public static Set<BusinessEntity> SEGMENT_ENTITIES = //
             ImmutableSet.of(Account, Contact, PurchaseHistory, Rating);
