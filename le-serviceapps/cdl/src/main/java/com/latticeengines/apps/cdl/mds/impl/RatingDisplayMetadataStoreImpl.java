@@ -20,8 +20,10 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import reactor.core.publisher.Flux;
 
@@ -75,10 +77,13 @@ public class RatingDisplayMetadataStoreImpl implements RatingDisplayMetadataStor
             reAttr.setSecondaryDisplayName(getSecondaryDisplayName(suffix));
             reAttr.setSubcategory(segmentDisplayName);
             reAttr.setCategory(Category.RATING);
-            if (isSegmentable(suffix)) {
+            if (isSegmentable(suffix) && !Boolean.TRUE.equals(summary.getDeleted())) {
                 reAttr.enableGroup(ColumnSelection.Predefined.Segment);
             } else {
                 reAttr.disableGroup(ColumnSelection.Predefined.Segment);
+            }
+            if (RatingEngineStatus.INACTIVE.equals(summary.getStatus())) {
+                reAttr.setAttrState(AttrState.Deprecated);
             }
             return reAttr;
         });

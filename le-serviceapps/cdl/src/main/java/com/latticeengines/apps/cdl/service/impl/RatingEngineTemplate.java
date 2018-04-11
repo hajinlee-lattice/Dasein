@@ -46,6 +46,7 @@ public abstract class RatingEngineTemplate {
         ratingEngineSummary.setNote(ratingEngine.getNote());
         ratingEngineSummary.setType(ratingEngine.getType());
         ratingEngineSummary.setStatus(ratingEngine.getStatus());
+        ratingEngineSummary.setDeleted(ratingEngine.getDeleted());
         ratingEngineSummary.setSegmentDisplayName(
                 ratingEngine.getSegment() != null ? ratingEngine.getSegment().getDisplayName() : null);
         ratingEngineSummary

@@ -68,6 +68,9 @@ public class RatingEngineSummary {
     @JsonProperty("advancedRatingConfig")
     private AdvancedRatingConfig advancedRatingConfig;
 
+    @JsonProperty("deleted")
+    private Boolean deleted;
+
     public String getId() {
         return this.id;
     }
@@ -202,6 +205,14 @@ public class RatingEngineSummary {
 
     public void setAdvancedRatingConfig(AdvancedRatingConfig advancedRatingConfig) {
         this.advancedRatingConfig = advancedRatingConfig;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
