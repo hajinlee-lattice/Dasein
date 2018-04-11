@@ -165,7 +165,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         try {
             if (latestSuccessJob.isPresent()) {
                 Report report = latestSuccessJob.get().getReports().stream()
-                        .filter(r -> r.getPurpose() == ReportPurpose.ENTITIES_SUMMARY)
+                        .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
                         .collect(Collectors.toList()).get(0);
                 ObjectMapper om = JsonUtils.getObjectMapper();
                 ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
