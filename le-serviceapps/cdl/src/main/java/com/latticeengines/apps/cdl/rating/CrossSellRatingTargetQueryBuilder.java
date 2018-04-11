@@ -30,9 +30,9 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     protected void handleProxyProducts() {
     }
 
-    @Override
-    protected void removeTimeWindowRestrictions() {
-    }
+    // @Override
+    // protected void removeTimeWindowRestrictions() {
+    // }
 
     @Override
     protected void buildProductTransactionRestrictions() {

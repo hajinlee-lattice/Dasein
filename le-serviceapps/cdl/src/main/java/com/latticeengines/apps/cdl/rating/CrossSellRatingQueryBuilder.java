@@ -64,15 +64,19 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected void removeTimeWindowRestrictions() {
         DepthFirstSearch dfs = new DepthFirstSearch();
         if (baseSegment.getAccountRestriction() != null) {
-            dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
+            Restriction accRestriction = baseSegment.getAccountRestriction();
+            dfs.run(accRestriction, (object, ctx) -> {
                 GraphNode node = (GraphNode) object;
                 if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
                     Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
-                    if (transaction.getNegate() && transaction.getTimeFilter().getRelation() != ComparisonType.EVER) {
+                    if (transaction.getTimeFilter().getRelation() == ComparisonType.EVER && !transaction.getNegate()) {
+                        ((BucketRestriction) node).setIgnored(false);
+                    } else {
                         ((BucketRestriction) node).setIgnored(true);
                     }
                 }
             });
+            baseSegment.setAccountRestriction(accRestriction);
         }
     }
 
@@ -109,7 +113,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                 }
             });
             baseSegment.setAccountRestriction(accRestriction);
-
         }
     }
 
