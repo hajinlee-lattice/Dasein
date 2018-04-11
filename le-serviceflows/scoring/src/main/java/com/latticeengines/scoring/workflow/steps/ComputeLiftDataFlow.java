@@ -103,6 +103,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
                 request.setModelGuid(modelGuid);
                 request.setRatingEngineId(ratingEngineId);
                 request.setLastModifiedBy(configuration.getUserId());
+                request.setTenantId(configuration.getCustomerSpace().toString());
                 request.setBucketMetadataList(bucketMetadata);
                 log.info("Save bucket metadata for modelGuid=" + modelGuid + ", ratingEngineId=" + ratingEngineId);
                 bucketedScoreProxy.createABCDBuckets(request);

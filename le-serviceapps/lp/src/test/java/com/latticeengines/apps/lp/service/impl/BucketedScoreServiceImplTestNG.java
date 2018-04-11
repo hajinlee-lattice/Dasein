@@ -54,6 +54,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
         long oldLastUpdateTime = modelSummary.getLastUpdateTime();
 
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        request.setTenantId(mainTestTenant.getId());
         request.setBucketMetadataList(BucketedScoreTestUtils.getBucketMetadataList1());
         request.setModelGuid(modelGuid);
         bucketedScoreService.createABCDBuckets(request);
@@ -72,6 +73,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
     public void createAnotherGroupsOfBucketMetadata_assertCreated() throws Exception {
         long oldLastUpdateTime = modelSummary.getLastUpdateTime();
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        request.setTenantId(mainTestTenant.getId());
         request.setBucketMetadataList(BucketedScoreTestUtils.getBucketMetadataList2());
         request.setModelGuid(modelGuid);
         bucketedScoreService.createABCDBuckets(request);

@@ -117,6 +117,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setBucketMetadataList(bucketMetadatas);
         request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
         request.setModelGuid(modelId);
+        request.setTenantId(MultiTenantContext.getTenantId());
         bucketedScoreProxy.createABCDBuckets(request);
     }
 
@@ -135,6 +136,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         request.setModelGuid(modelId);
         request.setRatingEngineId(ratingEngineId);
         request.setLastModifiedBy(userId);
+        request.setTenantId(MultiTenantContext.getTenantId());
         bucketedScoreProxy.createABCDBuckets(request);
     }
 
