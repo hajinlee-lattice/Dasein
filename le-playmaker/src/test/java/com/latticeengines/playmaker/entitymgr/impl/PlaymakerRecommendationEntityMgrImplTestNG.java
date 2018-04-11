@@ -222,8 +222,27 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
             }
         }
 
+        Assert.assertEquals(MAX_ACC_IDS, someAccountIds.size());
+
         getAccountExtensionsWithAccIds(someAccountIds, null);
-        getAccountExtensionsWithAccIds(someAccountIds, "RECOMMENDATIONS");
+        getAccountExtensionsWithAccIds(someAccountIds, "Recommendations");
+        getAccountExtensionsWithAccIds(someAccountIds, "NoRecommendations");
+        getAccountExtensionsWithAccIds(null, "Recommendations");
+        getAccountExtensionsWithAccIds(null, "NoRecommendations");
+
+        Map<String, Object> countResFilterByRecommendations = playMakerRecommendationEntityMgr
+                .getAccountextExsionCount(tenant.getTenantName(), null, 0L, null, "Recommendations", 0L);
+        Long countFilterByRecommendations = (Long) countResFilterByRecommendations
+                .get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Map<String, Object> countResFilterByNoRecommendations = playMakerRecommendationEntityMgr
+                .getAccountextExsionCount(tenant.getTenantName(), null, 0L, null, "NoRecommendations", 0L);
+        Long countFilterByNoRecommendations = (Long) countResFilterByNoRecommendations
+                .get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
+        Assert.assertTrue(countFilterByRecommendations > 0L);
+        Assert.assertTrue(countFilterByNoRecommendations > 0L);
+        Assert.assertTrue(countFilterByNoRecommendations != countFilterByRecommendations);
+        Assert.assertEquals(new Long(countFilterByNoRecommendations + countFilterByRecommendations),
+                originalTotalAccExtCount);
 
         testEmptyResultWithLargeOffset(shouldSendEmptyColumnMapping, columns, totalAccExtCount, max, startTime);
     }
@@ -315,26 +334,43 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         Long totalAccExtCount = (Long) countResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY);
 
         if (filterBy == null) {
-            Assert.assertEquals(MAX_ACC_IDS, someAccountIds.size());
             Assert.assertEquals(totalAccExtCount.intValue(), someAccountIds.size());
+        } else {
+            if (someAccountIds != null) {
+                Assert.assertTrue(totalAccExtCount.intValue() != someAccountIds.size());
+            }
+            Assert.assertTrue(totalAccExtCount.intValue() > 0L);
         }
 
+        int maximum = 250;
         Map<String, Object> result = playMakerRecommendationEntityMgr.getAccountExtensions(tenant.getTenantName(), null,
-                0L, 0, 250, someAccountIds, filterBy, 0L, null, false);
+                0L, 0, maximum, someAccountIds, filterBy, 0L, null, false);
         Assert.assertNotNull(result);
-        if (filterBy == null) {
-            Assert.assertEquals(result.size(), someAccountIds.size());
-        }
-
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> accExt = (List<Map<String, Object>>) result
                 .get(PlaymakerRecommendationEntityMgr.RECORDS_KEY);
+
+        if (filterBy == null) {
+            Assert.assertEquals(accExt.size(), someAccountIds.size());
+        } else {
+            if (someAccountIds != null) {
+                Assert.assertTrue(accExt.size() != someAccountIds.size());
+            }
+            Assert.assertTrue(totalAccExtCount.intValue() > 0L);
+            if (totalAccExtCount.intValue() > maximum) {
+                Assert.assertEquals(accExt.size(), maximum);
+            } else {
+                Assert.assertEquals(accExt.size(), totalAccExtCount.intValue());
+            }
+        }
 
         Assert.assertTrue(accExt.size() > 0L);
         for (Map<String, Object> a : accExt) {
             Assert.assertTrue(a.containsKey(PlaymakerRecommendationEntityMgr.ID_KEY));
             Integer id = (Integer) a.get(PlaymakerRecommendationEntityMgr.ID_KEY);
-            Assert.assertTrue(someAccountIds.contains(id.toString()));
+            if (filterBy == null) {
+                Assert.assertTrue(someAccountIds.contains(id.toString()));
+            }
         }
     }
 
