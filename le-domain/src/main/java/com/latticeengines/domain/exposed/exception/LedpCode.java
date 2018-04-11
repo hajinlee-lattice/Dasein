@@ -308,6 +308,7 @@ public enum LedpCode {
     LEDP_19002("Access denied."), //
     LEDP_19003("Resource not found."), //
     LEDP_19004("External User is not allowed with Lattice Email ID."), //
+    LEDP_19005("Could not validate current user as the requried information is missing from Identity Provider."), //
 
     // le-admin 19101-19999
     LEDP_19101("Service service error."), //

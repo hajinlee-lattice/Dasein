@@ -105,6 +105,8 @@ public class SamlLoginResource {
                 throw new LedpException(LedpCode.LEDP_18170);
             }
             
+            sessionService.validateSamlLoginResponse(samlLoginResp);
+            
             /*
             //TODO: Commenting part of PLS-7954. Need to be enabled after we fix the allowed domains check/
             // Check whether User already exists in the system and other attributes are up to date too.

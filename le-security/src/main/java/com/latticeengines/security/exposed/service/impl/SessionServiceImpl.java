@@ -5,6 +5,7 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheConfig;
@@ -16,6 +17,9 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.saml.LoginValidationResponse;
 import com.latticeengines.domain.exposed.security.Credentials;
 import com.latticeengines.domain.exposed.security.Session;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -37,7 +41,8 @@ public class SessionServiceImpl implements SessionService {
     private static Long retryIntervalMsec = 200L;
     private static final String AUTH_ROUTE_SSO = "SSO";
     private static final String AUTH_ROUTE_GA = "GA";
-
+    private static final String LATTICE_ENGINES_COM = "LATTICE-ENGINES.COM";
+    
     @Inject
     private GlobalSessionManagementService globalSessionManagementService;
 
@@ -63,6 +68,18 @@ public class SessionServiceImpl implements SessionService {
         return ticket;
     }
 
+    @Override
+    public void validateSamlLoginResponse(LoginValidationResponse samlLoginResp) {
+        if (samlLoginResp == null || StringUtils.isNotBlank(samlLoginResp.getUserId())) {
+            LOGGER.info("Saml Login response is missing required information. " + samlLoginResp);
+            throw new LedpException(LedpCode.LEDP_19005);
+        }
+        //PLS-6543. Do not allow usernames with lattice-email id.
+        if(samlLoginResp.getUserId().toUpperCase().endsWith(LATTICE_ENGINES_COM)) {
+            throw new LedpException(LedpCode.LEDP_19004);
+        }    
+    }
+    
     @Override
     public Session attachSamlUserToTenant(String userName, String tenantDeploymentId) {
         Ticket ticket = samlGlobalAuthenticationService.externallyAuthenticated(userName, tenantDeploymentId);
