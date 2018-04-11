@@ -271,7 +271,6 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
             Long recStart, String columns, boolean hasSfdcContactId, List<Integer> accountIds) {
 
         String additionalColumns = getAccountExtensionColumns(columns);
-        String additionalColumnsOriginal = additionalColumns;
         if (!StringUtils.isBlank(additionalColumns)) {
             additionalColumns = additionalColumns.trim();
             if (!additionalColumns.endsWith(",")) {
@@ -325,8 +324,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
                         + getAccountExtensionFromWhereClause(accountIds, filterBy, //
                                 false, start == null)
                         + "; " + "  " //
-                        + "     SET ROWCOUNT 0; " //
-                        + " END ";
+                        + " END " //
+                        + " ELSE " //
+                        + " BEGIN " //
+                        + "     SELECT TOP 0 NULL " //
+                        + " END " //
+                        + " " //
+                        + " SET ROWCOUNT 0; ";
 
         MapSqlParameterSource source = new MapSqlParameterSource();
         if (StringUtils.isNotEmpty(filterBy) && (filterBy.toUpperCase().equals("RECOMMENDATIONS")

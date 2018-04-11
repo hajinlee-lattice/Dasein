@@ -77,9 +77,15 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
         getAccountExtensions(false, "BAD_COLUMN");
         getAccountExtensions(false, "CrmRefreshDate");
         getAccountExtensions(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN");
+
+        testEmptyResultWithLargeOffset(false, null);
+        testEmptyResultWithLargeOffset(true, null);
+        testEmptyResultWithLargeOffset(false, "BAD_COLUMN");
+        testEmptyResultWithLargeOffset(false, "CrmRefreshDate");
+        testEmptyResultWithLargeOffset(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN");
     }
 
-    public void getAccountExtensions(boolean shouldSendEmptyColumnMapping, String columns) {
+    private void getAccountExtensions(boolean shouldSendEmptyColumnMapping, String columns) {
         int offset = 1;
         String url = apiHostPort + "/playmaker/accountextensions?start=1&offset=" + offset + "&maximum=100";
         if (columns == null) {
@@ -120,6 +126,23 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
                 }
             }
         }
+    }
+
+    private void testEmptyResultWithLargeOffset(boolean shouldSendEmptyColumnMapping, String columns) {
+        int offset = 1000000;
+        String url = apiHostPort + "/playmaker/accountextensions?start=1&offset=" + offset + "&maximum=100";
+        if (columns == null) {
+            if (shouldSendEmptyColumnMapping) {
+                url += "&columns=";
+            }
+        } else {
+            url += "&columns=" + columns;
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> result = restTemplate.getForObject(url, Map.class);
+        Assert.assertNotNull(result);
+        Assert.assertTrue(result.size() == 0);
     }
 
     @Test(groups = "deployment")

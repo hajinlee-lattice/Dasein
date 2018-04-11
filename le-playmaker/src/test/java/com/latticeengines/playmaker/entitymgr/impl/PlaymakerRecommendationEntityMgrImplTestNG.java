@@ -224,6 +224,17 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
 
         getAccountExtensionsWithAccIds(someAccountIds, null);
         getAccountExtensionsWithAccIds(someAccountIds, "RECOMMENDATIONS");
+
+        testEmptyResultWithLargeOffset(shouldSendEmptyColumnMapping, columns, totalAccExtCount, max, startTime);
+    }
+
+    private void testEmptyResultWithLargeOffset(boolean shouldSendEmptyColumnMapping, String columns,
+            Long totalAccExtCount, int max, long startTime) {
+        Map<String, Object> emptyResultDueToVeryLargeOffset = playMakerRecommendationEntityMgr.getAccountExtensions(
+                tenant.getTenantName(), null, startTime, (totalAccExtCount.intValue() + 100), max, null, null, 0L,
+                shouldSendEmptyColumnMapping ? "" : columns, false);
+        Assert.assertNotNull(emptyResultDueToVeryLargeOffset);
+        Assert.assertTrue(emptyResultDueToVeryLargeOffset.size() == 0);
     }
 
     private Long loopForAccExt(Long totalAccExtCount, Set<Integer> ids, List<Object> idsList,
