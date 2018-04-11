@@ -36,7 +36,7 @@ public class BucketMetadataUtils {
 
     public static List<BucketMetadata> getDefaultMetadata() {
         List<BucketMetadata> buckets = new ArrayList<>();
-        buckets.add(addBucket(100, 95, BucketName.A));
+        buckets.add(addBucket(99, 95, BucketName.A));
         buckets.add(addBucket(95, 85, BucketName.B));
         buckets.add(addBucket(85, 50, BucketName.C));
         buckets.add(addBucket(50, 5, BucketName.D));

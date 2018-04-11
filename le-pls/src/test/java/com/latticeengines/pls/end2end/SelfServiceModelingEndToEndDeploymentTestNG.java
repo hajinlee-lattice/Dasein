@@ -265,8 +265,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(reports.size(), 2);
     }
 
-    @Test(groups = { "deployment.cdl", "deployment.lp",
-            "precheckin" }, dependsOnMethods = "createModel", timeOut = 120000, enabled = true)
+    @Test(groups = { "deployment.cdl", "deployment.lp", "precheckin" }, dependsOnMethods = "createModel")
     public void retrieveModelSummary() throws InterruptedException {
         log.info("Retrieving model summary for modeling ...");
         originalModelSummary = waitToDownloadModelSummary(modelName);
@@ -279,6 +278,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertJobExistsWithModelIdAndModelName(originalModelSummary.getId());
         inspectOriginalModelSummaryPredictors(originalModelSummary);
         assertABCDBucketsCreated(originalModelSummary.getId());
+        log.info("Finished retrieveModelSummary");
     }
 
     void activateModelSummary(String modelId) throws InterruptedException {
@@ -296,7 +296,9 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
     @Test(groups = { "deployment.lp", "precheckin" }, enabled = true, dependsOnMethods = "retrieveModelSummary")
     public void compareRtsScoreWithModelingForOriginalModelSummary() throws IOException, InterruptedException {
+        log.info("Start compareRtsScoreWithModelingForOriginalModelSummary");
         compareRtsScoreWithModeling(originalModelSummary, 843, firstTenant.getId());
+        log.info("Finished compareRtsScoreWithModelingForOriginalModelSummary");
     }
 
     private void assertABCDBucketsCreated(String modelId) {
@@ -324,17 +326,17 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 break;
             case B:
                 bucketNames.remove(bucketMetadata.getBucket());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 94);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 95);
                 assertEquals(bucketMetadata.getRightBoundScore(), 85);
                 break;
             case C:
                 bucketNames.remove(bucketMetadata.getBucket());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 84);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 85);
                 assertEquals(bucketMetadata.getRightBoundScore(), 50);
                 break;
             case D:
                 bucketNames.remove(bucketMetadata.getBucket());
-                assertEquals(bucketMetadata.getLeftBoundScore(), 49);
+                assertEquals(bucketMetadata.getLeftBoundScore(), 50);
                 assertEquals(bucketMetadata.getRightBoundScore(), 5);
                 break;
             default:
@@ -358,6 +360,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         assertEquals(response.getStatusCode(), HttpStatus.OK);
         String errors = new String(response.getBody());
         assertTrue(errors.length() > 0);
+        log.info("Finished retrieveErrorsFile");
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummary")
@@ -373,6 +376,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 null, ResponseDocument.class);
         Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
         assertTrue(res);
+        log.info("Finished copyModel");
     }
 
     @Test(groups = "deployment.lp", dependsOnMethods = "copyModel", timeOut = 1200000, enabled = true)
@@ -392,6 +396,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         activateModelSummary(copiedModelSummary.getId());
         compareRtsScoreWithModeling(copiedModelSummary, 687, secondTenant.getId());
         assertABCDBucketsCreated(copiedModelSummary.getId());
+        log.info("Finished retrieveModelSummaryForCopiedModel");
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = { "retrieveModelSummaryForCopiedModel" })
@@ -442,6 +447,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         JobStatus completedStatus = waitForWorkflowStatus(workflowProxy, modelingWorkflowApplicationId, false,
                 secondTenant);
         assertEquals(completedStatus, JobStatus.COMPLETED);
+        log.info("Finished cloneAndRemodel");
     }
 
     @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "cloneAndRemodel", timeOut = 120000)
@@ -484,6 +490,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         compareRtsScoreWithModeling(clonedModelSummary, 730, secondTenant.getId());
         assertABCDBucketsCreated(clonedModelSummary.getId());
+        log.info("Finished retrieveModelSummaryForClonedModel");
     }
 
     @SuppressWarnings("rawtypes")
@@ -497,10 +504,11 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
                 parameters, ResponseDocument.class);
         Boolean res = new ObjectMapper().convertValue(response.getResult(), Boolean.class);
         Assert.assertTrue(res);
+        log.info("Finished replaceModel");
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "replaceModel", timeOut = 120000)
-    public void retrieveModelSummaryForReplacedModel() throws InterruptedException, IOException {
+    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "replaceModel")
+    public void retrieveModelSummaryForReplacedModel() throws InterruptedException {
         log.info("Retrieve the model summary after replacing ...");
         testBed.switchToSuperAdmin(secondTenant);
         replacedModelSummary = waitToDownloadModelSummary(modelName);
@@ -514,9 +522,10 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
 
         // Inspect some predictors
         inspectOriginalModelSummaryPredictors(replacedModelSummary);
+        log.info("Finished retrieveModelSummaryForReplacedModel");
     }
 
-    @Test(groups = "deployment.lp", enabled = true, dependsOnMethods = "retrieveModelSummaryForClonedModel", timeOut = 1200000)
+    @Test(groups = "deployment.lp", dependsOnMethods = "retrieveModelSummaryForClonedModel")
     public void scoreTrainingDataOfClonedModel() throws InterruptedException, IOException {
         log.info("Scoring the training data of the cloned model summary ...");
         System.out.println(String.format("%s/pls/scores/%s/training?useRtsApi=TRUE&performEnrichment=TRUE",
@@ -529,6 +538,7 @@ public class SelfServiceModelingEndToEndDeploymentTestNG extends PlsDeploymentTe
         System.out.println(String.format("Score training data applicationId = %s", applicationId));
         assertNotNull(applicationId);
         testJobIsListed("rtsBulkScoreWorkflow", clonedModelSummary.getId(), applicationId);
+        log.info("Finished scoreTrainingDataOfClonedModel");
     }
 
     private void testJobIsListed(final String jobType, final String modelId, String applicationId) {
