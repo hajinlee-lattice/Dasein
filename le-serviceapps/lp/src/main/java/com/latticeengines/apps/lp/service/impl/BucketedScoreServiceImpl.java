@@ -18,6 +18,10 @@ import com.latticeengines.apps.lp.entitymgr.BucketedScoreSummaryEntityMgr;
 import com.latticeengines.apps.lp.entitymgr.ModelSummaryEntityMgr;
 import com.latticeengines.apps.lp.repository.writer.ModelSummaryWriterRepository;
 import com.latticeengines.apps.lp.service.BucketedScoreService;
+import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionConfiguration;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -25,6 +29,7 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 
 @Service("bucketedScoreService")
@@ -46,6 +51,9 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Inject
     private ActionService actionService;
+
+    @Inject
+    private TenantEntityMgr tenantEntityMgr;
 
     @Override
     public Map<Long, List<BucketMetadata>> getModelBucketMetadataGroupedByCreationTimes(String modelId) {
@@ -86,7 +94,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             modelSummaryEntityMgr.updateLastUpdateTime(request.getModelGuid());
         }
         if (StringUtils.isNotBlank(request.getRatingEngineId())) {
-            registerAction(request.getRatingEngineId(), request.getModelGuid(), request.getLastModifiedBy());
+            registerAction(request);
         }
     }
 
@@ -123,7 +131,10 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         return creationTimesToBucketMetadatas;
     }
 
-    private void registerAction(String ratingEngineId, String modelGuid, String userId) {
+    private void registerAction(CreateBucketMetadataRequest request) {
+        String ratingEngineId = request.getRatingEngineId();
+        String modelGuid = request.getModelGuid();
+        String userId = request.getLastModifiedBy();
         log.info(String.format("Register AI_MODEL_BUCKET_CHANGE creation Action for RatingEngine %s, Model GUID %s",
                 ratingEngineId, modelGuid));
         Action action = new Action();
@@ -137,6 +148,18 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         action.setActionConfiguration(actionConfiguration);
         action.setDescription(action.getActionConfiguration().serialize());
         log.debug(String.format("Registering action %s", action));
+
+        try {
+            String tenantId = request.getTenantId();
+            tenantId = CustomerSpace.parse(tenantId).toString();
+            Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
+            if (tenant == null) {
+                throw new RuntimeException(String.format("No tenant found with id %s", tenantId));
+            }
+            MultiTenantContext.setTenant(tenant);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot set MultiTenantContext: " + JsonUtils.serialize(request), e);
+        }
         actionService.create(action);
     }
 
