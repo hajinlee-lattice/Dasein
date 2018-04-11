@@ -13,17 +13,28 @@ import com.latticeengines.domain.exposed.pls.BucketMetadata;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class CreateBucketMetadataRequest {
 
+    @JsonProperty("TenantId")
+    private String tenantId;
+
     @JsonProperty("BucketMetadataList")
-    List<BucketMetadata> bucketMetadataList;
+    private List<BucketMetadata> bucketMetadataList;
 
     @JsonProperty("LastModifiedBy")
-    String lastModifiedBy;
+    private String lastModifiedBy;
 
     @JsonProperty("ModelGUID")
-    String modelGuid;
+    private String modelGuid;
 
     @JsonProperty("RatingEngineId")
-    String ratingEngineId;
+    private String ratingEngineId;
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenant) {
+        this.tenantId = tenant;
+    }
 
     public List<BucketMetadata> getBucketMetadataList() {
         return bucketMetadataList;
