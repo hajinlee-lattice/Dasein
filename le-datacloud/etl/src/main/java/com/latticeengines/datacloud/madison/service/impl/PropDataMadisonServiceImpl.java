@@ -7,12 +7,12 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.hadoop.yarn.util.ConverterUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -95,6 +95,9 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     @Value("${propdata.madison.num.past.days}")
     private int numOfPastDays;
+
+    @Value("${propdata.madison.fixed.date:6}")
+    private int fixedDate;
 
     @Value("${propdata.madison.target.raw.table}")
     private String targetRawTable;
@@ -328,6 +331,8 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     private void getPastIncrementalDays(Date today, List<Date> pastDays) throws Exception {
+        if (!validateDate(today))
+            return;
         try {
             String todayIncrementalPath = getHdfsDataflowIncrementalRawPathWithDate(today);
             if (!HdfsUtils.fileExists(yarnConfiguration, todayIncrementalPath)) {
@@ -350,6 +355,11 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
             log.error("Failed to get HDFS paths", ex);
             throw ex;
         }
+    }
+
+    private boolean validateDate(Date today) {
+        int dayOfWeek = today.getDay();
+        return (dayOfWeek == fixedDate);
     }
 
     @Override

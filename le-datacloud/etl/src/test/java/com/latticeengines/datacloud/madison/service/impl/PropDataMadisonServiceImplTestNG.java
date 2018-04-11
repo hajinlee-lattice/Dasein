@@ -113,7 +113,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
     private void downloadFile(MadisonLogicDailyProgress dailyProgress, String outputDir) throws Exception {
 
         PropDataContext requestContext = new PropDataContext();
-//        requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
+        requestContext.setProperty(PropDataMadisonService.RECORD_KEY, dailyProgress);
         PropDataContext responseContext = propDataService.importFromDB(requestContext);
 
         Assert.assertEquals(responseContext.getProperty(PropDataMadisonService.STATUS_KEY, String.class),
@@ -133,6 +133,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
 
         PropDataContext requestContext = new PropDataContext();
 
+        ReflectionTestUtils.setField(propDataService, "fixedDate", yesterday.getDay());
         requestContext.setProperty(PropDataMadisonService.TODAY_KEY, yesterday);
         PropDataContext responseContext = propDataService.transform(requestContext);
 
@@ -141,8 +142,9 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput1 + "/output")));
 
+        ReflectionTestUtils.setField(propDataService, "fixedDate", today.getDay());
         requestContext = new PropDataContext();
-//        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
+        requestContext.setProperty(PropDataMadisonService.TODAY_KEY, today);
         propDataService.transform(requestContext);
         Assert.assertTrue(HdfsUtils.fileExists(yarnConfiguration,
                 ((PropDataMadisonServiceImpl) propDataService).getSuccessFile(transformOutput2 + "/output")));
