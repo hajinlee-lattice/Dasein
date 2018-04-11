@@ -104,14 +104,14 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             }
             pivotedRecordsMap.get(modelGuid).add(record);
         }
-        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
+        String customerSpace = configuration.getCustomerSpace().toString();
         pivotedRecordsMap.forEach((modelGuid, pivotedRecords) -> {
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                     .generateBucketedScoreSummary(pivotedRecords);
-            bucketedScoreSummaryMap.put(modelGuid, bucketedScoreSummary);
+            log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
+                    + JsonUtils.serialize(bucketedScoreSummary));
+            bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace, modelGuid, bucketedScoreSummary);
         });
-        log.info("Bucketed score summaries to save: " + JsonUtils.serialize(bucketedScoreSummaryMap));
-        bucketedScoreSummaryMap.forEach(bucketedScoreProxy::createOrUpdateBucketedScoreSummary);
     }
 
 }
