@@ -17,7 +17,7 @@ angular.module('login.tenants', [
         angular.extend(vm, {
             ResourceUtility: ResourceUtility,
             tenantList: TenantList,
-            tenantMap: {}, 
+            tenantMap: {},
             isLoggedInWithTempPassword: LoginDocument.MustChangePassword,
             isPasswordOlderThanNinetyDays: TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified),
             SortProperty: 'RegisteredTime',

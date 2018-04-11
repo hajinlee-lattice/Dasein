@@ -11,7 +11,7 @@ angular
             controllerAs: 'vm',
             templateUrl: '/components/datacloud/explorer/attributetile/attributetile.component.html',
             controller: function (
-                $scope, $state, $document, $timeout, $interval,
+                $scope, $state, $document, $timeout, $interval, QueryStore,
                 DataCloudStore, NumberUtility, QueryTreeService
             ) {
                 var vm = $scope.vm;
@@ -35,8 +35,20 @@ angular
 
                     var entity = enrichment.Entity;
                     var fieldname = enrichment.ColumnId;
+                    var state = '';
 
-                    $state.go('home.segment.explorer.enumpicker', {
+                    switch ($state.current.name) {
+                        case 'home.ratingsengine.rulesprospects.segment.attributes.rules': 
+                            state = 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker'; 
+                            break;
+                        case 'home.ratingsengine.dashboard.segment.attributes.add': 
+                            state = 'home.ratingsengine.dashboard.segment.attributes.rules.picker'; 
+                            break;
+                        default: 
+                            state = 'home.segment.explorer.enumpicker';
+                    }
+
+                    $state.go(state, {
                         entity: entity,
                         fieldname: fieldname
                     });

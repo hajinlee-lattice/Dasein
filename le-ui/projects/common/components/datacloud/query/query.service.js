@@ -333,7 +333,7 @@ angular.module('common.datacloud.query.service',[
                 return restriction.logicalRestriction;
             });
 
-            console.log(':add:', sameAttributes, '\n', logicalRestrictions);
+            //console.log(':add:', sameAttributes, '\n', logicalRestrictions);
 
             var newHome = null;
 

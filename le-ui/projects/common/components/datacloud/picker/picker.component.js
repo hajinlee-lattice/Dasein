@@ -12,7 +12,8 @@ angular.module('common.datacloud.valuepicker', [])
         sortPrefix: '-',
         page: 1,
         row_limit: 15, 
-        page_size: Math.ceil(15 * 3)
+        page_size: Math.ceil(15 * 3),
+        mode: $stateParams.mode
     });
 
     vm.init = function() {

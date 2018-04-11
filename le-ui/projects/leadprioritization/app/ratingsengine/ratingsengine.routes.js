@@ -244,8 +244,6 @@ angular
             .state('home.ratingsengine.dashboard.segment.attributes', {
                 url: '/attributes',
                 params: {
-                    pageIcon: 'ico-model',
-                    pageTitle: 'Models',
                     section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
@@ -336,9 +334,9 @@ angular
             .state('home.ratingsengine.dashboard.segment.attributes.add', {
                 url: '/add',
                 params: {
-                    pageIcon: 'ico-model',
-                    pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_attributes',
+                    pageIcon: 'ico-performance',
+                    pageTitle: 'Rules',
+                    section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
                 views: {
@@ -352,8 +350,8 @@ angular
             .state('home.ratingsengine.dashboard.segment.attributes.rules', {
                 url: '/rules',
                 params: {
-                    pageIcon: 'ico-model',
-                    pageTitle: 'Models',
+                    pageIcon: 'ico-performance',
+                    pageTitle: 'Rules',
                     section: 'wizard.ratingsengine_attributes',
                     gotoNonemptyCategory: true
                 },
@@ -417,6 +415,9 @@ angular
             })
             .state('home.ratingsengine.dashboard.segment.attributes.rules.picker', {
                 url: '/picker/:entity/:fieldname',
+                params: {
+                    mode: 'dashboardrules'
+                },
                 resolve: {
                     PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
                         var deferred = $q.defer();

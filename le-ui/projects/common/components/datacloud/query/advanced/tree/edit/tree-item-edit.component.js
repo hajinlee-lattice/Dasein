@@ -220,10 +220,12 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                         restriction: vm.tree
                     });
 
-                    var state = (vm.root.mode == 'rules')
+                    var state = vm.root.mode == 'rules'
                         ? 'home.ratingsengine.rulesprospects.segment.attributes.rules.picker'
-                        : 'home.segment.explorer.enumpicker';
-
+                        : (vm.root.mode == 'dashboardrules'
+                            ? 'home.ratingsengine.dashboard.segment.attributes.rules.picker'
+                            : 'home.segment.explorer.enumpicker');
+                    
                     $state.go(state, { entity: vm.item.Entity, fieldname: vm.item.ColumnId });
                 }
 

@@ -10,8 +10,6 @@ angular
         controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
             var vm = $scope.vm;
 
-            console.log(vm.bucket);
-
             angular.extend(vm, {
                 orders: {
                     attributeLookupMode: [ '-Value', 'DisplayName'],

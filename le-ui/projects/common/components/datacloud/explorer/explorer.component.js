@@ -94,17 +94,15 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
-
-        console.log($state);
-
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add') {
             vm.mode = 'dashboardrules';
         }
 
-        if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
-            vm.section = 'segment.analysis';
-            vm.inWizard = true;
-        }
+        // this behavior is nolonger desired by PM
+        // if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
+        //     vm.section = 'segment.analysis';
+        //     vm.inWizard = true;
+        // }
 
         QueryStore.setSegmentEnabled = false;
 
@@ -1505,17 +1503,17 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentAttributeInput = DataCloudStore.getMetadata('segmentAttributeInput') || {};
     vm.selectSegmentAttribute = function(attribute) {
-
-        console.log(attribute);
-
         if (!vm.cube) {
             return alert('Cube data not yet loaded. \nOne moment please.');
         }
+
         attribute.SegmentChecked = true;
+        
         if (!attribute.TopBkt) {
             vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
             return;
         }
+
         var attribute = angular.copy(attribute),
             attributeKey = attribute.Attribute || attribute.FieldName,
             stat = vm.getAttributeStat(attribute) || {},

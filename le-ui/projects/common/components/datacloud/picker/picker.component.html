@@ -14,7 +14,7 @@
         </ul>
     </div>
 
-    <div class="pagination" ng-if="filteredList.length / vm.page_size > 1">
+    <div class="pagination" ng-if="filteredList.length / vm.page_size > 1 && vm.mode != 'dashboardrules'">
         <pd-pagination-controls current="vm.page" max="filteredList.length / vm.page_size"></pd-pagination-controls>
     </div>
 
@@ -31,6 +31,15 @@
             <a class="sort button icon-button white-button" ng-click="vm.sortPrefix = (vm.sortPrefix == '+' ? '-' : '+'); vm.page = 1;">
                 <span class="fa fa-sort-amount-{{vm.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
             </a>
+            <button 
+                type="button"
+                ng-if="vm.mode == 'dashboardrules'"
+                ui-sref="home.ratingsengine.dashboard.segment.attributes.rules"
+                class="pull-right button blue-button">
+                Back to Rules
+            </button>
+        </li>
+        <li class="pull-right" ng-if="vm.mode == 'dashboardrules'">
         </li>
     </ul>
 
