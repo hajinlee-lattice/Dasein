@@ -241,6 +241,9 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer'
             },
+            onExit: ['DataCloudStore', 'Enrichments', function(DataCloudStore, Enrichments) {
+                DataCloudStore.setEnrichments(Enrichments, false);
+            }],
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
                     var deferred = $q.defer();
