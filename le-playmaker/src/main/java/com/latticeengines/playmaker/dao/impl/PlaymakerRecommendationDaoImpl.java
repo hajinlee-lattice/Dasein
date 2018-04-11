@@ -379,11 +379,13 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     private String getAccountExtensionColumns(String columns) {
-        if (StringUtils.isBlank(columns)) {
-            columns = null;
-        } else {
+        if (columns != null) {
             columns = StringUtils.strip(columns);
+            if ("".equals(columns)) {
+                return "";
+            }
         }
+
         List<Map<String, Object>> schema = getAccountExtensionSchema();
         StringBuilder builder = new StringBuilder();
         Set<String> columnsInDb = new HashSet<>();

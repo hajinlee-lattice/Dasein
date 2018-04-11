@@ -84,14 +84,15 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
     }
 
     private void getAccountExtensions(String filterBy) {
-        getAccountExtensions(false, null, filterBy);
-        getAccountExtensions(true, null, filterBy);
-        getAccountExtensions(false, "BAD_COLUMN", filterBy);
-        getAccountExtensions(false, "CrmRefreshDate", filterBy);
-        getAccountExtensions(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN", filterBy);
+        getAccountExtensions(false, null, filterBy, false);
+        getAccountExtensions(true, null, filterBy, true);
+        getAccountExtensions(false, "BAD_COLUMN", filterBy, true);
+        getAccountExtensions(false, "CrmRefreshDate", filterBy, false);
+        getAccountExtensions(false, "CrmRefreshDate,RevenueGrowth,BAD_COLUMN", filterBy, false);
     }
 
-    private void getAccountExtensions(boolean shouldSendEmptyColumnMapping, String columns, String filterBy) {
+    private void getAccountExtensions(boolean shouldSendEmptyColumnMapping, String columns, String filterBy,
+            boolean expectColumnsSizeEqualTo6) {
         int offset = 0;
         String url = apiHostPort + "/playmaker/%s?start=1&offset=" + offset + "&maximum=250";
         if (columns == null) {
@@ -145,6 +146,15 @@ public class RecommendationResourceDeploymentTestNG extends PlaymakerTestNGBase 
                     }
                 }
             }
+            Assert.assertTrue(rec.containsKey("SfdcContactID"));
+
+            if (expectColumnsSizeEqualTo6) {
+                Assert.assertTrue(rec.size() == 6,
+                        String.format("rec.size() = %d, expected to be = %d", rec.size(), 6));
+            } else {
+                Assert.assertTrue(rec.size() > 6, String.format("rec.size() = %d, expected to be > %d", rec.size(), 6));
+            }
+
         }
     }
 
