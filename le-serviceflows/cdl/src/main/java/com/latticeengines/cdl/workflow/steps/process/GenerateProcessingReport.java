@@ -235,26 +235,20 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private long countInRedshift(BusinessEntity entity) {
-        DataCollection.Version version = inactive;
         if (StringUtils.isBlank(
-                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), version))) {
-            log.info("Cannot find serving store for entity " + entity.name() + " with version " + version.name());
-            version = active;
-            if (StringUtils.isBlank(
-                    dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), version))) {
-                log.info("Cannot find serving store for entity " + entity.name() + " with version " + version.name());
-                return 0L;
-            }
+                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive))) {
+            log.info("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
+            return 0L;
         }
         FrontEndQuery frontEndQuery = new FrontEndQuery();
         frontEndQuery.setMainEntity(entity);
         int retries = 0;
         while (retries < 3) {
             try {
-                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, version);
+                return ratingProxy.getCountFromObjectApi(customerSpace.toString(), frontEndQuery, inactive);
             } catch (Exception ex) {
                 log.error("Exception in getting count from serving store for entity " + entity.name() + " with version "
-                        + version.name(), ex);
+                        + inactive.name(), ex);
                 retries++;
                 try {
                     Thread.sleep(2000);
@@ -263,7 +257,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             }
         }
         log.error("Fail to get count from serving store for entity " + entity.name() + " with version "
-                + version.name());
+                + inactive.name());
         return 0L;
     }
 
