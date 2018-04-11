@@ -52,6 +52,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     public final EventFrontEndQuery build() {
         handleCustomSegment();
         handleProxyProducts();
+        replaceTransactionRestrictionsWithBucketRestrictions();
         removeTimeWindowRestrictions();
         buildProductTransactionRestrictions();
         setQueryEvaluationId();
@@ -61,7 +62,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     protected void removeTimeWindowRestrictions() {
-        replaceTransactionRestrictionsWithBucketRestrictions();
         DepthFirstSearch dfs = new DepthFirstSearch();
         if (baseSegment.getAccountRestriction() != null) {
             dfs.run(baseSegment.getAccountRestriction(), (object, ctx) -> {
