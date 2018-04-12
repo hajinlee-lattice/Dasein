@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class JobStepDisplayInfoMapping {
-    private static final Logger LOGGER = LoggerFactory.getLogger(JobStepDisplayInfoMapping.class);
+    private static final Logger log = LoggerFactory.getLogger(JobStepDisplayInfoMapping.class);
 
     private static final String[] FIT_MODEL_STEPS = { //
             "load_data", //
@@ -406,9 +406,9 @@ public final class JobStepDisplayInfoMapping {
             String[] steps = DISPLAY_NAME.get(workflowType);
             return steps[stepIndex];
         } catch (RuntimeException exc) {
-            LOGGER.warn(
-                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
-                    exc);
+//            log.warn(
+//                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
+//                    exc);
             return "no_mapped_step_name";
         }
     }
@@ -418,9 +418,9 @@ public final class JobStepDisplayInfoMapping {
             String[] steps = DISPLAY_DESCRIPTION.get(workflowType);
             return steps[stepIndex];
         } catch (RuntimeException exc) {
-            LOGGER.warn(
-                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
-                    exc);
+//            log.warn(
+//                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
+//                    exc);
             return "no_mapped_step_description";
         }
     }
