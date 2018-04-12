@@ -346,37 +346,37 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true }, //
             { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true }, //
             { "AID2", "PID3", null, null, 0.0, 0.0, -100, true }, //
-            { "AID2", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID2", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true }, //
             { "AID3", "PID2", null, null, 0.0, 0.0, 0, false }, //
             { "AID3", "PID3", null, null, 0.0, 0.0, 0, false }, //
-            { "AID3", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID3", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true }, //
             { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true }, //
             { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true }, //
-            { "AID4", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID4", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID5", "PID1", null, null, 0.0, 0.0, 0, false }, //
             { "AID5", "PID2", null, null, 0.0, 0.0, 0, false }, //
-            { "AID5", "PID3", null, null, 0.0, 0.0, 0, null }, //
-            { "AID5", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID5", "PID3", null, null, 0.0, 0.0, 0, false }, //
+            { "AID5", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true }, //
             { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true }, //
-            { "AID6", "PID3", null, null, 0.0, 0.0, 0, null }, //
-            { "AID6", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID6", "PID3", null, null, 0.0, 0.0, 0, false }, //
+            { "AID6", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true }, //
-            { "AID7", "PID2", null, null, 0.0, 0.0, 0, null }, //
-            { "AID7", "PID3", null, null, 0.0, 0.0, 0, null }, //
-            { "AID7", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID7", "PID2", null, null, 0.0, 0.0, 0, false }, //
+            { "AID7", "PID3", null, null, 0.0, 0.0, 0, false }, //
+            { "AID7", "PID4", null, null, 0.0, 0.0, 0, false }, //
 
             { "AID8", "PID1", null, null, 0.0, 0.0, -100, true }, //
-            { "AID8", "PID2", null, null, 0.0, 0.0, 0, null }, //
-            { "AID8", "PID3", null, null, 0.0, 0.0, 0, null }, //
-            { "AID8", "PID4", null, null, 0.0, 0.0, 0, null }, //
+            { "AID8", "PID2", null, null, 0.0, 0.0, 0, false }, //
+            { "AID8", "PID3", null, null, 0.0, 0.0, 0, false }, //
+            { "AID8", "PID4", null, null, 0.0, 0.0, 0, false }, //
     };
 
     // Schema: AccountId

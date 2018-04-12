@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.serviceapps.cdl;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -43,7 +44,10 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields {
+public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields, Serializable {
+
+    private static final long serialVersionUID = -5942157947113415428L;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore

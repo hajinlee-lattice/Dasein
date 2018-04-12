@@ -69,14 +69,7 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         pivotValues.forEach(pivotVal -> {
             metricsFields.forEach(metrics -> {
                 String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
-                if (activityType == ActivityType.PurchaseHistory
-                        && field.endsWith(ActivityMetricsUtils.getHasPurchasedAbbr())
-                        && context.pivotData.get(field) == null) {
-                    result.set(namePositionMap.get(field), false);
-                } else {
-                    result.set(namePositionMap.get(field), context.pivotData.get(field));
-                }
-
+                result.set(namePositionMap.get(field), context.pivotData.get(field));
             });
         });
         return result;

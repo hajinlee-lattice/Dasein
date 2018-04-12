@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.query;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -17,7 +18,9 @@ import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class TimeFilter {
+public class TimeFilter implements Serializable {
+
+    private static final long serialVersionUID = 8673967424226878257L;
 
     @JsonIgnore
     private Lookup lhs;
