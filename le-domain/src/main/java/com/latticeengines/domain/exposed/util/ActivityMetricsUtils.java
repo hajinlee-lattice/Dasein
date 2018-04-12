@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
@@ -58,12 +59,23 @@ public class ActivityMetricsUtils {
     };
 
     @SuppressWarnings("serial")
-    private static Map<String, String> periodAbbr = new HashMap<String, String> () {
+    private static Map<String, String> periodAbbr = new HashMap<String, String>() {
         {
             put(PeriodStrategy.Template.Year.name(), "Y");
             put(PeriodStrategy.Template.Quarter.name(), "Q");
             put(PeriodStrategy.Template.Month.name(), "M");
             put(PeriodStrategy.Template.Week.name(), "W");
+        }
+    };
+
+    private static Map<InterfaceName, NullMetricsImputation> nullImputation = new HashMap<InterfaceName, NullMetricsImputation>() {
+        {
+            put(InterfaceName.Margin, NullMetricsImputation.NULL);
+            put(InterfaceName.SpendChange, NullMetricsImputation.ZERO);
+            put(InterfaceName.ShareOfWallet, NullMetricsImputation.NULL);
+            put(InterfaceName.AvgSpendOvertime, NullMetricsImputation.ZERO);
+            put(InterfaceName.TotalSpendOvertime, NullMetricsImputation.ZERO);
+            put(InterfaceName.HasPurchased, NullMetricsImputation.FALSE);
         }
     };
 
@@ -93,7 +105,7 @@ public class ActivityMetricsUtils {
         return HEADER + activityId + SEPARATOR + nameWithPeriod;
     }
 
-    public static String getActivityIdFromFullName(String fullName) {
+    public static String getProductIdFromFullName(String fullName) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;
         }
@@ -116,7 +128,11 @@ public class ActivityMetricsUtils {
         fullName = fullName.substring(HEADER.length()); // remove header
         return metricsAbbrRev.get(fullName.substring(fullName.lastIndexOf(SEPARATOR) + SEPARATOR.length()));
     }
-    
+
+    public static NullMetricsImputation getNullImputation(String fullName) {
+        return nullImputation.get(getMetricsFromFullName(fullName));
+    }
+
     public static String getPeriodsFromFullName(String fullName) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;

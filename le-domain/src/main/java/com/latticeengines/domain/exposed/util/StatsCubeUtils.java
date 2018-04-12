@@ -256,13 +256,13 @@ public class StatsCubeUtils {
             return attrStats;
         }
 
-        String activityId = ActivityMetricsUtils.getActivityIdFromFullName(attrName);
+        String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
 
         Buckets buckets = attrStats.getBuckets();
         buckets.setType(BucketType.TimeSeries);
         List<Bucket> bucketList = new ArrayList<>();
         buckets.getBucketList().forEach(bucket -> {
-            Bucket bucket1 = convertTxnBucketForHasPurchased(activityId, bucket);
+            Bucket bucket1 = convertTxnBucketForHasPurchased(productId, bucket);
             if (bucket1 != null) {
                 bucketList.add(bucket1);
             }

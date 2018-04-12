@@ -105,7 +105,7 @@ public class RestrictionUtils {
     private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator, List<Object> values) {
         String fullAttrName = attr.getAttribute();
         String metricAttr = ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullAttrName);
-        String bundleId = ActivityMetricsUtils.getActivityIdFromFullName(fullAttrName);
+        String bundleId = ActivityMetricsUtils.getProductIdFromFullName(fullAttrName);
         AttributeLookup metricAttrLookup = new AttributeLookup(BusinessEntity.DepivotedPurchaseHistory, metricAttr);
         Restriction metricRestriction = convertValueComparisons(metricAttrLookup, comparator, values);
         Restriction bundleIdRestriction = Restriction.builder() //

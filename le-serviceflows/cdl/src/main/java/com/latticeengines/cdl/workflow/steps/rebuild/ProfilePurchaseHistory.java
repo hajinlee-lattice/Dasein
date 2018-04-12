@@ -381,7 +381,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             attribute.setCategory(Category.PRODUCT_SPEND.getName());
 
             if (!InterfaceName.AccountId.name().equalsIgnoreCase(attribute.getName())) {
-                String productId = ActivityMetricsUtils.getActivityIdFromFullName(attribute.getName());
+                String productId = ActivityMetricsUtils.getProductIdFromFullName(attribute.getName());
                 if (StringUtils.isBlank(productId)) {
                     throw new RuntimeException("Cannot parse product id from attribute name " + attribute.getName());
                 }
