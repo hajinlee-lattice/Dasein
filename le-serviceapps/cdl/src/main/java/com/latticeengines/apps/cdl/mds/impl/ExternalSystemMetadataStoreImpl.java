@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.entitymgr.CDLExternalSystemEntityMgr;
@@ -43,28 +44,31 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
             if (externalSystem != null) {
                 Set<String> ids = new HashSet<>();
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
-                    ids.addAll(externalSystem.getCRMIdList());
+                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "CRM")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
-                    ids.addAll(externalSystem.getMAPIdList());
+                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "MAP")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
-                    ids.addAll(externalSystem.getERPIdList());
+                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "ERP")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
-                    ids.addAll(externalSystem.getOtherIdList());
-                }
-                if (CollectionUtils.isNotEmpty(ids)) {
-                    flux = Flux.fromIterable(ids).map(id -> {
-                        ColumnMetadata cm = new ColumnMetadata();
-                        cm.setAttrName(id);
-                        cm.enableGroup(ColumnSelection.Predefined.LookupId);
-                        return cm;
-                    });
+                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, null)));
                 }
             }
         }
         return flux;
+    }
+
+    private ColumnMetadata toColumnMetadata(String attrName, String type) {
+        ColumnMetadata cm = new ColumnMetadata();
+        cm.setAttrName(attrName);
+        cm.enableGroup(ColumnSelection.Predefined.LookupId);
+        cm.setSubcategory("Account IDs");
+        if (StringUtils.isNotBlank(type)) {
+            cm.setSecondaryDisplayName(type);
+        }
+        return cm;
     }
 
 }
