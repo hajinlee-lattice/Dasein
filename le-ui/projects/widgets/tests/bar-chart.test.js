@@ -1,6 +1,6 @@
 angular.module('barchart.test', ['le.widgets.barchart'])
     .component('barChartTest', {
-    template: `<div style="border: 1px solid red;">
+    template: `<div style="border: 0px solid red; margin-top: 20px;">
                     <le-bar-chart 
                         bktlist="$ctrl.getTestData()"
                         callback="$ctrl.clicked()"
@@ -84,12 +84,12 @@ angular.module('barchart.test', ['le.widgets.barchart'])
                         'header':'Attributes Value',
                         'emptymsg': '',
                         'color': '#2E6099',
-                        'mousehover': false,
+                        'mousehover': true,
                         'hovercolor': '#77aae5',
-                        'type': '',
+                        'type': 'decimal',
                         'showstatcount': true,
                         'maxVLines': 3,
-                        'showVLines': false
+                        'showVLines': true
                     },
                     'vlines':{
                         'suffix': 'x'
@@ -99,13 +99,13 @@ angular.module('barchart.test', ['le.widgets.barchart'])
                             'label': 'Lifts',
                             'type': 'string',
                             'sufix': 'x',
-                            'chart': false
+                            'chart': true
                         },
                         {
                             'field': 'Cnt',
                             'label': 'Records',
                             'type': 'number',
-                            'chart': true,
+                            'chart': false,
                         }
                     ]
                 };

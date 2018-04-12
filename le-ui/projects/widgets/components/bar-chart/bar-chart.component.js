@@ -18,11 +18,11 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
       return highest;
     }
 
-    function getHorizontalPercentage(stat, field, limit) {
+    function getHorizontalPercentage(stat, field, highest, limit) {
       var number = stat[field];
 
-      if (number && this.highest) {
-        percentage = ((number / this.highest) * 100);
+      if (number && highest) {
+        percentage = ((number / highest) * 100);
 
         if (typeof limit != 'undefined') {
           percentage = percentage.toFixed(limit);
@@ -32,9 +32,9 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
       return 0;
     }
 
-    function getHorizontalPercentageSubDec(stat, field, limit) {
+    function getHorizontalPercentageSubDec(stat, field, highest, limit) {
       // var max = Math.ceil(this.highest);
-      var max = Math.round(this.highest * 2) / 2;
+      var max = Math.round(highest * 2) / 2;
       var val = stat[field];
       if (max && val) {
         var percentage = (val * 100) / max;
@@ -194,13 +194,13 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
           }
         case 'string':
           {
-            return stat[column.field] + column.suffix;
+            return stat[column.field] + (column.suffix ? column.suffix : '');
           }
         default:
           return stat[column.field];
       }
     }
-
+    
     /**
      * Return the value showVLines fron the config object. 
      * If not set return false
@@ -235,11 +235,11 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
       switch (this.chartType) {
         case 'decimal':
           {
-            return getHorizontalPercentageSubDec(stat, column.field, limit);
+            return getHorizontalPercentageSubDec(stat, column.field, this.highest, limit);
           }
         default:
           {
-            return getHorizontalPercentage(stat, column.field, limit);
+            return getHorizontalPercentage(stat, column.field, this.highest, limit);
           }
       }
     }
