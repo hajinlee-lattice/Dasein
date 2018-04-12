@@ -120,7 +120,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     }
 
     private AIModel createAIModel(AIModel aiModel, ModelSummary modelSummary, PredictionType predictionType) {
-        aiModel.setModelSummary(modelSummary);
+        aiModel.setModelSummaryId(modelSummary.getId());
         CrossSellModelingConfig advancedConf = CrossSellModelingConfig.getAdvancedModelingConfig(aiModel);
         advancedConf.setTargetProducts(Collections.singletonList(TARGET_PRODUCT));
         aiModel.setPredictionType(predictionType);

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.AIModelEntityMgr;
@@ -70,9 +71,9 @@ public abstract class RatingEngineTemplate {
             } else {
                 aimodel = (AIModel) ratingEngine.getActiveModel();
             }
-            if (aimodel.getModelSummary() != null) {
+            if (!StringUtils.isEmpty(aimodel.getModelSummaryId())) {
                 ratingEngineSummary.setBucketMetadata(internalResourceProxy
-                        .getUpToDateABCDBuckets(aimodel.getModelSummary().getId(), CustomerSpace.parse(tenantId)));
+                        .getUpToDateABCDBuckets(aimodel.getModelSummaryId(), CustomerSpace.parse(tenantId)));
             }
         } else {
             Map<String, Long> counts = ratingEngine.getCountsAsMap();

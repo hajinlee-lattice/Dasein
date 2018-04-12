@@ -1,8 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -78,7 +76,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     protected String aiRatingModelId;
 
     @BeforeClass(groups = { "deployment" })
-    public void setup() throws KeyManagementException, NoSuchAlgorithmException, IOException, Exception {
+    public void setup() throws Exception {
         setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
         MetadataSegment createdSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(),
@@ -221,7 +219,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
         ModelSummary selectedModelSummary = new ModelSummary();
         selectedModelSummary.setId(retModelSummary.getId());
-        aiModel.setModelSummary(selectedModelSummary);
+        aiModel.setModelSummaryId(selectedModelSummary.getId());
 
         updateRatingModel(aiModel);
         assertUpdatedModelWithModelSummary(getSpecificRatingModel(), retModelSummary);
@@ -229,16 +227,16 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     @Test(groups = "deployment", dependsOnMethods = { "testUpdateRatingModelWithModelSummary" })
     private void testGetDependentAttrsInAllModels() {
-        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(
-                mainCustomerSpace, aiRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(mainCustomerSpace,
+                aiRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(attributes.size(), 2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
     private void testGetDependentAttrsInActiveModel() {
-        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(
-                mainCustomerSpace, aiRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(mainCustomerSpace,
+                aiRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(attributes.size(), 2);
     }
@@ -288,8 +286,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         RatingModel rm = getRatingModel();
         Assert.assertNotNull(rm);
         Assert.assertTrue(rm instanceof AIModel);
-        AIModel aiModel = (AIModel) rm;
-        return aiModel;
+        return (AIModel) rm;
     }
 
     private List<String> generateSeletedProducts() {
@@ -310,10 +307,14 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertEquals(1, aiModel.getIteration());
 
         Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts());
-        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID1));
-        Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID2));
-        Assert.assertFalse(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
-        Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts().contains(PRODUCT_ID3));
+        Assert.assertTrue(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID1));
+        Assert.assertTrue(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts().contains(PRODUCT_ID2));
+        Assert.assertFalse(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
+        Assert.assertNotNull(
+                CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts().contains(PRODUCT_ID3));
         Assert.assertEquals(aiModel.getModelingYarnJobId().toString(), APP_JOB_ID);
     }
 
@@ -333,9 +334,11 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
             return;
         }
         Assert.assertNotNull(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters());
-        Assert.assertEquals(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(), testFilters.size());
+        Assert.assertEquals(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().size(),
+                testFilters.size());
         for (ModelingConfigFilter filter : testFilters.values()) {
-            Assert.assertTrue(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().values().contains(filter));
+            Assert.assertTrue(
+                    CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getFilters().values().contains(filter));
         }
     }
 
@@ -345,8 +348,8 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         if (testModelSummary == null) {
             return;
         }
-        Assert.assertNotNull(aiModel.getModelSummary());
-        Assert.assertEquals(aiModel.getModelSummary().getId(), testModelSummary.getId());
+        Assert.assertNotNull(aiModel.getModelSummaryId());
+        Assert.assertEquals(aiModel.getModelSummaryId(), testModelSummary.getId());
     }
 
     private void assertDefaultAIModel(AIModel aiModel) {
@@ -354,8 +357,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
         Assert.assertNotNull(aiModel.getId());
         Assert.assertEquals(aiModel.getIteration(), 1);
 
-        Assert.assertTrue(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
-        Assert.assertTrue(CollectionUtils.isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
+        Assert.assertTrue(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts()));
+        Assert.assertTrue(CollectionUtils
+                .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTrainingProducts()));
         Assert.assertNull(aiModel.getTrainingSegment());
         Assert.assertNull(aiModel.getModelingYarnJobId());
     }

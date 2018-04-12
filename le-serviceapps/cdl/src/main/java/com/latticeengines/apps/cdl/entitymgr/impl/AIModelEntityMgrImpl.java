@@ -31,7 +31,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
 
     @Override
     public BaseJpaRepository<AIModel, Long> getRepository() {
-        return (BaseJpaRepository<AIModel, Long>) aiModelRepository;
+        return aiModelRepository;
     }
 
     @Override
@@ -87,7 +87,7 @@ public class AIModelEntityMgrImpl extends BaseEntityMgrRepositoryImpl<AIModel, L
         retrievedAIModel.setTrainingSegment(aiModel.getTrainingSegment());
         retrievedAIModel.setModelingJobId(
                 aiModel.getModelingYarnJobId() != null ? aiModel.getModelingYarnJobId().toString() : null);
-        retrievedAIModel.setModelSummary(aiModel.getModelSummary());
+        retrievedAIModel.setModelSummaryId(aiModel.getModelSummaryId());
         retrievedAIModel.getAdvancedModelingConfig().copyConfig(aiModel.getAdvancedModelingConfig());
     }
 

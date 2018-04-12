@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.BucketName;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -86,20 +85,16 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 isValid = isValidAIModel(aiModel);
                 if (!isValid) {
                     log.warn("AI rating model " + aiModel.getId() + " is not ready for scoring.");
-                } else if (StringUtils.isBlank(aiModel.getModelSummaryId())) {
-                    ModelSummary modelSummary = aiModel.getModelSummary();
-                    aiModel.setModelSummaryId(modelSummary.getId());
-                    aiModel.setModelSummary(null);
-                    if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
-                        List<BucketMetadata> bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
-                        summary.setBucketMetadata(bucketMetadata);
-                    }
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
                     log.warn("Rule based rating model " + ratingModel.getId() + " is not ready for scoring.");
                 }
+            }
+            if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
+                List<BucketMetadata> bucketMetadata = BucketMetadataUtils.getDefaultMetadata();
+                summary.setBucketMetadata(bucketMetadata);
             }
             if (isValid) {
                 container = new RatingModelContainer(ratingModel, summary);
@@ -110,13 +105,8 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
 
     private boolean isValidAIModel(AIModel model) {
         boolean valid = true;
-        if (model.getModelSummary() == null) {
-            log.warn("AI model " + model.getId() + " has null model summary.");
-            valid = false;
-        } else if (StringUtils.isNotBlank(model.getModelSummaryId())) {
-            valid = true;
-        } else if (model.getModelSummary() == null || StringUtils.isBlank(model.getModelSummary().getId())) {
-            log.warn("AI model " + model.getId() + " has blank model guid.");
+        if (StringUtils.isNotBlank(model.getModelSummaryId())) {
+            log.warn("AI model " + model.getId() + " does not have an associated model summary.");
             valid = false;
         }
         return valid;

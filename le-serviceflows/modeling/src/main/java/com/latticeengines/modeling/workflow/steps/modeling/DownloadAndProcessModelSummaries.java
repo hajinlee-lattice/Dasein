@@ -70,11 +70,11 @@ public class DownloadAndProcessModelSummaries extends BaseWorkflowStep<ModelStep
             if (ratingModel != null && ratingModel instanceof AIModel) {
                 AIModel aiModel = (AIModel) ratingModel;
                 for (String event : eventToModelId.keySet()) {
-                    aiModel.setModelSummary(eventToModelSummary.get(event));
+                    aiModel.setModelSummaryId(eventToModelSummary.get(event).getId());
                 }
                 ratingEngineProxy.updateRatingModel(configuration.getCustomerSpace().toString(),
                         configuration.getRatingEngineId(), configuration.getAiModelId(), aiModel);
-                log.info("Attaching model summary: " + aiModel.getModelSummary().getId() + " to RatingEngine: "
+                log.info("Attaching model summary: " + aiModel.getModelSummaryId() + " to RatingEngine: "
                         + configuration.getRatingEngineId() + ", AIModel: " + configuration.getAiModelId());
             } else {
                 log.info("No model found for RatingEngine: " + configuration.getRatingEngineId() + ", AIModel: "

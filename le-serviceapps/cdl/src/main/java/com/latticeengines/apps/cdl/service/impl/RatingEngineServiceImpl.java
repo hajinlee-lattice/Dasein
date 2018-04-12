@@ -317,86 +317,88 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public String modelRatingEngine(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
             String userEmail) {
-        ApplicationId jobId;
+        if (ratingEngine.getType() == RatingEngineType.RULE_BASED) {
+            throw new LedpException(LedpCode.LEDP_31107,
+                    new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
+        }
+        ApplicationId jobId = aiModel.getModelingYarnJobId();
+        if (jobId != null) {
+            return jobId.toString();
+        }
 
         switch (ratingEngine.getType()) {
         case RULE_BASED:
             throw new LedpException(LedpCode.LEDP_31107,
                     new String[] { RatingEngineType.RULE_BASED.getRatingEngineTypeName() });
         case CROSS_SELL:
-            jobId = aiModel.getModelingYarnJobId();
-            if (jobId == null) {
-                if (CollectionUtils
-                        .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
-                    throw new LedpException(LedpCode.LEDP_40012,
-                            new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
-                }
-                internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
-                RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
-                parameters.setName(aiModel.getId());
-                parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-                parameters.setDescription(ratingEngine.getDisplayName());
-                parameters.setModuleName("Module");
-                parameters.setUserId(userEmail);
-                parameters.setRatingEngineId(ratingEngine.getId());
-                parameters.setAiModelId(aiModel.getId());
-                parameters.setTargetFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET));
-                parameters.setTargetFilterTableName(aiModel.getId() + "_target");
-                parameters.setTrainFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING));
-                parameters.setTrainFilterTableName(aiModel.getId() + "_train");
-                parameters.setEventFilterQuery(
-                        getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT));
-                parameters.setEventFilterTableName(aiModel.getId() + "_event");
-
-                if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
-                    parameters.setExpectedValue(true);
-                }
-
-                log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
-                jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
-
-                aiModel.setModelingJobId(jobId.toString());
-                updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
+            if (CollectionUtils
+                    .isEmpty(CrossSellModelingConfig.getAdvancedModelingConfig(aiModel).getTargetProducts())) {
+                throw new LedpException(LedpCode.LEDP_40012,
+                        new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
             }
-            return jobId.toString();
+            internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+            RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
+            parameters.setName(aiModel.getId());
+            parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+            parameters.setDescription(ratingEngine.getDisplayName());
+            parameters.setModuleName("Module");
+            parameters.setUserId(userEmail);
+            parameters.setRatingEngineId(ratingEngine.getId());
+            parameters.setAiModelId(aiModel.getId());
+            parameters.setTargetFilterQuery(
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET));
+            parameters.setTargetFilterTableName(aiModel.getId() + "_target");
+            parameters.setTrainFilterQuery(
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING));
+            parameters.setTrainFilterTableName(aiModel.getId() + "_train");
+            parameters.setEventFilterQuery(
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT));
+            parameters.setEventFilterTableName(aiModel.getId() + "_event");
+
+            if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
+                parameters.setExpectedValue(true);
+            }
+
+            log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
+            jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);
+            break;
         case CUSTOM_EVENT:
-            jobId = aiModel.getModelingYarnJobId();
-            if (jobId == null) {
-                CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
-                ModelingParameters modelingParameters = new ModelingParameters();
-                modelingParameters.setName(aiModel.getId());
-                modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
-                modelingParameters.setDescription(ratingEngine.getDisplayName());
-                modelingParameters.setModuleName("Module");
-                modelingParameters.setUserId(userEmail);
-                modelingParameters.setRatingEngineId(ratingEngine.getId());
-                modelingParameters.setAiModelId(aiModel.getId());
-                modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
-                modelingParameters.setFilename(config.getSourceFileName());
-                modelingParameters.setActivateModelSummaryByDefault(true);
-                modelingParameters.setDeduplicationType(config.getDeduplicationType());
-                modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
-                modelingParameters.setExcludePropDataColumns(
-                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
-                modelingParameters.setExcludeCDLAttributes(
+            CustomEventModelingConfig config = (CustomEventModelingConfig) aiModel.getAdvancedModelingConfig();
+            ModelingParameters modelingParameters = new ModelingParameters();
+            modelingParameters.setName(aiModel.getId());
+            modelingParameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
+            modelingParameters.setDescription(ratingEngine.getDisplayName());
+            modelingParameters.setModuleName("Module");
+            modelingParameters.setUserId(userEmail);
+            modelingParameters.setRatingEngineId(ratingEngine.getId());
+            modelingParameters.setAiModelId(aiModel.getId());
+            modelingParameters.setCustomEventModelingType(config.getCustomEventModelingType());
+            modelingParameters.setFilename(config.getSourceFileName());
+            modelingParameters.setActivateModelSummaryByDefault(true);
+            modelingParameters.setDeduplicationType(config.getDeduplicationType());
+            modelingParameters.setExcludePublicDomains(config.isExcludePublicDomains());
+            modelingParameters.setTransformationGroup(config.getConvertedTransformationGroup());
+            modelingParameters.setExcludePropDataColumns(
+                    !config.getDataStores().contains(CustomEventModelingConfig.DataStore.DataCloud));
+            modelingParameters
+                    .setExcludeCDLAttributes(!config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
+            modelingParameters.setExcludeCustomFileAttributes(
+                    !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
+            internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
 
-                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CDL));
-                modelingParameters.setExcludeCustomFileAttributes(
-                        !config.getDataStores().contains(CustomEventModelingConfig.DataStore.CustomFileAttributes));
-                internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
-
-                log.info(String.format("Custom event modelling job submitted with parameters %s",
-                        modelingParameters.toString()));
-                jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
-                        modelingParameters);
-            }
-            return jobId.toString();
+            log.info(String.format("Custom event modelling job submitted with parameters %s",
+                    modelingParameters.toString()));
+            jobId = customEventModelingWorkflowSubmitter.submit(CustomerSpace.parse(customerSpace).toString(),
+                    modelingParameters);
+            break;
         default:
             throw new LedpException(LedpCode.LEDP_31107,
                     new String[] { ratingEngine.getType().getRatingEngineTypeName() });
         }
+
+        aiModel.setModelingJobId(jobId.toString());
+        updateRatingModel(ratingEngine.getId(), aiModel.getId(), aiModel);
+        return jobId.toString();
     }
 
     @VisibleForTesting

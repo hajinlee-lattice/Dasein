@@ -58,7 +58,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
     @Override
     public BucketedScoreSummary getBucketedScoreSummaryForModelId(String modelId) throws Exception {
-        BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy.getBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId);
+        BucketedScoreSummary bucketedScoreSummary = bucketedScoreProxy
+                .getBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId);
         if (bucketedScoreSummary == null) {
             ModelSummary modelSummary = modelSummaryService.findByModelId(modelId, false, false, false);
             bucketedScoreSummary = getBucketedScoreSummaryBasedOnModelSummary(modelSummary);
@@ -69,13 +70,14 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId,
             BucketedScoreSummary bucketedScoreSummary) {
-        return bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId, bucketedScoreSummary);
+        return bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId,
+                bucketedScoreSummary);
     }
 
     private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
             throws Exception {
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
-        String pivotAvroDirPath = null;
+        String pivotAvroDirPath;
 
         if (jobId == null || workflowJobService.find(jobId, false) == null) {
             throw new LedpException(LedpCode.LEDP_18125, new String[] { modelSummary.getId() });
@@ -96,7 +98,8 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
 
         BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                 .generateBucketedScoreSummary(pivotedRecords);
-        bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelSummary.getId(), bucketedScoreSummary);
+        bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelSummary.getId(),
+                bucketedScoreSummary);
         log.info("Copy bucketed score summary from avro to db for model " + modelSummary.getId());
         return bucketedScoreSummary;
     }
@@ -128,8 +131,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     @Override
     public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas,
             String userId) {
-        log.info(
-                String.format("Creating BucketMetadata for RatingEngine %s, Model %s", ratingEngineId, modelId));
+        log.info(String.format("Creating BucketMetadata for RatingEngine %s, Model %s", ratingEngineId, modelId));
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
         request.setBucketMetadataList(bucketMetadatas);
         request.setModelGuid(modelId);
@@ -167,14 +169,13 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
             throw new NullPointerException(String.format("Cannot find Rating Engine with Id %s", ratingEngineId));
         }
         RatingModel ratingModel = ratingEngineProxy.getRatingModel(tenant.getId(), ratingEngineId, modelId);
-        ModelSummary modelSummary = null;
+        ModelSummary modelSummary;
         if (ratingModel != null && ratingModel instanceof AIModel) {
             AIModel aiModel = (AIModel) ratingModel;
-            modelSummary = aiModel.getModelSummary();
+            modelSummary = modelSummaryService.getModelSummaryByModelId(aiModel.getModelSummaryId());
         } else {
             throw new LedpException(LedpCode.LEDP_18179, new String[] { modelId });
         }
-        modelSummary = modelSummaryService.getModelSummaryByModelId(modelSummary.getId());
         return new ImmutablePair<>(ratingEngine, modelSummary);
     }
 

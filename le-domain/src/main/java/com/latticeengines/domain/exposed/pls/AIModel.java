@@ -12,7 +12,6 @@ import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
-import javax.persistence.OneToOne;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,8 +50,6 @@ public class AIModel extends RatingModel {
     private String modelingJobId;
 
     private MetadataSegment trainingSegment;
-
-    private ModelSummary modelSummary;
 
     private AdvancedModelingConfig advancedModelingConfig;
 
@@ -137,19 +134,7 @@ public class AIModel extends RatingModel {
         return JsonUtils.serialize(this);
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "FK_MODEL_SUMMARY_ID")
-    @JsonProperty("modelSummary")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    public ModelSummary getModelSummary() {
-        return modelSummary;
-    }
-
-    public void setModelSummary(ModelSummary modelSummary) {
-        this.modelSummary = modelSummary;
-    }
-
-    @Transient
+    @Column(name = "MODEL_SUMMARY_ID")
     @JsonProperty("modelSummaryId")
     public String getModelSummaryId() {
         return modelSummaryId;

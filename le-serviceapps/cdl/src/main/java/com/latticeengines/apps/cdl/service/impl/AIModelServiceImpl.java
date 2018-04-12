@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +20,6 @@ import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -30,7 +28,6 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.AIModel;
-import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
@@ -91,16 +88,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             MetadataSegment segment = segmentDTO.getMetadataSegment();
             segment.setPid(segmentDTO.getPrimaryKey());
             ratingModel.setTrainingSegment(segment);
-        }
-        if (ratingModel.getModelSummary() != null) {
-            String modelSummaryId = ratingModel.getModelSummary().getId();
-            if (StringUtils.isBlank(modelSummaryId)) {
-                throw new IllegalArgumentException(
-                        "Cannot associate ModelSummary with AIModel as ModelSummary ID is empty.");
-            }
-            ModelSummary selModelSummary = internalResourceProxy.getModelSummaryFromModelId(modelSummaryId,
-                    CustomerSpace.parse(tenant.getId()));
-            ratingModel.setModelSummary(selModelSummary);
         }
         aiModelEntityMgr.createOrUpdateAIModel(ratingModel, ratingEngineId);
         return ratingModel;

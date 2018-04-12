@@ -54,7 +54,7 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
+    private static final boolean USE_EXISTING_TENANT = true;
     private static final String EXISTING_TENANT = "JLM1523408085423";
 
     private static final PredictionType PREDICTION_TYPE = PredictionType.EXPECTED_VALUE;
