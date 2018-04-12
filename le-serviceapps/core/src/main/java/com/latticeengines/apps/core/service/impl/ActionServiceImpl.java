@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.core.entitymgr.ActionEntityMgr;
@@ -14,6 +16,8 @@ import com.latticeengines.domain.exposed.security.Tenant;
 
 @Component("actionService")
 public class ActionServiceImpl implements ActionService {
+
+    private static final Logger log = LoggerFactory.getLogger(ActionServiceImpl.class);
 
     @Inject
     private ActionEntityMgr actionEntityMgr;
@@ -46,6 +50,9 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public Action create(Action action) {
         Tenant tenant = MultiTenantContext.getTenant();
+        if (action.getTenant() != null && tenant != null) {
+            log.info(String.format("Action tenant: %s, updated to: %s", action.getTenant().getId(), tenant.getId()));
+        }
         action.setTenant(tenant);
         actionEntityMgr.create(action);
         return action;
@@ -54,6 +61,9 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public Action update(Action action) {
         Tenant tenant = MultiTenantContext.getTenant();
+        if (action.getTenant() != null && tenant != null) {
+            log.info(String.format("Action tenant: %s, updated to: %s", action.getTenant().getId(), tenant.getId()));
+        }
         action.setTenant(tenant);
         actionEntityMgr.createOrUpdate(action);
         return action;

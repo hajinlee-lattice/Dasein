@@ -61,6 +61,7 @@ public class ProcessAccountWithImportDeploymentTestNG extends DataIngestionEnd2E
         importData(BusinessEntity.Account, ACCOUNT_IMPORT_SIZE_1_1, ACCOUNT_IMPORT_SIZE_1_2);
         importData(BusinessEntity.Contact, CONTACT_IMPORT_SIZE_1_1, CONTACT_IMPORT_SIZE_1_2);
         importData(BusinessEntity.Product, PRODUCT_IMPORT_SIZE_1_1, PRODUCT_IMPORT_SIZE_1_2);
+        Thread.sleep(2000);
     }
 
     private void verifyProcess() {

@@ -45,11 +45,16 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
+import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
+import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Extract;
@@ -165,9 +170,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private ColumnMetadataProxy columnMetadataProxy;
 
     @Inject
-    private PlsCDLImportProxy plsCDLImportProxy;
-
-    @Inject
     protected ModelingFileUploadProxy fileUploadProxy;
 
     @Inject
@@ -218,7 +220,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         updateDataCloudBuildNumber();
 
         attachProtectedProxy(fileUploadProxy);
-        attachProtectedProxy(plsCDLImportProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
     }
 
@@ -347,10 +348,39 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             }
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
-        ApplicationId applicationId = plsCDLImportProxy.startImportCSV(template.getName(), template.getName(), "File",
-                entity.name(), entity.name() + "Schema");
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(),
+                entity.name() + "Schema", template, template, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
+    }
+
+    private ApplicationId submitImport(String customerSpace, String source, String entity, String feedType,
+                                       SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
+        CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, metaData);
+        if (StringUtils.isEmpty(taskId)) {
+            throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
+        }
+        return cdlProxy.submitImportJob(customerSpace, taskId, metaData);
+    }
+
+    private CSVImportConfig generateImportConfig(String customerSpace, SourceFile templateSourceFile,
+                                                 SourceFile dataSourceFile, String email) {
+        CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
+        templateSourceFile.setTableName("SourceFile_" + templateSourceFile.getName().replace(".", "_"));
+        importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
+        importConfig.setTemplateName(templateSourceFile.getTableName());
+        importConfig.setFilePath(dataSourceFile.getPath());
+        importConfig.setFileSource("HDFS");
+        CSVImportFileInfo importFileInfo = new CSVImportFileInfo();
+        importFileInfo.setFileUploadInitiator(email);
+        importFileInfo.setReportFileDisplayName(dataSourceFile.getDisplayName());
+        importFileInfo.setReportFileName(dataSourceFile.getName());
+        CSVImportConfig csvImportConfig = new CSVImportConfig();
+        csvImportConfig.setCsvToHdfsConfiguration(importConfig);
+        csvImportConfig.setCSVImportFileInfo(importFileInfo);
+
+        return csvImportConfig;
     }
 
     private InputStream readCSVInputStreamFromS3(String fileName) {
@@ -434,8 +464,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
         long startTime = System.currentTimeMillis();
-        ApplicationId applicationId = plsCDLImportProxy.startImportCSV(template.getName(), data.getName(), "File",
-                entity.name(), "e2etest");
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(), "e2etest",
+                template, data, INITIATOR);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
                 applicationId.toString(), false);
         long endTime = System.currentTimeMillis();
