@@ -6,6 +6,8 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy.SourceType;
 
 public interface PurgeStrategyEntityMgr {
+    List<PurgeStrategy> findAll();
+
     List<PurgeStrategy> findStrategiesByType(SourceType sourceType);
 
     PurgeStrategy findStrategiesBySource(String source);

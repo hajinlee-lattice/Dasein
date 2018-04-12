@@ -64,6 +64,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private PurgeSource amLookupToBak;
     private PurgeSource mlDailyToDelete;
     private PurgeSource mlDailyToBak;
+    private String unknownSource = "TestUnknownSource";
 
     private Map<String, PurgeSource> validationMapNonDebugMode;
     private Map<String, PurgeSource> validationMapDebugMode;
@@ -79,6 +80,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         prepareGeneralSourceToPurge();
         prepareAMSourceToPurge();
         prepareMLSourceToPurge();
+        prepareUnknownSource();
         prepareValidationMap();
     }
 
@@ -110,6 +112,14 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         toPurge = purgeService.scan(POD_ID, true);
         log.info("Validating purge sources in debug mode");
         validatePurgeSources(toPurge, validationMapDebugMode);
+    }
+
+    @Test(groups = "functional")
+    public void testScanUnknownSource() {
+        List<String> unknownSources = purgeService.scanUnknownSources(POD_ID);
+        Assert.assertNotNull(unknownSources);
+        Assert.assertEquals(unknownSources.size(), 1);
+        Assert.assertEquals(unknownSources.get(0), unknownSource);
     }
 
     private void preparePipelineTempSource() throws IOException {
@@ -331,7 +341,11 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         strategy.setGlacierDays(170);
         strategy.setNoBak(false);
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
+    }
 
+    private void prepareUnknownSource() throws IOException {
+        String hdfsPath = hdfsPathBuilder.constructSnapshotDir(unknownSource, "2018-02-25_00-00-00_UTC").toString();
+        HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
     }
 
     private void prepareValidationMap() {

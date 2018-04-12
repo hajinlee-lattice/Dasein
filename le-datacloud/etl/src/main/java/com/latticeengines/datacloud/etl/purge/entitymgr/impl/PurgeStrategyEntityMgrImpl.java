@@ -21,6 +21,12 @@ public class PurgeStrategyEntityMgrImpl implements PurgeStrategyEntityMgr {
 
     @Override
     @Transactional(value = "propDataManage", readOnly = true)
+    public List<PurgeStrategy> findAll() {
+        return purgeStrategyDao.findAll();
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", readOnly = true)
     public List<PurgeStrategy> findStrategiesByType(SourceType sourceType) {
         return purgeStrategyDao.findAllByField("sourceType", sourceType);
     }

@@ -31,4 +31,12 @@ public class PurgeProxy extends MicroserviceRestApiProxy implements PurgeInterfa
         }
         return purgeSrcs;
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<String> getUnknownSources(String hdfsPod) {
+        String url = constructUrl("/sources/unknown?HdfsPod={hdfsPod}", hdfsPod);
+        List<String> list = get("unknown_source", url, List.class);
+        return list;
+    }
 }

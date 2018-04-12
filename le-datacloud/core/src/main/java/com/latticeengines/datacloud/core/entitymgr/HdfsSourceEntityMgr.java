@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.metadata.Table;
 
 public interface HdfsSourceEntityMgr {
 
+    List<String> getAllSources();
+
     String getCurrentVersion(Source source);
 
     String getCurrentVersion(String sourceName);

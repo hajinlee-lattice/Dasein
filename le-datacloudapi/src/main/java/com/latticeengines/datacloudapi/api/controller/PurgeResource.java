@@ -45,4 +45,23 @@ public class PurgeResource {
             HdfsPodContext.changeHdfsPodId(hdfsPod);
         }
     }
+
+    @RequestMapping(value = "sources/unknown", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiIgnore
+    @ApiOperation(value = "Get unknown sources to purger")
+    public List<String> getUnknownSources(
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
+        try {
+            if (StringUtils.isEmpty(hdfsPod)) {
+                hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            }
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+
+            return purgeService.scanUnknownSources(hdfsPod);
+        } finally {
+            hdfsPod = HdfsPodContext.getDefaultHdfsPodId();
+            HdfsPodContext.changeHdfsPodId(hdfsPod);
+        }
+    }
 }

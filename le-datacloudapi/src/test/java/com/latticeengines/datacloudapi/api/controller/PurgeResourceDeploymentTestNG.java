@@ -27,12 +27,24 @@ public class PurgeResourceDeploymentTestNG extends PropDataApiDeploymentTestNGBa
     @Test(groups = "deployment")
     public void testGetPurgeSources() {
         List<PurgeSource> list = purgeProxy.getPurgeSources(null);
-        for (PurgeSource src : list) {
-            log.info(JsonUtils.serialize(src));
-        }
+        list.forEach(s -> {
+            log.info(JsonUtils.serialize(s));
+        });
         list = purgeProxy.getPurgeSources(POD_ID); // Test empty pod
-        for (PurgeSource src : list) {
-            log.info(JsonUtils.serialize(src));
-        }
+        list.forEach(s -> {
+            log.info(JsonUtils.serialize(s));
+        });
+    }
+
+    @Test(groups = "deployment")
+    public void testGetUnknownSources() {
+        List<String> list = purgeProxy.getUnknownSources(null);
+        list.forEach(s -> {
+            log.info("Unknown source: " + s);
+        });
+        list = purgeProxy.getUnknownSources(POD_ID);
+        list.forEach(s -> {
+            log.info("Unknown source: " + s);
+        });
     }
 }

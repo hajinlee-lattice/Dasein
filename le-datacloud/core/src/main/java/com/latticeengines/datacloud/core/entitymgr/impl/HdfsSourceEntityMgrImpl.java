@@ -9,6 +9,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +53,24 @@ public class HdfsSourceEntityMgrImpl implements HdfsSourceEntityMgr {
 
     @Autowired
     YarnConfiguration yarnConfiguration;
+
+    @Override
+    public List<String> getAllSources() {
+        String basePath = hdfsPathBuilder.constructSourceBaseDir().toString();
+        try {
+            List<FileStatus> status = HdfsUtils.getFileStatusesForDir(yarnConfiguration, basePath, null);
+            List<String> sources = new ArrayList<>();
+            status.forEach(s -> {
+                if (s.isDirectory()) {
+                    sources.add(s.getPath().getName());
+                }
+            });
+            return sources;
+        } catch (IOException e) {
+            throw new RuntimeException("Fail to scan hdfs path " + basePath);
+        }
+
+    }
 
     @Override
     public String getCurrentVersion(Source source) {

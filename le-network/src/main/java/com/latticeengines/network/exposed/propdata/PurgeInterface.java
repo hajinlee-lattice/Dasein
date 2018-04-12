@@ -6,4 +6,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.PurgeSource;
 
 public interface PurgeInterface {
     List<PurgeSource> getPurgeSources(String hdfsPod);
+
+    List<String> getUnknownSources(String hdfsPod);
 }
