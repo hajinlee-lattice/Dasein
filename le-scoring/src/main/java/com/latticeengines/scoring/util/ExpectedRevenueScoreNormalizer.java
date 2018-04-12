@@ -40,7 +40,8 @@ public class ExpectedRevenueScoreNormalizer implements ScoreNormalizer {
     @Override
     public double normalize(double expectedRevenue, InterpolationFunctionType interpFunction) {
         if (!isInitialized()) {
-            return -1;
+            log.warn("ExpectedRevenueScoreNormalizer was not initialized!");
+            return 0;
         }
         if (expectedRevenue <= minimumExpectedRevenue) {
             return minimumExpectedRevenue == 0 ? 0

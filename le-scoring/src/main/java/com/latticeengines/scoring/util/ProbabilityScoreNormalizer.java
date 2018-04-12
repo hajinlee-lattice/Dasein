@@ -40,7 +40,8 @@ public class ProbabilityScoreNormalizer implements ScoreNormalizer {
     @Override
     public double normalize(double rawScore, InterpolationFunctionType interpFunction) {
         if (!isInitialized()) {
-            return -1;
+            log.warn("ProbabilityScoreNormalizer was not initialized!");
+            return 0;
         }
 
         if (rawScore <= minimumProbability) {
