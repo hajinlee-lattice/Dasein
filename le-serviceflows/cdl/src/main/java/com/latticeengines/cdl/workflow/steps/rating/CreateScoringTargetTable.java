@@ -28,11 +28,12 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
 
     private static final String MODEL_GUID = "Model_GUID";
 
-    private AtomicLong evaluationPeriod = new AtomicLong(-1);
+    private AtomicLong evaluationPeriod = null;
 
     @Override
     protected void postIngestion() {
         super.postIngestion();
+        removeObjectFromContext(FILTER_EVENT_TABLE);
         putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, targetTableName);
         putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
         String modelIds = StringUtils.join(containers.stream().map(container -> {
@@ -71,8 +72,9 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
             try {
                 String accountId = (String) map.get(accountIdAttr.toLowerCase());
                 String periodIdAttr = InterfaceName.PeriodId.name();
-                if (evaluationPeriod.get() < 0) {
+                if (evaluationPeriod == null) {
                     Long periodId = Long.valueOf(String.valueOf(map.get(InterfaceName.PeriodId.name().toLowerCase())));
+                    evaluationPeriod = new AtomicLong();
                     evaluationPeriod.set(periodId);
                 }
                 String compositeKey = String.format("%s_%s", accountId, modelId);

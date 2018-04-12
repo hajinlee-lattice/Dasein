@@ -25,8 +25,6 @@ import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
@@ -340,36 +338,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         }
     }
 
-    public List<BucketMetadata> getUpToDateABCDBuckets(String modelId, CustomerSpace customerSpace) {
-        try {
-            String url = constructUrl("pls/internal/abcdbuckets/uptodate", modelId);
-            url += "?tenantId=" + customerSpace.toString();
-            List<?> bucketMetadataList = restTemplate.getForObject(url, List.class);
-            return JsonUtils.convertList(bucketMetadataList, BucketMetadata.class);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Remote call failure for getting the up-to-date buckets of the model %s of tenant %s",
-                            modelId, customerSpace.toString()),
-                    e);
-        }
-    }
-
-    public void createABCDBuckets(String modelId, CustomerSpace customerSpace,
-            List<BucketMetadata> bucketMetadataList) {
-        try {
-            String url = constructUrl("pls/internal/abcdbuckets/", modelId);
-            url += "?tenantId=" + customerSpace.toString();
-            log.debug(String.format("Posting to %s", url));
-            restTemplate.postForEntity(url, bucketMetadataList, Void.class);
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    String.format("Remote call failure for creating abcd buckets for model %s of tenant %s", modelId,
-                            customerSpace.toString()),
-                    e);
-        }
-
-    }
-
     @SuppressWarnings("unchecked")
     public Map<String, String> getActiveStack() {
         try {
@@ -378,59 +346,6 @@ public class InternalResourceRestApiProxy extends DeprecatedBaseRestApiProxy {
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_31112, new String[] { e.getMessage() });
         }
-    }
-
-    public List<BucketMetadata> createDefaultABCDBuckets(String modelId, String userId, boolean cdl,
-            boolean expectedValue, boolean liftChart) {
-        try {
-            String url = constructUrl("pls/internal/bucketmetadata", modelId);
-            url = url + String.format("?cdl=%b&expectedValue=%b&liftChart=%b", cdl, expectedValue, liftChart);
-            List<?> abcdBuckets = restTemplate.postForObject(url, userId, List.class);
-            return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
-        } catch (Exception e) {
-            throw new RuntimeException("create default abcd buckets: Remote call failure", e);
-        }
-    }
-
-    @SuppressWarnings({ "deprecation", "unchecked" })
-    public Map<Long, List<BucketMetadata>> getABCDBucketsBasedOnRatingEngineId(String customerSpace,
-            String ratingEngineId) {
-        try {
-            String url = constructUrlForGetABCDBucketsForCDL(customerSpace, ratingEngineId);
-            Map<?, List<?>> abcdBuckets = restTemplate.getForObject(url, Map.class);
-            return JsonUtils.convertMapWithListValue(abcdBuckets, Long.class, BucketMetadata.class);
-        } catch (Exception e) {
-            throw new RuntimeException("getABCDBucketsBasedOnRatingEngineId: Remote call failure", e);
-        }
-    }
-
-    @VisibleForTesting
-    String constructUrlForGetABCDBucketsForCDL(String customerSpace, String ratingEngineId) {
-        String url = constructUrl("pls/internal/bucketmetadata/ratingengine/" + ratingEngineId + "/" + customerSpace);
-        log.info("constructUrlForGetABCDBucketsForCDL is " + url);
-        return url;
-    }
-
-    @SuppressWarnings("deprecation")
-    public List<BucketMetadata> createDefaultABCDBuckets(String customerSpace, String ratingEngineId, String modelId,
-            String userId, boolean expectedValue, boolean liftChart) {
-        try {
-            String url = constructUrlForDefaultABCDBucketsForCDL(customerSpace, ratingEngineId, modelId);
-            url = url + String.format("?expectedValue=%b&liftChart=%b", expectedValue, liftChart);
-            List<?> abcdBuckets = restTemplate.postForObject(url, userId, List.class);
-            return JsonUtils.convertList(abcdBuckets, BucketMetadata.class);
-        } catch (Exception e) {
-            throw new RuntimeException("create default abcd buckets: Remote call failure", e);
-        }
-    }
-
-    @SuppressWarnings("deprecation")
-    @VisibleForTesting
-    String constructUrlForDefaultABCDBucketsForCDL(String customerSpace, String ratingEngineId, String modelId) {
-        String url = constructUrl("pls/internal/bucketmetadata/ratingengine/" + ratingEngineId + "/model/" + modelId
-                + "/" + customerSpace);
-        log.info("constructUrlForDefaultABCDBucketsForCDL is " + url);
-        return url;
     }
 
     public void createSourceFile(SourceFile sourceFile, String tenantId) {

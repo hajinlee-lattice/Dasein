@@ -21,11 +21,10 @@ public class CreateCdlEventTableFilterFlow extends TypesafeDataFlowBuilder<Creat
 
     @Override
     public Node construct(CreateCdlEventTableFilterParameters parameters) {
-        List<String> retainFields = new ArrayList<>();
         Node trainFilterTable = addSource(parameters.trainFilterTable);
         Node eventFilterTable = addSource(parameters.eventFilterTable);
 
-        retainFields.addAll(eventFilterTable.getFieldNames());
+        List<String> retainFields = new ArrayList<>(eventFilterTable.getFieldNames());
         String eventColumn = parameters.getEventColumn();
         retainFields.add(eventColumn);
         retainFields.add(InterfaceName.Train.name());

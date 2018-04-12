@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +61,7 @@ import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ModelType;
 import com.latticeengines.domain.exposed.scoringapi.ScoreDerivation;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.ScoreCorrectnessArtifacts;
@@ -115,6 +117,9 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @Autowired
     private BatonService batonService;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private InternalResourceRestApiProxy internalResourceRestApiProxy;
 
@@ -285,8 +290,8 @@ public class ModelRetrieverImpl implements ModelRetriever {
 
     @VisibleForTesting
     List<BucketMetadata> getBucketMetadata(CustomerSpace customerSpace, String modelId) {
-        List<BucketMetadata> bucketMetadataList = internalResourceRestApiProxy.getUpToDateABCDBuckets(modelId,
-                customerSpace);
+        List<BucketMetadata> bucketMetadataList = bucketedScoreProxy
+                .getLatestABCDBucketsByModelGuid(customerSpace.toString(), modelId);
         if (bucketMetadataList == null) {
             throw new LedpException(LedpCode.LEDP_31200, new String[] { modelId });
         }

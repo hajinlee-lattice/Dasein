@@ -1,5 +1,9 @@
 package com.latticeengines.scoring.workflow.steps;
 
+import java.util.Collections;
+
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
@@ -8,9 +12,17 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.pls.AIModel;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
+import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 @Component("setConfigurationForScoring")
@@ -18,6 +30,9 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfigurationForScoringConfiguration> {
 
     private static final Logger log = LoggerFactory.getLogger(SetConfigurationForScoring.class);
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     public SetConfigurationForScoring() {
     }
@@ -45,6 +60,37 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
         putObjectInContext(EVENT_TABLE, matchResultTable);
 
+        setRatingModelsContext();
+    }
+
+    private void setRatingModelsContext() {
+        String engineId = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
+        if (StringUtils.isNotBlank(engineId)) {
+            String modelId = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.RATING_MODEL_ID);
+            log.info("Constructing rating model container for RatingEngineId=" + engineId + " and RatingModelId="
+                    + modelId);
+            String customerSpace = configuration.getCustomerSpace().toString();
+            RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
+
+            if (RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())) {
+                AIModel ratingModel = (AIModel) ratingEngineProxy.getRatingModel(customerSpace, engineId, modelId);
+                String modelGuid = ratingModel.getModelSummaryId();
+                if (StringUtils.isBlank(modelGuid)) {
+                    throw new RuntimeException("Must provide either model guid: " + JsonUtils.serialize(ratingModel));
+                }
+
+                RatingEngineSummary ratingEngineSummary = new RatingEngineSummary();
+                ratingEngineSummary.setId(ratingEngine.getId());
+                ratingEngineSummary.setDisplayName(ratingEngine.getDisplayName());
+                ratingEngineSummary.setType(ratingEngine.getType());
+                ratingEngineSummary.setStatus(ratingEngine.getStatus());
+                ratingEngineSummary.setSegmentName(ratingEngine.getSegment().getName());
+                ratingEngineSummary.setBucketMetadata(BucketMetadataUtils.getDefaultMetadata());
+
+                RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary);
+                putObjectInContext(RATING_MODELS, Collections.singletonList(container));
+            }
+        }
     }
 
 }

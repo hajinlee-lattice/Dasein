@@ -26,6 +26,7 @@ import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.MetadataSegmentDTO;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -104,14 +105,14 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType) {
+                                               ModelingQueryType modelingQueryType, DataCollection.Version version) {
         CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
 
         if (advancedConf != null
                 && Arrays.asList(ModelingStrategy.values()).contains(advancedConf.getModelingStrategy())) {
             PeriodStrategy strategy = periodService.getPeriodStrategies().stream()
                     .filter(x -> x.getTemplate() == PeriodStrategy.Template.Month).collect(Collectors.toList()).get(0);
-            int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy);
+            int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
                     .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);
             return ratingQueryBuilder.build();

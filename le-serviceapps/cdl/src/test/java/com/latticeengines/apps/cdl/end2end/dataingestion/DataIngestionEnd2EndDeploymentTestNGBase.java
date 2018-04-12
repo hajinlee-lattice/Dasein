@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -48,10 +49,13 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
+import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -66,8 +70,12 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
+import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
+import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -75,6 +83,8 @@ import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -136,10 +146,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long SEGMENT_2_CONTACT_2_REBUILD = 60;
 
     static final String SEGMENT_NAME_MODELING = NamingUtils.timestamp("E2ESegmentModeling");
-    static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentModeling");
+    static final String SEGMENT_NAME_TRAINING = NamingUtils.timestamp("E2ESegmentTraining");
 
     static final long RATING_A_COUNT_1 = 6;
-    static final long RATING_D_COUNT_1 = 4;
+    static final long RATING_D_COUNT_1 = 7;
     static final long RATING_F_COUNT_1 = 1;
 
     static final long RATING_A_COUNT_2 = 20;
@@ -150,7 +160,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_D_COUNT_2_REBUILD = 31;
     static final long RATING_F_COUNT_2_REBUILD = 4;
 
-    static final String TARGET_PRODUCT = "A80D4770376C1226C47617C071324C0B";
+    static final String TARGET_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
+    static final String TRAINING_PRODUCT = "A80D4770376C1226C47617C071324C0B";
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
@@ -209,6 +220,15 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     @BeforeClass(groups = { "end2end", "precheckin", "deployment", "end2end_with_import" })
     public void setup() throws Exception {
+        setupEnd2EndTestEnvironment();
+    }
+
+    @AfterClass(groups = { "end2end", "precheckin" })
+    protected void cleanup() throws Exception {
+        checkpointService.cleanup();
+    }
+
+    protected void setupEnd2EndTestEnvironment() throws Exception {
         logger.info("Bootstrapping test tenants using tenant console ...");
 
         setupTestEnvironment();
@@ -221,11 +241,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
-    }
-
-    @AfterClass(groups = { "end2end", "precheckin" })
-    protected void cleanup() throws Exception {
-        checkpointService.cleanup();
     }
 
     BusinessCalendar getStartingDateBusinessCalendderForTest() {
@@ -390,10 +405,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private class MultipartFileResource extends InputStreamResource {
 
         private String fileName;
-
-        public MultipartFileResource(InputStream inputStream) {
-            super(inputStream);
-        }
 
         public MultipartFileResource(InputStream inputStream, String fileName) {
             super(inputStream);
@@ -750,7 +761,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return segment;
     }
 
-    protected MetadataSegment constructTargetSegment() {
+    MetadataSegment constructTargetSegment() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
@@ -763,7 +774,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return segment;
     }
 
-    protected MetadataSegment constructTrainingSegment() {
+    MetadataSegment constructTrainingSegment() {
         Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
         BucketRestriction accountRestriction = new BucketRestriction(
                 new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
@@ -847,6 +858,40 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         ruleBasedModel.setRatingRule(ratingRule);
         ruleBasedModel.setId(modelId);
         return ruleBasedModel;
+    }
+
+    RatingEngine constructRatingEngine(RatingEngineType engineType, MetadataSegment targetSegment) {
+        RatingEngine ratingEngine = new RatingEngine();
+        ratingEngine.setDisplayName("CDL End2End " + engineType +" Engine");
+        ratingEngine.setTenant(mainTestTenant);
+        ratingEngine.setType(engineType);
+        ratingEngine.setSegment(targetSegment);
+        ratingEngine.setCreatedBy(TestFrameworkUtils.SUPER_ADMIN_USERNAME);
+        ratingEngine.setCreated(new Date());
+        return ratingEngine;
+    }
+
+    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, String targetProductId, String trainingProductId) {
+        testAIModel.setPredictionType(predictionType);
+
+        CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
+        Map<CrossSellModelingConfigKeys, ModelingConfigFilter> myMap = new HashMap<>();
+        myMap.put(CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, new ModelingConfigFilter(
+                CrossSellModelingConfigKeys.PURCHASED_BEFORE_PERIOD, ComparisonType.PRIOR_ONLY, 6));
+        config.setFilters(myMap);
+
+        config.setModelingStrategy(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
+        config.setTargetProducts(Collections.singletonList(targetProductId));
+        config.setTrainingProducts(Collections.singletonList(trainingProductId));
+    }
+
+    void configureCustomEventModel(AIModel testAIModel) {
+        CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
+        advancedConf.setDataStores(
+                Arrays.asList(CustomEventModelingConfig.DataStore.CDL, CustomEventModelingConfig.DataStore.DataCloud));
+        advancedConf.setCustomEventModelingType(CustomEventModelingType.CDL);
+        advancedConf.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
+        advancedConf.setExcludePublicDomains(false);
     }
 
     void verifyRatingEngineCount(String engineId, Map<RatingBucketName, Long> expectedCounts) {

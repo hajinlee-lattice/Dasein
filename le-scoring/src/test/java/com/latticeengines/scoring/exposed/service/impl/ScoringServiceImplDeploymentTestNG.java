@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
@@ -41,6 +43,8 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.scoring.RTSBulkScoringConfiguration;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoring.functionalframework.ScoringFunctionalTestNGBase;
 import com.latticeengines.scoring.util.ScoringTestUtils;
@@ -60,6 +64,9 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
     @Autowired
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -105,7 +112,7 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
                 applicationId, modelVersion);
         plsRest = new InternalResourceRestApiProxy(plsApiHostPort);
         ModelSummary modelSummary = createModel(plsRest, tenant, modelConfiguration, customerSpace);
-        generateDefaultBucketMetadata(plsRest, tenant, modelSummary, customerSpace);
+        generateDefaultBucketMetadata(modelSummary, customerSpace);
         setupHdfsArtifacts(yarnConfiguration, tenant, modelConfiguration);
         saveAttributeSelection(customerSpace);
     }
@@ -177,10 +184,12 @@ public class ScoringServiceImplDeploymentTestNG extends ScoringFunctionalTestNGB
         Assert.assertEquals(csvfiles.size(), 1);
     }
 
-    private void generateDefaultBucketMetadata(InternalResourceRestApiProxy plsRest, Tenant tenant,
-            ModelSummary modelSummary, CustomerSpace customerSpace) {
+    private void generateDefaultBucketMetadata(ModelSummary modelSummary, CustomerSpace customerSpace) {
         List<BucketMetadata> bucketMetadataList = ScoringTestUtils.generateDefaultBucketMetadataList();
-        plsRest.createABCDBuckets(modelSummary.getId(), customerSpace, bucketMetadataList);
+        CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        request.setBucketMetadataList(bucketMetadataList);
+        request.setModelGuid(modelSummary.getId());
+        bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
     }
 
     private ModelSummary createModel(InternalResourceRestApiProxy plsRest, Tenant tenant,

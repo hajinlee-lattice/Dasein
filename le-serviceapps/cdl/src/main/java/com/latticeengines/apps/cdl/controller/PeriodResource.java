@@ -10,11 +10,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.BusinessCalendarService;
 import com.latticeengines.apps.cdl.service.PeriodService;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 
 import io.swagger.annotations.Api;
@@ -83,7 +85,9 @@ public class PeriodResource {
     @PostMapping(value = "/maxperiodid")
     @ApiOperation(value = "Get the largest period id")
     // Only a temporary helper api for data science
-    public int getMaxPeriodId(@PathVariable String customerSpace, @RequestBody PeriodStrategy periodStrategy) {
-        return periodService.getMaxPeriodId(customerSpace, periodStrategy);
+    public int getMaxPeriodId(@PathVariable String customerSpace,
+                              @RequestParam(name = "version", required = false) DataCollection.Version version,
+                              @RequestBody PeriodStrategy periodStrategy) {
+        return periodService.getMaxPeriodId(customerSpace, periodStrategy, version);
     }
 }

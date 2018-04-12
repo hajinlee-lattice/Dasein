@@ -13,6 +13,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndMo
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
 import com.latticeengines.modeling.workflow.steps.ResolveMetadataFromUserRefinedAttributes;
+import com.latticeengines.scoring.dataflow.ComputeLift;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
@@ -48,6 +49,9 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
 
     @Inject
     private RatingEngineScoreWorkflow scoreWorkflow;
+
+    @Inject
+    private ComputeLift computeLift;
 
     @Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;

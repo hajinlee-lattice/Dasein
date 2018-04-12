@@ -7,6 +7,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -41,8 +43,10 @@ import com.latticeengines.domain.exposed.scoringapi.Fields;
 import com.latticeengines.domain.exposed.scoringapi.ModelDetail;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.oauth2.LatticeOAuth2RestTemplateFactory;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.scoringapi.exposed.model.ModelJsonTypeHandler;
@@ -91,6 +95,9 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
     @Autowired
     @Qualifier(value = "deploymentTestBed")
     protected GlobalAuthDeploymentTestBed deploymentTestBed;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     protected OAuthUserEntityMgr userEntityMgr;
 
@@ -254,8 +261,10 @@ public class ScoringApiControllerDeploymentTestNGBase extends ScoringApiFunction
         plsRest.createModelSummary(modelSummary, customerSpace);
 
         List<BucketMetadata> bucketMetadataList = ScoringApiTestUtils.generateDefaultBucketMetadataList();
-        plsRest.createABCDBuckets(modelId, customerSpace, bucketMetadataList);
-
+        CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        request.setBucketMetadataList(bucketMetadataList);
+        request.setModelGuid(modelId);
+        bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
         return tenant;
     }
 

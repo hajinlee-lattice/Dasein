@@ -39,7 +39,7 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
         }
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
-            generateAIRatingWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            generateAIRatingWorkflowBuilder.dataCloudVersion(dataCloudVersion.getVersion());
             return this;
         }
 

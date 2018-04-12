@@ -29,13 +29,12 @@ public class CDLComponent {
         this.componentManager = componentManager;
     }
 
-    public static String getVersionString() { return versionString; }
+    private static String getVersionString() { return versionString; }
 
     @PostConstruct
     private void registerBootStrapper() {
         BatonService batonService = new BatonServiceImpl();
-        boolean needToRegister = Boolean.valueOf(System.getProperty("com.latticeengines.registerBootstrappers"));
-        if (needToRegister && !batonService.getRegisteredServices().contains(componentName)) {
+        if (!batonService.getRegisteredServices().contains(componentName)) {
             ServiceProperties serviceProps = new ServiceProperties();
             serviceProps.dataVersion = 1;
             serviceProps.versionString = getVersionString();

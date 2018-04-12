@@ -2,7 +2,6 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -27,31 +26,31 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScoreWorkflowConfiguration> {
 
-    @Autowired
+    @Inject
     private CreateCdlTargetTableFilterStep createCdlTargetTableFilterStep;
 
-    @Autowired
+    @Inject
     private CreateCdlEventTableStep createCdlEventTableStep;
 
-    @Autowired
+    @Inject
     private MatchDataCloudWorkflow matchDataCloudWorkflow;
 
     @Inject
     private AddStandardAttributes addStandardAttributesDataFlow;
 
-    @Autowired
+    @Inject
     private ScoreEventTable score;
 
-    @Autowired
+    @Inject
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
-    @Autowired
+    @Inject
     private ScoreAggregateFlow scoreAggregateFlow;
 
-    @Autowired
+    @Inject
     private ExportData exportData;
 
-    @Autowired
+    @Inject
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
 
     @Override

@@ -4,8 +4,8 @@ import java.util.Collection;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
@@ -34,7 +34,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
-        private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
+        private MatchDataCloudWorkflowConfiguration.Builder match = new MatchDataCloudWorkflowConfiguration.Builder();
 
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
@@ -45,7 +45,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             configuration.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
-            matchDataCloudWorkflowBuilder.customer(customerSpace);
+            match.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
             scoreAgg.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
@@ -56,7 +56,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         public Builder microServiceHostPort(String microServiceHostPort) {
             generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
-            matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
+            match.microServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
@@ -64,18 +64,48 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
-        public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
-            matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion.getVersion());
+        public Builder dataCloudVersion(String dataCloudVersion) {
+            match.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchYarnQueue(String matchYarnQueue) {
-            matchDataCloudWorkflowBuilder.matchQueue(matchYarnQueue);
+            match.matchQueue(matchYarnQueue);
             return this;
         }
 
         public Builder fetchOnly(boolean fetchOnly) {
-            matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
+            match.fetchOnly(fetchOnly);
+            return this;
+        }
+
+        public Builder userId(String userId) {
+            computeLift.setUserId(userId);
+            return this;
+        }
+
+        public Builder dataCollectionVersion(DataCollection.Version version) {
+            generateRatingStepConfiguration.setDataCollectionVersion(version);
+            cdlEventTable.setDataCollectionVersion(version);
+            return this;
+        }
+
+        public Builder saveBucketMetadata() {
+            computeLift.setSaveBucketMetadata(Boolean.TRUE);
+            return this;
+        }
+
+        public Builder ratingEngineId(String ratingEngineId) {
+            computeLift.setRatingEngineId(ratingEngineId);
+            return this;
+        }
+
+        public Builder setExpectedValue(boolean expectedValue) {
+            if (expectedValue) {
+                computeLift.setScoreField(InterfaceName.ExpectedRevenue.name());
+            } else {
+                computeLift.setScoreField(InterfaceName.RawScore.name());
+            }
             return this;
         }
 
@@ -87,7 +117,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
                     configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(cdlEventTable);
-            configuration.add(matchDataCloudWorkflowBuilder.build());
+            configuration.add(match.build());
             configuration.add(score);
             configuration.add(scoreAgg);
             configuration.add(combineInputWithScores);
@@ -100,13 +130,13 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         private void setMatchConfig() {
-            matchDataCloudWorkflowBuilder.excludePublicDomains(false);
-            matchDataCloudWorkflowBuilder.matchRequestSource(MatchRequestSource.SCORING);
-            matchDataCloudWorkflowBuilder.matchColumnSelection(ColumnSelection.Predefined.RTS, "");
-            matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(null);
-            matchDataCloudWorkflowBuilder.setRetainLatticeAccountId(false);
-            matchDataCloudWorkflowBuilder.skipDedupStep(true);
-            matchDataCloudWorkflowBuilder.matchHdfsPod(null);
+            match.excludePublicDomains(false);
+            match.matchRequestSource(MatchRequestSource.SCORING);
+            match.matchColumnSelection(ColumnSelection.Predefined.RTS, "");
+            match.sourceSchemaInterpretation(null);
+            match.setRetainLatticeAccountId(false);
+            match.skipDedupStep(true);
+            match.matchHdfsPod(null);
         }
 
         private void setScoreConfig() {

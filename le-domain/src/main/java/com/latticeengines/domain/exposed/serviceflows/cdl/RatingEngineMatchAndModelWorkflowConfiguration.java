@@ -324,7 +324,6 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
 
         public Builder liftChart(boolean liftChart) {
             ratingEngineScoreWorkflowBuilder.liftChart(liftChart);
-            pivotScoreAndEvent.setLiftChart(liftChart);
             return this;
         }
 

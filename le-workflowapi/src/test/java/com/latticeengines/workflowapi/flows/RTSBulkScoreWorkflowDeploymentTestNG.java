@@ -8,6 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.apache.avro.Schema.Type;
 import org.apache.hadoop.conf.Configuration;
@@ -37,9 +39,11 @@ import com.latticeengines.domain.exposed.pls.ModelType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.scoringapi.Model;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.lp.CreateBucketMetadataRequest;
 import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.pls.workflow.RTSBulkScoreWorkflowSubmitter;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.utils.ModelSummaryUtils;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -59,6 +63,9 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     @Autowired
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     private static String TEST_INPUT_DATA_DIR;
 
@@ -103,7 +110,10 @@ public class RTSBulkScoreWorkflowDeploymentTestNG extends ScoreWorkflowDeploymen
 
     private void generateDefaultBucketMetadata(ModelSummary summary, CustomerSpace customerSpace) {
         List<BucketMetadata> bucketMetadataList = generateDefaultBucketMetadataList();
-        internalResourceProxy.createABCDBuckets(summary.getId(), customerSpace, bucketMetadataList);
+        CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
+        request.setBucketMetadataList(bucketMetadataList);
+        request.setModelGuid(summary.getId());
+        bucketedScoreProxy.createABCDBuckets(customerSpace.toString(), request);
     }
 
     private void saveAttributeSelection(CustomerSpace customerSpace) {

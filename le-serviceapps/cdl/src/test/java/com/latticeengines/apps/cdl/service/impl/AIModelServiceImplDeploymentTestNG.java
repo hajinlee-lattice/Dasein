@@ -113,7 +113,7 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
 
     protected EventFrontEndQuery getRatingEngineModelingQueries(RatingEngine ratingEngine, AIModel aiModel,
             ModelingQueryType queryType) {
-        return aiModelService.getModelingQuery(mainTestTenant.getId(), ratingEngine, aiModel, queryType);
+        return aiModelService.getModelingQuery(mainTestTenant.getId(), ratingEngine, aiModel, queryType, null);
     }
 
     @Test(groups = "deployment")

@@ -1,8 +1,6 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -10,17 +8,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -33,7 +27,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 
 public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -55,32 +49,45 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
+
+    @Inject
     private SegmentProxy segmentProxy;
 
-    @Value("${common.test.pls.url}")
-    private String internalResourceHostPort;
+    @BeforeClass(groups = { "end2end", "manual" })
+    public void setup() {
+    }
 
-    private InternalResourceRestApiProxy internalResourceProxy;
+    /**
+     * This test is part of CD pipeline
+     */
+    @Test(groups = "end2end")
+    public void end2endTest() throws Exception {
+        setupEnd2EndTestEnvironment();
+        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        bootstrap();
+        runTest();
+    }
 
-    @BeforeClass(groups = { "end2end" })
-    public void setup() throws Exception {
+    /**
+     * This test is for generating model artifacts for other tests
+     */
+    @Test(groups = "manual")
+    public void manualTest() throws Exception {
         if (USE_EXISTING_TENANT) {
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
         } else {
-            super.setup();
+            setupEnd2EndTestEnvironment();
             resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        attachProtectedProxy(modelSummaryProxy);
-        attachProtectedProxy(fileUploadProxy);
-        setupTestRatingEngine();
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+        bootstrap();
+        runTest();
     }
 
-    @Test(groups = "end2end")
-    public void runTest() {
+    private void runTest() {
         log.info("Start modeling ...");
         verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
@@ -92,32 +99,36 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         verifyBucketMetadataGenerated();
     }
 
+    private void bootstrap() {
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+        attachProtectedProxy(modelSummaryProxy);
+        attachProtectedProxy(fileUploadProxy);
+        setupTestRatingEngine();
+    }
+
     private void verifyBucketMetadataNotGenerated() {
-        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
-                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                        testRatingEngine.getId());
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
+                .getABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
         Assert.assertTrue(bucketMetadataHistory.isEmpty());
     }
 
     private void verifyBucketMetadataGenerated() {
-        Map<Long, List<BucketMetadata>> bucketMetadataHistory = internalResourceProxy
-                .getABCDBucketsBasedOnRatingEngineId(CustomerSpace.parse(mainTestTenant.getId()).toString(),
-                        testRatingEngine.getId());
+        Map<Long, List<BucketMetadata>> bucketMetadataHistory = bucketedScoreProxy
+                .getABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
         Assert.assertNotNull(bucketMetadataHistory);
         Assert.assertEquals(bucketMetadataHistory.size(), 1);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
     }
-
     private void setupTestSegment() {
         testSegment = constructTargetSegment();
         testSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), testSegment);
     }
 
     private void setupSourceFile() {
-        Resource csvResrouce = new ClassPathResource("end2end/csv/CustomEventModelTest.csv",
+        Resource csvResource = new ClassPathResource("end2end/csv/CustomEventModelTest.csv",
                 Thread.currentThread().getContextClassLoader());
         testSourceFile = fileUploadProxy.uploadFile(testSourceFileName, false, "CustomEventModelTest.csv",
-                SchemaInterpretation.Account, "Account", csvResrouce);
+                SchemaInterpretation.Account, "Account", csvResource);
         FieldMappingDocument fmDoc = fileUploadProxy.getFieldMappings(testSourceFileName, "Account");
         for (FieldMapping fm : fmDoc.getFieldMappings()) {
             if (fm.getUserField().equals("Event")) {
@@ -137,25 +148,13 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         setupTestSegment();
         setupSourceFile();
 
-        testRatingEngine = new RatingEngine();
-        testRatingEngine.setDisplayName("CreateAIModelDeploymentTestRating");
-        testRatingEngine.setTenant(mainTestTenant);
-        testRatingEngine.setType(RatingEngineType.CUSTOM_EVENT);
-        testRatingEngine.setSegment(testSegment);
-        testRatingEngine.setCreatedBy("bnguyen@lattice-engines.com");
-        testRatingEngine.setCreated(new Date());
-        testRatingEngine.setCreated(new Date());
+        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT, testSegment);
+        testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
 
-        testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), testRatingEngine);
         testAIModel = (AIModel) testRatingEngine.getActiveModel();
+        configureCustomEventModel(testAIModel);
         CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(testAIModel);
-        advancedConf.setDataStores(
-                Arrays.asList(CustomEventModelingConfig.DataStore.CDL, CustomEventModelingConfig.DataStore.DataCloud));
-        advancedConf.setCustomEventModelingType(CustomEventModelingType.CDL);
-        advancedConf.setDeduplicationType(DedupType.ONELEADPERDOMAIN);
-        advancedConf.setExcludePublicDomains(false);
         advancedConf.setSourceFileName(testSourceFile.getName());
-
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId(), testAIModel);
     }

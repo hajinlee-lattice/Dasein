@@ -53,9 +53,4 @@ public class PeriodProxy extends MicroserviceRestApiProxy implements ProxyInterf
         return get("get evaluation date", url, String.class);
     }
 
-    public int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy) {
-        String url = constructUrl(URL_PREFIX + "/maxperiodid", shortenCustomerSpace(customerSpace));
-        return post("get max periodid for the given period name", url, periodStrategy, Integer.class);
-    }
-
 }

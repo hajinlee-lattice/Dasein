@@ -20,16 +20,12 @@ public interface BucketedScoreService {
 
     void createBucketMetadatas(String modelId, List<BucketMetadata> bucketMetadatas);
 
-    void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas,
-            String userId);
+    void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas);
 
     List<BucketMetadata> getUpToDateModelBucketMetadata(String modelId);
 
     List<BucketMetadata> getUpToDateABCDBucketsBasedOnRatingEngineId(String ratingEngineId);
 
     List<BucketMetadata> getUpToDateModelBucketMetadataAcrossTenants(String modelId);
-
-    BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId, BucketedScoreSummary bucketedScoreSummary)
-            throws Exception;
 
 }

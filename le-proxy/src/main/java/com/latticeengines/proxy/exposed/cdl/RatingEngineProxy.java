@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.NoteParams;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineAndActionDTO;
@@ -234,15 +235,32 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType) {
+        return getModelingQueryCountByRatingId(customerSpace, ratingEngineId, aiModelId, modelingQueryType, null);
+    }
+
+    public Long getModelingQueryCountByRatingId(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
                 + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        if (version != null) {
+            url += "&version=" + version;
+        }
         return get("getModelingQueryCount", url, Long.class);
     }
 
     public Long getModelingQueryCountByRating(String customerSpace, String ratingEngineId, String aiModelId,
             ModelingQueryType modelingQueryType, RatingEngine ratingEngine) {
+        return getModelingQueryCountByRating(customerSpace, ratingEngineId, aiModelId, modelingQueryType, ratingEngine,
+                null);
+    }
+
+    public Long getModelingQueryCountByRating(String customerSpace, String ratingEngineId, String aiModelId,
+            ModelingQueryType modelingQueryType, RatingEngine ratingEngine, DataCollection.Version version) {
         String url = constructUrl(URL_PREFIX + "/{ratingEngineId}/ratingmodels/{aiModel}/modelingquery/count"
                 + "?querytype=" + modelingQueryType, shortenCustomerSpace(customerSpace), ratingEngineId, aiModelId);
+        if (version != null) {
+            url += "&version=" + version;
+        }
         return post("getModelingQueryCount", url, ratingEngine, Long.class);
     }
 

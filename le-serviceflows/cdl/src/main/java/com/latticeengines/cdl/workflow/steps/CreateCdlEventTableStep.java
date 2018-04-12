@@ -45,13 +45,22 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     @Value("${dataplatform.queue.scheme}")
     private String queueScheme;
 
+    private DataCollection.Version version;
+
     @Override
     public void onConfigurationInitialized() {
         CreateCdlEventTableConfiguration configuration = getConfiguration();
         if (StringUtils.isBlank(configuration.getTargetTableName())) {
             String targetTableName = NamingUtils.timestamp("CdlEventTable");
             configuration.setTargetTableName(targetTableName);
-            log.info("Read target table name from context: " + targetTableName);
+            log.info("Generated a new target table name: " + targetTableName);
+        }
+        version = configuration.getDataCollectionVersion();
+        if (version == null) {
+            version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            log.info("Read inactive version from workflow context: " + version);
+        } else {
+            log.info("Use the version specified in configuration: " + version);
         }
         configuration.setApplyTableProperties(true);
         configuration.setDataFlowParams(createDataFlowParameters());
@@ -69,7 +78,16 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private Table getAndSetAccountTable() {
         Table accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
-                TableRoleInCollection.ConsolidatedAccount);
+                TableRoleInCollection.ConsolidatedAccount, version);
+        if (accountTable == null) {
+            accountTable = dataCollectionProxy.getTable(getConfiguration().getCustomerSpace().toString(),
+                    TableRoleInCollection.ConsolidatedAccount, version.complement());
+            if (accountTable != null) {
+                log.info("Found ConsolidatedAccount table in version " + version.complement());
+            }
+        } else {
+            log.info("Found ConsolidatedAccount table in version " + version);
+        }
         if (accountTable == null) {
             throw new RuntimeException("There's no Account table!");
         }
@@ -85,8 +103,6 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
         if (changedCount > 0) {
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
                     accountTable);
-            DataCollection.Version version = dataCollectionProxy
-                    .getActiveVersion(configuration.getCustomerSpace().toString());
             dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
                     TableRoleInCollection.ConsolidatedAccount, version);
         }
@@ -96,7 +112,16 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private Table getAndSetApsTable() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState);
+        Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState, version);
+        if (apsTable == null) {
+            apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState,
+                    version.complement());
+            if (apsTable != null) {
+                log.info("Found AnalyticPurchaseState table in version " + version.complement());
+            }
+        } else {
+            log.info("Found AnalyticPurchaseState table in version " + version);
+        }
         if (apsTable == null) {
             throw new RuntimeException("There's no AnalyticPurchaseState table!");
         }

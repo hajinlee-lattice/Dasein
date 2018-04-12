@@ -3,14 +3,12 @@ package com.latticeengines.apps.cdl.service.impl;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.domain.exposed.cdl.RatingEngineDependencyType;
@@ -32,15 +30,7 @@ public class RatingEngineDashboardServiceImpl extends RatingEngineTemplate imple
     private RatingEngineService ratingEngineService;
 
     @Inject
-    private RatingCoverageService ratingCoverageService;
-
-    @Inject
     private PlayProxy playProxy;
-
-    @PostConstruct
-    public void init() {
-        initializeInternalResourceRestApiProxy();
-    }
 
     @Override
     public RatingEngineDashboard getRatingsDashboard(String customerSpace, String ratingEngineId) {

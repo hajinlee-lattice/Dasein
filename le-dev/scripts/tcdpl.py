@@ -67,7 +67,7 @@ PRESETS = {
     'cdl_pre_checkin': {
         'apps': ['admin', 'pls', 'microservice', 'matchapi','scoringapi'],
         'modules': ['eai', 'metadata', 'dataflowapi', 'workflowapi', 'modeling', 'scoring', 'datacloudapi', 'cdl',
-                    'objectapi', 'dante', 'sqoop', 'quartz']
+                    'objectapi', 'dante', 'sqoop', 'quartz', 'lp']
     },
     'lp': {
         'apps': ['admin', 'pls', 'microservice', 'oauth2', 'scoringapi', 'matchapi', 'playmaker', 'saml'],

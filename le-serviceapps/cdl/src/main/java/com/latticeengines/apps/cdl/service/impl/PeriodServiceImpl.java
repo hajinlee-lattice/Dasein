@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodBuilderFactory;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.proxy.exposed.objectapi.TransactionProxy;
 
@@ -107,9 +108,11 @@ public class PeriodServiceImpl implements PeriodService {
     }
 
     @Override
-    public int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy) {
-        String dateStr = transactionProxy.getMaxTransactionDate(customerSpace,
-                dataCollectionService.getActiveVersion(customerSpace));
+    public int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy, DataCollection.Version version) {
+        if (version == null) {
+            version = dataCollectionService.getActiveVersion(customerSpace);
+        }
+        String dateStr = transactionProxy.getMaxTransactionDate(customerSpace, version);
         LocalDate date = LocalDate.parse(dateStr);
         if (date.isAfter(LocalDate.now())) {
             dateStr = LocalDate.now().toString();

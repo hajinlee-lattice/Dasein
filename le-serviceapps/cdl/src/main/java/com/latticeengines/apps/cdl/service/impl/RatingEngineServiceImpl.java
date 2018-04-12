@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -64,6 +65,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
+import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 import reactor.core.publisher.ParallelFlux;
 
@@ -71,11 +73,6 @@ import reactor.core.publisher.ParallelFlux;
 public class RatingEngineServiceImpl extends RatingEngineTemplate implements RatingEngineService {
 
     private static Logger log = LoggerFactory.getLogger(RatingEngineServiceImpl.class);
-
-    @PostConstruct
-    public void init() {
-        initializeInternalResourceRestApiProxy();
-    }
 
     @Inject
     private RatingEngineEntityMgr ratingEngineEntityMgr;
@@ -103,6 +100,16 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Value("${common.pls.url}")
+    private String internalResourceHostPort;
+
+    private InternalResourceRestApiProxy internalResourceProxy;
+
+    @PostConstruct
+    public void postConstruct() {
+        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
+    }
 
     @Override
     public List<RatingEngine> getAllRatingEngines() {
@@ -281,7 +288,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType) {
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
         if (ratingModel == null) {
             throw new LedpException(LedpCode.LEDP_40014, new String[] { ratingEngine.getId(), customerSpace });
         }
@@ -289,8 +296,11 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         if (ratingEngine.getType() == RatingEngineType.CROSS_SELL && ratingModel instanceof AIModel) {
             AIModelService aiModelService = (AIModelService) RatingModelServiceBase
                     .getRatingModelService(ratingEngine.getType());
+            if (version == null) {
+                version = dataCollectionService.getActiveVersion(customerSpace);
+            }
             return aiModelService.getModelingQuery(customerSpace, ratingEngine, (AIModel) ratingModel,
-                    modelingQueryType);
+                    modelingQueryType, version);
         } else {
             throw new LedpException(LedpCode.LEDP_40009,
                     new String[] { ratingEngine.getId(), ratingModel.getId(), customerSpace });
@@ -299,9 +309,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-            ModelingQueryType modelingQueryType) {
-
-        EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType);
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
+        EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType, version);
         switch (modelingQueryType) {
         case TARGET:
             return eventProxy.getScoringCount(customerSpace, efeq);
@@ -337,6 +346,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                         new String[] { aiModel.getId(), CustomerSpace.parse(customerSpace).toString() });
             }
             internalResourceProxy.setModelSummaryDownloadFlag(CustomerSpace.parse(customerSpace).toString());
+            DataCollection.Version activeVersion = dataCollectionService.getActiveVersion(customerSpace);
             RatingEngineModelingParameters parameters = new RatingEngineModelingParameters();
             parameters.setName(aiModel.getId());
             parameters.setDisplayName(ratingEngine.getDisplayName() + "_" + aiModel.getIteration());
@@ -346,15 +356,14 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             parameters.setRatingEngineId(ratingEngine.getId());
             parameters.setAiModelId(aiModel.getId());
             parameters.setTargetFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET));
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TARGET, activeVersion));
             parameters.setTargetFilterTableName(aiModel.getId() + "_target");
             parameters.setTrainFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING));
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.TRAINING, activeVersion));
             parameters.setTrainFilterTableName(aiModel.getId() + "_train");
             parameters.setEventFilterQuery(
-                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT));
+                    getModelingQuery(customerSpace, ratingEngine, aiModel, ModelingQueryType.EVENT, activeVersion));
             parameters.setEventFilterTableName(aiModel.getId() + "_event");
-
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                 parameters.setExpectedValue(true);
             }

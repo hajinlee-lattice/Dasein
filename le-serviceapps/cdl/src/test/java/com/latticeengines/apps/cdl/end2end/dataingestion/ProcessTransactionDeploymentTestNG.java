@@ -110,7 +110,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         return expectedCnts;
     }
 
-    public void setupBusinessCalendar() {
+    private void setupBusinessCalendar() {
         periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
     }
 }

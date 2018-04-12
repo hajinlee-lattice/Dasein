@@ -97,8 +97,8 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             boolean isRatingEngine = !modelGuid.equals(engineId);
             log.info("Updating bucket metadata for " + (isRatingEngine ? "engine " : "model ") + engineId + " to "
                     + JsonUtils.pprint(bucketMetadata));
-            if (!multiModel && Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
-                String ratingEngineId = configuration.getRatingEngineId();
+            if (Boolean.TRUE.equals(configuration.getSaveBucketMetadata())) {
+                String ratingEngineId = isRatingEngine ? engineId : configuration.getRatingEngineId();
                 CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
                 request.setModelGuid(modelGuid);
                 request.setRatingEngineId(ratingEngineId);

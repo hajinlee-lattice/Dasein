@@ -13,6 +13,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.network.exposed.scoringapi.InternalScoringApiInterface;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.scoringapi.InternalScoringApiProxy;
@@ -66,6 +69,9 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
 
     @Autowired
     protected MetadataProxy metadataProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
 
     protected List<Record> generateRecords(int n,
             List<Entry<TestModelConfiguration, TestModelArtifactDataComposition>> modelList, boolean isPmmlModel)
@@ -387,7 +393,7 @@ public class ScoringResourceDeploymentTestNGBase extends ScoringApiControllerDep
             TestModelArtifactDataComposition modelArtifactDataComposition = null;
             if (modelId == null) {
                 modelConfiguration = new TestModelConfiguration(testModelFolderName, applicationId, modelVersion);
-                modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration,
+                modelArtifactDataComposition = modelCreator.createModels(yarnConfiguration, bucketedScoreProxy,
                         (plsRest != null ? plsRest : this.plsRest), (tenant != null ? tenant : this.tenant),
                         modelConfiguration, (customerSpace != null ? customerSpace : this.customerSpace), metadataProxy,
                         getTestModelSummaryParser(), hdfsSubPathForModel);

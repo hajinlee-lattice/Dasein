@@ -115,7 +115,7 @@ public class BucketedScoreServiceImplTestNG extends LPFunctionalTestNGBase {
         assertEquals(Math.round(retrieved.getTotalNumConverted()), 906);
 
         bucketedScoreSummary = BucketedScoreSummaryUtils.generateBucketedScoreSummary(records);
-        bucketedScoreSummary.setTotalNumConverted(bucketedScoreSummary.getTotalNumConverted() + 2);
+        bucketedScoreSummary.setTotalNumConverted(bucketedScoreSummary.getTotalNumConverted() + 2.0);
         bucketedScoreService.createOrUpdateBucketedScoreSummary(modelSummary.getId(), bucketedScoreSummary);
         Thread.sleep(500);
         retrieved = bucketedScoreService.getBucketedScoreSummaryByModelGuid(modelSummary.getId());

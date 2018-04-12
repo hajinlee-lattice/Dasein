@@ -24,10 +24,6 @@ public class InternalResourceRestApiProxyUnitTestNG {
 
     private ActionType actionType = ActionType.CDL_DATAFEED_IMPORT_WORKFLOW;
 
-    private String ratingEngineId = "ratingEngineId";
-
-    private String modelId = "modelId";
-
     @Test(groups = "unit")
     public void testGenerateFindJobsBasedOnActionIdsAndTypeUrl() {
         String customerSpace = CustomerSpace.parse(tenantId).toString();
@@ -39,24 +35,6 @@ public class InternalResourceRestApiProxyUnitTestNG {
         Assert.assertEquals(url, expectedPrefix + customerSpace + "?pid=1&pid=2&pid=3");
         url = internalProxy.generateFindJobsBasedOnActionIdsAndTypeUrl(tenantId, actionIds, actionType);
         Assert.assertEquals(url, expectedPrefix + customerSpace + "?pid=1&pid=2&pid=3&type=" + actionType.name());
-    }
-
-    @Test(groups = "unit")
-    public void testConstructUrlForDefaultABCDBucketsForCDL() {
-        String url = internalProxy.constructUrlForDefaultABCDBucketsForCDL(CustomerSpace.parse(tenantId).toString(),
-                ratingEngineId, modelId);
-        log.info("url is " + url);
-        Assert.assertEquals(url,
-                "http://localhost:8081/pls/internal/bucketmetadata/ratingengine/ratingEngineId/model/modelId/tenant.tenant.Production");
-    }
-
-    @Test(groups = "unit")
-    public void testConstructUrlForGetABCDBucketsForCDL() {
-        String url = internalProxy.constructUrlForGetABCDBucketsForCDL(CustomerSpace.parse(tenantId).toString(),
-                ratingEngineId);
-        log.info("url is " + url);
-        Assert.assertEquals(url,
-                "http://localhost:8081/pls/internal/bucketmetadata/ratingengine/ratingEngineId/tenant.tenant.Production");
     }
 
 }

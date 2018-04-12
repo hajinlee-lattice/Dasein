@@ -67,15 +67,7 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
         return bucketedScoreSummary;
     }
 
-    @Override
-    public BucketedScoreSummary createOrUpdateBucketedScoreSummary(String modelId,
-            BucketedScoreSummary bucketedScoreSummary) {
-        return bucketedScoreProxy.createOrUpdateBucketedScoreSummary(MultiTenantContext.getTenantId(), modelId,
-                bucketedScoreSummary);
-    }
-
-    private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary)
-            throws Exception {
+    private BucketedScoreSummary getBucketedScoreSummaryBasedOnModelSummary(ModelSummary modelSummary) throws Exception {
         String jobId = modelSummary.getModelSummaryConfiguration().getString(ProvenancePropertyName.WorkflowJobId);
         String pivotAvroDirPath;
 
@@ -129,14 +121,13 @@ public class BucketedScoreServiceImpl implements BucketedScoreService {
     }
 
     @Override
-    public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas,
-            String userId) {
+    public void createBucketMetadatas(String ratingEngineId, String modelId, List<BucketMetadata> bucketMetadatas) {
         log.info(String.format("Creating BucketMetadata for RatingEngine %s, Model %s", ratingEngineId, modelId));
         CreateBucketMetadataRequest request = new CreateBucketMetadataRequest();
         request.setBucketMetadataList(bucketMetadatas);
         request.setModelGuid(modelId);
         request.setRatingEngineId(ratingEngineId);
-        request.setLastModifiedBy(userId);
+        request.setLastModifiedBy(MultiTenantContext.getEmailAddress());
         bucketedScoreProxy.createABCDBuckets(MultiTenantContext.getTenantId(), request);
     }
 

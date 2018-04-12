@@ -224,14 +224,12 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder aiModelId(String aiModelId) {
             modelWorkflowBuilder.aiModelId(aiModelId);
-            pivotScoreAndEvent.setModelId(aiModelId);
             return this;
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
             computeLift.setRatingEngineId(ratingEngineId);
             modelWorkflowBuilder.ratingEngineId(ratingEngineId);
-            pivotScoreAndEvent.setRatingEngineId(ratingEngineId);
             return this;
         }
 

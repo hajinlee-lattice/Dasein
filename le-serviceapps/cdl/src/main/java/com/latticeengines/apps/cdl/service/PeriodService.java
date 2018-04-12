@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 
 public interface PeriodService {
 
@@ -13,7 +14,7 @@ public interface PeriodService {
 
     String getEvaluationDate();
 
-    int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy);
+    int getMaxPeriodId(String customerSpace, PeriodStrategy periodStrategy, DataCollection.Version version);
 
     Map<PeriodStrategy.Template, Integer> getPeriodId(String date, PeriodStrategy periodStrategy);
 }

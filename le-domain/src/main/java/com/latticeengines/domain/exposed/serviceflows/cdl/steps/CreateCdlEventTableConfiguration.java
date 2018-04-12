@@ -1,9 +1,12 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.steps;
 
+import com.latticeengines.domain.exposed.metadata.DataCollection;
+
 public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfiguration {
 
     private String sourceSchemaInterpretation;
     private String eventColumn;
+    private DataCollection.Version dataCollectionVersion;
 
     public CreateCdlEventTableConfiguration() {
         setBeanName("createCdlEventTableFlow");
@@ -23,5 +26,13 @@ public class CreateCdlEventTableConfiguration extends BaseCDLDataFlowStepConfigu
 
     public String getEventColumn() {
         return eventColumn;
+    }
+
+    public DataCollection.Version getDataCollectionVersion() {
+        return dataCollectionVersion;
+    }
+
+    public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
+        this.dataCollectionVersion = dataCollectionVersion;
     }
 }

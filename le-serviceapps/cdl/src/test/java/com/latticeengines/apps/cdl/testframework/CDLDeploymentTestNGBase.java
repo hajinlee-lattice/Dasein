@@ -123,7 +123,7 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
 
     protected void attachProtectedProxy(ProtectedRestApiProxy proxy) {
         testBed.attachProtectedProxy(proxy);
-        logger.info("Attached the proxy " + proxy.getClass().getSimpleName() + " to GA testbed.");
+        log.info("Attached the proxy " + proxy.getClass().getSimpleName() + " to GA testbed.");
     }
 
     protected MetadataSegment constructSegment(String segmentName) {

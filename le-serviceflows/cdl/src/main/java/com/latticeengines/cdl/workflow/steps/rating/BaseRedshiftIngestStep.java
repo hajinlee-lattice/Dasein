@@ -76,7 +76,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
 
     protected CustomerSpace customerSpace;
     protected Schema schema;
-    protected DataCollection.Version inactive;
+    protected DataCollection.Version version;
     protected List<RatingModelContainer> containers;
     protected String targetTableName;
 
@@ -93,7 +93,13 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
 
     private void preIngestion() {
         customerSpace = configuration.getCustomerSpace();
-        inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+        version = configuration.getDataCollectionVersion();
+        if (version == null) {
+            version = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
+            log.info("Read inactive version from workflow context: " + version);
+        } else {
+            log.info("Use the version specified in configuration: " + version);
+        }
 
         List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         containers = allContainers.stream() //
@@ -201,20 +207,21 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                 int retries = 0;
                 while (retries < 3) {
                     try {
-                        return ratingProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery, inactive);
+                        return ratingProxy.getCountFromObjectApi(customerSpace.getTenantId(), frontEndQuery, version);
                     } catch (Exception ex) {
                         log.error("Exception in getting total count in segment for Account", ex);
                         retries++;
                         try {
                             Thread.sleep(2000);
                         } catch (InterruptedException e) {
+                            // ignore
                         }
                     }
                 }
                 throw new RuntimeException("Fail to get total count in segment for Account");
             } else {
                 return ratingEngineProxy.getModelingQueryCountByRatingId(customerSpace.toString(), engineSummary.getId(),
-                        ratingModel.getId(), ModelingQueryType.TARGET);
+                        ratingModel.getId(), ModelingQueryType.TARGET, version);
             }
         }
 
@@ -228,10 +235,10 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
                 frontEndQuery.setPageFilter(new PageFilter(ingestedCount, PAGE_SIZE));
                 DataPage dataPage;
                 if (RatingEngineType.RULE_BASED.equals(engineType)) {
-                    dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, inactive);
+                    dataPage = ratingProxy.getData(customerSpace.getTenantId(), frontEndQuery, version);
                 } else {
                     dataPage = eventProxy.getScoringTuples(customerSpace.toString(), (EventFrontEndQuery) frontEndQuery,
-                            inactive);
+                            version);
                 }
                 if (dataPage != null) {
                     data = dataPage.getData();
