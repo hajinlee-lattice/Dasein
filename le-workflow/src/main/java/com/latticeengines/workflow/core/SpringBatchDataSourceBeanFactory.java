@@ -22,7 +22,7 @@ public class SpringBatchDataSourceBeanFactory extends DataSourceBeanFactory {
         }
         if (WebApp.equals(currentEnv)) {
             setMaxPoolSize(webAppMaxPoolSize);
-            setJdbcUrl(jdbcUrlReader);
+//            setJdbcUrl(jdbcUrlReader);
         } else {
             setWebAppMaxPoolSize(yarnContainerMaxPoolSize);
         }
