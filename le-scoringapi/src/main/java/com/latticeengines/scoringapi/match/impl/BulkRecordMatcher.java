@@ -137,7 +137,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
     private BulkMatchOutput executeMatch(BulkMatchInput matchInput, boolean isDebugMode) {
         log("matchInput:", matchInput, isDebugMode);
 
-        if (log.isInfoEnabled()) {
+        if (isDebugMode && log.isInfoEnabled()) {
             log.info("Calling match for " + matchInput.getInputList().size() + " match inputs");
         }
 
@@ -145,7 +145,7 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
         log("matchOutput:", matchOutput, isDebugMode);
 
-        if (log.isInfoEnabled()) {
+        if (isDebugMode && log.isInfoEnabled()) {
             log.info("Completed match for " + matchInput.getInputList().size() + " match inputs");
         }
 
@@ -232,11 +232,13 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
                 putInBulkMatchInput(RTS_MATCH_ONLY, matchInputMap, //
                         recordModelTuple, matchOnlyInput);
-                log.info(String.format(
-                        "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                        additionalScoreConfig.getSpace().getTenantId(), RTS_MATCH_ONLY,
-                        modelSummary == null ? null : modelSummary.getId(), matchOnlyInput.getDataCloudVersion(),
-                        matchOnlyInput.getData().size()));
+                if (additionalScoreConfig.isDebug()) {
+                    log.info(String.format(
+                            "Bulk-realtime match request info: recordId=%s, tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                            recordModelTuple.getRecord().getRecordId(), additionalScoreConfig.getSpace().getTenantId(),
+                            RTS_MATCH_ONLY, modelSummary == null ? null : modelSummary.getId(),
+                            matchOnlyInput.getDataCloudVersion(), matchOnlyInput.getData().size()));
+                }
             }
 
             // call enrichment (without predefined column selection) against
@@ -260,11 +262,13 @@ public class BulkRecordMatcher extends AbstractMatcher {
 
             putInBulkMatchInput(AM_ENRICH_ONLY, matchInputMap, //
                     recordModelTuple, matchAMEnrichmentInput);
-            log.info(String.format(
-                    "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                    additionalScoreConfig.getSpace().getTenantId(), AM_ENRICH_ONLY,
-                    modelSummary == null ? null : modelSummary.getId(), matchAMEnrichmentInput.getDataCloudVersion(),
-                    matchAMEnrichmentInput.getData().size()));
+            if (additionalScoreConfig.isDebug()) {
+                log.info(String.format(
+                        "Bulk-realtime match request info: recordId=%s, tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                        recordModelTuple.getRecord().getRecordId(), additionalScoreConfig.getSpace().getTenantId(),
+                        AM_ENRICH_ONLY, modelSummary == null ? null : modelSummary.getId(),
+                        matchAMEnrichmentInput.getDataCloudVersion(), matchAMEnrichmentInput.getData().size()));
+            }
         } else {
             // call regular match
             MatchInput matchInput = buildMatchInput(additionalScoreConfig.getSpace(), //
@@ -281,11 +285,13 @@ public class BulkRecordMatcher extends AbstractMatcher {
             }
 
             putInBulkMatchInput(key, matchInputMap, recordModelTuple, matchInput);
-            log.info(String.format(
-                    "Bulk-realtime match request info: tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
-                    additionalScoreConfig.getSpace().getTenantId(), key,
-                    modelSummary == null ? null : modelSummary.getId(), matchInput.getDataCloudVersion(),
-                    matchInput.getData().size()));
+            if (additionalScoreConfig.isDebug()) {
+                log.info(String.format(
+                        "Bulk-realtime match request info: recordId=%s, tenant=%s, scenario=%s, modelId=%s, dataCloudVersion=%s, rows=%d",
+                        recordModelTuple.getRecord().getRecordId(), additionalScoreConfig.getSpace().getTenantId(), key,
+                        modelSummary == null ? null : modelSummary.getId(), matchInput.getDataCloudVersion(),
+                        matchInput.getData().size()));
+            }
         }
     }
 

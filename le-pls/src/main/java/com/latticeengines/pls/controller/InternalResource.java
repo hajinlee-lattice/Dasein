@@ -1521,7 +1521,9 @@ public class InternalResource extends InternalResourceBase {
             @RequestParam(value = "type") ActionType actionType, //
             HttpServletRequest request) {
         checkHeader(request);
-        log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s", customerSpace, actionType));
+        log.debug(String.format("Retrieve Jobs for tenant: %s based on type %s. Pid list = %s", //
+                customerSpace, actionType, //
+                (pids == null ? "{}" : JsonUtils.serialize(pids))));
         manufactureSecurityContextForInternalAccess(CustomerSpace.parse(customerSpace).toString());
         return workflowJobService.findJobsBasedOnActionIdsAndType(pids, actionType);
     }

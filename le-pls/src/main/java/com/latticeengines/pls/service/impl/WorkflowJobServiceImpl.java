@@ -56,7 +56,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     // Special workflow id for unstarted ProcessAnalyze workflow
     public static final Long UNSTARTED_PROCESS_ANALYZE_ID = 0L;
 
-    private static final Logger log = LoggerFactory.getLogger(WorkflowJobService.class);
+    private static final Logger log = LoggerFactory.getLogger(WorkflowJobServiceImpl.class);
     private static final String[] NON_DISPLAYED_JOB_TYPE_VALUES = new String[] { //
             "bulkmatchworkflow", //
             "consolidateandpublishworkflow", //
@@ -250,7 +250,12 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @VisibleForTesting
     List<Job> expandActions(List<Action> actions) {
-        log.debug(String.format("Expand actions...actions=%s", actions));
+        if (log.isDebugEnabled()) {
+            log.debug(String.format("Expand actions...actions=%s", actions));
+        }
+
+        log.info(String.format("Expanding %d actions", actions.size()));
+
         List<Job> jobList = new ArrayList<>();
         List<String> workflowJobIds = new ArrayList<>();
         for (Action action : actions) {

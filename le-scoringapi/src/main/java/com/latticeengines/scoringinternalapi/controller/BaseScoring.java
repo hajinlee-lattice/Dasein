@@ -96,7 +96,9 @@ public abstract class BaseScoring extends CommonBase {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(type.toString());
             List<Model> models = modelRetriever.getActiveModels(customerSpace, type);
-            log.info(JsonUtils.serialize(models));
+            if (log.isDebugEnabled()) {
+                log.debug(JsonUtils.serialize(models));
+            }
             return models;
         }
     }
@@ -106,7 +108,9 @@ public abstract class BaseScoring extends CommonBase {
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             log.info(String.format("Getting model fields for the model %s", modelId));
             Fields fields = modelRetriever.getModelFields(customerSpace, modelId);
-            log.info(JsonUtils.serialize(fields));
+            if (log.isDebugEnabled()) {
+                log.debug(JsonUtils.serialize(fields));
+            }
             return fields;
         }
     }
@@ -196,8 +200,8 @@ public abstract class BaseScoring extends CommonBase {
                 response.setWarnings(warnings.getWarnings(requestId));
                 requestInfo.put(WARNINGS, JsonUtils.serialize(warnings.getWarnings(requestId)));
             }
-            if (log.isInfoEnabled()) {
-                log.info(JsonUtils.serialize(response));
+            if (log.isDebugEnabled()) {
+                log.debug(JsonUtils.serialize(response));
             }
 
             requestInfo.put(HAS_WARNING, String.valueOf(warnings.hasWarnings(requestId)));
@@ -296,8 +300,8 @@ public abstract class BaseScoring extends CommonBase {
 
             response = scoreRequestProcessor.process(scoreRequests, additionalScoreConfig);
 
-            if (log.isInfoEnabled()) {
-                log.info(JsonUtils.serialize(response));
+            if (log.isDebugEnabled()) {
+                log.debug(JsonUtils.serialize(response));
             }
 
             return response;

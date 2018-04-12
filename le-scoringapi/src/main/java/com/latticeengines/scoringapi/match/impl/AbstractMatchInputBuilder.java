@@ -82,7 +82,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
             boolean enforceFuzzyMatch, boolean skipDnBCache) {
         MatchInput matchInput = new MatchInput();
 
-        setMatchKeyMap(modelSummary, interpreted, record, matchInput);
+        setMatchKeyMap(modelSummary, interpreted, record, matchInput, isDebugMode);
 
         setColumnSelections(modelSummary, selectedLeadEnrichmentAttributes, //
                 skipPredefinedSelection, overrideDataCloudVersion, matchInput);
@@ -196,7 +196,7 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
     }
 
     private void setMatchKeyMap(ModelSummary modelSummary, InterpretedFields interpreted, Map<String, Object> record,
-            MatchInput matchInput) {
+            MatchInput matchInput, boolean isDebugMode) {
         Map<MatchKey, List<String>> keyMap = new HashMap<>();
         if (modelSummary != null
                 && (SchemaInterpretation.SalesforceAccount.name().equals(modelSummary.getSourceSchemaInterpretation()) //
@@ -218,8 +218,10 @@ public abstract class AbstractMatchInputBuilder implements MatchInputBuilder {
         addToKeyMapIfValueExists(keyMap, MatchKey.Zipcode, interpreted.getPostalCode(), record);
         addToKeyMapIfValueExists(keyMap, MatchKey.LatticeAccountID, interpreted.getLatticeAccountId(), record);
 
-        log.info(String.format("MatchKey for record: %s is : %s", JsonUtils.serialize(record),
-                JsonUtils.serialize(keyMap)));
+        if (isDebugMode) {
+            log.info(String.format("MatchKey for record: %s is : %s", JsonUtils.serialize(record),
+                    JsonUtils.serialize(keyMap)));
+        }
         matchInput.setKeyMap(keyMap);
     }
 
