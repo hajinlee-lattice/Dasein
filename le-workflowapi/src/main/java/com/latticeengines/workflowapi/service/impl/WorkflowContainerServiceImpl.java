@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.slf4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.aws.batch.BatchService;
 import com.latticeengines.aws.batch.JobRequest;
 import com.latticeengines.common.exposed.util.JacocoUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.dataplatform.Job;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -66,25 +68,88 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
     @Value("${dataplatform.trustore.jks}")
     private String trustStoreJks;
 
-    @Override
-    public ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig) {
-        Job job = createJob(workflowConfig);
-        ApplicationId appId = jobService.submitJob(job);
-        job.setId(appId.toString());
+//    @Override
+//    public ApplicationId submitWorkflowExecution(WorkflowConfiguration workflowConfig) {
+//        Job job = createJob(workflowConfig);
+//        ApplicationId appId = jobService.submitJob(job);
+//        job.setId(appId.toString());
+//
+//        createWorkflowJob(workflowConfig, job, appId.toString());
+//        return appId;
+//    }
 
-        createWorkflowJob(workflowConfig, job, appId.toString());
-        return appId;
+    @Override
+    public ApplicationId submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
+        WorkflowJob workflowJob = upsertWorkflowJob(workflowConfig, workflowPid);
+
+        if (workflowJob == null) {
+            log.error(String.format("Failed to upsert workflowJob. WorkflowPid=%s, WorkflowConfig=%s",
+                    workflowPid, JsonUtils.serialize(workflowConfig)));
+            return null;
+        }
+
+        try {
+            Job job = createJob(workflowConfig);
+            ApplicationId appId = jobService.submitJob(job);
+            job.setId(appId.toString());
+            jobEntityMgr.create(job);
+
+            workflowJob.setApplicationId(appId.toString());
+            workflowJobEntityMgr.updateApplicationId(workflowJob);
+
+            return appId;
+        } catch (Exception exc) {
+            workflowJob.setStatus(JobStatus.FAILED.name());
+            workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            workflowJob.setErrorDetailsString(exc.getMessage());
+            workflowJobEntityMgr.updateErrorDetails(workflowJob);
+            log.warn("Failed to launch a YARN container. Setting status to FAILED for workflowJob, pid=" +
+                    workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
+
+            return null;
+        }
     }
 
-    @Override
-    public String submitAwsWorkFlow(WorkflowConfiguration workflowConfig) {
-        Job job = createJob(workflowConfig);
-        JobRequest jobRequest = createJobRequest(workflowConfig);
-        String jobId = batchService.submitJob(jobRequest);
-        job.setId(jobId);
+//    @Override
+//    public String submitAwsWorkflow(WorkflowConfiguration workflowConfig) {
+//        Job job = createJob(workflowConfig);
+//        JobRequest jobRequest = createJobRequest(workflowConfig);
+//        String jobId = batchService.submitJob(jobRequest);
+//        job.setId(jobId);
+//
+//        createWorkflowJob(workflowConfig, job, jobId);
+//        return jobId;
+//    }
 
-        createWorkflowJob(workflowConfig, job, jobId);
-        return jobId;
+    @Override
+    public String submitAwsWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid) {
+        WorkflowJob workflowJob = upsertWorkflowJob(workflowConfig, workflowPid);
+
+        if (workflowJob == null) {
+            log.error(String.format("Failed to upsert workflowJob. WorkflowPid=%s, WorkflowConfig=%s",
+                    workflowPid, JsonUtils.serialize(workflowConfig)));
+            return null;
+        }
+
+        try {
+            Job job = createJob(workflowConfig);
+            JobRequest jobRequest = createJobRequest(workflowConfig);
+            String jobId = batchService.submitJob(jobRequest);
+            job.setId(jobId);
+            jobEntityMgr.create(job);
+
+            workflowJob.setApplicationId(jobId);
+            workflowJobEntityMgr.updateApplicationId(workflowJob);
+
+            return jobId;
+        } catch (Exception exc) {
+            workflowJob.setStatus(JobStatus.FAILED.name());
+            workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);
+            log.warn("Failed to submit job request to AWS batch. Setting status to FAILED for workflowJob, pid=" +
+                    workflowJob.getPid() + "\n" + ExceptionUtils.getStackTrace(exc));
+
+            return null;
+        }
     }
 
     private JobRequest createJobRequest(WorkflowConfiguration workflowConfig) {
@@ -111,29 +176,52 @@ public class WorkflowContainerServiceImpl implements WorkflowContainerService {
         return jobRequest;
     }
 
-    private void createWorkflowJob(WorkflowConfiguration workflowConfig, Job job, String appId) {
-        jobEntityMgr.create(job);
+    private WorkflowJob upsertWorkflowJob(WorkflowConfiguration workflowConfig, Long workflowPid) {
+        if (workflowPid == null) {
+            Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
+            String user = workflowConfig.getUserId();
+            user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
 
-        Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
-        String user = workflowConfig.getUserId();
-        user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+            Long currentTime = System.currentTimeMillis();
+            WorkflowJob workflowJob = new WorkflowJob();
+            workflowJob.setTenant(tenant);
+            workflowJob.setUserId(user);
+            workflowJob.setInputContext(workflowConfig.getInputProperties());
+            workflowJob.setStatus(JobStatus.PENDING.name());
+            workflowJob.setStartTimeInMillis(currentTime);
+            workflowJob.setType(workflowConfig.getWorkflowName());
+            workflowJobEntityMgr.create(workflowJob);
 
-        Long currentTime = System.currentTimeMillis();
-        WorkflowJob workflowJob = new WorkflowJob();
-        workflowJob.setTenant(tenant);
-        workflowJob.setUserId(user);
-        workflowJob.setApplicationId(appId);
-        workflowJob.setInputContext(workflowConfig.getInputProperties());
-        workflowJob.setStatus(JobStatus.PENDING.name());
-        workflowJob.setStartTimeInMillis(currentTime);
-        workflowJob.setType(workflowConfig.getWorkflowName());
-        workflowJobEntityMgr.create(workflowJob);
+            Long pid = workflowJob.getPid();
+            WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
+            jobUpdate.setWorkflowPid(pid);
+            jobUpdate.setLastUpdateTime(currentTime);
+            workflowJobUpdateEntityMgr.create(jobUpdate);
 
-        Long workflowPid = workflowJob.getPid();
-        WorkflowJobUpdate jobUpdate = new WorkflowJobUpdate();
-        jobUpdate.setWorkflowPid(workflowPid);
-        jobUpdate.setLastUpdateTime(currentTime);
-        workflowJobUpdateEntityMgr.create(jobUpdate);
+            return workflowJob;
+        } else {
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPid);
+
+            if (workflowJob == null) {
+                log.error("Failed to find workflowJob. WorkflowPid=" + workflowPid);
+                return null;
+            }
+
+            Tenant tenant = workflowTenantService.getTenantFromConfiguration(workflowConfig);
+            String user = workflowConfig.getUserId();
+            user = user != null ? user : WorkflowUser.DEFAULT_USER.name();
+
+            workflowJob.setTenant(tenant);
+            workflowJob.setUserId(user);
+            workflowJob.setInputContext(workflowConfig.getInputProperties());
+            workflowJob.setType(workflowConfig.getWorkflowName());
+            workflowJobEntityMgr.update(workflowJob);
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
+            jobUpdate.setLastUpdateTime(System.currentTimeMillis());
+            workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+
+            return workflowJob;
+        }
     }
 
     private Job createJob(WorkflowConfiguration workflowConfig) {

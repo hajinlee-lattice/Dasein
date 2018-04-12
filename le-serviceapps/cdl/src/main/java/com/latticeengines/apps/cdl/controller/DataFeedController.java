@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.workflow.ProcessAnalyzeWorkflowSubmitter;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
@@ -39,7 +40,7 @@ public class DataFeedController {
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request);
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
         return ResponseDocument.successResponse(appId.toString());
     }
 

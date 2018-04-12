@@ -12,26 +12,41 @@ import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 public interface WorkflowJobService {
     WorkflowExecutionId getWorkflowExecutionIdByApplicationId(String customerSpace, String applicationId);
 
-    JobStatus getJobStatus(String customerSpace, Long workflowId);
+    JobStatus getJobStatusByWorkflowId(String customerSpace, Long workflowId);
 
-    List<JobStatus> getJobStatus(String customerSpace, List<Long> workflowIds);
+    JobStatus getJobStatusByWorkflowPid(String customerSpace, Long workflowPid);
 
-    Job getJob(String customerSpace, Long workflowId, Boolean includeDetails);
+    List<JobStatus> getJobStatusByWorkflowIds(String customerSpace, List<Long> workflowIds);
+
+    List<JobStatus> getJobStatusByWorkflowPids(String customerSpace, List<Long> workflowPids);
+
+    Job getJobByWorkflowId(String customerSpace, Long workflowId, Boolean includeDetails);
+
+    Job getJobByWorkflowPid(String customerSpace, Long workflowPid, Boolean includeDetails);
 
     Job getJobByApplicationId(String customerSpace, String applicationId, Boolean includeDetails);
 
-    List<Job> getJobs(String customerSpace, Boolean includeDetails);
+    List<Job> getJobsByCustomerSpace(String customerSpace, Boolean includeDetails);
 
-    List<Job> getJobs(String customerSpace, List<Long> workflowIds, List<String> types, Boolean includeDetails,
-            Boolean hasParentId, Long parentJobId);
+    List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
+                                   Boolean includeDetails, Boolean hasParentId, Long parentJobId);
 
-    List<String> getStepNames(String customerSpace, Long workflowId);
+    List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowIds, List<String> types,
+                                   Boolean includeDetails, Boolean hasParentId, Long parentJobId);
 
-    void updateParentJobId(String customerSpace, List<Long> workflowIds, Long parentJobId);
+    List<String> getStepNames(String customerSpace, Long workflowPid);
 
-    ApplicationId submitWorkFlow(String customerSpace, WorkflowConfiguration workflowConfiguration);
+    void updateParentJobIdByWorkflowIds(String customerSpace, List<Long> workflowIds, Long parentJobId);
+
+    void updateParentJobIdByWorkflowPids(String customerSpace, List<Long> workflowPids, Long parentJobId);
+
+    ApplicationId submitWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration, Long workflowPid);
 
     String submitAwsWorkflow(String customerSpace, WorkflowConfiguration workflowConfiguration);
 
+    Long createWorkflowJob(String customerSpace);
+
     void stopWorkflow(String customerSpace, Long workflowId);
+
+    void stopWorkflowJob(String customerSpace, Long workflowPid);
 }

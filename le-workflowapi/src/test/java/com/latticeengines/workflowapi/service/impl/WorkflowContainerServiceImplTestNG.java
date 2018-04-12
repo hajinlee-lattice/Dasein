@@ -34,7 +34,7 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
     }
 
     @Test(groups = "functional", enabled = true)
-    public void submitAwsWorkFlow() {
+    public void testSubmitAwsWorkflow() {
         WorkflowConfiguration workflowConfig = new WorkflowConfiguration();
         workflowConfig.setWorkflowName("dummyWorkflow");
         workflowConfig.setCustomerSpace(WFAPITEST_CUSTOMERSPACE);
@@ -47,8 +47,11 @@ public class WorkflowContainerServiceImplTestNG extends WorkflowApiFunctionalTes
         BaseStepConfiguration baseConfig = new BaseStepConfiguration();
         workflowConfig.add(baseConfig);
 
-        String applicationId = workflowContainerService.submitAwsWorkFlow(workflowConfig);
+        String applicationId = workflowContainerService.submitAwsWorkflow(workflowConfig, null);
         Assert.assertNotNull(applicationId);
         workflowJob = workflowJobEntityMgr.findByApplicationId(applicationId);
+        Assert.assertNotNull(workflowJob);
+
+        Assert.assertNull(workflowContainerService.submitAwsWorkflow(workflowConfig, 9999L));
     }
 }

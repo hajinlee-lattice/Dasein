@@ -20,6 +20,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
     }
 
     @Override
+    public WorkflowJob findByWorkflowPid(long workflowPid) {
+        return findByKey(WorkflowJob.class, workflowPid);
+    }
+
+    @Override
     public WorkflowJob findByApplicationId(String applicationId) {
         return findByField("applicationId", applicationId);
     }
@@ -43,19 +48,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByTypes(List<String> types) {
+    public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
-        String queryStr = String.format("from %s workflowjob where workflowjob.type in :types",
+        String queryStr = String.format("from %s workflowjob where workflowjob.pid in :pids",
                 entityClz.getSimpleName());
         Query<WorkflowJob> query = session.createQuery(queryStr);
-        query.setParameterList("types", types);
+        query.setParameterList("pids", workflowPids);
         return query.list();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types) {
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
@@ -69,7 +74,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByWorkflowIdsAndParentJobId(List<Long> workflowIds, Long parentJobId) {
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, Long parentJobId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
@@ -83,22 +88,7 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByTypesAndParentJobId(List<String> types, Long parentJobId) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<WorkflowJob> entityClz = getEntityClass();
-        String queryStr = String.format(
-                "from %s workflowjob where workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
-                entityClz.getSimpleName());
-        Query<WorkflowJob> query = session.createQuery(queryStr);
-        query.setParameterList("types", types);
-        query.setParameter("parentJobId", parentJobId);
-        return query.list();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<WorkflowJob> findByWorkflowIdsAndTypesAndParentJobId(List<Long> workflowIds, List<String> types,
-                                                                     Long parentJobId) {
+    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.workflowId in :workflowIds and " +
@@ -113,39 +103,83 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByTenant(Tenant tenant) {
+    public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, List<String> types) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
-        String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid",
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.pid in :pids and workflowjob.type in :types",
                 entityClz.getSimpleName());
-        Query<WorkflowJob> query = session.createQuery(queryStr);
-        query.setParameter("tenantPid", tenant.getPid());
-        return query.list();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<WorkflowJob> findByTenant(Tenant tenant, List<String> types) {
-        Session session = getSessionFactory().getCurrentSession();
-        Class<WorkflowJob> entityClz = getEntityClass();
-        String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid and " +
-                "workflowjob.type in :types", entityClz.getSimpleName());
         Query query = session.createQuery(queryStr);
-        query.setParameter("tenantPid", tenant.getPid());
+        query.setParameterList("pids", workflowPids);
         query.setParameterList("types", types);
         return query.list();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds) {
+    public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.pid in :pids and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("pids", workflowPids);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, List<String> types, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.pid in :pids and " +
+                        "workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("pids", workflowPids);
+        query.setParameterList("types", types);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTypes(List<String> types) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format("from %s workflowjob where workflowjob.type in :types",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("types", types);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTypes(List<String> types, Long parentJobId) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "from %s workflowjob where workflowjob.type in :types and workflowjob.parentJobId=:parentJobId",
+                entityClz.getSimpleName());
+        Query<WorkflowJob> query = session.createQuery(queryStr);
+        query.setParameterList("types", types);
+        query.setParameter("parentJobId", parentJobId);
+        return query.list();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids) {
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format("from %s workflowjob where workflowjob.tenant.pid=:tenantPid and " +
-                "workflowjob.workflowId in :workflowIds", entityClz.getSimpleName());
+                "workflowjob.pid in :pids", entityClz.getSimpleName());
         Query<WorkflowJob> query = session.createQuery(queryStr);
         query.setParameter("tenantPid", tenant.getPid());
-        query.setParameter("workflowIds", workflowIds);
+        query.setParameter("pids", workflowPids);
         return query.list();
     }
 
@@ -154,12 +188,13 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.status=:status, workflowjob.startTimeInMillis=:startTimeInMillis where workflowjob.applicationId=:applicationId",
+                "update %s workflowjob set workflowjob.status=:status, " +
+                        "workflowjob.startTimeInMillis=:startTimeInMillis where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("status", workflowJob.getStatus());
         query.setParameter("startTimeInMillis", workflowJob.getStartTimeInMillis());
-        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 
@@ -181,11 +216,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.parentJobId=:parentJobId where workflowjob.workflowId=:workflowId",
+                "update %s workflowjob set workflowjob.parentJobId=:parentJobId where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("parentJobId", workflowJob.getParentJobId());
-        query.setParameter("workflowId", workflowJob.getWorkflowId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 
@@ -194,11 +229,11 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
         Session session = getSessionFactory().getCurrentSession();
         Class<WorkflowJob> entityClz = getEntityClass();
         String queryStr = String.format(
-                "update %s workflowjob set workflowjob.workflowId=:workflowId where workflowjob.applicationId=:applicationId",
+                "update %s workflowjob set workflowjob.workflowId=:workflowId where workflowjob.pid=:pid",
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("workflowId", workflowJob.getWorkflowId());
-        query.setParameter("applicationId", workflowJob.getApplicationId());
+        query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }
 
@@ -237,6 +272,19 @@ public class WorkflowJobDaoImpl extends BaseDaoImpl<WorkflowJob> implements Work
                 entityClz.getSimpleName());
         Query<?> query = session.createQuery(queryStr);
         query.setParameter("errorDetailsString", workflowJob.getErrorDetailsString());
+        query.setParameter("pid", workflowJob.getPid());
+        query.executeUpdate();
+    }
+
+    @Override
+    public void updateApplicationId(WorkflowJob workflowJob) {
+        Session session = getSessionFactory().getCurrentSession();
+        Class<WorkflowJob> entityClz = getEntityClass();
+        String queryStr = String.format(
+                "update %s workflowjob set workflowjob.applicationId=:applicationId where workflowjob.pid=:pid",
+                entityClz.getSimpleName());
+        Query<?> query = session.createQuery(queryStr);
+        query.setParameter("applicationId", workflowJob.getApplicationId());
         query.setParameter("pid", workflowJob.getPid());
         query.executeUpdate();
     }

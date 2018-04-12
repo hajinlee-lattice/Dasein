@@ -40,6 +40,12 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public WorkflowJob findByWorkflowPid(long workflowPid) {
+        return workflowJobDao.findByWorkflowPid(workflowPid);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public WorkflowJob findByApplicationId(String applicationId) {
         return workflowJobDao.findByApplicationId(applicationId);
     }
@@ -58,8 +64,8 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types) {
-        return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
+    public List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types) {
+        return workflowJobDao.findByWorkflowIds(workflowIds, types);
     }
 
     @Override
@@ -67,15 +73,15 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     public List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
                                                                    Long parentJobId) {
         if (workflowIds != null && types != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIdsAndTypesAndParentJobId(workflowIds, types, parentJobId);
+            return workflowJobDao.findByWorkflowIds(workflowIds, types, parentJobId);
         } else if (workflowIds != null && types != null) {
-            return workflowJobDao.findByWorkflowIdsAndTypes(workflowIds, types);
+            return workflowJobDao.findByWorkflowIds(workflowIds, types);
         } else if (workflowIds != null && parentJobId != null) {
-            return workflowJobDao.findByWorkflowIdsAndParentJobId(workflowIds, parentJobId);
+            return workflowJobDao.findByWorkflowIds(workflowIds, parentJobId);
         } else if (workflowIds != null) {
             return workflowJobDao.findByWorkflowIds(workflowIds);
         } else if (types != null && parentJobId != null) {
-            return workflowJobDao.findByTypesAndParentJobId(types, parentJobId);
+            return workflowJobDao.findByTypes(types, parentJobId);
         } else if (types != null) {
             return workflowJobDao.findByTypes(types);
         } else {
@@ -85,8 +91,41 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds) {
-        return workflowJobDao.findByTenantAndWorkflowIds(tenant, workflowIds);
+    public List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids) {
+        return workflowJobDao.findByWorkflowPids(workflowPids);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowPidsAndTypes(List<Long> workflowPids, List<String> types) {
+        return workflowJobDao.findByWorkflowPids(workflowPids, types);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByWorkflowPidsOrTypesOrParentJobId(List<Long> workflowPids, List<String> types,
+                                                                    Long parentJobId) {
+        if (workflowPids != null && types != null && parentJobId != null) {
+            return workflowJobDao.findByWorkflowPids(workflowPids, types, parentJobId);
+        } else if (workflowPids != null && types != null) {
+            return workflowJobDao.findByWorkflowPids(workflowPids, types);
+        } else if (workflowPids != null && parentJobId != null) {
+            return workflowJobDao.findByWorkflowPids(workflowPids, parentJobId);
+        } else if (workflowPids != null) {
+            return workflowJobDao.findByWorkflowPids(workflowPids);
+        } else if (types != null && parentJobId != null) {
+            return workflowJobDao.findByTypes(types, parentJobId);
+        } else if (types != null) {
+            return workflowJobDao.findByTypes(types);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids) {
+        return workflowJobDao.findByTenantAndWorkflowPids(tenant, workflowPids);
     }
 
     @Override
@@ -139,5 +178,11 @@ public class WorkflowJobEntityMgrImpl extends BaseEntityMgrImpl<WorkflowJob> imp
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void updateErrorDetails(WorkflowJob workflowJob) {
         workflowJobDao.updateErrorDetails(workflowJob);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void updateApplicationId(WorkflowJob workflowJob) {
+        workflowJobDao.updateApplicationId(workflowJob);
     }
 }

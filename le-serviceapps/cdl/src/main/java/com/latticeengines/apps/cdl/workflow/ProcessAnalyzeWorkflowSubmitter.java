@@ -39,6 +39,8 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
+import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -93,7 +95,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
-    public ApplicationId submit(String customerSpace, ProcessAnalyzeRequest request) {
+    @WithWorkflowJobPid
+    public ApplicationId submit(String customerSpace, ProcessAnalyzeRequest request, WorkflowPidWrapper pidWrapper) {
+        log.info("WorkflowJob created with pid=" + pidWrapper.getPid());
         if (customerSpace == null) {
             throw new IllegalArgumentException("There is not CustomerSpace in MultiTenantContext");
         }
@@ -121,7 +125,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             configuration.setFailingStep(request.getFailingStep());
 
-            return workflowJobService.submit(configuration);
+            return workflowJobService.submit(configuration, pidWrapper.getPid());
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());

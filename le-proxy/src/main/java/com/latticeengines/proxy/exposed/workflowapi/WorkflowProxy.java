@@ -33,16 +33,37 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         super("workflowapi/workflows");
     }
 
+    public AppSubmission submitWorkflow(WorkflowConfiguration workflowConfig, String customerSpace, Long workflowPid) {
+        checkCustomerSpace(customerSpace);
+        String baseUrl = "/jobs/submitwithpid";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
+        url += ("&workflowPid=" + workflowPid);
+        url = constructUrl(url);
+        return post("submitWorkflow", url, workflowConfig, AppSubmission.class);
+    }
+
+    public AppSubmission submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid, String... params) {
+        String baseUrl = "/jobs/submitwithpid";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        if (url.contains("customerSpace=")) {
+            url += ("&workflowPid=" + workflowPid);
+        } else {
+            url += ("?workflowPid=" + workflowPid);
+        }
+        url = constructUrl(url);
+        return post("submitWorkflow", url, workflowConfig, AppSubmission.class);
+    }
+
     public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String customerSpace) {
         checkCustomerSpace(customerSpace);
-        String baseUrl = "/jobs";
+        String baseUrl = "/jobs/submit";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url = constructUrl(url);
         return post("submitWorkflowExecution", url, workflowConfig, AppSubmission.class);
     }
 
     public AppSubmission submitWorkflowExecution(WorkflowConfiguration workflowConfig, String... params) {
-        String baseUrl = "/jobs";
+        String baseUrl = "/jobs/submit";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url);
         return post("submitWorkflowExecution", url, workflowConfig, AppSubmission.class);
@@ -50,17 +71,25 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
 
     public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String customerSpace) {
         checkCustomerSpace(customerSpace);
-        String baseUrl = "/awsJobs";
+        String baseUrl = "/awsJobs/submit";
         String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
         url = constructUrl(url);
         return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
     }
 
     public String submitAWSWorkflowExecution(WorkflowConfiguration workflowConfig, String... params) {
-        String baseUrl = "/awsJobs";
+        String baseUrl = "/awsJobs/submit";
         String url = parseOptionalParameter(baseUrl, "customerSpace", params);
         url = constructUrl(url);
         return post("submitAWSWorkflowExecution", url, workflowConfig, String.class);
+    }
+
+    public Long createWorkflowJob(String customerSpace) {
+        checkCustomerSpace(customerSpace);
+        String baseUrl = "/jobs/create";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
+        url = constructUrl(url);
+        return post("createWorkflowJob", url, null, Long.class);
     }
 
     public AppSubmission restartWorkflowExecution(String workflowId, String customerSpace) {

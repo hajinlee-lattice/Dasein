@@ -1,12 +1,15 @@
 package com.latticeengines.workflow.exposed.entitymanager.impl;
 
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
@@ -66,7 +69,7 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     }
 
     @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    public void teardown() {
         Tenant tenant1 = tenantService.findByTenantId(tenantId1);
         if (tenant1 != null) {
             tenantService.discardTenant(tenant1);
@@ -308,39 +311,38 @@ public class WorkflowJobEntityMgrImplTestNG extends WorkflowTestNGBase {
     }
 
     @Test(groups = "functional", dependsOnMethods = "testCreateWorkflowJob")
-    public void testFindByTenantAndWorkflowIds() {
+    public void testFindByTenantAndWorkflowPids() {
         Tenant tenant1 = tenantService.findByTenantId(tenantId1);
         MultiTenantContext.setTenant(tenant1);
         List<WorkflowJob> workflowJobs = workflowJobEntityMgr.findAll();
         assertEquals(workflowJobs.size(), 2);
 
-        workflowJobs.get(0).setWorkflowId(100L);
-        workflowJobs.get(1).setWorkflowId(200L);
-        workflowJobEntityMgr.update(workflowJobs.get(0));
-        workflowJobEntityMgr.update(workflowJobs.get(1));
-        List<Long> workflowIds = new ArrayList<>();
-        workflowIds.add(100L);
-        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, workflowIds);
+        List<Long> workflowPids = workflowJobs.stream().map(WorkflowJob::getPid).collect(Collectors.toList());
+        WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPids.get(0));
+        assertNotNull(workflowJob);
+        assertEquals(workflowJob.getApplicationId(), "application_00001");
+        workflowJob = workflowJobEntityMgr.findByWorkflowPid(workflowPids.get(1));
+        assertNotNull(workflowJob);
+        assertEquals(workflowJob.getApplicationId(), "application_00003");
+
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowPids(tenant1, workflowPids);
+        assertEquals(workflowJobs.size(), 2);
+
+        workflowPids.remove(0);
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowPids(tenant1, workflowPids);
         assertEquals(workflowJobs.size(), 1);
 
-        workflowIds.add(200L);
-        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, workflowIds);
-        assertEquals(workflowJobs.size(), 2);
-
-        workflowJobs = workflowJobEntityMgr.findByWorkflowIds(workflowIds);
-        assertEquals(workflowJobs.size(), 2);
-
-        List<Long> nonExistWorkflowIds = new ArrayList<>();
-        nonExistWorkflowIds.add(777L);
-        nonExistWorkflowIds.add(888L);
-        nonExistWorkflowIds.add(999L);
-        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowIds(tenant1, nonExistWorkflowIds);
+        List<Long> nonExistWorkflowPids = Arrays.asList(
+                ThreadLocalRandom.current().nextLong(),
+                ThreadLocalRandom.current().nextLong(),
+                ThreadLocalRandom.current().nextLong());
+        workflowJobs = workflowJobEntityMgr.findByTenantAndWorkflowPids(tenant1, nonExistWorkflowPids);
         assertEquals(workflowJobs.size(), 0);
-        workflowJobs = workflowJobEntityMgr.findByWorkflowIds(nonExistWorkflowIds);
+        workflowJobs = workflowJobEntityMgr.findByWorkflowIds(nonExistWorkflowPids);
         assertEquals(workflowJobs.size(), 0);
     }
 
-    @Test(groups = "functional", dependsOnMethods = "testFindByTenantAndWorkflowIds")
+    @Test(groups = "functional", dependsOnMethods = "testFindByTenantAndWorkflowPids")
     public void testUpdateReport() {
         Tenant tenant2 = tenantService.findByTenantId(tenantId2);
         WorkflowJob workflowJob = new WorkflowJob();

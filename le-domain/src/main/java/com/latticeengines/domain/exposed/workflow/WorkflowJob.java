@@ -68,8 +68,6 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     private String inputContextString;
 
     @Column(name = "STATUS")
-    // @Enumerated(EnumType.STRING)
-    // private FinalApplicationStatus status;
     private String status;
 
     @Column(name = "START_TIME")
@@ -85,7 +83,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     @Column(name = "OUTPUT_CONTEXT", length = 4000)
     private String outputContextString;
 
-    @Column(name = "PARENT_JOB_ID", nullable = true)
+    @Column(name = "PARENT_JOB_ID")
     private Long parentJobId;
 
     @Column(name = "TYPE")

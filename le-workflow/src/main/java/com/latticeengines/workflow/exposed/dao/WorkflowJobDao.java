@@ -8,28 +8,33 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
 
+    WorkflowJob findByWorkflowPid(long workflowPid);
+
     WorkflowJob findByApplicationId(String applicationId);
 
     WorkflowJob findByWorkflowId(long workflowId);
 
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
 
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types);
+
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, Long parentJobId);
+
+    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types, Long parentJobId);
+
+    List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids);
+
+    List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, List<String> types);
+
+    List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, Long parentJobId);
+
+    List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids, List<String> types, Long parentJobId);
+
     List<WorkflowJob> findByTypes(List<String> types);
 
-    List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types);
+    List<WorkflowJob> findByTypes(List<String> types, Long parentJobId);
 
-    List<WorkflowJob> findByWorkflowIdsAndParentJobId(List<Long> workflowIds, Long parentJobId);
-
-    List<WorkflowJob> findByTypesAndParentJobId(List<String> types, Long parentJobId);
-
-    List<WorkflowJob> findByWorkflowIdsAndTypesAndParentJobId(List<Long> workflowIds, List<String> types,
-                                                              Long parentJobId);
-
-    List<WorkflowJob> findByTenant(Tenant tenant);
-
-    List<WorkflowJob> findByTenant(Tenant tenant, List<String> types);
-
-    List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds);
+    List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids);
 
     void updateStatus(WorkflowJob workflowJob);
 
@@ -44,5 +49,7 @@ public interface WorkflowJobDao extends BaseDao<WorkflowJob> {
     void updateOutput(WorkflowJob workflowJob);
 
     void updateErrorDetails(WorkflowJob workflowJob);
+
+    void updateApplicationId(WorkflowJob workflowJob);
 
 }

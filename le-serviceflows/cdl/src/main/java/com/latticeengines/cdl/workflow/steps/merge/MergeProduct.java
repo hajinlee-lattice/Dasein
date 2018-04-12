@@ -508,7 +508,8 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                     compositeId, currentProduct.getProductId()));
             return currentProduct.getProductId();
         } else {
-            log.info("No product in currentProductMap. Generating new productId.");
+            log.info(String.format("No product with compositeId=%s found in currentProductMap. " +
+                    "Generating hashed productId based on productName=%s.", compositeId, productName));
             return HashUtils.getCleanedString(HashUtils.getShortHash(productName));
         }
     }

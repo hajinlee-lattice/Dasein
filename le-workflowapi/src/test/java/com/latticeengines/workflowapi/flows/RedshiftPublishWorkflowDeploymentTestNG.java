@@ -134,7 +134,7 @@ public class RedshiftPublishWorkflowDeploymentTestNG extends WorkflowApiDeployme
     }
 
     private void verifyReport(WorkflowExecutionId workflowId, ReportPurpose purpose, int count) {
-        Job job = workflowJobService.getJob(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(),
+        Job job = workflowJobService.getJobByWorkflowId(CustomerSpace.parse(mainTestTenant.getId()).toString(), workflowId.getId(),
                 true);
         Report publishDataReport = job.getReports().stream()
                 .filter(r -> r.getPurpose().equals(ReportPurpose.PUBLISH_DATA_SUMMARY)).findFirst().orElse(null);

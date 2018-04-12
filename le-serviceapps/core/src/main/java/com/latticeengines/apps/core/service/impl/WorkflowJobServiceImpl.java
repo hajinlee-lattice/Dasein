@@ -38,9 +38,20 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
 
     @Override
     public ApplicationId submit(WorkflowConfiguration configuration) {
-        AppSubmission submission = workflowProxy.submitWorkflowExecution(configuration);
-        String applicationId = submission.getApplicationIds().get(0);
+        return submit(configuration, null);
+    }
 
+    @Override
+    public ApplicationId submit(WorkflowConfiguration configuration, Long workflowPid) {
+        AppSubmission submission;
+
+        if (workflowPid != null) {
+            submission = workflowProxy.submitWorkflow(configuration, workflowPid);
+        } else {
+            submission = workflowProxy.submitWorkflowExecution(configuration);
+        }
+
+        String applicationId = submission.getApplicationIds().get(0);
         log.info(String.format("Submitted %s with application id %s", configuration.getWorkflowName(), applicationId));
         return ConverterUtils.toApplicationId(applicationId);
     }

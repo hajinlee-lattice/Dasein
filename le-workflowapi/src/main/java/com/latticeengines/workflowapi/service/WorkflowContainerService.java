@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public interface WorkflowContainerService {
 
-    ApplicationId submitWorkFlow(WorkflowConfiguration workflowConfig);
+    ApplicationId submitWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid);
 
-    String submitAwsWorkFlow(WorkflowConfiguration workflowConfig);
+    String submitAwsWorkflow(WorkflowConfiguration workflowConfig, Long workflowPid);
 }

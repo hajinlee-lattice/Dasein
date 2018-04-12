@@ -172,7 +172,7 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
         ScheduledFuture<?> future = checkWorkflowJobUpdate(workflowId);
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
         assertEquals(status, BatchStatus.COMPLETED);
-        List<Job> jobs = workflowApiWorkflowJobService.getJobs(customerSpace,
+        List<Job> jobs = workflowApiWorkflowJobService.getJobsByWorkflowIds(customerSpace,
                 Collections.singletonList(workflowId.getId()), Collections.singletonList(failableWorkflow.name()),
                 false, false, null);
         assertEquals(jobs.size(), 1);
@@ -221,7 +221,7 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
         this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
         assertEquals(status, BatchStatus.FAILED);
-        Job job = workflowApiWorkflowJobService.getJob(customerSpace, workflowId.getId(), false);
+        Job job = workflowApiWorkflowJobService.getJobByWorkflowId(customerSpace, workflowId.getId(), false);
         assertEquals(job.getErrorCode(), LedpCode.LEDP_28001);
         assertNotNull(job.getErrorMsg());
     }
@@ -235,7 +235,7 @@ public class WorkflowServiceImplFlowTestNG extends WorkflowApiFunctionalTestNGBa
         this.workflowId = workflowId.getId();
         BatchStatus status = workflowService.waitForCompletion(workflowId, MAX_MILLIS_TO_WAIT, 3000).getStatus();
         assertEquals(status, BatchStatus.FAILED);
-        Job job = workflowApiWorkflowJobService.getJob(customerSpace, workflowId.getId(), false);
+        Job job = workflowApiWorkflowJobService.getJobByWorkflowId(customerSpace, workflowId.getId(), false);
         assertEquals(job.getErrorCode(), LedpCode.LEDP_00002);
         assertNotNull(job.getErrorMsg());
     }

@@ -8,29 +8,27 @@ import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 
 public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
-    WorkflowJob findByApplicationId(String applicationId);
+    WorkflowJob findByWorkflowPid(long workflowPid);
 
-//    WorkflowJob findByApplicationIdWithFilter(String applicationId);
+    WorkflowJob findByApplicationId(String applicationId);
 
     WorkflowJob findByWorkflowId(long workflowId);
 
-//    WorkflowJob findByWorkflowIdWithFilter(long workflowId);
-
-//    List<WorkflowJob> findAllWithFilter();
-
     List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds);
 
-    List<WorkflowJob> findByWorkflowIds(List<Long> workflowIds, List<String> types);
+    List<WorkflowJob> findByWorkflowIdsAndTypes(List<Long> workflowIds, List<String> types);
 
-    List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types, Long parentJobId);
+    List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobId(List<Long> workflowIds, List<String> types,
+                                                            Long parentJobId);
 
-//    List<WorkflowJob> findByWorkflowIdsOrTypesOrParentJobIdWithFilter(List<Long> workflowIds, List<String> types, Long parentJobId);
+    List<WorkflowJob> findByWorkflowPids(List<Long> workflowPids);
 
-//    List<WorkflowJob> findByTenant(Tenant tenant);
+    List<WorkflowJob> findByWorkflowPidsAndTypes(List<Long> workflowIds, List<String> types);
 
-//    List<WorkflowJob> findByTenant(Tenant tenant, List<String> types);
+    List<WorkflowJob> findByWorkflowPidsOrTypesOrParentJobId(List<Long> workflowPids, List<String> types,
+                                                             Long parentJobId);
 
-    List<WorkflowJob> findByTenantAndWorkflowIds(Tenant tenant, List<Long> workflowIds);
+    List<WorkflowJob> findByTenantAndWorkflowPids(Tenant tenant, List<Long> workflowPids);
 
     WorkflowJob updateStatusFromYarn(WorkflowJob workflowJob,
             com.latticeengines.domain.exposed.dataplatform.JobStatus yarnJobStatus);
@@ -47,5 +45,7 @@ public interface WorkflowJobEntityMgr extends BaseEntityMgr<WorkflowJob> {
 
     void updateOutput(WorkflowJob workflowJob);
 
-    void updateErrorDetails(WorkflowJob job);
+    void updateErrorDetails(WorkflowJob workflowJob);
+
+    void updateApplicationId(WorkflowJob workflowJob);
 }

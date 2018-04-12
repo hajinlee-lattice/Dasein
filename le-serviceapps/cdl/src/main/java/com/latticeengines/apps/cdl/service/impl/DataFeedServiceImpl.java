@@ -395,17 +395,7 @@ public class DataFeedServiceImpl implements DataFeedService {
         if (!lockExecution(customerSpace, datafeedName, jobType)) {
             throw new RuntimeException("can't lock execution for job type:" + jobType);
         }
-        // TODO remove this part until return statement when registering extract
-        // moved to startprocessing in p&a
-        // datafeed = datafeedEntityMgr.findByNameInflated(datafeedName);
-        // DataFeedExecution newExecution = datafeed.getActiveExecution();
-        // log.info(String.format("new execution pid: %d",
-        // newExecution.getPid()));
-        // if (DataFeedExecutionJobType.PA == jobType) {
-        // execution.getImports().forEach(dfi -> dfi.setPid(null));
-        // newExecution.addImports(execution.getImports());
-        // datafeedExecutionEntityMgr.updateImports(newExecution);
-        // }
+
         return execution.getWorkflowId();
     }
 }

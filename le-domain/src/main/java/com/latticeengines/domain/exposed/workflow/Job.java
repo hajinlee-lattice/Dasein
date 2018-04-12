@@ -20,6 +20,7 @@ public class Job implements HasId<Long>, HasName {
     public static final EnumSet<JobStatus> TERMINAL_JOB_STATUS = EnumSet.of(JobStatus.COMPLETED, JobStatus.CANCELLED,
             JobStatus.FAILED, JobStatus.SKIPPED);
 
+    private Long pid;
     private Long id;
     private String name;
     private Long parentId;
@@ -39,6 +40,16 @@ public class Job implements HasId<Long>, HasName {
     private Integer numDisplayedSteps;
     private String note;
     private List<Job> subJobs;
+
+    @JsonProperty
+    public Long getPid() {
+        return pid;
+    }
+
+    @JsonProperty
+    public void setPid(Long pid) {
+        this.pid = pid;
+    }
 
     @Override
     @JsonProperty
