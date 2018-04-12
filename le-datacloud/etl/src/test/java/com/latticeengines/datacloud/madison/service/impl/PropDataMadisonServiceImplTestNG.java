@@ -51,6 +51,7 @@ public class PropDataMadisonServiceImplTestNG extends AbstractTestNGSpringContex
         yesterday = DateUtils.addDays(today, -3);
         today = DateUtils.addDays(today, -2);
         ReflectionTestUtils.setField(propDataService, "numOfPastDays", 1);
+        ReflectionTestUtils.setField(propDataService, "numOfOldPastDays", 1);
 
         dailyProgress1 = new MadisonLogicDailyProgress();
         dailyProgress2 = new MadisonLogicDailyProgress();

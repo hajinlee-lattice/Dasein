@@ -96,6 +96,9 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.num.past.days}")
     private int numOfPastDays;
 
+    @Value("${propdata.madison.num.old.past.days:30}")
+    private int numOfOldPastDays;
+
     @Value("${propdata.madison.fixed.date:6}")
     private int fixedDate;
 
@@ -359,6 +362,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
 
     private boolean validateDate(Date today) {
         int dayOfWeek = today.getDay();
+        log.info("Current day of the week=" + dayOfWeek + " fixed Date=" + fixedDate);
         return (dayOfWeek == fixedDate);
     }
 
@@ -539,7 +543,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     }
 
     private String getJobName() {
-        return "MadisonLogic-Days-" + numOfPastDays;
+        return "MadisonLogic-Days-" + numOfOldPastDays;
     }
 
     String getSuccessFile(String targetDir) {
