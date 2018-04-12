@@ -70,7 +70,7 @@ public class SessionServiceImpl implements SessionService {
 
     @Override
     public void validateSamlLoginResponse(LoginValidationResponse samlLoginResp) {
-        if (samlLoginResp == null || StringUtils.isNotBlank(samlLoginResp.getUserId())) {
+        if (samlLoginResp == null || StringUtils.isBlank(samlLoginResp.getUserId())) {
             LOGGER.info("Saml Login response is missing required information. " + samlLoginResp);
             throw new LedpException(LedpCode.LEDP_19005);
         }
