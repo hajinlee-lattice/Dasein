@@ -11,5 +11,3 @@ if [ ! -a ./conf/latticeengines.properties ]; then
 fi
 
 build_docker latticeengines/datascienceapp
-
-docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
