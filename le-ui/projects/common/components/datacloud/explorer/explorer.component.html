@@ -121,7 +121,7 @@
             <ul class="enrichments {{vm.view}}">
                 <li explorer-attribute-tile
                     class="box enrichment"
-                    ng-repeat="enrichment in (filteredList = (vm.enrichmentsObj[vm.category]
+                    ng-repeat="enrichment in (filteredList = (vm.getAttributes([vm.category])
                         | filter: vm.searchFields
                         | filter: vm.enrichmentsFilter()
                         | orderBy: vm.sortOrder()))

@@ -124,4 +124,20 @@ module.exports = [{
         '/websocket/assets': '/assets',
         '/websocket/lib': '/lib',
     }
+},{    
+    path: '/projects/widgets',
+    html5mode: true,
+    pages: {
+        '/widgets/': 'index.html',
+        '/widgets/index': 'index.html'
+    },
+    folders: {
+        '/widgets/app': '/app',
+        '/widgets/assets': '/assets',
+        '/widgets/components': '/components',
+        '/widgets/css': '/css',
+        '/widgets/libs': '/node_modules',
+        '/widgets/sass': '/sass',
+        '/widgets/tests': '/tests'
+    }
 }];

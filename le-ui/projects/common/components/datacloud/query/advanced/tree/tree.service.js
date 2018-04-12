@@ -143,6 +143,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 if (attr) {
                     var dot = attr.indexOf('.');
                     var entity = attr.slice(0, dot);
+                    if(entity === 'PurchaseHistory' && bucketRestriction.bkt && !bucketRestriction.bkt.Txn){
+                        return 'Account';
+                    }
                     return entity;
                 } else {
                     return 'Unkown';

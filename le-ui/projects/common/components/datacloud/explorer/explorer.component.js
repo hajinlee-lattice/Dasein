@@ -231,6 +231,22 @@ angular.module('common.datacloud.explorer', [
         DataCloudStore.setMetadata('subcategory', subcategory);
     }
 
+    vm.getAttributes = function(category){
+        var attributes = vm.enrichmentsObj[category];
+        // console.log('*******************************************');
+        // console.log(attributes);
+        // console.log('*******************************************');
+
+        var subcategory = DataCloudStore.getMetadata('subcategory');
+        var ret = [];
+        for(var i = 0; i<attributes.length ; i++){
+            if(attributes[i].Subcategory === subcategory){
+                ret.push(attributes[i]);
+            }
+        }
+        return ret;
+    }
+
     vm.subcategoryRenamer = function(string, replacement){
         if (string) {
             var replacement = replacement || '';
