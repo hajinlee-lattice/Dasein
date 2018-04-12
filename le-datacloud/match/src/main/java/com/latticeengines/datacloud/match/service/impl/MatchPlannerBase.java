@@ -66,7 +66,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         if (StringUtils.isEmpty(decisionGraph)) {
             decisionGraph = defaultGraph;
             input.setDecisionGraph(decisionGraph);
-            log.info("Did not specify decision graph, use the default one: " + decisionGraph);
+            log.debug("Did not specify decision graph, use the default one: " + decisionGraph);
         }
     }
 
