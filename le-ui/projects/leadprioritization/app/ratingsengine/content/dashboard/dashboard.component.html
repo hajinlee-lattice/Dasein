@@ -101,7 +101,7 @@
                                     Model with similar segment: {{ vm.trainingSegment.display_name }}
                                 </li>
                                 <li
-                                    ng-if="vm.trainingProducts.length !== 0">
+                                    ng-if="vm.trainingProducts !== undefined">
                                     Model with similar product(s): 
                                     <span ng-if="vm.trainingProducts.length === 1">{{ vm.trainingProductName }}</span>
                                     <span ng-if="vm.trainingProducts.length > 1">{{ vm.trainingProducts.length }} selected</span>
@@ -129,12 +129,14 @@
                             <tr>
                                 <th>Created</th>
                                 <th>User</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>{{ vm.ratingEngine.created | date }}</td>
                                 <td>{{ vm.ratingEngine.createdBy }}</td>
+                                <td class="orange-text">Active</td>
                             </tr>
                         </tbody>
                     </table>

@@ -225,6 +225,8 @@ angular.module('lp.ratingsengine.dashboard', [
             if (type === 'cross_sell') {
                 if ((Object.keys(model.AI.advancedModelingConfig[type].filters).length === 0 || (model.AI.advancedModelingConfig[type].filters['PURCHASED_BEFORE_PERIOD'] && Object.keys(model.AI.advancedModelingConfig[type].filters).length === 1)) && model.AI.trainingSegment === null && model.AI.advancedModelingConfig[type].filters.trainingProducts === null) {
                     vm.hasSettingsInfo = false;
+                } else {
+                    vm.hasSettingsInfo = true;
                 }
 
                 vm.targetProducts = model.AI.advancedModelingConfig[type].targetProducts;
