@@ -147,6 +147,11 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
         if (dlTenantMappingEnabled) {
             customerSpace = mapCustomerSpace(customerSpace);
         }
+        Tenant tenant = tenantService.findByTenantId(customerSpace.toString());
+        if (tenant == null) {
+            throw new RuntimeException(String.format("Cannot find the tenant %s", customerSpace.getTenantId()));
+        }
+        MultiTenantContext.setTenant(tenant);
         DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), taskIdentifier);
         if (dataFeedTask == null) {
             throw new RuntimeException("Cannot find the data feed task!");

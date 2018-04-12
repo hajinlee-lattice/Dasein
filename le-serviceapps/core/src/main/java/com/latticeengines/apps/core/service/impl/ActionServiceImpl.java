@@ -50,22 +50,30 @@ public class ActionServiceImpl implements ActionService {
     @Override
     public Action create(Action action) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (action.getTenant() != null && tenant != null) {
-            log.info(String.format("Action tenant: %s, updated to: %s", action.getTenant().getId(), tenant.getId()));
+        if (action.getTenant() != null) {
+            log.info(String.format("Action tenant: %s", action.getTenant().getId()));
+        }
+        if (tenant != null) {
+            log.info(String.format("Action new tenant: %s", tenant.getId()));
         }
         action.setTenant(tenant);
         actionEntityMgr.create(action);
+        log.info(String.format("Create Action=%s", action));
         return action;
     }
 
     @Override
     public Action update(Action action) {
         Tenant tenant = MultiTenantContext.getTenant();
-        if (action.getTenant() != null && tenant != null) {
-            log.info(String.format("Action tenant: %s, updated to: %s", action.getTenant().getId(), tenant.getId()));
+        if (action.getTenant() != null) {
+            log.info(String.format("Action tenant: %s", action.getTenant().getId()));
+        }
+        if (tenant != null) {
+            log.info(String.format("Action new tenant: %s", tenant.getId()));
         }
         action.setTenant(tenant);
         actionEntityMgr.createOrUpdate(action);
+        log.info(String.format("Update Action=%s", action));
         return action;
     }
 
