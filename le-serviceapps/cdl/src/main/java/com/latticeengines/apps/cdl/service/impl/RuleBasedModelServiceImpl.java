@@ -20,6 +20,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 
 @Component("ruleBasedModelService")
 public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedModel> implements RuleBasedModelService {
@@ -55,30 +56,17 @@ public class RuleBasedModelServiceImpl extends RatingModelServiceBase<RuleBasedM
     }
 
     @Override
-    public void findRatingModelAttributeLookups(String customerSpace, RuleBasedModel ratingModel) {
+    public void findRatingModelAttributeLookups(RuleBasedModel ratingModel) {
         TreeMap<String, Map<String, Restriction>> rulesMap = ratingModel.getRatingRule().getBucketToRuleMap();
         Iterator it = rulesMap.keySet().iterator();
         Set<AttributeLookup> attributes = new HashSet<>();
         while (it.hasNext()) {
             Map<String, Restriction> rules = rulesMap.get(it.next());
             for (Map.Entry<String, Restriction> entry : rules.entrySet()) {
-                attributes.addAll(getRestrictionDependingAttributes(entry.getValue()));
+                attributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(entry.getValue()));
             }
         }
 
         ratingModel.setRatingModelAttributes(attributes);
-    }
-
-    private Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
-        Set<AttributeLookup> attributes = new HashSet<>();
-        DepthFirstSearch search = new DepthFirstSearch();
-        search.run(restriction, (object, ctx) -> {
-            GraphNode node = (GraphNode) object;
-            if (node instanceof AttributeLookup) {
-                attributes.add(((AttributeLookup) node));
-            }
-        });
-
-        return attributes;
     }
 }

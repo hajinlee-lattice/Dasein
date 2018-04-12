@@ -4,8 +4,12 @@ import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NOT_NULL
 import static com.latticeengines.domain.exposed.query.ComparisonType.IS_NULL;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import com.latticeengines.common.exposed.graph.GraphNode;
+import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
@@ -237,4 +241,16 @@ public class RestrictionUtils {
         }
     }
 
+    public static Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
+        Set<AttributeLookup> attributes = new HashSet<>();
+        DepthFirstSearch search = new DepthFirstSearch();
+        search.run(restriction, (object, ctx) -> {
+            GraphNode node = (GraphNode) object;
+            if (node instanceof AttributeLookup) {
+                attributes.add(((AttributeLookup) node));
+            }
+        });
+
+        return attributes;
+    }
 }

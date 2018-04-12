@@ -155,16 +155,14 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
 
     @Test(groups = "deployment", dependsOnMethods = { "testFindAndUpdateRuleBasedModel" })
     private void testGetDependentAttrsInAllModels() {
-        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(
-                mainCustomerSpace, rbRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInAllModels(rbRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(attributes.size(), 2);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetDependentAttrsInAllModels" })
     private void testGetDependentAttrsInActiveModel() {
-        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(
-                mainCustomerSpace, rbRatingEngineId);
+        List<AttributeLookup> attributes = ratingEngineService.getDependentAttrsInActiveModel(rbRatingEngineId);
         Assert.assertNotNull(attributes);
         Assert.assertEquals(attributes.size(), 2);
     }
@@ -175,7 +173,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         attributes.add("Contact.ContactName");
         attributes.add("Account.Other");
 
-        List<RatingModel> ratingModels = ratingEngineService.getDependingRatingModels(mainCustomerSpace, attributes);
+        List<RatingModel> ratingModels = ratingEngineService.getDependingRatingModels(attributes);
         Assert.assertNotNull(ratingModels);
         Assert.assertEquals(ratingModels.size(), 1);
     }
@@ -186,7 +184,7 @@ public class RuleBasedModelServiceImplDeploymentTestNG extends CDLDeploymentTest
         attributes.add("Contact.ContactName");
         attributes.add("Account.Other");
 
-        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(mainCustomerSpace, attributes);
+        List<RatingEngine> ratingEngines = ratingEngineService.getDependingRatingEngines(attributes);
         Assert.assertNotNull(ratingEngines);
         Assert.assertEquals(ratingEngines.size(), 1);
     }

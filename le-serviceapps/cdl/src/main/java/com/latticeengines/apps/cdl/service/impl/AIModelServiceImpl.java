@@ -19,6 +19,7 @@ import com.latticeengines.apps.cdl.rating.CrossSellRatingQueryBuilder;
 import com.latticeengines.apps.cdl.rating.RatingQueryBuilder;
 import com.latticeengines.apps.cdl.service.AIModelService;
 import com.latticeengines.apps.cdl.service.PeriodService;
+import com.latticeengines.apps.cdl.service.SegmentService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
@@ -53,6 +54,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private SegmentProxy segmentProxy;
+
+    @Inject
+    private SegmentService segmentService;
 
     @Inject
     private AIModelEntityMgr aiModelEntityMgr;
@@ -119,10 +123,10 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @SuppressWarnings("unchecked")
     @Override
-    public void findRatingModelAttributeLookups(String customerSpace, AIModel ratingModel) {
+    public void findRatingModelAttributeLookups(AIModel ratingModel) {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(ratingModel.getTrainingSegment());
         ratingModel
-                .setRatingModelAttributes(new HashSet(segmentProxy.findDependingAttributes(customerSpace, segments)));
+                .setRatingModelAttributes(new HashSet(segmentService.findDependingAttributes(segments)));
     }
 }

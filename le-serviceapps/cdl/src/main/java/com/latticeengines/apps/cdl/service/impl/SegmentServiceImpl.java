@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.RestrictionUtils;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 
 @Component("segmentService")
@@ -247,7 +248,7 @@ public class SegmentServiceImpl implements SegmentService {
         Set<AttributeLookup> segmentAttributes = new HashSet<>();
         Set<Restriction> restrictions = getSegmentRestrictions(metadataSegment);
         for (Restriction restriction : restrictions) {
-            segmentAttributes.addAll(getRestrictionDependingAttributes(restriction));
+            segmentAttributes.addAll(RestrictionUtils.getRestrictionDependingAttributes(restriction));
         }
 
         metadataSegment.setSegmentAttributes(segmentAttributes);
@@ -284,20 +285,6 @@ public class SegmentServiceImpl implements SegmentService {
         }
 
         return restrictionSet;
-    }
-
-    @NoCustomerSpace
-    private Set<AttributeLookup> getRestrictionDependingAttributes(Restriction restriction) {
-        Set<AttributeLookup> attributes = new HashSet<>();
-        DepthFirstSearch search = new DepthFirstSearch();
-        search.run(restriction, (object, ctx) -> {
-            GraphNode node = (GraphNode) object;
-            if (node instanceof AttributeLookup) {
-                attributes.add(((AttributeLookup) node));
-            }
-        });
-
-        return attributes;
     }
 
     @NoCustomerSpace

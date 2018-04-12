@@ -487,7 +487,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AttributeLookup> getDependentAttrsInAllModels(String customerSpace, String ratingEngineId) {
+    public List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId) {
         Set<AttributeLookup> attributes = new HashSet<>();
         RatingEngine ratingEngine = validateRatingEngine(ratingEngineId);
         RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
@@ -496,7 +496,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         List<RatingModel> ratingModels = ratingModelService.getAllRatingModelsByRatingEngineId(ratingEngineId);
         if (ratingModels != null) {
             for (RatingModel ratingModel : ratingModels) {
-                ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                ratingModelService.findRatingModelAttributeLookups(ratingModel);
                 attributes.addAll(ratingModel.getRatingModelAttributes());
             }
         }
@@ -506,7 +506,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<AttributeLookup> getDependentAttrsInActiveModel(String customerSpace, String ratingEngineId) {
+    public List<AttributeLookup> getDependentAttrsInActiveModel(String ratingEngineId) {
         Set<AttributeLookup> attributes = new HashSet<>();
         RatingEngine ratingEngine = validateRatingEngine_PopulateActiveModel(ratingEngineId);
         RatingModelService<RatingModel> ratingModelService = RatingModelServiceBase
@@ -514,7 +514,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
         RatingModel activeRatingModel = ratingEngine.getActiveModel();
         if (activeRatingModel != null) {
-            ratingModelService.findRatingModelAttributeLookups(customerSpace, activeRatingModel);
+            ratingModelService.findRatingModelAttributeLookups(activeRatingModel);
             attributes.addAll(activeRatingModel.getRatingModelAttributes());
         }
 
@@ -523,7 +523,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<RatingModel> getDependingRatingModels(String customerSpace, List<String> attributes) {
+    public List<RatingModel> getDependingRatingModels(List<String> attributes) {
         Set<RatingModel> ratingModelSet = new HashSet<>();
         RatingModelService<RatingModel> ratingModelService;
         List<RatingEngine> ratingEngines = getAllRatingEngines();
@@ -535,7 +535,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                         .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                 if (ratingModels != null) {
                     for (RatingModel ratingModel : ratingModels) {
-                        ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                        ratingModelService.findRatingModelAttributeLookups(ratingModel);
                         for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
                             if (attributes.contains(sanitize(modelAttribute.toString()))) {
                                 ratingModelSet.add(ratingModel);
@@ -552,7 +552,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @SuppressWarnings("unchecked")
     @Override
-    public List<RatingEngine> getDependingRatingEngines(String customerSpace, List<String> attributes) {
+    public List<RatingEngine> getDependingRatingEngines(List<String> attributes) {
         Set<RatingEngine> ratingEngineSet = new HashSet<>();
         RatingModelService<RatingModel> ratingModelService;
         List<RatingEngine> ratingEngines = getAllRatingEngines();
@@ -564,7 +564,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
                         .getAllRatingModelsByRatingEngineId(ratingEngine.getId());
                 if (ratingModels != null) {
                     rm: for (RatingModel ratingModel : ratingModels) {
-                        ratingModelService.findRatingModelAttributeLookups(customerSpace, ratingModel);
+                        ratingModelService.findRatingModelAttributeLookups(ratingModel);
                         for (AttributeLookup modelAttribute : ratingModel.getRatingModelAttributes()) {
                             if (attributes.contains(sanitize(modelAttribute.toString()))) {
                                 ratingEngineSet.add(ratingEngine);
