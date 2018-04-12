@@ -7,16 +7,12 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.hadoop.fs.FileStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.datacloud.manage.PurgeStrategy;
 
 public abstract class AMSourcePurger extends ConfigurablePurger {
-
-    private static Logger log = LoggerFactory.getLogger(AMSourcePurger.class);
 
     protected abstract String getHdfsVersionFromDCVersion(DataCloudVersion dcVersion);
 

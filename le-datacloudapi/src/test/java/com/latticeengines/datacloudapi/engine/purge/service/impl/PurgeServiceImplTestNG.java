@@ -1,8 +1,12 @@
 package com.latticeengines.datacloudapi.engine.purge.service.impl;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.hadoop.fs.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,9 +62,13 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     private PurgeSource amToBak;
     private PurgeSource amLookupToDelete;
     private PurgeSource amLookupToBak;
+    private PurgeSource mlDailyToDelete;
+    private PurgeSource mlDailyToBak;
 
     private Map<String, PurgeSource> validationMapNonDebugMode;
     private Map<String, PurgeSource> validationMapDebugMode;
+
+    private Date now = new Date();
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
@@ -69,6 +78,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         prepareIngestionToPurge();
         prepareGeneralSourceToPurge();
         prepareAMSourceToPurge();
+        prepareMLSourceToPurge();
         prepareValidationMap();
     }
 
@@ -83,6 +93,7 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
                 .delete(purgeStrategyEntityMgr.findStrategiesBySource(generalSourceToDelete.getSourceName()));
         purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amToDelete.getSourceName()));
         purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(amLookupToDelete.getSourceName()));
+        purgeStrategyEntityMgr.delete(purgeStrategyEntityMgr.findStrategiesBySource(mlDailyToDelete.getSourceName()));
     }
 
     /**
@@ -93,10 +104,12 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testScan() throws IOException {
         List<PurgeSource> toPurge = purgeService.scan(POD_ID, false);
-        validatePurgeSourcesNonDebugMode(toPurge);
+        log.info("Validating purge sources in non-debug mode");
+        validatePurgeSources(toPurge, validationMapNonDebugMode);
 
         toPurge = purgeService.scan(POD_ID, true);
-        validatePurgeSourcesDebugMode(toPurge);
+        log.info("Validating purge sources in debug mode");
+        validatePurgeSources(toPurge, validationMapDebugMode);
     }
 
     private void preparePipelineTempSource() throws IOException {
@@ -281,12 +294,54 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
     }
 
+    private void prepareMLSourceToPurge() throws IOException {
+        String sourceName = "TestMadisonLogic";
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String versionToRetain = df.format(now);
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -250);
+        String versionToBak = df.format(cal.getTime());
+        cal.add(Calendar.DATE, -250);
+        String versionToDelete = df.format(cal.getTime());
+
+        String hdfsPath = new Path("/user/propdata/madison/dataflow/incremental", versionToRetain).toString();
+        if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        }
+
+        hdfsPath = new Path("/user/propdata/madison/dataflow/incremental", versionToBak).toString();
+        if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        }
+        List<String> hdfsPaths = Arrays.asList(hdfsPath);
+        mlDailyToBak = new PurgeSource(sourceName, hdfsPaths, null, true);
+
+        hdfsPath = new Path("/user/propdata/madison/dataflow/incremental", versionToDelete).toString();
+        if (!HdfsUtils.fileExists(yarnConfiguration, hdfsPath)) {
+            HdfsUtils.mkdir(yarnConfiguration, hdfsPath);
+        }
+        hdfsPaths = Arrays.asList(hdfsPath);
+        mlDailyToDelete = new PurgeSource(sourceName, hdfsPaths, null, false);
+
+        PurgeStrategy strategy = new PurgeStrategy();
+        strategy.setSource(sourceName);
+        strategy.setSourceType(SourceType.ML_SOURCE);
+        strategy.setHdfsDays(200);
+        strategy.setS3Days(30);
+        strategy.setGlacierDays(170);
+        strategy.setNoBak(false);
+        purgeStrategyEntityMgr.insertAll(Collections.singletonList(strategy));
+
+    }
+
     private void prepareValidationMap() {
         validationMapNonDebugMode = new HashMap<>();
         validationMapNonDebugMode.put(getValidationKey(ingestionToPurge), ingestionToPurge);
         validationMapNonDebugMode.put(getValidationKey(generalSourceToBak), generalSourceToBak);
         validationMapNonDebugMode.put(getValidationKey(amToBak), amToBak);
         validationMapNonDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
+        validationMapNonDebugMode.put(getValidationKey(mlDailyToBak), mlDailyToBak);
+        validationMapNonDebugMode.put(getValidationKey(mlDailyToDelete), mlDailyToDelete);
 
         validationMapDebugMode = new HashMap<>();
         validationMapDebugMode.put(getValidationKey(pipelineTempSourceToPurge), pipelineTempSourceToPurge);
@@ -297,6 +352,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         validationMapDebugMode.put(getValidationKey(amToDelete), amToDelete);
         validationMapDebugMode.put(getValidationKey(amLookupToBak), amLookupToBak);
         validationMapDebugMode.put(getValidationKey(amLookupToDelete), amLookupToDelete);
+        validationMapDebugMode.put(getValidationKey(mlDailyToBak), mlDailyToBak);
+        validationMapDebugMode.put(getValidationKey(mlDailyToDelete), mlDailyToDelete);
 
         // generalSourceToDelete should not be any of these map because upload
         // days is not old enough based on HdfsDays
@@ -306,34 +363,22 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         return purgeSource.getSourceName() + "_ToBak_" + purgeSource.isToBak();
     }
 
-    private void validatePurgeSourcesNonDebugMode(List<PurgeSource> toPurge) {
-        log.info("Validating purge sources in non-debug mode");
+    private void validatePurgeSources(List<PurgeSource> toPurge, Map<String, PurgeSource> validationMap) {
         Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
         toPurge.forEach(purgeSource -> {
             log.info("Validating " + JsonUtils.serialize(purgeSource));
-            PurgeSource expected = validationMapNonDebugMode.get(getValidationKey(purgeSource));
+            PurgeSource expected = validationMap.get(getValidationKey(purgeSource));
             Assert.assertNotNull(expected);
             log.info("Expecting " + JsonUtils.serialize(expected));
-            Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-            Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
+            if (purgeSource.getSourceName().equals(mlDailyToBak.getSourceName())) {
+                validateMLSource(purgeSource);
+            } else {
+                Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
+                Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
+            }
         });
-        Assert.assertEquals(toPurge.size(), validationMapNonDebugMode.size());
-    }
-
-    private void validatePurgeSourcesDebugMode(List<PurgeSource> toPurge) {
-        log.info("Validating purge sources in debug mode");
-        Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
-        toPurge.forEach(purgeSource -> {
-            log.info("Validating " + JsonUtils.serialize(purgeSource));
-            PurgeSource expected = validationMapDebugMode.get(getValidationKey(purgeSource));
-            Assert.assertNotNull(expected);
-            log.info("Expecting " + JsonUtils.serialize(expected));
-            Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
-            Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
-            Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
-        });
-        Assert.assertEquals(toPurge.size(), validationMapDebugMode.size());
+        Assert.assertEquals(toPurge.size(), validationMap.size());
     }
 
     private boolean isIdenticalList(List<String> expected, List<String> actual) {
@@ -353,5 +398,21 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
             }
         }
         return true;
+    }
+
+    private void validateMLSource(PurgeSource purgeSource) {
+        Assert.assertTrue(CollectionUtils.isNotEmpty(purgeSource.getHdfsPaths()));
+        Set<String> hdfsPathSet = new HashSet<>(purgeSource.getHdfsPaths());
+        if (purgeSource.isToBak()) {
+            Assert.assertTrue(hdfsPathSet.contains(mlDailyToBak.getHdfsPaths().get(0)));
+            Assert.assertFalse(hdfsPathSet.contains(mlDailyToDelete.getHdfsPaths().get(0)));
+        } else {
+            Assert.assertTrue(hdfsPathSet.contains(mlDailyToDelete.getHdfsPaths().get(0)));
+            Assert.assertFalse(hdfsPathSet.contains(mlDailyToBak.getHdfsPaths().get(0)));
+        }
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        String versionToRetain = df.format(now);
+        String hdfsPathToRetain = new Path("/user/propdata/madison/dataflow/incremental", versionToRetain).toString();
+        Assert.assertFalse(hdfsPathSet.contains(hdfsPathToRetain));
     }
 }

@@ -137,6 +137,6 @@ public class PurgeStrategy implements HasPid, Serializable {
     }
 
     public enum SourceType {
-        INGESTION_SOURCE, GENERAL_SOURCE, TEMP_SOURCE, ACCOUNT_MASTER, ACCOUNT_MASTER_LOOKUP
+        INGESTION_SOURCE, GENERAL_SOURCE, TEMP_SOURCE, ACCOUNT_MASTER, ACCOUNT_MASTER_LOOKUP, ML_SOURCE
     }
 }

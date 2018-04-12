@@ -34,6 +34,7 @@ public class IngestionPurger extends ConfigurablePurger{
         return null;
     }
 
+    @Override
     protected Pair<List<String>, List<String>> constructHdfsPathsHiveTables(PurgeStrategy strategy,
             List<String> versions) {
         List<String> hdfsPaths = new ArrayList<>();

@@ -102,6 +102,18 @@ public abstract class ConfigurablePurger implements SourcePurger {
         return Pair.of(hdfsPaths, hiveTables);
     }
 
+    /**
+     * Override this method if the source needs to be dealt with specially
+     */
+    protected List<String> findAllVersions(PurgeStrategy strategy) {
+        try {
+            return hdfsSourceEntityMgr.getVersions(new GeneralSource(strategy.getSource()));
+        } catch (Exception ex) {
+            log.error("Fail to get versions for source " + strategy.getSource(), ex);
+        }
+        return null;
+    }
+
     @Override
     public List<PurgeSource> findSourcesToPurge(final boolean debug) {
         List<PurgeStrategy> strategies = purgeStrategyEntityMgr.findStrategiesByType(getSourceType());
@@ -137,15 +149,6 @@ public abstract class ConfigurablePurger implements SourcePurger {
             list.add(purgeSource);
         }
         return list;
-    }
-
-    protected List<String> findAllVersions(PurgeStrategy strategy) {
-        try {
-            return hdfsSourceEntityMgr.getVersions(new GeneralSource(strategy.getSource()));
-        } catch (Exception ex) {
-            log.error("Fail to get versions for source " + strategy.getSource(), ex);
-        }
-        return null;
     }
 
     private Pair<List<String>, List<String>> findPathsToDelete(PurgeStrategy strategy, List<String> currentVersions,
