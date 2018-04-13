@@ -17,6 +17,8 @@ public class WorkflowContextConstants {
         public static final String EAI_JOB_APPLICATION_ID = "EAI_JOB_APPLICATION_ID";
         public static final String IMPACTED_BUSINESS_ENTITIES = "IMPACTED_BUSINESS_ENTITIES";
         public static final String DATAFEEDTASK_REGISTERED_TABLES = "DATAFEEDTASK_REGISTERED_TABLES";
+        public static final String DATAFEEDTASK_IMPORT_ERROR_FILES = "DATAFEEDTASK_IMPORT_ERROR_FILES";
+        public static final String DATAFEEDTASK_IMPORT_DUPLICATE_FILES = "DATAFEEDTASK_IMPORT_DUPLICATE_FILES";
     }
 
     public static class Inputs {

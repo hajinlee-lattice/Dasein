@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.listeners;
 
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,13 +8,16 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.PathUtils;
 import com.latticeengines.domain.exposed.eai.EaiImportJobDetail;
@@ -36,6 +40,9 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     private final static Logger log = LoggerFactory.getLogger(DataFeedTaskImportListener.class);
 
+    private static final String ERROR_FILE = "error.csv";
+    private static final String DUPLICATE_FILE = "duplicate.csv";
+
     @Inject
     private EaiJobDetailProxy eaiJobDetailProxy;
 
@@ -50,6 +57,9 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    private Configuration yarnConfiguration;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -100,6 +110,7 @@ public class DataFeedTaskImportListener extends LEJobListener {
 
                     return;
                 }
+                setErrorFileContext(pathList, job);
                 List<Extract> extracts = new ArrayList<>();
                 for (int i = 0; i < pathList.size(); i++) {
                     log.info(
@@ -153,6 +164,39 @@ public class DataFeedTaskImportListener extends LEJobListener {
                         jobExecution.getStatus().name()));
                 dataLoaderService.reportGetDataStatus(statusUrl, vdbLoadTableStatus);
             }
+        }
+    }
+
+    private void setErrorFileContext(List<String> pathList, WorkflowJob job) {
+        List<String> errorFiles = new ArrayList<>();
+        List<String> duplicateFiles = new ArrayList<>();
+
+        pathList.forEach(path -> {
+            try {
+                String dirPath = path.substring(0, path.lastIndexOf("*.avro"));
+                log.info("Diagnostic file path: " + dirPath);
+                if (HdfsUtils.fileExists(yarnConfiguration, dirPath + ERROR_FILE)) {
+                    errorFiles.add(dirPath + ERROR_FILE);
+                }
+                if (HdfsUtils.fileExists(yarnConfiguration, dirPath + DUPLICATE_FILE)) {
+                    duplicateFiles.add(dirPath + DUPLICATE_FILE);
+                }
+            } catch (IOException e) {
+                log.error("Check error file existence error.");
+            }
+        });
+
+        if (CollectionUtils.isNotEmpty(errorFiles)) {
+            job.setOutputContextValue(WorkflowContextConstants.Outputs.DATAFEEDTASK_IMPORT_ERROR_FILES,
+                    JsonUtils.serialize(errorFiles));
+        } else {
+            log.info("Error file list empty.");
+        }
+        if (CollectionUtils.isNotEmpty(duplicateFiles)) {
+            job.setOutputContextValue(WorkflowContextConstants.Outputs.DATAFEEDTASK_IMPORT_DUPLICATE_FILES,
+                    JsonUtils.serialize(duplicateFiles));
+        } else {
+            log.info("Duplicate file list empty.");
         }
     }
 
