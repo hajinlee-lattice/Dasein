@@ -95,7 +95,9 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         
         if (log.isInfoEnabled()) {
             log.info("Setting Max Connections to: {},  for Envrionment: {}", maxPoolSize, currentEnv);
-            log.info("Stack Trace: {} ",
+        }
+        if (log.isDebugEnabled()) {
+            log.debug("Stack Trace: {} ",
                     Arrays.asList(Thread.currentThread().getStackTrace()).parallelStream()
                             .filter(st -> st != null && st.toString().startsWith("com.latticeengines"))
                             .collect(Collectors.toList()));
