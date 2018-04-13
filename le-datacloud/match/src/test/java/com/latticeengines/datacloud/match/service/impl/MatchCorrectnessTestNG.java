@@ -38,8 +38,8 @@ public class MatchCorrectnessTestNG extends DataCloudMatchFunctionalTestNGBase {
 
     // domain only easy cases
     private static final Object[][] TEST_DATA_1 = new Object[][] { //
-            /*{ "google.com", null, null, null, null, null, null, "google.com", "GOOGLE LLC", "California", "USA",
-                    ">10,000", ">10B" },*/
+            { "google.com", null, null, null, null, null, null, "google.com", "GOOGLE LLC", "California", "USA",
+                    ">10,000", ">10B" },
             { "microsoft.com", null, null, null, null, null, null, "microsoft.com", "Microsoft Corporation", "Washington", "USA", ">10,000", ">10B" },
             { "apple.com", null, null, null, null, null, null, "apple.com", "Apple Inc.", "California", "USA", ">10,000", ">10B" },
             { "chevron.com", null, null, null, null, null, null, "chevron.com", "Chevron Corporation", "California", "USA", ">10,000", ">10B" },
