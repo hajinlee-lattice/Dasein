@@ -48,7 +48,7 @@ import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 @Component(ActivityMetricsCurateFlow.BEAN_NAME)
-public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetricsCuratorConfig> {
+public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityMetricsCuratorConfig> {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ActivityMetricsCurateFlow.class);
 
@@ -60,7 +60,6 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
     private Map<String, PeriodBuilder> periodBuilders;  //period name -> period builder
     private Map<String, List<ActivityMetrics>> periodMetrics;   // period name -> metrics list
     private Map<String, Node> periodTables; // period name -> period table
-    private Map<InterfaceName, Class<?>> metricsClasses;
 
     private Node account = null, product = null;
 
@@ -76,13 +75,14 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         for (int i = 0; i < config.getPeriodStrategies().size(); i++) {
             periodTableList.add(addSource(parameters.getBaseTables().get(i)));
         }
-        if (config.getType() == ActivityType.PurchaseHistory) {
+        if (shouldLoadAccount()) {
             account = addSource(parameters.getBaseTables().get(config.getPeriodStrategies().size()));
+        }
+        if (shouldLoadProduct()) {
             product = addSource(parameters.getBaseTables().get(config.getPeriodStrategies().size() + 1));
             product = product.filter(String.format("\"%s\".equalsIgnoreCase(%s)", ProductType.Analytic.name(),
                     InterfaceName.ProductType.name()), new FieldList(InterfaceName.ProductType.name()));
         }
-
 
         init();
         validateMetrics();
@@ -97,7 +97,11 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         }
 
         Node toReturn = join(base, toJoin);
-        toReturn = imputeNull(toReturn);
+        if (!config.isReduced()) {
+            // ShareOfWallet node returns less rows then base, but null
+            // imputation for it null, so no need to call imputeNull
+            toReturn = imputeNullDepivoted(toReturn);
+        }
         toReturn = assignCompositeKey(toReturn);
         return toReturn;
     }
@@ -110,13 +114,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
             periodStrategies.put(strategy.getName(), strategy);
         });
         timeFilterTranslator = new TimeFilterTranslator(config.getPeriodStrategies(), config.getCurrentDate());
-        metricsClasses = new HashMap<>();
-        metricsClasses.put(InterfaceName.Margin, Integer.class);
-        metricsClasses.put(InterfaceName.ShareOfWallet, Integer.class);
-        metricsClasses.put(InterfaceName.SpendChange, Integer.class);
-        metricsClasses.put(InterfaceName.TotalSpendOvertime, Double.class);
-        metricsClasses.put(InterfaceName.AvgSpendOvertime, Double.class);
-        metricsClasses.put(InterfaceName.HasPurchased, Boolean.class);
+        prepareMetricsMetadata(config.getMetrics(), null);
     }
 
     private void validateMetrics() {
@@ -197,6 +195,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
             }
             Iterator<GenericRecord> recordIterator = AvroUtils.iterator(periodTable.getHadoopConfig(), hdfsPath);
             if (recordIterator.hasNext()) {
+                // Read one row to identify which period table it is
                 GenericRecord record = recordIterator.next();
                 if (periodMetrics.containsKey(String.valueOf(record.get(InterfaceName.PeriodName.name())))) {
                     // Transaction table has both AnalyticProduct and
@@ -218,14 +217,23 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
     }
 
     private Node getBaseNode() {
-        Node base;
-        if (config.getType() == ActivityType.PurchaseHistory) {
+        Node base = null;
+        if (config.getType() == ActivityType.PurchaseHistory && !config.isReduced()) {
             account = account.addColumnWithFixedValue("_DUMMY_", null, String.class);
             product = product.addColumnWithFixedValue("_DUMMY_", null, String.class);
             base = account.join(new FieldList("_DUMMY_"), product, new FieldList("_DUMMY_"), JoinType.INNER)
                     .retain(new FieldList(config.getGroupByFields()));
         } else {
-            base = periodTables.values().iterator().next();
+            // Choose smaller period table
+            List<String> periods = Arrays.asList(PeriodStrategy.Template.Year.name(),
+                    PeriodStrategy.Template.Quarter.name(), PeriodStrategy.Template.Month.name(),
+                    PeriodStrategy.Template.Week.name());
+            for (String period : periods) {
+                if (periodTables.containsKey(period)) {
+                    base = periodTables.get(period);
+                    break;
+                }
+            }
             base = base.retain(new FieldList(config.getGroupByFields()))
                     .groupByAndLimit(new FieldList(config.getGroupByFields()), 1);
         }
@@ -326,7 +334,7 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         periodTable = periodTable.apply(
                 new MetricsShareOfWalletFunc(ActivityMetricsUtils.getNameWithPeriod(metrics), "_APSpend_", "_ATSpend_",
                         "_SPSpend_", "_STSpend_"),
-                new FieldList(periodTable.getFieldNames()), prepareFms(periodTable, metrics, false).get(0))
+                new FieldList(periodTable.getFieldNames()), metricsMetadata.get(metrics))
                 .retain(new FieldList(retainFields));
         return periodTable.renamePipe("_shareofwallet_node_" + periodTable.getPipeName());
     }
@@ -359,8 +367,6 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         return node;
     }
 
-
-
     private Node join(Node base, List<Node> toJoin) {
         List<String> retainFields = new ArrayList<>();
         retainFields.addAll(config.getGroupByFields());
@@ -377,41 +383,6 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         return base.filter(sb.substring(0, sb.length() - 4), new FieldList(config.getGroupByFields()));
     }
 
-    private Node imputeNull(Node node) {
-        for (ActivityMetrics metrics : config.getMetrics()) {
-            switch (metrics.getMetrics()) {
-            case SpendChange:
-                node = node.apply(
-                        String.format("%s == null  ? Integer.valueOf(0) : %s",
-                                ActivityMetricsUtils.getNameWithPeriod(metrics),
-                                ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        new FieldList(ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        prepareFms(node, metrics, false).get(0));
-                break;
-            case TotalSpendOvertime:
-            case AvgSpendOvertime:
-                node = node.apply(
-                        String.format("%s == null  ? Double.valueOf(0) : %s",
-                                ActivityMetricsUtils.getNameWithPeriod(metrics),
-                                ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        new FieldList(ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        prepareFms(node, metrics, false).get(0));
-                break;
-            case HasPurchased:
-                node = node.apply(
-                        String.format("%s == null  ? Boolean.valueOf(false) : %s",
-                                ActivityMetricsUtils.getNameWithPeriod(metrics),
-                                ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        new FieldList(ActivityMetricsUtils.getNameWithPeriod(metrics)),
-                        prepareFms(node, metrics, false).get(0));
-                break;
-            default:
-                break;
-            }
-        }
-        return node;
-    }
-
     private Node assignCompositeKey(Node node) {
         node = node.apply(
                 String.format("%s + \"_\" + %s", InterfaceName.AccountId.name(), InterfaceName.ProductId.name()),
@@ -420,25 +391,13 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         return node;
     }
 
-    private List<FieldMetadata> prepareFms(Node source, ActivityMetrics metrics, boolean includeGroupBy) {
-        List<FieldMetadata> fms = new ArrayList<>();
-        if (includeGroupBy) {
-            config.getGroupByFields().forEach(field -> {
-                fms.add(source.getSchema(field));
-            });
-        }
-        fms.add(new FieldMetadata(ActivityMetricsUtils.getNameWithPeriod(metrics),
-                metricsClasses.get(metrics.getMetrics())));
-        return fms;
-    }
-
     private List<FieldMetadata> prepareFms(Node source, List<ActivityMetrics> metrics) {
         List<FieldMetadata> fms = new ArrayList<>();
         config.getGroupByFields().forEach(field -> {
             fms.add(source.getSchema(field));
         });
         metrics.forEach(m -> {
-            fms.add(new FieldMetadata(ActivityMetricsUtils.getNameWithPeriod(m), metricsClasses.get(m.getMetrics())));
+            fms.add(metricsMetadata.get(m));
         });
         return fms;
     }
@@ -479,6 +438,30 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
         return Arrays.asList(periodBuilder.toPeriodId(minTxnDate), periodBuilder.toPeriodId(maxTxnDate));
     }
 
+    private boolean shouldLoadAccount() {
+        if (config.getType() != ActivityType.PurchaseHistory) {
+            return false;
+        }
+        for (ActivityMetrics m : config.getMetrics()) {
+            if (m.getMetrics() == InterfaceName.ShareOfWallet) {
+                return true;
+            }
+        }
+        if (config.isReduced()) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    private boolean shouldLoadProduct() {
+        if (config.getType() == ActivityType.PurchaseHistory) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     @Override
     public Class<? extends TransformerConfig> getTransformerConfigClass() {
         return ActivityMetricsCuratorConfig.class;
@@ -493,7 +476,6 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
     public String getTransformerName() {
         return DataCloudConstants.ACTIVITY_METRICS_CURATOR;
     }
-
 
     /******************** Following methods are deprecated ********************/
     @Deprecated
@@ -617,5 +599,18 @@ public class ActivityMetricsCurateFlow extends ConfigurableFlowBase<ActivityMetr
                         new FieldList(InterfaceName.TotalAmount.name()), prepareFms(node, metrics, false).get(0))
                 .retain(new FieldList(retainFields));
         return node.renamePipe("_haspurchased_node_");
+    }
+
+    @Deprecated
+    private List<FieldMetadata> prepareFms(Node source, ActivityMetrics metrics, boolean includeGroupBy) {
+        List<FieldMetadata> fms = new ArrayList<>();
+        if (includeGroupBy) {
+            config.getGroupByFields().forEach(field -> {
+                fms.add(source.getSchema(field));
+            });
+        }
+        fms.add(new FieldMetadata(ActivityMetricsUtils.getNameWithPeriod(metrics),
+                metricsClasses.get(metrics.getMetrics())));
+        return fms;
     }
 }

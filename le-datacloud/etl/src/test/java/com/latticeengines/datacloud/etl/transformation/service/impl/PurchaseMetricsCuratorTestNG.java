@@ -43,8 +43,10 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private GeneralSource weekTable = new GeneralSource("WeekTable");
     private GeneralSource depivotedMetrics = new GeneralSource("DepivotedMetrics");
     private GeneralSource pivotMetrics = new GeneralSource("PivotMetrics");
+    private GeneralSource reducedDepivotedMetrics = new GeneralSource("ReducedDepivotedMetrics");
+    private GeneralSource expandedPivotMetrics = new GeneralSource("ExpandedPivotMetrics");
 
-    private GeneralSource source = pivotMetrics;
+    private GeneralSource source = expandedPivotMetrics;
 
     private String MAX_TXN_DATE = "2018-01-01";
 
@@ -67,6 +69,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         finish(progress);
         confirmIntermediateSource(depivotedMetrics, null);
         confirmIntermediateSource(pivotMetrics, null);
+        confirmIntermediateSource(reducedDepivotedMetrics, null);
+        confirmIntermediateSource(expandedPivotMetrics, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -100,7 +104,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step10.setBaseSources(baseSources);
         step10.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step10.setTargetSource(depivotedMetrics.getSourceName());
-        step10.setConfiguration(getActivityMetricsCuratorConfig());
+        step10.setConfiguration(getActivityMetricsCuratorConfig(false));
 
         TransformationStepConfig step20 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -108,12 +112,33 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step20.setBaseSources(baseSources);
         step20.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
         step20.setTargetSource(pivotMetrics.getSourceName());
-        step20.setConfiguration(getActivityMetricsPivotConfig());
+        step20.setConfiguration(getActivityMetricsPivotConfig(false));
+
+        TransformationStepConfig step30 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(weekTable.getSourceName());
+        baseSources.add(account.getSourceName());
+        baseSources.add(product.getSourceName());
+        step30.setBaseSources(baseSources);
+        step30.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
+        step30.setTargetSource(reducedDepivotedMetrics.getSourceName());
+        step30.setConfiguration(getActivityMetricsCuratorConfig(true));
+
+        TransformationStepConfig step40 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(reducedDepivotedMetrics.getSourceName());
+        baseSources.add(account.getSourceName());
+        step40.setBaseSources(baseSources);
+        step40.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
+        step40.setTargetSource(expandedPivotMetrics.getSourceName());
+        step40.setConfiguration(getActivityMetricsPivotConfig(true));
 
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step10);
         steps.add(step20);
+        steps.add(step30);
+        steps.add(step40);
 
         // -----------
         configuration.setSteps(steps);
@@ -122,7 +147,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         return configuration;
     }
 
-    private String getActivityMetricsCuratorConfig() {
+    private String getActivityMetricsCuratorConfig(boolean reduced) {
         ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
         conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
         conf.setCurrentDate(MAX_TXN_DATE);
@@ -154,10 +179,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         conf.setMetrics(metricsList);
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         conf.setType(ActivityType.PurchaseHistory);
+        conf.setReduced(reduced);
         return JsonUtils.serialize(conf);
     }
 
-    private String getActivityMetricsPivotConfig() {
+    private String getActivityMetricsPivotConfig(boolean expanded) {
         ActivityMetricsPivotConfig config = new ActivityMetricsPivotConfig();
         config.setActivityType(ActivityType.PurchaseHistory);
         config.setGroupByField(InterfaceName.AccountId.name());
@@ -168,6 +194,10 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         productMap.put("PID3", null);
         productMap.put("PID4", null);
         config.setProductMap(productMap);
+        config.setExpanded(expanded);
+        if (config.isExpanded()) {
+            config.setMetrics(metricsList);
+        }
         return JsonUtils.serialize(config);
     }
 
@@ -335,9 +365,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     };
 
     // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP
-    // HasPurchased in depivoted metrics: true / false / null
-    // HasPurchased in pivote metrics: true / false
-    private Object[][] depivotedMetricsData = new Object[][] {
+    private Object[][] depivotedMetricsData = new Object[][] { //
             { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true }, //
             { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true }, //
             { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true }, //
@@ -377,6 +405,36 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID8", "PID2", null, null, 0.0, 0.0, 0, false }, //
             { "AID8", "PID3", null, null, 0.0, 0.0, 0, false }, //
             { "AID8", "PID4", null, null, 0.0, 0.0, 0, false }, //
+    };
+    
+    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP
+    private Object[][] reducedDepivotedMetricsData = new Object[][] { //
+            { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true }, //
+            { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true }, //
+            { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true }, //
+            { "AID1", "PID4", 50, 122, 45.0, 45.0, 125, true }, //
+
+            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true }, //
+            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true }, //
+            { "AID2", "PID3", null, null, 0.0, 0.0, -100, true }, //
+
+            { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true }, //
+            { "AID3", "PID2", null, null, 0.0, 0.0, 0, false }, //
+            { "AID3", "PID3", null, null, 0.0, 0.0, 0, false }, //
+
+            { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true }, //
+            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true }, //
+            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true }, //
+
+            { "AID5", "PID1", null, null, 0.0, 0.0, 0, false }, //
+            { "AID5", "PID2", null, null, 0.0, 0.0, 0, false }, //
+
+            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true }, //
+            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true }, //
+
+            { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true }, //
+
+            { "AID8", "PID1", null, null, 0.0, 0.0, -100, true }, //
     };
 
     // Schema: AccountId
@@ -454,10 +512,16 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         try {
             switch (source) {
             case "DepivotedMetrics":
-                verifyDepivotedMetrics(records);
+                verifyDepivotedMetrics(records, depivotedMetricsData);
                 break;
             case "PivotMetrics":
-                verifyPivotMetrics(records);
+                verifyPivotMetrics(records, pivotMetricsData);
+                break;
+            case "ReducedDepivotedMetrics":
+                verifyDepivotedMetrics(records, reducedDepivotedMetricsData);
+                break;
+            case "ExpandedPivotMetrics":
+                verifyPivotMetrics(records, pivotMetricsData);
                 break;
             default:
                 throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
@@ -467,7 +531,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         }
     }
 
-    private void verifyDepivotedMetrics(Iterator<GenericRecord> records) {
+    private void verifyDepivotedMetrics(Iterator<GenericRecord> records, Object[][] depivotedMetricsData) {
         log.info("Verifying depivoted metrics");
         Map<String, Object[]> expectedMetrics = new HashMap<>();
         for (Object[] ent : depivotedMetricsData) {
@@ -498,10 +562,10 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                     expected[7]));
             cnt++;
         }
-        Assert.assertEquals(cnt, accountData.length * (productData.length - 2));
+        Assert.assertEquals(cnt, depivotedMetricsData.length);
     }
 
-    private void verifyPivotMetrics(Iterator<GenericRecord> records) {
+    private void verifyPivotMetrics(Iterator<GenericRecord> records, Object[][] pivotMetricsData) {
         log.info("Verifying pivot metrics table");
         Map<String, Object[]> expectedMetrics = new HashMap<>();
         for (Object[] ent : pivotMetricsData) {
@@ -531,7 +595,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                 }
             cnt++;
         }
-        Assert.assertEquals(cnt, accountData.length);
+        Assert.assertEquals(cnt, pivotMetricsData.length);
     }
 
     @Override

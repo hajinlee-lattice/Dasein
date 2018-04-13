@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsPivotConfig extends TransformerConfig {
     @JsonProperty("ActivityType")
@@ -19,6 +20,13 @@ public class ActivityMetricsPivotConfig extends TransformerConfig {
 
     @JsonProperty("PivotField")
     private String pivotField;
+    
+    @JsonProperty("Metrics")
+    private List<ActivityMetrics> metrics;
+
+    @JsonProperty("Expanded")
+    private boolean expanded = false;   // true: need to join Account table to include all AID
+                                        // false: DepivotedMetrics already has all AID
 
     public ActivityType getActivityType() {
         return activityType;
@@ -50,6 +58,22 @@ public class ActivityMetricsPivotConfig extends TransformerConfig {
 
     public void setPivotField(String pivotField) {
         this.pivotField = pivotField;
+    }
+
+    public boolean isExpanded() {
+        return expanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        this.expanded = expanded;
+    }
+
+    public List<ActivityMetrics> getMetrics() {
+        return metrics;
+    }
+
+    public void setMetrics(List<ActivityMetrics> metrics) {
+        this.metrics = metrics;
     }
 
 }

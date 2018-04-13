@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.latticeengines.dataflow.runtime.cascading.BaseAggregator;
-import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 import cascading.operation.Aggregator;
@@ -18,20 +17,18 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
 
     private static final long serialVersionUID = 5854576978926098341L;
 
-    private List<Object> pivotValues;
+    private List<String> pivotValues;
     private String groupByField;
     private String pivotField;
     private List<String> metricsFields;
-    private ActivityType activityType;
 
     public ActivityMetricsPivotAgg(Fields fieldDeclaration, String groupByField, String pivotField,
-            List<String> metricsFields, List<Object> pivotValues, ActivityType activityType) {
+            List<String> metricsFields, List<String> pivotValues) {
         super(fieldDeclaration);
         this.pivotValues = pivotValues;
         this.groupByField = groupByField;
         this.pivotField = pivotField;
         this.metricsFields = metricsFields;
-        this.activityType = activityType;
     }
 
     public static class Context extends BaseAggregator.Context {
@@ -68,7 +65,7 @@ public class ActivityMetricsPivotAgg extends BaseAggregator<ActivityMetricsPivot
         result.set(namePositionMap.get(groupByField), context.groupByVal);
         pivotValues.forEach(pivotVal -> {
             metricsFields.forEach(metrics -> {
-                String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
+                String field = ActivityMetricsUtils.getFullName(metrics, pivotVal);
                 result.set(namePositionMap.get(field), context.pivotData.get(field));
             });
         });

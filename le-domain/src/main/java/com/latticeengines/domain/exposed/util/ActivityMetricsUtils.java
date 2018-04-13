@@ -97,12 +97,12 @@ public class ActivityMetricsUtils {
         return String.join(SEPARATOR, periodNames) + SEPARATOR + metricsAbbr.get(activityMetrics.getMetrics());
     }
 
-    public static String getFullName(ActivityMetrics activityMetrics, String activityId) {
-        return HEADER + activityId + SEPARATOR + getNameWithPeriod(activityMetrics);
+    public static String getFullName(ActivityMetrics activityMetrics, String prefix) {
+        return HEADER + prefix + SEPARATOR + getNameWithPeriod(activityMetrics);
     }
 
-    public static String getFullName(String nameWithPeriod, String activityId) {
-        return HEADER + activityId + SEPARATOR + nameWithPeriod;
+    public static String getFullName(String nameWithPeriod, String prefix) {
+        return HEADER + prefix + SEPARATOR + nameWithPeriod;
     }
 
     public static String getProductIdFromFullName(String fullName) {

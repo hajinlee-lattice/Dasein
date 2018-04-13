@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
+import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ActivityMetricsPivotAgg;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
@@ -20,23 +21,33 @@ import cascading.operation.Aggregator;
 import cascading.tuple.Fields;
 
 @Component(ActivityMetricsPivotFlow.BEAN_NAME)
-public class ActivityMetricsPivotFlow extends ConfigurableFlowBase<ActivityMetricsPivotConfig> {
+public class ActivityMetricsPivotFlow extends ActivityMetricsBaseFlow<ActivityMetricsPivotConfig> {
     public static final String BEAN_NAME = "activityMetricsPivotFlow";
 
     private ActivityMetricsPivotConfig config;
 
-    private List<Object> pivotValues;
+    private List<String> pivotValues;
+
+    private Node account;
 
     @Override
     public Node construct(TransformationFlowParameters parameters) {
         config = getTransformerConfig(parameters);
         Node node = addSource(parameters.getBaseTables().get(0));
 
+        if (shouldLoadAccount()) {
+            account = addSource(parameters.getBaseTables().get(1));
+        }
+
         init();
         if (node.getSchema(InterfaceName.__Composite_Key__.name()) != null) {
             node = node.discard(InterfaceName.__Composite_Key__.name());
         }
         node = pivot(node);
+
+        if (config.isExpanded()) {
+            node = expandAccount(node);
+        }
 
         return node;
     }
@@ -66,17 +77,33 @@ public class ActivityMetricsPivotFlow extends ConfigurableFlowBase<ActivityMetri
         fields.add(config.getGroupByField());
         fms.add(node.getSchema(config.getGroupByField()));
 
-        for (Object pivotVal : pivotValues)
+        for (String pivotVal : pivotValues)
             for (String metrics : metricsFields) {
-                String field = ActivityMetricsUtils.getFullName(metrics, String.valueOf(pivotVal));
+                String field = ActivityMetricsUtils.getFullName(metrics, pivotVal);
                 fields.add(field);
                 fms.add(new FieldMetadata(field, node.getSchema(metrics).getJavaType()));
             }
 
         Aggregator agg = new ActivityMetricsPivotAgg(new Fields(fields.toArray(new String[fields.size()])),
-                config.getGroupByField(), config.getPivotField(), metricsFields, pivotValues, config.getActivityType());
+                config.getGroupByField(), config.getPivotField(), metricsFields, pivotValues);
         node = node.groupByAndAggregate(new FieldList(config.getGroupByField()), agg, fms);
         return node;
+    }
+
+    private Node expandAccount(Node node) {
+        List<String> toRetain = new ArrayList<>(node.getFieldNames());
+        node = account.join(new FieldList(InterfaceName.AccountId.name()), node,
+                new FieldList(InterfaceName.AccountId.name()), JoinType.LEFT).retain(new FieldList(toRetain));
+        prepareMetricsMetadata(config.getMetrics(), pivotValues);
+        return imputeNullPivoted(node, pivotValues);
+    }
+
+    private boolean shouldLoadAccount() {
+        if (config.isExpanded()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override

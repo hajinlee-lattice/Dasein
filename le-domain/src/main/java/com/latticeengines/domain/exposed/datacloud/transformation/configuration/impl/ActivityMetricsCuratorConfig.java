@@ -23,6 +23,12 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
     @JsonProperty("ActivityType")
     private ActivityType type;
 
+    @JsonProperty("Reduced")
+    private boolean reduced = false; // true: DepivotedMetrics has complete AID
+                                     // + PID for purchase history; 
+                                     // false: DepivotedMetrics only has AID + PID
+                                     // which exist in Transaction
+
     public List<ActivityMetrics> getMetrics() {
         return metrics;
     }
@@ -61,5 +67,13 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
 
     public void setType(ActivityType type) {
         this.type = type;
+    }
+
+    public boolean isReduced() {
+        return reduced;
+    }
+
+    public void setReduced(boolean reduced) {
+        this.reduced = reduced;
     }
 }
