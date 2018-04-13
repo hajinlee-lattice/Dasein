@@ -1,9 +1,11 @@
 angular.module('le.widgets.barchart', []).component('leBarChart', {
   bindings: {
+    vm: '=?',
     bktlist: '=',
-    callback: '&',
+    callback: '&?',
     config: '=',
-    statcount: '='
+    statcount: '=?',
+    enrichment: '=?'
   },
   templateUrl: './components/bar-chart/bar-chart.component.html',
 
@@ -200,7 +202,7 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
           return stat[column.field];
       }
     }
-    
+
     /**
      * Return the value showVLines fron the config object. 
      * If not set return false
