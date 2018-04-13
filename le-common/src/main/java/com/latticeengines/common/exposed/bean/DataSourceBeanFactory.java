@@ -3,6 +3,8 @@ package com.latticeengines.common.exposed.bean;
 import static com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment.WebApp;
 
 import java.beans.PropertyVetoException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -29,6 +31,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private Boolean enableDebugSlowSql;
     private int minPoolSize = -1;
     private int maxPoolSize = -1;
+    private int maxPoolSizeForWebApp = -1;
+    private int maxPoolSizeForAppMaster = -1;
     private int acquireIncrement = -1;
     private int maxIdleTime = -1;
 
@@ -72,7 +76,30 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setPassword(password);
 
         int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : 1;
-        int maxPoolSize = this.maxPoolSize > minPoolSize ? this.maxPoolSize : Math.max(minPoolSize, 8);
+        int maxPoolSize = -1;
+        BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
+        switch (currentEnv) {
+            case WebApp:
+                maxPoolSize = this.maxPoolSizeForWebApp;
+                break;
+            case AppMaster:
+                maxPoolSize = this.maxPoolSizeForAppMaster;
+                break;
+            case TestClient:
+            default:
+                maxPoolSize = this.maxPoolSize;
+        }
+        //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
+        maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
+        maxPoolSize = maxPoolSize > minPoolSize ? maxPoolSize : Math.max(minPoolSize, 8);
+        
+        if (log.isInfoEnabled()) {
+            log.info("Setting Max Connections to: {},  for Envrionment: {}", maxPoolSize, currentEnv);
+            log.info("Stack Trace: {} ",
+                    Arrays.asList(Thread.currentThread().getStackTrace()).parallelStream()
+                            .filter(st -> st != null && st.toString().startsWith("com.latticeengines"))
+                            .collect(Collectors.toList()));
+        }
         int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : 1;
         cpds.setMinPoolSize(minPoolSize);
         cpds.setInitialPoolSize(minPoolSize);
@@ -159,6 +186,22 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setMaxPoolSize(int maxPoolSize) {
         this.maxPoolSize = maxPoolSize;
+    }
+
+    public int getMaxPoolSizeForWebApp() {
+        return maxPoolSizeForWebApp;
+    }
+
+    public void setMaxPoolSizeForWebApp(int maxPoolSizeForWebApp) {
+        this.maxPoolSizeForWebApp = maxPoolSizeForWebApp;
+    }
+
+    public int getMaxPoolSizeForAppMaster() {
+        return maxPoolSizeForAppMaster;
+    }
+
+    public void setMaxPoolSizeForAppMaster(int maxPoolSizeForAppMaster) {
+        this.maxPoolSizeForAppMaster = maxPoolSizeForAppMaster;
     }
 
     public int getAcquireIncrement() {

@@ -17,7 +17,9 @@
         <property name="jdbcUrl" value="${auth.globalauth.datasource.url}" />
         <property name="user" value="${auth.globalauth.datasource.user}" />
         <property name="password" value="${auth.globalauth.datasource.password.encrypted}" />
-        <property name="maxPoolSize" value="4"/>
+        <property name="maxPoolSize" value="${auth.globalauth.datasource.poolsize.max}"/>
+        <property name="maxPoolSizeForWebApp" value="${auth.globalauth.datasource.poolsize.max.webapp}"/>
+        <property name="maxPoolSizeForAppMaster" value="${auth.globalauth.datasource.poolsize.max.appmaster}"/>
     </bean>
 
     <!-- Hibernate session factory 

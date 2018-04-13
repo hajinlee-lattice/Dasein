@@ -14,7 +14,9 @@
         <property name="user" value="${quartzclient.datasource.user}" />
         <property name="password" value="${quartzclient.datasource.password.encrypted}" />
         <property name="minPoolSize" value="0"/>
-        <property name="maxPoolSize" value="4"/>
+        <property name="maxPoolSize" value="${quartzclient.datasource.poolsize.max}"/>
+        <property name="maxPoolSizeForWebApp" value="${quartzclient.datasource.poolsize.max.webapp}"/>
+        <property name="maxPoolSizeForAppMaster" value="${quartzclient.datasource.poolsize.max.appmaster}"/>
         <property name="acquireIncrement" value="1"/>
     </bean>
 

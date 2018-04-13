@@ -9,7 +9,9 @@
         <property name="jdbcUrl" value="${db.datasource.reader.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
-        <property name="maxPoolSize" value="32"/>
+        <property name="maxPoolSize" value="${db.datasource.reader.poolsize.max}"/>
+        <property name="maxPoolSizeForWebApp" value="${db.datasource.reader.poolsize.max.webapp}"/>
+        <property name="maxPoolSizeForAppMaster" value="${db.datasource.reader.poolsize.max.appmaster}"/>        
     </bean>
 
     <!-- Entity manager factory -->

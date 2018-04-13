@@ -13,7 +13,9 @@
         <property name="jdbcUrl" value="${db.datasource.url}"/>
         <property name="user" value="${db.datasource.user}" />
         <property name="password" value="${db.datasource.password.encrypted}" />
-        <property name="maxPoolSize" value="32"/>
+        <property name="maxPoolSize" value="${db.datasource.poolsize.max}"/>
+        <property name="maxPoolSizeForWebApp" value="${db.datasource.poolsize.max.webapp}"/>
+        <property name="maxPoolSizeForAppMaster" value="${db.datasource.poolsize.max.appmaster}"/>                
         <property name="enableDebugSlowSql" value="false" />
     </bean>
 	
