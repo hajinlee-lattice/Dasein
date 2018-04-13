@@ -17,11 +17,13 @@ angular
 
                 function getHighestStat(stats, fieldName) {
                     var highest = 0;
-                    stats.forEach(function (stat) {
-                        if (stat[fieldName] > highest) {
-                            highest = stat[fieldName];
-                        }
-                    })
+                        if(stats){
+                            stats.forEach(function (stat) {
+                                if (stat[fieldName] > highest) {
+                                    highest = Number(stat[fieldName]);
+                                }
+                            });
+                    }
                     return highest;
                 }
 
@@ -34,7 +36,7 @@ angular
                         if (typeof limit != 'undefined') {
                             percentage = percentage.toFixed(limit);
                         }
-                        return percentage + '%';
+                        return Number(percentage) + '%';
                     }
                     return 0;
                 }
@@ -45,7 +47,7 @@ angular
                     var val = stat[field];
                     if (max && val) {
                         var percentage = (val * 100) / max;
-                        return percentage + '%';
+                        return Number(percentage) + '%';
                     }
                     return 0;
                 }

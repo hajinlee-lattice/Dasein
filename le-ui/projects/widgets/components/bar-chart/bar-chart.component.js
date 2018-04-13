@@ -14,7 +14,7 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
       var highest = 0;
       stats.forEach(function (stat) {
         if (stat[fieldName] > highest) {
-          highest = stat[fieldName];
+          highest = Number(stat[fieldName]);
         }
       })
       return highest;
@@ -29,7 +29,7 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
         if (typeof limit != 'undefined') {
           percentage = percentage.toFixed(limit);
         }
-        return percentage + '%';
+        return Number(percentage) + '%';
       }
       return 0;
     }
@@ -39,8 +39,9 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
       var max = Math.round(highest * 2) / 2;
       var val = stat[field];
       if (max && val) {
+        val = Number(val);
         var percentage = (val * 100) / max;
-        return percentage + '%';
+        return Number(percentage) + '%';
       }
       return 0;
     }
