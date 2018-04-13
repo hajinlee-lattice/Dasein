@@ -49,7 +49,6 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
     @Override
     public OAuth2Authentication deserialize(JsonParser jp, DeserializationContext ctxt)
             throws IOException, JsonProcessingException {
-        System.out.println("Init Custom deserialization");
         ObjectCodec oc = jp.getCodec();
         JsonNode node = oc.readTree(jp);
         // log.info("JSON Object: " + node);
