@@ -47,7 +47,7 @@ angular
                         ModelConfig: function($q, $rootScope, Model, JobsStore, IsPmml){
                             $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
                             var config = {};
-                            ModelId = Model.ModelId;
+                            ModelId = (Model.ModelId ? Model.ModelId : ((Model.ModelDetails ? Model.ModelDetails.ModelID : undefined)));
                             IsPmml = IsPmml || false; 
                             config.ModelId = ModelId;
                             config.IsPmml = IsPmml;

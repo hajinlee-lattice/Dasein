@@ -30,7 +30,7 @@
     .navigation-element {
         margin: 1px;
         padding: 1px;
-        width: 100%;
+        width: 90%;
         height: 50px;
         border: 1px solid white;
         display: flex;
@@ -46,6 +46,11 @@
     .navigation-element:hover {
         background-color: rgb(62, 106, 150);
     }
+    .active { 
+        background-color: rgb(24, 90, 155);
+        border: 1px solid rgb(186, 184, 184);
+    }
+
 </style>
 
 
@@ -55,16 +60,16 @@
     </header>
     <section class="main hbox space-between">
         <nav>
-            <a ui-sref="dropdown" class="navigation-element">
+            <a ui-sref="dropdown" class="navigation-element" ui-sref-active="active">
                 <img src="./assets/images/dropdown-field.png" class="navigation-icon" alt="" title="Dropdown">
             </a>
-            <a ui-sref="date" class="navigation-element">
+            <a ui-sref="date" class="navigation-element" ui-sref-active="active">
                 <img src="./assets/images/date-icon.png" class="navigation-icon" alt="Date Picker" title="Date Picker">
             </a>
-            <a ui-sref="barchart" class="navigation-element">
+            <a ui-sref="barchart" class="navigation-element" ui-sref-active="active">
                 <img src="./assets/images/barchart.png" class="navigation-icon" alt="Barchart" title="Bar Chart">
             </a>
-            <a ui-sref="modal" class="navigation-element">
+            <a ui-sref="modal" class="navigation-element" ui-sref-active="active">
                 <img src="./assets/images/modal.png" class="navigation-icon" alt="" title="Modal">
             </a>
         </nav>
