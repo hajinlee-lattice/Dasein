@@ -43,6 +43,9 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "LETest1523626065618";
+
     @Inject
     private RatingEngineProxy ratingEngineProxy;
 
@@ -65,52 +68,59 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private RatingEngine rule2;
     private RatingEngine ai1;
     private RatingEngine ai2;
+    private RatingEngine ai3;
 
     private String uuid1;
     private String uuid2;
+    private String uuid3;
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
-        setupEnd2EndTestEnvironment();
-        setupBusinessCalendar();
+        if (USE_EXISTING_TENANT) {
+            testBed.useExistingTenantAsMain(EXISTING_TENANT);
+            testBed.switchToSuperAdmin();
+            mainTestTenant = testBed.getMainTestTenant();
+        } else {
+            setupEnd2EndTestEnvironment();
+            setupBusinessCalendar();
+            if (ENABLE_AI_RATINGS) {
+                new Thread(this::setupAIModels).start();
+            }
+            resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
+            new Thread(() -> {
+                createTestSegment2();
+                rule1 = createRuleBasedRatingEngine();
+                rule2 = createRuleBasedRatingEngine();
+                createAndDeleteRatingEngine();
+            }).start();
+            if (ENABLE_AI_RATINGS) {
+                createModelingSegment();
+                MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
+                        SEGMENT_NAME_MODELING);
+                Assert.assertNotNull(segment);
+
+                ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
+                ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
+                long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
+                        ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
+                Assert.assertEquals(targetCount, 87);
+
+                modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
+                ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
+                targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
+                        ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
+                Assert.assertEquals(targetCount, 87);
+
+                modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid3);
+                ai3 = createCustomEventEngine(segment, modelSummary);
+            }
+        }
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
     }
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        if (ENABLE_AI_RATINGS) {
-            new Thread(this::setupAIModels).start();
-        }
-
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
-        verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
-
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-
-        new Thread(() -> {
-            createTestSegment2();
-            rule1 = createRuleBasedRatingEngine();
-            rule2 = createRuleBasedRatingEngine();
-            createAndDeleteRatingEngine();
-        }).start();
-
-        if (ENABLE_AI_RATINGS) {
-            createModelingSegment();
-            MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(), SEGMENT_NAME_MODELING);
-            Assert.assertNotNull(segment);
-
-            ModelSummary modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid1);
-            ai1 = createAIEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
-            long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                    ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
-            Assert.assertEquals(targetCount, 87);
-
-            modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
-            ai2 = createAIEngine(segment, modelSummary, PredictionType.PROPENSITY);
-            targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
-                    ai2.getId(), ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
-            Assert.assertEquals(targetCount, 87);
-        }
-
         processAnalyze(constructRequest());
         verifyProcess();
     }
@@ -120,10 +130,11 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         testBed.switchToSuperAdmin();
         uuid1 = uploadModel(MODELS_RESOURCE_ROOT + "/ev_model.tar.gz");
         uuid2 = uploadModel(MODELS_RESOURCE_ROOT + "/propensity_model.tar.gz");
+        uuid3 = uploadModel(MODELS_RESOURCE_ROOT + "/customevent_model.tar.gz");
     }
 
-    private RatingEngine createAIEngine(MetadataSegment segment, ModelSummary modelSummary,
-                                        PredictionType predictionType) throws InterruptedException {
+    private RatingEngine createCrossSellEngine(MetadataSegment segment, ModelSummary modelSummary,
+            PredictionType predictionType) throws InterruptedException {
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, segment);
 
         RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
@@ -134,6 +145,30 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
         AIModel model = (AIModel) newEngine.getActiveModel();
         configureCrossSellModel(model, predictionType, TARGET_PRODUCT, TRAINING_PRODUCT);
+        model.setModelSummaryId(modelSummary.getId());
+
+        ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
+        log.info("Updated rating model " + model.getId());
+
+        final String modelGuid = modelSummary.getId();
+        final String engineId = newEngine.getId();
+        new Thread(() -> insertBucketMetadata(modelGuid, engineId)).start();
+        Thread.sleep(300);
+        return ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+    }
+
+    private RatingEngine createCustomEventEngine(MetadataSegment segment, ModelSummary modelSummary)
+            throws InterruptedException {
+        RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CUSTOM_EVENT, segment);
+
+        RatingEngine newEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
+        newEngine = ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), newEngine.getId());
+        assertNotNull(newEngine);
+        Assert.assertNotNull(newEngine.getActiveModel(), JsonUtils.pprint(newEngine));
+        log.info("Created rating engine " + newEngine.getId());
+
+        AIModel model = (AIModel) newEngine.getActiveModel();
+        configureCustomEventModel(model);
         model.setModelSummaryId(modelSummary.getId());
 
         ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), newEngine.getId(), model.getId(), model);
@@ -190,7 +225,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private void verifyDecoratedMetadata() {
         List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
-        Assert.assertEquals(ratingMetadata.size(), 10);
+        Assert.assertEquals(ratingMetadata.size(), 10, JsonUtils.serialize(ratingMetadata));
     }
 
     private ProcessAnalyzeRequest constructRequest() {

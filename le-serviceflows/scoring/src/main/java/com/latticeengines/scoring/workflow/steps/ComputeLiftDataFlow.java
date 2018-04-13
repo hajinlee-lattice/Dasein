@@ -108,8 +108,8 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
                 bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
             }
         });
-
-        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
+        // metadataProxy.deleteTable(configuration.getCustomerSpace().toString(),
+        // configuration.getTargetTableName());
     }
 
     private void preDataFlow() {
@@ -147,9 +147,14 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, String> getModelGuidToEngineIdMap() {
         Map<String, String> modelGuidToEngineIdMap = new HashMap<>();
         if (multiModel) {
-            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS,
+                    RatingModelContainer.class);
             List<RatingModelContainer> containers = allContainers.stream() //
-                    .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
+                    .filter(container -> {
+                        RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                        return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                                || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                    }) //
                     .collect(Collectors.toList());
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
@@ -167,10 +172,14 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, List<BucketMetadata>> getModelGuidToBucketMetadataMap() {
         Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap = new HashMap<>();
         if (multiModel) {
-            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS,
+                    RatingModelContainer.class);
             List<RatingModelContainer> containers = allContainers.stream() //
-                    .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
-                    .collect(Collectors.toList());
+                    .filter(container -> {
+                        RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                        return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                                || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                    }).collect(Collectors.toList());
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
                 String modelGuid = aiModel.getModelSummaryId();
@@ -182,7 +191,8 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             });
         } else {
             String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
-            List<BucketMetadata> bucketMetadata = getListObjectFromContext(SCORING_BUCKET_METADATA, BucketMetadata.class);
+            List<BucketMetadata> bucketMetadata = getListObjectFromContext(SCORING_BUCKET_METADATA,
+                    BucketMetadata.class);
             if (CollectionUtils.isEmpty(bucketMetadata)) {
                 throw new IllegalArgumentException("Must provide bucket metadata for model " + modelGuid);
             }

@@ -23,8 +23,15 @@ import org.springframework.stereotype.Component;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.core.service.ActionService;
+import com.latticeengines.apps.core.util.FeatureFlagUtils;
+import com.latticeengines.apps.core.util.UpdateTransformDefinitionsUtils;
 import com.latticeengines.apps.core.workflow.WorkflowSubmitter;
+import com.latticeengines.baton.exposed.service.BatonService;
+import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
+import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
@@ -37,10 +44,11 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
-import com.latticeengines.common.exposed.workflow.annotation.WithWorkflowJobPid;
-import com.latticeengines.common.exposed.workflow.annotation.WorkflowPidWrapper;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
@@ -75,14 +83,17 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final ActionService actionService;
 
+    private final BatonService batonService;
+
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService) {
+            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
+        this.batonService = batonService;
     }
 
     @Value("${common.pls.url}")
@@ -195,6 +206,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             String currentDataCloudBuildNumber) {
         DataCloudVersion dataCloudVersion = columnMetadataProxy.latestVersion(null);
         String scoringQueue = LedpQueueAssigner.getScoringQueueNameForSubmission();
+
+        FeatureFlagValueMap flags = batonService.getFeatureFlags(MultiTenantContext.getCustomerSpace());
+        TransformationGroup transformationGroup = FeatureFlagUtils.getTransformationGroupFromZK(flags);
+        List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
+                .getTransformDefinitions(SchemaInterpretation.SalesforceAccount.toString(), transformationGroup);
+
         return new ProcessAnalyzeWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
@@ -216,6 +233,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                         .build()) //
                 .workflowContainerMem(workflowMemMb) //
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
+                .transformationGroup(transformationGroup, stdTransformDefns) //
                 .build();
     }
 

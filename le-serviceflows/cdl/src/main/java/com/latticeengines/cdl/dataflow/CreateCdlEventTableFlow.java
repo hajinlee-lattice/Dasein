@@ -25,17 +25,35 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
 
     @Override
     public Node construct(CreateCdlEventTableParameters parameters) {
-        Node inputTable = addSource(parameters.inputTable);
-        Node apsTable = addSource(parameters.apsTable);
         Node accountTable = addSource(parameters.accountTable);
+        // this is a hack solution to solve the CompanyName column issue
+        if (!accountTable.getFieldNames().contains(InterfaceName.CompanyName.name())) {
+            for (String field : accountTable.getFieldNames()) {
+                if (field.equalsIgnoreCase("name")) {
+                    accountTable = accountTable.rename(new FieldList(field),
+                            new FieldList(InterfaceName.CompanyName.name()));
+                    break;
+                }
+            }
+        }
+
+        Node inputTable = addSource(parameters.inputTable);
+
+        Node apsTable = null;
+        if (inputTable.getFieldNames().contains(InterfaceName.PeriodId.name())) {
+            apsTable = addSource(parameters.apsTable);
+        }
 
         List<String> retainFields = buildRetainFields(parameters, inputTable, apsTable, accountTable);
 
-        FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
-        Node result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), inputTable, inputGroupFields,
-                JoinType.RIGHT);
         FieldList accountGroupFields = new FieldList(InterfaceName.AccountId.name());
-        result = result.leftJoin(accountGroupFields, accountTable, accountGroupFields);
+        Node result = inputTable.leftJoin(accountGroupFields, accountTable, accountGroupFields);
+
+        if (apsTable != null) {
+            FieldList inputGroupFields = new FieldList(InterfaceName.AccountId.name(), InterfaceName.PeriodId.name());
+            result = apsTable.join(new FieldList("LEAccount_ID", "Period_ID"), result, inputGroupFields,
+                    JoinType.RIGHT);
+        }
 
         result = result.retain(new FieldList(retainFields));
         log.info("Cdl event table's columns=" + StringUtils.join(retainFields, ","));
@@ -45,7 +63,9 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
     private List<String> buildRetainFields(CreateCdlEventTableParameters parameters, Node inputTable, Node apsTable,
             Node accountTable) {
         List<String> retainFields = new ArrayList<>();
-        retainFields.addAll(apsTable.getFieldNames());
+        if (apsTable != null) {
+            retainFields.addAll(apsTable.getFieldNames());
+        }
         retainFields.addAll(accountTable.getFieldNames());
         if (inputTable.getFieldNames().contains(parameters.eventColumn))
             retainFields.add(parameters.eventColumn);

@@ -11,12 +11,14 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RedshiftPublishWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -141,6 +143,12 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         public Builder userId(String userId) {
             configuration.setUserId(userId);
+            return this;
+        }
+
+        public Builder transformationGroup(TransformationGroup transformationGroup,
+                                           List<TransformDefinition> stdTransformDefns) {
+            processRatingWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }
 

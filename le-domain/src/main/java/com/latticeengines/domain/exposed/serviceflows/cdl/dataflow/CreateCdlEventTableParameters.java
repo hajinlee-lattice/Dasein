@@ -30,7 +30,7 @@ public class CreateCdlEventTableParameters extends DataFlowParameters {
     public CreateCdlEventTableParameters() {
     }
 
-    public void setEventTable(String eventColumn) {
+    public void setEventColumn(String eventColumn) {
         this.eventColumn = eventColumn;
     }
 }

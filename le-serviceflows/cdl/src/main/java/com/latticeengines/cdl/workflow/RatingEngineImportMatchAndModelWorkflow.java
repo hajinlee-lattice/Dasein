@@ -13,7 +13,6 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
@@ -50,13 +49,7 @@ public class RatingEngineImportMatchAndModelWorkflow
     private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
-    private RatingEngineScoreWorkflow scoreWorkflow;
-
-    @Inject
     private GenerateAIRatingWorkflow generateRating;
-
-    @Inject
-    private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
 
     @Inject
     private ExportData exportData;
@@ -77,9 +70,7 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(addStandardAttributesDataFlow) //
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
-//                .next(scoreWorkflow) //
                 .next(generateRating) //
-                .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //

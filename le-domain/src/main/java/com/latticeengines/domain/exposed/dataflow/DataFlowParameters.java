@@ -31,6 +31,7 @@ import com.latticeengines.domain.exposed.serviceflows.modeling.dataflow.DedupEve
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateAttributeLevelSummaryParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.CreateScoreTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.prospectdiscovery.dataflow.QuotaFlowParameters;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineFilterTableParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineMatchDebugWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.ComputeLiftParameters;
@@ -40,6 +41,7 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.PivotScor
 @JsonSubTypes({ //
         @JsonSubTypes.Type(value = QuotaFlowParameters.class, name = "quotaFlowParameters"), //
         @JsonSubTypes.Type(value = CreateScoreTableParameters.class, name = "createScoreTableParameters"), //
+        @JsonSubTypes.Type(value = CombineFilterTableParameters.class, name = "combineFilterTableParameters"), //
         @JsonSubTypes.Type(value = CombineInputTableWithScoreParameters.class, name = "combineInputTableWithScoreParameters"), //
         @JsonSubTypes.Type(value = CombineMatchDebugWithScoreParameters.class, name = "combineMatchDebugWithScoreParameters"), //
         @JsonSubTypes.Type(value = ScoreAggregateParameters.class, name = "scoreAggregateParameters"), //

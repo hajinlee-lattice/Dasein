@@ -54,8 +54,8 @@ import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
-import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
+import com.latticeengines.domain.exposed.eai.CSVToHdfsConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -110,7 +110,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.ServingStoreProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.ModelingFileUploadProxy;
-import com.latticeengines.testframework.exposed.proxy.pls.PlsCDLImportProxy;
 import com.latticeengines.testframework.exposed.proxy.pls.TestMetadataSegmentProxy;
 import com.latticeengines.testframework.exposed.service.TestArtifactService;
 import com.latticeengines.testframework.exposed.utils.TestFrameworkUtils;
@@ -370,7 +369,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     private ApplicationId submitImport(String customerSpace, String source, String entity, String feedType,
-                                       SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
+            SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
         String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, metaData);
         if (StringUtils.isEmpty(taskId)) {
@@ -380,7 +379,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     private CSVImportConfig generateImportConfig(String customerSpace, SourceFile templateSourceFile,
-                                                 SourceFile dataSourceFile, String email) {
+            SourceFile dataSourceFile, String email) {
         CSVToHdfsConfiguration importConfig = new CSVToHdfsConfiguration();
         templateSourceFile.setTableName("SourceFile_" + templateSourceFile.getName().replace(".", "_"));
         importConfig.setCustomerSpace(CustomerSpace.parse(customerSpace));
@@ -475,8 +474,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
         long startTime = System.currentTimeMillis();
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(), "e2etest",
-                template, data, INITIATOR);
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(), "e2etest", template,
+                data, INITIATOR);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
                 applicationId.toString(), false);
         long endTime = System.currentTimeMillis();
@@ -862,7 +861,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     RatingEngine constructRatingEngine(RatingEngineType engineType, MetadataSegment targetSegment) {
         RatingEngine ratingEngine = new RatingEngine();
-        ratingEngine.setDisplayName("CDL End2End " + engineType +" Engine");
+        ratingEngine.setDisplayName("CDL End2End " + engineType + " Engine");
         ratingEngine.setTenant(mainTestTenant);
         ratingEngine.setType(engineType);
         ratingEngine.setSegment(targetSegment);
@@ -871,7 +870,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return ratingEngine;
     }
 
-    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, String targetProductId, String trainingProductId) {
+    void configureCrossSellModel(AIModel testAIModel, PredictionType predictionType, String targetProductId,
+            String trainingProductId) {
         testAIModel.setPredictionType(predictionType);
 
         CrossSellModelingConfig config = CrossSellModelingConfig.getAdvancedModelingConfig(testAIModel);
@@ -932,7 +932,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         Assert.assertTrue(actions.stream().allMatch(action -> action.getOwnerId() != null));
     }
 
-    protected void runCommonPAVerifications() {
+    void runCommonPAVerifications() {
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(initialVersion.complement());
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());

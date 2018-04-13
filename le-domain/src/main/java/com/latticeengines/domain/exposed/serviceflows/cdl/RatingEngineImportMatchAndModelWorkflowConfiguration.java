@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttr
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -54,7 +53,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
-        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         private DedupEventTableConfiguration dedupEventTable = new DedupEventTableConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
@@ -69,7 +67,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             ratingEngineScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
-            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -86,7 +83,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             ratingEngineScoreWorkflowBuilder.customer(customerSpace);
             generateAIRating.customer(customerSpace);
-            pivotScoreAndEvent.setCustomerSpace(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
             return this;
@@ -101,7 +97,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
             ratingEngineScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
-            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -137,7 +132,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder userId(String userId) {
             cdlModelWorkflowBuilder.userId(userId);
-            pivotScoreAndEvent.setUserId(userId);
             configuration.setUserId(userId);
             generateAIRating.userId(userId);
             return this;
@@ -384,7 +378,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
             generateAIRating.setExpectedValue(expectedValue);
             ratingEngineScoreWorkflowBuilder.setExpectedValue(expectedValue);
-            pivotScoreAndEvent.setExpectedValue(expectedValue);
             return this;
         }
 
@@ -406,7 +399,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(ratingEngineScoreWorkflowBuilder.build());
             configuration.add(generateAIRating.build());
-            configuration.add(pivotScoreAndEvent);
 
             return configuration;
         }

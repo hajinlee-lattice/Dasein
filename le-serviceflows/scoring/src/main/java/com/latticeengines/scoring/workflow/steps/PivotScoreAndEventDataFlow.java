@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
@@ -51,19 +50,16 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
         PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
         Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
-        if (avgScores != null) {
+        if (MapUtils.isNotEmpty(avgScores)) {
             dataFlowParams.setAvgScores(avgScores);
         } else {
             dataFlowParams.setAvgScores(ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID),
                     getDoubleValueFromContext(SCORING_AVG_SCORE))//
             );
         }
-        Map<String, PredictionType> predictionTypes = getMapObjectFromContext(PREDICTION_TYPES, String.class,
-                PredictionType.class);
-        if (predictionTypes != null) {
-            dataFlowParams.setScoreFieldMap(predictionTypes.entrySet().stream()
-                    .collect(Collectors.toMap(Map.Entry::getKey, e -> PredictionType.EXPECTED_VALUE == e.getValue()
-                            ? InterfaceName.ExpectedRevenue.name() : InterfaceName.RawScore.name())));
+        Map<String, String> scoreFieldMap = getMapObjectFromContext(SCORING_SCORE_FIELDS, String.class, String.class);
+        if (MapUtils.isNotEmpty(scoreFieldMap)) {
+            dataFlowParams.setScoreFieldMap(scoreFieldMap);
         } else {
             dataFlowParams.setScoreFieldMap(
                     ImmutableMap.of(getStringValueFromContext(SCORING_MODEL_ID), configuration.isExpectedValue()
@@ -105,13 +101,21 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
             pivotedRecordsMap.get(modelGuid).add(record);
         }
         String customerSpace = configuration.getCustomerSpace().toString();
+        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = new HashMap<>();
         pivotedRecordsMap.forEach((modelGuid, pivotedRecords) -> {
             BucketedScoreSummary bucketedScoreSummary = BucketedScoreSummaryUtils
                     .generateBucketedScoreSummary(pivotedRecords);
-            log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
-                    + JsonUtils.serialize(bucketedScoreSummary));
-            bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace, modelGuid, bucketedScoreSummary);
+            if (configuration.isDeferSavingBucketedScoreSummaries()) {
+                bucketedScoreSummaryMap.put(modelGuid, bucketedScoreSummary);
+            } else {
+                log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
+                        + JsonUtils.serialize(bucketedScoreSummary));
+                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace, modelGuid, bucketedScoreSummary);
+            }
         });
+        if (configuration.isDeferSavingBucketedScoreSummaries()) {
+            putObjectInContext(BUCKETED_SCORE_SUMMARIES, bucketedScoreSummaryMap);
+        }
     }
 
 }

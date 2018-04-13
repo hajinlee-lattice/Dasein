@@ -89,6 +89,8 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
 
                 RatingModelContainer container = new RatingModelContainer(ratingModel, ratingEngineSummary);
                 putObjectInContext(RATING_MODELS, Collections.singletonList(container));
+
+                putStringValueInContext(SCORING_MODEL_ID, modelGuid);
             }
         }
     }

@@ -4,6 +4,7 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
 
     private String eventColumn;
     private boolean expectedValue;
+    private boolean deferSavingBucketedScoreSummaries;
 
     public PivotScoreAndEventConfiguration() {
         setBeanName("pivotScoreAndEvent");
@@ -25,4 +26,11 @@ public class PivotScoreAndEventConfiguration extends BaseScoringDataFlowStepConf
         this.expectedValue = expectedValue;
     }
 
+    public boolean isDeferSavingBucketedScoreSummaries() {
+        return deferSavingBucketedScoreSummaries;
+    }
+
+    public void setDeferSavingBucketedScoreSummaries(boolean deferSavingBucketedScoreSummaries) {
+        this.deferSavingBucketedScoreSummaries = deferSavingBucketedScoreSummaries;
+    }
 }

@@ -10,6 +10,7 @@ import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 @JsonSubTypes({
         @Type(value = CombineInputTableWithScoreDataFlowConfiguration.class, name = "CombineInputTableWithScoreDataFlowConfiguration"),
         @Type(value = CombineMatchDebugWithScoreDataFlowConfiguration.class, name = "CombineMatchDebugWithScoreDataFlowConfiguration"),
+        @Type(value = CombineFilterTableConfiguration.class, name = "CombineFilterTableConfiguration"),
         @Type(value = ComputeLiftDataFlowConfiguration.class, name = "ComputeLiftDataFlowConfiguration"),
         @Type(value = PivotScoreAndEventConfiguration.class, name = "PivotScoreAndEventConfiguration"), })
 public class BaseScoringDataFlowStepConfiguration extends DataFlowStepConfiguration {

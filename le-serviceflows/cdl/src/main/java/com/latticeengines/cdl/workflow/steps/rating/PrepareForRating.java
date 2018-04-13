@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.NamingUtils;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
@@ -23,6 +25,7 @@ import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.util.BucketMetadataUtils;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -65,6 +68,16 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 log.info("Found " + activeModels.size() + " active rating models.");
                 putObjectInContext(RATING_MODELS, activeModels);
             }
+            if (CollectionUtils.isNotEmpty(activeModels)) {
+                List<String> modelGuids = activeModels.stream().filter(container -> {
+                    RatingEngineType engineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CUSTOM_EVENT.equals(engineType) || RatingEngineType.CROSS_SELL.equals(engineType);
+                }).map(container -> {
+                    AIModel aiModel = (AIModel) container.getModel();
+                    return aiModel.getModelSummaryId();
+                }).collect(Collectors.toList());
+                putStringValueInContext(SCORING_MODEL_ID, StringUtils.join(modelGuids, "|"));
+            }
         } else {
             log.info("There is no rating engine summaries");
         }
@@ -75,13 +88,19 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         String engineId = summary.getId();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
         RatingModel ratingModel = engine.getActiveModel();
-        if (ratingModel != null && !Boolean.TRUE.equals(engine.getDeleted())) {
+        if (ratingModel != null && !Boolean.TRUE.equals(engine.getDeleted()) && StringUtils.isNotBlank(summary.getSegmentName())) {
             boolean isValid = false;
             if (RatingEngineType.CROSS_SELL.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
-                isValid = isValidAIModel(aiModel);
+                isValid = isValidCrossSellModel(aiModel);
                 if (!isValid) {
-                    log.warn("AI rating model " + aiModel.getId() + " is not ready for scoring.");
+                    log.warn("Cross sell rating model " + aiModel.getId() + " is not ready for scoring.");
+                }
+            } else if (RatingEngineType.CUSTOM_EVENT.equals(summary.getType())) {
+                AIModel aiModel = (AIModel) ratingModel;
+                isValid = isValidCustomEventModel(aiModel);
+                if (!isValid) {
+                    log.warn("Custom event rating model " + aiModel.getId() + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
@@ -100,11 +119,23 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         return container;
     }
 
-    private boolean isValidAIModel(AIModel model) {
+    private boolean isValidCrossSellModel(AIModel model) {
         boolean valid = true;
-        if (StringUtils.isNotBlank(model.getModelSummaryId())) {
+        if (StringUtils.isBlank(model.getModelSummaryId())) {
             log.warn("AI model " + model.getId() + " does not have an associated model summary.");
             valid = false;
+        }
+        return valid;
+    }
+
+    private boolean isValidCustomEventModel(AIModel model) {
+        boolean valid;
+        if (StringUtils.isBlank(model.getModelSummaryId())) {
+            log.warn("AI model " + model.getId() + " does not have an associated model summary.");
+            valid = false;
+        } else {
+            CustomEventModelingConfig advancedConf = CustomEventModelingConfig.getAdvancedModelingConfig(model);
+            valid = CustomEventModelingType.CDL.equals(advancedConf.getCustomEventModelingType());
         }
         return valid;
     }

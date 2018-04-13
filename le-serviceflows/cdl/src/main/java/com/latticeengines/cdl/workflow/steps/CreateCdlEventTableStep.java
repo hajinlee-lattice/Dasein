@@ -68,11 +68,15 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private DataFlowParameters createDataFlowParameters() {
         Table inputTable = getAndSetInputTable();
+        if (inputTable == null) {
+            throw new IllegalArgumentException("No input table.");
+        }
         Table apsTable = getAndSetApsTable();
         Table accountTable = getAndSetAccountTable();
+
         CreateCdlEventTableParameters parameters = new CreateCdlEventTableParameters(inputTable.getName(),
                 apsTable.getName(), accountTable.getName());
-        parameters.setEventTable(configuration.getEventColumn());
+        parameters.setEventColumn(configuration.getEventColumn());
         return parameters;
     }
 
@@ -101,10 +105,33 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
             }
         }
         if (changedCount > 0) {
+            String customerSpace = configuration.getCustomerSpace().toString();
+            TableRoleInCollection roleInCollection = TableRoleInCollection.ConsolidatedAccount;
+
+            boolean updateVersion = false;
+            String tableName = dataCollectionProxy.getTableName(customerSpace, roleInCollection, version);
+            if (accountTable.getName().equals(tableName)) {
+                updateVersion = true;
+            }
+
+            boolean updateComplementVersion = false;
+            tableName = dataCollectionProxy.getTableName(customerSpace, roleInCollection, version.complement());
+            if (accountTable.getName().equals(tableName)) {
+                updateComplementVersion = true;
+            }
+
             metadataProxy.updateTable(configuration.getCustomerSpace().toString(), accountTable.getName(),
                     accountTable);
-            dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
-                    TableRoleInCollection.ConsolidatedAccount, version);
+
+            if (updateVersion) {
+                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
+                        TableRoleInCollection.ConsolidatedAccount, version);
+            }
+            if (updateComplementVersion) {
+                dataCollectionProxy.upsertTable(configuration.getCustomerSpace().toString(), accountTable.getName(), //
+                        TableRoleInCollection.ConsolidatedAccount, version.complement());
+            }
+
         }
         log.info("The number of attributes having no Tags is=" + changedCount);
         return accountTable;
@@ -112,7 +139,8 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
 
     private Table getAndSetApsTable() {
         String customerSpace = configuration.getCustomerSpace().toString();
-        Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState, version);
+        Table apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState,
+                version);
         if (apsTable == null) {
             apsTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.AnalyticPurchaseState,
                     version.complement());
@@ -131,36 +159,38 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     private Table getAndSetInputTable() {
         Table inputTable = getObjectFromContext(FILTER_EVENT_TABLE, Table.class);
         if (inputTable == null) {
-            String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+            String inputTableName = getStringValueFromContext(COMBINED_FILTER_TABLE_NAME);
             if (StringUtils.isNotBlank(inputTableName)) {
                 inputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
             }
         }
         if (inputTable == null) {
-            throw new RuntimeException("There's no input table found!");
-        }
-        String path = inputTable.getExtracts().get(0).getPath();
-        if (!path.endsWith(".avro")) {
-            path = path + "/" + "*.avro";
-        }
-        long count = AvroUtils.count(yarnConfiguration, path);
-        log.info(count + " records in input table " + inputTable.getName() + ":" + path);
-        List<Attribute> attributes = inputTable.getAttributes();
-        for (Attribute attribute : attributes) {
-            attribute.setApprovedUsage(ApprovedUsage.NONE);
-            attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
-            String name = attribute.getName();
-            if (getConfiguration().getEventColumn().equalsIgnoreCase(name)) {
-                attribute.setLogicalDataType(LogicalDataType.Event);
+            log.warn("There's no cross sell input table found!");
+        } else {
+            String path = inputTable.getExtracts().get(0).getPath();
+            if (!path.endsWith(".avro")) {
+                path = path + "/" + "*.avro";
             }
+            long count = AvroUtils.count(yarnConfiguration, path);
+            log.info(count + " records in cross sell input table " + inputTable.getName() + ":" + path);
+            List<Attribute> attributes = inputTable.getAttributes();
+            for (Attribute attribute : attributes) {
+                attribute.setApprovedUsage(ApprovedUsage.NONE);
+                attribute.setTags(ModelingMetadata.EXTERNAL_TAG);
+                String name = attribute.getName();
+                if (getConfiguration().getEventColumn().equalsIgnoreCase(name)) {
+                    attribute.setLogicalDataType(LogicalDataType.Event);
+                }
+            }
+            metadataProxy.updateTable(configuration.getCustomerSpace().toString(), inputTable.getName(), inputTable);
         }
-        metadataProxy.updateTable(configuration.getCustomerSpace().toString(), inputTable.getName(), inputTable);
         return inputTable;
     }
 
     @Override
     public void onExecutionCompleted() {
-        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
+        Table eventTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
+                configuration.getTargetTableName());
         putObjectInContext(PREMATCH_UPSTREAM_EVENT_TABLE, eventTable);
     }
 

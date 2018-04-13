@@ -26,9 +26,12 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.MatchTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
@@ -156,6 +159,18 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         if (cols.contains(columnName)) {
             keyMap.put(key, Collections.singletonList(columnName));
         }
+    }
+
+    @Override
+    protected Table enrichTableSchema(Table table) {
+        List<Attribute> attrs = new ArrayList<>();
+        table.getAttributes().forEach(attr0 -> {
+            attr0.setTags(Tag.INTERNAL);
+            attrs.add(attr0);
+        });
+        table.setAttributes(attrs);
+        metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
+        return table;
     }
 
 

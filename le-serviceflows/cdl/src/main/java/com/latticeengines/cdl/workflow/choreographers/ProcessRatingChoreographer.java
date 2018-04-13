@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
+import com.latticeengines.cdl.workflow.steps.rating.CreateCrossSellScoringTargetTable;
+import com.latticeengines.cdl.workflow.steps.rating.CreateCustomEventScoringTargetTable;
 import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
@@ -40,6 +42,12 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private GenerateAIRatingWorkflow generateAIRatingWorkflow;
 
     @Inject
+    private CreateCustomEventScoringTargetTable createCustomEventScoringTargetTable;
+
+    @Inject
+    private CreateCrossSellScoringTargetTable createCrossSellScoringTargetTable;
+
+    @Inject
     private IngestRuleBasedRating ingestRuleBasedRating;
 
     @Inject
@@ -58,6 +66,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean enforceRebuild = false;
     private boolean hasDataChange = false;
     private boolean hasAIModels = false;
+    private boolean hasCrossSellModels = false;
+    private boolean hasCustomEventModels = false;
     private boolean hasRuleModels = false;
 
     private boolean shouldProcessAI = false;
@@ -77,7 +87,15 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         log.info("Step namespace = " + getStepNamespace(seq) + " generateAIRatingWorkflow.name()=" + generateAIRatingWorkflow.name());
 
         if (isAIWorkflow(seq)) {
-            return !shouldProcessAI;
+            boolean skipAIStep = !shouldProcessAI;
+            if (!skipAIStep) {
+                if (isCreateCrossSellFilterTable(step) && !hasCrossSellModels) {
+                    skipAIStep = true;
+                } else if (isCreateCustomEventFilterTable(step) && !hasCustomEventModels) {
+                    skipAIStep = true;
+                }
+            }
+            return skipAIStep;
         }
 
         if (isIngestRuleRatingStep(step)) {
@@ -92,13 +110,17 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             List<RatingModelContainer> containers = step.getListObjectFromContext(RATING_MODELS,
                     RatingModelContainer.class);
             hasDataChange = hasDataChange();
-            hasAIModels = hasAIModels(containers);
+            hasCrossSellModels = hasCrossSellModels(containers);
+            hasCustomEventModels = hasCustomEventModels(containers);
+            hasAIModels = hasCrossSellModels || hasCustomEventModels;
             hasRuleModels = hasRuleModels(containers);
             shouldProcessAI = shouldProcessAI();
             shouldProcessRuleBased = shouldProcessRuleBased();
             String[] msgs = new String[] { //
                     "enforced=" + enforceRebuild, //
                     "hasDataChange=" + hasDataChange, //
+                    "hasCrossSellModels=" + hasCrossSellModels, //
+                    "hasCustomEventModels=" + hasCustomEventModels, //
                     "hasAIModels=" + hasAIModels, //
                     "hasRuleModels=" + hasRuleModels, //
                     "shouldProcessAI=" + shouldProcessAI, //
@@ -124,6 +146,14 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean isAIWorkflow(int seq) {
         String namespace = getStepNamespace(seq);
         return namespace.contains(generateAIRatingWorkflow.name());
+    }
+
+    private boolean isCreateCrossSellFilterTable(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(createCrossSellScoringTargetTable.name());
+    }
+
+    private boolean isCreateCustomEventFilterTable(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(createCustomEventScoringTargetTable.name());
     }
 
     private boolean shouldProcessAI() {
@@ -156,9 +186,14 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
         enforceRebuild = Boolean.TRUE.equals(configuration.getRebuild());
     }
 
-    private boolean hasAIModels(Collection<RatingModelContainer> containers) {
+    private boolean hasCrossSellModels(Collection<RatingModelContainer> containers) {
         return CollectionUtils.isNotEmpty(containers) && containers.stream()
                 .anyMatch(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType()));
+    }
+
+    private boolean hasCustomEventModels(Collection<RatingModelContainer> containers) {
+        return CollectionUtils.isNotEmpty(containers) && containers.stream()
+                .anyMatch(container -> RatingEngineType.CUSTOM_EVENT.equals(container.getEngineSummary().getType()));
     }
 
     private boolean hasRuleModels(Collection<RatingModelContainer> containers) {

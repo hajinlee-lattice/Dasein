@@ -101,12 +101,14 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String REDSHIFT_EXPORT_REPORT = "REDSHIFT_EXPORT_REPORT";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
+    protected static final String COMBINED_FILTER_TABLE_NAME = "COMBINED_FILTER_TABLE_NAME";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
-    protected static final String PREDICTION_TYPES = "PREDICTION_TYPES";
+    protected static final String CUSTOM_EVENT_SCORE_FILTER_TABLENAME = "CUSTOM_EVENT_SCORE_FILTER_TABLENAME";
+    protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
     public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
     public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
     public static final String NEW_RECORDS = "NEW_RECORDS";

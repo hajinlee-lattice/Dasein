@@ -1,22 +1,29 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
+import java.util.List;
 
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineFilterTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ScoreStepConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
 public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfiguration {
 
@@ -33,34 +40,43 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         private GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
+        private CombineFilterTableConfiguration combineFilterTable = new CombineFilterTableConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
+        private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private MatchDataCloudWorkflowConfiguration.Builder match = new MatchDataCloudWorkflowConfiguration.Builder();
 
         private ScoreStepConfiguration score = new ScoreStepConfiguration();
         private ScoreAggregateFlowConfiguration scoreAgg = new ScoreAggregateFlowConfiguration();
         private CombineInputTableWithScoreDataFlowConfiguration combineInputWithScores = new CombineInputTableWithScoreDataFlowConfiguration();
         private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
+        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
+            addStandardAttributes.setCustomerSpace(customerSpace);
             match.customer(customerSpace);
             score.setCustomerSpace(customerSpace);
             scoreAgg.setCustomerSpace(customerSpace);
             combineInputWithScores.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
+            pivotScoreAndEvent.setCustomerSpace(customerSpace);
+            combineFilterTable.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
             generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
+            addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
             match.microServiceHostPort(microServiceHostPort);
             score.setMicroServiceHostPort(microServiceHostPort);
             scoreAgg.setMicroServiceHostPort(microServiceHostPort);
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
+            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
+            combineFilterTable.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -106,6 +122,19 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             } else {
                 computeLift.setScoreField(InterfaceName.RawScore.name());
             }
+            pivotScoreAndEvent.setExpectedValue(expectedValue);
+            return this;
+        }
+
+        public Builder deferSavingBucketedScoreSummaries() {
+            pivotScoreAndEvent.setDeferSavingBucketedScoreSummaries(false);
+            return this;
+        }
+
+        public Builder transformationGroup(TransformationGroup transformationGroup,
+                                           List<TransformDefinition> stdTransformDefns) {
+            addStandardAttributes.setTransformationGroup(transformationGroup);
+            addStandardAttributes.setTransforms(stdTransformDefns);
             return this;
         }
 
@@ -113,20 +142,28 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             setCdlEventTableConfig();
             setMatchConfig();
             setScoreConfig();
+            setAddStandardAttributesConfig();
             configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
+            configuration.add(combineFilterTable);
             configuration.add(cdlEventTable);
+            configuration.add(addStandardAttributes);
             configuration.add(match.build());
             configuration.add(score);
             configuration.add(scoreAgg);
             configuration.add(combineInputWithScores);
             configuration.add(computeLift);
+            configuration.add(pivotScoreAndEvent);
             return configuration;
         }
 
         private void setCdlEventTableConfig() {
             cdlEventTable.setEventColumn(InterfaceName.Target.name());
+        }
+
+        private void setAddStandardAttributesConfig() {
+            addStandardAttributes.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
         }
 
         private void setMatchConfig() {

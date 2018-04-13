@@ -95,7 +95,6 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             params.setScoreFieldMap(scoreFieldMap);
             params.setModelGuidField(MODEL_GUID_FIELD);
         }
-
         configuration.setDataFlowParams(params);
     }
 
@@ -117,7 +116,11 @@ public class ScoreAggregateFlow extends RunDataFlow<ScoreAggregateFlowConfigurat
             return Collections.emptyList();
         }
         return allContainers.stream() //
-                .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }) //
                 .collect(Collectors.toList());
     }
 

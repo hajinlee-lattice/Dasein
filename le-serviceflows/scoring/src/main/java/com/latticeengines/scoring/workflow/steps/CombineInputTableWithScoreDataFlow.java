@@ -85,11 +85,9 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         Map<String, String> scoreFieldMap = new HashMap<>();
         Map<String, Integer> scoreMultiplierMap = new HashMap<>();
 
-        Map<String, PredictionType> predictionTypeMap = new HashMap<>();
         containers.forEach(container -> {
             CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
             String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
-            predictionTypeMap.put(modelGuid, singleModelParams.getPredictionType());
             bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
             scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());
             scoreMultiplierMap.put(modelGuid, singleModelParams.getScoreMultiplier());
@@ -102,7 +100,6 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
         params.setIdColumn(InterfaceName.__Composite_Key__.toString());
         params.setModelIdField(ScoreResultField.ModelId.displayName);
         putObjectInContext(SCORING_SCORE_FIELDS, scoreFieldMap);
-        putObjectInContext(PREDICTION_TYPES, predictionTypeMap);
     }
 
     private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
@@ -115,24 +112,17 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
             throw new IllegalArgumentException("AI model " + aiModel.getId() + " does not have bucket metadata.");
         }
         params.setBucketMetadata(bucketMetadata);
-        params.setScoreFieldName(getScoreFieldName(predictionType));
+        params.setScoreFieldName(getScoreFieldName(aiModel));
         params.setPredictionType(predictionType);
         // no multiplier, because always calculate lift chart
         params.setScoreMultiplier(null);
         return params;
     }
 
-    private String getScoreFieldName(PredictionType predictionType) {
-        String scoreField;
-        switch (predictionType) {
-        case PROPENSITY:
-            scoreField = InterfaceName.RawScore.name();
-            break;
-        case EXPECTED_VALUE:
+    private String getScoreFieldName(AIModel aiModel) {
+        String scoreField = InterfaceName.RawScore.name();
+        if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())) {
             scoreField = InterfaceName.ExpectedRevenue.name();
-            break;
-        default:
-            throw new UnsupportedOperationException("Unknown prediction type: " + predictionType);
         }
         return scoreField;
     }
@@ -140,12 +130,16 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     private List<RatingModelContainer> getModelContainers() {
         List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         return allContainers.stream() //
-                .filter(container -> RatingEngineType.CROSS_SELL.equals(container.getEngineSummary().getType())) //
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }) //
                 .collect(Collectors.toList());
     }
 
     private String getInputTableName() {
-        String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+        String inputTableName = getStringValueFromContext(COMBINED_FILTER_TABLE_NAME);
         if (StringUtils.isBlank(inputTableName)) {
             inputTableName = getDataFlowParams().getInputTableName();
         }

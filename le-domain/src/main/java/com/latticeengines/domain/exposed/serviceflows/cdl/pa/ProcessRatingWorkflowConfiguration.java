@@ -1,7 +1,10 @@
 package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
+import java.util.List;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.transform.TransformationGroup;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -20,7 +23,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
         private ProcessRatingWorkflowConfiguration configuration = new ProcessRatingWorkflowConfiguration();
 
         private ProcessRatingStepConfiguration processRatingStepConfiguration = new ProcessRatingStepConfiguration();
-        private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklowConfigurationBuilder = new GenerateRatingWorkflowConfiguration.Builder();
+        private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklow = new GenerateRatingWorkflowConfiguration.Builder();
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportDataToRedshiftConfiguration exportDataToRedshiftConfiguration = new ExportDataToRedshiftConfiguration();
@@ -29,14 +32,14 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             configuration.setCustomerSpace(customerSpace);
             processRatingStepConfiguration.setCustomerSpace(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
-            generateRatingWorfklowConfigurationBuilder.customer(customerSpace);
+            generateRatingWorfklow.customer(customerSpace);
             exportDataToRedshiftConfiguration.setCustomerSpace(customerSpace);
             generateRatingStepConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
 
         public Builder microServiceHostPort(String microServiceHostPort) {
-            generateRatingWorfklowConfigurationBuilder.microServiceHostPort(microServiceHostPort);
+            generateRatingWorfklow.microServiceHostPort(microServiceHostPort);
             exportDataToRedshiftConfiguration.setMicroServiceHostPort(microServiceHostPort);
             generateRatingStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -55,17 +58,17 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
         }
 
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
-            generateRatingWorfklowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
+            generateRatingWorfklow.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchYarnQueue(String matchYarnQueue) {
-            generateRatingWorfklowConfigurationBuilder.matchYarnQueue(matchYarnQueue);
+            generateRatingWorfklow.matchYarnQueue(matchYarnQueue);
             return this;
         }
 
         public Builder fetchOnly(boolean fetchOnly) {
-            generateRatingWorfklowConfigurationBuilder.fetchOnly(fetchOnly);
+            generateRatingWorfklow.fetchOnly(fetchOnly);
             return this;
         }
 
@@ -78,13 +81,19 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
+        public Builder transformationGroup(TransformationGroup transformationGroup,
+                                                                               List<TransformDefinition> stdTransformDefns) {
+            generateRatingWorfklow.transformationGroup(transformationGroup, stdTransformDefns);
+            return this;
+        }
+
         public ProcessRatingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
 
             configuration.add(processRatingStepConfiguration);
             configuration.add(combineStatisticsConfiguration);
-            configuration.add(generateRatingWorfklowConfigurationBuilder.build());
+            configuration.add(generateRatingWorfklow.build());
             configuration.add(generateRatingStepConfiguration);
             configuration.add(exportDataToRedshiftConfiguration);
             return configuration;
