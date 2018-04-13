@@ -237,19 +237,10 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Test environment setup finished.");
         createDataFeed();
         updateDataCloudBuildNumber();
+        setupBusinessCalendar();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
-    }
-
-    BusinessCalendar getStartingDateBusinessCalendderForTest() {
-        BusinessCalendar calendar = new BusinessCalendar();
-        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
-        calendar.setStartingDate("JAN-01");
-        calendar.setLongerMonth(1);
-        calendar.setCreated(new Date());
-        calendar.setUpdated(new Date());
-        return calendar;
     }
 
     protected void resetCollection() {
@@ -937,6 +928,20 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         verifyActiveVersion(initialVersion.complement());
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
+    }
+
+    private BusinessCalendar createBusinessCalendar() {
+        BusinessCalendar calendar = new BusinessCalendar();
+        calendar.setMode(BusinessCalendar.Mode.STARTING_DATE);
+        calendar.setStartingDate("JAN-01");
+        calendar.setLongerMonth(1);
+        calendar.setCreated(new Date());
+        calendar.setUpdated(new Date());
+        return calendar;
+    }
+
+    protected void setupBusinessCalendar() {
+        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), createBusinessCalendar());
     }
 
 }

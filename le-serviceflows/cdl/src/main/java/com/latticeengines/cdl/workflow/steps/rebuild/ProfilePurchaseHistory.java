@@ -6,6 +6,8 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -80,7 +82,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private List<String> periodTableNames;
     private List<PeriodStrategy> periodStrategies;
     private List<ActivityMetrics> purchaseMetrics;
-    private String maxTxnDate;
+    private String evaluationDate;
 
     private String curatedMetricsTablePrefix;
 
@@ -168,9 +170,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find account master table.");
         }
 
-        maxTxnDate = findLatestTransactionDate();
-        if (StringUtils.isBlank(maxTxnDate)) {
-            throw new IllegalStateException("Cannot find maximum transaction date");
+        evaluationDate = findEvaluationDate();
+        if (StringUtils.isBlank(evaluationDate)) {
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
+            evaluationDate = LocalDate.now().format(formatter);
         }
 
         periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
@@ -238,6 +241,10 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         return periodTables;
     }
 
+    private String findEvaluationDate() {
+        return periodProxy.getEvaluationDate(customerSpace.toString());
+    }
+
     private String findLatestTransactionDate() {
         DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
         if (feed.getLatestTransaction() == null) {
@@ -290,10 +297,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
         conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
-        conf.setCurrentDate(maxTxnDate);
+        conf.setCurrentDate(evaluationDate);
         conf.setMetrics(purchaseMetrics);
         conf.setPeriodStrategies(periodStrategies);
         conf.setType(ActivityType.PurchaseHistory);
+        conf.setReduced(true);
 
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
@@ -302,6 +310,12 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private TransformationStepConfig pivot() {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(curateStep));
+        List<String> baseSources = Arrays.asList(accountTableName);
+        step.setBaseSources(baseSources);
+        Map<String, SourceTable> baseTables = new HashMap<>();
+        SourceTable accountSourceTable = new SourceTable(accountTableName, customerSpace);
+        baseTables.put(accountTableName, accountSourceTable);
+        step.setBaseTables(baseTables);
         step.setTransformer(DataCloudConstants.ACTIVITY_METRICS_PIVOT);
         TargetTable targetTable = new TargetTable();
         targetTable.setCustomerSpace(customerSpace);
@@ -313,6 +327,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setGroupByField(InterfaceName.AccountId.name());
         conf.setPivotField(InterfaceName.ProductId.name());
         conf.setProductMap(productMap);
+        conf.setExpanded(true);
+        conf.setMetrics(purchaseMetrics);
 
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
@@ -405,7 +421,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 }
 
                 Pair<String, String> displayNames = ActivityMetricsUtils
-                        .getDisplayNamesFromFullName(attribute.getName(), maxTxnDate, periodStrategies);
+                        .getDisplayNamesFromFullName(attribute.getName(), evaluationDate, periodStrategies);
                 attribute.setDisplayName(displayNames.getLeft());
                 attribute.setSecondaryDisplayName(displayNames.getRight());
                 attribute.setSubcategory(productName);

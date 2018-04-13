@@ -142,7 +142,7 @@ public class ActivityMetricsUtils {
     }
 
     // <DisplayName, SecondDisplayName>
-    public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String currentTxnDate,
+    public static Pair<String, String> getDisplayNamesFromFullName(String fullName, String evaluationDate,
             List<PeriodStrategy> strategies) {
         if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
             return null;
@@ -151,7 +151,7 @@ public class ActivityMetricsUtils {
         String displayName = metricsDisplayNames.get(metrics);
         String period = getPeriodsFromFullName(fullName);
         displayName += periodStrToDisplayName(period, metrics);
-        String secDisplayName = periodStrToSecondDisplayName(period, metrics, currentTxnDate, strategies);
+        String secDisplayName = periodStrToSecondDisplayName(period, metrics, evaluationDate, strategies);
         return Pair.of(displayName, secDisplayName);
     }
 

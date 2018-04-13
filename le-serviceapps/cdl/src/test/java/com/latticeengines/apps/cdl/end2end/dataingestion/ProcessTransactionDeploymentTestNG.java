@@ -33,6 +33,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private static final int TRANSACTION_IMPORT_SIZE_1_2 = 10000;
     private static final long AGGREGATE_TRANSACTION_SIZE = 22747L;
     private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 77266L;
+    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
 
     private RatingEngine ratingEngine;
 
@@ -40,9 +41,6 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
         resumeVdbCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
-
-        // Test starting date mode for business calendar
-        setupBusinessCalendar();
 
         new Thread(() -> {
             createTestSegment1();
@@ -104,13 +102,9 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
         Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
         expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_1 * PRODUCT_IMPORT_SIZE_1));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_1);
         return expectedCnts;
     }
 
-    private void setupBusinessCalendar() {
-        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
-    }
 }

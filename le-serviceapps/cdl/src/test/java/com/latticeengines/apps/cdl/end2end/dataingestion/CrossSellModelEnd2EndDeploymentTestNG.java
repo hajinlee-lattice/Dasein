@@ -191,10 +191,6 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         return segment;
     }
 
-    private void setupBusinessCalendar() {
-        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
-    }
-
     private void verifyCounts(boolean useDateRestriction) {
         long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);

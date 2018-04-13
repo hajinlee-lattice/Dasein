@@ -28,7 +28,8 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     static final String CHECK_POINT = "update3";
     private RatingEngine ratingEngine;
 
-    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 103558L;
+    private static final long AGGREGATE_PERIOD_TRANSACTION_SIZE = 102439L;
+    private static final long DEPIVOTED_METRICS_SIZE = 10777L;
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
@@ -100,8 +101,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         expectedCnts.put(TableRoleInCollection.AggregatedTransaction, (long) TRANSACTION_IMPORT_SIZE_1);
         expectedCnts.put(TableRoleInCollection.SortedProduct, (long) (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_TOTAL * (PRODUCT_IMPORT_SIZE_1 + PRODUCT_IMPORT_SIZE_2)));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
         return expectedCnts;
     }
 

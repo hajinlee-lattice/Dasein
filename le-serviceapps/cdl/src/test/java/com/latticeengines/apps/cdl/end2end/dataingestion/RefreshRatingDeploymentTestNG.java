@@ -259,9 +259,4 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 .getLatestABCDBucketsByEngineId(mainTestTenant.getId(), engineId);
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
     }
-
-    private void setupBusinessCalendar() {
-        periodProxy.saveBusinessCalendar(mainTestTenant.getId(), getStartingDateBusinessCalendderForTest());
-    }
-
 }
