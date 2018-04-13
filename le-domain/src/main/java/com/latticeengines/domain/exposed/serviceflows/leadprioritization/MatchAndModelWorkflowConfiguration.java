@@ -94,6 +94,7 @@ public class MatchAndModelWorkflowConfiguration extends BaseLPWorkflowConfigurat
             setConfigForScoring.setCustomerSpace(customerSpace);
             rtsBulkScoreWorkflowBuilder.customer(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
+            computeLift.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             return this;
         }
