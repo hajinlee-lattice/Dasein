@@ -5,7 +5,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 
 public interface LPAttrConfigProxy {
 
-    AttrConfigRequest getAttrConfigByEntity(String customerSpace, BusinessEntity entity);
+    AttrConfigRequest getAttrConfigByEntity(String customerSpace, BusinessEntity entity, boolean render);
 
     AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName);
 

@@ -50,13 +50,17 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
     }
 
     @Override
-    public List<AttrConfig> getRenderedList(BusinessEntity entity) {
+    public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
         String tenantId = MultiTenantContext.getTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(entity);
-            renderedList = render(columns, customConfig);
+            if (render) {
+                renderedList = render(columns, customConfig);
+            } else {
+                renderedList = customConfig;
+            }
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);

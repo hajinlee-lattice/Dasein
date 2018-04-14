@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,9 +34,10 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest getAttrConfigByEntity(@PathVariable String customerSpace,
-            @PathVariable BusinessEntity entity) {
+            @PathVariable BusinessEntity entity,
+            @RequestParam(value = "render", required = false, defaultValue = "true") boolean render) {
         AttrConfigRequest request = new AttrConfigRequest();
-        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(entity);
+        List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(entity, render);
         request.setAttrConfigs(attrConfigs);
         return request;
     }

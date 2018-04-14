@@ -34,7 +34,6 @@ import com.latticeengines.app.exposed.service.EnrichmentService;
 import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.statistics.AccountMasterCube;
@@ -45,9 +44,8 @@ import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
-import com.latticeengines.proxy.exposed.lp.LPProxy;
+import com.latticeengines.proxy.exposed.lp.LPAttrConfigProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -76,7 +74,7 @@ public class LatticeInsightsResource {
     private BatonService batonService;
 
     @Autowired
-    private LPProxy proxy;
+    private LPAttrConfigProxy proxy;
 
     // ------------START for Insights-------------------//
     @GetMapping(value = INSIGHTS_PATH + "/categories")
@@ -277,9 +275,10 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get attr config request")
-    public AttrConfigRequest getAttrConfigRequest(HttpServletRequest request) {
+    public AttrConfigRequest getAttrConfigRequest(HttpServletRequest request,
+            @RequestParam(value = "entity", required = false) BusinessEntity entity) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return proxy.getAttrConfigRequest(tenant.getId());
+        return proxy.getAttrConfigByEntity(tenant.getId(), entity, true);
     }
 
     @RequestMapping(value = ATTR_CONFIG_PATH, //
@@ -287,9 +286,20 @@ public class LatticeInsightsResource {
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Save attr config request")
-    public ResponseDocument<String> saveAttrConfigRequest(HttpServletRequest request,
-            @RequestBody List<AttrConfig> configs) {
-        return ResponseDocument.successResponse("the method is not realized");
+    public AttrConfigRequest saveAttrConfigRequest(HttpServletRequest request, @RequestBody AttrConfigRequest config) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return proxy.saveAttrConfig(tenant.getId(), config);
+    }
+
+    @RequestMapping(value = ATTR_CONFIG_PATH + "/validate", //
+            method = RequestMethod.POST, //
+            headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Validate attr config request")
+    public AttrConfigRequest validateAttrConfigRequest(HttpServletRequest request,
+            @RequestBody AttrConfigRequest config) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return proxy.validateAttrConfig(tenant.getId(), config);
     }
 
     private boolean containsAtleastOneAttributeForCategory(List<LeadEnrichmentAttribute> allAttributes,

@@ -2,20 +2,28 @@ package com.latticeengines.proxy.cdl;
 
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
 
+    private static final Logger log = LoggerFactory.getLogger(BaseAttrConfigProxyImpl.class);
     protected BaseAttrConfigProxyImpl(String rootpath, Object... urlVariables) {
         super(rootpath, urlVariables);
     }
 
-    public AttrConfigRequest getAttrConfigByEntity(String customerSpace, BusinessEntity entity) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/entities/{entity}", //
-                shortenCustomerSpace(customerSpace), entity);
-        return getKryo("get attr config by entity", url, AttrConfigRequest.class);
+    public AttrConfigRequest getAttrConfigByEntity(String customerSpace, BusinessEntity entity, boolean render) {
+        StringBuilder url = new StringBuilder();
+        url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/entities/{entity}", //
+                shortenCustomerSpace(customerSpace), entity));
+        if (!render) {
+            url.append("?render=" + render);
+        }
+        return getKryo("get attr config by entity", url.toString(), AttrConfigRequest.class);
     }
 
     public AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName) {

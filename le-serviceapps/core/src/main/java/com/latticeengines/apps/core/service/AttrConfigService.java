@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 
 public interface AttrConfigService {
 
-    List<AttrConfig> getRenderedList(BusinessEntity entity);
+    List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render);
 
     List<AttrConfig> getRenderedList(Category category);
 

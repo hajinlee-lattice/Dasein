@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
+import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
@@ -36,6 +37,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
+import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 
@@ -46,18 +48,25 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
+    @Inject
+    private AttrValidationService attrValidationService;
+
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
 
     @Override
-    public List<AttrConfig> getRenderedList(BusinessEntity entity) {
+    public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
         String tenantId = MultiTenantContext.getTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
             List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(entity);
-            renderedList = render(columns, customConfig);
+            if (render) {
+                renderedList = render(columns, customConfig);
+            } else {
+                renderedList = customConfig;
+            }
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);
@@ -83,6 +92,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public AttrConfigRequest validateRequest(AttrConfigRequest request) {
+        ValidationDetails details = attrValidationService.validate(request.getAttrConfigs());
+        request.setDetails(details);
         return request;
     }
 
@@ -101,13 +112,18 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrConfigGrps.get(entity).add(attrConfig);
         });
 
+        String tenantId = MultiTenantContext.getTenantId();
+        mergeConfigWithExisting(tenantId, attrConfigGrps);
+
         List<AttrConfig> renderedList;
+        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
         if (MapUtils.isEmpty(attrConfigGrps)) {
             toReturn = request;
         } else {
             if (attrConfigGrps.size() == 1) {
                 BusinessEntity entity = new ArrayList<>(attrConfigGrps.keySet()).get(0);
                 renderedList = renderForEntity(attrConfigs, entity);
+                attrConfigGrpsForTrim.put(entity, renderedList);
             } else {
                 log.info("Saving attr configs for " + attrConfigGrps.size() + " entities in parallel.");
                 // distribute to tasklets
@@ -117,7 +133,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     Callable<List<AttrConfig>> callable =
                             () -> {
                                 MultiTenantContext.setTenant(tenant);
-                                return renderForEntity(configList, entity);
+                                List<AttrConfig> renderedConfigList = renderForEntity(configList, entity);
+                                attrConfigGrpsForTrim.put(entity, renderedConfigList);
+                                return renderedConfigList;
                             };
                     callables.add(callable);
                 });
@@ -135,6 +153,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 }).collect(Collectors.toList());
             }
 
+            log.info("rendered List" + JsonUtils.serialize(renderedList));
             toReturn = new AttrConfigRequest();
             toReturn.setAttrConfigs(renderedList);
             AttrConfigRequest validated = validateRequest(toReturn);
@@ -143,10 +162,36 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                         "Request has validation errors, cannot be saved: " + JsonUtils.serialize(validated.getDetails()));
             }
 
-            //TODO: save renderedList: trim -> save ?
+            log.info("AttrConfig before saving is " + JsonUtils.serialize(request));
+            // trim and save
+            attrConfigGrpsForTrim.forEach((entity, configList) -> {
+                attrConfigEntityMgr
+                        .save(MultiTenantContext.getTenantId(), entity, trim(configList));
+            });
         }
 
         return toReturn;
+    }
+
+    /**
+     * Merge with existing configs in Document DB
+     */
+    private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps) {
+        attrConfigGrps.forEach((entity, configList) -> {
+            List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            Map<String, AttrConfig> existingMap = new HashMap<>();
+            existingConfigs.forEach(config -> existingMap.put(config.getAttrName(), config));
+            for (AttrConfig config : configList) {
+                AttrConfig existingConfig = existingMap.get(config.getAttrName());
+                if (existingConfig != null) {
+                    existingConfig.getAttrProps().forEach((name, value) -> {
+                        if (!config.getAttrProps().containsKey(name)) {
+                            config.getAttrProps().put(name, value);
+                        }
+                    });
+                }
+            }
+        });
     }
 
     /**
@@ -194,11 +239,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             if (mergeConfig == null) {
                 mergeConfig = new AttrConfig();
                 mergeConfig.setAttrName(metadata.getAttrName());
-                mergeConfig.setAttrType(type);
-                mergeConfig.setAttrSubType(subType);
-                mergeConfig.setEntity(metadata.getEntity());
                 mergeConfig.setAttrProps(new HashMap<>());
             }
+            mergeConfig.setAttrType(type);
+            mergeConfig.setAttrSubType(subType);
+            mergeConfig.setEntity(metadata.getEntity());
+
             Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
             if (attrProps == null) {
                 attrProps = new HashMap<>();
@@ -248,7 +294,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     case Model:
                     case Segment:
                     case TalkingPoint:
-                        usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group, new AttrConfigProp<Boolean>());
+                    usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group.name(),
+                            new AttrConfigProp<Boolean>());
                         usageProp.setSystemValue(metadata.isEnabledFor(group));
                         usageProp.setAllowCustomization(attrSpec == null ? true : attrSpec.allowChange(group));
                         break;
