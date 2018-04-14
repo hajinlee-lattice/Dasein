@@ -195,6 +195,10 @@ public abstract class BaseScoring extends CommonBase {
                     .setForceSkipMatching(forceSkipMatching) //
                     .setCalledViaInternalResource(isCalledViaInternalResource);
 
+            if (log.isInfoEnabled()) {
+                log.info(String.format("Score config = %s", JsonUtils.serialize(additionalScoreConfig)));
+            }
+
             ScoreResponse response = scoreRequestProcessor.process(scoreRequest, additionalScoreConfig);
             if (warnings.hasWarnings(requestId)) {
                 response.setWarnings(warnings.getWarnings(requestId));
@@ -297,6 +301,10 @@ public abstract class BaseScoring extends CommonBase {
                     .setHomogeneous(scoreRequests.isHomogeneous()) //
                     .setForceSkipMatching(forceSkipMatching) //
                     .setCalledViaInternalResource(isCalledViaInternalResource);
+
+            if (log.isInfoEnabled()) {
+                log.info(String.format("Score config = %s", JsonUtils.serialize(additionalScoreConfig)));
+            }
 
             response = scoreRequestProcessor.process(scoreRequests, additionalScoreConfig);
 
