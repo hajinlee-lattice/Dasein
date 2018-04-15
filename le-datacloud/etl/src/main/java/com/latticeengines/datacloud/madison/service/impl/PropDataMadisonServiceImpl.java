@@ -99,7 +99,7 @@ public class PropDataMadisonServiceImpl implements PropDataMadisonService {
     @Value("${propdata.madison.num.old.past.days:30}")
     private int numOfOldPastDays;
 
-    @Value("${propdata.madison.fixed.date:6}")
+    @Value("${propdata.madison.fixed.date:5}")
     private int fixedDate;
 
     @Value("${propdata.madison.target.raw.table}")
