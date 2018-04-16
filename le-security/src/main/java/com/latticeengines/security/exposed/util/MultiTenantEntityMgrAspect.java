@@ -2,6 +2,8 @@ package com.latticeengines.security.exposed.util;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.EntityManager;
 
@@ -13,12 +15,20 @@ import org.hibernate.SessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.StackTraceUtils;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 public class MultiTenantEntityMgrAspect {
     private static final Logger log = LoggerFactory.getLogger(MultiTenantEntityMgrAspect.class);
+
+    //TODO: this needs to be cleaned up once we fix all the sources where Tenant PID is null. //PLS-6039
+    private Set<String> missingTenantContexts;
+    
+    public MultiTenantEntityMgrAspect() {
+        missingTenantContexts = ConcurrentHashMap.newKeySet(); 
+    }
     
     public void enableMultiTenantFilter(JoinPoint joinPoint, SessionFactory sessionFactory,
             TenantEntityMgr tenantEntityMgr) {
@@ -37,11 +47,17 @@ public class MultiTenantEntityMgrAspect {
         if (tenant == null) {
             throw new RuntimeException("Problem with multi-tenancy framework");
         }
-
+        
         if (tenant.getPid() == null) {
-            // Technically, control should never come here, because Tenant.pid should never be null. Just to reduce the risk and make the backward compatibility leaving this code.
-            log.warn("Tenant PID is null. Need to fix the code path", new RuntimeException("Check the stacktrace for PID is null"));
-
+            // Technically, control should never come here, because Tenant.pid should never
+            // be null. Just to reduce the risk and make the backward compatibility leaving this code as is.
+            if (log.isWarnEnabled()) {
+                if (! missingTenantContexts.contains(joinPoint.toString())) {
+                    missingTenantContexts.add(joinPoint.toString());
+                    log.warn("Tenant PID is null. Total occurances are {}. Need to fix the code path. Here is current StackTrace: {} ",
+                            missingTenantContexts.size(), StackTraceUtils.getCurrentStackTrace());
+                }
+            }
             Tenant tenantWithPid = tenantEntityMgr.findByTenantId(tenant.getId());
 
             if (tenantWithPid == null) {
