@@ -1,39 +1,45 @@
-angular.module('le.widgets.dropdown', []).component('dropDown', {
-    templateUrl: './components/drop-down/dropdown.component.html',
+    'use strict';
 
-    bindings: {
-        selection: '<',
-        options: '=',
-        callback: '&'
-    },
+    angular.module('le.widgets.dropdown', [])
+        .component('leDropDown', {
+            templateUrl: './components/drop-down/dropdown.component.html',
 
-    controller: function () {
+            bindings: {
+                selection: '<',
+                options: '=',
+                callback: '&'
+            },
 
-        function getOptions() {
-            return this.options;
-        }
-        function valueChanged(val){
-            if(this.callback !== undefined){
-                var selection = JSON.stringify(this.selected);
-                this.callback({value: val});
+            controller: function () {
+
+                function getOptions() {
+                    return this.options;
+                }
+
+                function valueChanged(val) {
+                    if (this.callback !== undefined) {
+                        var selection = JSON.stringify(this.selected);
+                        this.callback({
+                            value: val
+                        });
+                    }
+                }
+                this.$onInit = function () {
+                    if (!this.options || this.options == null) {
+                        this.options = [];
+                    }
+                    this.options.unshift({
+                        value: -1,
+                        name: '-- Select Option --'
+                    });
+                    if (!this.selection) {
+                        this.selection = this.options[0];
+                    }
+
+                };
+
+                this.changed = valueChanged;
+                this.getOptions = getOptions;
             }
-        }
-        this.$onInit = function () {
-            if (!this.options || this.options == null) {
-                this.options = [];
-            }
-            this.options.unshift({
-                value: -1,
-                name: '-- Select Option --'
-            });
-            if (!this.selection) {
-                this.selection = this.options[0];
-            }
 
-        };
-
-        this.changed = valueChanged;
-        this.getOptions = getOptions;
-    }
-
-});
+        });

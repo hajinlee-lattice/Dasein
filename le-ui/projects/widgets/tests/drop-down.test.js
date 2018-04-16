@@ -1,6 +1,6 @@
 angular.module('dd.test', ['le.widgets.dropdown']).component('dropDownTest', {
     template: ` <div style=" display: flex; flex-direction: row;">
-                    <drop-down options="$ctrl.options" selection="$ctrl.selected()" callback="$ctrl.mycallback(value)"></drop-down>
+                    <le-drop-down options="$ctrl.options" selection="$ctrl.selected()" callback="$ctrl.mycallback(value)"></le-drop-down>
                     <p id="callbackMsg">On Selection changed you are going to see the position selected</p>
                 </div>`,
     bindings: {
