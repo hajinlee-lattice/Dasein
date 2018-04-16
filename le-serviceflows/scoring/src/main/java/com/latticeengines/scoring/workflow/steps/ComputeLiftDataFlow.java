@@ -68,7 +68,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
         Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap = getModelGuidToBucketMetadataMap();
         records.forEach(record -> {
             String modelGuid = record.get(modelGuidField).toString();
-            String rating = record.get(ratingField).toString();
+            String rating = record.get(ratingField) != null ? record.get(ratingField).toString() : "";
             Object liftObj = record.get(liftField);
             final Double lift = liftObj instanceof Double ? (Double) liftObj : 0.0D;
             Long count = (Long) record.get(RATING_COUNT);
