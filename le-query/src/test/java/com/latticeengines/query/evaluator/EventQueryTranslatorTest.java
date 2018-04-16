@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -609,11 +610,73 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
         Assert.assertEquals(count, 1857);
     }
 
+    private TransactionRestriction getHasPurchasedLater(TransactionRestriction original,
+                                                        int laggingPeriodCount) {
+        TimeFilter timeFilter = new TimeFilter(original.getTimeFilter().getLhs(),
+                                               ComparisonType.FOLLOWING,
+                                               original.getTimeFilter().getPeriod(),
+                                               Arrays.asList(laggingPeriodCount, laggingPeriodCount));
+
+
+        String targetProductId = original.getTargetProductId() == null
+                ? original.getProductId()
+                : original.getTargetProductId();
+
+        return new TransactionRestriction(targetProductId, //
+                                          timeFilter, //
+                                          false, //
+                                          null, //
+                                          null);
+    }
+
+    private TransactionRestriction getHasPurchasedLaterWithAmount(TransactionRestriction original,
+                                                                  int laggingPeriodCount,
+                                                                  int totalAmount) {
+        TimeFilter timeFilter = new TimeFilter(original.getTimeFilter().getLhs(),
+                                               ComparisonType.FOLLOWING,
+                                               original.getTimeFilter().getPeriod(),
+                                               Arrays.asList(laggingPeriodCount, laggingPeriodCount));
+
+        String targetProductId = original.getTargetProductId() == null
+                ? original.getProductId()
+                : original.getTargetProductId();
+
+        AggregationFilter spentFilter = new AggregationFilter(
+                AggregationSelector.SPENT,
+                AggregationType.SUM,
+                ComparisonType.GREATER_THAN,
+                Arrays.asList(totalAmount)
+        );
+
+        return new TransactionRestriction(targetProductId, //
+                                          timeFilter, //
+                                          false, //
+                                          spentFilter, //
+                                          null);
+    }
+
+    @Test(groups = "functional")
+    public void testFirstPurchaseForEvent() {
+        TransactionRestriction txRestriction = getHasNotEngagedProd1();
+        TransactionRestriction nextRestriction = getHasPurchasedLaterWithAmount(txRestriction, 1, 200);
+        Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
+        EventQueryTranslator eventTranslator = getEventQueryTranslator();
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
+                                                        getDefaultEventFrontEndQuery(),
+                                                        Query.builder()).build();
+        SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
+        System.out.println("sqlQuery = " + sqlQuery);
+        long count = queryEvaluatorService.getCount(attrRepo, query);
+        Assert.assertEquals(count, 52);
+    }
+
     @Test(groups = "functional")
     public void testHasEngagedForEvent() {
         TransactionRestriction txRestriction = getHasEngaged();
+        TransactionRestriction nextRestriction = getHasPurchasedLater(txRestriction, 1);
+        Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, txRestriction,
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
                                                         getDefaultEventFrontEndQuery(),
                                                         Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
@@ -626,8 +689,10 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testHasEngagedForEventWithRevenue() throws SQLException {
         TransactionRestriction txRestriction = getHasEngaged();
+        TransactionRestriction nextRestriction = getHasPurchasedLater(txRestriction, 1);
+        Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, txRestriction,
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
                                                         getEventFrontEndQueryWithProductRevenue(),
                                                         Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
@@ -702,8 +767,12 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
 
     @Test(groups = "functional")
     public void testLogicalAndTwoChildrenForEvent() {
-        TransactionRestriction t1 = getHasEngaged();
-        TransactionRestriction t2 = getSumAmount();
+        TransactionRestriction txRestriction = getHasEngaged();
+        TransactionRestriction nextRestriction = getHasPurchasedLater(txRestriction, 1);
+        Restriction t1 = Restriction.builder().and(txRestriction, nextRestriction).build();
+        TransactionRestriction sumRestriction = getSumAmount();
+        TransactionRestriction sumNextRestriction = getHasPurchasedLater(sumRestriction, 1);
+        Restriction t2 = Restriction.builder().and(sumRestriction, sumNextRestriction).build();
         Restriction l1 = Restriction.builder().and(t1, t2).build();
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, l1, getDefaultEventFrontEndQuery(),
@@ -854,9 +923,11 @@ public class EventQueryTranslatorTest extends QueryFunctionalTestNGBase {
     @Test(groups = "functional")
     public void testTotalAmountBetweenPeriodsForEvent() {
         TransactionRestriction txRestriction = getTotalAmountBetweenPeriods();
+        TransactionRestriction nextRestriction = getHasPurchasedLater(txRestriction, 1);
+        Restriction eventRestriction = Restriction.builder().and(txRestriction, nextRestriction).build();
 
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
-        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, txRestriction,
+        Query query = eventTranslator.translateForEvent(queryFactory, attrRepo, eventRestriction,
                                                         getDefaultEventFrontEndQuery(), Query.builder()).build();
         SQLQuery sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         System.out.println("sqlQuery = " + sqlQuery);

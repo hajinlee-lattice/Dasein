@@ -1,5 +1,6 @@
 package com.latticeengines.objectapi.service.impl;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -190,8 +191,13 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
         Bucket bucket = Bucket.txnBkt(txn);
         Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        TimeFilter nextPeriod = TimeFilter.following(1, 1, txn.getTimeFilter().getPeriod());
+        Bucket.Transaction next = new Bucket.Transaction(txn.getProductId(), nextPeriod, null, null, false);
+        Bucket nextBucket = Bucket.txnBkt(next);
+        Restriction nextRestriction = new BucketRestriction(attrLookup, nextBucket);
+        Restriction eventRestriction = Restriction.builder().and(restriction, nextRestriction).build();
 
-        frontEndRestriction.setRestriction(restriction);
+        frontEndRestriction.setRestriction(eventRestriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
         frontEndQuery.setMainEntity(BusinessEntity.Account);
         frontEndQuery.setPageFilter(new PageFilter(0, 0));

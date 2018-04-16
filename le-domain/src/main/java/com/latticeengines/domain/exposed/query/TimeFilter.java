@@ -70,6 +70,14 @@ public class TimeFilter implements Serializable {
         return filter;
     }
 
+    public static TimeFilter following(int begin, int end, String period) {
+        TimeFilter filter = new TimeFilter();
+        filter.relation = ComparisonType.FOLLOWING;
+        filter.period = period != null ? period : PeriodStrategy.Template.Month.name();
+        filter.values = Arrays.asList(begin, end);
+        return filter;
+    }
+
     public TimeFilter() {
     }
 

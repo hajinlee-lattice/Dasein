@@ -474,28 +474,6 @@ public class EventQueryTranslator extends TranslatorCommon {
 
     }
 
-    private TransactionRestriction translateLaggingBehindRestriction(TransactionRestriction original,
-                                                                     int laggingPeriodCount) {
-        TimeFilter timeFilter = new TimeFilter(original.getTimeFilter().getLhs(),
-                                               ComparisonType.FOLLOWING,
-                                               original.getTimeFilter().getPeriod(),
-                                               Arrays.asList(ONE_LAG_BEHIND_OFFSET, laggingPeriodCount));
-
-        String targetProductId = original.getTargetProductId() == null
-                ? original.getProductId()
-                : original.getTargetProductId();
-
-        if (StringUtils.isEmpty(targetProductId)) {
-            throw new RuntimeException("Invalid transaction restriction, no target product specified");
-        }
-
-        return new TransactionRestriction(targetProductId, //
-                                          timeFilter, //
-                                          false, //
-                                          null, //
-                                          null);
-    }
-
 
     private SubQuery translateSelectAll(QueryFactory queryFactory,
                                         AttributeRepository repository,
@@ -654,28 +632,6 @@ public class EventQueryTranslator extends TranslatorCommon {
             builder.with(translateProductRevenue(queryFactory, repository, frontEndQuery.getTargetProductIds(),
                                                  period));
             builder.with(translateShiftedRevenue(queryFactory, repository, laggingPeriodCount));
-        }
-
-        // generate lag behind restriction for event query, this is not needed for scoring and training
-        if (isEvent) {
-            if (rootRestriction instanceof LogicalRestriction) {
-                BreadthFirstSearch bfs = new BreadthFirstSearch();
-                bfs.run(rootRestriction, (object, ctx) -> {
-                    if (object instanceof TransactionRestriction) {
-                        TransactionRestriction txRestriction = (TransactionRestriction) object;
-                        TransactionRestriction lagBehind = translateLaggingBehindRestriction(
-                                txRestriction, laggingPeriodCount);
-                        Restriction newRestriction = Restriction.builder().and(txRestriction, lagBehind).build();
-                        LogicalRestriction parent = (LogicalRestriction) ctx.getProperty("parent");
-                        parent.getRestrictions().remove(txRestriction);
-                        parent.getRestrictions().add(newRestriction);
-                    }
-                });
-            } else if (rootRestriction instanceof TransactionRestriction) {
-                TransactionRestriction txRestriction = (TransactionRestriction) rootRestriction;
-                TransactionRestriction lagBehind = translateLaggingBehindRestriction(txRestriction, laggingPeriodCount);
-                rootRestriction = Restriction.builder().and(txRestriction, lagBehind).build();
-            }
         }
 
         // translate mutli-product "has engaged" to logical grouping
