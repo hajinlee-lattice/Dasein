@@ -19,6 +19,7 @@ public class AttrValidationServiceImpl implements AttrValidationService {
 
     @PostConstruct
     private void initializeValidator() {
+        validatorList.add(CDLImpactValidator.VALIDATOR_NAME);
         validatorList.add(GenericValidator.VALIDATOR_NAME);
         validatorList.add(LifecycleValidator.VALIDATOR_NAME);
         validatorList.add(LimitationValidator.VALIDATOR_NAME);

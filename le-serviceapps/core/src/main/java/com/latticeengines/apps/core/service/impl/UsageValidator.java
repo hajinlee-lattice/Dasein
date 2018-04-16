@@ -38,7 +38,7 @@ public class UsageValidator extends AttrValidator {
     private void checkUsage(AttrConfig attrConfig) {
         AttrSpecification attrSpec = parseAttrSpecification(attrConfig);
         if (attrSpec == null) {
-            log.warn(String.format("Cannot get Attribute Specification for attribute % with Type %s, SubType %s",
+            log.warn(String.format("Cannot get Attribute Specification for attribute %s with Type %s, SubType %s",
                     attrConfig.getAttrName(), attrConfig.getAttrType().name(), attrConfig.getAttrSubType().name()));
             return;
         }
@@ -98,7 +98,8 @@ public class UsageValidator extends AttrValidator {
         BusinessEntity entity = attrConfig.getEntity();
         AttrSpecification attrSpecification = AttrSpecification.getAttrSpecification(attrType, attrSubType, entity);
         if (attrSpecification == null) {
-            log.error(String.format("Cannot resolve Type %s and SubType %s to AttrSpecification"));
+            log.error(String.format("Cannot resolve Type %s and SubType %s to AttrSpecification", attrType.name(),
+                    attrSubType.name()));
         }
         return attrSpecification;
     }

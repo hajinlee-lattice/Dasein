@@ -48,6 +48,12 @@ public enum AttrSpecification {
 
     public static AttrSpecification getAttrSpecification(AttrType attrType, AttrSubType attrSubType,
                                                           BusinessEntity entity) {
+        if (attrType == null) {
+            throw new IllegalArgumentException("AttrType cannot be null!");
+        }
+        if (attrSubType == null) {
+            throw new IllegalArgumentException("AttrSubType cannot be null!");
+        }
         switch (attrType) {
             case DataCloud:
                 switch (attrSubType) {
