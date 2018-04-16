@@ -26,6 +26,8 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update1";
 
+    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
@@ -82,8 +84,7 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         expectedCnts.put(TableRoleInCollection.BucketedAccount, Long.valueOf(ACCOUNT_IMPORT_SIZE_2));
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
                 (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_TOTAL * PRODUCT_IMPORT_SIZE_1));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
         return expectedCnts;
     }
 
