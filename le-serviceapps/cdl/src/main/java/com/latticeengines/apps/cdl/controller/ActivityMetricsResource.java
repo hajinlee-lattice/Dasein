@@ -26,8 +26,15 @@ public class ActivityMetricsResource {
     private ActivityMetricsService metricsService;
 
     @GetMapping(value = "/{type}")
-    @ApiOperation(value = "Get all the active metrics for specific activity type")
+    @ApiOperation(value = "Get all the metrics for specific activity type")
     public List<ActivityMetrics> getActivityMetrics(@PathVariable String customerSpace,
+            @PathVariable ActivityType type) {
+        return metricsService.findWithType(type);
+    }
+
+    @GetMapping(value = "/{type}/active")
+    @ApiOperation(value = "Get all the active metrics for specific activity type")
+    public List<ActivityMetrics> getActiveActivityMetrics(@PathVariable String customerSpace,
             @PathVariable ActivityType type) {
         return metricsService.findActiveWithType(type);
     }

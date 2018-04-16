@@ -1,7 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -11,12 +9,10 @@ import org.springframework.stereotype.Service;
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
-import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 @Service("activityMetricsService")
 public class ActivityMetricsServiceImpl implements ActivityMetricsService {
@@ -24,9 +20,14 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
     private ActivityMetricsEntityMgr entityMgr;
 
     @Override
+    public List<ActivityMetrics> findWithType(ActivityType type) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ActivityMetricsUtils.fakeMetrics(tenant);
+    }
+
+    @Override
     public List<ActivityMetrics> findActiveWithType(ActivityType type) {
-        // return entityMgr.findActiveWithType(type);
-        return fakeMetrics();
+        return entityMgr.findActiveWithType(type);
     }
 
     @Override
@@ -35,44 +36,5 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
             metrics.setType(type);
         });
         return entityMgr.save(metricsList);
-    }
-
-    // Serve the API before UI has finished metrics configuration for tenant
-    private List<ActivityMetrics> fakeMetrics() {
-        ActivityMetrics margin = fakeSingleMetrics();
-        margin.setMetrics(InterfaceName.Margin);
-        margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
-
-        ActivityMetrics shareOfWallet = fakeSingleMetrics();
-        shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
-        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name())));
-
-        ActivityMetrics avgSpendOvertime = fakeSingleMetrics();
-        avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
-        avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
-
-        ActivityMetrics totalSpendOvertime = fakeSingleMetrics();
-        totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
-        totalSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
-
-        ActivityMetrics spendChange = fakeSingleMetrics();
-        spendChange.setMetrics(InterfaceName.SpendChange);
-        spendChange.setPeriodsConfig(
-                Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name()),
-                        TimeFilter.between(2, 3, PeriodStrategy.Template.Month.name())));
-
-        return Arrays.asList(margin, shareOfWallet, avgSpendOvertime, totalSpendOvertime, spendChange);
-    }
-
-    private ActivityMetrics fakeSingleMetrics() {
-        Tenant tenant = MultiTenantContext.getTenant();
-        ActivityMetrics metrics = new ActivityMetrics();
-        metrics.setType(ActivityType.PurchaseHistory);
-        metrics.setTenant(tenant);
-        metrics.setEOL(false);
-        metrics.setDeprecated(null);
-        metrics.setCreated(new Date());
-        metrics.setUpdated(metrics.getCreated());
-        return metrics;
     }
 }

@@ -12,7 +12,8 @@ public enum ActionType {
     CDL_OPERATION_WORKFLOW("cdlOperationWorkflow", "Delete"), //
     RATING_ENGINE_CHANGE("ratingEngineChange", "Scoring"), //
     METADATA_SEGMENT_CHANGE("segmentChange", "Segment Edited"), //
-    METADATA_CHANGE("metadataChange", "Metadata Change"); //
+    METADATA_CHANGE("metadataChange", "Metadata Change"), //
+    ACTIVITY_METRICS_CHANGE("activityMetricsChange", "Activity Metrics Change"); //
 
     private String name;
     private String displayName;

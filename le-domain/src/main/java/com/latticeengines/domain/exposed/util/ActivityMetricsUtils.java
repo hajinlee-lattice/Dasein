@@ -1,9 +1,13 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,9 +15,11 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 
 public class ActivityMetricsUtils {
@@ -68,6 +74,17 @@ public class ActivityMetricsUtils {
         }
     };
 
+    @SuppressWarnings("serial")
+    private static Map<String, PeriodStrategy.Template> periodAbbrRev = new HashMap<String, PeriodStrategy.Template>() {
+        {
+            put("Y", PeriodStrategy.Template.Year);
+            put("Q", PeriodStrategy.Template.Quarter);
+            put("M", PeriodStrategy.Template.Month);
+            put("W", PeriodStrategy.Template.Week);
+        }
+    };
+
+    @SuppressWarnings("serial")
     private static Map<InterfaceName, NullMetricsImputation> nullImputation = new HashMap<InterfaceName, NullMetricsImputation>() {
         {
             put(InterfaceName.Margin, NullMetricsImputation.NULL);
@@ -80,12 +97,26 @@ public class ActivityMetricsUtils {
     };
 
     @SuppressWarnings("serial")
-    private static Map<String, PeriodStrategy.Template> periodAbbrRev = new HashMap<String, PeriodStrategy.Template>() {
+    private static Map<InterfaceName, Set<ComparisonType>> comparisonType = new HashMap<InterfaceName, Set<ComparisonType>>() {
         {
-            put("Y", PeriodStrategy.Template.Year);
-            put("Q", PeriodStrategy.Template.Quarter);
-            put("M", PeriodStrategy.Template.Month);
-            put("W", PeriodStrategy.Template.Week);
+            put(InterfaceName.Margin, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+            put(InterfaceName.SpendChange, new HashSet<>(Arrays.asList(ComparisonType.WITHIN, ComparisonType.BETWEEN)));
+            put(InterfaceName.ShareOfWallet, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+            put(InterfaceName.AvgSpendOvertime, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+            put(InterfaceName.TotalSpendOvertime, new HashSet<>(Arrays.asList(ComparisonType.WITHIN)));
+            put(InterfaceName.HasPurchased, new HashSet<>(Arrays.asList(ComparisonType.EVER)));
+        }
+    };
+
+    @SuppressWarnings("serial")
+    private static Map<InterfaceName, Integer> maxCnt = new HashMap<InterfaceName, Integer>() {
+        {
+            put(InterfaceName.Margin, 1);
+            put(InterfaceName.SpendChange, 1);
+            put(InterfaceName.ShareOfWallet, 1);
+            put(InterfaceName.AvgSpendOvertime, 5);
+            put(InterfaceName.TotalSpendOvertime, 5);
+            put(InterfaceName.HasPurchased, 1);
         }
     };
 
@@ -212,5 +243,163 @@ public class ActivityMetricsUtils {
             strs.add(String.valueOf(value));
         });
         return String.join(SUB_SEPARATOR, strs);
+    }
+
+    public static boolean isValidMetrics(List<ActivityMetrics> metrics) {
+        if (CollectionUtils.isEmpty(metrics)) {
+            return true;
+        }
+        Map<InterfaceName, Integer> cnts = new HashMap<>();
+        Set<String> metricsIds = new HashSet<>();
+        for (ActivityMetrics m : metrics) {
+            isValidMetrics(m);
+            if (!cnts.containsKey(m.getMetrics())) {
+                cnts.put(m.getMetrics(), 0);
+            }
+            cnts.put(m.getMetrics(), cnts.get(m.getMetrics()) + 1);
+            metricsIds.add(ActivityMetricsUtils.getNameWithPeriod(m));
+        }
+        cnts.forEach((m, cnt) -> {
+            if (cnt > maxCnt.get(m)) {
+                throw new RuntimeException(
+                        String.format("Maximum for metrics %s is %d, but found %d", m, maxCnt.get(m), cnt));
+            }
+        });
+        if (metricsIds.size() != metrics.size()) {
+            throw new RuntimeException("Metrics cannot be duplicate");
+        }
+        return true;
+    }
+
+    public static boolean isValidMetrics(ActivityMetrics metrics) {
+        switch (metrics.getMetrics()) {
+        case Margin:
+        case ShareOfWallet:
+        case TotalSpendOvertime:
+        case AvgSpendOvertime:
+            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
+            isValidComparisonType(metrics.getMetrics(), metrics.getPeriodsConfig().get(0).getRelation());
+            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
+            break;
+        case SpendChange:
+            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 2);
+            isValidComparisonTypes(metrics.getMetrics(), metrics.getPeriodsConfig());
+            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(0));
+            isValidPeriodValue(metrics.getMetrics(), metrics.getPeriodsConfig().get(1));
+            break;
+        case HasPurchased:
+            isValidPeriodConfig(metrics.getMetrics(), metrics.getPeriodsConfig(), 1);
+            isValidComparisonType(metrics.getMetrics(), metrics.getPeriodsConfig().get(0).getRelation());
+            break;
+        default:
+            throw new UnsupportedOperationException(metrics.getMetrics() + " metrics is not supported");
+        }
+        return true;
+    }
+
+    private static boolean isValidPeriodConfig(InterfaceName metricsName, List<TimeFilter> timeFilters,
+            int expectedCnt) {
+        if (CollectionUtils.isEmpty(timeFilters) || timeFilters.size() != expectedCnt) {
+            throw new RuntimeException(metricsName + " metrics should have " + expectedCnt + " period config");
+        }
+        Set<String> periods = new HashSet<>();
+        for (TimeFilter timeFilter : timeFilters) {
+            periods.add(timeFilter.getPeriod());
+        }
+        if (periods.size() > 1) {
+            throw new RuntimeException(metricsName + " metrics should have consistent period name");
+        }
+        return true;
+    }
+
+    private static boolean isValidPeriodValue(InterfaceName metricsName, TimeFilter timeFilter) {
+        Map<ComparisonType, Integer> expectedCnt = new HashMap<>();
+        expectedCnt.put(ComparisonType.WITHIN, 1);
+        expectedCnt.put(ComparisonType.BETWEEN, 2);
+        if (CollectionUtils.isEmpty(timeFilter.getValues())
+                || timeFilter.getValues().size() != expectedCnt.get(timeFilter.getRelation())) {
+            throw new RuntimeException(metricsName + " metrics should have "
+                    + expectedCnt.get(timeFilter.getRelation()) + " period values");
+        }
+        for (Object val : timeFilter.getValues()) {
+            try {
+                if ((Integer) val <= 0) {
+                    throw new RuntimeException(metricsName + " metrics should have positive period values");
+                }
+            } catch (Exception ex) {
+                throw new RuntimeException(
+                        "Fail to parse period value " + String.valueOf(val) + " for metrics " + metricsName);
+            }
+        }
+        return true;
+    }
+
+    private static boolean isValidComparisonType(InterfaceName metricsName, ComparisonType type) {
+        if (type == null || !comparisonType.get(metricsName).contains(type)) {
+            List<String> expectedTypes = new ArrayList<>();
+            comparisonType.get(metricsName).forEach(ct -> {
+                expectedTypes.add(ct.name());
+            });
+            throw new RuntimeException(String.format("%s metrics should have comparison type as %s but found %s",
+                    metricsName, String.join(",", expectedTypes), type));
+        }
+        return true;
+    }
+
+    private static boolean isValidComparisonTypes(InterfaceName metricsName, List<TimeFilter> timeFilters) {
+        Set<ComparisonType> types = new HashSet<>();
+        timeFilters.forEach(pc -> {
+            types.add(pc.getRelation());
+        });
+        if (CollectionUtils.isEmpty(types) || comparisonType.get(metricsName).size() != types.size()) {
+            List<String> expectedTypes = new ArrayList<>();
+            comparisonType.get(metricsName).forEach(ct -> {
+                expectedTypes.add(ct.name());
+            });
+            List<String> actualTypes = new ArrayList<>();
+            types.forEach(t -> {
+                actualTypes.add(t.name());
+            });
+            throw new RuntimeException(String.format("%s metrics should have comparison type as %s but found %s",
+                    metricsName, String.join(",", expectedTypes), String.join(",", actualTypes)));
+        }
+        return true;
+    }
+
+    // Serve the API before UI has finished metrics configuration for tenant
+    public static List<ActivityMetrics> fakeMetrics(Tenant tenant) {
+        ActivityMetrics margin = createFakedMetrics(tenant);
+        margin.setMetrics(InterfaceName.Margin);
+        margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
+
+        ActivityMetrics shareOfWallet = createFakedMetrics(tenant);
+        shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
+        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name())));
+
+        ActivityMetrics avgSpendOvertime = createFakedMetrics(tenant);
+        avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
+        avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
+
+        ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant);
+        totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
+        totalSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
+
+        ActivityMetrics spendChange = createFakedMetrics(tenant);
+        spendChange.setMetrics(InterfaceName.SpendChange);
+        spendChange.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name()),
+                TimeFilter.between(2, 3, PeriodStrategy.Template.Month.name())));
+
+        return Arrays.asList(margin, shareOfWallet, avgSpendOvertime, totalSpendOvertime, spendChange);
+    }
+
+    private static ActivityMetrics createFakedMetrics(Tenant tenant) {
+        ActivityMetrics metrics = new ActivityMetrics();
+        metrics.setType(ActivityType.PurchaseHistory);
+        metrics.setTenant(tenant);
+        metrics.setEOL(false);
+        metrics.setDeprecated(null);
+        metrics.setCreated(new Date());
+        metrics.setUpdated(metrics.getCreated());
+        return metrics;
     }
 }

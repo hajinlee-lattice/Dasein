@@ -134,51 +134,8 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                 periodMetrics.put(period, new ArrayList<>());
             }
             periodMetrics.get(period).add(metrics);
-            switch (metrics.getMetrics()) {
-            case Margin:
-                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.WITHIN) {
-                    throw new UnsupportedOperationException("Margin metrics only support WITHIN comparison type");
-                }
-                break;
-            case ShareOfWallet:
-                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.WITHIN) {
-                    throw new UnsupportedOperationException(
-                            "ShareOfWallet metrics only support WITHIN comparison type");
-                }
-                break;
-            case SpendChange:
-                if (metrics.getPeriodsConfig().size() != 2) {
-                    throw new RuntimeException("SpendChange metrics should have 2 period config");
-                }
-                if (!(metrics.getPeriodsConfig().get(0).getRelation() == ComparisonType.WITHIN
-                        && metrics.getPeriodsConfig().get(1).getRelation() == ComparisonType.BETWEEN)
-                        || (metrics.getPeriodsConfig().get(0).getRelation() == ComparisonType.BETWEEN
-                                && metrics.getPeriodsConfig().get(1).getRelation() == ComparisonType.WITHIN)) {
-                    throw new UnsupportedOperationException(
-                            "SpendChange metrics should have one comparison type as WITHIN and the other one as BETWEEN");
-                }
-                break;
-            case TotalSpendOvertime:
-                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.WITHIN) {
-                    throw new UnsupportedOperationException(
-                            "TotalSpendOvertime metrics only support WITHIN comparison type");
-                }
-                break;
-            case AvgSpendOvertime:
-                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.WITHIN) {
-                    throw new UnsupportedOperationException(
-                            "AvgSpendOvertime metrics only support WITHIN comparison type");
-                }
-                break;
-            case HasPurchased:
-                if (metrics.getPeriodsConfig().get(0).getRelation() != ComparisonType.EVER) {
-                    throw new UnsupportedOperationException("HasPurchased metrics only support EVER comparison type");
-                }
-                break;
-            default:
-                throw new UnsupportedOperationException(metrics.getMetrics() + " metrics is not supported");
-            }
         }
+        ActivityMetricsUtils.isValidMetrics(config.getMetrics());
     }
 
     private void validatePeriodTables(List<Node> periodTableList) {

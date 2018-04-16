@@ -21,6 +21,13 @@ public class ActivityMetricsProxy extends MicroserviceRestApiProxy {
     public List<ActivityMetrics> getActivityMetrics(String customerSpace, ActivityType type) {
         String url = constructUrl("/customerspaces/{customerSpace}/metrics/{type}", shortenCustomerSpace(customerSpace),
                 type.name());
+        List<?> list = get("Get all the metrics for specific activity type", url, List.class);
+        return JsonUtils.convertList(list, ActivityMetrics.class);
+    }
+
+    public List<ActivityMetrics> getActiveActivityMetrics(String customerSpace, ActivityType type) {
+        String url = constructUrl("/customerspaces/{customerSpace}/metrics/{type}/active",
+                shortenCustomerSpace(customerSpace), type.name());
         List<?> list = get("Get all the active metrics for specific activity type", url, List.class);
         return JsonUtils.convertList(list, ActivityMetrics.class);
     }
