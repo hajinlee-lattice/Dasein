@@ -71,7 +71,7 @@ public class ActionProxyImpl extends MicroserviceRestApiProxy implements ActionP
 
     @Override
     public void patchOwnerIdByPids(String customerSpace, Long ownerId, List<Long> actionPids) {
-        String url = constructUrl("/customerspaces/{customerSpace}/actions/ownerid?", //
+        String url = constructUrl("/customerspaces/{customerSpace}/actions/ownerid", //
                 shortenCustomerSpace(customerSpace));
         if (ownerId != null || CollectionUtils.isNotEmpty(actionPids)) {
             List<String> params = new ArrayList<>();

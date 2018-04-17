@@ -65,10 +65,6 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
 import com.latticeengines.domain.exposed.pls.AttributeMap;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.BucketName;
-import com.latticeengines.domain.exposed.pls.BucketedScore;
-import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.pls.CrmConstants;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttribute;
 import com.latticeengines.domain.exposed.pls.LeadEnrichmentAttributesOperationMap;
@@ -105,7 +101,6 @@ import com.latticeengines.pls.service.SourceFileService;
 import com.latticeengines.pls.service.TargetMarketService;
 import com.latticeengines.pls.service.TenantConfigService;
 import com.latticeengines.pls.service.WorkflowJobService;
-import com.latticeengines.pls.workflow.RatingEngineBucketBuilder;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.security.exposed.AccessLevel;
 import com.latticeengines.security.exposed.Constants;
@@ -851,8 +846,7 @@ public class InternalResource extends InternalResourceBase {
     @ResponseBody
     @ApiOperation(value = "Send out email after processanalyze")
     public void sendCDLProcessAnalyzeEmail(@PathVariable("result") String result,
-            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo,
-            HttpServletRequest request) {
+            @PathVariable("tenantId") String tenantId, @RequestBody AdditionalEmailInfo emailInfo) {
         List<User> users = userService.getUsers(tenantId);
         for (User user : users) {
             if (result.equals("COMPLETED")) {
@@ -895,15 +889,17 @@ public class InternalResource extends InternalResourceBase {
             for (User user : users) {
                 if (user.getEmail().equals(export.getCreatedBy())) {
                     String tenantName = tenantService.findByTenantId(tenantId).getName();
-                    if (export != null) {
-                        String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
-                        if (result.equals("COMPLETED")) {
+                    String url = appPublicUrl + "/lp/tenant/" + tenantName + "/export/" + exportID;
+                    switch (result) {
+                        case "COMPLETED":
                             emailService.sendPlsExportSegmentSuccessEmail(user, url, exportID, exportType);
-                        } else if (result.equals("FAILED")) {
+                            break;
+                        case "FAILED":
                             emailService.sendPlsExportSegmentErrorEmail(user, exportID, exportType);
-                        } else if (result.equals("STARTED")) {
+                            break;
+                        case "STARTED":
                             emailService.sendPlsExportSegmentRunningEmail(user, exportID);
-                        }
+                            break;
                     }
                 }
             }
