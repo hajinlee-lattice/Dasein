@@ -531,7 +531,7 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeframe) {
         List<ModelSummary> modelSummaryList = modelSummaryDao.getModelSummariesModifiedWithinTimeFrame(timeframe);
-        modelSummaryList.stream().forEach(this::inflateDetails);
+        modelSummaryList.forEach(this::inflateDetails);
         return modelSummaryList;
     }
 

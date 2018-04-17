@@ -9,10 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
-import com.latticeengines.cdl.workflow.steps.rating.CreateCrossSellScoringTargetTable;
-import com.latticeengines.cdl.workflow.steps.rating.CreateCustomEventScoringTargetTable;
+import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
-import com.latticeengines.scoring.workflow.steps.CombineFilterTableDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
@@ -28,13 +26,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
 
     @Inject
-    private CreateCrossSellScoringTargetTable createCrossSellScoringTargetTable;
-
-    @Inject
-    private CreateCustomEventScoringTargetTable createCustomEventScoringTargetTable;
-
-    @Inject
-    private CombineFilterTableDataFlow combineFilterTable;
+    private CreateScoringTargetTable createCrossSellScoringTargetTable;
 
     @Inject
     private CreateCdlEventTableStep createCdlEventTable;
@@ -61,8 +53,6 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
                 .next(createCrossSellScoringTargetTable) //
-                .next(createCustomEventScoringTargetTable) //
-                .next(combineFilterTable) //
                 .next(createCdlEventTable) //
                 .next(matchDataCloud) //
                 .next(addStandardAttributes) //

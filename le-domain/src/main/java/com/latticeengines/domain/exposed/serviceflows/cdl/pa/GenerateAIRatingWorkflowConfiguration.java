@@ -17,7 +17,6 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineFilterTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
@@ -40,7 +39,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         private GenerateAIRatingWorkflowConfiguration configuration = new GenerateAIRatingWorkflowConfiguration();
 
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
-        private CombineFilterTableConfiguration combineFilterTable = new CombineFilterTableConfiguration();
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
         private MatchDataCloudWorkflowConfiguration.Builder match = new MatchDataCloudWorkflowConfiguration.Builder();
@@ -62,7 +60,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             combineInputWithScores.setCustomerSpace(customerSpace);
             computeLift.setCustomerSpace(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
-            combineFilterTable.setCustomerSpace(customerSpace);
             return this;
         }
 
@@ -76,7 +73,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             combineInputWithScores.setMicroServiceHostPort(microServiceHostPort);
             computeLift.setMicroServiceHostPort(microServiceHostPort);
             pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
-            combineFilterTable.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -146,7 +142,6 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(generateRatingStepConfiguration);
-            configuration.add(combineFilterTable);
             configuration.add(cdlEventTable);
             configuration.add(addStandardAttributes);
             configuration.add(match.build());

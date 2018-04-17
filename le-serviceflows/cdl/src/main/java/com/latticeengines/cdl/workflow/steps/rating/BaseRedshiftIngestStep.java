@@ -25,7 +25,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
@@ -82,9 +81,11 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
     protected List<RatingModelContainer> containers;
     protected String targetTableName;
 
-    protected abstract RatingEngineType getTargetEngineType();
+    protected abstract List<RatingEngineType> getTargetEngineTypes();
 
     protected abstract Schema generateSchema();
+
+    protected abstract String getTargetTableName();
 
     protected abstract List<GenericRecord> dataPageToRecords(String modelId, String modelGuid,
             List<Map<String, Object>> data);
@@ -96,7 +97,7 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
         postIngestion();
     }
 
-    private void preIngestion() {
+    protected void preIngestion() {
         customerSpace = configuration.getCustomerSpace();
         version = configuration.getDataCollectionVersion();
         if (version == null) {
@@ -108,18 +109,18 @@ abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration>
 
         List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
         containers = allContainers.stream() //
-                .filter(container -> getTargetEngineType().equals(container.getEngineSummary().getType())) //
+                .filter(container -> getTargetEngineTypes().contains(container.getEngineSummary().getType())) //
                 .collect(Collectors.toList());
         if (CollectionUtils.isEmpty(containers)) {
-            throw new IllegalStateException("There is no models of type " + getTargetEngineType() + " to be rated.");
+            throw new IllegalStateException("There is no models of type " + getTargetEngineTypes() + " to be rated.");
         }
 
-        targetTableName = NamingUtils.timestamp(getTargetEngineType().name());
+        targetTableName = getTargetTableName();
     }
 
     private void ingest() {
-        log.info("Ingesting ratings/indicators for " + containers.size() + " rating models of type "
-                + getTargetEngineType());
+        log.info("Ingesting ratings/indicators for " + containers.size() + " rating models of type(s) "
+                + getTargetEngineTypes());
         schema = generateSchema();
 
         String tableDataPath = PathBuilder.buildDataTablePath(CamilleEnvironment.getPodId(), customerSpace, "")

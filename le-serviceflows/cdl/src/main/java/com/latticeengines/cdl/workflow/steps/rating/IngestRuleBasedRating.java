@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.rating;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
@@ -58,8 +60,13 @@ public class IngestRuleBasedRating extends BaseRedshiftIngestStep<GenerateRating
     }
 
     @Override
-    protected RatingEngineType getTargetEngineType() {
-        return RatingEngineType.RULE_BASED;
+    protected List<RatingEngineType> getTargetEngineTypes() {
+        return Collections.singletonList(RatingEngineType.RULE_BASED);
+    }
+
+    @Override
+    protected String getTargetTableName() {
+        return NamingUtils.timestamp("RuleBased");
     }
 
 }

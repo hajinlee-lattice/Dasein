@@ -159,7 +159,7 @@ public class CreateCdlEventTableStep extends RunDataFlow<CreateCdlEventTableConf
     private Table getAndSetInputTable() {
         Table inputTable = getObjectFromContext(FILTER_EVENT_TABLE, Table.class);
         if (inputTable == null) {
-            String inputTableName = getStringValueFromContext(COMBINED_FILTER_TABLE_NAME);
+            String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
             if (StringUtils.isNotBlank(inputTableName)) {
                 inputTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(), inputTableName);
             }

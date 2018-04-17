@@ -139,7 +139,7 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
     }
 
     private String getInputTableName() {
-        String inputTableName = getStringValueFromContext(COMBINED_FILTER_TABLE_NAME);
+        String inputTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
         if (StringUtils.isBlank(inputTableName)) {
             inputTableName = getDataFlowParams().getInputTableName();
         }
