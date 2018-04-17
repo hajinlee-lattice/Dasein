@@ -538,7 +538,7 @@ angular
             },
             resolve: {
                 Ratings: function(PlaybookWizardStore) {
-                    return PlaybookWizardStore.getRatings(true);
+                    return PlaybookWizardStore.getRatings({active: true});
                 }
             },
             views: {

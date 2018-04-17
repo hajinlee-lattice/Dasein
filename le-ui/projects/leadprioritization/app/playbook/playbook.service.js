@@ -585,13 +585,15 @@ angular.module('lp.playbook')
         return deferred.promise;
     }
 
-    this.getRatings = function(active) {
-        var deferred = $q.defer();
+    this.getRatings = function(opts) {
+        var deferred = $q.defer(),
+            opts = opts;
+
         $http({
             method: 'GET',
             params: {
-                type: 'RULE_BASED',
-                status: (active ? 'ACTIVE' : ''),
+                type: opts.type || null, //'RULE_BASED'
+                status: (opts.active ? 'ACTIVE' : ''),
                 'only-in-redshift': 'true'
             },
             url: this.host + '/ratingengines',
