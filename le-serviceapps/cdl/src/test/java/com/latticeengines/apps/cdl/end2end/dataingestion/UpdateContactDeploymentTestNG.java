@@ -29,6 +29,8 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update2";
 
+    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
+
     private RatingEngine ratingEngine;
 
     @Test(groups = "end2end")
@@ -101,8 +103,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         // Because Account is enforced to rebuild
         expectedCnts.put(TableRoleInCollection.BucketedAccount, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
         expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory,
-                (long) (ACCOUNT_IMPORT_SIZE_TOTAL * PRODUCT_IMPORT_SIZE_1));
+        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
         return expectedCnts;
     }
 
