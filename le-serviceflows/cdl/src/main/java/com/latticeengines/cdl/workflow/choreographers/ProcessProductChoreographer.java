@@ -14,7 +14,6 @@ import com.latticeengines.cdl.workflow.steps.rebuild.ProfileProduct;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfileProductHierarchy;
 import com.latticeengines.cdl.workflow.steps.reset.ResetProduct;
 import com.latticeengines.cdl.workflow.steps.update.CloneProduct;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -107,7 +106,8 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
             if (entity != null) {
                 Map<BusinessEntity, Integer> entityValueMap;
                 try {
-                    entityValueMap = step.getMapObjectFromContext(BaseWorkflowStep.FINAL_RECORDS, BusinessEntity.class, Integer.class);
+                    entityValueMap = step.getMapObjectFromContext(
+                            BaseWorkflowStep.FINAL_RECORDS, BusinessEntity.class, Integer.class);
                 } catch (Exception e) {
                     entityValueMap = null;
                 }

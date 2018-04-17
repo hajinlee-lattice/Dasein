@@ -140,15 +140,29 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                     ? (ObjectNode) entitiesSummaryNode.get(entity.name()) : initEntityReport(entity);
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
-            long newCnt = consolidateSummaryNode.get("NEW").asLong();
-            long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
-            log.info(String.format(
-                    "For entity %s, previous total count: %d, current total count: %d, new count: %s, delete count: %d",
-                    entity.name(), previousCnts.get(entity), currentCnts.get(entity), newCnt, deleteCnt));
-            consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
-            ObjectNode entityNumberNode = JsonUtils.createObjectNode();
-            entityNumberNode.put("TOTAL", String.valueOf(currentCnts.get(entity)));
-            entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            if (entity != BusinessEntity.Product) {
+                long newCnt = consolidateSummaryNode.get("NEW").asLong();
+                long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
+                log.info(String.format(
+                        "For entity %s, previous total count: %d, current total count: %d, new count: %s, delete count: %d",
+                        entity.name(), previousCnts.get(entity), currentCnts.get(entity), newCnt, deleteCnt));
+                consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
+                ObjectNode entityNumberNode = JsonUtils.createObjectNode();
+                entityNumberNode.put("TOTAL", String.valueOf(currentCnts.get(entity)));
+                entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            } else {
+                long idCnt = consolidateSummaryNode.get("PRODUCT_ID").asLong();
+                long bundleCnt = consolidateSummaryNode.get("PRODUCT_HIERARCHY").asLong();
+                long hierarchyCnt = consolidateSummaryNode.get("PRODUCT_HIERARCHY").asLong();
+                String errMsg = consolidateSummaryNode.get("ERROR_MESSAGE").asText();
+                String warnMsg = consolidateSummaryNode.get("WARN_MESSAGE").asText();
+                log.info(String.format("For entity %s, productId count: %d, bundle count: %d, hierarchy count: %d, " +
+                                "error message: %s, warning message: %s",
+                        entity.name(), idCnt, bundleCnt, hierarchyCnt, errMsg, warnMsg));
+                ObjectNode entityNumberNode = JsonUtils.createObjectNode();
+                entityNumberNode.put("TOTAL", String.valueOf(idCnt));
+                entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
+            }
 
             entitiesSummaryNode.set(entity.name(), entityNode);
         }
@@ -275,8 +289,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             consolidateSummaryNode.put("UPDATE", "0");
             break;
         case Product:
-            consolidateSummaryNode.put("NEW", "0");
-            consolidateSummaryNode.put("UPDATE", "0");
+            consolidateSummaryNode.put("PRODUCT_ID", "0");
+            consolidateSummaryNode.put("PRODUCT_HIERARCHY", "0");
+            consolidateSummaryNode.put("PRODUCT_BUNDLE", "0");
+            consolidateSummaryNode.put("ERROR_MESSAGE", "");
+            consolidateSummaryNode.put("WARN_MESSAGE", "");
             break;
         case Transaction:
             consolidateSummaryNode.put("NEW", "0");

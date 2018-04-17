@@ -1,16 +1,17 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Collections;
 
 import org.apache.commons.lang3.StringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -19,12 +20,8 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.HashUtils;
-import com.latticeengines.common.exposed.util.HdfsUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
@@ -32,8 +29,13 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
+import com.latticeengines.common.exposed.util.HashUtils;
+import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -44,7 +46,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
     private static final Logger log = LoggerFactory.getLogger(MergeProduct.class);
 
     static final String BEAN_NAME = "mergeProduct";
-    private Map<String, Integer> mergeReport;
+    private Map<String, Object> mergeReport;
 
     public PipelineTransformationRequest getConsolidateRequest() {
         try {
@@ -107,36 +109,56 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             currentProducts = new ArrayList<>();
         }
 
-        mergeReport = new HashMap<>();
         Map<String, Integer> productCounts = countProducts(currentProducts);
-        mergeReport.put("Current_NumBundleProducts", productCounts.get("nBundle"));
-        mergeReport.put("Current_NumHierarchyProducts", productCounts.get("nHierarchy"));
-        mergeReport.put("Current_NumAnalyticProducts", productCounts.get("nAnalytic"));
-        mergeReport.put("Current_NumSpendingProducts", productCounts.get("nSpending"));
-        log.info("Current_NumBundleProducts " + productCounts.get("nBundle"));
-        log.info("Current_NumHierarchyProducts " + productCounts.get("nHierarchy"));
-        log.info("Current_NumAnalyticProducts " + productCounts.get("nAnalytic"));
-        log.info("Current_NumSpendingProducts " +  productCounts.get("nSpending"));
+        mergeReport = new HashMap<>();
+        mergeReport.put("Current_NumProductsInTotal", currentProducts.size());
+        mergeReport.put("Current_NumProductIds", productCounts.get("nProductIds"));
+        mergeReport.put("Current_NumProductBundles", productCounts.get("nProductBundles"));
+        mergeReport.put("Current_NumProductCategories", productCounts.get("nProductCategories"));
+        mergeReport.put("Current_NumProductAnalytics", productCounts.get("nProductAnalytics"));
+        mergeReport.put("Current_NumProductSpendings", productCounts.get("nProductSpendings"));
+        mergeReport.put("Current_NumObsoleteProducts", productCounts.get("nObsoleteProducts"));
+
+        log.info("Current_NumProductsInTotal: ", mergeReport.get("Current_NumProductsInTotal"));
+        log.info("Current_NumProductIds: " + mergeReport.get("Current_NumProductIds"));
+        log.info("Current_NumProductBundles: " + mergeReport.get("Current_NumProductBundles"));
+        log.info("Current_NumProductCategories: " + mergeReport.get("Current_NumProductCategories"));
+        log.info("Current_NumProductAnalytics: " + mergeReport.get("Current_NumProductAnalytics"));
+        log.info("Current_NumProductSpendings: " + mergeReport.get("Current_NumProductSpendings"));
+        log.info("Current_NumObsoleteProducts: " + mergeReport.get("Current_NumObsoleteProducts"));
 
         List<Product> productList = new ArrayList<>();
         Integer nInvalids = 0;
         try {
-            nInvalids = mergeProducts(inputProducts, currentProducts, productList);
+            nInvalids = mergeProducts(inputProducts, currentProducts, productList, mergeReport);
         } catch (Exception exc) {
             productList = currentProducts;
-            log.error("Found inconsistency during imports. Current product map will be used.");
+            String errMsg = "Found inconsistency during imports. Current product map will be used.";
+            log.error(errMsg + exc.getMessage(), exc);
+            mergeReport.put("Merged_ErrorMessage", errMsg);
+            mergeReport.put("Merged_NumProductBundles", 0);
+            mergeReport.put("Merged_NumProductCategories", 0);
         }
 
         productCounts = countProducts(productList);
-        mergeReport.put("Merged_NumTotalInputs", inputProducts.size());
-        mergeReport.put("Merged_NumInvalids", nInvalids);
-        mergeReport.put("Merged_NumBundleProducts", productCounts.get("nBundle"));
-        mergeReport.put("Merged_NumHierarchyProducts", productCounts.get("nHierarchy"));
-        mergeReport.put("Merged_NumAnalyticProducts", productCounts.get("nAnalytic"));
-        mergeReport.put("Merged_NumSpendingProducts", productCounts.get("nSpending"));
+        mergeReport.put("Merged_NumInputProducts", inputProducts.size());
+        mergeReport.put("Merged_NumInvalidProducts", nInvalids);
+        mergeReport.put("Merged_NumProductsInTotal", productList.size());
+        mergeReport.put("Merged_NumProductIds", productCounts.get("nProductIds"));
+        mergeReport.put("Merged_NumProductBundles", productCounts.get("nProductBundles"));
+        mergeReport.put("Merged_NumProductCategories", productCounts.get("nProductCategories"));
+        mergeReport.put("Merged_NumProductAnalytics", productCounts.get("nProductAnalytics"));
+        mergeReport.put("Merged_NumProductSpendings", productCounts.get("nProductSpendings"));
+        mergeReport.put("Merged_NumObsoleteProducts", productCounts.get("nObsoleteProducts"));
 
-        updateEntityValueMapInContext(FINAL_RECORDS, productCounts.get("nAnalytic"), Integer.class);
-        updateEntityValueMapInContext(BusinessEntity.ProductHierarchy, FINAL_RECORDS, productCounts.get("nHierarchy"), Integer.class);
+        updateEntityValueMapInContext(
+                MERGED_PRODUCT_ID, (Integer) mergeReport.get("Merged_NumProductIds"), Integer.class);
+        updateEntityValueMapInContext(
+                MERGED_PRODUCT_BUNDLE, (Integer) mergeReport.get("Merged_NumProductBundles"), Integer.class);
+        updateEntityValueMapInContext(BusinessEntity.ProductHierarchy,
+                MERGED_PRODUCT_HIERARCHY, (Integer) mergeReport.get("Merged_NumProductCategories"), Integer.class);
+        updateEntityValueMapInContext(
+                FINAL_RECORDS, (Integer) mergeReport.get("Merged_NumProductAnalytics"), Integer.class);
 
         try {
             ProductUtils.saveProducts(yarnConfiguration, table.getExtracts().get(0).getPath(), productList);
@@ -148,12 +170,13 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                 TableRoleInCollection.ConsolidatedProduct, inactive);
         log.info(String.format("Upsert table %s to role %s, version %s.", table.getName(), TableRoleInCollection.ConsolidatedProduct, inactive));
 
-//        generateReport(mergeReport);
+        generateReport();
+        log.info("MergeReport=" + JsonUtils.serialize(mergeReport));
     }
 
-    public void generateReport(Map<String, Integer> mergedReport1) {
+    private void generateReport() {
         ObjectNode report = getObjectFromContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(),
-                    ObjectNode.class);
+                ObjectNode.class);
 //        ObjectNode report = JsonUtils.deserialize("{\n" +
 //                "    \"SystemActions\": [\n" +
 //                "        \"Rebuild due to Data Cloud Version Changed\"\n" +
@@ -198,14 +221,14 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 //                "    }\n" +
 //                "}", ObjectNode.class);
 
-        ObjectMapper om = JsonUtils.getObjectMapper();
-        ObjectNode newItem;
-        try {
-            newItem = (ObjectNode) om.readTree(JsonUtils.serialize(mergedReport1));
-        } catch (IOException exc) {
-            log.error("Failed to generate report for merging products. " + exc);
-            throw new RuntimeException("Failed to generate report for merging products. " + exc);
-        }
+//        ObjectMapper om = JsonUtils.getObjectMapper();
+//        ObjectNode newItem;
+//        try {
+//            newItem = (ObjectNode) om.readTree(JsonUtils.serialize(mergeReport));
+//        } catch (IOException exc) {
+//            log.error("Failed to generate report for product merge. " + exc);
+//            throw new RuntimeException("Failed to generate report for product merge. " + exc);
+//        }
         JsonNode entitiesSummaryNode = report.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
         if (entitiesSummaryNode == null) {
             entitiesSummaryNode = report.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
@@ -219,13 +242,23 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             consolidateSummaryNode = ((ObjectNode) entityNode)
                     .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
         }
-        ((ObjectNode) consolidateSummaryNode).setAll((ObjectNode) newItem.get(entity.name()));
 
+        ((ObjectNode) consolidateSummaryNode).put(
+                ReportConstants.PRODUCT_ID, (Integer) mergeReport.get("Merged_NumProductIds"));
+        ((ObjectNode) consolidateSummaryNode).put(
+                ReportConstants.PRODUCT_HIERARCHY, (Integer) mergeReport.get("Merged_NumProductCategories"));
+        ((ObjectNode) consolidateSummaryNode).put(
+                ReportConstants.PRODUCT_BUNDLE, (Integer) mergeReport.get("Merged_NumProductBundles"));
+        ((ObjectNode) consolidateSummaryNode).put(
+                ReportConstants.ERROR_MESSAGE, (String) mergeReport.get("Merged_ErrorMessage"));
+        ((ObjectNode) consolidateSummaryNode).put(
+                ReportConstants.WARN_MESSAGE, (String) mergeReport.get("Merged_WarnMessage"));
 
         putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), report);
     }
 
-    public int mergeProducts(List<Product> inputProducts, List<Product> currentProducts, List<Product> result) {
+    public int mergeProducts(List<Product> inputProducts, List<Product> currentProducts, List<Product> result,
+                             Map<String, Object> mergeReport) {
         boolean foundProductBundle = false;
         boolean foundProductHierarchy = false;
         int nInvalids = 0;
@@ -274,7 +307,13 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                     lineId = lineProduct.getProductId();
                     inputProduct.setProductLineId(lineId);
                 }
-                mergeHierarchyProduct(inputProduct, inputProductMap);
+
+                try {
+                    mergeHierarchyProduct(inputProduct, inputProductMap);
+                } catch (Exception exc) {
+                    mergeReport.put(ReportConstants.WARN_MESSAGE, exc.getMessage());
+                    throw exc;
+                }
             }
 
             if (inputProduct.getProductBundle() == null && inputProduct.getProductCategory() == null) {
@@ -467,37 +506,44 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
     }
 
     private Map<String, Integer> countProducts(List<Product> products) {
+        Set<String> productIdSet = new HashSet<>();
+        Set<String> productCategorySet = new HashSet<>();
+        Set<String> productBundleSet = new HashSet<>();
+        Set<String> productAnalyticSet = new HashSet<>();
+        Set<String> productSpendingSet = new HashSet<>();
+        Set<String> obsoleteProducts = new HashSet<>();
         Map<String, Integer> result = new HashMap<>();
-        int nBundle = 0, nHierarchy = 0, nAnalytic = 0, nSpending = 0;
 
-        for (Product product : products) {
-            if (product.getProductStatus().equals(ProductStatus.Obsolete.name())) {
-                continue;
+        products.forEach(product -> {
+            if (!product.getProductStatus().equals(ProductStatus.Obsolete.name())) {
+                if (product.getProductType().equals(ProductType.Bundle.name())) {
+                    productIdSet.add(product.getProductId());
+                    productBundleSet.add(product.getProductBundleId());
+                }
+
+                if (product.getProductType().equals(ProductType.Hierarchy.name())) {
+                    productIdSet.add(product.getProductId());
+                    productCategorySet.add(product.getProductCategoryId());
+                }
+
+                if (product.getProductType().equals(ProductType.Analytic.name())) {
+                    productAnalyticSet.add(product.getProductId());
+                }
+
+                if (product.getProductType().equals(ProductType.Spending.name())) {
+                    productSpendingSet.add(product.getProductId());
+                }
+            } else {
+                obsoleteProducts.add(product.getProductId());
             }
+        });
 
-            switch (ProductType.valueOf(product.getProductType())) {
-                case Bundle:
-                    nBundle ++;
-                    break;
-                case Analytic:
-                    nAnalytic ++;
-                    break;
-                case Hierarchy:
-                    nHierarchy ++;
-                    break;
-                case Spending:
-                    nSpending ++;
-                    break;
-                case Raw:
-                default:
-                    break;
-            }
-        }
-
-        result.put("nBundle", nBundle);
-        result.put("nHierarchy", nHierarchy);
-        result.put("nAnalytic", nAnalytic);
-        result.put("nSpending", nSpending);
+        result.put("nProductIds", productIdSet.size());
+        result.put("nProductBundles", productBundleSet.size());
+        result.put("nProductCategories", productCategorySet.size());
+        result.put("nProductAnalytics", productAnalyticSet.size());
+        result.put("nProductSpendings", productSpendingSet.size());
+        result.put("nObsoleteProducts", obsoleteProducts.size());
         return result;
     }
 
@@ -512,5 +558,15 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                     "Generating hashed productId based on productName=%s.", compositeId, productName));
             return HashUtils.getCleanedString(HashUtils.getShortHash(productName));
         }
+    }
+
+    @VisibleForTesting
+    public Map<String, Object> getMergeReport() {
+        return mergeReport;
+    }
+
+    @VisibleForTesting
+    public void setMergeReport(Map<String, Object> report) {
+        this.mergeReport = report;
     }
 }

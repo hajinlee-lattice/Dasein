@@ -107,9 +107,9 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
-    public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
-    public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
-    public static final String NEW_RECORDS = "NEW_RECORDS";
+    public static final String MERGED_PRODUCT_ID = "MERGED_PRODUCT_ID";
+    public static final String MERGED_PRODUCT_BUNDLE = "MERGED_PRODUCT_BUNDLE";
+    public static final String MERGED_PRODUCT_HIERARCHY = "MERGED_PRODUCT_HIERARCHY";
     public static final String FINAL_RECORDS = "FINAL_RECORDS";
 
     protected static final String CUSTOM_EVENT_IMPORT = "CUSTOM_EVENT_IMPORT";
@@ -133,7 +133,8 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     @Autowired
     protected WorkflowJobEntityMgr workflowJobEntityMgr;
 
-    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader = new MagicAuthenticationHeaderHttpRequestInterceptor();
+    protected MagicAuthenticationHeaderHttpRequestInterceptor addMagicAuthHeader =
+            new MagicAuthenticationHeaderHttpRequestInterceptor();
     protected List<ClientHttpRequestInterceptor> addMagicAuthHeaders = Arrays
             .asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader });
     protected RestTemplate restTemplate = HttpClientUtils.newRestTemplate();
@@ -174,7 +175,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected String getHdfsDir(String path) {
         String[] tokens = StringUtils.split(path, "/");
         String[] newTokens = null;
-        ;
+
         if (path.endsWith("avro")) {
             newTokens = new String[tokens.length - 1];
         } else {
@@ -209,8 +210,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
             return null;
         }
         InternalResourceRestApiProxy proxy = getInternalResourceProxy();
-        SourceFile sourceFile = proxy.findSourceFileByName(name, space.toString());
-        return sourceFile;
+        return proxy.findSourceFileByName(name, space.toString());
     }
 
     protected InternalResourceRestApiProxy getInternalResourceProxy() {
@@ -222,7 +222,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
         Map<String, String> map = getObjectFromContext(WorkflowContextConstants.REPORTS, Map.class);
 
         if (map == null) {
-            map = new HashMap<String, String>();
+            map = new HashMap<>();
         }
 
         map.put(report.getPurpose().getKey(), report.getName());

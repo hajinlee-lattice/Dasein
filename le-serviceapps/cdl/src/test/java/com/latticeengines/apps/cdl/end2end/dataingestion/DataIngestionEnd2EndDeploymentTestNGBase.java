@@ -631,9 +631,19 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                         .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
                 Assert.assertNotNull(consolidateSummaryNode);
-                Assert.assertTrue(consolidateSummaryNode.has("NEW"));
-                Assert.assertTrue(consolidateSummaryNode.has("DELETE"));
-                if (entity != BusinessEntity.Transaction) {
+
+                if (entity != BusinessEntity.Product) {
+                    Assert.assertTrue(consolidateSummaryNode.has("NEW"));
+                    Assert.assertTrue(consolidateSummaryNode.has("DELETE"));
+                } else {
+                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_ID"));
+                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_BUNDLE"));
+                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_HIERARCHY"));
+                    Assert.assertTrue(consolidateSummaryNode.has("ERROR_MESSAGE"));
+                    Assert.assertTrue(consolidateSummaryNode.has("WARN_MESSAGE"));
+                }
+
+                if (entity != BusinessEntity.Transaction && entity != BusinessEntity.Product) {
                     Assert.assertTrue(consolidateSummaryNode.has("UPDATE"));
                 }
                 if (entity == BusinessEntity.Account) {
