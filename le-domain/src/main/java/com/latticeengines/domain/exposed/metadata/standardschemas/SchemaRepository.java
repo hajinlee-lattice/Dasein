@@ -676,18 +676,19 @@ public class SchemaRepository {
                 .build());
         table.addAttribute(attr(InterfaceName.CreatedDate.name()) //
                 .allowedDisplayNames(Sets.newHashSet("CREATEDDATE", "CREATED_DATE")) //
-                .type(Schema.Type.LONG) //
+                .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.CreatedDate) //
+                .logicalType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
                 .build());
         table.addAttribute(attr(InterfaceName.LastModifiedDate.name()) //
-                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //
-                .type(Schema.Type.LONG) //
-                .logicalType(LogicalDataType.Timestamp)
+                .allowedDisplayNames(Sets.newHashSet("LASTMODIFIEDDATE", "LAST_MODIFIED_DATE", "LASTMODIFIED")) //)__
+                .type(Schema.Type.STRING) //
                 .interfaceName(InterfaceName.LastModifiedDate) //
+                .logicalType(LogicalDataType.Timestamp) //
                 .fundamentalType(FundamentalType.DATE.name()) //
-                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE) //
+                .approvedUsage(ModelingMetadata.NONE_APPROVED_USAGE)
                 .build());
         return table;
     }
