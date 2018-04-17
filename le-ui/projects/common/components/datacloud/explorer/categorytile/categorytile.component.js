@@ -47,8 +47,8 @@ angular
                     icon = category + (subcategory ? '-'+subcategory : '') + '.png';
                 
                 switch(category){
-                    case 'latticerating': {
-                        icon = 'latticerating.png';
+                    case 'latticeratings': {
+                        icon = 'latticeratings.png';
                         break;
                     }
                     case 'productspendprofile': {

@@ -9,7 +9,7 @@ angular
                 callback: '&?',
                 config: '=',
                 statcount: '=?',
-                enrichment:'=?'
+                enrichment: '=?'
 
             },
             templateUrl: '/components/charts/bar-chart.component.html',
@@ -17,12 +17,12 @@ angular
 
                 function getHighestStat(stats, fieldName) {
                     var highest = 0;
-                        if(stats){
-                            stats.forEach(function (stat) {
-                                if (stat[fieldName] > highest) {
-                                    highest = Number(stat[fieldName]);
-                                }
-                            });
+                    if (stats) {
+                        stats.forEach(function (stat) {
+                            if (stat[fieldName] > highest) {
+                                highest = Number(stat[fieldName]);
+                            }
+                        });
                     }
                     return highest;
                 }
@@ -43,9 +43,13 @@ angular
 
                 function getHorizontalPercentageSubDec(stat, field, limit) {
                     // var max = Math.ceil($scope.highest);
-                    var max = Math.round($scope.highest * 2) / 2;
+                    var max = Number(Math.round($scope.highest * 2) / 2);
+                    if (max < $scope.highest) {
+                        max = Number(Math.round(max));
+                    }
                     var val = stat[field];
                     if (max && val) {
+                        val = Number(val);
                         var percentage = (val * 100) / max;
                         return Number(percentage) + '%';
                     }
@@ -131,8 +135,8 @@ angular
                     /************************Data config ***********************/
                     $scope.tosort = $scope.config.data.tosort == undefined ? false : $scope.config.data.tosort;
                     $scope.sortBy = $scope.config.data.sortBy !== undefined ? $scope.config.data.sortBy : '-Cnt';
-                    $scope.trimData = $scope.config.data.trim  !== undefined ? $scope.config.data.trim : false;
-                    $scope.top = $scope.config.data.top  !== undefined ? $scope.config.data.top : 5;
+                    $scope.trimData = $scope.config.data.trim !== undefined ? $scope.config.data.trim : false;
+                    $scope.top = $scope.config.data.top !== undefined ? $scope.config.data.top : 5;
 
                     /***********************************************************/
 
@@ -140,7 +144,7 @@ angular
                     $scope.header = $scope.config.chart.header !== undefined ? $scope.config.chart.header : 'Header';
                     $scope.emptymsg = $scope.config.chart.emptymsg !== undefined ? $scope.config.chart.emptymsg : 'No Stats';
                     $scope.color = $scope.config.chart.color !== undefined ? $scope.config.chart.color : '#D0D1D0';
-                    $scope.usecolor = $scope.config.chart.usecolor!== undefined ? Boolean($scope.config.chart.usecolor) : true;
+                    $scope.usecolor = $scope.config.chart.usecolor !== undefined ? Boolean($scope.config.chart.usecolor) : true;
                     $scope.mousehover = $scope.config.chart.mousehover !== undefined ? $scope.config.chart.mousehover : false;
                     $scope.hovercolor = $scope.config.chart.hovercolor !== undefined ? $scope.config.chart.hovercolor : $scope.color;
                     $scope.chartType = $scope.config.chart.type !== undefined ? $scope.config.chart.type : 'decimal';
@@ -220,17 +224,17 @@ angular
                 }
 
                 $scope.getBarColor = function (stat) {
-                    if($scope.usecolor == true || $scope.getStatCount(stat) > 0){
+                    if ($scope.usecolor == true || $scope.getStatCount(stat) > 0) {
                         return $scope.color;
-                    }else{
+                    } else {
                         return "#939393";
                     }
                 }
 
-                $scope.getMouseOverColor = function(){
-                    if($scope.mousehover){
+                $scope.getMouseOverColor = function () {
+                    if ($scope.mousehover) {
                         return $scope.hovercolor;
-                    }else{
+                    } else {
                         return $scope.color;;
                     }
                 }
@@ -254,38 +258,79 @@ angular
                     }
                 }
 
+                // $scope.getVerticalLines = function () {
+                //     if ($scope.bktlist.length == 0) {
+                //         return [];
+                //     }
+                //     if ($scope.vertcalLines === undefined) {
+                //         var top = Math.round($scope.highest * 2) / 2;
+                //         if (top == 1) {
+                //             $scope.maxVLines = 2;
+                //         }
+
+                //         var lines = [];
+                //         var intervalPerc = 100 / $scope.maxVLines;
+                //         var intervalLabel = $scope.highest / $scope.maxVLines;
+                //         intervalLabel = Math.round(intervalLabel * 2) / 2;
+                //         for (var i = 0; i < $scope.maxVLines; i++) {
+                //             var perc = (intervalPerc * (i + 1));
+                //             var label = (intervalLabel * (i + 1));
+                //             lines.push({
+                //                 'perc': perc + '%',
+                //                 'label': label + $scope.vlinesSuffix
+                //             });
+                //         }
+                //         $scope.vertcalLines = lines;
+                //     }
+                //     return $scope.vertcalLines;
+                // }
+
                 $scope.getVerticalLines = function () {
                     if ($scope.bktlist.length == 0) {
                         return [];
                     }
                     if ($scope.vertcalLines === undefined) {
-                        var top = Math.round($scope.highest * 2) / 2;
-                        if (top == 1) {
-                            $scope.maxVLines = 2;
+                        var lines = [];
+                        var f = getColumnForGraph($scope.columns).field;
+                        var max = Number(Math.round($scope.highest * 2) / 2);
+                        if (max < $scope.highest) {
+                            max = Number(Math.round(max));
                         }
 
-                        var lines = [];
-                        var intervalPerc = 100 / $scope.maxVLines;
-                        var intervalLabel = $scope.highest / $scope.maxVLines;
-                        intervalLabel = Math.round(intervalLabel * 2) / 2;
-                        for (var i = 0; i < $scope.maxVLines; i++) {
-                            var perc = (intervalPerc * (i + 1));
-                            var label = (intervalLabel * (i + 1));
+                        if ($scope.bktlist.length == 1) {
                             lines.push({
-                                'perc': perc + '%',
-                                'label': label + $scope.vlinesSuffix
+                                'perc': Number(100 / 2) + '%',
+                                'label': (max / 2) + $scope.vlinesSuffix
                             });
+                            lines.push({
+                                'perc': 100 + '%',
+                                'label': max + $scope.vlinesSuffix
+                            });
+                        } else {
+                            var intervallRange = Number(max / $scope.maxVLines);
+
+                            for (var u = 0; u < $scope.maxVLines; u++) {
+                                var val = (intervallRange * (u + 1));
+                                val = Number(Math.round(val * 2) / 2);
+                                val = val.toFixed(1);
+                                var per = (100 * val) / max;
+                                lines.push({
+                                    'perc': per + '%',
+                                    'label': val + $scope.vlinesSuffix
+                                });
+                            }
+
                         }
                         $scope.vertcalLines = lines;
                     }
                     return $scope.vertcalLines;
                 }
 
-                $scope.getStatCount = function(stat){
-                    if($scope.vm){
+                $scope.getStatCount = function (stat) {
+                    if ($scope.vm) {
                         var count = $scope.vm.getAttributeRules($scope.enrichment, stat).length;
                         return count;
-                    }else{
+                    } else {
                         return 0;
                     }
                 }

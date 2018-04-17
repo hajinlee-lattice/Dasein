@@ -36,7 +36,10 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
 
     function getHorizontalPercentageSubDec(stat, field, highest, limit) {
       // var max = Math.ceil(this.highest);
-      var max = Math.round(highest * 2) / 2;
+      var max = Number(Math.round(highest * 2) / 2);
+      if (max < highest) {
+        max = Number(Math.round(max));
+      }
       var val = stat[field];
       if (max && val) {
         val = Number(val);
@@ -252,22 +255,36 @@ angular.module('le.widgets.barchart', []).component('leBarChart', {
         return [];
       }
       if (this.vertcalLines === undefined) {
-        var top = Math.round(this.highest * 2) / 2;
-        if (top == 1) {
-          this.maxVLines = 2;
-        }
-
         var lines = [];
-        var intervalPerc = 100 / this.maxVLines;
-        var intervalLabel = this.highest / this.maxVLines;
-        intervalLabel = Math.round(intervalLabel * 2) / 2;
-        for (var i = 0; i < this.maxVLines; i++) {
-          var perc = (intervalPerc * (i + 1));
-          var label = (intervalLabel * (i + 1));
+        var f = getColumnForGraph(this.columns).field;
+        var max = Math.round(this.highest * 2) / 2;
+        if (max < this.highest) {
+          max = Number(Math.round(max));
+        }
+      
+        if (this.bktlist.length.length == 1) {
           lines.push({
-            'perc': perc + '%',
-            'label': label + this.vlinesSuffix
+            'perc': Number(100 / 2) + '%',
+            'label': (max / 2) + this.vlinesSuffix
           });
+          lines.push({
+            'perc': 100 + '%',
+            'label': max + this.vlinesSuffix
+          });
+        } else {
+          var intervallRange = max / this.maxVLines;
+          
+          for (var u = 0; u < this.maxVLines; u++) {
+            var val = (intervallRange * (u+1));
+            val = val.toFixed(1);
+            // val = Math.round(val * 2)/2;
+            var per = (100 * val)/max;
+            lines.push({
+              'perc': per + '%',
+              'label': val + this.vlinesSuffix
+            });
+          }
+
         }
         this.vertcalLines = lines;
       }

@@ -48,7 +48,6 @@ angular
 
                 DataCloudStore.getEnrichments().then(function(enrichments) {
                     vm.enrichments = enrichments;
-                    
                     if (vm.tree.bucketRestriction) {
                         var bucket = vm.tree.bucketRestriction,
                             bucketEntity = bucket.attr.split('.')[0],
@@ -63,6 +62,7 @@ angular
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube.Bkts) {
+                                console.log('=========> ', vm.item);
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)

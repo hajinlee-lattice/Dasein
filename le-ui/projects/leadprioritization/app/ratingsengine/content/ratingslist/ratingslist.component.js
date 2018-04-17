@@ -123,6 +123,9 @@ angular.module('lp.ratingsengine.ratingslist', [
             vm.header.filter.unfiltered = vm.current.ratings;
 
             angular.forEach(vm.current.ratings, function(rating, key) {
+                if(rating.displayName === 'DS_Test_1stPur_0002_EV'){
+                    console.log(JSON.stringify(rating.bucketMetadata));
+                }
                 if(rating.type === 'CROSS_SELL' && rating.advancedRatingConfig) {
                     rating.tileClass = rating.advancedRatingConfig.cross_sell.modelingStrategy;
                 } else {

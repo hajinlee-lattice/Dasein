@@ -13,7 +13,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 var vm = $scope.vm;
                 vm.booleanChanged = false;
                 vm.presetOperation;
-                
+                console.log(vm.tree.bucketRestriction);
 
                 function showNumericalRange() {
                     switch (vm.numericalCmpModel) {
@@ -239,6 +239,10 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     } else {
                         return false;
                     }
+                }
+
+                vm.getEntity = function(){
+                    return vm.item.Entity;
                 }
 
                 //================= Numerical ==============================

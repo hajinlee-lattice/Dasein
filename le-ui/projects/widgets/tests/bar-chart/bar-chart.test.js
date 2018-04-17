@@ -124,7 +124,7 @@ angular.module('barchart.test', ['le.widgets.barchart'])
                             "mousehover": false,
                             "type": "decimal",
                             "showstatcount": false,
-                            "maxVLines": 3,
+                            "maxVLines": 4,
                             "showVLines": true
                         },
                         "vlines": {
@@ -143,47 +143,83 @@ angular.module('barchart.test', ['le.widgets.barchart'])
             }
             this.getBugData = function () {
                 if (this.data === undefined) {
+                    // this.data = [{
+                    //         "bucket_name": "A",
+                    //         "left_bound_score": 95,
+                    //         "right_bound_score": 85,
+                    //         "num_leads": 15,
+                    //         "lift": "20.5",
+                    //         "creation_timestamp": 1523337152898,
+                    //         "last_modified_by_user": "dipei.he@lattice-engines.com",
+                    //         "$$hashKey": "object:365"
+                    //     },
+                    //     {
+                    //         "bucket_name": "B",
+                    //         "left_bound_score": 84,
+                    //         "right_bound_score": 75,
+                    //         "num_leads": 79,
+                    //         "lift": "3.9",
+                    //         "creation_timestamp": 1523337152898,
+                    //         "last_modified_by_user": "dipei.he@lattice-engines.com",
+                    //         "$$hashKey": "object:366"
+                    //     },
+                    //     {
+                    //         "bucket_name": "C",
+                    //         "left_bound_score": 74,
+                    //         "right_bound_score": 50,
+                    //         "num_leads": 701,
+                    //         "lift": "3.1",
+                    //         "creation_timestamp": 1523337152898,
+                    //         "last_modified_by_user": "dipei.he@lattice-engines.com",
+                    //         "$$hashKey": "object:367"
+                    //     },
+                    //     {
+                    //         "bucket_name": "D",
+                    //         "left_bound_score": 49,
+                    //         "right_bound_score": 5,
+                    //         "num_leads": 3823,
+                    //         "lift": "0.5",
+                    //         "creation_timestamp": 1523337152898,
+                    //         "last_modified_by_user": "dipei.he@lattice-engines.com",
+                    //         "$$hashKey": "object:368"
+                    //     }
+                    // ]
                     this.data = [{
-                            "bucket_name": "A",
-                            "left_bound_score": 95,
-                            "right_bound_score": 85,
-                            "num_leads": 15,
-                            "lift": "20.5",
-                            "creation_timestamp": 1523337152898,
-                            "last_modified_by_user": "dipei.he@lattice-engines.com",
-                            "$$hashKey": "object:365"
-                        },
-                        {
-                            "bucket_name": "B",
-                            "left_bound_score": 84,
-                            "right_bound_score": 75,
-                            "num_leads": 79,
-                            "lift": "3.9",
-                            "creation_timestamp": 1523337152898,
-                            "last_modified_by_user": "dipei.he@lattice-engines.com",
-                            "$$hashKey": "object:366"
-                        },
-                        {
-                            "bucket_name": "C",
-                            "left_bound_score": 74,
-                            "right_bound_score": 50,
-                            "num_leads": 701,
-                            "lift": "3.1",
-                            "creation_timestamp": 1523337152898,
-                            "last_modified_by_user": "dipei.he@lattice-engines.com",
-                            "$$hashKey": "object:367"
-                        },
-                        {
-                            "bucket_name": "D",
-                            "left_bound_score": 49,
-                            "right_bound_score": 5,
-                            "num_leads": 3823,
-                            "lift": "0.5",
-                            "creation_timestamp": 1523337152898,
-                            "last_modified_by_user": "dipei.he@lattice-engines.com",
-                            "$$hashKey": "object:368"
-                        }
-                    ]
+                        "bucket_name": "A",
+                        "left_bound_score": 95,
+                        "right_bound_score": 85,
+                        "num_leads": 5,
+                        "lift": 0,
+                        "creation_timestamp": 1523414446993,
+                        "last_modified_by_user": "dipei.he@lattice-engines.com"
+                    },
+                    {
+                        "bucket_name": "B",
+                        "left_bound_score": 84,
+                        "right_bound_score": 75,
+                        "num_leads": 166,
+                        "lift": 1.6644011945216763,
+                        "creation_timestamp": 1523414446993,
+                        "last_modified_by_user": "dipei.he@lattice-engines.com"
+                    },
+                    {
+                        "bucket_name": "C",
+                        "left_bound_score": 74,
+                        "right_bound_score": 50,
+                        "num_leads": 855,
+                        "lift": 0.4154745838956365,
+                        "creation_timestamp": 1523414446993,
+                        "last_modified_by_user": "dipei.he@lattice-engines.com"
+                    },
+                    {
+                        "bucket_name": "D",
+                        "left_bound_score": 49,
+                        "right_bound_score": 5,
+                        "num_leads": 3592,
+                        "lift": 1.109821445567548,
+                        "creation_timestamp": 1523414446993,
+                        "last_modified_by_user": "dipei.he@lattice-engines.com"
+                    }];
                 }
                 return this.data;
             }
@@ -206,7 +242,7 @@ angular.module('barchart.test', ['le.widgets.barchart'])
                             'hovercolor': '#77aae5',
                             'type': 'decimal',
                             'showstatcount': true,
-                            'maxVLines': 3,
+                            'maxVLines': 4,
                             'showVLines': true
                         },
                         'vlines': {
@@ -241,7 +277,7 @@ angular.module('barchart.test', ['le.widgets.barchart'])
                             'hovercolor': '#77aae5',
                             'type': 'decimal',
                             'showstatcount': true,
-                            'maxVLines': 3,
+                            'maxVLines': 4,
                             'showVLines': true
                         },
                         'vlines': {
