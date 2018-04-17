@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,7 +132,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
 
         createReportJson();
-        updateActions();
         setRebuildEntities();
         setupInactiveVersion();
         String namespace = String.format("%s.%s.%s", getParentNamespace(), redshiftPublishWorkflow.name(),
@@ -206,14 +204,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
             entityImportsMap.get(entity).add(i);
         });
         putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
-    }
-
-    private void updateActions() {
-        List<Long> actionIds = configuration.getActionIds();
-        log.info(String.format("Updating actions=%s", Arrays.toString(actionIds.toArray())));
-        if (CollectionUtils.isNotEmpty(actionIds)) {
-            actionProxy.patchOwnerIdByPids(configuration.getCustomerSpace().toString(), jobId, actionIds);
-        }
     }
 
     private void addActionAssociateTables() {

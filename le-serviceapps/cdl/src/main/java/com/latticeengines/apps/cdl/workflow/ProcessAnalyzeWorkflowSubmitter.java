@@ -64,9 +64,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private static final Logger log = LoggerFactory.getLogger(ProcessAnalyzeWorkflowSubmitter.class);
 
-    // Special owner id for actions whose actual owner Id is not known yet
-    private static final Long UNKNOWN_OWNER_ID = 0L;
-
     @Value("${aws.s3.bucket}")
     private String s3Bucket;
 
@@ -87,7 +84,8 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
-            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService, BatonService batonService) {
+            WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
+            BatonService batonService) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
@@ -128,7 +126,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
         try {
             Pair<List<Long>, List<Long>> actionAndJobIds = getActionAndJobIds(customerSpace);
-            updateActions(customerSpace, actionAndJobIds.getLeft());
+            updateActions(customerSpace, actionAndJobIds.getLeft(), pidWrapper.getPid());
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
@@ -182,13 +180,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return idPair;
     }
 
-    // update actions with place holder owner Id to minimize the discrepancy
-    // issue of jobs page in UI
-    private void updateActions(String customerSpace, List<Long> actionIds) {
+    private void updateActions(String customerSpace, List<Long> actionIds, Long workflowPid) {
         log.info(String.format("Updating actions=%s with place holder ownerId=%d", Arrays.toString(actionIds.toArray()),
-                UNKNOWN_OWNER_ID));
+                workflowPid));
         if (CollectionUtils.isNotEmpty(actionIds)) {
-            actionService.patchOwnerIdByPids(UNKNOWN_OWNER_ID, actionIds);
+            actionService.patchOwnerIdByPids(workflowPid, actionIds);
         }
     }
 
