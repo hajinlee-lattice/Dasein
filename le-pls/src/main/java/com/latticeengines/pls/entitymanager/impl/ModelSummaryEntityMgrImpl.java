@@ -535,4 +535,10 @@ public class ModelSummaryEntityMgrImpl extends BaseEntityMgrImpl<ModelSummary> i
         return modelSummaryList;
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public boolean hasBucketMetadata(String modelId) {
+        return modelSummaryDao.hasBucketMetadata(modelId);
+    }
+
 }

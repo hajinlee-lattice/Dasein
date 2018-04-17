@@ -223,7 +223,7 @@ public class ModelSummaryServiceImplTestNG extends PlsFunctionalTestNGBase {
         assertEquals(category, Category.ACCOUNT_INFORMATION.getName());
     }
 
-    @Test(groups = "functional")
+    @Test(groups = "functional", enabled = false)
     private void createRatingForModel()
     {
         ModelSummary testSummary = modelSummaryService.getModelSummary(summary1.getId());

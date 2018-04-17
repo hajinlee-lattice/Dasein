@@ -4,13 +4,15 @@ import java.util.List;
 
 import javax.persistence.Table;
 
-import org.hibernate.query.Query;
+import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.query.Query;
 import org.hibernate.type.StringType;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
+import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelSummaryStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -209,7 +211,18 @@ public class ModelSummaryDaoImpl extends BaseDaoImpl<ModelSummary> implements Mo
         Query query = session.createQuery(queryStr);
         query.setLong("currentTime", System.currentTimeMillis());
         query.setLong("timeFrame", timeFrame);
+        return query.list();
+    }
+
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public boolean hasBucketMetadata(String modelId) {
+        Session session = getSessionFactory().getCurrentSession();
+        String queryStr = String.format("from %s bm where bm.modelSummary.id = :modelId",
+                BucketMetadata.class.getSimpleName());
+        Query query = session.createQuery(queryStr);
+        query.setParameter("modelId", modelId);
         List list = query.list();
-        return list;
+        return CollectionUtils.isNotEmpty(list);
     }
 }

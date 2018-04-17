@@ -34,4 +34,6 @@ public interface ModelSummaryDao extends BaseDao<ModelSummary> {
 
     List<ModelSummary> getModelSummariesModifiedWithinTimeFrame(long timeFrame);
 
+    boolean hasBucketMetadata(String modelId);
+
 }
