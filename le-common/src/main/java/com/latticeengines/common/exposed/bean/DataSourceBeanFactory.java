@@ -129,7 +129,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
             JndiTemplate jndiTemplate = new JndiTemplate();
             return jndiTemplate.lookup(jndiName, DataSource.class);
         } catch (Exception e) {
-            log.warn("Cannot read jndi datasource named " + jndiName, e);
+            // As this is expected warning message on QA and Prod, we no need to log the full exception trace
+            log.warn("Cannot read jndi datasource named:{}, Reason: {}", jndiName, e.getMessage());
             return null;
         }
     }
