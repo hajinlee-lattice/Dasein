@@ -13,6 +13,8 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class EventFrontEndQuery extends FrontEndQuery {
+    @JsonProperty(FrontEndQueryConstants.SEGMENT_QUERY)
+    private FrontEndQuery segmentQuery;
 
     @JsonProperty(FrontEndQueryConstants.PERIOD_NAME)
     private String periodName;
@@ -31,6 +33,10 @@ public class EventFrontEndQuery extends FrontEndQuery {
 
     @JsonProperty(FrontEndQueryConstants.LAGGING_PERIOD_COUNT)
     private int laggingPeriodCount = 1;
+
+    public FrontEndQuery getSegmentQuery() {
+        return segmentQuery;
+    }
 
     public String getPeriodName() {
         return periodName;

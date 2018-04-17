@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.query.frontend;
 public class FrontEndQueryConstants {
     public static final String PREEXISTING_SEGMENT_NAME = "preexisting_segment_name";
 
+    public static final String SEGMENT_QUERY = "segment_query";
+
     public static final String MAIN_ENTITY = "main_entity";
 
     public static final String LOOKUPS = "lookups";

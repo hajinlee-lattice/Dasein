@@ -17,7 +17,9 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.Sort;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.latticeengines.query.exposed.translator.EventQueryTranslator;
 
@@ -27,7 +29,8 @@ public class ModelingQueryTranslator extends QueryTranslator {
         super(queryFactory, repository);
     }
 
-    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType) {
+    public Query translateModelingEvent(EventFrontEndQuery frontEndQuery, EventType eventType,
+                                        TimeFilterTranslator timeTranslator) {
         FrontEndRestriction frontEndRestriction = getEntityFrontEndRestriction(BusinessEntity.Account, frontEndQuery);
 
         if (frontEndRestriction == null || frontEndRestriction.getRestriction() == null) {
@@ -38,6 +41,13 @@ public class ModelingQueryTranslator extends QueryTranslator {
         QueryBuilder queryBuilder = Query.builder();
         Restriction restriction = translateFrontEndRestriction(frontEndRestriction);
         restriction = translateInnerRestriction(frontEndQuery, BusinessEntity.Account, restriction);
+
+        if (frontEndQuery.getSegmentQuery() != null) {
+            Restriction segmentRestriction = translateSegmentQuery(
+                frontEndQuery.getSegmentQuery(), timeTranslator, queryBuilder);
+            restriction = Restriction.builder().and(segmentRestriction, restriction).build();
+        }
+
         setTargetProducts(restriction, frontEndQuery.getTargetProductIds());
 
         switch (eventType) {
@@ -74,6 +84,17 @@ public class ModelingQueryTranslator extends QueryTranslator {
         }
 
         return queryBuilder.build();
+    }
+
+    private Restriction translateSegmentQuery(FrontEndQuery segmentQuery,
+                                              TimeFilterTranslator timeTranslator,
+                                              QueryBuilder queryBuilder) {
+        FrontEndRestriction segmentAccountRestriction = getEntityFrontEndRestriction(BusinessEntity.Account,
+                                                                                     segmentQuery);
+        Restriction segmentRestriction = translateFrontEndRestriction(
+            BusinessEntity.Account, segmentAccountRestriction, queryBuilder, timeTranslator);
+        segmentRestriction = translateInnerRestriction(segmentQuery, BusinessEntity.Account, segmentRestriction);
+        return segmentRestriction;
     }
 
     private void setTargetProducts(Restriction rootRestriction, List<String> targetProducts) {

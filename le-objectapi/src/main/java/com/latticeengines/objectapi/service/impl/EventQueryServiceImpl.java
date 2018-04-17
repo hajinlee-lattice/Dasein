@@ -15,7 +15,9 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.EventType;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.EventQueryService;
+import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.objectapi.util.ModelingQueryTranslator;
 import com.latticeengines.objectapi.util.QueryServiceUtils;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
@@ -28,9 +30,12 @@ public class EventQueryServiceImpl implements EventQueryService {
 
     private final QueryEvaluatorService queryEvaluatorService;
 
+    private final TransactionService transactionService;
+
     @Inject
-    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService) {
+    public EventQueryServiceImpl(QueryEvaluatorService queryEvaluatorService, TransactionService transactionService) {
         this.queryEvaluatorService = queryEvaluatorService;
+        this.transactionService = transactionService;
     }
 
     @Override
@@ -71,7 +76,9 @@ public class EventQueryServiceImpl implements EventQueryService {
         try {
             ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
                     queryEvaluatorService.getQueryFactory(), attrRepo);
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
+            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
+                    transactionService, frontEndQuery.getSegmentQuery());
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
             return queryEvaluatorService.getCount(attrRepo, query);
         } catch (Exception e) {
             log.error("Failed to execute query!", e);
@@ -86,7 +93,9 @@ public class EventQueryServiceImpl implements EventQueryService {
         try {
             ModelingQueryTranslator queryTranslator = new ModelingQueryTranslator(
                     queryEvaluatorService.getQueryFactory(), attrRepo);
-            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType);
+            TimeFilterTranslator timeTranslator = QueryServiceUtils.getTimeFilterTranslator(
+                    transactionService, frontEndQuery.getSegmentQuery());
+            Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
             return queryEvaluatorService.getData(attrRepo, query);
         } catch (Exception e) {
             log.error("Failed to execute query!", e);

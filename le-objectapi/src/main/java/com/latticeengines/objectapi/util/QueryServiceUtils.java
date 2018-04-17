@@ -5,6 +5,9 @@ import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
+import com.latticeengines.objectapi.service.TransactionService;
 import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
 
 public class QueryServiceUtils {
@@ -17,5 +20,14 @@ public class QueryServiceUtils {
             throw new LedpException(LedpCode.LEDP_37015, new Object[]{ tenant, version });
         }
         return attrRepo;
+    }
+
+    static public TimeFilterTranslator getTimeFilterTranslator(TransactionService transactionService,
+                                                               FrontEndQuery frontEndQuery) {
+        if (frontEndQuery != null && transactionService.hasTransactionBucket(frontEndQuery)) {
+            return transactionService.getTimeFilterTranslator(frontEndQuery.getEvaluationDateStr());
+        } else {
+            return null;
+        }
     }
 }
