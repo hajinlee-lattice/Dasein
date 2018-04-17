@@ -3,7 +3,6 @@ package com.latticeengines.domain.exposed.pls;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -85,7 +84,7 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     );
 
     // needed for both prediction types
-    public static final List<ScoreType> COMMON_SCORES = Arrays.asList(ScoreType.Probability, ScoreType.NormalizedScore);
+    public static final List<ScoreType> COMMON_SCORES = Collections.singletonList(ScoreType.NormalizedScore);
 
     // needed for ev models
     public static final List<ScoreType> EV_SCORES = Collections.singletonList(ScoreType.ExpectedRevenue);
