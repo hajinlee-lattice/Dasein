@@ -225,7 +225,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private void verifyDecoratedMetadata() {
         List<ColumnMetadata> ratingMetadata = getFullyDecoratedMetadata(BusinessEntity.Rating);
-        Assert.assertEquals(ratingMetadata.size(), 10, JsonUtils.serialize(ratingMetadata));
+        Assert.assertEquals(ratingMetadata.size(), 12, JsonUtils.serialize(ratingMetadata));
     }
 
     private ProcessAnalyzeRequest constructRequest() {
