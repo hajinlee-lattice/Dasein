@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.rating;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
@@ -18,11 +19,11 @@ import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilder {
 
@@ -85,25 +86,29 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
 
-            productTxnRestriction = new BucketRestriction(attrLookup,
-                    Bucket.txnBkt(new Bucket.Transaction(productIds,
-                            TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()),
-                            null, null, false)));
+            TransactionRestriction notPurchasedInPastXPeriods = new TransactionRestriction(productIds,
+                    TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()), false,
+                    null, null);
+
+            TransactionRestriction purchasedInNextPeriod = new TransactionRestriction(productIds,
+                    new TimeFilter(ComparisonType.FOLLOWING, PeriodStrategy.Template.Month.name(), Arrays.asList(1, 1)),
+                    false, spentFilter, unitsFilter);
+
+            productTxnRestriction = Restriction.builder() //
+                    .and(notPurchasedInPastXPeriods, purchasedInNextPeriod) //
+                    .build();
             break;
         case CROSS_SELL_FIRST_PURCHASE:
-            if (unitsFilter == null && spentFilter == null) {
-                txn = new Bucket.Transaction(productIds, TimeFilter.ever(), null, null, true);
-                productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
-            } else {
-                Bucket txnBkt1 = Bucket.txnBkt(new Bucket.Transaction(productIds,
-                        TimeFilter.priorOnly(1, PeriodStrategy.Template.Month.name()), null, null, true));
-                Bucket txnBkt2 = Bucket.txnBkt(new Bucket.Transaction(productIds,
-                        new TimeFilter(ComparisonType.IN_CURRENT_PERIOD, PeriodStrategy.Template.Month.name(), null),
-                        spentFilter, unitsFilter, false));
-                productTxnRestriction = Restriction.builder()
-                        .and(new BucketRestriction(attrLookup, txnBkt1), new BucketRestriction(attrLookup, txnBkt2))
-                        .build();
-            }
+            TransactionRestriction neverPurchasedIncludingCurrent = new TransactionRestriction(productIds,
+                    TimeFilter.ever(PeriodStrategy.Template.Month.name()), true, null, null);
+
+            purchasedInNextPeriod = new TransactionRestriction(productIds,
+                    new TimeFilter(ComparisonType.FOLLOWING, PeriodStrategy.Template.Month.name(), Arrays.asList(1, 1)),
+                    true, spentFilter, unitsFilter);
+
+            productTxnRestriction = Restriction.builder() //
+                    .and(neverPurchasedIncludingCurrent, purchasedInNextPeriod) //
+                    .build();
             break;
         default:
             throw new LedpException(LedpCode.LEDP_40017);
