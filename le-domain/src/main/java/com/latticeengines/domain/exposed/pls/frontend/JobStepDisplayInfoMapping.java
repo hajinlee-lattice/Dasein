@@ -32,6 +32,7 @@ public final class JobStepDisplayInfoMapping {
     private static final String[] IMPORT_MATCH_AND_MODEL_STEPS = { //
             "load_data", //
             "load_data", //
+            "load_data", //
             "generate_insights", //
             "generate_insights", //
             "generate_insights", //
@@ -39,6 +40,8 @@ public final class JobStepDisplayInfoMapping {
             "generate_insights", //
             "generate_insights", //
             "generate_insights", //
+            "generate_insights", //
+            "generate_insights", //
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
@@ -55,6 +58,9 @@ public final class JobStepDisplayInfoMapping {
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
+            "score_training_set", //
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //
@@ -105,6 +111,9 @@ public final class JobStepDisplayInfoMapping {
     private static final String[] MODEL_AND_EMAIL_STEPS = { //
             "load_data", //
             "load_data", //
+            "load_data", //
+            "generate_insights", //
+            "generate_insights", //
             "generate_insights", //
             "generate_insights", //
             "create_global_target_market", //
@@ -123,6 +132,8 @@ public final class JobStepDisplayInfoMapping {
             "create_global_target_market", //
             "create_global_target_market", //
             "create_global_target_market", //
+            "create_global_target_market", //
+            "create_global_target_market", //
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //
@@ -132,7 +143,8 @@ public final class JobStepDisplayInfoMapping {
             "score_training_set", //
             "score_training_set", //
             "score_training_set", //
-            "score_training_set" //
+            "score_training_set", //
+            "score_training_set"
     };
 
     private static final String[] RATING_MODEL_AND_EMAIL_STEPS = { //
@@ -178,8 +190,9 @@ public final class JobStepDisplayInfoMapping {
             "launch_play" //
     };
 
-    private static final String[] EXPORT_SEGMENT_STEPS = { //
-            "Segment Export" //
+    private static final String[] SEGMENT_EXPORT_STEPS = { //
+            "segment_export_init", //
+            "export_data"
     };
 
     private static final String[] PROCESS_ANALYZE_STEPS = { //
@@ -321,50 +334,111 @@ public final class JobStepDisplayInfoMapping {
     };
 
     private static final String[] CUSTOM_EVENT_MODELING_STEPS = {
-            "load_data",
-            "load_data",
-            "load_data",
-            "load_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "match_data",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "create_global_model",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
-            "score_training_set",
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "load_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "create_global_model", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
             "score_training_set"
+    };
+
+    private static final String[] CDL_OPERATION_STEPS = {
+            "delete_file_upload", //
+            "delete_file_upload", //
+            "delete_file_upload", //
+            "start_maintenance", //
+            "start_maintenance", //
+            "start_maintenance", //
+            "cleanup_by_upload", //
+            "cleanup_by_upload", //
+            "cleanup_by_upload", //
+            "operation_execute", //
+            "operation_execute", //
+            "operation_execute"
+    };
+
+    private static final String[] IMPORT_AND_RTS_BULK_SCORE_STEPS = {
+            "import_data", //
+            "import_data", //
+            "create_table_import_report", //
+            "create_table_import_report", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set", //
+            "score_training_set"
+    };
+
+    private static final String[] SCORE_STEPS = {
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "match_data", //
+            "score_data", //
+            "score_data", //
+            "score_data", //
+            "score_data"
     };
 
     private static final Map<String, String[]> DISPLAY_NAME = new HashMap<>();
@@ -378,12 +452,15 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_NAME.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_NAME.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_NAME.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
-        DISPLAY_NAME.put("segmentExportWorkflow", EXPORT_SEGMENT_STEPS);
+        DISPLAY_NAME.put("segmentExportWorkflow", SEGMENT_EXPORT_STEPS);
         DISPLAY_NAME.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_NAME.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_NAME.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
         DISPLAY_NAME.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
         DISPLAY_NAME.put("customEventModelingWorkflow", CUSTOM_EVENT_MODELING_STEPS);
+        DISPLAY_NAME.put("cdlOperationWorkflow", CDL_OPERATION_STEPS);
+        DISPLAY_NAME.put("importAndRTSBulkScoreWorkflow", IMPORT_AND_RTS_BULK_SCORE_STEPS);
+        DISPLAY_NAME.put("scoreWorkflow", SCORE_STEPS);
 
         DISPLAY_DESCRIPTION.put("fitModelWorkflow", FIT_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndModelWorkflow", IMPORT_MATCH_AND_MODEL_STEPS);
@@ -393,12 +470,15 @@ public final class JobStepDisplayInfoMapping {
         DISPLAY_DESCRIPTION.put("modelAndEmailWorkflow", MODEL_AND_EMAIL_STEPS);
         DISPLAY_DESCRIPTION.put("pmmlModelWorkflow", PMML_MODEL_STEPS);
         DISPLAY_DESCRIPTION.put("playLaunchWorkflow", PLAY_LAUNCH_STEPS);
-        DISPLAY_DESCRIPTION.put("segmentExportWorkflow", EXPORT_SEGMENT_STEPS);
+        DISPLAY_DESCRIPTION.put("segmentExportWorkflow", SEGMENT_EXPORT_STEPS);
         DISPLAY_DESCRIPTION.put("processAnalyzeWorkflow", PROCESS_ANALYZE_STEPS);
         DISPLAY_DESCRIPTION.put("rtsBulkScoreWorkflow", RTS_BULK_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("cdlDataFeedImportWorkflow", CDL_DATA_FEED_IMPORT_STEPS);
         DISPLAY_DESCRIPTION.put("importMatchAndScoreWorkflow", IMPORT_MATCH_AND_SCORE_STEPS);
         DISPLAY_DESCRIPTION.put("customEventModelingWorkflow", CUSTOM_EVENT_MODELING_STEPS);
+        DISPLAY_DESCRIPTION.put("cdlOperationWorkflow", CDL_OPERATION_STEPS);
+        DISPLAY_DESCRIPTION.put("importAndRTSBulkScoreWorkflow", IMPORT_AND_RTS_BULK_SCORE_STEPS);
+        DISPLAY_DESCRIPTION.put("scoreWorkflow", SCORE_STEPS);
     }
 
     public static String getMappedName(String workflowType, int stepIndex) {
@@ -406,9 +486,6 @@ public final class JobStepDisplayInfoMapping {
             String[] steps = DISPLAY_NAME.get(workflowType);
             return steps[stepIndex];
         } catch (RuntimeException exc) {
-//            log.warn(
-//                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
-//                    exc);
             return "no_mapped_step_name";
         }
     }
@@ -418,9 +495,6 @@ public final class JobStepDisplayInfoMapping {
             String[] steps = DISPLAY_DESCRIPTION.get(workflowType);
             return steps[stepIndex];
         } catch (RuntimeException exc) {
-//            log.warn(
-//                    String.format("Have runtime error for workflow of type %s, at step %d.", workflowType, stepIndex),
-//                    exc);
             return "no_mapped_step_description";
         }
     }
