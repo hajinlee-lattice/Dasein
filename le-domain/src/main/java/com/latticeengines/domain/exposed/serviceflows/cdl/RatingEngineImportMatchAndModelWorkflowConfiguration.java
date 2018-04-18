@@ -243,6 +243,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             addStandardAttributes.setTransforms(stdTransformDefns);
             ratingEngineScoreWorkflowBuilder.transformationGroup(transformationGroup);
             ratingEngineScoreWorkflowBuilder.transformDefinitions(stdTransformDefns);
+            generateAIRating.transformationGroup(transformationGroup, stdTransformDefns);
             cdlModelWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }
