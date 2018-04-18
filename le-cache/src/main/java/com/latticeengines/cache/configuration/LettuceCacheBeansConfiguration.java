@@ -28,6 +28,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext.SerializationPair;
@@ -54,6 +55,12 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
     @Value("${cache.type}")
     private String cacheType;
+
+    @Value("${cache.use.aws.redis}")
+    private boolean useAwsRedis;
+
+    @Value("${cache.redis.command.timeout.min}")
+    private int redisTimeout;
 
     @Bean
     @Lazy
@@ -145,6 +152,13 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         // END: objectapi proxy
         // =====================
 
+        RedisCacheConfiguration servingMetadataCache = RedisCacheConfiguration.defaultCacheConfig()//
+                .entryTtl(Duration.ofDays(ttl)) //
+                .disableCachingNullValues() //
+                .serializeKeysWith(SerializationPair.fromSerializer(new StringRedisSerializer())) //
+                .serializeValuesWith(SerializationPair.fromSerializer(getValueSerializer())) //
+                .prefixKeysWith(getPrefix(CacheName.Constants.ServingMetadataCacheName));
+
         RedisCacheConfiguration tableRoleMetadataCacheConfig = RedisCacheConfiguration.defaultCacheConfig()//
                 .entryTtl(Duration.ofDays(ttl)) //
                 .disableCachingNullValues() //
@@ -169,6 +183,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         cacheConfigs.put(CacheName.Constants.EntityDataCacheName, entityDataCacheConfig);
         cacheConfigs.put(CacheName.Constants.EntityRatingCountCacheName, entityRatingCountCacheConfig);
         cacheConfigs.put(CacheName.Constants.RatingCoverageCacheName, ratingCoverageCacheConfig);
+        cacheConfigs.put(CacheName.Constants.ServingMetadataCacheName, servingMetadataCache);
         cacheConfigs.put(CacheName.Constants.TableRoleMetadataCacheName, tableRoleMetadataCacheConfig);
 
         cacheConfigs.put(CacheName.Constants.DataCloudVersionCacheName, dataCloudVersionCacheConfig);
@@ -216,19 +231,27 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
 
     @Bean
     public RedisConnectionFactory lettuceConnectionFactory() {
-        LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
-                elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
+        RedisConnectionFactory factory;
 
-        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
-                .readFrom(ReadFrom.SLAVE_PREFERRED)//
-                .commandTimeout(Duration.ofMinutes(1))//
-                .shutdownTimeout(Duration.ZERO) //
-                .useSsl() //
-                .and() //
-                .build();
+        if (useAwsRedis) {
+            LedpMasterSlaveConfiguration masterSlave = new LedpMasterSlaveConfiguration(
+                    elastiCacheService.getNodeAddresses().stream().map(RedisURI::create).collect(Collectors.toList()));
 
-        LedpLettuceConnectionFactory factory = new LedpLettuceConnectionFactory(masterSlave, clientConfig);
-        factory.afterPropertiesSet();
+            LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+                    .readFrom(ReadFrom.SLAVE_PREFERRED)//
+                    .commandTimeout(Duration.ofMinutes(redisTimeout))//
+                    .shutdownTimeout(Duration.ZERO) //
+                    .useSsl() //
+                    .and() //
+                    .build();
+
+            LedpLettuceConnectionFactory lettuceFactory = new LedpLettuceConnectionFactory(masterSlave, clientConfig);
+            lettuceFactory.afterPropertiesSet();
+            factory = lettuceFactory;
+        } else {
+            factory = new LettuceConnectionFactory();
+        }
+
         return factory;
     }
 

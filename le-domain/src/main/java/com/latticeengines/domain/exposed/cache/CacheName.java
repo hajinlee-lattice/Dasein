@@ -15,6 +15,7 @@ public enum CacheName {
     TimeTranslatorCache(Constants.TimeTranslatorCacheName), //
     JobsCache(Constants.JobsCacheName), //
     MetadataCache(Constants.MetadataCacheName), //
+    ServingMetadataCache(Constants.ServingMetadataCacheName), //
     TableRoleMetadataCache(Constants.TableRoleMetadataCacheName), //
 
     DataCloudCMCache(Constants.DataCloudCMCacheName), //
@@ -46,6 +47,7 @@ public enum CacheName {
                 EntityDataCache, //
                 EntityRatingCountCache, //
                 RatingCoverageCache, //
+                ServingMetadataCache, //
                 TableRoleMetadataCache
         };
     }
@@ -72,6 +74,7 @@ public enum CacheName {
         public static final String DataCloudCMCacheName = "DataCloudCMCacheM19";
         public static final String DataCloudStatsCacheName = "DataCloudStatsCache";
         public static final String DataCloudVersionCacheName = "DataCloudVersionCache";
+        public static final String ServingMetadataCacheName = "ServingMetadataCache";
         public static final String TableRoleMetadataCacheName = "TableRoleMetadataCache";
     }
 }

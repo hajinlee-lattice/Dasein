@@ -6,8 +6,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -101,12 +99,11 @@ public abstract class CDLDeploymentTestNGBase extends AbstractTestNGSpringContex
     @Value("${camille.zk.pod.id}")
     private String podId;
 
-    protected void setupTestEnvironment() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironment() {
         setupTestEnvironment(null);
     }
 
-    protected void setupTestEnvironment(String existingTenant)
-            throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    protected void setupTestEnvironment(String existingTenant) {
 
         if (!StringUtils.isEmpty(existingTenant)) {
             testBed.useExistingTenantAsMain(existingTenant);

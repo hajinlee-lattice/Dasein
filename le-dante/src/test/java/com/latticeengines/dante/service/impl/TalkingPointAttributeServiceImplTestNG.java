@@ -63,6 +63,11 @@ public class TalkingPointAttributeServiceImplTestNG extends AbstractTestNGSpring
             }
 
             @Override
+            public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity) {
+                return null;
+            }
+
+            @Override
             public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity,
                     List<ColumnSelection.Predefined> groups) {
                 return null;

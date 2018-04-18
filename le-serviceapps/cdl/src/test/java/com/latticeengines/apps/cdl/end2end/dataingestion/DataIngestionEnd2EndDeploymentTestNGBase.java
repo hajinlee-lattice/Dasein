@@ -923,7 +923,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     List<ColumnMetadata> getFullyDecoratedMetadata(BusinessEntity entity) {
-        return servingStoreProxy.getDecoratedMetadata(mainCustomerSpace, entity).collectList().block();
+        return servingStoreProxy.getDecoratedMetadataFromCache(mainCustomerSpace, entity);
     }
 
     void verifyUpdateActions() {
@@ -950,7 +950,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return calendar;
     }
 
-    protected void setupBusinessCalendar() {
+    void setupBusinessCalendar() {
         periodProxy.saveBusinessCalendar(mainTestTenant.getId(), createBusinessCalendar());
     }
 

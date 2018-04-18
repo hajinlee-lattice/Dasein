@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.MetadataSegmentService;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 
 @Service("metadataSegmentService")
 public class MetadataSegmentServiceImpl implements MetadataSegmentService {
@@ -33,10 +34,13 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
 
     private final ActionService actionService;
 
+    private final ServingStoreCacheService servingStoreCacheService;
+
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService, ServingStoreCacheService servingStoreCacheService) {
         this.segmentProxy = segmentProxy;
         this.actionService = actionService;
+        this.servingStoreCacheService = servingStoreCacheService;
     }
 
     @Override
@@ -101,6 +105,7 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         } catch (Exception e) {
             log.warn("Failed to update entity counts for segment " + segment.getName());
         }
+        clearRatingCache();
         return updatedSegment;
     }
 
@@ -178,6 +183,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
             }
             actionService.create(action);
         }
+    }
+
+    private void clearRatingCache() {
+        String tenantId = MultiTenantContext.getTenantId();
+        servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
     }
 
 }

@@ -80,6 +80,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
+            initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
         } else {
             setupEnd2EndTestEnvironment();
             setupBusinessCalendar();

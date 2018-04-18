@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -22,6 +25,9 @@ import reactor.core.publisher.Mono;
 @Component
 public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements ServingStoreProxy {
 
+    @Inject
+    private ServingStoreCacheService cacheService;
+
     protected ServingStoreProxyImpl() {
         super("cdl");
     }
@@ -34,6 +40,11 @@ public class ServingStoreProxyImpl extends MicroserviceRestApiProxy implements S
     @Override
     public Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
         return getDecoratedMetadata(customerSpace, entity, Collections.emptyList());
+    }
+
+    @Override
+    public List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity) {
+        return cacheService.getDecoratedMetadata(customerSpace, entity);
     }
 
     @Override

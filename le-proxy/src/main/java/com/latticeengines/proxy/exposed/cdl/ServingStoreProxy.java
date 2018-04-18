@@ -17,4 +17,6 @@ public interface ServingStoreProxy {
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity);
     Flux<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity, List<ColumnSelection.Predefined> groups);
 
+    List<ColumnMetadata> getDecoratedMetadataFromCache(String customerSpace, BusinessEntity entity);
+
 }

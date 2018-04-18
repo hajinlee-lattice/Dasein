@@ -201,7 +201,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)")
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", sync = true)
     public TopNTree getTopNTree(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
@@ -241,7 +241,6 @@ public class DataLakeServiceImpl implements DataLakeService {
         return cmMap;
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeCMCacheName, key = "T(java.lang.String).format(\"%s|%s|metadata\", #customerSpace, #entity)", sync = true)
     public List<ColumnMetadata> getCachedServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
         return getServingMetadataForEntity(customerSpace, entity).collectList().block();
     }
@@ -249,8 +248,9 @@ public class DataLakeServiceImpl implements DataLakeService {
     private Flux<ColumnMetadata> getServingMetadataForEntity(String customerSpace, BusinessEntity entity) {
         Flux<ColumnMetadata> cms = Flux.empty();
         if (entity != null) {
-            cms = servingStoreProxy.getDecoratedMetadata(customerSpace, entity);
-            if (cms != null) {
+            List<ColumnMetadata> cmList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
+            if (CollectionUtils.isNotEmpty(cmList)) {
+                cms = Flux.fromIterable(cmList);
                 if (BusinessEntity.Account.equals(entity)) {
                     cms = ImportanceOrderingUtils.addImportanceOrdering(cms);
                 }

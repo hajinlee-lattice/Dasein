@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.service.impl;
 
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.mds.ExternalSystemMetadataStore;
 import com.latticeengines.apps.cdl.mds.SystemMetadataStore;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -52,10 +50,16 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
     @Inject
     private CDLTestDataService cdlTestDataService;
 
+    @Inject
+    private ExternalSystemMetadataStore externalSystemMetadataStore;
+
     @BeforeClass(groups = "deployment")
-    public void setup() throws NoSuchAlgorithmException, KeyManagementException, IOException {
+    public void setup() {
         super.setupTestEnvironment();
         cdlTestDataService.populateData(mainTestTenant.getId());
+        List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
+                .collectList().block();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
     @Test(groups = "deployment")
@@ -86,7 +90,11 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
     public void testLookupIdAttrGroup() {
-        List<ColumnMetadata> cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
+        String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
+
+        cms = systemMetadataStore.getMetadata(BusinessEntity.Account, DataCollection.Version.Blue)
                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.LookupId)).collectList().block();
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
@@ -116,12 +124,16 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
                 CDLExternalSystemType.CRM);
         Assert.assertEquals(crmList.size(), 2);
         for (CDLExternalSystemMapping cesm : crmList) {
-            if (cesm.getFieldName().equals("accountId")) {
-                Assert.assertEquals(cesm.getDisplayName(), "TestAccountID");
-            } else if (cesm.getFieldName().equals("testId")) {
-                Assert.assertEquals(cesm.getDisplayName(), "TestDummyID");
-            } else {
-                Assert.assertTrue("External system not the same as input", false);
+            switch (cesm.getFieldName()) {
+                case "accountId":
+                    Assert.assertEquals(cesm.getDisplayName(), "TestAccountID");
+                    break;
+                case "testId":
+                    Assert.assertEquals(cesm.getDisplayName(), "TestDummyID");
+                    break;
+                default:
+                    Assert.assertTrue("External system not the same as input", false);
+                    break;
             }
         }
         Map<String, List<CDLExternalSystemMapping>> mapping =

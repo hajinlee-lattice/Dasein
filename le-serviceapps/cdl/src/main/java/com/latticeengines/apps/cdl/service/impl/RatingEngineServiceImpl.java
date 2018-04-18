@@ -63,6 +63,7 @@ import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.cdl.ServingStoreCacheService;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.EventProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
@@ -100,6 +101,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Inject
     private DataCollectionService dataCollectionService;
+
+    @Inject
+    private ServingStoreCacheService servingStoreCacheService;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -493,6 +497,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
         CacheService cacheService = CacheServiceBase.getCacheService();
         String keyPrefix = tenantId + "|" + BusinessEntity.Rating.name();
         cacheService.refreshKeysByPattern(keyPrefix, CacheName.DataCloudCMCache);
+        servingStoreCacheService.clearCache(tenantId, BusinessEntity.Rating);
     }
 
     @SuppressWarnings("unchecked")
