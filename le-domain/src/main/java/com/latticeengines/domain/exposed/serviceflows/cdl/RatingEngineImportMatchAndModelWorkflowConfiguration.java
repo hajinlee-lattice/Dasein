@@ -335,6 +335,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder dataCollectionVersion(DataCollection.Version version) {
+            cdlEventTable.setDataCollectionVersion(version);
             generateAIRating.dataCollectionVersion(version);
             return this;
         }
