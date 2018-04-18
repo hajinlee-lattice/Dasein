@@ -98,11 +98,10 @@ angular.module('common.datacloud.explorer', [
             vm.mode = 'dashboardrules';
         }
 
-        // this behavior is nolonger desired by PM
-        // if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
-        //     vm.section = 'segment.analysis';
-        //     vm.inWizard = true;
-        // }
+        if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
+//            vm.section = 'segment.analysis';
+            vm.inWizard = true;
+        }
 
         QueryStore.setSegmentEnabled = false;
 
@@ -1525,7 +1524,7 @@ angular.module('common.datacloud.explorer', [
 
         attribute.SegmentChecked = true;
         
-        if (!attribute.TopBkt) {
+        if (!attribute.TopBkt && !vm.inWizard) {
             vm.addFreeTextAttribute(attribute, vm.cube.data[attribute.Entity].Stats[attribute.Attribute]);
             return;
         }
@@ -1549,23 +1548,22 @@ angular.module('common.datacloud.explorer', [
             vm.segmentAttributeInputRange[attributeRangeKey] = !vm.segmentAttributeInputRange[attributeRangeKey];
         }
         
+        var addEntity = entity == 'Rating' || entity == 'LatticeAccount' ? 'Account' : entity;
 
-        var toAdd = entity;
-        
-        if (toAdd === 'Rating' || toAdd === 'LatticeAccount'){
-            toAdd = 'Account';
+        var attributeData = {
+            columnName: attributeKey, 
+            resourceType: entity
+        };
+
+        if (!vm.inWizard) {
+            attributeData.bkt = angular.copy(topBkt);
         }
 
         QueryStore.counts.accounts.loading = true;
         QueryStore.counts.contacts.loading = true;
-        QueryStore['add' + toAdd + 'Restriction']({
-            columnName: attributeKey, 
-            resourceType: entity, 
-            bkt: angular.copy(topBkt)
-        });
+        QueryStore['add' + addEntity + 'Restriction'](attributeData);
 
         vm.checkSaveButtonState();
-
     }
 
     vm.segmentAttributeInputRange = vm.segmentAttributeInputRange || {};
@@ -1678,7 +1676,7 @@ angular.module('common.datacloud.explorer', [
         if (treeRoot) {
             var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
                 attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
-
+            
             vm.selectSegmentAttribute(attribute);
 
             RatingsEngineStore.setValidation('add', true);
@@ -1707,16 +1705,23 @@ angular.module('common.datacloud.explorer', [
     }
 
     vm.getAttributeRules = function(attribute, bucket) {
-        var attributes = QueryStore.getDataCloudAttributes(true);
+        var getEmptyBuckets = vm.mode == 'dashboardrules';
+        var attributes = QueryStore.getDataCloudAttributes(true, getEmptyBuckets); // second parm is getEmptyBuckets
 
         attributes = attributes.filter(function(item) {
             var restriction = item.bucketRestriction,
                 isSameAttribute = restriction.attr == attribute.Entity + '.' + (attribute.Attribute || attribute.ColumnId),
                 isSameBucket = true,
-                bkt = restriction.bkt;
-            var ret = QueryTreeService.getAttributeRules(restriction, bkt, bucket, isSameAttribute);
+                bkt = restriction.bkt,
+                ret = isSameAttribute;
+
+            if (bucket && bkt) {
+                ret = QueryTreeService.getAttributeRules(restriction, bkt, bucket, isSameAttribute);
+            }
+
             return ret;
         });
+
         return attributes;
     }
 
@@ -1730,7 +1735,7 @@ angular.module('common.datacloud.explorer', [
         var cube = vm.cube.data[attribute.Entity].Stats[attribute.Attribute];
         var cubeMatches = [];
         var cubeLabels = [];
-
+        var matches = [];
         var filtered = rules.filter(function(item) {
             var Lbl = item.bucketRestriction.bkt.Lbl;
 
@@ -1738,7 +1743,6 @@ angular.module('common.datacloud.explorer', [
             return Lbl == label;
         });
 
-        var matches = []
         if (cube.Bkt) {
              matches = cube.Bkts.List.filter(function(item) { 
                 if (cubeLabels.indexOf(item.Lbl) >= 0) {
@@ -1747,8 +1751,6 @@ angular.module('common.datacloud.explorer', [
                 return item.Lbl == label;
             });
         }
-        
-        //console.log(attribute.Entity+'.'+attribute.Attribute, rules.length, filtered.length, matches.length, cubeMatches.length, label, cube, { 'rules':rules, 'filtered':filtered, 'matches':matches, 'cubeLabels':cubeLabels, 'cubeMatches':cubeMatches, 'attribute':attribute });
 
         if (filtered.length != rules.length && rules.length > 1) {
             return 'MULTIPLE USES';

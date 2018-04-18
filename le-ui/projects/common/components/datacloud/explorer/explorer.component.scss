@@ -4,7 +4,7 @@
         padding: 0 2.12766%;
     }
     &.dashboardrules {
-        padding-top: 40px;
+        padding-top: 1.5em;
         .success-message {
             width: auto;
         }
@@ -154,7 +154,7 @@
     }
     .filters {
         @include flex-container;
-        margin-top: 10px;
+        margin-top: 1.5em;
         margin-bottom: 15px;
         // margin-right: 14px;
         input[type="radio"], input[type="checkbox"] {
@@ -1301,6 +1301,15 @@
                     box-shadow: 0 0 10px 0 rgba(57, 137, 195, 0.1);
                     background-color: #e5e5e5;
                     border: solid 1px #bbb;
+
+                    &:hover {
+                        border-style: outset;
+                        color: #457EBA;
+                    }
+                    &:active {
+                        border-style: inset;
+                        color: #000000;
+                    }
                     span {
                          padding-right: 20px;
                     }
@@ -1308,9 +1317,18 @@
             }
             .ratings-selection,
             .enrich {
-                button {
+                & button {
                     &:after {
                         @include font-awesome-inline("\f00d");
+                    }
+                }
+                &.dashboardrules button {
+                    &:after {
+                        @include font-awesome-inline("\f067");
+                    }
+                }
+                button {
+                    &:after {
                         position: absolute;
                         top: 0;
                         bottom: 0;

@@ -165,7 +165,7 @@ angular
                     var querySnippet = enrichment.DisplayName + ' ';
                     if (vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
                         querySnippet += 'is ';
-                        querySnippet += (type == 'Enum' && rule.bucketRestriction.bkt.Vals.length > 1) ? vm.generateBucketLabel(rule.bucketRestriction.bkt) : rule.bucketRestriction.bkt.Lbl;
+                        querySnippet += (type == 'Enum' && rule.bucketRestriction.bkt.Vals && rule.bucketRestriction.bkt.Vals.length > 1) ? vm.generateBucketLabel(rule.bucketRestriction.bkt) : rule.bucketRestriction.bkt.Lbl;
                     } else { //non-bucketable attributes e.g. pure-string
                         querySnippet += vm.getOperationLabel('String', rule.bucketRestriction) + ' ' + vm.getOperationValue(rule.bucketRestriction, 'String');
                     }

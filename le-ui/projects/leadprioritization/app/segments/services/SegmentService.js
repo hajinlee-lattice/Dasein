@@ -175,10 +175,10 @@ angular
             var bucket = map[bucketName];
 
             if (bucket) {
-                SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);
+                //SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);
                 SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
 
-                SegmentStore.removeEmptyBuckets([ bucket.contact_restriction ]);
+                //SegmentStore.removeEmptyBuckets([ bucket.contact_restriction ]);
                 SegmentStore.sanitizeSegmentRestriction([ bucket.contact_restriction ]);
             }
         });

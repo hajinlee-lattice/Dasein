@@ -8,8 +8,8 @@ angular.module('common.datacloud.query.factory.restriction', [])
             this.attr = attr;
         }
         if (bkt === null || attr === undefined) {
-            this.bkt = bkt;
-            this.bkt.Rng = range;
+            this.bkt = {};
+            //this.bkt.Rng = range;
         } else {
             this.bkt = bkt;
         }

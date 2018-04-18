@@ -679,7 +679,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
             if (bucketRestriction.bkt.Cmp == 'IS_NULL' || bucketRestriction.bkt.Cmp == 'IS_NOT_NULL') {
                 return '';
             }
-            return bucketRestriction.bkt.Vals[0] ? bucketRestriction.bkt.Vals[0] : 'any (*)';
+            return bucketRestriction.bkt.Vals && bucketRestriction.bkt.Vals[0] ? bucketRestriction.bkt.Vals[0] : 'any (*)';
         }
 
         this.getOperationValue = function (bucketRestriction, operatorType, position) {
