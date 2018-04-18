@@ -145,28 +145,22 @@ public class CDLJobServiceImpl implements CDLJobService {
             Tenant tenant = dataFeed.getTenant();
             MultiTenantContext.setTenant(tenant);
             log.debug(String.format("tenant: %s", tenant.getId()));
-            Boolean allowAutoSchedule = false;
-            try {
-                allowAutoSchedule = batonService.isEnabled(CustomerSpace.parse(tenant.getId()),
-                        LatticeFeatureFlag.ALLOW_AUTO_SCHEDULE);
-            } catch (Exception e) {
-                log.warn("get 'allow auto schedule' value failed: " + e.getMessage());
-            }
-
-            if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs && allowAutoSchedule) {
+            if(runningProcessAnalyzeJobs < concurrentProcessAnalyzeJobs) {
                 CDLJobDetail processAnalyzeJobDetail = cdlJobDetailEntityMgr.findLatestJobByJobType(CDLJobType.PROCESSANALYZE);
-                Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()));
-                log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
-                if (currentTimeMillis > invokeTime.getTime()) {
-                    list.add(new HashMap.SimpleEntry<>(invokeTime,
-                            new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
+                if(processAnalyzeJobDetail.getCdlJobStatus() != CDLJobStatus.RUNNING) {
+                    Date invokeTime = getNextInvokeTime(CustomerSpace.parse(tenant.getId()));
+                    if (invokeTime!= null && currentTimeMillis > invokeTime.getTime()) {
+                        log.info(String.format("next invoke time for %s: %s", tenant.getId(), invokeTime.toString()));
+                        list.add(new HashMap.SimpleEntry<>(invokeTime,
+                                new HashMap.SimpleEntry<>(dataFeed, processAnalyzeJobDetail)));
+                    }
                 }
             }
         }
 
         list.sort(Comparator.comparing(Map.Entry::getKey));
-
         log.info(String.format("need to submit process analyze jobs count: %d", list.size()));
+
         for (Map.Entry<Date, Map.Entry<SimpleDataFeed, CDLJobDetail>> entry : list) {
             SimpleDataFeed dataFeed = entry.getValue().getKey();
             CDLJobDetail processAnalyzeJobDetail = entry.getValue().getValue();
