@@ -37,6 +37,7 @@ def main():
         raise Exception('Bootstrap State is already %s!' % state)
 
     logger.info('Current bootstrap state is %s' % state)
+    save_contract_backup(args.tenant, contract)
     try:
 
         flags = get_feature_flags(args.tenant)
@@ -106,6 +107,11 @@ def import_dante_tree(tenant, tree):
     node = "%s/Contracts/%s/Tenants/%s/Spaces/Production/Services" % (pod_path(), tenant, tenant)
     return ZK.import_tree(tree, node)
 
+def save_contract_backup(tenant, tree):
+    node = ("/dante_backup/%s/%d" % (tenant, int(round(time.time()))))
+    ZK.create_recursive(node, '', zc.zk.OPEN_ACL_UNSAFE)
+    logger.info('Save contract backup at ' + node)
+    return ZK.import_tree(tree, node)
 
 def fake_dante_status(tenant):
     logger.info('Restore Dante configurations.')
