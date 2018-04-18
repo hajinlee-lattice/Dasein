@@ -21,7 +21,9 @@ public interface RatingEngineService {
 
     List<RatingEngineSummary> getAllRatingEngineSummaries();
 
-    List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status);
+    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status);
+
+    List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status, boolean publishedRatingsOnly);
 
     List<String> getAllRatingEngineIdsInSegment(String segmentName);
 
@@ -51,15 +53,12 @@ public interface RatingEngineService {
             String ratingEngineId);
 
     EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
-                                        ModelingQueryType modelingQueryType, DataCollection.Version version);
+            ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType, DataCollection.Version version);
 
     String modelRatingEngine(String tenantId, RatingEngine ratingEngine, AIModel aiModel, String userEmail);
-
-    List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
-            Boolean onlyInRedshift);
 
     List<AttributeLookup> getDependentAttrsInAllModels(String ratingEngineId);
 

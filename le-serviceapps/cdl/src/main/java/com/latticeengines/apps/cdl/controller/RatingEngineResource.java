@@ -83,8 +83,8 @@ public class RatingEngineResource {
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @PathVariable String customerSpace, @RequestParam(value = "status", required = false) String status, //
             @RequestParam(value = "type", required = false) String type,
-            @RequestParam(value = "only-in-redshift", required = false, defaultValue = "false") Boolean onlyInRedshift) {
-        return ratingEngineService.getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, onlyInRedshift);
+            @RequestParam(value = "publishedratingsonly", required = false, defaultValue = "false") Boolean publishedRatingsOnly) {
+        return ratingEngineService.getAllRatingEngineSummaries(type, status, publishedRatingsOnly);
     }
 
     @GetMapping(value = "/deleted")

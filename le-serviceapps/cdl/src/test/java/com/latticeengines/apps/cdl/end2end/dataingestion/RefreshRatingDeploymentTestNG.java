@@ -43,8 +43,8 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1523950661101";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM_PublishRatings";
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;

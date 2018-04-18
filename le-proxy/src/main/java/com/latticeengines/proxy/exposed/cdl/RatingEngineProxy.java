@@ -52,12 +52,12 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
     }
 
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace, String status, String type) {
-        return getRatingEngineSummaries(customerSpace, status, type, null);
+        return getRatingEngineSummaries(customerSpace, status, type, false);
     }
 
     @SuppressWarnings("rawtypes")
     public List<RatingEngineSummary> getRatingEngineSummaries(String customerSpace, String status, String type,
-            Boolean onlyInRedshift) {
+            boolean publishedRatingsOnly) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(status)) {
@@ -66,8 +66,8 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         if (StringUtils.isNotBlank(type)) {
             params.add("type=" + type);
         }
-        if (onlyInRedshift != null) {
-            params.add("only-in-redshift=" + onlyInRedshift.toString());
+        if (publishedRatingsOnly) {
+            params.add("publishedratingsonly=" + ((Boolean) publishedRatingsOnly).toString());
         }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");

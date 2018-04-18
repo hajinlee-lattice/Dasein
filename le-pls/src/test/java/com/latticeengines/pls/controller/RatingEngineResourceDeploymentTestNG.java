@@ -171,21 +171,21 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         // test Rating Attribute in Redshift
         ratingEngineSummarieObjects = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&only-in-redshift=true",
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&publishedratingsonly=true",
                 List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         ratingEngineSummarieObjects = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&only-in-redshift=false",
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&type=RULE_BASED&publishedratingsonly=false",
                 List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         ratingEngineSummarieObjects = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&only-in-redshift=true", List.class);
+                getRestAPIHostPort() + "/pls/ratingengines?status=ACTIVE&publishedratingsonly=true", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 1);
         ratingEngineSummarieObjects = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL&only-in-redshift=true", List.class);
+                getRestAPIHostPort() + "/pls/ratingengines?type=CROSS_SELL&publishedratingsonly=true", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
         ratingEngineSummarieObjects = restTemplate.getForObject(
-                getRestAPIHostPort() + "/pls/ratingengines?type=CUSTOM_EVENT&only-in-redshift=true", List.class);
+                getRestAPIHostPort() + "/pls/ratingengines?type=CUSTOM_EVENT&publishedratingsonly=true", List.class);
         Assert.assertEquals(ratingEngineSummarieObjects.size(), 0);
 
         // test get specific rating engine
@@ -256,10 +256,10 @@ public class RatingEngineResourceDeploymentTestNG extends PlsDeploymentTestNGBas
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
         // test Rating Attribute in Redshift
         ratingEngineSummaries = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?only-in-redshift=true", List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?publishedratingsonly=true", List.class);
         Assert.assertEquals(ratingEngineSummaries.size(), 1);
         ratingEngineSummaries = restTemplate
-                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?only-in-redshift=false", List.class);
+                .getForObject(getRestAPIHostPort() + "/pls/ratingengines?publishedratingsonly=false", List.class);
         Assert.assertEquals(ratingEngineSummaries.size(), 3);
 
         // test update rule based model

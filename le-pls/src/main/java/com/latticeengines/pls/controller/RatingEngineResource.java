@@ -79,9 +79,9 @@ public class RatingEngineResource {
     public List<RatingEngineSummary> getRatingEngineSummaries( //
             @RequestParam(value = "status", required = false) String status, //
             @RequestParam(value = "type", required = false) String type, //
-            @RequestParam(value = "only-in-redshift", required = false) Boolean onlyInRedshift) {
+            @RequestParam(value = "publishedratingsonly", required = false, defaultValue = "false") Boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
-        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, onlyInRedshift);
+        return ratingEngineProxy.getRatingEngineSummaries(tenant.getId(), status, type, publishedRatingsOnly);
     }
 
     @GetMapping(value = "/deleted")

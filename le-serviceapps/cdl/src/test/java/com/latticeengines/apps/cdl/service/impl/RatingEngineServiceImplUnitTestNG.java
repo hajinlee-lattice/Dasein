@@ -65,10 +65,9 @@ public class RatingEngineServiceImplUnitTestNG {
     }
 
     @Test(groups = "unit")
-    public void testGetAllRatingEngineSummariesWithTypeAndStatusInRedShift() {
-        List<RatingEngineSummary> summaryList = ratingEngineService
-                .getAllRatingEngineSummariesWithTypeAndStatusInRedShift(RatingEngineType.RULE_BASED.name(),
-                        RatingEngineStatus.ACTIVE.toString(), true);
+    public void testGetAllRatingEngineSummaries() {
+        List<RatingEngineSummary> summaryList = ratingEngineService.getAllRatingEngineSummaries(
+                RatingEngineType.RULE_BASED.name(), RatingEngineStatus.ACTIVE.toString(), true);
         Assert.assertEquals(summaryList.size(), 1);
         Assert.assertEquals(summaryList.get(0).getId(), id1);
     }

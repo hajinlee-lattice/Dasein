@@ -594,7 +594,7 @@ angular.module('lp.playbook')
             params: {
                 type: opts.type || null, //'RULE_BASED'
                 status: (opts.active ? 'ACTIVE' : ''),
-                'only-in-redshift': 'true'
+                'publishedratingsonly': 'true'
             },
             url: this.host + '/ratingengines',
             headers: {

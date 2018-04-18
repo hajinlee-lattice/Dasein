@@ -121,7 +121,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public List<RatingEngineSummary> getAllRatingEngineSummaries() {
-        return getAllRatingEngineSummariesWithTypeAndStatus(null, null);
+        return getAllRatingEngineSummaries(null, null);
     }
 
     @Override
@@ -130,20 +130,20 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     }
 
     @Override
-    public List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatus(String type, String status) {
-        return getAllRatingEngineSummariesWithTypeAndStatusInRedShift(type, status, false);
+    public List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status) {
+        return getAllRatingEngineSummaries(type, status, false);
     }
 
     @Override
-    public List<RatingEngineSummary> getAllRatingEngineSummariesWithTypeAndStatusInRedShift(String type, String status,
-            Boolean onlyInRedshift) {
+    public List<RatingEngineSummary> getAllRatingEngineSummaries(String type, String status,
+            boolean publishedRatingsOnly) {
         Tenant tenant = MultiTenantContext.getTenant();
         log.info(String.format(
                 "Get all the rating engine summaries for tenant %s with status set to %s and type set to %s",
                 tenant.getId(), status, type));
         List<RatingEngine> list = ratingEngineEntityMgr.findAllByTypeAndStatus(type, status);
         List<RatingEngine> selectedList = list;
-        if (onlyInRedshift != null && onlyInRedshift) {
+        if (publishedRatingsOnly) {
             Set<String> availableRatingIdInRedshift = engineIdsAvailableInRedshift();
             log.info(String.format("Available Rating Ids in Redshift are %s", availableRatingIdInRedshift));
             selectedList = list.stream()
@@ -310,7 +310,8 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
     @Override
     public Long getModelingQueryCount(String customerSpace, RatingEngine ratingEngine, RatingModel ratingModel,
             ModelingQueryType modelingQueryType, DataCollection.Version version) {
-        EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType, version);
+        EventFrontEndQuery efeq = getModelingQuery(customerSpace, ratingEngine, ratingModel, modelingQueryType,
+                version);
         switch (modelingQueryType) {
         case TARGET:
             return eventProxy.getScoringCount(customerSpace, efeq);
