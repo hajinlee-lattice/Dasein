@@ -643,16 +643,18 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                     Assert.assertTrue(consolidateSummaryNode.has("WARN_MESSAGE"));
                 }
 
-                if (entity != BusinessEntity.Transaction && entity != BusinessEntity.Product) {
+                if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact) {
                     Assert.assertTrue(consolidateSummaryNode.has("UPDATE"));
                 }
                 if (entity == BusinessEntity.Account) {
                     Assert.assertTrue(consolidateSummaryNode.has("UNMATCH"));
                 }
 
-                ObjectNode entityNumberNode = (ObjectNode) entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
-                Assert.assertNotNull(entityNumberNode);
-                Assert.assertTrue(entityNumberNode.has("TOTAL"));
+                if (entity != BusinessEntity.Product) {
+                    ObjectNode entityNumberNode = (ObjectNode) entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
+                    Assert.assertNotNull(entityNumberNode);
+                    Assert.assertTrue(entityNumberNode.has("TOTAL"));
+                }
             }
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);

@@ -107,10 +107,13 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";
     protected static final String RATING_LIFTS = "RATING_LIFTS";
     protected static final String BUCKETED_SCORE_SUMMARIES = "BUCKETED_SCORE_SUMMARIES";
+    public static final String EXISTING_RECORDS = "EXISTING_RECORDS";
+    public static final String UPDATED_RECORDS = "UPDATED_RECORDS";
+    public static final String NEW_RECORDS = "NEW_RECORDS";
+    public static final String FINAL_RECORDS = "FINAL_RECORDS";
     public static final String MERGED_PRODUCT_ID = "MERGED_PRODUCT_ID";
     public static final String MERGED_PRODUCT_BUNDLE = "MERGED_PRODUCT_BUNDLE";
     public static final String MERGED_PRODUCT_HIERARCHY = "MERGED_PRODUCT_HIERARCHY";
-    public static final String FINAL_RECORDS = "FINAL_RECORDS";
 
     protected static final String CUSTOM_EVENT_IMPORT = "CUSTOM_EVENT_IMPORT";
     protected static final String CUSTOM_EVENT_MATCH_ATTRIBUTES = "CUSTOM_EVENT_MATCH_ATTRIBUTES";

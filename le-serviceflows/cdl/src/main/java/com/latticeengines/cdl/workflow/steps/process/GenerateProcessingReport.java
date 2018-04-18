@@ -13,7 +13,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -150,18 +152,6 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
                 entityNumberNode.put("TOTAL", String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
-            } else {
-                long idCnt = consolidateSummaryNode.get("PRODUCT_ID").asLong();
-                long bundleCnt = consolidateSummaryNode.get("PRODUCT_HIERARCHY").asLong();
-                long hierarchyCnt = consolidateSummaryNode.get("PRODUCT_HIERARCHY").asLong();
-                String errMsg = consolidateSummaryNode.get("ERROR_MESSAGE").asText();
-                String warnMsg = consolidateSummaryNode.get("WARN_MESSAGE").asText();
-                log.info(String.format("For entity %s, productId count: %d, bundle count: %d, hierarchy count: %d, " +
-                                "error message: %s, warning message: %s",
-                        entity.name(), idCnt, bundleCnt, hierarchyCnt, errMsg, warnMsg));
-                ObjectNode entityNumberNode = JsonUtils.createObjectNode();
-                entityNumberNode.put("TOTAL", String.valueOf(idCnt));
-                entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
             }
 
             entitiesSummaryNode.set(entity.name(), entityNode);
@@ -289,11 +279,11 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             consolidateSummaryNode.put("UPDATE", "0");
             break;
         case Product:
-            consolidateSummaryNode.put("PRODUCT_ID", "0");
-            consolidateSummaryNode.put("PRODUCT_HIERARCHY", "0");
-            consolidateSummaryNode.put("PRODUCT_BUNDLE", "0");
-            consolidateSummaryNode.put("ERROR_MESSAGE", "");
-            consolidateSummaryNode.put("WARN_MESSAGE", "");
+            consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, "0");
+            consolidateSummaryNode.put(ReportConstants.PRODUCT_HIERARCHY, "0");
+            consolidateSummaryNode.put(ReportConstants.PRODUCT_BUNDLE, "0");
+            consolidateSummaryNode.put(ReportConstants.ERROR_MESSAGE, "");
+            consolidateSummaryNode.put(ReportConstants.WARN_MESSAGE, "");
             break;
         case Transaction:
             consolidateSummaryNode.put("NEW", "0");
