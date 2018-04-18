@@ -38,6 +38,10 @@ public class EventFrontEndQuery extends FrontEndQuery {
         return segmentQuery;
     }
 
+    public void setSegmentQuery(FrontEndQuery segmentQuery) {
+        this.segmentQuery = segmentQuery;
+    }
+
     public String getPeriodName() {
         return periodName;
     }

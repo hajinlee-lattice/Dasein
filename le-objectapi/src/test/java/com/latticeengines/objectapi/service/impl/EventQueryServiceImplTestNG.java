@@ -22,6 +22,7 @@ import com.latticeengines.domain.exposed.query.PageFilter;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.objectapi.service.EventQueryService;
 import com.latticeengines.query.exposed.exception.QueryEvaluationException;
@@ -119,6 +120,8 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Bucket.Transaction txn = new Bucket.Transaction(PRODUCT_ID, TimeFilter.ever(), null, null, false);
         long scoringCount = countTxnBktForScoring(txn);
         Assert.assertEquals(scoringCount, 832);
+        scoringCount = countTxnBktForScoringUsingSegmentQuery(txn);
+        Assert.assertEquals(scoringCount, 832);
         long trainingCount = countTxnBktForTraining(txn);
         Assert.assertEquals(trainingCount, 16378);
         long eventCount = countTxnBktForEvent(txn);
@@ -147,6 +150,13 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return countRestrictionForScoring(restriction);
     }
 
+    private long countTxnBktForScoringUsingSegmentQuery(Bucket.Transaction txn) {
+        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
+        Bucket bucket = Bucket.txnBkt(txn);
+        Restriction restriction = new BucketRestriction(attrLookup, bucket);
+        return countRestrictionForScoringUsingSegmentQuery(restriction);
+    }
+
     private long countRestrictionForScoring(Restriction restriction) {
         EventFrontEndQuery frontEndQuery = new EventFrontEndQuery();
         FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
@@ -157,6 +167,21 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         frontEndQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
         frontEndQuery.setPeriodName("Month");
         return eventQueryService.getScoringCount(frontEndQuery, DataCollection.Version.Blue);
+    }
+
+    private long countRestrictionForScoringUsingSegmentQuery(Restriction restriction) {
+        EventFrontEndQuery eventQuery = new EventFrontEndQuery();
+        FrontEndQuery segmentQuery = new FrontEndQuery();
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        frontEndRestriction.setRestriction(restriction);
+        segmentQuery.setAccountRestriction(frontEndRestriction);
+        segmentQuery.setMainEntity(BusinessEntity.Account);
+        segmentQuery.setEvaluationDateStr(maxTransactionDate);
+        eventQuery.setSegmentQuery(segmentQuery);
+        eventQuery.setPageFilter(new PageFilter(0, 0));
+        eventQuery.setTargetProductIds(Collections.singletonList(PRODUCT_ID));
+        eventQuery.setPeriodName("Month");
+        return eventQueryService.getScoringCount(eventQuery, DataCollection.Version.Blue);
     }
 
     private DataPage retrieveScoringDataByRestriction(Restriction restriction, int numTuples) {
