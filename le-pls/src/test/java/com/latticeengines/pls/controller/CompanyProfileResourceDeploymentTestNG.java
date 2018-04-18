@@ -60,8 +60,7 @@ public class CompanyProfileResourceDeploymentTestNG extends PlsDeploymentTestNGB
         }
 
         String[] requiredAttrs = { "LDC_Name", "LDC_Street", "LDC_City", "LDC_State", "LDC_ZipCode", "LDC_Domain",
-                "LDC_DUNS", "LE_NUMBER_OF_LOCATIONS", "LE_IS_PRIMARY_LOCATION", "LE_INDUSTRY", "LE_REVENUE_RANGE",
-                "LE_EMPLOYEE_RANGE" };
+                "LDC_DUNS", "LE_NUMBER_OF_LOCATIONS", "LE_IS_PRIMARY_LOCATION", "LE_INDUSTRY", "LE_REVENUE_RANGE" };
         Set<String> requiredAttrSet = new HashSet<String>(Arrays.asList(requiredAttrs));
         Set<String> actualAttrSet = new HashSet<>();
 
