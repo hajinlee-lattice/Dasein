@@ -79,14 +79,18 @@ public class OAuth2AuthenticationDeserializer extends JsonDeserializer<OAuth2Aut
         OAuth2Request oauth2Request = new OAuth2Request(requestParameters, clientId, authorities, approved, scope,
                 resourceIds, redirectUri, responseTypes, null);
 
-        log.info("ClientId: " + oauth2Request.getClientId());
+        if (log.isDebugEnabled()) {
+            log.debug("ClientId: {}", oauth2Request.getClientId());
+        }
 
         return oauth2Request;
     }
 
     private Authentication extractAuthentication(JsonParser jp, JsonNode authNode) {
         Authentication authentication = jsonToUsernamePasswordAuthentication(authNode);
-        log.info("Authentication Autorities: " + authentication.getAuthorities());
+        if (log.isDebugEnabled()) {
+            log.debug("Authentication Autorities: {}", authentication.getAuthorities());
+        }
         return authentication;
     }
 

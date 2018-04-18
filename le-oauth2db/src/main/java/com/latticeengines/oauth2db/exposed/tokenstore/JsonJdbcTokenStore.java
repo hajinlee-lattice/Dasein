@@ -18,11 +18,12 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.oauth2db.exposed.util.OAuth2AuthenticationDeserializer;
+import com.latticeengines.oauth2db.exposed.util.OAuth2RefreshTokenDeserializer;
 
 public class JsonJdbcTokenStore extends JdbcTokenStore {
 
-	private static final Logger log = LoggerFactory.getLogger(JsonJdbcTokenStore.class);
-	
+    private static final Logger log = LoggerFactory.getLogger(JsonJdbcTokenStore.class);
+
     public JsonJdbcTokenStore(DataSource dataSource) {
         super(dataSource);
     }
@@ -53,7 +54,8 @@ public class JsonJdbcTokenStore extends JdbcTokenStore {
 
     private byte[] serialize(Object token) {
         byte[] bytes = JsonUtils.serialize(token).getBytes(Charset.forName("UTF-8"));
-        //log.info("Serialized Token: **** \n" + new String(bytes, Charset.forName("UTF-8")) );
+        // log.info("Serialized Token: **** \n" + new String(bytes,
+        // Charset.forName("UTF-8")) );
         try {
             return CompressionUtils.compressByteArray(bytes);
         } catch (IOException e) {
@@ -62,15 +64,16 @@ public class JsonJdbcTokenStore extends JdbcTokenStore {
     }
 
     private <T> T deserialize(byte[] bytes, Class<T> clz) {
-    		String uncompressedData = new String(CompressionUtils.decompressByteArray(bytes), Charset.forName("UTF-8"));
-    		//String uncompressedData = new String(bytes, Charset.forName("UTF-8"));
-    		//log.info("DeSerialize Token: **** \n" +  uncompressedData);
-    		if (StringUtils.isNotEmpty(uncompressedData)) {
-    			ObjectMapper mapper = JsonUtils.getObjectMapper();
-    	        SimpleModule module = new SimpleModule();
-    			module.addDeserializer(OAuth2Authentication.class, new OAuth2AuthenticationDeserializer());
-    			mapper.registerModule(module);
-    			
+        String uncompressedData = new String(CompressionUtils.decompressByteArray(bytes), Charset.forName("UTF-8"));
+        // String uncompressedData = new String(bytes, Charset.forName("UTF-8"));
+        // log.info("DeSerialize Token: **** \n" + uncompressedData);
+        if (StringUtils.isNotEmpty(uncompressedData)) {
+            ObjectMapper mapper = JsonUtils.getObjectMapper();
+            SimpleModule module = new SimpleModule();
+            module.addDeserializer(OAuth2Authentication.class, new OAuth2AuthenticationDeserializer());
+            module.addDeserializer(OAuth2RefreshToken.class, new OAuth2RefreshTokenDeserializer());
+            mapper.registerModule(module);
+
             return JsonUtils.deserialize(mapper, uncompressedData, clz);
         } else {
             return null;
