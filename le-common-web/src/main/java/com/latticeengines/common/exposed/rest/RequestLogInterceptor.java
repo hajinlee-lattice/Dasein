@@ -19,7 +19,7 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
 
     public static final String IDENTIFIER_KEY = "com.latticeengines.requestid";
     public static final String REQUEST_ID = "Request-Id";
-    private static final String URI_KEY = "com.latticeengines.uri";
+    public static final String URI_KEY = "com.latticeengines.uri";
 
     private static final Logger log = LoggerFactory.getLogger(RequestLogInterceptor.class);
 
@@ -56,7 +56,9 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
         try {
             httpStopWatch.stop();
             long duration = httpStopWatch.getTime();
-            log.info(String.format("{\"requestDurationMS\":\"%d\"}", duration));
+            if (!shouldSkipLogging(request.getRequestURI())) {
+                log.info(String.format("{\"requestDurationMS\":\"%d\"}", duration));
+            }
         } finally {
             // If this doesn't get called, memory can permanently leak.
             MDC.remove(URI_KEY);
@@ -76,5 +78,9 @@ public class RequestLogInterceptor extends HandlerInterceptorAdapter {
             requestId = String.valueOf(identifier);
         }
         return requestId;
+    }
+
+    protected boolean shouldSkipLogging(String requestURI) {
+        return false;
     }
 }

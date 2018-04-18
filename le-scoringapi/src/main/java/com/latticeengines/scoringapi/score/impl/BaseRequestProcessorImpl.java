@@ -35,8 +35,8 @@ public class BaseRequestProcessorImpl {
 
     protected void split(String key) {
         httpStopWatch.split(key);
-        if (log.isInfoEnabled()) {
-            log.info(key);
+        if (log.isDebugEnabled()) {
+            log.debug(key);
         }
     }
 

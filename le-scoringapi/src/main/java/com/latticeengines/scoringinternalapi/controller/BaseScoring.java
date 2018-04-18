@@ -399,7 +399,12 @@ public abstract class BaseScoring extends CommonBase {
                 }
             }
         } catch (Exception ex) {
-            log.debug("Any exception in logging block should not fail rest of the scoring: " + ex.getMessage(), ex);
+            if (log.isInfoEnabled()) {
+                log.info("Any exception in logging block should not fail rest of the scoring: " + ex.getMessage());
+            }
+            if (log.isDebugEnabled()) {
+                log.debug(ex.getLocalizedMessage(), ex);
+            }
         }
     }
 
