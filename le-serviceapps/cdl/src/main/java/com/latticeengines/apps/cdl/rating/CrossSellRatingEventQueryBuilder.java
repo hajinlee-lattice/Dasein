@@ -77,7 +77,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                     configFilter.getCriteria(), Collections.singletonList(configFilter.getValue()));
         }
 
-        TimeFilter nextperiodTimeFilter = new TimeFilter(ComparisonType.FOLLOWING, PeriodStrategy.Template.Month.name(),
+        TimeFilter nextPeriodTimeFilter = new TimeFilter(ComparisonType.FOLLOWING, PeriodStrategy.Template.Month.name(),
                 Arrays.asList(1, 1));
         switch (advancedConf.getModelingStrategy()) {
         case CROSS_SELL_REPEAT_PURCHASE:
@@ -90,7 +90,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
                     TimeFilter.priorOnly(configFilter.getValue() - 1, PeriodStrategy.Template.Month.name()), false,
                     null, null);
 
-            TransactionRestriction purchasedInNextPeriod = new TransactionRestriction(productIds, nextperiodTimeFilter,
+            TransactionRestriction purchasedInNextPeriod = new TransactionRestriction(productIds, nextPeriodTimeFilter,
                     false, spentFilter, unitsFilter);
 
             productTxnRestriction = Restriction.builder() //
@@ -101,7 +101,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
             TransactionRestriction neverPurchasedIncludingCurrent = new TransactionRestriction(productIds,
                     TimeFilter.ever(PeriodStrategy.Template.Month.name()), true, null, null);
 
-            purchasedInNextPeriod = new TransactionRestriction(productIds, nextperiodTimeFilter, false, spentFilter,
+            purchasedInNextPeriod = new TransactionRestriction(productIds, nextPeriodTimeFilter, false, spentFilter,
                     unitsFilter);
 
             productTxnRestriction = Restriction.builder() //
