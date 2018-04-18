@@ -49,7 +49,7 @@ def main():
         flags["EnableTalkingPoints"] = True
         flags["UseAccountMaster"] = True
         flags["LatticeInsights"] = True
-        flags["EnableDataEncryption"] = True
+        # flags["EnableDataEncryption"] = True
         flags["EnableLpiPlaymaker"] = True
         logger.info("Feature Flags are:\n%s" % json.dumps(flags, indent=2))
 
