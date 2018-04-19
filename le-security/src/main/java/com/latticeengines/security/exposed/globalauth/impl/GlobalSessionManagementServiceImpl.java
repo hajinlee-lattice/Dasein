@@ -127,7 +127,7 @@ public class GlobalSessionManagementServiceImpl extends GlobalAuthenticationServ
     }
 
     @Override
-    @CachePut(key = "#ticket.data")
+    @CachePut(key = "#ticket.data", unless = "#result == null")
     public synchronized Session attach(Ticket ticket) {
         if (ticket == null) {
             throw new NullPointerException("Ticket cannot be null.");
