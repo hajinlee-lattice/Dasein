@@ -70,13 +70,13 @@ public class DataLakeServiceImpl implements DataLakeService {
     @Inject
     private ServingStoreProxy servingStoreProxy;
 
-    private final DataLakeService _dataLakeService;
+    private final DataLakeServiceImpl _dataLakeService;
 
     private LocalCacheManager<String, Map<String, StatsCube>> statsCubesCache;
     private LocalCacheManager<String, List<ColumnMetadata>> cmCache;
 
     @Inject
-    public DataLakeServiceImpl(DataLakeService dataLakeService) {
+    public DataLakeServiceImpl(DataLakeServiceImpl dataLakeService) {
         _dataLakeService = dataLakeService;
         statsCubesCache = new LocalCacheManager<>(CacheName.DataLakeStatsCubesCache, str -> {
             String[] tokens = str.split("\\|");
@@ -201,8 +201,18 @@ public class DataLakeServiceImpl implements DataLakeService {
         return entityProxy.getData(customerSpace, frontEndQuery);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", sync = true)
-    public TopNTree getTopNTree(String customerSpace) {
+    @Override
+    public synchronized TopNTree getTopNTree(String customerSpace) {
+        return _dataLakeService.getTopNTreeFromCache(customerSpace);
+    }
+
+    @Override
+    public synchronized Map<String, StatsCube> getStatsCubes(String customerSpace) {
+        return _dataLakeService.getStatsCubesFromCache(customerSpace);
+    }
+
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless="#result == null")
+    public TopNTree getTopNTreeFromCache(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
             return null;
@@ -217,8 +227,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", sync = true)
-    public Map<String, StatsCube> getStatsCubes(String customerSpace) {
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", unless="#result == null")
+    public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
             Map<String, StatsCube> cubes = container.getStatsCubes();

@@ -54,7 +54,7 @@ public class ServingStoreCacheServiceImpl extends MicroserviceRestApiProxy imple
     }
 
     @Override
-    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", sync = true)
+    @Cacheable(cacheNames = CacheName.Constants.ServingMetadataCacheName, key = "T(java.lang.String).format(\"%s|%s|decoratedmetadata\", #customerSpace, #entity)", unless="#result == null")
     public List<ColumnMetadata> getDecoratedMetadata(String customerSpace, BusinessEntity entity) {
         String key = customerSpace + "|" + entity.name();
         return getDecoratedMetadataFromApi(key);

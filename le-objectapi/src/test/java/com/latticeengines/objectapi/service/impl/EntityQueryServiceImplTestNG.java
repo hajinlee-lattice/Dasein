@@ -170,16 +170,16 @@ public class EntityQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         AggregationFilter filter1 = new AggregationFilter(ComparisonType.LESS_THAN, Collections.singletonList(500));
         Bucket.Transaction txn1 = new Bucket.Transaction(prodId, timeFilter, filter1, null, false);
         long count1 = countTxnBkt(txn1);
-        Assert.assertEquals(count1, 3077);
+        Assert.assertEquals(count1, 125);
 
         AggregationFilter filter2 = new AggregationFilter(ComparisonType.LESS_OR_EQUAL, Collections.singletonList(5));
         Bucket.Transaction txn2 = new Bucket.Transaction(prodId, timeFilter, null, filter2, false);
         long count2 = countTxnBkt(txn2);
-        Assert.assertEquals(count2, 3093);
+        Assert.assertEquals(count2, 141);
 
         Bucket.Transaction txn3 = new Bucket.Transaction(prodId, timeFilter, filter1, filter2, false);
         long count3 = countTxnBkt(txn3);
-        Assert.assertEquals(count3, 3067);
+        Assert.assertEquals(count3, 115);
     }
 
     @Test(groups = "functional")

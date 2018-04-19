@@ -288,7 +288,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertTrue(output.getStatistics().getRowsMatched() > 0);
     }
 
-    @Test(groups = "deployment", dataProvider = "allDataCloudVersions", enabled = true)
+    @Test(groups = "deployment", dataProvider = "allDataCloudVersions")
     public void testBulkMatchWithSchema(String version) throws Exception {
         String avroDirInThisRun = avroDir + "/" + version;
         HdfsPodContext.changeHdfsPodId(podId);
@@ -338,8 +338,8 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         }
     }
 
-    @Test(groups = "deployment", enabled = true)
-    public void testBulkMatchWithoutSchema() throws Exception {
+    @Test(groups = "deployment")
+    public void testBulkMatchWithoutSchema() {
         String version = dataCloudVersionEntityMgr.latestApprovedForMajorVersion(latestMajorVersion).getVersion();
 
         HdfsPodContext.changeHdfsPodId(podId);
@@ -366,7 +366,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
         Assert.assertEquals(matchCommand.getRowsMatched(), new Integer(100));
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testMultiBlockBulkMatch() throws InterruptedException {
         String version = "1.0.0";
         HdfsPodContext.changeHdfsPodId(podId);
@@ -403,7 +403,7 @@ public class MatchResourceDeploymentTestNG extends MatchapiDeploymentTestNGBase 
                 hdfsPathBuilder.constructMatchOutputDir(command.getRootOperationUid()).toString());
     }
 
-    @Test(groups = "deployment", enabled = true)
+    @Test(groups = "deployment")
     public void testGetBulkConfig() {
         String currentVersion = dataCloudVersionEntityMgr.currentApprovedVersionAsString();
         MatchInput input = createAvroBulkMatchInput(true, null, currentVersion);

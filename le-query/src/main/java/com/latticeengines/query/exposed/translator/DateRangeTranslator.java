@@ -37,30 +37,18 @@ public class DateRangeTranslator extends TranslatorCommon {
 
     public Restriction convert(TransactionRestriction txnRestriction, QueryFactory queryFactory,
             AttributeRepository repository) {
-        Restriction accountHasNotPurchased = null;
-        Restriction accountInRestriction = null;
-        if (isHasNotPurchased(txnRestriction) || isNegativeRestriction(txnRestriction)) {
+        if (isHasNotPurchased(txnRestriction)) {
             SubQuery notPurchasedSubQuery = constructHasPurchasedSubQuery(txnRestriction, queryFactory, repository);
-            accountHasNotPurchased = Restriction.builder() //
+            return Restriction.builder() //
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                     .notInSubquery(notPurchasedSubQuery) //
                     .build();
-        }
-
-        if (!isHasNotPurchased(txnRestriction)) {
+        } else {
             SubQuery subQuery = constructSubQuery(txnRestriction, queryFactory, repository);
-            accountInRestriction = Restriction.builder() //
+            return Restriction.builder() //
                     .let(BusinessEntity.Account, InterfaceName.AccountId.name()) //
                     .inSubquery(subQuery) //
                     .build();
-        }
-
-        if (accountHasNotPurchased != null && accountInRestriction != null) {
-            return Restriction.builder().or(accountHasNotPurchased, accountInRestriction).build();
-        } else if (accountHasNotPurchased != null) {
-            return accountHasNotPurchased;
-        } else {
-            return accountInRestriction;
         }
     }
 
