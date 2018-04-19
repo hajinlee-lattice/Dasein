@@ -67,6 +67,8 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
 
     private static final String DUPLICATE_FILE = "duplicate.csv";
 
+    private static final String NULL = "null";
+
     private Schema schema;
 
     private Table table;
@@ -261,6 +263,9 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                         avroFieldValue = toAvro(csvFieldValue, avroType, attr);
                         if (attr.getName().equals(idColumnName)) {
                             id = String.valueOf(avroFieldValue);
+                            if (id.equalsIgnoreCase(NULL)) {
+                                throw new RuntimeException(String.format("The %s value is equals to string null", attr.getDisplayName()));
+                            }
                             if (deduplicate) {
                                 if (uniqueIds.contains(id)) {
                                     throw new LedpException(LedpCode.LEDP_17017, new String[]{id});

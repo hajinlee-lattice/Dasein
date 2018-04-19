@@ -17,6 +17,7 @@ import com.latticeengines.domain.exposed.eai.ImportConfiguration;
 import com.latticeengines.domain.exposed.eai.ImportProperty;
 import com.latticeengines.domain.exposed.eai.SourceImportConfiguration;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.SourceFile;
 import com.latticeengines.domain.exposed.pls.SourceFileState;
@@ -69,6 +70,7 @@ public class ImportData extends BaseWorkflowStep<ImportStepConfiguration> {
             sourceImportConfig.setProperty(ImportProperty.HDFSFILE, sourceFile.getPath());
             sourceImportConfig.setProperty(ImportProperty.METADATA, //
                     JsonUtils.serialize(metadata.getModelingMetadata()));
+            sourceImportConfig.setProperty(ImportProperty.ID_COLUMN_NAME, InterfaceName.Id.name());
             sourceImportConfig.setTables(Arrays.asList(metadata));
         }
         return importConfig;
