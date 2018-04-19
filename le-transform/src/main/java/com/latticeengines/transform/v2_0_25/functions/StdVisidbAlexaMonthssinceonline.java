@@ -4,11 +4,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.transform.exposed.RealTimeTransform;
 import com.latticeengines.transform.exposed.metadata.ApprovedUsage;
@@ -20,6 +21,8 @@ import com.latticeengines.transform.exposed.metadata.TransformMetadata;
 
 public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
 
+    private static final Logger log = LoggerFactory.getLogger(StdVisidbAlexaMonthssinceonline.class);
+
     private static final long serialVersionUID = -2835201443521620065L;
 
     public StdVisidbAlexaMonthssinceonline() {
@@ -30,42 +33,35 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
 
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        String s = column == null ? null : String.valueOf(record.get(column));
-
-        if (s.equals("null"))
+        if (StringUtils.isBlank(column) || record.get(column) == null) {
             return null;
-
-        return calculateStdVisidbAlexaMonthssinceonline(s);
+        }
+        return calculateStdVisidbAlexaMonthssinceonline(record.get(column));
     }
 
-    public static Integer calculateStdVisidbAlexaMonthssinceonline(String date) {
-        if (StringUtils.isEmpty(date) || "null".equals(date))
-            return null;
-
+    public static Integer calculateStdVisidbAlexaMonthssinceonline(Object date) {
         Date dt = null;
-
-        if (Pattern.matches("\\d+", date)) {
-            try {
-                Long dateAsLong = new Long(date);
-                dt = new Date(dateAsLong);
-            } catch (Exception e) {
-                e.printStackTrace();
-                return null;
-            }
-        } else {
-            // Needs to match datetime.datetime.strptime(date, '%m/%d/%Y
-            // %I:%M:%S %p')
-            SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy HH:mm:ss a");
-            try {
-                dt = format.parse(date);
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return null;
+        if (date instanceof Long) { // from AccountMaster
+            dt = new Date((Long) date);
+        } else if (date instanceof Date) { // from DerivedColumnsCache
+            dt = (Date) date;
+        } else { // If string from std_visidb_alexa_monthssinceonline.py, needs to match datetime.datetime.strptime(date, '%m/%d/%Y%I:%M:%S %p')
+                 // Or unknown type from unknown source, parse will fail
+            if (StringUtils.isNotBlank(String.valueOf(date))) {
+                SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy HH:mm:ss a");
+                try {
+                    dt = format.parse(String.valueOf(date));
+                } catch (ParseException e) {
+                    log.error(String.format("Fail to parse AlexaOnlneSince %s", String.valueOf(date)));
+                }
             }
         }
 
-        Period p = new Period(new DateTime(dt.getTime()), DateTime.now());
+        if (dt == null) {
+            return null;
+        }
 
+        Period p = new Period(new DateTime(dt.getTime()), DateTime.now());
         return p.getYears() * 12 + p.getMonths();
     }
 
