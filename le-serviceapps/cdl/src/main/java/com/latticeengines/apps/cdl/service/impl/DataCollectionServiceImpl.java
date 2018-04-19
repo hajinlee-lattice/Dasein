@@ -115,8 +115,10 @@ public class DataCollectionServiceImpl implements DataCollectionService {
                 int numLinks = dataCollectionEntityMgr.findTablesFromCollection(collectionName, existingTableName)
                         .size();
                 removeTable(customerSpace, collectionName, existingTableName, role, version);
+                Tenant currentTenant = MultiTenantContext.getTenant();
                 if (numLinks == 1) {
                     new Thread(() -> {
+                        MultiTenantContext.setTenant(currentTenant);
                         log.info(existingTableName + " is an orphan table, delete it completely.");
                         tableEntityMgr.deleteTableAndCleanupByName(existingTableName);
                     }).start();

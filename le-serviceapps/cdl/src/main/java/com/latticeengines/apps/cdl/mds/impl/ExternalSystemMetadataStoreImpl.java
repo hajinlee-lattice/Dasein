@@ -1,8 +1,5 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -42,18 +39,17 @@ public class ExternalSystemMetadataStoreImpl implements ExternalSystemMetadataSt
             cdlNamespaceService.setMultiTenantContext(namespace.getCoord1());
             CDLExternalSystem externalSystem = cdlExternalSystemEntityMgr.findExternalSystem();
             if (externalSystem != null) {
-                Set<String> ids = new HashSet<>();
                 if (CollectionUtils.isNotEmpty(externalSystem.getCRMIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "CRM")));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getCRMIdList()).map(id -> toColumnMetadata(id, "CRM")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getMAPIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "MAP")));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getMAPIdList()).map(id -> toColumnMetadata(id, "MAP")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getERPIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, "ERP")));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getERPIdList()).map(id -> toColumnMetadata(id, "ERP")));
                 }
                 if (CollectionUtils.isNotEmpty(externalSystem.getOtherIdList())) {
-                    flux = flux.concatWith(Flux.fromIterable(ids).map(id -> toColumnMetadata(id, null)));
+                    flux = flux.concatWith(Flux.fromIterable(externalSystem.getOtherIdList()).map(id -> toColumnMetadata(id, null)));
                 }
             }
         }

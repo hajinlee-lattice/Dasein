@@ -1,7 +1,6 @@
 package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -20,12 +19,8 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.metadata.Table;
-import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
@@ -67,12 +62,12 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         String customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
         CDLExternalSystem cdlExternalSystem = new CDLExternalSystem();
         List<String> crmIds = new ArrayList<>();
-        crmIds.add("accountId");
-        crmIds.add("testId");
-        crmIds.add(InterfaceName.SalesforceSandboxAccountID.name());
+        crmIds.add("TechIndicator_MarketGID");
+        crmIds.add("TechIndicator_MGID");
+        crmIds.add("TechIndicator_Squid");
         cdlExternalSystem.setCRMIdList(crmIds);
-        cdlExternalSystem.setMapIds(InterfaceName.MarketoAccountID.name() + "," + InterfaceName.EloquaAccountID);
-        cdlExternalSystem.setErpIds("TestERPId");
+        cdlExternalSystem.setMapIds("TechIndicator_CAVSAMAid" + "," + "TechIndicator_Candid");
+        cdlExternalSystem.setErpIds("TechIndicator_SysAid");
         cdlExternalSystemProxy.createOrUpdateCDLExternalSystem(customerSpace, cdlExternalSystem);
 
         CDLExternalSystem system = cdlExternalSystemProxy.getCDLExternalSystem(customerSpace);
@@ -83,12 +78,12 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertEquals(system.getERPIdList().size(), 1);
         Assert.assertEquals(system.getOtherIdList().size(), 0);
 
-        Assert.assertTrue(system.getCrmIds().contains(InterfaceName.SalesforceSandboxAccountID.name()));
-        Assert.assertTrue(system.getMapIds().contains(InterfaceName.MarketoAccountID.name()));
-        Assert.assertTrue(system.getErpIds().contains("TestERPId"));
+        Assert.assertTrue(system.getCrmIds().contains("TechIndicator_MarketGID"));
+        Assert.assertTrue(system.getMapIds().contains("TechIndicator_CAVSAMAid"));
+        Assert.assertTrue(system.getErpIds().contains("TechIndicator_SysAid"));
     }
 
-    @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
+    @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet", enabled = true)
     public void testLookupIdAttrGroup() {
         String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
         List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
@@ -99,50 +94,22 @@ public class CDLExternalSystemServiceImplDeploymentTestNG extends CDLDeploymentT
         Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
     }
 
-    private void prepareTable() {
-        Table table = new Table();
-        table.setName("TestExternalSystemTable");
-        table.setDisplayName("TestExternalSystemTable");
-        Attribute attr1 = new Attribute("accountId");
-        attr1.setDisplayName("TestAccountID");
-        attr1.setPhysicalDataType("String");
-        Attribute attr2 = new Attribute("testId");
-        attr2.setDisplayName("TestDummyID");
-        attr2.setPhysicalDataType("String");
-        Attribute attr3 = new Attribute(InterfaceName.MarketoAccountID.name());
-        attr3.setDisplayName("TestMarketoID");
-        attr3.setPhysicalDataType("String");
-        table.setAttributes(Arrays.asList(attr1, attr2, attr3));
-        metadataProxy.createTable(mainCustomerSpace, table.getName(), table);
-        dataCollectionProxy.upsertTable(mainCustomerSpace, table.getName(), TableRoleInCollection.BucketedAccount, DataCollection.Version.Blue);
-    }
 
     @Test(groups = "deployment", dependsOnMethods = "testCreateAndGet")
     public void testGetMapping() {
-        prepareTable();
+        String tenantId = CustomerSpace.parse(mainCustomerSpace).getTenantId();
+        List<ColumnMetadata> cms = externalSystemMetadataStore.getMetadata(tenantId, BusinessEntity.Account).collectList().block();
+        Assert.assertTrue(CollectionUtils.isNotEmpty(cms));
         List<CDLExternalSystemMapping> crmList = cdlExternalSystemProxy.getExternalSystemByType(mainCustomerSpace,
                 CDLExternalSystemType.CRM);
-        Assert.assertEquals(crmList.size(), 2);
-        for (CDLExternalSystemMapping cesm : crmList) {
-            switch (cesm.getFieldName()) {
-                case "accountId":
-                    Assert.assertEquals(cesm.getDisplayName(), "TestAccountID");
-                    break;
-                case "testId":
-                    Assert.assertEquals(cesm.getDisplayName(), "TestDummyID");
-                    break;
-                default:
-                    Assert.assertTrue("External system not the same as input", false);
-                    break;
-            }
-        }
+        Assert.assertEquals(crmList.size(), 3);
+
         Map<String, List<CDLExternalSystemMapping>> mapping =
                 cdlExternalSystemProxy.getExternalSystemMap(mainCustomerSpace);
-        Assert.assertEquals(mapping.size(), 2);
-        List<CDLExternalSystemMapping> mapList = mapping.get(CDLExternalSystemType.MAP.name());
+        Assert.assertEquals(mapping.size(), 3);
+        List<CDLExternalSystemMapping> mapList = mapping.get(CDLExternalSystemType.ERP.name());
         Assert.assertEquals(mapList.size(), 1);
-        Assert.assertEquals(mapList.get(0).getFieldName(), InterfaceName.MarketoAccountID.name());
-        Assert.assertEquals(mapList.get(0).getDisplayName(), "TestMarketoID");
+        Assert.assertEquals(mapList.get(0).getFieldName(), "TechIndicator_SysAid");
     }
 
 
