@@ -18,11 +18,7 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         implements Aggregator<AMSeedPriLocAggregator.Context> {
 
     private static final long serialVersionUID = 6246503522063890526L;
-    public final static String GOVERNMENT = "Government";
-    public final static String EDUCATION = "Education";
-    public final static String NON_PROFIT = "Non-profit";
-    public final static Long NON_PROFIT_TOTAL_SALES = 1000000L;
-    public final static Integer NON_PROFIT_TOTAL_EMP = 1000;
+
     private List<String> groupFields;
 
     public static class Context extends BaseAggregator.Context {
@@ -35,7 +31,6 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         String isPriLoc = null;
         String isPriAct = null;
         String country = null;
-        String reasonType = null;
     }
 
     public AMSeedPriLocAggregator(Fields fieldDeclaration, List<String> groupFields) {
@@ -89,27 +84,13 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-
-        if (isNoProfitable(arguments,
-                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                (Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE))) {
-            res = checkRuleLargerIntegers((Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE),
-                    context.employee);
-            if (res > 0) {
-                return update(context, arguments);
-            } else if (res < 0) {
-                return update(context, arguments);
-            }
-        } else {
-            res = checkRuleLargerLong((Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                    context.salesVol);
-           if (res > 0) {
-               return update(context, arguments);
-           } else if (res < 0) {
-               return update(context, arguments);
-           }
+        res = checkRuleLargerLongWithThreshold((Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
+                context.salesVol, 100000000, 10000000);
+        if (res > 0) {
+            return update(context, arguments);
+        } else if (res < 0) {
+            return context;
         }
-
         res = checkRuleEqualStrings(arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
                 arguments.getString(DataCloudConstants.ATTR_DU_DUNS), context.duns,
                 context.duDuns);
@@ -118,7 +99,6 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-
         res = checkRuleEqualStrings(arguments.getString(DataCloudConstants.AMS_ATTR_DUNS),
                 arguments.getString(DataCloudConstants.ATTR_GU_DUNS), context.duns,
                 context.guDuns);
@@ -127,27 +107,12 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-
-        if (isNoProfitable(arguments,
-                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                (Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE))) {
-            res = checkRuleLargerIntegers((Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE),
-                    context.employee);
-            if (res > 0) {
-                return update(context, arguments);
-            } else if (res < 0) {
-                return update(context, arguments);
-            }
-        } else {
-            res = checkRuleLargerLong((Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                    context.salesVol);
-            if (res > 0) {
-                return update(context, arguments);
-            } else if (res < 0) {
-                return update(context, arguments);
-            }
+        res = checkRuleLargerLong((Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US), context.salesVol);
+        if (res > 0) {
+            return update(context, arguments);
+        } else if (res < 0) {
+            return context;
         }
-
         res = checkRuleBooleanValuedStringIsTrue(arguments.getString(DataCloudConstants.ATTR_IS_PRIMARY_LOCATION),
                 context.isPriLoc);
         if (res > 0) {
@@ -162,27 +127,13 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else if (res < 0) {
             return context;
         }
-
-        if (isNoProfitable(arguments,
-                (Long) arguments.getObject(DataCloudConstants.ATTR_SALES_VOL_US),
-                (Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE))) {
-            res = checkRuleLargerIntegers((Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE),
-                    context.employee);
-            if (res > 0) {
-                return update(context, arguments);
-            } else if (res < 0) {
-                return context;
-            }
-        } else {
-            res = checkRuleLargerIntegers((Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE),
-                    context.employee);
-            if (res > 0) {
-                return update(context, arguments);
-            } else if (res < 0) {
-                return update(context, arguments);
-            }
+        res = checkRuleLargerIntegers((Integer) arguments.getObject(DataCloudConstants.ATTR_EMPLOYEE_HERE),
+                context.employee);
+        if (res > 0) {
+            return update(context, arguments);
+        } else if (res < 0) {
+            return context;
         }
-
         return context;
     }
 
@@ -218,6 +169,18 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         if (StringUtils.isNotEmpty(checking) && StringUtils.isEmpty(checked)) {
             return 1;
         } else if (StringUtils.isNotEmpty(checked) && StringUtils.isEmpty(checking)) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
+
+    private int checkRuleLargerLongWithThreshold(Long checking, Long checked, long threshold, long gap) {
+        if (checking != null && checking >= threshold
+                && (checked == null || checking.longValue() >= (checked.longValue() + gap))) {
+            return 1;
+        } else if (checked != null && checked >= threshold
+                && (checking == null || checked.longValue() >= (checking.longValue() + gap))) {
             return -1;
         } else {
             return 0;
@@ -266,21 +229,6 @@ public class AMSeedPriLocAggregator extends BaseAggregator<AMSeedPriLocAggregato
         } else {
             return 0;
         }
-    }
-
-    private boolean isNoProfitable(TupleEntry arguments, Long salesVolVal, Integer empTotalVal) {
-        String primaryIndustry = arguments.getString(DataCloudConstants.AMS_ATTR_PRIMARY_INDUSTRY);
-        if (salesVolVal == null)
-            salesVolVal = 0L;
-        if (empTotalVal == null)
-            empTotalVal = 0;
-        if (primaryIndustry != null
-                && (primaryIndustry.equals(GOVERNMENT) || primaryIndustry.equals(EDUCATION)
-                        || primaryIndustry.equals(NON_PROFIT))
-                || (salesVolVal < NON_PROFIT_TOTAL_SALES && empTotalVal > NON_PROFIT_TOTAL_EMP)) {
-            return true;
-        }
-        return false;
     }
 
     private Context update(Context context, TupleEntry arguments) {

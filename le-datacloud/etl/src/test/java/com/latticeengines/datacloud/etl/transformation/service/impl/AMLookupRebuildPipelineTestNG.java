@@ -173,110 +173,72 @@ public class AMLookupRebuildPipelineTestNG
         columns.add(Pair.of("EMPLOYEES_HERE", Integer.class));
         columns.add(Pair.of("SALES_VOLUME_US_DOLLARS", Long.class));
         columns.add(Pair.of("IsPrimaryAccount", String.class));
-        columns.add(Pair.of("PrimaryIndustry", String.class));
+
         Object[][] data = new Object[][] {
                 // all kinds of keys
-                { 1L, "dom1.com", null, null, null, "DUNS1", "Y", "Y", null, "DUNS1", 10000, 10000L, null,
-                        "Food Production" },
-                { 2L, "dom2.com", null, null, "Country1", "DUNS2", "Y", "Y", null, "DUNS2", 10000, 10000L, null,
-                        "Consumer Services" },
-                { 3L, "dom3.com", null, "ZipCode3", "Country3", "DUNS3", "Y", "Y", null, "DUNS3", 10000, 10000L, null,
-                        "Food Production" },
-                { 4L, "dom4.com", "State4", null, "Country4", "DUNS4", "Y", "Y", null, "DUNS4", 10000, 10000L, null,
-                        "Consumer Services" },
+                { 1L, "dom1.com", null, null, null, "DUNS1", "Y", "Y", null, "DUNS1", 10000, 10000L, null },
+                { 2L, "dom2.com", null, null, "Country1", "DUNS2", "Y", "Y", null, "DUNS2", 10000, 10000L, null },
+                { 3L, "dom3.com", null, "ZipCode3", "Country3", "DUNS3", "Y", "Y", null, "DUNS3", 10000, 10000L, null },
+                { 4L, "dom4.com", "State4", null, "Country4", "DUNS4", "Y", "Y", null, "DUNS4", 10000, 10000L, null },
                 { 5L, "dom5.com", "State5", "ZipCode5", "Country5", "DUNS5", "Y", "Y", null, "DUNS4", 10000, 10000L,
-                        null, "Food Production" },
+                        null },
 
                 // secondary domain not exists
-                { 11L, "dom11.com", null, null, null, "DUNS11", "Y", "Y", null, "DUNS11", 10000, 10000L, null,
-                        "Consumer Services" },
-                { 12L, "dom12.com", null, null, null, null, "Y", "Y", null, "DUNS11", 10000, 10000L, null,
-                        "Food Production" },
+                { 11L, "dom11.com", null, null, null, "DUNS11", "Y", "Y", null, "DUNS11", 10000, 10000L, null },
+                { 12L, "dom12.com", null, null, null, null, "Y", "Y", null, "DUNS11", 10000, 10000L, null },
 
                 // secondary domain exists with DUNS
-                { 21L, "dom21.com", null, null, null, "DUNS21", "Y", "Y", null, "DUNS21", 10000, 10000L, null,
-                        "Consumer Services" },
-                { 22L, "dom22.com", null, null, null, "DUNS22", "Y", "Y", null, "DUNS22", 10000, 10000L, null,
-                        "Food Production" },
+                { 21L, "dom21.com", null, null, null, "DUNS21", "Y", "Y", null, "DUNS21", 10000, 10000L, null },
+                { 22L, "dom22.com", null, null, null, "DUNS22", "Y", "Y", null, "DUNS22", 10000, 10000L, null },
 
                 // secondary domain exists without DUNS
-                { 31L, "dom31.com", null, null, null, "DUNS31", "Y", "Y", null, "DUNS31", 10000, 10000L, null,
-                        "Consumer Services" },
-                { 32L, "dom32.com", null, null, null, null, "Y", "Y", null, null, 10000, 10000L, null,
-                        "Food Production" },
+                { 31L, "dom31.com", null, null, null, "DUNS31", "Y", "Y", null, "DUNS31", 10000, 10000L, null },
+                { 32L, "dom32.com", null, null, null, null, "Y", "Y", null, null, 10000, 10000L, null },
 
                 // test priority to pick primary location
                 // test IsPrimaryAccount
-                { 33L, "dom001.com", null, null, null, "DUNS001", "N", "Y", null, null, null, null, "Y",
-                        "Consumer Services" },
-                { 34L, "dom001.com", null, null, null, "DUNS002", "Y", "Y", null, null, null, null, "N",
-                        "Food Production" },
+                { 33L, "dom001.com", null, null, null, "DUNS001", "N", "Y", null, null, null, null, "Y" },
+                { 34L, "dom001.com", null, null, null, "DUNS002", "Y", "Y", null, null, null, null, "N" },
                 // test DUNS not empty
-                { 35L, "dom003.com", null, null, null, null, "Y", "Y", null, null, null, null, null,
-                        "Consumer Services" },
-                { 36L, "dom003.com", null, null, null, "DUNS003", "N", "Y", null, null, null, null, null,
-                        "Food Production" },
+                { 35L, "dom003.com", null, null, null, null, "Y", "Y", null, null, null, null, null },
+                { 36L, "dom003.com", null, null, null, "DUNS003", "N", "Y", null, null, null, null, null },
                 // test DUDuns not empty
-                { 37L, "dom004.com", null, null, null, "DUNS004", "N", "Y", "DUDUNS004", null, null, null, null,
-                        "Consumer Services" },
-                { 38L, "dom004.com", null, null, null, "DUNS005", "Y", "Y", null, null, null, null, null,
-                        "Food Production" },
+                { 37L, "dom004.com", null, null, null, "DUNS004", "N", "Y", "DUDUNS004", null, null, null, null },
+                { 38L, "dom004.com", null, null, null, "DUNS005", "Y", "Y", null, null, null, null, null },
                 // test larger sales volume with threshold
-                { 39L, "dom006.com", null, null, null, "DUNS006", "N", "Y", "DUNS006", null, null, 200000000L, null,
-                        "Consumer Services" },
-                { 40L, "dom006.com", null, null, null, "DUNS007", "Y", "Y", null, null, null, 199999999L, null,
-                        "Food Production" },
-                { 41L, "dom006.com", null, null, null, "DUNS008", "N", "Y", null, null, null, 200000001L, null,
-                        "Consumer Services" },
+                { 39L, "dom006.com", null, null, null, "DUNS006", "N", "Y", "DUNS006", null, null, 200000000L, null },
+                { 40L, "dom006.com", null, null, null, "DUNS007", "Y", "Y", null, null, null, 199999999L, null },
+                { 41L, "dom006.com", null, null, null, "DUNS008", "N", "Y", null, null, null, 200000001L, null },
                 // test duns equals duduns
-                { 42L, "dom009.com", null, null, null, "DUNS009", "N", "Y", null, null, null, null, null,
-                        "Food Production" },
-                { 43L, "dom009.com", null, null, null, "DUNS010", "N", "Y", "DUNS010", null, null, null, null,
-                        "Consumer Services" },
-                { 44L, "dom009.com", null, null, null, "DUNS011", "N", "Y", "DUNS010", null, null, null, null,
-                        "Food Production" },
+                { 42L, "dom009.com", null, null, null, "DUNS009", "N", "Y", null, null, null, null, null },
+                { 43L, "dom009.com", null, null, null, "DUNS010", "N", "Y", "DUNS010", null, null, null, null },
+                { 44L, "dom009.com", null, null, null, "DUNS011", "N", "Y", "DUNS010", null, null, null, null },
                 // test duns equals guduns
-                { 45L, "dom012.com", null, null, null, "DUNS012", "N", "Y", null, null, null, null, null,
-                        "Consumer Services" },
-                { 46L, "dom012.com", null, null, null, "DUNS013", "N", "Y", null, "DUNS013", null, null, null,
-                        "Food Production" },
-                { 47L, "dom012.com", null, null, null, "DUNS014", "N", "Y", null, "DUNS013", null, null, null,
-                        "Consumer Services" },
+                { 45L, "dom012.com", null, null, null, "DUNS012", "N", "Y", null, null, null, null, null },
+                { 46L, "dom012.com", null, null, null, "DUNS013", "N", "Y", null, "DUNS013", null, null, null },
+                { 47L, "dom012.com", null, null, null, "DUNS014", "N", "Y", null, "DUNS013", null, null, null },
                 // test larger sales volume without threshold
-                { 48L, "dom015.com", null, null, null, "DUNS015", "N", "Y", null, null, null, 1000L, null,
-                        "Food Production" },
-                { 49L, "dom015.com", null, null, null, "DUNS016", "Y", "Y", null, null, null, 999L, null,
-                        "Consumer Services" },
+                { 48L, "dom015.com", null, null, null, "DUNS015", "N", "Y", null, null, null, 1000L, null },
+                { 49L, "dom015.com", null, null, null, "DUNS016", "Y", "Y", null, null, null, 999L, null },
                 // test IsPrimaryLocation
-                { 50L, "dom017.com", null, null, null, "DUNS017", "N", "Y", null, null, null, null, null,
-                        "Food Production" },
-                { 51L, "dom017.com", null, null, null, "DUNS018", "Y", "Y", null, null, null, null, null,
-                        "Consumer Services" },
+                { 50L, "dom017.com", null, null, null, "DUNS017", "N", "Y", null, null, null, null, null },
+                { 51L, "dom017.com", null, null, null, "DUNS018", "Y", "Y", null, null, null, null, null },
                 // test USA country
-                { 52L, "dom019.com", null, null, "USA", "DUNS019", "N", "Y", null, null, null, null, null,
-                        "Food Production" },
-                { 53L, "dom019.com", null, null, "England", "DUNS020", "N", "Y", null, null, null, null, null,
-                        "Consumer Services" },
+                { 52L, "dom019.com", null, null, "USA", "DUNS019", "N", "Y", null, null, null, null, null },
+                { 53L, "dom019.com", null, null, "England", "DUNS020", "N", "Y", null, null, null, null, null },
                 // test employee
-                { 54L, "dom021.com", null, null, null, "DUNS021", "N", "Y", null, null, 999, null, null,
-                        "Food Production" },
-                { 55L, "dom021.com", null, null, null, "DUNS022", "N", "Y", null, null, null, null, null,
-                        "Consumer Services" },
-                { 56L, "dom021.com", null, null, null, "DUNS023", "N", "Y", null, null, 1000, null, null,
-                        "Food Production" },
+                { 54L, "dom021.com", null, null, null, "DUNS021", "N", "Y", null, null, 999, null, null },
+                { 55L, "dom021.com", null, null, null, "DUNS022", "N", "Y", null, null, null, null, null },
+                { 56L, "dom021.com", null, null, null, "DUNS023", "N", "Y", null, null, 1000, null, null },
 
                 // test priority to search by dom+country / dom+country+state / dom+country+zip
                 { 100L, "dom100.com", "State100", "Zip100", "Country100", "DUNS100", "Y", "Y", null, "DUNS100", 10000,
-                        10000L, "N", "Consumer Services" },
+                        10000L, "N" },
                 { 101L, "dom100.com", "State100", "Zip100", "Country100", "DUNS101", "Y", "Y", null, "DUNS101", 10000,
-                        10000L, "Y", "Food Production" },
+                        10000L, "Y" },
 
-                // non-profit organization
-                { 102L, "dom019.com", "State101", "Zip101", "Country101", "DUNS26", "Y", "Y", "DUNS102", "DUNS103",
-                        3700, 104500L, "Y", "Non-profit" },
-                { 103L, "dom024.com", "State102", "Zip102", "Country102", "DUNS23", "Y", "Y", "DUNS103", "DUNS104",
-                        5359, 193103L, "Y", "Government" },
         };
+
         uploadBaseSourceData(ams, baseSourceVersion, columns, data);
     }
 
@@ -341,8 +303,8 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_NULL_DUNS_DUNS21", 21L }, //
 
                 { "_DOMAIN_dom22.com_DUNS_DUNS22", 22L }, //
-                { "_DOMAIN_dom22.com_DUNS_NULL", 22L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS22", 22L }, //
+                { "_DOMAIN_dom22.com_DUNS_NULL", 22L }, //
 
                 { "_DOMAIN_dom31.com_DUNS_DUNS31", 31L }, //
                 { "_DOMAIN_dom31.com_DUNS_NULL", 31L }, //
@@ -391,11 +353,11 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_dom012.com_DUNS_DUNS013", 46L }, //
                 { "_DOMAIN_dom012.com_DUNS_DUNS014", 47L }, //
 
+                { "_DOMAIN_dom015.com_DUNS_NULL", 48L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS015", 48L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS016", 49L }, //
                 { "_DOMAIN_dom015.com_DUNS_DUNS015", 48L }, //
                 { "_DOMAIN_dom015.com_DUNS_DUNS016", 49L }, //
-                { "_DOMAIN_dom015.com_DUNS_NULL", 49L }, //
 
                 { "_DOMAIN_dom017.com_DUNS_NULL", 51L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS017", 50L }, //
@@ -403,6 +365,7 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_dom017.com_DUNS_DUNS017", 50L }, //
                 { "_DOMAIN_dom017.com_DUNS_DUNS018", 51L }, //
 
+                { "_DOMAIN_dom019.com_DUNS_NULL", 52L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS019", 52L }, //
                 { "_DOMAIN_NULL_DUNS_DUNS020", 53L }, //
                 { "_DOMAIN_dom019.com_DUNS_DUNS019", 52L }, //
@@ -426,18 +389,6 @@ public class AMLookupRebuildPipelineTestNG
                 { "_DOMAIN_NULL_DUNS_DUNS101", 101L }, //
                 { "_DOMAIN_dom100.com_DUNS_DUNS100", 100L }, //
                 { "_DOMAIN_dom100.com_DUNS_DUNS101", 101L }, //
-                { "_DOMAIN_dom019.com_DUNS_NULL_COUNTRY_Country101_STATE_State101_ZIPCODE_NULL", 102L }, //
-                { "_DOMAIN_dom019.com_DUNS_NULL", 102L }, //
-                { "_DOMAIN_dom019.com_DUNS_DUNS26", 102L }, //
-                { "_DOMAIN_dom019.com_DUNS_NULL_COUNTRY_Country101_STATE_NULL_ZIPCODE_Zip101", 102L }, //
-                { "_DOMAIN_NULL_DUNS_DUNS26", 102L }, //
-                { "_DOMAIN_dom019.com_DUNS_NULL_COUNTRY_Country101_STATE_NULL_ZIPCODE_NULL", 102L }, //
-                { "_DOMAIN_NULL_DUNS_DUNS23", 103L }, //
-                { "_DOMAIN_dom024.com_DUNS_NULL", 103L }, //
-                { "_DOMAIN_dom024.com_DUNS_NULL_COUNTRY_Country102_STATE_NULL_ZIPCODE_NULL", 103L }, //
-                { "_DOMAIN_dom024.com_DUNS_NULL_COUNTRY_Country102_STATE_NULL_ZIPCODE_Zip102", 103L }, //
-                { "_DOMAIN_dom024.com_DUNS_DUNS23", 103L }, //
-                { "_DOMAIN_dom024.com_DUNS_NULL_COUNTRY_Country102_STATE_State102_ZIPCODE_NULL", 103L }, //
         };
 
         Map<String, Long> lookup = new HashMap<>();
