@@ -32,7 +32,6 @@ public final class JobStepDisplayInfoMapping {
     private static final String[] IMPORT_MATCH_AND_MODEL_STEPS = { //
             "load_data", //
             "load_data", //
-            "load_data", //
             "generate_insights", //
             "generate_insights", //
             "generate_insights", //
