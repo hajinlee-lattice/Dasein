@@ -37,9 +37,7 @@ public class CDLServiceImpl implements CDLService {
     private CDLProxy cdlProxy;
 
     @Override
-    public ApplicationId processAnalyze(String customerSpace) {
-        ProcessAnalyzeRequest request = new ProcessAnalyzeRequest();
-        request.setUserId(MultiTenantContext.getEmailAddress());
+    public ApplicationId processAnalyze(String customerSpace, ProcessAnalyzeRequest request) {
         return cdlProxy.processAnalyze(customerSpace, request);
     }
 

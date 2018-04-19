@@ -4,6 +4,7 @@ import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
+import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
@@ -42,10 +44,13 @@ public class CDLResource {
 
     @RequestMapping(value = "/processanalyze", method = RequestMethod.POST)
     @ApiOperation(value = "Start Process And Analyze job")
-    public ResponseDocument<String> processAnalyze() {
+    public ResponseDocument<String> processAnalyze(@RequestBody(required = false) ProcessAnalyzeRequest request) {
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
-        String user = MultiTenantContext.getEmailAddress();
-        ApplicationId result = cdlService.processAnalyze(customerSpace.toString());
+        if (request == null) {
+            request = new ProcessAnalyzeRequest();
+        }
+        request.setUserId(MultiTenantContext.getEmailAddress());
+        ApplicationId result = cdlService.processAnalyze(customerSpace.toString(), request);
         return ResponseDocument.successResponse(result.toString());
     }
 
