@@ -17,7 +17,7 @@ RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apr-${APR_VERSION}-1.x86_64.rpm -O /root/ch
 
 
 
-ENV TOMCAT_VERSION=8.5.23
+ENV TOMCAT_VERSION=9.0.5
 ENV CATALINA_HOME /opt/apache-tomcat-${TOMCAT_VERSION}
 RUN wget -q ${TOMCAT_TAR_URL_PREFIX}/apache-tomcat-${TOMCAT_VERSION}.tar.gz -O /root/chefcache/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
     && tar xfz  /root/chefcache/apache-tomcat-${TOMCAT_VERSION}.tar.gz \
