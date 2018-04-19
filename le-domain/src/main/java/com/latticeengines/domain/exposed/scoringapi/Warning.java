@@ -5,6 +5,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Warning {
 
+    private static final int MAX_ALLOWED_CHARS = 1000;
+
     @JsonProperty("warning")
     private String warning;
 
@@ -33,7 +35,11 @@ public class Warning {
     }
 
     public String getDescription() {
-        return description;
+        if (Math.min(description.length(), MAX_ALLOWED_CHARS) == description.length()) {
+            return description;
+        }
+        // if description is too big then trim it
+        return String.format("%s ...", description.substring(0, MAX_ALLOWED_CHARS));
     }
 
     public void setDescription(String description) {
@@ -55,4 +61,7 @@ public class Warning {
         return description;
     }
 
+    public WarningCode getCode() {
+        return code;
+    }
 }

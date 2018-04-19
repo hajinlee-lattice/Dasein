@@ -9,11 +9,11 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.latticeengines.common.exposed.util.DateTimeUtils;
@@ -35,6 +35,7 @@ import com.latticeengines.domain.exposed.scoringapi.RecordScoreResponse.ScoreMod
 import com.latticeengines.domain.exposed.scoringapi.ScoreRequest;
 import com.latticeengines.domain.exposed.scoringapi.ScoreResponse;
 import com.latticeengines.domain.exposed.scoringapi.Warning;
+import com.latticeengines.domain.exposed.scoringapi.WarningCode;
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.scoringapi.exposed.context.RequestInfo;
 import com.latticeengines.scoringapi.exposed.context.ScoreRequestMetrics;
@@ -82,6 +83,8 @@ public abstract class BaseScoring extends CommonBase {
     protected static final int MAX_ALLOWED_RECORDS = 200;
 
     private static final String TOTAL_TIME_PREFIX = "total_";
+
+    private static final Integer MAX_ALLOWED_WARNING_FOR_A_TYPE = null;
 
     @Autowired
     protected OAuthUserEntityMgr oAuthUserEntityMgr;
@@ -355,21 +358,17 @@ public abstract class BaseScoring extends CommonBase {
                         String error = scoreTuple.getError();
                         String errorDesc = scoreTuple.getErrorDescription();
                         String recordId = record.getRecordId();
-                        List<Warning> warningList = new ArrayList<>();
                         requestInfo.put(WARNINGS, null);
+
                         if (!CollectionUtils.isEmpty(resp.getWarnings())) {
-                            if (!CollectionUtils.isEmpty(warnings.getWarnings(recordId))) {
-                                for (Warning warning : warnings.getWarnings(recordId)) {
-                                    warningList.add(warning);
-                                }
-                            }
+                            List<Warning> warningList = prepareWarningList(record, recordId);
 
                             if (!warningList.isEmpty()) {
                                 requestInfo.put(WARNINGS, JsonUtils.serialize(warningList));
                             }
                         }
 
-                        requestInfo.put(HAS_WARNING, String.valueOf(!warningList.isEmpty()));
+                        requestInfo.put(HAS_WARNING, String.valueOf(requestInfo.get(WARNINGS) != null));
                         boolean hasError = !com.latticeengines.common.exposed.util.StringStandardizationUtils
                                 .objectIsNullOrEmptyString(error);
                         requestInfo.put(HAS_ERROR, Boolean.toString(hasError));
@@ -406,6 +405,40 @@ public abstract class BaseScoring extends CommonBase {
                 log.debug(ex.getLocalizedMessage(), ex);
             }
         }
+    }
+
+    private List<Warning> prepareWarningList(Record record, String recordId) {
+        List<Warning> warningList = new ArrayList<>();
+
+        if (!CollectionUtils.isEmpty(warnings.getWarnings(recordId))) {
+            Map<WarningCode, Integer> warningCounterMap = new HashMap<>();
+            int recordCardinality = record.getModelAttributeValuesMap().size();
+
+            for (Warning warning : warnings.getWarnings(recordId)) {
+                // skip logging for WarningCode.EXTRA_FIELDS
+                if (!WarningCode.EXTRA_FIELDS.equals(warning.getCode())) {
+                    int currentCounter = 0;
+                    if (warningCounterMap.containsKey(warning.getCode())) {
+                        // we should ignore additional
+                        // warning of a given warningCode
+                        // type if it crosses more than
+                        // record cardinality
+                        currentCounter = warningCounterMap.get(warning.getCode());
+
+                        if (currentCounter >= recordCardinality) {
+                            // skip this warning
+                            continue;
+                        }
+                    }
+                    warningList.add(warning);
+
+                    // increment counter
+                    warningCounterMap.put(warning.getCode(), (currentCounter + 1));
+                }
+            }
+        }
+
+        return warningList;
     }
 
     private void logTotalDurationSummary(Map<String, String> totalDurationStopWatchSplits) {
