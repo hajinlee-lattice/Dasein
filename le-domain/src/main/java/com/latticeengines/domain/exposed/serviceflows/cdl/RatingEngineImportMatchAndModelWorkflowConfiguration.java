@@ -365,6 +365,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder setUseScorederivation(boolean useScorederivation) {
             ratingEngineScoreWorkflowBuilder.setUseScorederivation(useScorederivation);
+            generateAIRating.setUseScorederivation(useScorederivation);
             return this;
         }
 
