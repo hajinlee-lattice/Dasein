@@ -64,6 +64,7 @@ public class OAuth2ResourceServerConfig extends ResourceServerConfigurerAdapter 
                 .permitAll() //
                 .antMatchers("/ulysses/latticeinsights/**", //
                         "/ulysses/companyprofiles/**", //
+                        "/ulysses/lookup-id-mapping/**", //
                         "/ulysses/attributes/**", //
                         "/ulysses/tenant/**", //
                         "/ulysses/tenantconfig/**", //
