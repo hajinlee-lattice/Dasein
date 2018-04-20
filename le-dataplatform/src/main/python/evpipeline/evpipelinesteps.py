@@ -66,7 +66,7 @@ class ImputationStep(PipelineStep):
      
     def transform(self, dataFrame, configMetadata, test):
         calculateImputationValues = True
-        if len(self.imputationValues) != 0:
+        if len(self.imputationValues) != 0 or self.targetColumn not in dataFrame:
             calculateImputationValues = False
 
         outputFrame, nullValues = self.generateTransformedBooleanColumns(dataFrame, calculateImputationValues)
