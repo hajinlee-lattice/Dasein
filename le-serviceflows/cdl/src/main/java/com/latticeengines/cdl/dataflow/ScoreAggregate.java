@@ -50,7 +50,7 @@ public class ScoreAggregate extends TypesafeDataFlowBuilder<ScoreAggregateParame
 
     private Node aggregateSingleModel(Node source) {
         String scoreFieldName;
-        if (params.getExpectedValue()) {
+        if (params.getExpectedValue() != null && params.getExpectedValue()) {
             scoreFieldName = InterfaceName.ExpectedRevenue.name();
         } else {
             scoreFieldName = InterfaceName.Probability.name();

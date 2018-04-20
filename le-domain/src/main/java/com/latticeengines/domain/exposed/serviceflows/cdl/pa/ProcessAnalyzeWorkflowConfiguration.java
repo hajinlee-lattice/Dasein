@@ -132,6 +132,21 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder uniqueKeyColumn(String uniqueKeyColumn) {
+            processRatingWorkflowBuilder.uniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            processRatingWorkflowBuilder.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            processRatingWorkflowBuilder.cdlMultiModel(cdlMultiMode);
+            return this;
+        }
+
         public Builder rebuildEntities(Set<BusinessEntity> entities) {
             processAccountWorkflowBuilder.rebuildEntities(entities);
             processContactWorkflowBuilder.rebuildEntities(entities);

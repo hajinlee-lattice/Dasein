@@ -56,6 +56,21 @@ public class GenerateRatingWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder uniqueKeyColumn(String uniqueKeyColumn) {
+            generateAIRating.uniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            generateAIRating.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            generateAIRating.cdlMultiModel(cdlMultiMode);
+            return this;
+        }
+
         public Builder transformationGroup(TransformationGroup transformationGroup,
                             List<TransformDefinition> stdTransformDefns) {
             generateAIRating.transformationGroup(transformationGroup, stdTransformDefns);

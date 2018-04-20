@@ -57,8 +57,9 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
                 getStringValueFromContext(EXPORT_OUTPUT_PATH));
 
         // for score step in score workflow
-        Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE, Table.class);
-        putObjectInContext(EVENT_TABLE, matchResultTable);
+        // Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE,
+        // Table.class);
+        // putObjectInContext(EVENT_TABLE, matchResultTable);
 
         setRatingModelsContext();
     }
@@ -72,7 +73,8 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
             String customerSpace = configuration.getCustomerSpace().toString();
             RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
 
-            if (RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())) {
+            if (RatingEngineType.CROSS_SELL.equals(ratingEngine.getType())
+                    || RatingEngineType.CUSTOM_EVENT.equals(ratingEngine.getType())) {
                 AIModel ratingModel = (AIModel) ratingEngineProxy.getRatingModel(customerSpace, engineId, modelId);
                 String modelGuid = ratingModel.getModelSummaryId();
                 if (StringUtils.isBlank(modelGuid)) {

@@ -11,15 +11,15 @@ import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.eai.SourceType;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.MetadataSegmentExport;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
+import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
@@ -28,9 +28,8 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
@@ -57,14 +56,12 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
 
         private ModelWorkflowConfiguration.Builder modelWorkflowBuilder = new ModelWorkflowConfiguration.Builder();
-
-        private PrepareScoringAfterModelingWorkflowConfiguration.Builder prepareConfigForScoringBuilder = new PrepareScoringAfterModelingWorkflowConfiguration.Builder();
-        private RTSBulkScoreWorkflowConfiguration.Builder rtsBulkScoreWorkflowBuilder = new RTSBulkScoreWorkflowConfiguration.Builder();
-
-        private ComputeLiftDataFlowConfiguration computeLift = new ComputeLiftDataFlowConfiguration();
         private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private LdcOnlyAttributesConfiguration ldcOnlyAttributes = new LdcOnlyAttributesConfiguration();
+
+        private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
+        private GenerateAIRatingWorkflowConfiguration.Builder generateAIRating = new GenerateAIRatingWorkflowConfiguration.Builder();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -77,9 +74,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             ldcOnlyAttributes.setCustomerSpace(customerSpace);
             export.setCustomerSpace(customerSpace);
             modelWorkflowBuilder.customer(customerSpace);
-            prepareConfigForScoringBuilder.customer(customerSpace);
-            rtsBulkScoreWorkflowBuilder.customer(customerSpace);
-            computeLift.setCustomerSpace(customerSpace);
+            setConfigForScoring.setCustomerSpace(customerSpace);
+            generateAIRating.customer(customerSpace);
             pivotScoreAndEvent.setCustomerSpace(customerSpace);
 
             return this;
@@ -96,12 +92,10 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             ldcOnlyAttributes.setMicroServiceHostPort(microServiceHostPort);
             modelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
 
-            rtsBulkScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
-            prepareConfigForScoringBuilder.microServiceHostPort(microServiceHostPort);
-            computeLift.setMicroServiceHostPort(microServiceHostPort);
-            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             export.setMicroServiceHostPort(microServiceHostPort);
-
+            setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
+            generateAIRating.microServiceHostPort(microServiceHostPort);
+            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -145,8 +139,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             ldcOnlyAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
-            prepareConfigForScoringBuilder.internalResourceHostPort(internalResourceHostPort);
-            rtsBulkScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
+            setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
@@ -167,58 +160,45 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder userId(String userId) {
-            computeLift.setUserId(userId);
             modelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
+            generateAIRating.userId(userId);
             return this;
         }
 
         public Builder modelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
             modelWorkflowBuilder.modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
-            prepareConfigForScoringBuilder.modelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
+            setConfigForScoring.setModelingServiceHdfsBaseDir(modelingServiceHdfsBaseDir);
             return this;
         }
 
         public Builder inputProperties(Map<String, String> inputProperties) {
             configuration.setInputProperties(inputProperties);
-            prepareConfigForScoringBuilder.inputProperties(inputProperties);
+            setConfigForScoring.setInputProperties(inputProperties);
             return this;
         }
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             customEventMatchWorkflowConfigurationBuilder.matchClientDocument(matchClientDocument);
-            prepareConfigForScoringBuilder.matchClientDocument(matchClientDocument);
-            rtsBulkScoreWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchAccountIdColumn(String matchAccountIdColumn) {
             customEventMatchWorkflowConfigurationBuilder.matchAccountIdColumn(matchAccountIdColumn);
-            prepareConfigForScoringBuilder.matchAccountIdColumn(matchAccountIdColumn);
             return this;
         }
 
         public Builder modelingType(CustomEventModelingType customEventModelingType) {
             customEventMatchWorkflowConfigurationBuilder.modelingType(customEventModelingType);
-            prepareConfigForScoringBuilder.modelingType(customEventModelingType);
-            if (CustomEventModelingType.LPI == customEventModelingType) {
-                computeLift.setScoreField(InterfaceName.Event.name());
-            } else if (CustomEventModelingType.CDL == customEventModelingType) {
-                computeLift.setScoreField(ScoreResultField.Percentile.displayName);
-                rtsBulkScoreWorkflowBuilder.skipMatching(Boolean.TRUE);
-                rtsBulkScoreWorkflowBuilder.setScoreTestFile(Boolean.TRUE);
-            }
+            generateAIRating.modelingType(customEventModelingType);
+            String scoreField = CustomEventModelingType.LPI == customEventModelingType ? InterfaceName.Event.name()
+                    : ScoreResultField.Percentile.displayName;
+            generateAIRating.scoreField(scoreField);
             return this;
         }
 
         public Builder targetTableName(String targetTableName) {
             modelWorkflowBuilder.targetTableName(targetTableName);
-            prepareConfigForScoringBuilder.matchCdlTargetTableName(targetTableName);
-            return this;
-        }
-
-        public Builder metadataSegmentExport(MetadataSegmentExport metadataSegmentExport) {
-            prepareConfigForScoringBuilder.metadataSegmentExport(metadataSegmentExport);
             return this;
         }
 
@@ -228,82 +208,75 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public Builder ratingEngineId(String ratingEngineId) {
-            computeLift.setRatingEngineId(ratingEngineId);
+            generateAIRating.ratingEngineId(ratingEngineId);
             modelWorkflowBuilder.ratingEngineId(ratingEngineId);
+            return this;
+        }
+
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            generateAIRating.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
+            generateAIRating.setModelIdFromRecord(setModelIdFromRecord);
             return this;
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             customEventMatchWorkflowConfigurationBuilder.matchRequestSource(matchRequestSource);
-            prepareConfigForScoringBuilder.matchRequestSource(matchRequestSource);
-            rtsBulkScoreWorkflowBuilder.matchRequestSource(matchRequestSource);
             return this;
         }
 
         public Builder matchQueue(String queue) {
             customEventMatchWorkflowConfigurationBuilder.matchQueue(queue);
-            prepareConfigForScoringBuilder.matchQueue(queue);
-            rtsBulkScoreWorkflowBuilder.matchQueue(queue);
+            generateAIRating.matchYarnQueue(queue);
             return this;
         }
 
         public Builder fetchOnly(boolean fetchOnly) {
             customEventMatchWorkflowConfigurationBuilder.fetchOnly(fetchOnly);
-            rtsBulkScoreWorkflowBuilder.fetchOnly(fetchOnly);
-            prepareConfigForScoringBuilder.fetchOnly(fetchOnly);
+            generateAIRating.fetchOnly(fetchOnly);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
                     selectionVersion);
-            prepareConfigForScoringBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
-            rtsBulkScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
             customEventMatchWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
             modelWorkflowBuilder.dataCloudVersion(dataCloudVersion);
-            prepareConfigForScoringBuilder.dataCloudVersion(dataCloudVersion);
-            rtsBulkScoreWorkflowBuilder.dataCloudVersion(dataCloudVersion);
+            generateAIRating.dataCloudVersion(dataCloudVersion);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
             customEventMatchWorkflowConfigurationBuilder.matchType(matchCommandType);
-            prepareConfigForScoringBuilder.matchType(matchCommandType);
-            rtsBulkScoreWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder setRetainLatticeAccountId(boolean retainLatticeAccountId) {
             customEventMatchWorkflowConfigurationBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
-            prepareConfigForScoringBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
-            rtsBulkScoreWorkflowBuilder.setRetainLatticeAccountId(retainLatticeAccountId);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
             customEventMatchWorkflowConfigurationBuilder.matchDestTables(destTables);
-            prepareConfigForScoringBuilder.matchDestTables(destTables);
-            rtsBulkScoreWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
         public Builder excludePublicDomains(boolean excludePublicDomains) {
             customEventMatchWorkflowConfigurationBuilder.excludePublicDomains(excludePublicDomains);
             modelWorkflowBuilder.excludePublicDomain(excludePublicDomains);
-            prepareConfigForScoringBuilder.excludePublicDomains(excludePublicDomains);
-            rtsBulkScoreWorkflowBuilder.excludePublicDomain(excludePublicDomains);
             return this;
         }
 
         public Builder excludeDataCloudAttrs(boolean exclude) {
             customEventMatchWorkflowConfigurationBuilder.excludeDataCloudAttrs(exclude);
             modelWorkflowBuilder.excludeDataCloudAttrs(exclude);
-            rtsBulkScoreWorkflowBuilder.excludeDataCloudAttrs(exclude);
-            prepareConfigForScoringBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
@@ -322,13 +295,10 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             customEventMatchWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             modelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
-            prepareConfigForScoringBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
-            rtsBulkScoreWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
         public Builder matchDebugEnabled(boolean matchDebugEnabled) {
-            rtsBulkScoreWorkflowBuilder.matchDebugEnabled(matchDebugEnabled);
             return this;
         }
 
@@ -351,7 +321,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelDataValidationWorkflow.sourceTableName(trainingTableName);
             customEventMatchWorkflowConfigurationBuilder.matchInputTableName(trainingTableName);
             modelWorkflowBuilder.trainingTableName(trainingTableName);
-            rtsBulkScoreWorkflowBuilder.inputTableName(trainingTableName);
+            generateAIRating.inputTableName(trainingTableName);
             return this;
         }
 
@@ -360,6 +330,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
             modelWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
+            generateAIRating.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
         }
 
@@ -399,13 +370,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder saveBucketMetadata(){
-            computeLift.setSaveBucketMetadata(Boolean.TRUE);
-            return this;
-        }
-
-        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
-            rtsBulkScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
+        public Builder saveBucketMetadata() {
+            generateAIRating.saveBucketMetadata();
             return this;
         }
 
@@ -426,15 +392,22 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder idColumnName(String idColumnName) {
             modelWorkflowBuilder.idColumnName(idColumnName);
-            rtsBulkScoreWorkflowBuilder.idColumnName(idColumnName);
+            return this;
+        }
+
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            generateAIRating.cdlMultiModel(cdlMultiMode);
+            return this;
+        }
+
+        public Builder dataCollectionVersion(DataCollection.Version version) {
+            generateAIRating.dataCollectionVersion(version);
             return this;
         }
 
         public CustomEventModelingWorkflowConfiguration build() {
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
-            rtsBulkScoreWorkflowBuilder.skipBulkMatch(Boolean.TRUE);
-
             configuration.add(importData);
             configuration.add(registerReport);
             configuration.add(modelDataValidationWorkflow.build());
@@ -444,9 +417,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(addStandardAttributes);
             configuration.add(ldcOnlyAttributes);
             configuration.add(modelWorkflowBuilder.build());
-            configuration.add(prepareConfigForScoringBuilder.build());
-            configuration.add(rtsBulkScoreWorkflowBuilder.build());
-            configuration.add(computeLift);
+            configuration.add(setConfigForScoring);
+            configuration.add(generateAIRating.build());
             configuration.add(pivotScoreAndEvent);
             configuration.add(export);
 

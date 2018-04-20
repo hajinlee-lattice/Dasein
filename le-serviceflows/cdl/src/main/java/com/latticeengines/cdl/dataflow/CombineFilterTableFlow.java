@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.TypesafeDataFlowBuilder;
+import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineFilterTableParameters;
 
@@ -29,6 +30,7 @@ public class CombineFilterTableFlow extends TypesafeDataFlowBuilder<CombineFilte
             if (inputTable != null) {
                 customEventInputTable = customEventInputTable.addColumnWithFixedValue(InterfaceName.PeriodId.name(),
                         null, Long.class);
+                customEventInputTable = customEventInputTable.retain(new FieldList(inputTable.getFieldNames()));
                 inputTable = inputTable.merge(customEventInputTable);
             } else {
                 inputTable = customEventInputTable;

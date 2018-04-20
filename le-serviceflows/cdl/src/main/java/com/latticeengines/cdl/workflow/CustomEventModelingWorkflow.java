@@ -2,21 +2,20 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
-import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import com.latticeengines.cdl.workflow.steps.LdcOnlyAttributesStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.scoring.workflow.RTSBulkScoreWorkflow;
-import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
 import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
+import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
@@ -55,17 +54,14 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     private ModelWorkflow modelWorkflow;
 
     @Inject
-    private PrepareScoringAfterModelingWorkflow prepareScoringAfterModelingWorkflow;
+    private SetConfigurationForScoring setConfigurationForScoring;
 
     @Inject
-    private RTSBulkScoreWorkflow rtsBulkScoreWorkflow;
+    private GenerateAIRatingWorkflow generateRating;
 
-    @Inject
-    private ComputeLiftDataFlow computeLift;
-
-    @Inject
+	@Inject
     private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
-
+    
     @Inject
     private ExportData exportData;
 
@@ -86,9 +82,9 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(addStandardAttributesDataFlow) //
                 .next(ldcOnlyAttributesDataFlow) //
                 .next(modelWorkflow) //
-                .next(prepareScoringAfterModelingWorkflow) //
-                .next(rtsBulkScoreWorkflow) //
-                .next(computeLift) //
+                .next(setConfigurationForScoring) //
+                .next(generateRating) //
+                .next(exportData) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(activateRatingEngineListener) //

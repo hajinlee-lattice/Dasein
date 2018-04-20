@@ -3,11 +3,13 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
@@ -17,6 +19,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingSt
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ComputeLiftDataFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
@@ -32,6 +35,17 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
                 .add(SoftwareLibrary.Scoring.getName())//
                 .addAll(super.getSwpkgNames()) //
                 .build();
+    }
+
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
+
+    public CustomEventModelingType getCustomEventModelingType() {
+        return customEventModelingType;
+    }
+
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
     public static class Builder {
@@ -91,6 +105,16 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder uniqueKeyColumn(String uniqueKeyColumn) {
+            score.setUniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            combineInputWithScores.setCdlMultiModel(cdlMultiMode);
+            return this;
+        }
+
         public Builder userId(String userId) {
             computeLift.setUserId(userId);
             return this;
@@ -112,6 +136,16 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder setUseScorederivation(boolean useScorederivation) {
+            score.setUseScorederivation(useScorederivation);
+            return this;
+        }
+
+        public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
+            score.setModelIdFromRecord(setModelIdFromRecord);
+            return this;
+        }
+
         public Builder setExpectedValue(boolean expectedValue) {
             if (expectedValue) {
                 computeLift.setScoreField(InterfaceName.ExpectedRevenue.name());
@@ -127,17 +161,31 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder inputTableName(String tableName) {
+            combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
+            return this;
+        }
+
         public Builder transformationGroup(TransformationGroup transformationGroup,
-                                           List<TransformDefinition> stdTransformDefns) {
+                List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
+            return this;
+        }
+
+        public Builder modelingType(CustomEventModelingType customEventModelingType) {
+            configuration.setCustomEventModelingType(customEventModelingType);
+            return this;
+        }
+
+        public Builder scoreField(String scoreField) {
+            computeLift.setScoreField(scoreField);
             return this;
         }
 
         public GenerateAIRatingWorkflowConfiguration build() {
             setCdlEventTableConfig();
             setMatchConfig();
-            setScoreConfig();
             setAddStandardAttributesConfig();
             configuration.setContainerConfiguration("generateAIRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
@@ -170,13 +218,5 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             match.skipDedupStep(true);
             match.matchHdfsPod(null);
         }
-
-        private void setScoreConfig() {
-            score.setUniqueKeyColumn(InterfaceName.__Composite_Key__.name());
-            score.setModelIdFromRecord(true);
-            score.setUseScorederivation(false);
-            combineInputWithScores.setCdlMultiModel(true);
-        }
-
     }
 }

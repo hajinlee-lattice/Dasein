@@ -354,6 +354,12 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
             ratingEngineScoreWorkflowBuilder.setUniqueKeyColumn(uniqueKeyColumn);
+            generateAIRating.uniqueKeyColumn(uniqueKeyColumn);
+            return this;
+        }
+
+        public Builder cdlMultiModel(boolean cdlMultiMode) {
+            generateAIRating.cdlMultiModel(cdlMultiMode);
             return this;
         }
 

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.cdl.workflow.steps.ScoreAggregateFlow;
 import com.latticeengines.cdl.workflow.steps.rating.CreateScoringTargetTable;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
@@ -26,7 +27,7 @@ import com.latticeengines.workflow.exposed.build.WorkflowBuilder;
 public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingWorkflowConfiguration> {
 
     @Inject
-    private CreateScoringTargetTable createCrossSellScoringTargetTable;
+    private CreateScoringTargetTable createScoringTargetTable;
 
     @Inject
     private CreateCdlEventTableStep createCdlEventTable;
@@ -51,14 +52,18 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
 
     @Override
     public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
-        return new WorkflowBuilder(name(), config) //
-                .next(createCrossSellScoringTargetTable) //
-                .next(createCdlEventTable) //
-                .next(matchDataCloud) //
-                .next(addStandardAttributes) //
-                .next(scoreEventTable) //
-                .next(scoreAggregate) //
-                .next(combineInputTableWithScore) //
+        WorkflowBuilder builder = new WorkflowBuilder(name(), config);
+        if (!CustomEventModelingType.LPI.equals(config.getCustomEventModelingType())) {
+            builder.next(createScoringTargetTable) //
+                    .next(createCdlEventTable) //
+                    .next(matchDataCloud) //
+                    .next(addStandardAttributes); //
+        }
+        builder.next(scoreEventTable);
+        if (!CustomEventModelingType.LPI.equals(config.getCustomEventModelingType())) {
+            builder.next(scoreAggregate); //
+        }
+        return builder.next(combineInputTableWithScore) //
                 .next(computeLift) //
                 .build();
     }

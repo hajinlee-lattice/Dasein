@@ -50,7 +50,8 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
         removeObjectFromContext(FILTER_EVENT_TABLE);
         putStringValueInContext(FILTER_EVENT_TARGET_TABLE_NAME, targetTableName);
         putStringValueInContext(SCORING_UNIQUEKEY_COLUMN, InterfaceName.__Composite_Key__.name());
-        putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
+        if (evaluationPeriod != null)
+            putLongValueInContext(EVALUATION_PERIOD, evaluationPeriod.get());
     }
 
     @Override
@@ -85,7 +86,8 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
                 String periodIdAttr = InterfaceName.PeriodId.name();
                 if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
                     if (evaluationPeriod == null) {
-                        Long periodId = Long.valueOf(String.valueOf(map.get(InterfaceName.PeriodId.name().toLowerCase())));
+                        Long periodId = Long
+                                .valueOf(String.valueOf(map.get(InterfaceName.PeriodId.name().toLowerCase())));
                         evaluationPeriod = new AtomicLong();
                         evaluationPeriod.set(periodId);
                     }

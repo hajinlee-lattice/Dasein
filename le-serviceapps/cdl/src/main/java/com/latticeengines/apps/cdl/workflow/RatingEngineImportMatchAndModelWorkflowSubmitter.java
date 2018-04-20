@@ -134,11 +134,12 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .setRetainLatticeAccountId(true) //
                 .setActivateModelSummaryByDefault(parameters.getActivateModelSummaryByDefault()) //
                 .cdlModel(true) //
-                .setUniqueKeyColumn(InterfaceName.AnalyticPurchaseState_ID.name()) //
+                .setUniqueKeyColumn(InterfaceName.__Composite_Key__.name()) //
+                .cdlMultiModel(true) //
                 .setEventColumn(InterfaceName.Target.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
-                .setModelIdFromRecord(false) //
+                .setModelIdFromRecord(true) //
                 .dataCollectionVersion(version) //
                 .liftChart(parameters.isLiftChart()) //
                 .aiModelId(parameters.getAiModelId()) //
@@ -174,7 +175,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
 
     public ApplicationId submit(RatingEngineModelingParameters parameters) {
         TransformationGroup transformationGroup = TransformationGroup.NONE; // TODO:
-                                                                                // plsFeatureFlagService.getTransformationGroupFromZK();
+                                                                            // plsFeatureFlagService.getTransformationGroupFromZK();
         if (parameters.getTransformationGroup() == null) {
             parameters.setTransformationGroup(transformationGroup);
         }
