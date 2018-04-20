@@ -7,8 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.pls.AdditionalEmailInfo;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.workflow.exposed.build.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.LEJobListener;
@@ -20,6 +22,9 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
 
     @Autowired
     private WorkflowJobEntityMgr workflowJobEntityMgr;
+
+    @Autowired
+    private RatingEngineProxy ratingEngineProxy;
 
     @Override
     public void beforeJobExecution(JobExecution jobExecution) {
@@ -37,7 +42,13 @@ public class SendEmailAfterModelCompletionListener extends LEJobListener {
         WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(jobExecution.getId());
         if (job != null) {
             String modelName = job.getInputContextValue(WorkflowContextConstants.Inputs.MODEL_DISPLAY_NAME);
-            emailInfo.setModelId(modelName);
+            String ratingEngineId = job.getInputContextValue(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
+            if (ratingEngineId != null) {
+                RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(tenantId, ratingEngineId);
+                emailInfo.setModelId(ratingEngine != null ? ratingEngine.getDisplayName() : modelName);
+            } else {
+                emailInfo.setModelId(modelName);
+            }
             log.info(String.format("userId: %s; modelName: %s", emailInfo.getUserId(), emailInfo.getModelId()));
             InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
             try {
