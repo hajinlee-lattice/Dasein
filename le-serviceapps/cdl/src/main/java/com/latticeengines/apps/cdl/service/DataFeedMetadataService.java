@@ -44,4 +44,12 @@ public abstract class DataFeedMetadataService {
     public abstract void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
             String customerSpace);
 
+    public boolean validateOriginalTable(Table original) {
+        // 1. Table from source cannot be null.
+        if (original == null) {
+            return false;
+        }
+        return true;
+    }
+
 }

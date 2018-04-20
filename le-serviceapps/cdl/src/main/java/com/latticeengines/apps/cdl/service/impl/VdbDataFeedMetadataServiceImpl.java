@@ -63,10 +63,10 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
         metaTable.setPrimaryKey(null);
         metaTable.setName(vdbLoadTableConfig.getTableName());
         metaTable.setDisplayName(vdbLoadTableConfig.getTableName());
-        if (VdbMetadataUtils.validateVdbTable(metaTable)) {
+        if (VdbMetadataUtils.validateVdbTable(metaTable) && validateOriginalTable(metaTable)) {
             return metaTable;
         } else {
-            throw new RuntimeException("The metadata from vdb is not valid! ");
+            throw new RuntimeException("The metadata from vdb is not valid!");
         }
     }
 
@@ -343,6 +343,23 @@ public class VdbDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             cdlExternalSystem.setCrmIds(crmAttr.getName());
             cdlExternalSystemService.createOrUpdateExternalSystem(customerSpace, cdlExternalSystem);
         }
+    }
+
+    @Override
+    public boolean validateOriginalTable(Table original) {
+        if (!super.validateOriginalTable(original)) {
+            log.error("The original table cannot be null!");
+            return false;
+        }
+        // 1. All data types from source should be recognizable.
+        for (Attribute attr : original.getAttributes()) {
+            Type avroType = getAvroType(attr);
+            if (avroType == null) {
+                log.error(String.format("Not supported type %s for column %s", attr.getPhysicalDataType(), attr.getSourceAttrName()));
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

@@ -2,8 +2,10 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.avro.Schema.Type;
 import org.apache.commons.lang3.StringUtils;
@@ -52,7 +54,11 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
                 attribute.setGroupsViaList(groups);
             }
         }
-        return metaTable;
+        if (validateOriginalTable(metaTable)) {
+            return metaTable;
+        } else {
+            throw new RuntimeException("The metadata from csv import is not valid!");
+        }
     }
 
     @Override
@@ -154,6 +160,25 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
     public void autoSetCDLExternalSystem(CDLExternalSystemService cdlExternalSystemService, Table table,
             String customerSpace) {
         return;
+    }
+
+    @Override
+    public boolean validateOriginalTable(Table original) {
+        if (!super.validateOriginalTable(original)) {
+            log.error("The original table cannot be null!");
+            return false;
+        }
+        Set<String> attrNames = new HashSet<>();
+        for (Attribute attribute : original.getAttributes()) {
+            if (attrNames.contains(attribute.getName().toLowerCase())) {
+                log.error(String.format("Table already have attribute with same name %s (case insensitive)",
+                        attribute.getName()));
+                return false;
+            } else {
+                attrNames.add(attribute.getName().toLowerCase());
+            }
+        }
+        return true;
     }
 
     @Override

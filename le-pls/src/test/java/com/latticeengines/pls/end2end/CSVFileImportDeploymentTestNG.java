@@ -466,4 +466,37 @@ public class CSVFileImportDeploymentTestNG extends CDLDeploymentTestNGBase {
         JobStatus completedStatus2 = waitForWorkflowStatus(workflowProxy, applicationId2.toString(), false);
         assertEquals(completedStatus2, JobStatus.COMPLETED);
     }
+
+    @Test(groups = "deployment")
+    public void testWrongFieldMapping() {
+        SourceFile firstFile = fileUploadService.uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                SchemaInterpretation.valueOf(ENTITY_ACCOUNT), ENTITY_ACCOUNT, "Small_Account.csv",
+                ClassLoader.getSystemResourceAsStream(SOURCE_FILE_LOCAL_PATH + "Small_Account.csv"));
+
+        String feedType = ENTITY_ACCOUNT + FEED_TYPE_SUFFIX + "TestWrongFieldMapping";
+
+        FieldMappingDocument fieldMappingDocument = modelingFileMetadataService
+                .getFieldMappingDocumentBestEffort(firstFile.getName(), ENTITY_ACCOUNT, SOURCE, feedType);
+
+        FieldMapping m1 = new FieldMapping();
+        m1.setUserField("ID");
+        m1.setMappedToLatticeField(false);
+        m1.setMappedField("AccountId");
+        m1.setCdlExternalSystemType(CDLExternalSystemType.CRM);
+
+
+        fieldMappingDocument.getFieldMappings().add(m1);
+
+        modelingFileMetadataService.resolveMetadata(firstFile.getName(), fieldMappingDocument, ENTITY_ACCOUNT, SOURCE,
+                feedType);
+
+        boolean submitError = false;
+        try {
+            cdlService.submitCSVImport(customerSpace, firstFile.getName(),
+                    firstFile.getName(), SOURCE, ENTITY_ACCOUNT, feedType);
+        } catch (Exception e) {
+            submitError = true;
+        }
+        Assert.assertTrue(submitError, "There should be error when submit wrong field mapping jobs.");
+    }
 }

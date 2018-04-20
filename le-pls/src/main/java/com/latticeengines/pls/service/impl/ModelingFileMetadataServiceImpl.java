@@ -257,7 +257,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
         }
         resolver.calculateBasedOnFieldMappingDocument(table);
 
-        String customerSpace = MultiTenantContext.getTenant().getId().toString();
+        String customerSpace = MultiTenantContext.getCustomerSpace().toString();
 
         if (sourceFile.getTableName() != null) {
             metadataProxy.deleteTable(customerSpace, sourceFile.getTableName());
