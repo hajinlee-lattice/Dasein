@@ -97,6 +97,6 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
                 .contains("score_event_table_output"));
         assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_OUTPUT_PATH").contains(t2.getName()));
         assertEquals(setConfigurationForScoring.getObjectFromContext("EVENT_TABLE", Table.class).toString(),
-                t1.toString());
+                t2.toString());
     }
 }
