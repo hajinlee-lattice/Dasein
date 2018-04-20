@@ -44,6 +44,7 @@ import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.domain.exposed.util.StatsCubeUtils;
 import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -123,7 +124,8 @@ public class DataLakeServiceImpl implements DataLakeService {
     private Flux<ColumnMetadata> getAllSegmentAttributes() {
         String tenantId = MultiTenantContext.getTenantId();
         return Flux.fromIterable(BusinessEntity.SEGMENT_ENTITIES) //
-                .flatMap(entity -> Flux.fromIterable(_dataLakeService.getCachedServingMetadataForEntity(tenantId, entity))) //
+                .flatMap(entity -> Flux
+                        .fromIterable(_dataLakeService.getCachedServingMetadataForEntity(tenantId, entity))) //
                 .filter(cm -> cm.isEnabledFor(ColumnSelection.Predefined.Segment)) //
                 .filter(cm -> !StatsCubeUtils.shouldHideAttr(cm));
     }
@@ -134,9 +136,9 @@ public class DataLakeServiceImpl implements DataLakeService {
         String tenantId = MultiTenantContext.getTenantId();
         List<ColumnMetadata> cms = _dataLakeService.getCachedServingMetadataForEntity(tenantId, BusinessEntity.Account);
         return cms.stream().filter(cm -> cm.getGroups() != null && cm.isEnabledFor(predefined)
-                // Hack to limit attributes for talking points temporarily PLS-7065
+        // Hack to limit attributes for talking points temporarily PLS-7065
                 && (cm.getCategory().equals(Category.ACCOUNT_ATTRIBUTES)
-                || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
+                        || cm.getCategory().equals(Category.FIRMOGRAPHICS))) //
                 .collect(Collectors.toList());
     }
 
@@ -211,7 +213,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         return _dataLakeService.getStatsCubesFromCache(customerSpace);
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|topn\", #customerSpace)", unless = "#result == null")
     public TopNTree getTopNTreeFromCache(String customerSpace) {
         Map<String, StatsCube> cubes = getStatsCubes();
         if (MapUtils.isEmpty(cubes)) {
@@ -227,7 +229,7 @@ public class DataLakeServiceImpl implements DataLakeService {
         }
     }
 
-    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", unless="#result == null")
+    @Cacheable(cacheNames = CacheName.Constants.DataLakeStatsCubesCache, key = "T(java.lang.String).format(\"%s|statscubes\", #customerSpace)", unless = "#result == null")
     public Map<String, StatsCube> getStatsCubesFromCache(String customerSpace) {
         StatisticsContainer container = dataCollectionProxy.getStats(customerSpace);
         if (container != null) {
@@ -260,7 +262,8 @@ public class DataLakeServiceImpl implements DataLakeService {
         if (entity != null) {
             List<ColumnMetadata> cmList = servingStoreProxy.getDecoratedMetadataFromCache(customerSpace, entity);
             if (CollectionUtils.isNotEmpty(cmList)) {
-                cms = Flux.fromIterable(cmList);
+                cms = Flux.fromIterable(cmList) //
+                        .filter(cm -> !AttrState.Inactive.equals(cm.getAttrState()));
                 if (BusinessEntity.Account.equals(entity)) {
                     cms = ImportanceOrderingUtils.addImportanceOrdering(cms);
                 }
