@@ -39,7 +39,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 public abstract class AbstractAttrConfigService implements AttrConfigService {
 

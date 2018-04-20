@@ -19,7 +19,7 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 @Service("cdlAttrConfigService")
 public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implements AttrConfigService {

@@ -31,7 +31,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.matchapi.testframework.MatchapiFunctionalTestNGBase;
 import com.latticeengines.matchapi.testframework.TestMatchInputService;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 @Component
 public class MatchResourceTestNG extends MatchapiFunctionalTestNGBase {

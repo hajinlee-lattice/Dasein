@@ -18,7 +18,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Lookup;
 import com.latticeengines.domain.exposed.query.Query;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.query.exposed.factory.QueryFactory;
 import com.querydsl.sql.SQLQuery;

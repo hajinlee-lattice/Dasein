@@ -19,7 +19,7 @@ import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.datacloud.manage.AccountMasterColumn;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

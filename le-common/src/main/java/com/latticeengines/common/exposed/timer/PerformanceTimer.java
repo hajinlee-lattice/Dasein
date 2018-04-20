@@ -1,4 +1,4 @@
-package com.latticeengines.monitor.exposed.metrics;
+package com.latticeengines.common.exposed.timer;
 
 import java.io.Closeable;
 import java.util.Date;

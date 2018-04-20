@@ -14,7 +14,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.query.functionalframework.QueryFunctionalTestNGBase;
 import com.querydsl.core.types.EntityPath;
 import com.querydsl.core.types.Expression;

@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.ModelService;
 import com.latticeengines.domain.exposed.pls.ModelSummary;
 import com.latticeengines.domain.exposed.pls.ModelType;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.pls.service.ModelCopyService;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.db.exposed.util.MultiTenantContext;

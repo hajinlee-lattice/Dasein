@@ -20,7 +20,7 @@ import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.metadata.repository.db.AttributeRepository;
 import com.latticeengines.metadata.repository.db.TableRepository;
 import com.latticeengines.metadata.mds.NamedDataTemplate;
-import com.latticeengines.monitor.exposed.metrics.PerformanceTimer;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
