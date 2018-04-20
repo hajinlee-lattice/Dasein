@@ -379,9 +379,11 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
 
     private void validatePurgeSources(List<PurgeSource> toPurge, Map<String, PurgeSource> validationMap) {
         Assert.assertTrue(CollectionUtils.isNotEmpty(toPurge));
+        Set<String> actualKeys = new HashSet<>();
         toPurge.forEach(purgeSource -> {
+            String key = getValidationKey(purgeSource);
             log.info("Validating " + JsonUtils.serialize(purgeSource));
-            PurgeSource expected = validationMap.get(getValidationKey(purgeSource));
+            PurgeSource expected = validationMap.get(key);
             Assert.assertNotNull(expected);
             log.info("Expecting " + JsonUtils.serialize(expected));
             Assert.assertEquals(purgeSource.isToBak(), expected.isToBak());
@@ -391,8 +393,11 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
                 Assert.assertTrue(isIdenticalList(expected.getHdfsPaths(), purgeSource.getHdfsPaths()));
                 Assert.assertTrue(isIdenticalList(expected.getHiveTables(), purgeSource.getHiveTables()));
             }
+            if (validationMap.containsKey(key)) {
+                actualKeys.add(key);
+            }
         });
-        Assert.assertEquals(toPurge.size(), validationMap.size());
+        Assert.assertEquals(actualKeys.size(), validationMap.size());
     }
 
     private boolean isIdenticalList(List<String> expected, List<String> actual) {
