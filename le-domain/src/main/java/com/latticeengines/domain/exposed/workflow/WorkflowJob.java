@@ -195,7 +195,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     public Map<String, String> getReportContext() {
         if (reportContextString == null) {
             log.debug("report context is empty.");
-            setReportContext(new HashMap<String, String>());
+            setReportContext(new HashMap<>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(reportContextString, Map.class);
         return JsonUtils.convertMap(raw, String.class, String.class);
@@ -231,7 +231,7 @@ public class WorkflowJob implements HasPid, HasTenantId, HasApplicationId {
     public Map<String, String> getOutputContext() {
         if (outputContextString == null) {
             log.debug("output context is empty.");
-            setOutputContext(new HashMap<String, String>());
+            setOutputContext(new HashMap<>());
         }
         Map<?, ?> raw = JsonUtils.deserialize(outputContextString, Map.class);
         return JsonUtils.convertMap(raw, String.class, String.class);

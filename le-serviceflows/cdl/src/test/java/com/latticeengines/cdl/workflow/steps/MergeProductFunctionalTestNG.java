@@ -48,6 +48,26 @@ public class MergeProductFunctionalTestNG {
             new Product("3", "sku_g3p3", null, null,
                     null, null, null, null, null, null, null, null, null));
 
+    private final List<Product> productGroup4 = Arrays.asList(
+            new Product(null, null, null, null,
+                    null, "l1", null, "c1", null, null, null, null, null),
+            new Product("1", null, null, null,
+                    null, "l1", null, "c1", null, null, null, null, null),
+            new Product("2", null, null, null,
+                    null, "l2", null, "c2", null, null, null, null, null));
+
+    private final List<Product> productGroup5 = Arrays.asList(
+            new Product("1", null, null, null,
+                    null, "l1", "f1", null, null, null, null, null, null),
+            new Product("2", null, null, null,
+                    null, "l2", null, null, null, null, null, null, null));
+
+    private final List<Product> productGroup6 = Arrays.asList(
+            new Product(null, null, null, null,
+                    null, "l1", null, "c1", null, null, null, null, null),
+            new Product(null, null, null, null,
+                    null, "l2", null, "c2", null, null, null, null, null));
+
     @BeforeClass(groups = "functional")
     public void setup() {
         step = new MergeProduct();
@@ -336,6 +356,33 @@ public class MergeProductFunctionalTestNG {
         Assert.assertEquals(report.get("Merged_NumProductAnalytics"), 0);
         Assert.assertEquals(report.get("Merged_NumProductSpendings"), 6);
         Assert.assertEquals(report.get("Merged_NumObsoleteProducts"), 1);
+    }
+
+    @Test(groups = "functional")
+    public void testMergeInvalidProductHierarchy() {
+        List<Product> result = new ArrayList<>();
+        try {
+            step.mergeProducts(productGroup4, currentProductList, result, report);
+        } catch (Exception exc) {
+            Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testMergeInvalidVDBProducts() {
+        List<Product> result = new ArrayList<>();
+        try {
+            step.mergeProducts(productGroup5, currentProductList, result, report);
+        } catch (Exception exc) {
+            Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testMergeInvalidProductIds() {
+        List<Product> result = new ArrayList<>();
+        int nInvalids = step.mergeProducts(productGroup6, currentProductList, result, report);
+        Assert.assertEquals(nInvalids, 2);
     }
 
     private List<Product> getProductByBundle(List<Product> products, String bundle) {
