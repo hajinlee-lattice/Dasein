@@ -30,7 +30,8 @@
                                     class="form-control"
                                     ng-disabled="!checkboxModel.spend"
                                     ng-model="vm.spendValue"
-                                    ng-model-options="{ debounce: 750 }" />
+                                    ng-model-options="{ debounce: 750 }"
+                                    ng-change="vm.formOnChange()" />
                             </div>
                         </div>
                     </li>
@@ -54,7 +55,8 @@
                                     class="form-control"
                                     ng-disabled="!checkboxModel.quantity"
                                     ng-model="vm.quantityValue"
-                                    ng-model-options="{ debounce: 750 }" />
+                                    ng-model-options="{ debounce: 750 }"
+                                    ng-change="vm.formOnChange()" />
                                 <span>Units</span>
                             </div>
                         </div>
@@ -72,7 +74,8 @@
                                     class="form-control"
                                     ng-disabled="!checkboxModel.periods"
                                     ng-model="vm.periodsValue"
-                                    ng-model-options="{ debounce: 500 }" />
+                                    ng-model-options="{ debounce: 750 }"
+                                    ng-change="vm.formOnChange()" />
                                 <span>months</span>
                             </div>
                             <!-- <select class="form-control">

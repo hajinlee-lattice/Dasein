@@ -97,6 +97,10 @@ angular.module('lp.ratingsengine.wizard.training', [
     };
 
     vm.formOnChange = function(){
+
+
+        console.log($scope.vm.spendValue);
+
         vm.recordsCountReturned = false;
         vm.purchasesCountReturned = false;
 

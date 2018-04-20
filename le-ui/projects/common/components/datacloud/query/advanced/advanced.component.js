@@ -166,6 +166,8 @@ angular.module('common.datacloud.query.builder', [
                 return [ vm.restriction.restriction ];
             case 'rules':
                 return [ vm.generateRulesTree() ];
+            case 'dashboardrules':
+                return [ vm.generateRulesTree() ];
         }
     }
 

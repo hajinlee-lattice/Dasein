@@ -99,6 +99,12 @@ Page Summary / Sub-Nav Headers
     }
   }
   .stats {
+    background: rgba(255, 255, 255, 0.9);
+    color: $dark-gray;
+    &.black-summary-list {
+      background: rgba(0, 0, 0, 0.5);
+      color: #fff;
+    }
     h3 {
       color: rgba(255,255,255,0.8);
       text-align: left;
@@ -162,21 +168,28 @@ Page Summary / Sub-Nav Headers
     flex-direction: column;
     position: relative;
     & > div {
-        margin: 7px;
+        margin: 2px;
+        padding: 12px;
         min-height: auto;
     }
     @include media(">470px") {
       flex-direction: row;
       flex-wrap: wrap;
       & > div {
-        width: 46%;
+        width: 49.25%;
       }
     }
-    @include media(">740px") {
+    @include media(">1040px") {
       padding: 40px 0;
       flex-wrap: nowrap;
       & > div {
         width: 25%;
+      }
+    }
+    @include media(">1140px") {
+      & > div {
+        margin: 7px;
+        padding: 18px;
       }
     }
   }
@@ -236,7 +249,7 @@ Page Summary / Sub-Nav Headers
   		}
   	}
   }
-  .summary-list, .stats {
+  .summary-list {
   	padding: 18px;
   	background: rgba(255, 255, 255, 0.9);
   	color: $dark-gray;

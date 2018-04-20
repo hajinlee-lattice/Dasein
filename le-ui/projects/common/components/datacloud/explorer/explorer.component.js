@@ -94,7 +94,7 @@ angular.module('common.datacloud.explorer', [
     DataCloudStore.setMetadata('lookupMode', vm.lookupMode);
 
     vm.init = function() {
-        if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add') {
+        if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add' || $state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.add') {
             vm.mode = 'dashboardrules';
         }
 
