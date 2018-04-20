@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
+import com.latticeengines.domain.exposed.pls.ActivityMetricsWithAction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
@@ -31,4 +32,11 @@ public class ActivityMetricsProxy extends MicroserviceRestApiProxy {
         List<?> list = get("Get all the active metrics for specific activity type", url, List.class);
         return JsonUtils.convertList(list, ActivityMetrics.class);
     }
+
+    public ActivityMetricsWithAction save(String customerSpace, ActivityType type, List<ActivityMetrics> metrics) {
+        String url = constructUrl("/customerspaces/{customerSpace}/metrics/{type}", shortenCustomerSpace(customerSpace),
+                type.name());
+        return post("Save metrics for specific activity type", url, metrics, ActivityMetricsWithAction.class);
+    }
+
 }
