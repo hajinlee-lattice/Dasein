@@ -119,13 +119,8 @@ public class PurgeServiceImplTestNG extends PropDataEngineFunctionalTestNGBase {
         List<String> unknownSources = purgeService.scanUnknownSources(POD_ID);
         Assert.assertNotNull(unknownSources);
         Assert.assertTrue(unknownSources.size() >= 1);
-        boolean found = false;
-        for (String s : unknownSources) {
-            if (unknownSource.equals(s)) {
-                found = true;
-            }
-        }
-        Assert.assertTrue(found);
+        Set<String> unknown = new HashSet<>(unknownSources);
+        Assert.assertTrue(unknown.contains(unknownSource));
     }
 
     private void preparePipelineTempSource() throws IOException {
