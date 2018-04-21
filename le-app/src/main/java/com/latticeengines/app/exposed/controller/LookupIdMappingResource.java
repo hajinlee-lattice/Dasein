@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +34,7 @@ import io.swagger.annotations.ApiOperation;
 @RestController
 @RequestMapping(value = "/lookup-id-mapping")
 public class LookupIdMappingResource {
+    private static final Logger log = LoggerFactory.getLogger(LookupIdMappingResource.class);
 
     @Inject
     private CDLExternalSystemProxy cdlExternalSystemProxy;
@@ -49,7 +52,7 @@ public class LookupIdMappingResource {
     @RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register an org")
-    public void registerExterSystem(HttpServletRequest request, @RequestBody LookupIdMap lookupIdsMap) {
+    public LookupIdMap registerExternalSystem(HttpServletRequest request, @RequestBody LookupIdMap lookupIdsMap) {
         if (lookupIdsMap != null //
                 && StringUtils.isNotBlank(lookupIdsMap.getOrgId()) //
                 && StringUtils.isNotBlank(lookupIdsMap.getOrgName()) //
@@ -60,6 +63,9 @@ public class LookupIdMappingResource {
             // get those registered. Make sure to check if this org id is
             // already registered or not. If it exists, just allow update of org
             // name
+
+            lookupIdsMap.setId(String.format("id_%d", lookupIdsMap.getOrgId().hashCode()));
+            return lookupIdsMap;
         } else {
             throw new RuntimeException(
                     "Incorrect input payload. Will replace this exception with proper LEDP exception.");
@@ -108,12 +114,27 @@ public class LookupIdMappingResource {
             CDLExternalSystemType externalSystemType) {
         CustomerSpace space = MultiTenantContext.getCustomerSpace();
         Map<String, List<CDLExternalSystemMapping>> result = null;
-        if (externalSystemType == null) {
-            cdlExternalSystemProxy.getExternalSystemMap(space.toString());
-        } else {
+        try {
+            if (externalSystemType == null) {
+                cdlExternalSystemProxy.getExternalSystemMap(space.toString());
+            } else {
+                result = new HashMap<>();
+                result.put(externalSystemType.name(),
+                        cdlExternalSystemProxy.getExternalSystemByType(space.toString(), externalSystemType));
+            }
+        } catch (Exception ex) {
+            log.error("Ignoring this error for now", ex);
             result = new HashMap<>();
-            result.put(externalSystemType.name(),
-                    cdlExternalSystemProxy.getExternalSystemByType(space.toString(), externalSystemType));
+            CDLExternalSystemMapping c1 = new CDLExternalSystemMapping("CRM_Acc_Id_1", "String", "Id CRM_Acc_Id_1");
+            CDLExternalSystemMapping c2 = new CDLExternalSystemMapping("CRM_Acc_Id_2", "String", "Id CRM_Acc_Id_2");
+            CDLExternalSystemMapping c3 = new CDLExternalSystemMapping("CRM_Acc_Id_3", "String", "Id CRM_Acc_Id_3");
+            result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(c1, c2, c3));
+            CDLExternalSystemMapping m1 = new CDLExternalSystemMapping("MAP_Acc_Id_1", "String", "Id MAP_Acc_Id_1");
+            CDLExternalSystemMapping m2 = new CDLExternalSystemMapping("MAP_Acc_Id_2", "String", "Id MAP_Acc_Id_2");
+            result.put(CDLExternalSystemType.MAP.name(), Arrays.asList(m1, m2));
+            CDLExternalSystemMapping o1 = new CDLExternalSystemMapping("OTHER_Acc_Id_1", "String", "Id OTHER_Acc_Id_1");
+            CDLExternalSystemMapping o2 = new CDLExternalSystemMapping("OTHER_Acc_Id_2", "String", "Id OTHER_Acc_Id_2");
+            result.put(CDLExternalSystemType.MAP.name(), Arrays.asList(o1, o2));
         }
 
         return result;
@@ -137,22 +158,24 @@ public class LookupIdMappingResource {
 
     private Map<String, List<LookupIdMap>> createDummyMapping(CDLExternalSystemType externalSystemType) {
         LookupIdMap idMap1 = createDummyIdMap(1L, "SFDC_SAND_ABC", "My Salesforce Sandbox", CDLExternalSystemType.CRM,
-                "Acc_Id_1", null);
+                "CRM_Acc_Id_1", null);
         LookupIdMap idMap2 = createDummyIdMap(2L, "SFDC_PROD_PQR", "My Salesforce Prod", CDLExternalSystemType.CRM,
-                "Acc_Id_2", null);
-        LookupIdMap idMap3 = createDummyIdMap(3L, "SFDC_SAND_XYZ", "My Another Salesforce Sandbox",
-                CDLExternalSystemType.CRM, "Acc_Id_1", null);
-        LookupIdMap idMap4 = createDummyIdMap(1L, "ELQ_SAND_ABC", "My Salesforce Sandbox", CDLExternalSystemType.CRM,
-                "Acc_Id_3", null);
-        LookupIdMap idMap5 = createDummyIdMap(2L, "ELQ_PROD_PQR", "My Salesforce Prod", CDLExternalSystemType.CRM,
-                "Acc_Id_4", null);
-        LookupIdMap idMap6 = createDummyIdMap(3L, "OTHER_SAND_XYZ", "My Another Salesforce Sandbox",
-                CDLExternalSystemType.CRM, "Acc_Id_5", null);
+                "CRM_Acc_Id_2", null);
+        LookupIdMap idMap3 = createDummyIdMap(3L, "SFDC_SAND_XYZ", "My other Salesforce Sandbox",
+                CDLExternalSystemType.CRM, "CRM_Acc_Id_1", null);
+        LookupIdMap idMap4 = createDummyIdMap(3L, "SFDC_SAND_123", "My third Salesforce Sandbox",
+                CDLExternalSystemType.CRM, null, null);
+        LookupIdMap idMap5 = createDummyIdMap(1L, "ELQ_SAND_ABC", "My Eloqua Sandbox", CDLExternalSystemType.MAP,
+                "MAP_Acc_Id_1", null);
+        LookupIdMap idMap6 = createDummyIdMap(2L, "ELQ_PROD_PQR", "My Eloqua Prod", CDLExternalSystemType.MAP,
+                "MAP_Acc_Id_2", null);
+        LookupIdMap idMap7 = createDummyIdMap(3L, "OTHER_SAND_XYZ", "My Other Sandbox", CDLExternalSystemType.OTHER,
+                "OTHER_Acc_Id_1", null);
 
         Map<String, List<LookupIdMap>> result = new HashMap<>();
-        result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(idMap1, idMap2, idMap3));
-        result.put(CDLExternalSystemType.MAP.name(), Arrays.asList(idMap4, idMap5));
-        result.put(CDLExternalSystemType.OTHER.name(), Arrays.asList(idMap6));
+        result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(idMap1, idMap2, idMap3, idMap4));
+        result.put(CDLExternalSystemType.MAP.name(), Arrays.asList(idMap5, idMap6));
+        result.put(CDLExternalSystemType.OTHER.name(), Arrays.asList(idMap7));
 
         if (externalSystemType != null) {
             List<LookupIdMap> list = result.get(externalSystemType.name());
