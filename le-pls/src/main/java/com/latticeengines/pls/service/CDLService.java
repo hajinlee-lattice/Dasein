@@ -16,4 +16,10 @@ public interface CDLService {
     ApplicationId cleanup(String customerSpace, String sourceFileName, SchemaInterpretation schemaInterpretation,
                           CleanupOperationType cleanupOperationType);
 
+    ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime, 
+									SchemaInterpretation schemaInterpretation);
+
+    ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation);
+
+
 }

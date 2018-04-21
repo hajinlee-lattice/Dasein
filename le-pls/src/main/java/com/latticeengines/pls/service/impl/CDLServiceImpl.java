@@ -84,6 +84,45 @@ public class CDLServiceImpl implements CDLService {
                 cleanupOperationType, email);
     }
 
+    @Override
+    public ApplicationId cleanupByTimeRange(String customerSpace, String startTime, String endTime, 
+                                            SchemaInterpretation schemaInterpretation) {
+        BusinessEntity entity;
+        switch (schemaInterpretation) {
+            case Transaction:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        }
+        String email = MultiTenantContext.getEmailAddress();
+        try {
+            return cdlProxy.cleanupByTimeRange(customerSpace, startTime, endTime, entity, email);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to cleanup by time range: " + e.toString());
+        }
+    }
+
+    @Override
+    public ApplicationId cleanupAllData(String customerSpace, SchemaInterpretation schemaInterpretation) {
+        BusinessEntity entity;
+        switch (schemaInterpretation) {
+            case Account:
+                entity = BusinessEntity.Account;
+                break;
+            case Contact:
+                entity = BusinessEntity.Contact;
+                break;
+            case Transaction:
+                entity = BusinessEntity.Transaction;
+                break;
+            default:
+                throw new RuntimeException("Cleanup operation does not support schema: " + schemaInterpretation.name());
+        }
+        String email = MultiTenantContext.getEmailAddress();
+        return cdlProxy.cleanupAllData(customerSpace, entity, email);
+    }
+
     @VisibleForTesting
     CSVImportConfig generateImportConfig(String customerSpace, String templateFileName, String dataFileName,
                                          String email) {

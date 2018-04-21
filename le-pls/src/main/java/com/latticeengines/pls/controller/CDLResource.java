@@ -76,4 +76,22 @@ public class CDLResource {
         ApplicationId applicationId = cdlService.cleanup(customerSpace.toString(), fileName, schemaInterpretation, type);
         return ResponseDocument.successResponse(applicationId.toString());
     }
+
+    @RequestMapping(value = "/cleanupbyrange", method = RequestMethod.POST)
+    @ApiOperation(value = "Start cleanup job")
+    public ResponseDocument<String> cleanupByRange(@RequestParam(value = "startTime") String startTime,
+                                            @RequestParam(value = "endTime") String endTime,
+                                            @RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        ApplicationId applicationId = cdlService.cleanupByTimeRange(customerSpace.toString(), startTime, endTime, schemaInterpretation);
+        return ResponseDocument.successResponse(applicationId.toString());
+    }
+
+    @RequestMapping(value = "/cleanupall", method = RequestMethod.POST)
+    @ApiOperation(value = "Start cleanup job")
+    public ResponseDocument<String> cleanupAll(@RequestParam(value = "schema") SchemaInterpretation schemaInterpretation) {
+        CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
+        ApplicationId applicationId = cdlService.cleanupAllData(customerSpace.toString(), schemaInterpretation);
+        return ResponseDocument.successResponse(applicationId.toString());
+    }
 }
