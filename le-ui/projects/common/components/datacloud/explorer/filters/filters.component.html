@@ -29,6 +29,12 @@
             Import Data
         </button>
     </li>
+    <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+        <button class="button icon-button white-button" 
+                ui-sref="home.delete">
+            Delete Data
+        </button>
+    </li>
     <li class="filter dropdown-container" ng-if="['segment.analysis','wizard.ratingsengine_segment'].indexOf(vm.section) == -1">
         <h2 class="button icon-button white-button" ng-class="{selected: vm.metadata.toggle.show.selected || vm.metadata.toggle.hide.selected || vm.metadata.toggle.show.premium || vm.metadata.toggle.hide.premium || vm.metadata.toggle.show.internal || (vm.section != 'insights' && vm.metadata.toggle.show.enabled) || vm.metadata.toggle.hide.enabled || vm.metadata.toggle.show.highlighted  || vm.metadata.toggle.hide.highlighted || vm.metadata.toggle.show.nulls}">
             <i class="fa fa-filter"></i>

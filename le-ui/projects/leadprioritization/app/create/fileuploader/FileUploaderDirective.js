@@ -392,7 +392,8 @@ angular
                             modelId: vm.params.modelId || false,
                             metadataFile: vm.params.metadataFile || null,
                             compressed: vm.isCompressed(),
-                            displayName: vm.selectedFileDisplayName
+                            displayName: vm.selectedFileDisplayName,
+                            operationType: vm.params.operationType || null
                         },
                         progress: vm.uploadProgress
                     };

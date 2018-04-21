@@ -22,8 +22,10 @@ angular
                 showto: '=',
                 changed: '&',
                 fromlabel: '@',
-                tolabel: '@'
-
+                tolabel: '@',
+                showinline: '@',
+                startplaceholder: '@',
+                endplaceholder: '@'
             },
             templateUrl: '/components/datacloud/query/advanced/tree/edit/date-range/date-range.component.html',
             controller: function ($scope, $element, $timeout, moment) {
@@ -37,6 +39,13 @@ angular
                     var config = values[Object.keys(values)[position]];
                     return config;
                 }
+
+                $scope.getConfig = function(position) {
+                    var values = JSON.parse($scope.config);
+                    var config = values[Object.keys(values)[position]];
+                    return config;
+                }
+
 
                 function isDateValid(momentDate, otherPosition) {
                     switch (otherPosition) {
@@ -74,7 +83,7 @@ angular
 
                 }
 
-                function validateDates() {
+                $scope.validateDates = function() {
 
                     var fromConf = getConfigField(0);
                     var toConf = getConfigField(1);
@@ -92,6 +101,8 @@ angular
                             $scope.form[toConf.name].$setValidity('dateto', false);
                         } else {
                             var valid = moment(momentFrom).isBefore(momentTo);
+                            // console.log('valid', valid);
+                            // console.time(fromConf.name);
                             $scope.form[fromConf.name].$setValidity('datefrom', valid);
                             $scope.form[toConf.name].$setValidity('dateto', valid);
                         }
@@ -117,6 +128,10 @@ angular
                             }
                         }
                     }
+
+                    setTimeout(function() {
+                        $scope.$apply();
+                    }, 0);
                 }
 
                 function initDates() {
@@ -144,7 +159,7 @@ angular
                                     var val = moment(date).format(DATE_FORMAT);
                                     var valid = isDateValid(val, 1);
                                     $scope.fromDate = val;
-                                    validateDates();
+                                    $scope.validateDates();
                                     // readDate(1);
                                     if (valid) {
                                         $scope.changed({ type: 'Time', position: 0, value: val });
@@ -170,7 +185,7 @@ angular
                                     var val = moment(date).format(DATE_FORMAT);
                                     var valid = isDateValid(val, 0);
                                     $scope.toDate = val;
-                                    validateDates();
+                                    $scope.validateDates();
                                     // readDate(0);
                                     if (valid) {
                                         $scope.changed({ type: 'Time', position: 1, value: val });
@@ -188,7 +203,7 @@ angular
                         (getConfigField(1).visible && getConfigField(1).visible == true)) {
                         initDates();
                     }
-                    validateDates();
+                    $scope.validateDates();
                 }
 
 
@@ -254,6 +269,7 @@ angular
                     switch(position){
                         case 0: {
                             var fromConf = getConfigField(0);
+                            // console.timeEnd(fromConf.name);
                             if(fromConf.visible === true){
                                 return $scope.form[fromConf.name].$error.datefrom;
                                 // myForm.pw.$error.one

@@ -79,7 +79,7 @@ angular
             params = options.params || {},
             whitelist = [
                 'schema','modelId','notesContent','compressed',
-                'displayName','file','metadataFile','entity','fileName'
+                'displayName','file','metadataFile','entity','fileName', 'operationType'
             ];
 
         if (params.metadataFile) {
