@@ -38,6 +38,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
     protected int queryEvaluationId;
+    protected String periodTypeName = PeriodStrategy.Template.Month.name();
 
     protected abstract void handleCustomSegment();
 
@@ -127,7 +128,7 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         querySegment.setAccountRestriction(finalQueryRestriction);
 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
-        ratingFrontEndQuery.setPeriodName(PeriodStrategy.Template.Month.name());
+        ratingFrontEndQuery.setPeriodName(periodTypeName);
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
         ratingFrontEndQuery.setEvaluationPeriodId(queryEvaluationId);
     }

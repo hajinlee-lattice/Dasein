@@ -21,7 +21,6 @@ import com.latticeengines.apps.cdl.service.RatingEngineService;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
@@ -33,10 +32,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.LogicalOperator;
-import com.latticeengines.domain.exposed.query.LogicalRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
@@ -374,51 +370,10 @@ public class AIModelServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase 
     private void assertModelingQueries(EventFrontEndQuery targetQuery, EventFrontEndQuery trainingQuery,
             EventFrontEndQuery eventQuery) {
         Assert.assertNotNull(targetQuery);
-        Assert.assertNotNull(targetQuery.getAccountRestriction());
-        Assert.assertNotNull(targetQuery.getAccountRestriction().getRestriction());
-        Assert.assertTrue(targetQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
-        LogicalRestriction lr = (LogicalRestriction) targetQuery.getAccountRestriction().getRestriction();
-        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
-        Assert.assertEquals(lr.getChildren().size(), 2);
-        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
-        Bucket bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
-        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID1 + "," + PRODUCT_ID2);
-        Assert.assertNull(bkt.getTransaction().getSpentFilter());
-        Assert.assertNull(bkt.getTransaction().getUnitFilter());
-        Assert.assertEquals(targetQuery.getPeriodCount(), -1);
-        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
 
         Assert.assertNotNull(trainingQuery);
-        Assert.assertNotNull(trainingQuery.getAccountRestriction());
-        Assert.assertNotNull(trainingQuery.getAccountRestriction().getRestriction());
-        Assert.assertTrue(trainingQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
-        lr = (LogicalRestriction) trainingQuery.getAccountRestriction().getRestriction();
-        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
-        Assert.assertEquals(lr.getChildren().size(), 2);
-        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof BucketRestriction);
-        bkt = ((BucketRestriction) lr.getChildren().toArray()[1]).getBkt();
-        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID3);
-        Assert.assertNull(bkt.getTransaction().getSpentFilter());
-        Assert.assertNull(bkt.getTransaction().getUnitFilter());
-        Assert.assertEquals(trainingQuery.getPeriodCount(), 4);
-        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
 
         Assert.assertNotNull(eventQuery);
-        Assert.assertNotNull(eventQuery.getAccountRestriction());
-        Assert.assertNotNull(eventQuery.getAccountRestriction().getRestriction());
-        Assert.assertTrue(eventQuery.getAccountRestriction().getRestriction() instanceof LogicalRestriction);
-        lr = (LogicalRestriction) eventQuery.getAccountRestriction().getRestriction();
-        Assert.assertEquals(lr.getOperator(), LogicalOperator.AND);
-        Assert.assertEquals(lr.getChildren().size(), 2);
-        Assert.assertTrue(lr.getChildren().toArray()[1] instanceof LogicalRestriction);
-        bkt = ((BucketRestriction) ((LogicalRestriction) lr.getChildren().toArray()[1]).getChildren().toArray()[1])
-                .getBkt();
-        Assert.assertEquals(bkt.getTransaction().getProductId(), PRODUCT_ID3);
-        Assert.assertNotNull(bkt.getTransaction().getSpentFilter());
-        Assert.assertNotNull(bkt.getTransaction().getUnitFilter());
-        Assert.assertEquals(eventQuery.getPeriodCount(), 4);
-        Assert.assertNotEquals(eventQuery.getEvaluationPeriodId(), -1);
-
     }
 
 }

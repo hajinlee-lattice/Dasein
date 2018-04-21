@@ -2,8 +2,6 @@ package com.latticeengines.apps.cdl.rating;
 
 import java.util.Map;
 
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -11,10 +9,8 @@ import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
 
@@ -36,9 +32,6 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds);
-        Bucket.Transaction txn;
-
         CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
 
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters = //
@@ -51,13 +44,11 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
             if (config == null) {
                 throw new LedpException(LedpCode.LEDP_40011, new String[] { aiModel.getId() });
             }
-            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(new Bucket.Transaction(productIds,
-                    TimeFilter.priorOnly(config.getValue() - 1, PeriodStrategy.Template.Month.name()), null, null,
-                    false)));
+            productTxnRestriction = new TransactionRestriction(productIds,
+                    TimeFilter.priorOnly(config.getValue() - 1, periodTypeName), false, null, null);
             break;
         case CROSS_SELL_FIRST_PURCHASE:
-            txn = new Bucket.Transaction(productIds, TimeFilter.ever(), null, null, true);
-            productTxnRestriction = new BucketRestriction(attrLookup, Bucket.txnBkt(txn));
+            productTxnRestriction = new TransactionRestriction(productIds, TimeFilter.ever(), true, null, null);
             break;
         default:
             throw new LedpException(LedpCode.LEDP_40017);

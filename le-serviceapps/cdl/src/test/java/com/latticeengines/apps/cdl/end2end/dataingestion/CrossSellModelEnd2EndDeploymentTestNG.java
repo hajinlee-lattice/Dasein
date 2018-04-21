@@ -43,7 +43,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1524102601033";
+    private static final String EXISTING_TENANT = "JLM1524265593258";
 
     private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = false;
     private static final boolean E2E_TEST_USE_TRANSACTION_RESTRICTION = false;
@@ -66,6 +66,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
 
     private static final String targetProductId = TARGET_PRODUCT;
     private static final String trainingProductId = TRAINING_PRODUCT;
+    private long targetCount;
 
     @BeforeClass(groups = { "end2end", "manual" })
     public void setup() {
@@ -133,6 +134,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         log.info("time is " + bucketMetadataHistory.keySet().toString());
         List<BucketMetadata> latestBucketedMetadata = bucketedScoreProxy
                 .getLatestABCDBucketsByEngineId(mainTestTenant.getId(), testRatingEngine.getId());
+        Assert.assertEquals(targetCount, latestBucketedMetadata.stream().mapToLong(BucketMetadata::getNumLeads).sum(),
+                "Sum of leads in BucketMetadata is not equal to the target count");
         log.info("bucket metadata is " + JsonUtils.serialize(latestBucketedMetadata));
     }
 
@@ -184,7 +187,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     }
 
     private void verifyCounts() {
-        long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
+        targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TRAINING);
