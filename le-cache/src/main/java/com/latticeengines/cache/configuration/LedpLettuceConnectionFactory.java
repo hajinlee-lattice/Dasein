@@ -1,8 +1,11 @@
 package com.latticeengines.cache.configuration;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionProvider;
@@ -21,6 +24,8 @@ import io.lettuce.core.pubsub.StatefulRedisPubSubConnection;
 import io.lettuce.core.sentinel.api.StatefulRedisSentinelConnection;
 
 public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
+
+    private static final Logger log = LoggerFactory.getLogger(LedpLettuceConnectionFactory.class);
 
     private final LedpMasterSlaveConfiguration configuration;
 
@@ -100,6 +105,13 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
 
             StatefulRedisMasterSlaveConnection<?, ?> connection = MasterSlave.connect(client, codec, endpoints);
             connection.setReadFrom(readFrom);
+
+            if (configuration instanceof LettuceClientConfiguration) {
+                LettuceClientConfiguration lettuceClientConfiguration = (LettuceClientConfiguration) configuration;
+                Duration duration = lettuceClientConfiguration.getCommandTimeout();
+                log.info("Set ElasticCache master slave connection command timeout to " + duration);
+                connection.setTimeout(duration);
+            }
 
             return connection;
         }
