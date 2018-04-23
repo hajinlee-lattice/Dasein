@@ -249,12 +249,12 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         return exportConfig;
     }
 
-    public ApplicationId retryLatestFailed(String customerSpace) {
+    public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         Long workflowId = dataFeedProxy.restartExecution(customerSpace, DataFeedExecutionJobType.PA);
         try {
             log.info(String.format("restarted execution with pid: %s", workflowId));
-            return workflowJobService.restart(workflowId, customerSpace);
+            return workflowJobService.restart(workflowId, customerSpace, memory);
         } catch (Exception e) {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeed.getStatus().getName());

@@ -13,6 +13,6 @@ public interface WorkflowJobService {
 
     ApplicationId submit(WorkflowConfiguration configuration, Long workflowPid);
 
-    ApplicationId restart(Long jobId, String customerSpace);
+    ApplicationId restart(Long jobId, String customerSpace, Integer memory);
 
 }

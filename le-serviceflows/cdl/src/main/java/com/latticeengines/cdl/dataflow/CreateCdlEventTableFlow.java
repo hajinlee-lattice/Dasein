@@ -32,6 +32,7 @@ public class CreateCdlEventTableFlow extends TypesafeDataFlowBuilder<CreateCdlEv
                 if (field.equalsIgnoreCase("name")) {
                     accountTable = accountTable.rename(new FieldList(field),
                             new FieldList(InterfaceName.CompanyName.name()));
+                    accountTable = accountTable.retain(new FieldList(accountTable.getFieldNames()));
                     break;
                 }
             }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,7 @@ import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "datafeeds", description = "Controller of data feed operations.")
 @RestController
@@ -40,16 +42,18 @@ public class DataFeedController {
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request, new WorkflowPidWrapper(-1L));
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
+                new WorkflowPidWrapper(-1L));
         return ResponseDocument.successResponse(appId.toString());
     }
 
     @RequestMapping(value = "/processanalyze/restart", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Restart a previous failed processanalyze execution")
-    public ResponseDocument<String> restart(@PathVariable String customerSpace) {
+    public ResponseDocument<String> restart(@PathVariable String customerSpace,
+            @ApiParam(value = "Memory in MB", required = false) @RequestParam(value = "memory", required = false) Integer memory) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace);
+        ApplicationId appId = processAnalyzeWorkflowSubmitter.retryLatestFailed(customerSpace, memory);
         return ResponseDocument.successResponse(appId.toString());
     }
 

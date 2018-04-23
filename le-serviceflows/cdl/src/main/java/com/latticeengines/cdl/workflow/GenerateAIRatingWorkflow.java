@@ -57,14 +57,15 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Override
     public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config);
-        if (!CustomEventModelingType.LPI.equals(config.getCustomEventModelingType())) {
+        boolean isLPI = CustomEventModelingType.LPI.equals(config.getCustomEventModelingType());
+        if (!isLPI) {
             builder.next(createScoringTargetTable) //
                     .next(createCdlEventTable) //
                     .next(matchDataCloud) //
                     .next(addStandardAttributes); //
         }
         builder.next(scoreEventTable);
-        if (!CustomEventModelingType.LPI.equals(config.getCustomEventModelingType())) {
+        if (!isLPI) {
             builder.next(scoreAggregate); //
         }
         return builder.next(combineInputTableWithScore) //
