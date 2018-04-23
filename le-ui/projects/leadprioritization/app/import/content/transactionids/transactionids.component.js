@@ -70,6 +70,7 @@ angular.module('lp.import.wizard.transactionids', [])
                 map = {
                     userField: userField, 
                     mappedField: vm.mappedFieldMap[key],
+                    // removing the following 3 lines makes it update instead of append
                     originalUserField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalUserField : vm.keyMap[vm.mappedFieldMap[key]]),
                     originalMappedField: (vm.saveMap[vm.mappedFieldMap[key]] ? vm.saveMap[vm.mappedFieldMap[key]].originalMappedField : vm.mappedFieldMap[key]),
                     append: true

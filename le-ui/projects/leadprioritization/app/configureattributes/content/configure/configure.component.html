@@ -1,0 +1,14 @@
+<div class="configure-attributes-content container">
+    <div class="configuration">
+        <div class="header">
+            <h2>
+                You have configured <em>[some number]</em> of <strong>{{vm.steps_count}}</strong> of available attritubes.
+            </h2>
+        </div>
+        <ul class="steps">
+            <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name}">
+                <strong>{{item.label}}</strong>
+            </li>
+        </ul>
+    </div>
+</div>

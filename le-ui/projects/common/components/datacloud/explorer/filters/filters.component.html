@@ -23,6 +23,12 @@
             <input type="text" class="form-control" placeholder="Search" ng-model="vm.queryText" ng-change="vm.metadata.current = 1" />
         </div>
     </li>
+    <li class="configureattributes" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+        <button class="button icon-button white-button" 
+                ui-sref="home.configureattributes">
+            Configure Attributes
+        </button>
+    </li>
     <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
         <button class="button icon-button white-button" 
                 ui-sref="home.import.entry">

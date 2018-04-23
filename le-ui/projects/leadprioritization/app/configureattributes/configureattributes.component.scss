@@ -1,0 +1,87 @@
+@import "content/configure/configure.component.scss";
+
+.configure-attributes-content {
+    .configuration {
+        padding: 50px 0;
+        margin: 0 auto;
+        display: table;
+        .header {
+            margin-bottom: 40px;
+            h2 {
+                font-size: 19px;
+                font-weight: bold;
+                text-align: center;
+                em {
+                    color: green;
+                }
+                em, strong {
+                    font-weight: bold;
+                }
+            }
+        }
+        ul.steps {
+            @include flex-container;
+            justify-content: center;
+            flex-wrap: nowrap;
+            margin: 20px auto;
+            padding-bottom: 50px;
+            border-bottom: 1px solid #e2e3e5;
+            li {
+                @include flex-item(1 1 auto);
+                position: relative;
+                text-align: center;
+                margin-right: 50px;
+                &:last-child {
+                    margin-right: 0;
+                }
+                &:before {
+                    display: block;
+                    content: '';
+                    height: 115px;
+                    width: 115px;
+                    border: 1px solid #e2e3e5;
+                    border-radius: 50%;
+                    margin: 0 auto;
+                    margin-bottom: 10px;
+                }
+                &:after {
+                    display: none;
+                    content: '';
+                    height: 20px;
+                    width: 20px;
+                    position: absolute;
+                    bottom: calc(-50px - 17px);
+                    left: calc(50% - 5px);
+                    background: white;
+                    border-top: 1px solid #e2e3e5;
+                    border-left: 1px solid #e2e3e5;
+                    transform: rotate(45deg) translateX(-50%)
+                }
+                &[href] {
+                    cursor: pointer;
+                }
+                &:hover {
+                    color: blue;
+                    &:before {
+                        border-color: blue;
+                    }
+                }
+                &.active {
+                    color: orange;
+                    &:before {
+                        border-color: orange;
+                    }
+                    &:after {
+                        display: block;
+                    }
+                }
+                &.completed {
+                    color: green;
+                    &:before {
+                        border-color: green;
+                    }
+                }
+            }
+        }
+    }
+}
