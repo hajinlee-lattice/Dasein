@@ -25,6 +25,8 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
 
     private static final Logger log = LoggerFactory.getLogger(CombineInputTableWithScore.class);
 
+    private String ratingField = ScoreResultField.Rating.displayName;
+
     @Override
     public Node construct(CombineInputTableWithScoreParameters parameters) {
         Node inputTable = addSource(parameters.getInputTableName());
@@ -40,27 +42,19 @@ public class CombineInputTableWithScore extends TypesafeDataFlowBuilder<CombineI
             log.info("Enter multi-model mode");
             Map<String, List<BucketMetadata>> bucketMetadataMap = parameters.getBucketMetadataMap();
             String modelIdField = parameters.getModelIdField();
-            Map<String, String> scoreFieldMap = parameters.getScoreFieldMap();
-            Map<String, Double> scoreAvgMap = parameters.getScoreAvgMap();
-            Map<String, Integer> scoreMultiplierMap = parameters.getScoreMultiplierMap();
+            String scoreField = parameters.getScoreFieldName();
             List<String> applyToFields = new ArrayList<>();
             applyToFields.add(modelIdField);
-            scoreFieldMap.values().forEach(scoreField -> {
-                if (!applyToFields.contains(scoreField)) {
-                    applyToFields.add(scoreField);
-                }
-            });
+            applyToFields.add(scoreField);
             scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(scoreFieldMap, modelIdField, ScoreResultField.Rating.displayName,
-                            bucketMetadataMap, scoreMultiplierMap, scoreAvgMap),
-                    new FieldList(applyToFields), new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
+                    new AddRatingColumnFunction(scoreField, modelIdField, ratingField, bucketMetadataMap),
+                    new FieldList(applyToFields), new FieldMetadata(ratingField, String.class));
         } else if (noRatingColumnInScoreTable && notPMMLModel) {
             log.info("Enter single-model mode");
             scoreWithRating = scoreTable.apply(
-                    new AddRatingColumnFunction(parameters.getScoreFieldName(), ScoreResultField.Rating.displayName,
+                    new AddRatingColumnFunction(parameters.getScoreFieldName(), ratingField,
                             parameters.getBucketMetadata(), parameters.getScoreMultiplier(), parameters.getAvgScore()),
-                    new FieldList(parameters.getScoreFieldName()),
-                    new FieldMetadata(ScoreResultField.Rating.displayName, String.class));
+                    new FieldList(parameters.getScoreFieldName()), new FieldMetadata(ratingField, String.class));
         }
 
         Node combinedResultTable = null;

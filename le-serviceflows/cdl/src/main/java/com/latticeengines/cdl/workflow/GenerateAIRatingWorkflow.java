@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWorkflowConfiguration;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.ComputeLiftDataFlow;
+import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -50,6 +51,9 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
     @Inject
     private ComputeLiftDataFlow computeLift;
 
+    @Inject
+    private PivotScoreAndEventDataFlow pivotScoreAndEvent;
+
     @Override
     public Workflow defineWorkflow(GenerateAIRatingWorkflowConfiguration config) {
         WorkflowBuilder builder = new WorkflowBuilder(name(), config);
@@ -65,6 +69,7 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         }
         return builder.next(combineInputTableWithScore) //
                 .next(computeLift) //
+                .next(pivotScoreAndEvent) //
                 .build();
     }
 

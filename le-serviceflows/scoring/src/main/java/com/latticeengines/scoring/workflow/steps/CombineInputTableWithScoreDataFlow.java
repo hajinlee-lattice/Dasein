@@ -13,7 +13,6 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -82,49 +81,29 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
             throw new IllegalStateException("There is no AI models in context.");
         }
         Map<String, List<BucketMetadata>> bucketMetadataMap = new HashMap<>();
-        Map<String, String> scoreFieldMap = new HashMap<>();
-        Map<String, Integer> scoreMultiplierMap = new HashMap<>();
 
         containers.forEach(container -> {
             CombineInputTableWithScoreParameters singleModelParams = getSingleModelParams(container);
             String modelGuid = ((AIModel) container.getModel()).getModelSummaryId();
             bucketMetadataMap.put(modelGuid, singleModelParams.getBucketMetadata());
-            scoreFieldMap.put(modelGuid, singleModelParams.getScoreFieldName());
-            scoreMultiplierMap.put(modelGuid, singleModelParams.getScoreMultiplier());
         });
 
         params.setBucketMetadataMap(bucketMetadataMap);
-        params.setScoreFieldMap(scoreFieldMap);
-        params.setScoreMultiplierMap(scoreMultiplierMap);
-        params.setScoreAvgMap(getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class));
+        params.setScoreFieldName(InterfaceName.Score.name());
         params.setIdColumn(InterfaceName.__Composite_Key__.toString());
         params.setModelIdField(ScoreResultField.ModelId.displayName);
-        putObjectInContext(SCORING_SCORE_FIELDS, scoreFieldMap);
     }
 
     private CombineInputTableWithScoreParameters getSingleModelParams(RatingModelContainer container) {
         CombineInputTableWithScoreParameters params = new CombineInputTableWithScoreParameters(
                 getScoreResultTableName(), getInputTableName());
         AIModel aiModel = (AIModel) container.getModel();
-        PredictionType predictionType = aiModel.getPredictionType();
         List<BucketMetadata> bucketMetadata = container.getEngineSummary().getBucketMetadata();
         if (CollectionUtils.isEmpty(bucketMetadata)) {
             throw new IllegalArgumentException("AI model " + aiModel.getId() + " does not have bucket metadata.");
         }
         params.setBucketMetadata(bucketMetadata);
-        params.setScoreFieldName(getScoreFieldName(aiModel));
-        params.setPredictionType(predictionType);
-        // no multiplier, because always calculate lift chart
-        params.setScoreMultiplier(null);
         return params;
-    }
-
-    private String getScoreFieldName(AIModel aiModel) {
-        String scoreField = InterfaceName.RawScore.name();
-        if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())) {
-            scoreField = InterfaceName.ExpectedRevenue.name();
-        }
-        return scoreField;
     }
 
     private List<RatingModelContainer> getModelContainers() {

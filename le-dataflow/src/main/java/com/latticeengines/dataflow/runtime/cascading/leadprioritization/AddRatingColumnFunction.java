@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,9 +36,6 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     private boolean multiModelMode = false;
     private List<BucketMetadata> bucketMetadata;
     private Map<String, List<BucketMetadata>> bucketMetadataMap;
-    private Map<String, String> scoreFieldMap;
-    private Map<String, Integer> scoreMultiplierMap;
-    private Map<String, Double> scoreAvgMap;
 
     public AddRatingColumnFunction(String scoreFieldName, String ratingFieldName, List<BucketMetadata> bucketMetadata,
             Integer scoreMultiplier, Double avgScore) {
@@ -50,15 +46,12 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         this.avgScore = avgScore;
     }
 
-    public AddRatingColumnFunction(Map<String, String> scoreFieldMap, String modelIdFieldName, String ratingFieldName,
-            Map<String, List<BucketMetadata>> bucketMetadataMap, Map<String, Integer> scoreMultiplierMap,
-            Map<String, Double> scoreAvgMap) {
+    public AddRatingColumnFunction(String scoreFieldName, String modelIdFieldName, String ratingFieldName,
+            Map<String, List<BucketMetadata>> bucketMetadataMap) {
         super(new Fields(ratingFieldName));
         this.multiModelMode = true;
-        this.scoreFieldMap = scoreFieldMap;
+        this.scoreFieldName = scoreFieldName;
         this.modelIdFieldName = modelIdFieldName;
-        this.scoreMultiplierMap = scoreMultiplierMap;
-        this.scoreAvgMap = scoreAvgMap;
         this.bucketMetadataMap = new HashMap<>();
         bucketMetadataMap.forEach((modelId, bucketMetadata) -> //
         this.bucketMetadataMap.put(modelId, sortBucketMetadata(bucketMetadata)));
@@ -68,28 +61,9 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         String scoreField = scoreFieldName;
-        if (multiModelMode) {
-            String modelId = arguments.getString(modelIdFieldName);
-            scoreField = scoreFieldMap.get(modelId);
-        }
         Object scoreObj = arguments.getObject(scoreField);
         double score = Double.parseDouble(scoreObj.toString());
-        if (multiModelMode) {
-            String modelId = arguments.getString(modelIdFieldName);
-            Double newAvgScore = scoreAvgMap.get(modelId);
-            if (MapUtils.isNotEmpty(scoreMultiplierMap)) {
-                Integer scoreMultiplier = scoreMultiplierMap.get(modelId);
-                if (scoreMultiplier != null) {
-                    score *= scoreMultiplier;
-                    if (newAvgScore != null) {
-                        newAvgScore *= scoreMultiplier;
-                    }
-                }
-            }
-            if (newAvgScore != null) {
-                score /= newAvgScore;
-            }
-        } else {
+        if (!multiModelMode) {
             Double newAvgScore = avgScore;
             if (scoreMultiplier != null) {
                 score *= scoreMultiplier;
@@ -116,7 +90,7 @@ public class AddRatingColumnFunction extends BaseOperation implements Function {
         if (CollectionUtils.isNotEmpty(bucketMetadata)) {
             bucketName = BucketMetadataUtils.bucketMetadata(bucketMetadata, score).getBucket();
         } else {
-            //FIXME: should never go to this branch after M19
+            // FIXME: should never go to this branch after M19
             // use default bucketing criteria
             if (log.isDebugEnabled()) {
                 log.debug("No bucket metadata is defined, therefore use default bucketing criteria.");

@@ -10,13 +10,16 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.lp.BucketedScoreProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -39,6 +42,10 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
 
     @Inject
     private MetadataProxy metadataProxy;
+
+    @Inject
+    private BucketedScoreProxy bucketedScoreProxy;
+
     private DataCollection.Version inactive;
     private CustomerSpace customerSpace;
 
@@ -64,6 +71,9 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
             // ignore
         }
 
+        // update bucket metadata and bucketed score summary
+        updateBucketMetadata();
+
         // update segment and rating engine counts
         SegmentCountUtils.updateEntityCounts(segmentProxy, entityProxy, customerSpace.toString());
         RatingEngineCountUtils.updateRatingEngineCounts(ratingEngineProxy, customerSpace.toString());
@@ -83,6 +93,19 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
                     log.info("Removing orphan table " + tableName);
                     metadataProxy.deleteTable(customerSpace.toString(), tableName);
                 }
+            });
+        }
+    }
+
+    private void updateBucketMetadata() {
+        Map<String, BucketedScoreSummary> bucketedScoreSummaryMap = getMapObjectFromContext(BUCKETED_SCORE_SUMMARIES,
+                String.class, BucketedScoreSummary.class);
+        if (MapUtils.isNotEmpty(bucketedScoreSummaryMap)) {
+            log.info("Found " + bucketedScoreSummaryMap.size() + " bucketed score summaries to update");
+            bucketedScoreSummaryMap.forEach((modelGuid, bucketedScoreSummary) -> {
+                log.info("Save bucketed score summary for modelGUID=" + modelGuid + " : "
+                        + JsonUtils.serialize(bucketedScoreSummary));
+                bucketedScoreProxy.createOrUpdateBucketedScoreSummary(customerSpace.toString(), modelGuid, bucketedScoreSummary);
             });
         }
     }

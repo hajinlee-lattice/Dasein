@@ -28,7 +28,6 @@ import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfi
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.scoring.steps.PivotScoreAndEventConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -56,7 +55,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
 
         private ModelWorkflowConfiguration.Builder modelWorkflowBuilder = new ModelWorkflowConfiguration.Builder();
-        private PivotScoreAndEventConfiguration pivotScoreAndEvent = new PivotScoreAndEventConfiguration();
         private ExportStepConfiguration export = new ExportStepConfiguration();
         private LdcOnlyAttributesConfiguration ldcOnlyAttributes = new LdcOnlyAttributesConfiguration();
 
@@ -76,7 +74,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             modelWorkflowBuilder.customer(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
-            pivotScoreAndEvent.setCustomerSpace(customerSpace);
 
             return this;
         }
@@ -95,7 +92,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             export.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
-            pivotScoreAndEvent.setMicroServiceHostPort(microServiceHostPort);
             return this;
         }
 
@@ -140,7 +136,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             ldcOnlyAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
-            pivotScoreAndEvent.setInternalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -419,7 +414,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(modelWorkflowBuilder.build());
             configuration.add(setConfigForScoring);
             configuration.add(generateAIRating.build());
-            configuration.add(pivotScoreAndEvent);
             configuration.add(export);
 
             return configuration;

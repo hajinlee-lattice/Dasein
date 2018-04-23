@@ -21,11 +21,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.scoring.ScoreResultField;
@@ -58,7 +58,6 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
 
     @Override
     public void onExecutionCompleted() {
-        Map<String, String> scoreFieldMap = getScoreFieldsMap();
         Table liftTable = metadataProxy.getTable(configuration.getCustomerSpace().toString(),
                 configuration.getTargetTableName());
         List<GenericRecord> records = AvroUtils.getDataFromGlob(yarnConfiguration,
@@ -81,11 +80,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
                 }
             });
 
-            String scoreField = scoreFieldMap.get(modelGuid);
             String engineId = modelGuidToEngineIdMap.get(modelGuid);
-            if (InterfaceName.ExpectedRevenue.name().equals(scoreField)) {
-                engineId = RatingEngine.toRatingAttrName(engineId, RatingEngine.ScoreType.ExpectedRevenue);
-            }
             if (!liftMap.containsKey(engineId)) {
                 liftMap.put(engineId, new HashMap<>());
             }
@@ -108,8 +103,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
                 bucketedScoreProxy.createABCDBuckets(configuration.getCustomerSpace().toString(), request);
             }
         });
-        // metadataProxy.deleteTable(configuration.getCustomerSpace().toString(),
-        // configuration.getTargetTableName());
+        metadataProxy.deleteTable(configuration.getCustomerSpace().toString(), configuration.getTargetTableName());
     }
 
     private void preDataFlow() {
@@ -132,7 +126,18 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, String> getScoreFieldsMap() {
         Map<String, String> scoreFieldsMap;
         if (multiModel) {
-            scoreFieldsMap = getMapObjectFromContext(SCORING_SCORE_FIELDS, String.class, String.class);
+            scoreFieldsMap = new HashMap<>();
+            List<RatingModelContainer> containers = getModelContainers();
+            containers.forEach(container -> {
+                AIModel aiModel = (AIModel) container.getModel();
+                String modelGuid = aiModel.getModelSummaryId();
+                String scoreField = InterfaceName.RawScore.name();
+                if (PredictionType.EXPECTED_VALUE.equals(aiModel.getPredictionType())) {
+                    scoreField = InterfaceName.ExpectedRevenue.name();
+                }
+                scoreFieldsMap.put(modelGuid, scoreField);
+            });
+            putObjectInContext(LIFT_SCORE_FIELDS, scoreFieldsMap);
         } else {
             String modelGuid = getStringValueFromContext(SCORING_MODEL_ID);
             String scoreField = configuration.getScoreField();
@@ -147,15 +152,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, String> getModelGuidToEngineIdMap() {
         Map<String, String> modelGuidToEngineIdMap = new HashMap<>();
         if (multiModel) {
-            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS,
-                    RatingModelContainer.class);
-            List<RatingModelContainer> containers = allContainers.stream() //
-                    .filter(container -> {
-                        RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                        return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                                || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-                    }) //
-                    .collect(Collectors.toList());
+            List<RatingModelContainer> containers = getModelContainers();
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
                 String modelGuid = aiModel.getModelSummaryId();
@@ -172,14 +169,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
     private Map<String, List<BucketMetadata>> getModelGuidToBucketMetadataMap() {
         Map<String, List<BucketMetadata>> modelGuidToBucketMetadataMap = new HashMap<>();
         if (multiModel) {
-            List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS,
-                    RatingModelContainer.class);
-            List<RatingModelContainer> containers = allContainers.stream() //
-                    .filter(container -> {
-                        RatingEngineType ratingEngineType = container.getEngineSummary().getType();
-                        return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
-                                || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
-                    }).collect(Collectors.toList());
+            List<RatingModelContainer> containers = getModelContainers();
             containers.forEach(container -> {
                 AIModel aiModel = (AIModel) container.getModel();
                 String modelGuid = aiModel.getModelSummaryId();
@@ -199,6 +189,16 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
             modelGuidToBucketMetadataMap.put(modelGuid, bucketMetadata);
         }
         return modelGuidToBucketMetadataMap;
+    }
+
+    private List<RatingModelContainer> getModelContainers() {
+        List<RatingModelContainer> allContainers = getListObjectFromContext(RATING_MODELS, RatingModelContainer.class);
+        return allContainers.stream() //
+                .filter(container -> {
+                    RatingEngineType ratingEngineType = container.getEngineSummary().getType();
+                    return RatingEngineType.CROSS_SELL.equals(ratingEngineType)
+                            || RatingEngineType.CUSTOM_EVENT.equals(ratingEngineType);
+                }).collect(Collectors.toList());
     }
 
 }

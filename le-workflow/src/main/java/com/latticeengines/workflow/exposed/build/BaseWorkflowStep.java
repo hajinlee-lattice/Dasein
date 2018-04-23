@@ -65,7 +65,7 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String MODEL_AVG_PROBABILITY = "MODEL_AVG_PROBABILITY";
     protected static final String SCORING_AVG_SCORE = "SCORING_AVG_SCORE";
     protected static final String SCORING_AVG_SCORES = "SCORING_AVG_SCORES";
-    protected static final String SCORING_SCORE_FIELDS = "SCORING_SCORE_FIELDS";
+    protected static final String LIFT_SCORE_FIELDS = "LIFT_SCORE_FIELDS";
     protected static final String SCORING_BUCKET_METADATA = "SCORING_BUCKET_METADATA";
     protected static final String SCORING_RESULT_TABLE_NAME = "SCORING_RESULT_TABLE_NAME";
     protected static final String SCORING_MODEL_ID = "SCORING_MODEL_ID";

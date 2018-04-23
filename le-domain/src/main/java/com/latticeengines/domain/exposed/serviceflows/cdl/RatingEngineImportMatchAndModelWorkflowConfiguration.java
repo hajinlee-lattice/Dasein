@@ -12,7 +12,6 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.dataflow.flows.leadprioritization.DedupType;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
-import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.ProvenancePropertyName;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
@@ -44,7 +43,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         private MatchDataCloudWorkflowConfiguration.Builder matchDataCloudWorkflowBuilder = new MatchDataCloudWorkflowConfiguration.Builder();
         private CdlModelWorkflowConfiguration.Builder cdlModelWorkflowBuilder = new CdlModelWorkflowConfiguration.Builder();
-        private RatingEngineScoreWorkflowConfiguration.Builder ratingEngineScoreWorkflowBuilder = new RatingEngineScoreWorkflowConfiguration.Builder();
         private GenerateAIRatingWorkflowConfiguration.Builder generateAIRating = new GenerateAIRatingWorkflowConfiguration.Builder();
 
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
@@ -65,7 +63,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
-            ratingEngineScoreWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
             dedupEventTable.setMicroServiceHostPort(microServiceHostPort);
             addStandardAttributes.setMicroServiceHostPort(microServiceHostPort);
@@ -81,7 +78,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             export.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
-            ratingEngineScoreWorkflowBuilder.customer(customerSpace);
             generateAIRating.customer(customerSpace);
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
@@ -96,7 +92,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
             cdlTargetTableTupleFilter.setInternalResourceHostPort(internalResourceHostPort);
-            ratingEngineScoreWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             dedupEventTable.setInternalResourceHostPort(internalResourceHostPort);
             addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -107,7 +102,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setTrainFilterTableName(trainFilterTableName);
             cdlEventTableTupleFilter.setEventFilterTableName(eventFilterTableName);
             cdlTargetTableTupleFilter.setTargetFilterTableName(targetFilterTableName);
-            ratingEngineScoreWorkflowBuilder.filterTableName(targetFilterTableName);
             return this;
         }
 
@@ -116,7 +110,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlEventTableTupleFilter.setTrainQuery(trainQuery);
             cdlEventTableTupleFilter.setEventQuery(eventQuery);
             cdlTargetTableTupleFilter.setTargetQuery(targetQuery);
-            ratingEngineScoreWorkflowBuilder.filterQuery(targetQuery);
             return this;
         }
 
@@ -157,7 +150,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder excludeDataCloudAttrs(boolean exclude) {
             matchDataCloudWorkflowBuilder.excludeDataCloudAttrs(exclude);
             cdlModelWorkflowBuilder.excludeDataCloudAttrs(exclude);
-            ratingEngineScoreWorkflowBuilder.excludeDataCloudAttrs(exclude);
             return this;
         }
 
@@ -170,31 +162,22 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder fetchOnly(boolean fetchOnly) {
             matchDataCloudWorkflowBuilder.fetchOnly(fetchOnly);
-            ratingEngineScoreWorkflowBuilder.fetchOnly(fetchOnly);
             return this;
         }
 
         public Builder matchRequestSource(MatchRequestSource matchRequestSource) {
             matchDataCloudWorkflowBuilder.matchRequestSource(matchRequestSource);
-            ratingEngineScoreWorkflowBuilder.matchRequestSource(matchRequestSource);
-            return this;
-        }
-
-        public Builder skipImport(boolean skipImport) {
-            ratingEngineScoreWorkflowBuilder.skipImport(skipImport);
             return this;
         }
 
         public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
             matchDataCloudWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
-            ratingEngineScoreWorkflowBuilder.matchColumnSelection(predefinedColumnSelection, selectionVersion);
             return this;
         }
 
         public Builder dataCloudVersion(String dataCloudVersion) {
             matchDataCloudWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             cdlModelWorkflowBuilder.dataCloudVersion(dataCloudVersion);
-            ratingEngineScoreWorkflowBuilder.dataCloudVersion(dataCloudVersion);
             generateAIRating.dataCloudVersion(dataCloudVersion);
             return this;
         }
@@ -203,7 +186,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlModelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             cdlEventTable.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             matchDataCloudWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
-            ratingEngineScoreWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
@@ -216,7 +198,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder targetTableName(String targetTableName) {
-            ratingEngineScoreWorkflowBuilder.inputTableName(targetTableName);
             cdlModelWorkflowBuilder.targetTableName(targetTableName);
             return this;
         }
@@ -241,8 +222,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
                 List<TransformDefinition> stdTransformDefns) {
             addStandardAttributes.setTransformationGroup(transformationGroup);
             addStandardAttributes.setTransforms(stdTransformDefns);
-            ratingEngineScoreWorkflowBuilder.transformationGroup(transformationGroup);
-            ratingEngineScoreWorkflowBuilder.transformDefinitions(stdTransformDefns);
             generateAIRating.transformationGroup(transformationGroup, stdTransformDefns);
             cdlModelWorkflowBuilder.transformationGroup(transformationGroup, stdTransformDefns);
             return this;
@@ -270,19 +249,16 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder matchClientDocument(MatchClientDocument matchClientDocument) {
             matchDataCloudWorkflowBuilder.matchClientDocument(matchClientDocument);
-            ratingEngineScoreWorkflowBuilder.matchClientDocument(matchClientDocument);
             return this;
         }
 
         public Builder matchType(MatchCommandType matchCommandType) {
             matchDataCloudWorkflowBuilder.matchType(matchCommandType);
-            ratingEngineScoreWorkflowBuilder.matchType(matchCommandType);
             return this;
         }
 
         public Builder matchDestTables(String destTables) {
             matchDataCloudWorkflowBuilder.matchDestTables(destTables);
-            ratingEngineScoreWorkflowBuilder.matchDestTables(destTables);
             return this;
         }
 
@@ -298,7 +274,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         public Builder cdlModel(boolean isCdlModel) {
             cdlModelWorkflowBuilder.cdlModel(isCdlModel);
-            ratingEngineScoreWorkflowBuilder.cdlModel(isCdlModel);
             return this;
         }
 
@@ -310,28 +285,16 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         public Builder matchQueue(String queue) {
             generateAIRating.matchYarnQueue(queue);
             matchDataCloudWorkflowBuilder.matchQueue(queue);
-            ratingEngineScoreWorkflowBuilder.matchQueue(queue);
             return this;
         }
 
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
-            ratingEngineScoreWorkflowBuilder.skipStandardTransform(skipTransform);
             return this;
         }
 
         public Builder setActivateModelSummaryByDefault(boolean value) {
             cdlModelWorkflowBuilder.setActivateModelSummaryByDefault(value);
-            return this;
-        }
-
-        public Builder bucketMetadata(List<BucketMetadata> bucketMetadata) {
-            ratingEngineScoreWorkflowBuilder.bucketMetadata(bucketMetadata);
-            return this;
-        }
-
-        public Builder liftChart(boolean liftChart) {
-            ratingEngineScoreWorkflowBuilder.liftChart(liftChart);
             return this;
         }
 
@@ -353,7 +316,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder setUniqueKeyColumn(String uniqueKeyColumn) {
-            ratingEngineScoreWorkflowBuilder.setUniqueKeyColumn(uniqueKeyColumn);
             generateAIRating.uniqueKeyColumn(uniqueKeyColumn);
             return this;
         }
@@ -364,20 +326,13 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public Builder setUseScorederivation(boolean useScorederivation) {
-            ratingEngineScoreWorkflowBuilder.setUseScorederivation(useScorederivation);
             generateAIRating.setUseScorederivation(useScorederivation);
-            return this;
-        }
-
-        public Builder setModelIdFromRecord(boolean setModelIdFromRecord) {
-            ratingEngineScoreWorkflowBuilder.setModelIdFromRecord(setModelIdFromRecord);
             return this;
         }
 
         public Builder setEventColumn(String eventColumn) {
             cdlEventTable.setEventColumn(eventColumn);
             cdlEventTableTupleFilter.setEventColumn(eventColumn);
-            ratingEngineScoreWorkflowBuilder.setEventColumn(eventColumn);
             dedupEventTable.setEventColumn(eventColumn);
             return this;
         }
@@ -386,7 +341,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             cdlEventTableTupleFilter.setExpectedValue(expectedValue);
             generateAIRating.setExpectedValue(expectedValue);
-            ratingEngineScoreWorkflowBuilder.setExpectedValue(expectedValue);
             return this;
         }
 
@@ -406,7 +360,6 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(export);
             configuration.add(setConfigForScoring);
             configuration.add(cdlTargetTableTupleFilter);
-            configuration.add(ratingEngineScoreWorkflowBuilder.build());
             configuration.add(generateAIRating.build());
 
             return configuration;

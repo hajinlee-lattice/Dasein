@@ -105,7 +105,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .skipDedupStep(parameters.getDeduplicationType() == DedupType.MULTIPLELEADSPERDOMAIN) //
                 .fetchOnly(true) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
-                .skipImport(false) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .skipStandardTransform(transformationGroup == TransformationGroup.NONE) //
                 .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
@@ -127,8 +126,6 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .moduleName(moduleName) //
                 .isDefaultDataRules(true) //
                 .dataRules(DataRuleLists.getDataRules(DataRuleListName.STANDARD)) //
-                .bucketMetadata(
-                        new RatingEngineBucketBuilder().build(parameters.isExpectedValue(), parameters.isLiftChart())) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
                 .matchDestTables("DerivedColumnsCache") //
                 .setRetainLatticeAccountId(true) //
@@ -139,9 +136,7 @@ public class RatingEngineImportMatchAndModelWorkflowSubmitter extends WorkflowSu
                 .setEventColumn(InterfaceName.Target.name()) //
                 .setExpectedValue(parameters.isExpectedValue()) //
                 .setUseScorederivation(false) //
-                .setModelIdFromRecord(true) //
                 .dataCollectionVersion(version) //
-                .liftChart(parameters.isLiftChart()) //
                 .aiModelId(parameters.getAiModelId()) //
                 .ratingEngineId(parameters.getRatingEngineId()) //
                 .notesContent(parameters.getNotesContent());

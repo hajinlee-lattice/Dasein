@@ -129,7 +129,6 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
         }
 
         public Builder userId(String userId) {
-            pivotScoreAndEvent.setUserId(userId);
             cdlModelWorkflowBuilder.userId(userId);
             configuration.setUserId(userId);
             return this;
@@ -361,7 +360,6 @@ public class RatingEngineMatchAndModelWorkflowConfiguration extends BaseCDLWorkf
         public Builder setExpectedValue(boolean expectedValue) {
             cdlModelWorkflowBuilder.setExpectedValue(expectedValue);
             ratingEngineScoreWorkflowBuilder.setExpectedValue(expectedValue);
-            pivotScoreAndEvent.setExpectedValue(expectedValue);
             return this;
         }
 

@@ -6,7 +6,6 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.dataflow.annotation.SourceTableName;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.dataflow.DataFlowParameters;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -45,17 +44,6 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     @JsonProperty("model_id_field")
     private String modelIdField;
-
-    @JsonProperty("score_field_map")
-    private Map<String, String> scoreFieldMap;
-
-    @JsonProperty("score_multiplier_map")
-    private Map<String, Integer> scoreMultiplierMap;
-
-    @JsonProperty("score_avg_map")
-    private Map<String, Double> scoreAvgMap;
-
-    private PredictionType predictionType;
 
     public CombineInputTableWithScoreParameters(String scoreResultsTable, String trainingTable) {
         this(scoreResultsTable, trainingTable, null);
@@ -160,38 +148,6 @@ public class CombineInputTableWithScoreParameters extends DataFlowParameters {
 
     public void setModelIdField(String modelIdField) {
         this.modelIdField = modelIdField;
-    }
-
-    public Map<String, String> getScoreFieldMap() {
-        return scoreFieldMap;
-    }
-
-    public void setScoreFieldMap(Map<String, String> scoreFieldMap) {
-        this.scoreFieldMap = scoreFieldMap;
-    }
-
-    public Map<String, Integer> getScoreMultiplierMap() {
-        return scoreMultiplierMap;
-    }
-
-    public void setScoreMultiplierMap(Map<String, Integer> scoreMultiplierMap) {
-        this.scoreMultiplierMap = scoreMultiplierMap;
-    }
-
-    public Map<String, Double> getScoreAvgMap() {
-        return scoreAvgMap;
-    }
-
-    public void setScoreAvgMap(Map<String, Double> scoreAvgMap) {
-        this.scoreAvgMap = scoreAvgMap;
-    }
-
-    public PredictionType getPredictionType() {
-        return predictionType;
-    }
-
-    public void setPredictionType(PredictionType predictionType) {
-        this.predictionType = predictionType;
     }
 
     @Override

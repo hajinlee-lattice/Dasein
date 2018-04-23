@@ -57,7 +57,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
                     getDoubleValueFromContext(SCORING_AVG_SCORE))//
             );
         }
-        Map<String, String> scoreFieldMap = getMapObjectFromContext(SCORING_SCORE_FIELDS, String.class, String.class);
+        Map<String, String> scoreFieldMap = getMapObjectFromContext(LIFT_SCORE_FIELDS, String.class, String.class);
         if (MapUtils.isNotEmpty(scoreFieldMap)) {
             dataFlowParams.setScoreFieldMap(scoreFieldMap);
         } else {
