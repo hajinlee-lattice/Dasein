@@ -42,13 +42,11 @@ angular
         this.states.fromParams.push(params);
     }
 })
-.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateHistory) {
+.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateHistory, $urlRouter) {
     var self = this;
-
     $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
         StateHistory.setTo(toState, toParams);
         StateHistory.setFrom(fromState, fromParams);
-
         // when user hits browser Back button after app instantiate, send back to login
         if (fromState.name == 'home.models' && toState.name == 'home') {
             event.preventDefault();
@@ -105,12 +103,31 @@ angular
 })
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise('/tenant/');
-
+    $urlRouterProvider.otherwise(function ($injector, $location) {
+        var $state = $injector.get('$state');
+        $state.go('loading');
+    });
+    
     $stateProvider
+        .state('loading', {
+            
+            resolve: {
+                ClientSession: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getClientSession();
+                },
+                Tenant: function(ClientSession, $state) {
+                    var name = ClientSession.Tenant.DisplayName; 
+                    $state.go('home',{tenantName: name});
+
+                }
+            }
+
+        })
         .state('home', {
             url: '/tenant/:tenantName',
+            
             resolve: {
+                
                 ClientSession: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getClientSession();
                 },
@@ -160,7 +177,6 @@ angular
                 "sidebar": {
                     controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService, DataCloudStore) {
                         var tenantName = $stateParams.tenantName;
-
                         if (tenantName != Tenant.DisplayName) {
                             $rootScope.tenantName = window.escape(Tenant.DisplayName);
                             $rootScope.tenantId = window.escape(Tenant.Identifier);
@@ -168,7 +184,6 @@ angular
                             FeatureFlagService.GetAllFlags().then(function(result) {
                                 var flags = FeatureFlagService.Flags();
                                 if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-                                    //console.log('Routing to home.segment.explorer.attributes');
                                     $state.go('home.segment.explorer.attributes', {
                                         tenantName: Tenant.DisplayName,
                                         segment: 'Create'
@@ -179,6 +194,20 @@ angular
                                     });
                                 }
                             });
+                        }else {
+                            var currentState = $state.current.name;
+                            if('home' === currentState){
+                                var flags = FeatureFlagService.Flags();
+                                if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
+                                    $state.go('home.segment.explorer.attributes',{
+                                        segment: 'Create'
+                                    });
+                                }else{
+                                    $state.go('home.models', {
+                                        tenantName: Tenant.DisplayName
+                                    });
+                                }
+                            }
                         }
                     },
                     templateUrl: 'app/navigation/sidebar/sidebar.component.html'

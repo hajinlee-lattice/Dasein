@@ -21,28 +21,26 @@ angular.module('pd.navigation.header', [
     $scope.jobs = JobsStore.data.jobs;
     $scope.importJobs = JobsStore.data.importJobs;
     $scope.exportJobs = JobsStore.data.exportJobs;
+    $scope.headerBack = null;
+    // $scope.IsRatingEngine = false;
+    $scope.isModelDetailsPage = false;
 
+    $scope.showHeaderBack = function(){
+        var ret = !!($scope.headerBack && (($scope.IsRatingEngine === true) || ($scope.isModelDetailsPage === true)));
+        return ret;
+    }
     /**
      * It returns the state to go to for the jobs
      * If CDL the firts tab is going to be P&A jobs
      */
     $scope.getJobSRef = function(){
         var state = '';
-        // This is the case of refresh where $scope.IsRatingEngine is undefined
-        if($scope.IsRatingEngine === undefined){
-            var flags = FeatureFlagService.Flags();
-            var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
-            if(cdl === true){
-                state = 'home.jobs.data';
-            }else {
-                state = 'home.jobs.status';
-            }
+        var flags = FeatureFlagService.Flags();
+        var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
+        if(cdl === true){
+            state = 'home.jobs.data';
         }else {
-            if($scope.IsRatingEngine === true){
-                state = 'home.jobs.data';
-            }else{
-                state = 'home.jobs.status';
-            }
+            state = 'home.jobs.status';
         }
         return state;
     }
@@ -97,6 +95,11 @@ angular.module('pd.navigation.header', [
         .addClass('initialized');
 
     $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
+        // console.log('STATE CHANGED e --> ', e);
+        // console.log('STATE CHANGED toState --> ', toState);
+        // console.log('STATE CHANGED toParams --> ', toParams);
+        // console.log('STATE CHANGED fromState --> ', fromState.url);
+        // console.log('STATE CHANGED fromParams --> ',fromParams);
         if (toState.params) {
             setPageTitle(toState.params);
         }
@@ -105,7 +108,8 @@ angular.module('pd.navigation.header', [
             $scope.isModelDetailsPage = false;
         }
         
-        if($scope.headerBack && toState.name && ($scope.headerBack.path && !toState.name.match($scope.headerBack.path))) {
+        if(($scope.headerBack && toState.name && ($scope.headerBack.path && !toState.name.match($scope.headerBack.path)))) {
+            // console.log('HHHHHHH');
             $scope.headerBack = null;
         }
     });
@@ -135,6 +139,7 @@ angular.module('pd.navigation.header', [
         /**
          * args.path is required.  It's a regex compared to toState.name. When it fails headerBack is destroyed, otherwise your header back stuff will persist.
          */
+        // console.log('BACK --> ', args);
         if(args.path) {
             $scope.headerBack = args;
         }

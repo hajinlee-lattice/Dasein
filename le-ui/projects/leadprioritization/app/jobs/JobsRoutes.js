@@ -56,7 +56,6 @@ angular
 
                         InitJobs: function($q, Model, JobsStore){
                             var deferred = $q.defer();
-                            console.log('Fetching ModelId');
                             JobsStore.getJobs(false, Model.ModelId).then(function(res){
                                 deferred.resolve();
                             });
@@ -76,6 +75,7 @@ angular
                 pageTitle: 'Jobs',
                 jobCreationSuccess: null
             },
+
             resolve: {
 
                 // This a temporary fix so the Jobs page does not 
@@ -95,7 +95,6 @@ angular
                 InitJobs: function($q, JobsStore){
                     var deferred = $q.defer();
                     if(JobsStore.isJobsEverFetched() == false){
-                        console.log('Fetching jobs');
                         JobsStore.getJobs(false).then(function(res){
                             deferred.resolve();
                         });
@@ -129,7 +128,6 @@ angular
                         InitJobs: function($q, JobsStore){
                             var deferred = $q.defer();
                             if(JobsStore.isJobsEverFetched() == false){                               
-                                console.log('Fetching import');
                                 JobsStore.getJobs(false).then(function(res){
                                     deferred.resolve();
                                 });
@@ -158,7 +156,6 @@ angular
                         InitJobs: function($q, JobsStore){
                             var deferred = $q.defer();
                             if(JobsStore.isJobsEverFetched() == false){
-                                console.log('Fetching export');
                                 JobsStore.getJobs(false).then(function(res){
                                     deferred.resolve();
                                 });
@@ -185,7 +182,6 @@ angular
                     resolve: {
                         InitJob: function($q, $stateParams, JobsStore){
                             var deferred = $q.defer();
-                            console.log('Fetching Summary');
                             JobsStore.getJob($stateParams.jobId).then(function(result) {
                                 deferred.resolve(result);
                             });
@@ -224,7 +220,6 @@ angular
             resolve: {
                 JobResult: function($q, $stateParams, JobsStore, ServiceErrorUtility) {
                     var deferred = $q.defer();
-                    console.log('Fetching Report');
                     JobsStore.getJob($stateParams.jobId).then(function(result) {
                         ServiceErrorUtility.check({ data: result, config: { headers: { ErrorDisplayMethod: 'banner' } } });
                         deferred.resolve(result);
