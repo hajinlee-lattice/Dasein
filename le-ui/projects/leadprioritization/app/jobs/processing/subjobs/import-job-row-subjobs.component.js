@@ -6,18 +6,21 @@ angular.module('lp.jobs.row.subjobs', [])
                 // console.log('EXPANDED ======= ',$scope);
             }
             $scope.getActionType = function (subjob) {
-                
+
                 var type = subjob.jobType;
                 switch (type) {
-                    case 'cdlDataFeedImportWorkflow': {
-                        return 'Import: ';
-                    };
-                    case 'cdlOperationWorkflow': {
-                        return 'Delete: ';
-                    };
-                    default: {
-                        return subjob.name;
-                    }
+                    case 'cdlDataFeedImportWorkflow':
+                        {
+                            return 'Import: ';
+                        };
+                    case 'cdlOperationWorkflow':
+                        {
+                            return 'Delete: ';
+                        };
+                    default:
+                        {
+                            return subjob.name;
+                        }
                 }
             }
             $scope.getActionName = function (subjob) {
@@ -34,26 +37,40 @@ angular.module('lp.jobs.row.subjobs', [])
                 var clientSession = BrowserStorageUtility.getClientSession();
                 var tenantId = clientSession.Tenant.Identifier;
                 return path + fileName + '&Authorization=' + auth;
-            }
+            };
+
+            $scope.canBeDownload = function(subjob) {
+                var fileName = subjob.inputs != undefined ? subjob.inputs['SOURCE_FILE_NAME'] : '';
+                if(fileName != ''){
+                    var extPosition = fileName.lastIndexOf('.');
+                    var extention = fileName.substring(extPosition, fileName.length).toLowerCase();
+                    if(extention !== '.csv'){
+                        return false;
+                    }else{
+                        return true;
+                    }
+                }
+                return false;
+            };
 
             $scope.getValidation = function (subjob) {
-                if(subjob.jobStatus === 'Failed'){
+                if (subjob.jobStatus === 'Failed') {
                     return 'Failed';
                 }
-                if(subjob.jobStatus === 'Running'){
+                if (subjob.jobStatus === 'Running') {
                     return 'In Progress';
                 }
-                
+
                 if (getPayloadValue(subjob, 'total_rows') === '-' && getPayloadValue(subjob, 'imported_rows') === '-' && subjob.jobStatus !== 'Completed') {
                     return 'In Progress';
                 }
-                if (getPayloadValue(subjob, 'total_failed_rows') ===  getPayloadValue(subjob, 'total_rows') && subjob.jobStatus !== 'Completed') {
+                if (getPayloadValue(subjob, 'total_failed_rows') === getPayloadValue(subjob, 'total_rows') && subjob.jobStatus !== 'Completed') {
                     return 'Failed';
                 }
                 if (getPayloadValue(subjob, 'total_rows') === getPayloadValue(subjob, 'imported_rows') && subjob.jobStatus === 'Completed') {
                     return 'Success';
                 }
-                if (getPayloadValue(subjob, 'imported_rows') <  getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed') {
+                if (getPayloadValue(subjob, 'imported_rows') < getPayloadValue(subjob, 'total_rows') && subjob.jobStatus === 'Completed') {
                     return 'Partial Success';
                 }
                 return subjob.jobStatus;
@@ -61,7 +78,7 @@ angular.module('lp.jobs.row.subjobs', [])
 
             }
 
-            function getPayloadValue(subjob, field){
+            function getPayloadValue(subjob, field) {
                 if (subjob.reports && subjob.reports.length > 0) {
                     var json = subjob.reports[0].json.Payload;
                     var obj = JSON.parse(json);
@@ -74,15 +91,15 @@ angular.module('lp.jobs.row.subjobs', [])
 
             $scope.getRecordFound = function (subjob) {
                 return getPayloadValue(subjob, 'total_rows');
-               
+
             }
             $scope.getRecordFailed = function (subjob) {
                 return getPayloadValue(subjob, 'total_failed_rows');
-                
+
             }
             $scope.getRecordUploaded = function (subjob) {
                 return getPayloadValue(subjob, 'imported_rows');
-                
+
             }
             $scope.getUser = function (subjob) {
                 return subjob.user;
@@ -102,4 +119,3 @@ angular.module('lp.jobs.row.subjobs', [])
             templateUrl: "app/jobs/processing/subjobs/import-job-row-subjobs.component.html",
         };
     }]);
-

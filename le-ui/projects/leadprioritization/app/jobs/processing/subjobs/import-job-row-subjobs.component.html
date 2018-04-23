@@ -17,9 +17,10 @@
             <div class="le-cell le-col-start-2 le-col-span-2">
                 <span class="text-ellipsis">
                     {{getActionType(subjob)}}
-                    <a href="{{getDownloadLink(subjob)}}" title="{{getActionName(subjob)}}">
+                    <a href="{{getDownloadLink(subjob)}}" title="{{getActionName(subjob)}}" ng-if="canBeDownload(subjob)">
                         <span>{{getActionName(subjob)}}</span>
                     </a>
+                    <span ng-if="!canBeDownload(subjob)">{{getActionName(subjob)}}</span>
                 </span>
 
             </div>
