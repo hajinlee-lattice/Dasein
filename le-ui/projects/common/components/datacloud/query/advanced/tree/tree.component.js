@@ -17,7 +17,7 @@ angular
         },
         templateUrl: '/components/datacloud/query/advanced/tree/tree.component.html',
         controllerAs: 'vm',
-        controller: function ($scope, $timeout, $filter, DataCloudStore, QueryStore, QueryTreeService) {
+        controller: function ($scope, $timeout, $filter, DataCloudStore, QueryStore, QueryTreeService, RatingsEngineStore) {
             var vm = this;
 
             angular.extend(vm, {
@@ -62,7 +62,7 @@ angular
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube.Bkts) {
-                                console.log('=========> ', vm.item);
+                                // console.log('=========> ', vm.item);
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
@@ -205,7 +205,7 @@ angular
             }
 
             vm.updateBucketCount = function() {
-                if (vm.root.mode != 'rules') {
+                if (vm.root.mode != 'rules' || vm.root.mode != 'dashboardrules') {
                     vm.records_updating = true;
 
                     QueryTreeService.updateBucketCount(angular.copy(vm.tree.bucketRestriction)).then(function(data) {
@@ -334,6 +334,7 @@ angular
             }
 
             vm.clickDelete = function() {
+
                 vm.root.saveState();
 
                 vm.parent.logicalRestriction.restrictions.forEach(function(item, index) {
@@ -343,7 +344,6 @@ angular
                         }
                     }
                 });
-
                 vm.root.updateCount();
             }
 

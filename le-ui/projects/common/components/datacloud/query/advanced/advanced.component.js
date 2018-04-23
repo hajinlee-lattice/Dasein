@@ -68,11 +68,12 @@ angular.module('common.datacloud.query.builder', [
         }
 
         if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
+            vm.ratingEngineModel = RatingEngineModel;
             vm.rating_rule = RatingEngineModel.rule.ratingRule;
             vm.rating_buckets = vm.rating_rule.bucketToRuleMap;
             vm.default_bucket = vm.rating_rule.defaultBucketName;
 
-            RatingsEngineStore.setRule(RatingEngineModel)
+            RatingsEngineStore.setRule(RatingEngineModel);
 
             vm.initCoverageMap();
             vm.getRatingsAndRecordCounts(RatingEngineModel, CurrentRatingEngine.segment.name);
@@ -331,20 +332,19 @@ angular.module('common.datacloud.query.builder', [
                 ids = [],
                 rids = [];
 
-
             setBuckets.forEach(function(value, index) {
                 ids.push(value.bucketRestriction.attr);
-            })
+            });
 
             allBuckets.forEach(function(value, index) {
                 rids.push(value.bucketRestriction.attr);
-            })
+            });
 
             bucketRestrictions.forEach(function(value, index) {
                 if (ids.indexOf(value.bucketRestriction.attr) < 0 && rids.indexOf(value.bucketRestriction.attr) < 0) {
                     restrictions.push(value);
                 }
-            })
+            });
         }
 
         return fromBucket;
@@ -403,9 +403,9 @@ angular.module('common.datacloud.query.builder', [
     }
 
     vm.clickBucketTile = function(bucket) {
+
         vm.labelIncrementor = 0;
         vm.bucket = bucket.bucket;
-        // vm.tree = vm.getTree();
 
         vm.setSelectedBucket(vm.bucket);
         vm.setRulesTree();
@@ -430,7 +430,7 @@ angular.module('common.datacloud.query.builder', [
         }
 
         var accountRestrictions = [], contactRestrictions = [];
-        var filteredAccounts = [], filteredContacts = []
+        var filteredAccounts = [], filteredContacts = [];
 
         buckets.forEach(function(bucket, index) {
             accountRestrictions = QueryStore.getAllBuckets(bucket['account_restriction'].logicalRestriction.restrictions);
@@ -536,6 +536,7 @@ angular.module('common.datacloud.query.builder', [
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);
 
         if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
+
             QueryStore.counts[vm.treeMode + 's'].loading = true;
 
             var RatingEngineCopy = angular.copy(RatingEngineModel),

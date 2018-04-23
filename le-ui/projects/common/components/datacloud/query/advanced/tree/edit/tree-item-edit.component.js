@@ -233,8 +233,8 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     return $scope.form.$valid;
                 }
 
-                vm.showUsetButton = function(){
-                    if(vm.root.mode === 'rules'){
+                vm.showUnsetButton = function(){
+                    if(vm.root.mode === 'rules' || vm.root.mode === 'dashboardrules'){
                         return true;
                     } else {
                         return false;
