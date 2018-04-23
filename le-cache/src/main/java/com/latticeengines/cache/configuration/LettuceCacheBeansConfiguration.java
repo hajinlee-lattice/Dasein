@@ -233,6 +233,7 @@ public class LettuceCacheBeansConfiguration implements CachingConfigurer {
         RedisConnectionFactory factory;
 
         if (useLocalRedis()) {
+            log.info("Using local redis server");
             RedisStandaloneConfiguration standaloneConfiguration = new RedisStandaloneConfiguration();
             LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
                     .commandTimeout(Duration.ofMinutes(redisTimeout))//

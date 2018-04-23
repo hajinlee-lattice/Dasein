@@ -28,17 +28,19 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
     private static final Logger log = LoggerFactory.getLogger(LedpLettuceConnectionFactory.class);
 
     private final LedpMasterSlaveConfiguration configuration;
+    private final LettuceClientConfiguration clientConfiguration;
 
     public LedpLettuceConnectionFactory(LedpMasterSlaveConfiguration standaloneConfig,
             LettuceClientConfiguration clientConfig) {
         super(standaloneConfig, clientConfig);
         this.configuration = standaloneConfig;
+        this.clientConfiguration = clientConfig;
     }
 
     @Override
     protected LettuceConnectionProvider doCreateConnectionProvider(AbstractRedisClient client, RedisCodec<?, ?> codec) {
         return new ElasticacheConnectionProvider((RedisClient) client, codec, getClientConfiguration().getReadFrom(),
-                this.configuration);
+                this.configuration, this.clientConfiguration);
     }
 
     static class ElasticacheConnectionProvider implements LettuceConnectionProvider, TargetAware {
@@ -47,14 +49,20 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
         private final RedisCodec<?, ?> codec;
         private final Optional<ReadFrom> readFrom;
         private final LedpMasterSlaveConfiguration configuration;
+        private final LettuceClientConfiguration clientConfiguration;
 
         public ElasticacheConnectionProvider(RedisClient client, RedisCodec<?, ?> codec, Optional<ReadFrom> readFrom,
-                LedpMasterSlaveConfiguration configuration) {
+                LedpMasterSlaveConfiguration configuration, LettuceClientConfiguration clientConfiguration) {
 
             this.client = client;
             this.codec = codec;
             this.readFrom = readFrom;
             this.configuration = configuration;
+            this.clientConfiguration = clientConfiguration;
+
+            Duration duration = clientConfiguration.getCommandTimeout();
+            log.info("Set redis client default command timeout to " + duration);
+            this.client.setDefaultTimeout(duration);
         }
 
         @Override
@@ -105,14 +113,9 @@ public class LedpLettuceConnectionFactory extends LettuceConnectionFactory {
 
             StatefulRedisMasterSlaveConnection<?, ?> connection = MasterSlave.connect(client, codec, endpoints);
             connection.setReadFrom(readFrom);
-
-            if (configuration instanceof LettuceClientConfiguration) {
-                LettuceClientConfiguration lettuceClientConfiguration = (LettuceClientConfiguration) configuration;
-                Duration duration = lettuceClientConfiguration.getCommandTimeout();
-                log.info("Set ElasticCache master slave connection command timeout to " + duration);
-                connection.setTimeout(duration);
-            }
-
+            Duration duration = clientConfiguration.getCommandTimeout();
+            log.info("Set ElasticCache master slave connection command timeout to " + duration);
+            connection.setTimeout(duration);
             return connection;
         }
     }
