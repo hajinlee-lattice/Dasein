@@ -39,8 +39,13 @@ public class CDLProxy extends MicroserviceRestApiProxy implements ProxyInterface
         if (responseDoc == null) {
             return null;
         }
-        String appIdStr = responseDoc.getResult();
-        return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        if (responseDoc.isSuccess()) {
+            String appIdStr = responseDoc.getResult();
+            return StringUtils.isBlank(appIdStr) ? null : ConverterUtils.toApplicationId(appIdStr);
+        } else {
+            throw new RuntimeException(
+                    "Failed to start processAnalyze job: " + StringUtils.join(responseDoc.getErrors(), ","));
+        }
     }
 
     @SuppressWarnings("unchecked")

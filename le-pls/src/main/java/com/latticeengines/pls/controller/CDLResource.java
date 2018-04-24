@@ -3,6 +3,8 @@ package com.latticeengines.pls.controller;
 import javax.inject.Inject;
 
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,8 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.pls.service.CDLService;
 import com.latticeengines.proxy.exposed.cdl.CDLJobProxy;
@@ -27,6 +31,8 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/cdl")
 @PreAuthorize("hasRole('View_PLS_CDL_Data')")
 public class CDLResource {
+
+    private static final Logger log = LoggerFactory.getLogger(CDLResource.class);
 
     @Inject
     private CDLJobProxy cdlJobProxy;
@@ -50,8 +56,13 @@ public class CDLResource {
             request = new ProcessAnalyzeRequest();
         }
         request.setUserId(MultiTenantContext.getEmailAddress());
-        ApplicationId result = cdlService.processAnalyze(customerSpace.toString(), request);
-        return ResponseDocument.successResponse(result.toString());
+        try {
+            ApplicationId result = cdlService.processAnalyze(customerSpace.toString(), request);
+            return ResponseDocument.successResponse(result.toString());
+        } catch (RuntimeException e) {
+            log.error(String.format("Failed to submit processAnalyze job: %s", e.getMessage()));
+            throw new LedpException(LedpCode.LEDP_18182, new String[] {e.getMessage()});
+        }
     }
 
     @RequestMapping(value = "/import/csv", method = RequestMethod.POST)

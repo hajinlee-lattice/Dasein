@@ -42,9 +42,13 @@ public class DataFeedController {
         if (request == null) {
             request = defaultProcessAnalyzeRequest();
         }
-        ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
-                new WorkflowPidWrapper(-1L));
-        return ResponseDocument.successResponse(appId.toString());
+        try {
+            ApplicationId appId = processAnalyzeWorkflowSubmitter.submit(customerSpace, request,
+                    new WorkflowPidWrapper(-1L));
+            return ResponseDocument.successResponse(appId.toString());
+        } catch (RuntimeException e) {
+            return ResponseDocument.failedResponse(e);
+        }
     }
 
     @RequestMapping(value = "/processanalyze/restart", method = RequestMethod.POST, headers = "Accept=application/json")
