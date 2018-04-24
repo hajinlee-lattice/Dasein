@@ -58,9 +58,10 @@ angular.module('lp.segments.segments', [
         //     console.log(response);
         // });
 
-        if ($stateParams.edit) {
+        if ($stateParams.edit && vm.isValid($stateParams.edit)) {
             var tileState = vm.tileStates[$stateParams.edit];
             tileState.editSegment = !tileState.editSegment;
+            tileState.saveEnabled = true;
             $stateParams.edit = null;
         }
     }
@@ -205,8 +206,8 @@ angular.module('lp.segments.segments', [
 
     };
 
-    vm.isValid = function(segment){
-        if(!segment.display_name || segment.display_name.trim().length == 0){
+    vm.isValid = function(segmentDisplayName){
+        if(!segmentDisplayName || segmentDisplayName.trim().length == 0){
             return false;
         }
         else{

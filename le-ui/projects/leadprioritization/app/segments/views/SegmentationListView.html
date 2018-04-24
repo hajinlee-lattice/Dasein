@@ -136,7 +136,7 @@
                                 maxlength="50"
                                 ng-trim="false"
                                 class="form-control"
-                                ng-class="!vm.isValid(segment)? 'invalid-field' : ''"
+                                ng-class="!vm.isValid(segment.display_name)? 'invalid-field' : ''"
                                 placeholder="Segment Name"
                                 ng-disabled="vm.saveInProgress"
                                 ng-change="vm.nameChanged(segment)" />
