@@ -22,12 +22,17 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
+import com.latticeengines.transform.v2_0_25.common.JsonUtils;
 
 public class AttrConfigServiceImplUnitTestNG {
 
@@ -44,6 +49,10 @@ public class AttrConfigServiceImplUnitTestNG {
     private static final Long inactiveForIntent = 4000L;
     private static final Long totalIntentAttrs = 90000L;
     private static Tenant tenant;
+
+    private static final String[] select = { "attr1", "attr2", "attr3" };
+    private static final String[] deselect = { "attr4", "attr5", "attr6" };
+    private static final String usage = "Export";
 
     @BeforeTest(groups = "unit")
     public void setup() {
@@ -90,12 +99,11 @@ public class AttrConfigServiceImplUnitTestNG {
                 ColumnSelection.Predefined.Enrichment.getName())).thenReturn(
                         generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Enrichment.getName()));
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.CompanyProfile.getName()))
-                        .thenReturn(generatePropertyAttrConfigOverview(
-                                ColumnSelection.Predefined.Segment.CompanyProfile.getName()));
+                ColumnSelection.Predefined.CompanyProfile.getName())).thenReturn(
+                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.CompanyProfile.getName()));
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
                 ColumnSelection.Predefined.TalkingPoint.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.TalkingPoint.getName()));
+                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.TalkingPoint.getName()));
         AttrConfigUsageOverview usageOverview = attrConfigService.getAttrConfigUsageOverview();
         log.info("usageOverview is " + usageOverview);
         Map<String, Long> attrNums = usageOverview.getAttrNums();
@@ -179,6 +187,55 @@ public class AttrConfigServiceImplUnitTestNG {
         propSummary6.put(propertyName, propDetails6);
         result.add(attrConfig6);
         return result;
+    }
+
+    @Test(groups = "unit")
+    public void testTranslateUsageToProperty() {
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("SEGMENTATION")
+                .equals(ColumnSelection.Predefined.Segment.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("EXPoRT")
+                .equals(ColumnSelection.Predefined.Enrichment.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("TALKING pOINTS")
+                .equals(ColumnSelection.Predefined.TalkingPoint.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("COMPANY PROFILE")
+                .equals(ColumnSelection.Predefined.CompanyProfile.getName()));
+        try {
+            attrConfigService.translateUsageToProperty("randome");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGenerateAttrConfigRequestForUsage() {
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(deselect));
+        request.setSelect(Arrays.asList(select));
+        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(usage, request);
+        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
+        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        for (AttrConfig attrConfig : attrConfigs) {
+            Assert.assertNotNull(attrConfig.getAttrName());
+            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
+            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Enrichment.getName()));
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGenerateAttrConfigRequestForActivation() {
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(deselect));
+        request.setSelect(Arrays.asList(select));
+        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForActivation(request);
+        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
+        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        for (AttrConfig attrConfig : attrConfigs) {
+            Assert.assertNotNull(attrConfig.getAttrName());
+            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
+            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+        }
     }
 
 }

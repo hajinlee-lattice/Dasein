@@ -1,5 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +11,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -91,6 +99,75 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
         }
         return usageOverview;
+    }
+
+    @Override
+    public void updateActivationConfig(String categoryName, AttrConfigSelectionRequest request) {
+        String tenantId = MultiTenantContext.getTenantId();
+        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(request);
+        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+    }
+
+    @VisibleForTesting
+    AttrConfigRequest generateAttrConfigRequestForActivation(AttrConfigSelectionRequest request) {
+        AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        attrConfigRequest.setAttrConfigs(attrConfigs);
+        for (String attr : request.getSelect()) {
+            updateAttrConfigs(attrConfigs, attr, ColumnMetadataKey.State, Boolean.TRUE);
+        }
+        for (String attr : request.getDeselect()) {
+            updateAttrConfigs(attrConfigs, attr, ColumnMetadataKey.State, Boolean.FALSE);
+        }
+        return attrConfigRequest;
+    }
+
+    private void updateAttrConfigs(List<AttrConfig> attrConfigs, String attrName, String property,
+            Boolean selectThisAttr) {
+        AttrConfig config = new AttrConfig();
+        config.setAttrName(attrName);
+        config.setEntity(BusinessEntity.Account);
+        AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
+        enrichProp.setCustomValue(selectThisAttr);
+        config.setAttrProps(ImmutableMap.of(property, enrichProp));
+        attrConfigs.add(config);
+    }
+
+    @Override
+    public void updateUsageConfig(String categoryName, String usage, AttrConfigSelectionRequest request) {
+        String tenantId = MultiTenantContext.getTenantId();
+        AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForUsage(usage, request);
+        cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+    }
+
+    @VisibleForTesting
+    AttrConfigRequest generateAttrConfigRequestForUsage(String usage, AttrConfigSelectionRequest request) {
+        String property = translateUsageToProperty(usage);
+        AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        attrConfigRequest.setAttrConfigs(attrConfigs);
+        for (String attr : request.getSelect()) {
+            updateAttrConfigs(attrConfigs, attr, property, Boolean.TRUE);
+        }
+        for (String attr : request.getDeselect()) {
+            updateAttrConfigs(attrConfigs, attr, property, Boolean.FALSE);
+        }
+        return attrConfigRequest;
+    }
+
+    @VisibleForTesting
+    String translateUsageToProperty(String usage) {
+        if (usage.equalsIgnoreCase("SEGMENTATION")) {
+            return ColumnSelection.Predefined.Segment.getName();
+        } else if (usage.equalsIgnoreCase("EXPORT")) {
+            return ColumnSelection.Predefined.Enrichment.getName();
+        } else if (usage.equalsIgnoreCase("TALKING POINTS")) {
+            return ColumnSelection.Predefined.TalkingPoint.getName();
+        } else if (usage.equalsIgnoreCase("COMPANY PROFILE")) {
+            return ColumnSelection.Predefined.CompanyProfile.getName();
+        } else {
+            throw new IllegalArgumentException(String.format("%s is not a valid usage", usage));
+        }
     }
 
 }

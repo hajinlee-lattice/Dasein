@@ -7,14 +7,20 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.pls.service.AttrConfigService;
@@ -51,7 +57,22 @@ public class AttrConfigResource {
         return usageOverview;
     }
 
-    @GetMapping(value = "/activation/config/category/{categoryName}")
+    @PutMapping(value = "/activation/config/category/{categoryName}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateActivationConfig(@PathVariable String categoryName,
+            @RequestBody AttrConfigSelectionRequest request) {
+        attrConfigService.updateActivationConfig(categoryName, request);
+    }
+
+    @PutMapping(value = "/activation/config/category/{categoryName}")
+    @ResponseStatus(HttpStatus.OK)
+    public void updateUsageConfig(@PathVariable String categoryName,
+            @RequestParam(value = "usage", required = true) String usage,
+            @RequestBody AttrConfigSelectionRequest request) {
+        attrConfigService.updateUsageConfig(categoryName, usage, request);
+    }
+
+    @GetMapping(value = "/usage/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get activation configuration for a specific category")
     public AttrConfigRequest getActivationConfiguration(@PathVariable String categoryName) {
