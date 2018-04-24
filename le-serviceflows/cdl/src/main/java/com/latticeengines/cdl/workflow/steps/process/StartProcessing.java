@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
+import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
@@ -174,6 +176,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                     ((BaseProcessEntityStepConfiguration) e.getValue()).setRebuild(Boolean.TRUE);
                     putObjectInContext(e.getKey(), e.getValue());
                 });
+    }
+
+    private List<Action> getAttrManagementActions() {
+        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds())
+                .stream()
+                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
+                .collect(Collectors.toList());
     }
 
     private List<Job> getDeleteJobs() {

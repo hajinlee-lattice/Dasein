@@ -173,6 +173,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .map(action -> action.getPid()).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
+        List<Long> attrManagementActionIds = actions.stream()
+                .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
+                .map(action -> action.getPid()).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
+            log.info(String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
+            completedActionIds.addAll(attrManagementActionIds);
+        }
+
         List<Long> ratingEngineActionIds = actions.stream()
                 .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(action -> action.getPid())
                 .collect(Collectors.toList());

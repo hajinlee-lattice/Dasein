@@ -21,6 +21,7 @@ import org.springframework.lang.NonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
+import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
@@ -31,6 +32,8 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -54,6 +57,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Inject
     private AttrValidationService attrValidationService;
+
+    @Inject
+    private ActionService actionService;
 
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
@@ -384,5 +390,11 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }
         return results;
+    }
+
+    private void registerAction(ActionType actionType) {
+        Action action = new Action();
+        action.setType(actionType);
+        actionService.create(action);
     }
 }
