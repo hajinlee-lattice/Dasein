@@ -96,7 +96,7 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         };
     }
 
-    @BeforeClass(groups = "deployment")
+    @BeforeClass(groups = "deployment", enabled = false)
     public void init() {
         prepareCleanPod(POD_ID);
         for (Object[] data : getOrchestrations()) {
@@ -121,7 +121,22 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @Test(groups = "deployment")
+    @AfterClass(groups = "deployment", enabled = false)
+    public void tearDown() {
+        for (Orchestration orch : orchestrations) {
+            orchestrationEntityMgr.delete(orch);
+        }
+        for (Ingestion ingestion : ingestions) {
+            ingestionEntityMgr.delete(ingestion);
+        }
+        List<TransformationProgress> transformProgresses = transformationProgressEntityMgr
+                .findAllforPipeline(DNB_TRANSFORMATION);
+        for (TransformationProgress progress : transformProgresses) {
+            transformationProgressEntityMgr.deleteProgress(progress);
+        }
+    }
+
+    @Test(groups = "deployment", enabled = false)
     public void testOrchestration() {
         List<OrchestrationProgress> progresses = orchService.scan(POD_ID); // No job should be triggered
         Assert.assertEquals(progresses.size(), 0);  
@@ -210,18 +225,4 @@ public class OrchestrationDeploymentTestNG extends PropDataApiDeploymentTestNGBa
         }
     }
 
-    @AfterClass(groups = "deployment")
-    public void tearDown() {
-        for (Orchestration orch : orchestrations) {
-            orchestrationEntityMgr.delete(orch);
-        }
-        for (Ingestion ingestion : ingestions) {
-            ingestionEntityMgr.delete(ingestion);
-        }
-        List<TransformationProgress> transformProgresses = transformationProgressEntityMgr
-                .findAllforPipeline(DNB_TRANSFORMATION);
-        for (TransformationProgress progress : transformProgresses) {
-            transformationProgressEntityMgr.deleteProgress(progress);
-        }
-    }
 }
