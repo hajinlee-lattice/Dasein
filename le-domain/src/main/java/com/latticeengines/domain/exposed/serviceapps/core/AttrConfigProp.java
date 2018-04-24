@@ -14,7 +14,7 @@ public class AttrConfigProp<T extends Serializable> implements Serializable {
     private static final long serialVersionUID = 3252663465868093601L;
 
     @JsonProperty("AllowCustomization")
-    private boolean allowCustomization;
+    private Boolean allowCustomization;
 
     @JsonProperty("SystemValue")
     private T systemValue;
@@ -22,11 +22,11 @@ public class AttrConfigProp<T extends Serializable> implements Serializable {
     @JsonProperty("CustomValue")
     private T customValue;
 
-    public boolean isAllowCustomization() {
+    public Boolean isAllowCustomization() {
         return allowCustomization;
     }
 
-    public void setAllowCustomization(boolean allowCustomization) {
+    public void setAllowCustomization(Boolean allowCustomization) {
         this.allowCustomization = allowCustomization;
     }
 

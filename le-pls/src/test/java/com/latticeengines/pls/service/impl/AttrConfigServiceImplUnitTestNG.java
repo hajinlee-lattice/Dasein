@@ -18,6 +18,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -29,6 +30,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
@@ -236,6 +238,22 @@ public class AttrConfigServiceImplUnitTestNG {
             Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
             log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
         }
+    }
+
+    @Test(groups = "unit")
+    public void testAttrConfig() {
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfig config = new AttrConfig();
+        config.setAttrName("a");
+        config.setEntity(BusinessEntity.Account);
+        AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
+        enrichProp.setCustomValue(Boolean.TRUE);
+        config.setAttrProps(ImmutableMap.of(ColumnMetadataKey.State, enrichProp));
+        log.info("isAllowCustomization() is "
+                + config.getAttrProps().get(ColumnMetadataKey.State).isAllowCustomization());
+        log.info("CustomValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue());
+        log.info("SystemValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getSystemValue());
+        attrConfigs.add(config);
     }
 
 }
