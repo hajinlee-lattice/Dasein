@@ -232,6 +232,7 @@ public class GlobalAuthDeploymentTestBed extends AbstractGlobalAuthTestBed imple
 
     @Override
     public void createTenant(Tenant tenant) {
+        log.info("plsApiHostPort is " + plsApiHostPort);
         magicRestTemplate.postForObject(plsApiHostPort + "/pls/admin/tenants", tenant, Boolean.class);
     }
 
