@@ -76,9 +76,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import Data', 
+                label: 'Import File', 
                 state: 'accounts.ids.thirdpartyids.latticefields.customfields.jobstatus', 
-                nextLabel: 'Done', 
+                nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -113,9 +113,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import Data', 
+                label: 'Import File', 
                 state: 'contacts.ids.latticefields.customfields.jobstatus', 
-                nextLabel: 'Done', 
+                nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -143,9 +143,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import Data', 
+                label: 'Import File', 
                 state: 'product_purchases.ids.latticefields.jobstatus', 
-                nextLabel: 'Done', 
+                nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -172,9 +172,9 @@ angular.module('lp.import')
                     });
                 }
             },{ 
-                label: 'Import Data', 
+                label: 'Import File', 
                 state: 'product_bundles.ids.latticefields.jobstatus', 
-                nextLabel: 'Done', 
+                nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
@@ -194,7 +194,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Product Hierarchy', 
                 state: 'product_hierarchy.ids.product_hierarchy', 
-                nextLabel: 'Import File', 
+                nextLabel: 'Next, Import File', 
                 nextFn: function(nextState) {
                     ImportWizardStore.nextSaveMapping(nextState);
                     ImportWizardStore.nextSaveFieldDocuments(nextState, function(){
@@ -204,7 +204,7 @@ angular.module('lp.import')
             },{ 
                 label: 'Import File', 
                 state: 'product_hierarchy.ids.product_hierarchy.jobstatus', 
-                nextLabel: 'Done', 
+                nextLabel: 'Submit', 
                 hideBack: true,
                 nextFn: function(nextState) {
                     ImportWizardService.startImportCsv(ImportWizardStore.getCsvFileName(), ImportWizardStore.getEntityType()).then(function(){
