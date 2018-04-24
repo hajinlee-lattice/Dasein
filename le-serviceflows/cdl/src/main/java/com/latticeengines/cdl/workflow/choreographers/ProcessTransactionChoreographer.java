@@ -61,9 +61,6 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
     private ProcessProductChoreographer productChoreographer;
 
     @Inject
-    private ProfilePurchaseHistoryWrapper profilePurchaseHistoryWrapper;
-
-    @Inject
     private YarnConfiguration yarnConfiguration;
 
     private boolean hasRawStore = false;

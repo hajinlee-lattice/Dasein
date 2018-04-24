@@ -2,6 +2,7 @@ package com.latticeengines.cdl.workflow;
 
 import javax.inject.Inject;
 
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
@@ -48,7 +49,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
     private ScoreAggregateFlow scoreAggregateFlow;
 
     @Inject
-    private ExportData exportData;
+    private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
@@ -65,7 +66,7 @@ public class RatingEngineScoreWorkflow extends AbstractWorkflow<RatingEngineScor
                 .next(score) //
                 .next(scoreAggregateFlow) //
                 .next(combineInputTableWithScore) //
-                .next(exportData) //
+                .next(exportScoreTrainingFile) //
                 .listener(sendEmailAfterScoringCompletionListener);
         return builder.build();
     }

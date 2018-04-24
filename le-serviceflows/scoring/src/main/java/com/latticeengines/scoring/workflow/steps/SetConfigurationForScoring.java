@@ -41,8 +41,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
     public void execute() {
         log.info("Setting the configuration for scoring.");
 
-        // for export step in score workflow
-        removeObjectFromContext(EXPORT_INPUT_PATH);
+        // for export score training file step in score workflow
         String sourceFileName = configuration.getInputProperties()
                 .get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME);
         String targetFileName = String.format("%s_scored_%s",
@@ -52,14 +51,9 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
         String outputPath = String.format("%s/%s/data/%s/csv_files/score_event_table_output/%s",
                 configuration.getModelingServiceHdfsBaseDir(), configuration.getCustomerSpace(), eventTable.getName(),
                 targetFileName);
-        putStringValueInContext(EXPORT_OUTPUT_PATH, outputPath);
+        putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH, outputPath);
         saveOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH,
-                getStringValueFromContext(EXPORT_OUTPUT_PATH));
-
-        // for score step in score workflow
-        // Table matchResultTable = getObjectFromContext(MATCH_RESULT_TABLE,
-        // Table.class);
-        // putObjectInContext(EVENT_TABLE, matchResultTable);
+                getStringValueFromContext(EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH));
 
         setRatingModelsContext();
     }

@@ -75,10 +75,16 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String ATTR_LEVEL_TYPE = "ATTR_LEVEL_TYPE";
     protected static final String IMPORT_DATA_APPLICATION_ID = "IMPORT_DATA_APPLICATION_ID";
     protected static final String ACTIVATE_MODEL_IDS = "ACTIVATE_MODEL_IDS";
+    protected static final String COMPUTE_LIFT_INPUT_TABLE_NAME = "COMPUTE_LIFT_INPUT_TABLE_NAME";
+    protected static final String PIVOT_SCORE_INPUT_TABLE_NAME = "PIVOT_SCORE_INPUT_TABLE_NAME";
     protected static final String EXPORT_DATA_APPLICATION_ID = "EXPORT_DATA_APPLICATION_ID";
     protected static final String EXPORT_TABLE_NAME = "EXPORT_TABLE_NAME";
     protected static final String EXPORT_INPUT_PATH = "EXPORT_INPUT_PATH";
     protected static final String EXPORT_OUTPUT_PATH = "EXPORT_OUTPUT_PATH";
+    protected static final String EXPORT_BUCKET_TOOL_TABLE_NAME = "EXPORT_BUCKET_TOOL_TABLE_NAME";
+    protected static final String EXPORT_BUCKET_TOOL_OUTPUT_PATH = "EXPORT_BUCKET_TOOL_OUTPUT_PATH";
+    protected static final String EXPORT_SCORE_TRAINING_FILE_TABLE_NAME = "EXPORT_SCORE_TRAINING_FILE_TABLE_NAME";
+    protected static final String EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH = "EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH";
     protected static final String TRANSFORMATION_GROUP_NAME = "TRANSFORMATION_GROUP_NAME";
     protected static final String COLUMN_RULE_RESULTS = "COLUMN_RULE_RESULTS";
     protected static final String ROW_RULE_RESULTS = "ROW_RULE_RESULTS";

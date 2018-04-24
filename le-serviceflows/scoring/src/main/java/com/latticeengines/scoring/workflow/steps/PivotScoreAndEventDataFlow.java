@@ -46,7 +46,7 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
 
     @Override
     public void onConfigurationInitialized() {
-        String scoreTableName = getStringValueFromContext(EXPORT_TABLE_NAME);
+        String scoreTableName = getStringValueFromContext(PIVOT_SCORE_INPUT_TABLE_NAME);
 
         PivotScoreAndEventParameters dataFlowParams = new PivotScoreAndEventParameters(scoreTableName);
         Map<String, Double> avgScores = getMapObjectFromContext(SCORING_AVG_SCORES, String.class, Double.class);
@@ -82,10 +82,10 @@ public class PivotScoreAndEventDataFlow extends RunDataFlow<PivotScoreAndEventCo
         saveBucketedScoreSummary(targetExtractPath);
         putOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_AVRO_PATH, targetExtractPath);
 
-        putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(EXPORT_BUCKET_TOOL_TABLE_NAME, configuration.getTargetTableName());
         String scoreOutputPath = getOutputValue(WorkflowContextConstants.Outputs.EXPORT_OUTPUT_PATH);
         String pivotOutputPath = StringUtils.replace(scoreOutputPath, "_scored_", "_pivoted_");
-        putStringValueInContext(EXPORT_OUTPUT_PATH, pivotOutputPath);
+        putStringValueInContext(EXPORT_BUCKET_TOOL_OUTPUT_PATH, pivotOutputPath);
         saveOutputValue(WorkflowContextConstants.Outputs.PIVOT_SCORE_EVENT_EXPORT_PATH, pivotOutputPath);
     }
 

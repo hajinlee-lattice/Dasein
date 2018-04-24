@@ -11,8 +11,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.ScoreWorkflowConfi
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterScoringCompletionListener;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineMatchDebugWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.ScoreEventTable;
-import com.latticeengines.serviceflows.workflow.export.ExportWorkflow;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -40,7 +40,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
     private CombineInputTableWithScoreDataFlow combineInputTableWithScore;
 
     @Inject
-    private ExportWorkflow exportWorkflow;
+    private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
     private SendEmailAfterScoringCompletionListener sendEmailAfterScoringCompletionListener;
@@ -53,7 +53,7 @@ public class ScoreWorkflow extends AbstractWorkflow<ScoreWorkflowConfiguration> 
                 .next(score) //
                 .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
-                .next(exportWorkflow) //
+                .next(exportScoreTrainingFile) //
                 .listener(sendEmailAfterScoringCompletionListener) //
                 .build();
 

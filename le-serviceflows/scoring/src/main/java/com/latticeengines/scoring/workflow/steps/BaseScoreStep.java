@@ -65,7 +65,7 @@ public abstract class BaseScoreStep<T extends ScoreStepConfiguration> extends Ba
                 if (HdfsUtils.fileExists(yarnConfiguration, importErrorPath)) {
                     HdfsUtils.copyFiles(yarnConfiguration, importErrorPath, targetDir);
 
-                    saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH.toString(),
+                    saveOutputValue(WorkflowContextConstants.Outputs.ERROR_OUTPUT_PATH,
                             targetDir + "/error.csv");
                 }
             } catch (IOException e) {

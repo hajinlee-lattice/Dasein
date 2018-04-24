@@ -14,8 +14,9 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
+import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
 import com.latticeengines.serviceflows.workflow.importdata.ImportData;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
@@ -57,9 +58,12 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Inject
     private GenerateAIRatingWorkflow generateRating;
-    
+
     @Inject
-    private ExportData exportData;
+    private ExportScoreTrainingFile exportScoreTrainingFile;
+
+    @Inject
+    private ExportBucketTool exportBucketTool;
 
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -80,7 +84,8 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(generateRating) //
-                .next(exportData) //
+                .next(exportScoreTrainingFile) //
+                .next(exportBucketTool) //
                 .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();

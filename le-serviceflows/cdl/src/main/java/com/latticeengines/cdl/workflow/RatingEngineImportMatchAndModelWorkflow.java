@@ -13,8 +13,9 @@ import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
+import com.latticeengines.scoring.workflow.steps.ExportBucketTool;
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.serviceflows.workflow.transformation.AddStandardAttributes;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -52,7 +53,10 @@ public class RatingEngineImportMatchAndModelWorkflow
     private GenerateAIRatingWorkflow generateRating;
 
     @Inject
-    private ExportData exportData;
+    private ExportBucketTool exportBucketTool;
+
+    @Inject
+    private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
@@ -71,7 +75,8 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(generateRating) //
-                .next(exportData) //
+                .next(exportScoreTrainingFile) //
+                .next(exportBucketTool) //
                 .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();

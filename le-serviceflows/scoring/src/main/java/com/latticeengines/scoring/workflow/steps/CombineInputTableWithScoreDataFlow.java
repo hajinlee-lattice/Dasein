@@ -39,7 +39,9 @@ public class CombineInputTableWithScoreDataFlow extends RunDataFlow<CombineInput
 
     @Override
     public void onExecutionCompleted() {
-        putStringValueInContext(EXPORT_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(EXPORT_SCORE_TRAINING_FILE_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(COMPUTE_LIFT_INPUT_TABLE_NAME, configuration.getTargetTableName());
+        putStringValueInContext(PIVOT_SCORE_INPUT_TABLE_NAME, configuration.getTargetTableName());
         putStringValueInContext(AI_RAW_RATING_TABLE_NAME, configuration.getTargetTableName());
     }
 

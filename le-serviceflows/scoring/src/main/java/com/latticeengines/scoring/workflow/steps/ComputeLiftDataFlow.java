@@ -108,7 +108,7 @@ public class ComputeLiftDataFlow extends RunDataFlow<ComputeLiftDataFlowConfigur
 
     private void preDataFlow() {
         multiModel = isMultiModel();
-        String inputTableName = getStringValueFromContext(EXPORT_TABLE_NAME);
+        String inputTableName = getStringValueFromContext(COMPUTE_LIFT_INPUT_TABLE_NAME);
         ComputeLiftParameters params = new ComputeLiftParameters();
         params.setInputTableName(inputTableName);
         params.setLiftField(InterfaceName.Lift.name());

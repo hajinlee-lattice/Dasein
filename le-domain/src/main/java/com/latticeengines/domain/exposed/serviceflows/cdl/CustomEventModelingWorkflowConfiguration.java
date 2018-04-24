@@ -23,11 +23,12 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.pa.GenerateAIRatingWor
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ImportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelDataValidationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.ModelWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportBucketToolStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -55,7 +56,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         private AddStandardAttributesConfiguration addStandardAttributes = new AddStandardAttributesConfiguration();
 
         private ModelWorkflowConfiguration.Builder modelWorkflowBuilder = new ModelWorkflowConfiguration.Builder();
-        private ExportStepConfiguration export = new ExportStepConfiguration();
+        private ExportBucketToolStepConfiguration exportBucketTool = new ExportBucketToolStepConfiguration();
+        private ExportScoreTrainingFileStepConfiguration exportScoreTrainingFile = new ExportScoreTrainingFileStepConfiguration();
         private LdcOnlyAttributesConfiguration ldcOnlyAttributes = new LdcOnlyAttributesConfiguration();
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
@@ -70,7 +72,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             dedupEventTable.setCustomerSpace(customerSpace);
             addStandardAttributes.setCustomerSpace(customerSpace);
             ldcOnlyAttributes.setCustomerSpace(customerSpace);
-            export.setCustomerSpace(customerSpace);
+            exportBucketTool.setCustomerSpace(customerSpace);
+            exportScoreTrainingFile.setCustomerSpace(customerSpace);
             modelWorkflowBuilder.customer(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
@@ -89,7 +92,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             ldcOnlyAttributes.setMicroServiceHostPort(microServiceHostPort);
             modelWorkflowBuilder.microServiceHostPort(microServiceHostPort);
 
-            export.setMicroServiceHostPort(microServiceHostPort);
+            exportBucketTool.setMicroServiceHostPort(microServiceHostPort);
+            exportScoreTrainingFile.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
             return this;
@@ -401,6 +405,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public CustomEventModelingWorkflowConfiguration build() {
+            exportBucketTool.setUsingDisplayName(false);
+
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(importData);
@@ -414,7 +420,8 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             configuration.add(modelWorkflowBuilder.build());
             configuration.add(setConfigForScoring);
             configuration.add(generateAIRating.build());
-            configuration.add(export);
+            configuration.add(exportBucketTool);
+            configuration.add(exportScoreTrainingFile);
 
             return configuration;
         }

@@ -11,8 +11,8 @@ import com.latticeengines.domain.exposed.serviceflows.scoring.RTSBulkScoreWorkfl
 import com.latticeengines.scoring.workflow.listeners.SendEmailAfterRTSBulkScoringCompletionListener;
 import com.latticeengines.scoring.workflow.steps.CombineInputTableWithScoreDataFlow;
 import com.latticeengines.scoring.workflow.steps.CombineMatchDebugWithScoreDataFlow;
+import com.latticeengines.scoring.workflow.steps.ExportScoreTrainingFile;
 import com.latticeengines.scoring.workflow.steps.RTSScoreEventTable;
-import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.match.MatchDataCloudWorkflow;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.Workflow;
@@ -36,7 +36,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
     private CombineMatchDebugWithScoreDataFlow combineMatchDebugWithScore;
 
     @Inject
-    private ExportData exportData;
+    private ExportScoreTrainingFile exportScoreTrainingFile;
 
     @Inject
     private SendEmailAfterRTSBulkScoringCompletionListener sendEmailAfterRTSBulkScoringCompletionListener;
@@ -48,7 +48,7 @@ public class RTSBulkScoreWorkflow extends AbstractWorkflow<RTSBulkScoreWorkflowC
                 .next(score) //
                 .next(combineMatchDebugWithScore) //
                 .next(combineInputTableWithScore) //
-                .next(exportData) //
+                .next(exportScoreTrainingFile) //
                 .listener(sendEmailAfterRTSBulkScoringCompletionListener) //
                 .build();
     }

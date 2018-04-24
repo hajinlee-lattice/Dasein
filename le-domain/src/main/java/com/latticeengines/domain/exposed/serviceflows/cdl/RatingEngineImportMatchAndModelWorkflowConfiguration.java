@@ -21,9 +21,10 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportBucketToolStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.SetConfigurationForScoringConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -47,7 +48,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
 
         private CreateCdlEventTableConfiguration cdlEventTable = new CreateCdlEventTableConfiguration();
         private CreateCdlEventTableFilterConfiguration cdlEventTableTupleFilter = new CreateCdlEventTableFilterConfiguration();
-        private ExportStepConfiguration export = new ExportStepConfiguration();
+        private ExportScoreTrainingFileStepConfiguration exportScoreTrainingFile = new ExportScoreTrainingFileStepConfiguration();
+        private ExportBucketToolStepConfiguration exportBucketTool = new ExportBucketToolStepConfiguration();
 
         private SetConfigurationForScoringConfiguration setConfigForScoring = new SetConfigurationForScoringConfiguration();
         private CreateCdlTargetTableFilterConfiguration cdlTargetTableTupleFilter = new CreateCdlTargetTableFilterConfiguration();
@@ -60,7 +62,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             matchDataCloudWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             cdlEventTable.setMicroServiceHostPort(microServiceHostPort);
             cdlEventTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
-            export.setMicroServiceHostPort(microServiceHostPort);
+            exportScoreTrainingFile.setMicroServiceHostPort(microServiceHostPort);
+            exportBucketTool.setMicroServiceHostPort(microServiceHostPort);
             setConfigForScoring.setMicroServiceHostPort(microServiceHostPort);
             cdlTargetTableTupleFilter.setMicroServiceHostPort(microServiceHostPort);
             generateAIRating.microServiceHostPort(microServiceHostPort);
@@ -75,7 +78,8 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             matchDataCloudWorkflowBuilder.customer(customerSpace);
             cdlEventTable.setCustomerSpace(customerSpace);
             cdlEventTableTupleFilter.setCustomerSpace(customerSpace);
-            export.setCustomerSpace(customerSpace);
+            exportScoreTrainingFile.setCustomerSpace(customerSpace);
+            exportBucketTool.setCustomerSpace(customerSpace);
             setConfigForScoring.setCustomerSpace(customerSpace);
             cdlTargetTableTupleFilter.setCustomerSpace(customerSpace);
             generateAIRating.customer(customerSpace);
@@ -345,7 +349,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
         }
 
         public RatingEngineImportMatchAndModelWorkflowConfiguration build() {
-            export.setUsingDisplayName(Boolean.FALSE);
+            exportBucketTool.setUsingDisplayName(Boolean.FALSE);
             generateAIRating.saveBucketMetadata();
             generateAIRating.fetchOnly(Boolean.TRUE);
 
@@ -357,8 +361,9 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             configuration.add(addStandardAttributes);
             configuration.add(matchDataCloudWorkflowBuilder.build());
             configuration.add(cdlModelWorkflowBuilder.build());
-            configuration.add(export);
             configuration.add(setConfigForScoring);
+            configuration.add(exportBucketTool);
+            configuration.add(exportScoreTrainingFile);
             configuration.add(cdlTargetTableTupleFilter);
             configuration.add(generateAIRating.build());
 
