@@ -108,7 +108,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     private CustomerSpace customerSpace;
 
     // TODO - enable when we have a way to simulate full/partial failure
-    @BeforeClass(groups = "workflow", enabled = false)
+    @BeforeClass(groups = "deployment", enabled = false)
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -143,13 +143,13 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     }
 
     // TODO - enable when we have a way to simulate full/partial failure
-    @AfterClass(groups = { "workflow" }, enabled = false)
+    @AfterClass(groups = { "deployment" }, enabled = false)
     public void teardown() throws Exception {
         testPlayCreationHelper.cleanupArtifacts();
     }
 
     // TODO - enable when we have a way to simulate full/partial failure
-    @Test(groups = "workflow", enabled = false)
+    @Test(groups = "deployment", enabled = false)
     public void testExecute() {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNull(playLaunch.getAccountsLaunched());
@@ -176,7 +176,7 @@ public class PlayLaunchInitStepWithFailureDeploymentTestNG extends AbstractTestN
     }
 
     // TODO - enable when we have a way to simulate full/partial failure
-    @Test(groups = "workflow", dependsOnMethods = { "testExecute" }, enabled = false)
+    @Test(groups = "deployment", dependsOnMethods = { "testExecute" }, enabled = false)
     public void verifyRecommendationsDirectly() {
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);

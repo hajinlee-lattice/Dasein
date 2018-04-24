@@ -25,6 +25,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -39,7 +40,6 @@ import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.sqoop.SqoopProxy;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListener;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -117,7 +117,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     private CustomerSpace customerSpace;
 
-    @BeforeClass(groups = "workflow")
+    @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         testPlayCreationHelper.setupTenantAndCreatePlay();
 
@@ -146,7 +146,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         playLaunchInitStep.setConfiguration(createConf(customerSpace, playId, playLaunchId));
     }
 
-    @AfterClass(groups = { "workflow" })
+    @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
 
         testPlayCreationHelper.cleanupArtifacts();
@@ -161,7 +161,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
         });
     }
 
-    @Test(groups = "workflow")
+    @Test(groups = "deployment")
     public void testExecute() {
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
         Assert.assertNull(playLaunch.getAccountsLaunched());
@@ -183,7 +183,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     }
 
-    @Test(groups = "workflow", dependsOnMethods = { "testExecute" })
+    @Test(groups = "deployment", dependsOnMethods = { "testExecute" })
     public void verifyRecommendationsDirectly() {
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
         Assert.assertNotNull(recommendations);

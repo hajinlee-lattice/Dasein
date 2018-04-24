@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.workflowapi.steps;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

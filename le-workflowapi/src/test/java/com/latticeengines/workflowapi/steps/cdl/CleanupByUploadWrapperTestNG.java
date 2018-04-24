@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.workflowapi.steps.cdl;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -48,7 +48,7 @@ public class CleanupByUploadWrapperTestNG extends WorkflowApiFunctionalTestNGBas
     @Inject
     private WorkflowTranslator workflowTranslator;
 
-    @Test(groups = "workflow")
+    @Test(groups = "deployment")
     public void test() throws Exception {
         CleanupByUploadStep cleanupByUploadStep = new CleanupByUploadStep();
         cleanupByUploadStep.setBeanName("cleanupByUploadStep");

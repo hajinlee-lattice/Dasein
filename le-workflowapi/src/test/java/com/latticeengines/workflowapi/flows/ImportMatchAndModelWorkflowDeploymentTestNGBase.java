@@ -28,14 +28,13 @@ import com.latticeengines.domain.exposed.pls.SourceFileState;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.pls.entitymanager.ModelSummaryEntityMgr;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelSummaryService;
 import com.latticeengines.pls.service.impl.ModelSummaryParser;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 
-public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiDeploymentTestNGBase {
+public abstract class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApiDeploymentTestNGBase {
     @SuppressWarnings("unused")
     private static final Logger log = LoggerFactory.getLogger(ImportMatchAndModelWorkflowDeploymentTestNGBase.class);
 
@@ -47,9 +46,6 @@ public class ImportMatchAndModelWorkflowDeploymentTestNGBase extends WorkflowApi
 
     @Autowired
     private MetadataProxy metadataProxy;
-
-    @Autowired
-    private ModelSummaryEntityMgr modelSummaryEntityMgr;
 
     @Autowired
     private ModelSummaryService modelSummaryService;

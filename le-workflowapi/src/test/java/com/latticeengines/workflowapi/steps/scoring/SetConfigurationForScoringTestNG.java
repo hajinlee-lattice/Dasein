@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows;
+package com.latticeengines.workflowapi.steps.scoring;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -51,7 +51,7 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
     @Inject
     private WorkflowTranslator workflowTranslator;
 
-    @Test(groups = "workflow")
+    @Test(groups = "deployment")
     public void test() throws Exception {
         SetConfigurationForScoring setConfigurationForScoring = new SetConfigurationForScoring();
         setConfigurationForScoring.setBeanName("setConfigurationForScoring");
