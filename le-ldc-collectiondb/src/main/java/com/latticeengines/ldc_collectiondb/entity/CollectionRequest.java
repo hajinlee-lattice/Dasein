@@ -31,16 +31,16 @@ public class CollectionRequest {
     @Column(name = "VENDOR", nullable = false)
     private String vendor;
 
-    @Column(name = "PICKUP_TIME", nullable = false)
+    @Column(name = "PICKUP_TIME")
     private Timestamp pickupTime;
 
-    @Column(name = "PICKUP_WORKER", nullable = false)
+    @Column(name = "PICKUP_WORKER")
     private String pickupWorker;
 
     @Column(name = "STATUS", nullable = false)
     private String status;
 
-    @Column(name = "DELIVERY_TIME", nullable = false)
+    @Column(name = "DELIVERY_TIME")
     private Timestamp deliveryTime;
 
     @Column(name = "RETRY_ATTEMPTS", nullable = false)

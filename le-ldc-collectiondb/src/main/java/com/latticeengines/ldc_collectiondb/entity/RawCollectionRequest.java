@@ -19,6 +19,9 @@ public class RawCollectionRequest {
     @Column(name = "PID", unique = true, nullable = false)
     private long pid;
 
+    @Column(name = "VENDOR", nullable = false)
+    private String vendor;
+
     @Column(name = "DOMAIN", nullable = false)
     private String domain;
 
@@ -36,6 +39,14 @@ public class RawCollectionRequest {
     }
     public void setPid(long pid) {
         this.pid = pid;
+    }
+
+    public String getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(String vendor) {
+        this.vendor = vendor.toUpperCase();
     }
 
     public String getDomain() {
