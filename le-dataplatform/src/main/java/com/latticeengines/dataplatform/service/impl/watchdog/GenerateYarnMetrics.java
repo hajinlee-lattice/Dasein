@@ -64,6 +64,7 @@ public class GenerateYarnMetrics extends WatchdogPlugin {
             "transformationWorkflow", //
             "cdlDataFeedImportWorkflow", //
             "consolidateAndPublishWorkflow", //
+            "processAnalyzeWorkflow", //
             "profileAndPublishWorkflow", //
             "redshiftPublishWorkflow", //
             "publishWorkflow", //
