@@ -96,6 +96,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -633,27 +634,27 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 Assert.assertNotNull(consolidateSummaryNode);
 
                 if (entity != BusinessEntity.Product) {
-                    Assert.assertTrue(consolidateSummaryNode.has("NEW"));
-                    Assert.assertTrue(consolidateSummaryNode.has("DELETE"));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.NEW));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.DELETE));
                 } else {
-                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_ID"));
-                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_BUNDLE"));
-                    Assert.assertTrue(consolidateSummaryNode.has("PRODUCT_HIERARCHY"));
-                    Assert.assertTrue(consolidateSummaryNode.has("ERROR_MESSAGE"));
-                    Assert.assertTrue(consolidateSummaryNode.has("WARN_MESSAGE"));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_ID));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_BUNDLE));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.PRODUCT_HIERARCHY));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.ERROR_MESSAGE));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.WARN_MESSAGE));
                 }
 
                 if (entity == BusinessEntity.Account || entity == BusinessEntity.Contact) {
-                    Assert.assertTrue(consolidateSummaryNode.has("UPDATE"));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.UPDATE));
                 }
                 if (entity == BusinessEntity.Account) {
-                    Assert.assertTrue(consolidateSummaryNode.has("UNMATCH"));
+                    Assert.assertTrue(consolidateSummaryNode.has(ReportConstants.UNMATCH));
                 }
 
                 if (entity != BusinessEntity.Product) {
                     ObjectNode entityNumberNode = (ObjectNode) entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
                     Assert.assertNotNull(entityNumberNode);
-                    Assert.assertTrue(entityNumberNode.has("TOTAL"));
+                    Assert.assertTrue(entityNumberNode.has(ReportConstants.TOTAL));
                 }
             }
         } catch (IOException e) {

@@ -120,6 +120,16 @@ public class ActivityMetricsUtils {
         }
     };
 
+    public static boolean isHasPurchasedAttr(String fullName) {
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr());
+    }
+
+    public static boolean isSpendChangeAttr(String fullName) {
+        return fullName.startsWith(ActivityMetricsUtils.HEADER)
+                && fullName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getSpendChangeAttr());
+    }
+
     public static String getNameWithPeriod(ActivityMetrics activityMetrics) {
         List<String> periodNames = new ArrayList<>();
         activityMetrics.getPeriodsConfig().forEach(config -> {
@@ -188,6 +198,10 @@ public class ActivityMetricsUtils {
 
     public static String getHasPurchasedAbbr() {
         return metricsAbbr.get(InterfaceName.HasPurchased);
+    }
+
+    public static String getSpendChangeAttr() {
+        return metricsAbbr.get(InterfaceName.SpendChange);
     }
 
     private static String periodStrToSecondDisplayName(String period, InterfaceName metrics, String currentTxnDate,

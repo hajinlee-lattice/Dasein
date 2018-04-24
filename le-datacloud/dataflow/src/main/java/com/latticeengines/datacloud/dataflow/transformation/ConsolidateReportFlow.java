@@ -15,6 +15,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.BasicTransformationConfiguration;
 import com.latticeengines.domain.exposed.dataflow.FieldMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 
 @Component(ConsolidateReportFlow.DATAFLOW_BEAN_NAME)
 public class ConsolidateReportFlow
@@ -27,10 +28,10 @@ public class ConsolidateReportFlow
 
     public static final String REPORT_TOPIC = "Topic";
     public static final String REPORT_CONTENT = "Content";
-    public static final String REPORT_TOPIC_TOTAL = "TOTAL";
-    public static final String REPORT_TOPIC_NEW = "NEW";
-    public static final String REPORT_TOPIC_UPDATE = "UPDATE";
-    public static final String REPORT_TOPIC_UNMATCH = "UNMATCH";
+    public static final String REPORT_TOPIC_TOTAL = ReportConstants.TOTAL;
+    public static final String REPORT_TOPIC_NEW = ReportConstants.NEW;
+    public static final String REPORT_TOPIC_UPDATE = ReportConstants.UPDATE;
+    public static final String REPORT_TOPIC_UNMATCH = ReportConstants.UNMATCH;
     public static final String REPORT_TOPIC_MATCH = "MATCH";
 
     @Override

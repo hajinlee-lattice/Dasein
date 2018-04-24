@@ -13,9 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hadoop.hdfs.server.protocol.BlockReportContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -33,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
@@ -143,14 +142,14 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
                     .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             if (entity != BusinessEntity.Product) {
-                long newCnt = consolidateSummaryNode.get("NEW").asLong();
+                long newCnt = consolidateSummaryNode.get(ReportConstants.NEW).asLong();
                 long deleteCnt = newCnt - (currentCnts.get(entity) - previousCnts.get(entity));
                 log.info(String.format(
                         "For entity %s, previous total count: %d, current total count: %d, new count: %s, delete count: %d",
                         entity.name(), previousCnts.get(entity), currentCnts.get(entity), newCnt, deleteCnt));
                 consolidateSummaryNode.put("DELETE", String.valueOf(deleteCnt));
                 ObjectNode entityNumberNode = JsonUtils.createObjectNode();
-                entityNumberNode.put("TOTAL", String.valueOf(currentCnts.get(entity)));
+                entityNumberNode.put(ReportConstants.TOTAL, String.valueOf(currentCnts.get(entity)));
                 entityNode.set(ReportPurpose.ENTITY_STATS_SUMMARY.getKey(), entityNumberNode);
             }
 
@@ -178,7 +177,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
                         .filter(entity -> entitiesSummaryNode.get(entity.name()) != null && entitiesSummaryNode
                                 .get(entity.name()).get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()) != null)
                         .forEach(entity -> previousCnts.put(entity, entitiesSummaryNode.get(entity.name())
-                                .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()).get("TOTAL").asLong()));
+                                .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey()).get(ReportConstants.TOTAL).asLong()));
             } else {
                 log.info("Cannot find previous successful processAnalyzeWorkflow job");
             }
@@ -270,13 +269,13 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
         ObjectNode consolidateSummaryNode = JsonUtils.createObjectNode();
         switch (entity) {
         case Account:
-            consolidateSummaryNode.put("NEW", "0");
-            consolidateSummaryNode.put("UPDATE", "0");
-            consolidateSummaryNode.put("UNMATCH", "0");
+            consolidateSummaryNode.put(ReportConstants.NEW, "0");
+            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
+            consolidateSummaryNode.put(ReportConstants.UNMATCH, "0");
             break;
         case Contact:
-            consolidateSummaryNode.put("NEW", "0");
-            consolidateSummaryNode.put("UPDATE", "0");
+            consolidateSummaryNode.put(ReportConstants.NEW, "0");
+            consolidateSummaryNode.put(ReportConstants.UPDATE, "0");
             break;
         case Product:
             consolidateSummaryNode.put(ReportConstants.PRODUCT_ID, "0");
@@ -286,7 +285,7 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             consolidateSummaryNode.put(ReportConstants.WARN_MESSAGE, "");
             break;
         case Transaction:
-            consolidateSummaryNode.put("NEW", "0");
+            consolidateSummaryNode.put(ReportConstants.NEW, "0");
             break;
         default:
             throw new UnsupportedOperationException(entity.name() + " business entity is not supported in P&A report");

@@ -51,6 +51,9 @@ public class Bucket implements Serializable {
     @JsonProperty("Txn")
     private Transaction transaction;
 
+    @JsonProperty("PctChg")
+    private PercentChange percentChange;
+
     public static Bucket nullBkt() {
         return new Bucket();
     }
@@ -222,6 +225,14 @@ public class Bucket implements Serializable {
         this.transaction = transaction;
     }
 
+    public PercentChange getPercentChange() {
+        return percentChange;
+    }
+
+    public void setPercentChange(PercentChange percentChange) {
+        this.percentChange = percentChange;
+    }
+
     public int getIdAsInt() {
         return id.intValue();
     }
@@ -278,6 +289,55 @@ public class Bucket implements Serializable {
 
         public AggregationFilter getUnitFilter() {
             return unitFilter;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
+    public static class PercentChange implements Serializable {
+
+        private static final long serialVersionUID = 5575780996889844007L;
+
+        @JsonProperty("Direction")
+        private Direction direction;
+
+        @JsonProperty("ComparisonType")
+        private ComparisonType comparisonType;
+
+        @JsonProperty("AbsVals")
+        private List<Object> absVals;
+
+        public Direction getDirection() {
+            return direction;
+        }
+
+        public void setDirection(Direction direction) {
+            this.direction = direction;
+        }
+
+        public ComparisonType getComparisonType() {
+            return comparisonType;
+        }
+
+        public void setComparisonType(ComparisonType comparisonType) {
+            this.comparisonType = comparisonType;
+        }
+
+        public List<Object> getAbsVals() {
+            return absVals;
+        }
+
+        public void setAbsVals(List<Object> absVals) {
+            this.absVals = absVals;
+        }
+
+        public enum Direction {
+            INC, DEC
+        }
+
+        public enum ComparisonType {
+            AT_LEAST, AS_MUCH_AS, BETWEEN
         }
     }
 }

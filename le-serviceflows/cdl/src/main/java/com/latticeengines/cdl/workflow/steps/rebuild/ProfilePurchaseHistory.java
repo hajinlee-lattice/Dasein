@@ -30,7 +30,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.latticeengines.common.exposed.util.DateTimeUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
@@ -46,10 +45,10 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
@@ -57,6 +56,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
@@ -245,14 +245,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         return periodProxy.getEvaluationDate(customerSpace.toString());
     }
 
-    private String findLatestTransactionDate() {
-        DataFeed feed = dataFeedProxy.getDataFeed(customerSpace.toString());
-        if (feed.getLatestTransaction() == null) {
-            throw new IllegalStateException("Latest transaction day period in data feed is empty");
-        }
-        return DateTimeUtils.dayPeriodToDate(feed.getLatestTransaction());
-    }
-
     private void loadProductMap() {
         Table productTable = dataCollectionProxy.getTable(customerSpace.toString(),
                 TableRoleInCollection.ConsolidatedProduct, inactive);
@@ -425,6 +417,11 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 attribute.setDisplayName(displayNames.getLeft());
                 attribute.setSecondaryDisplayName(displayNames.getRight());
                 attribute.setSubcategory(productName);
+                if (ActivityMetricsUtils.isHasPurchasedAttr(attribute.getName())) {
+                    attribute.setFundamentalType(FundamentalType.BOOLEAN);
+                } else {
+                    attribute.setFundamentalType(FundamentalType.NUMERIC);
+                }
             }
             attribute.removeAllowedDisplayNames();
         }
@@ -466,8 +463,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 consolidateSummaryNode = ((ObjectNode) entityNode)
                         .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
             }
-            ((ObjectNode) consolidateSummaryNode).put("PRODUCT", productMap.size());
-            ((ObjectNode) consolidateSummaryNode).put("METRICS", purchaseMetrics.size());
+            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.PRODUCT, productMap.size());
+            ((ObjectNode) consolidateSummaryNode).put(ReportConstants.METRICS, purchaseMetrics.size());
         } catch (Exception e) {
             throw new RuntimeException("Fail to update report payload", e);
         }

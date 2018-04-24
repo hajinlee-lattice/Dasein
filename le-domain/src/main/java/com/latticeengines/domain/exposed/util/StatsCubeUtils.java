@@ -251,11 +251,18 @@ public class StatsCubeUtils {
     }
 
     public static AttributeStats convertPurchaseHistoryStats(String attrName, AttributeStats attrStats) {
-        if (!attrName.startsWith(ActivityMetricsUtils.HEADER)
-                || !attrName.endsWith(ActivityMetricsUtils.SEPARATOR + ActivityMetricsUtils.getHasPurchasedAbbr())) {
-            return attrStats;
+        if (ActivityMetricsUtils.isHasPurchasedAttr(attrName)) {
+            return convertHasPurchasedStats(attrName, attrStats);
         }
 
+        if (ActivityMetricsUtils.isSpendChangeAttr(attrName)) {
+            return convertSpendChangeStats(attrName, attrStats);
+        }
+
+        return attrStats;
+    }
+
+    private static AttributeStats convertHasPurchasedStats(String attrName, AttributeStats attrStats) {
         String productId = ActivityMetricsUtils.getProductIdFromFullName(attrName);
 
         Buckets buckets = attrStats.getBuckets();
@@ -275,12 +282,87 @@ public class StatsCubeUtils {
         return attrStats;
     }
 
-    private static Bucket convertTxnBucketForHasPurchased(String activityId, Bucket bucket) {
-        Bucket.Transaction transaction = new Bucket.Transaction(activityId, TimeFilter.ever(), null, null,
+    private static Bucket convertTxnBucketForHasPurchased(String productId, Bucket bucket) {
+        Bucket.Transaction transaction = new Bucket.Transaction(productId, TimeFilter.ever(), null, null,
                 "No".equalsIgnoreCase(bucket.getLabel()));
         bucket.setComparisonType(null);
         bucket.setValues(null);
         bucket.setTransaction(transaction);
+        return bucket;
+    }
+
+    private static AttributeStats convertSpendChangeStats(String attrName, AttributeStats attrStats) {
+        Buckets buckets = attrStats.getBuckets();
+        buckets.setType(BucketType.PercentChange);
+        List<Bucket> bucketList = new ArrayList<>();
+        buckets.getBucketList().forEach(bucket -> {
+            Bucket bucket1 = convertPctChgBucketForSpendChange(bucket);
+            if (bucket1 != null) {
+                bucketList.add(bucket1);
+            }
+        });
+        if (bucketList.isEmpty()) {
+            return null;
+        }
+        buckets.setBucketList(bucketList);
+        attrStats.setBuckets(buckets);
+        return attrStats;
+    }
+
+    private static Bucket convertPctChgBucketForSpendChange(Bucket bucket) {
+        if (CollectionUtils.isEmpty(bucket.getValues())) {
+            return null;
+        }
+        Bucket.PercentChange pctChg = new Bucket.PercentChange();
+        List<Object> absVals = new ArrayList<>();
+        if (bucket.getComparisonType() == ComparisonType.LESS_THAN) {
+            // Numerical bucket gives Number as value type, Discrete bucket gives String as value type
+            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            if (val <= 0) {
+                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
+                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
+            } else {
+                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
+                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AS_MUCH_AS);
+            }
+            absVals.add(Integer.valueOf(Math.abs(val)));
+        } else if (bucket.getComparisonType() == ComparisonType.GREATER_OR_EQUAL) {
+            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            if (val < 0) {
+                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
+                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AS_MUCH_AS);
+            } else {
+                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
+                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
+            }
+            absVals.add(Integer.valueOf(Math.abs(val)));
+        } else if (bucket.getComparisonType() == ComparisonType.EQUAL) {
+            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            if (val < 0) {
+                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
+            } else {
+                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
+            }
+            pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
+            absVals.add(Integer.valueOf(Math.abs(val)));
+        } else { // ComparisonType.GTE_AND_LT
+            Integer val1 = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            Integer val2 = Integer.valueOf(String.valueOf(bucket.getValues().get(1)));
+            if (val2 > 0) {
+                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
+                absVals.add(Integer.valueOf(0));
+                absVals.add(Integer.valueOf(Math.abs(val2)));
+            } else {
+                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
+                absVals.add(Integer.valueOf(Math.abs(val2)));
+                absVals.add(Integer.valueOf(Math.abs(val1)));
+            }
+            pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.BETWEEN);
+        }
+        pctChg.setAbsVals(absVals);
+        bucket.setPercentChange(pctChg);
+        bucket.setComparisonType(null);
+        bucket.setValues(null);
         return bucket;
     }
 
