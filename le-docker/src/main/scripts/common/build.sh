@@ -40,7 +40,9 @@ popd
 
 pushd le-tomcat
 build_docker latticeengines/tomcat ${NO_CACHE}
-docker tag latticeengines/tomcat:latest latticeengines/tomcat:8.5
+docker tag latticeengines/tomcat:latest latticeengines/tomcat:9.0.5
+docker tag latticeengines/tomcat:latest latticeengines/tomcat:9.0
+docker tag latticeengines/tomcat:latest quay.io/latticesoftware/tomcat:9.0
 popd
 
 docker rmi -f $(docker images -a --filter "dangling=true" -q --no-trunc) 2> /dev/null
