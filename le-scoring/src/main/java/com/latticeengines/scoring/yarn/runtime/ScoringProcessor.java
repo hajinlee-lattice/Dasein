@@ -381,15 +381,15 @@ public class ScoringProcessor extends SingleContainerYarnProcessor<RTSBulkScorin
     @VisibleForTesting
     long checkForInternalIdAndCountRecords(String path) throws IOException {
         long count = 0;
-        try (FileReader<GenericRecord> prereader = instantiateReaderForBulkScoreRequest(path);) {
-            GenericRecord avroRecord = prereader.next();
+        try (FileReader<GenericRecord> preReader = instantiateReaderForBulkScoreRequest(path);) {
+            GenericRecord avroRecord = preReader.next();
             count++;
             Object idObj = avroRecord.get(idColumnName);
             if (idObj == null) {
-                throw new LedpException(LedpCode.LEDP_20034);
+                throw new LedpException(LedpCode.LEDP_20034, new String[] { idColumnName });
             }
-            while (prereader.hasNext()) {
-                prereader.next();
+            while (preReader.hasNext()) {
+                preReader.next();
                 count++;
             }
         }
