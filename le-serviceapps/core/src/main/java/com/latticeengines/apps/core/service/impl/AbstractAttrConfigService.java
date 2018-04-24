@@ -1,5 +1,6 @@
 package com.latticeengines.apps.core.service.impl;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +17,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.lang.NonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
@@ -31,6 +35,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrSpecification;
@@ -39,7 +44,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrSubType;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationDetails;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 public abstract class AbstractAttrConfigService implements AttrConfigService {
 
@@ -72,6 +76,66 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             timer.setTimerMessage(msg);
         }
         return renderedList;
+    }
+
+    @Override
+    public List<AttrConfigOverview<?>> getAttrConfigOverview(Category category, String propertyName) {
+        List<AttrConfigOverview<?>> results = new ArrayList<>();
+        log.info("category is " + category);
+        if (category == null) {
+            // get attrConfigOverview for each category. can be improved by
+            // multithreading
+            for (Category ele : Category.values()) {
+                results.add(getAttrConfigOverview(getRenderedList(ele), ele, propertyName));
+            }
+        } else {
+            results.add(getAttrConfigOverview(getRenderedList(category), category, propertyName));
+        }
+        return results;
+    }
+
+    @SuppressWarnings("unchecked")
+    @VisibleForTesting
+    <T extends Serializable> AttrConfigOverview<T> getAttrConfigOverview(@NonNull List<AttrConfig> renderedList,
+            Category category, String propertyName) {
+        AttrConfigOverview<T> overview = new AttrConfigOverview<T>();
+        Map<String, Map<T, Long>> propSummary = new HashMap<>();
+        overview.setPropSummary(propSummary);
+        Map<T, Long> valueNumberMap = new HashMap<>();
+        propSummary.put(propertyName, valueNumberMap);
+        overview.setCategory(category);
+        overview.setTotalAttrs((long) renderedList.size());
+        // TODO set the limit for overview
+        overview.setLimit(500L);
+
+        for (AttrConfig attrConfig : renderedList) {
+            Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
+            AttrConfigProp<?> configProp = attrProps.get(propertyName);
+            if (configProp != null) {
+                Object actualValue = getActualValue(configProp);
+                if (actualValue == null) {
+                    log.warn(String.format("configProp %s does not have proper value", configProp));
+                    continue;
+                }
+                Long count = valueNumberMap.get(actualValue);
+                if (count == null) {
+                    valueNumberMap.put((T) actualValue, 1L);
+                } else {
+                    valueNumberMap.put((T) actualValue, count + 1);
+                }
+            }
+        }
+        return overview;
+    }
+
+    @VisibleForTesting
+    <T extends Serializable> Object getActualValue(AttrConfigProp<T> configProp) {
+        if (configProp.isAllowCustomization()) {
+            if (configProp.getCustomValue() != null) {
+                return configProp.getCustomValue();
+            }
+        }
+        return configProp.getSystemValue();
     }
 
     @Override
@@ -130,13 +194,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 final Tenant tenant = MultiTenantContext.getTenant();
                 List<Callable<List<AttrConfig>>> callables = new ArrayList<>();
                 attrConfigGrps.forEach((entity, configList) -> {
-                    Callable<List<AttrConfig>> callable =
-                            () -> {
-                                MultiTenantContext.setTenant(tenant);
-                                List<AttrConfig> renderedConfigList = renderForEntity(configList, entity);
-                                attrConfigGrpsForTrim.put(entity, renderedConfigList);
-                                return renderedConfigList;
-                            };
+                    Callable<List<AttrConfig>> callable = () -> {
+                        MultiTenantContext.setTenant(tenant);
+                        List<AttrConfig> renderedConfigList = renderForEntity(configList, entity);
+                        attrConfigGrpsForTrim.put(entity, renderedConfigList);
+                        return renderedConfigList;
+                    };
                     callables.add(callable);
                 });
 
@@ -158,15 +221,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             toReturn.setAttrConfigs(renderedList);
             AttrConfigRequest validated = validateRequest(toReturn);
             if (validated.hasError()) {
-                throw new IllegalArgumentException(
-                        "Request has validation errors, cannot be saved: " + JsonUtils.serialize(validated.getDetails()));
+                throw new IllegalArgumentException("Request has validation errors, cannot be saved: "
+                        + JsonUtils.serialize(validated.getDetails()));
             }
 
             log.info("AttrConfig before saving is " + JsonUtils.serialize(request));
             // trim and save
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
-                attrConfigEntityMgr
-                        .save(MultiTenantContext.getTenantId(), entity, trim(configList));
+                attrConfigEntityMgr.save(MultiTenantContext.getTenantId(), entity, trim(configList));
             });
         }
 
@@ -232,8 +294,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
             AttrSpecification attrSpec = AttrSpecification.getAttrSpecification(type, subType, metadata.getEntity());
             if (attrSpec == null) {
-                log.warn(String.format("Cannot get Attr Specification for Type %s, SubType %s",
-                        type.name(), subType.name()));
+                log.warn(String.format("Cannot get Attr Specification for Type %s, SubType %s", type.name(),
+                        subType.name()));
             }
             AttrConfig mergeConfig = map.get(metadata.getAttrName());
             if (mergeConfig == null) {
@@ -286,21 +348,21 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             descriptionProp.setAllowCustomization(attrSpec == null ? true : attrSpec.descriptionChange());
             mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
 
-            for (ColumnSelection.Predefined group: ColumnSelection.Predefined.values()) {
+            for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
                 AttrConfigProp<Boolean> usageProp;
                 switch (group) {
-                    case CompanyProfile:
-                    case Enrichment:
-                    case Model:
-                    case Segment:
-                    case TalkingPoint:
+                case CompanyProfile:
+                case Enrichment:
+                case Model:
+                case Segment:
+                case TalkingPoint:
                     usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group.name(),
                             new AttrConfigProp<Boolean>());
-                        usageProp.setSystemValue(metadata.isEnabledFor(group));
-                        usageProp.setAllowCustomization(attrSpec == null ? true : attrSpec.allowChange(group));
-                        break;
-                    default:
-                        continue;
+                    usageProp.setSystemValue(metadata.isEnabledFor(group));
+                    usageProp.setAllowCustomization(attrSpec == null ? true : attrSpec.allowChange(group));
+                    break;
+                default:
+                    continue;
                 }
                 mergeConfig.putProperty(group.name(), usageProp);
             }

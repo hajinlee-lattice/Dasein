@@ -35,6 +35,8 @@ public enum Category {
     private final String name;
     private static Map<String, Category> nameMap;
     private static Set<String> values;
+    private static Set<Category> premiumCategories = new HashSet<>(
+            Arrays.asList(INTENT, TECHNOLOGY_PROFILE, ACCOUNT_ATTRIBUTES, CONTACT_ATTRIBUTES));
 
     static {
         nameMap = new HashMap<>();
@@ -87,6 +89,14 @@ public enum Category {
         public void serialize(Category value, JsonGenerator jgen, SerializerProvider provider) throws IOException {
             jgen.writeFieldName(value.getName());
         }
+    }
+
+    public static Set<Category> getPremiunCategories() {
+        return premiumCategories;
+    }
+
+    public boolean isPremium() {
+        return premiumCategories.contains(this);
     }
 
 }

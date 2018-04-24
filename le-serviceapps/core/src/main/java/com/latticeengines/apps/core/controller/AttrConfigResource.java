@@ -17,6 +17,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 
 import io.swagger.annotations.Api;
@@ -52,6 +53,17 @@ public class AttrConfigResource {
         List<AttrConfig> attrConfigs = attrConfigService.getRenderedList(category);
         request.setAttrConfigs(attrConfigs);
         return request;
+    }
+
+    @GetMapping(value = "")
+    @ResponseBody
+    @ApiOperation("get cdl attribute management overview")
+    public List<AttrConfigOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
+            @RequestParam(value = "category", required = false) String categoryName, //
+            @RequestParam(value = "property", required = true) String propertyName) {
+        Category category = categoryName != null ? resolveCategory(categoryName) : null;
+        List<AttrConfigOverview<?>> list = attrConfigService.getAttrConfigOverview(category, propertyName);
+        return list;
     }
 
     @PostMapping(value = "")
