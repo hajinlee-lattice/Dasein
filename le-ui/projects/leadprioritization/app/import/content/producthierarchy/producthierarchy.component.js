@@ -31,9 +31,13 @@ angular.module('lp.import.wizard.producthierarchy', [])
         ImportWizardStore.setUnmappedFields(UnmappedFields);
         ImportWizardStore.setValidation('ids', false);
         
+        var userFields = [];
         vm.fieldMappings.forEach(function(fieldMapping, index) {
             vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-            vm.AvailableFields.push(fieldMapping);
+            if(userFields.indexOf(fieldMapping.userField) === -1) {
+                userFields.push(fieldMapping.userField);
+                vm.AvailableFields.push(fieldMapping);
+            }
             for(var i in vm.mappedFieldMap) {
                 if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
                     vm.fieldMapping[i] = fieldMapping.userField
@@ -45,7 +49,10 @@ angular.module('lp.import.wizard.producthierarchy', [])
                 vm.saveMap[fieldMapping.originalMappedField] = fieldMapping;
 
                 vm.fieldMappingsMap[fieldMapping.mappedField] = fieldMapping;
-                vm.AvailableFields.push(fieldMapping);
+                if(fieldMapping.userField && userFields.indexOf(fieldMapping.userField) === -1) {
+                    userFields.push(fieldMapping.userField);
+                    vm.AvailableFields.push(fieldMapping);
+                }
                 for(var i in vm.mappedFieldMap) {
                     if(fieldMapping.mappedField == vm.mappedFieldMap[i]) {
                         vm.fieldMapping[i] = fieldMapping.userField
@@ -63,6 +70,16 @@ angular.module('lp.import.wizard.producthierarchy', [])
                     }
                 });
             }
+
+            var tmpMappedFields = [];
+            for(var i in vm.mappedFieldMap) {
+                tmpMappedFields.push(vm.mappedFieldMap[i]);
+            }
+            vm.fieldMappings.forEach(function(item) {
+                if(item.mappedField && tmpMappedFields.indexOf(item.mappedField) === -1) {
+                    vm.unavailableFields.push(item.userField);
+                }
+            })
         } else {
             vm.fieldMappings.forEach(function(fieldMapping, index) {
                 if(fieldMapping.mappedField) {
@@ -73,11 +90,13 @@ angular.module('lp.import.wizard.producthierarchy', [])
     };
 
     vm.changeLatticeField = function(mapping, form) {
-        var mapped = [];
+        var mapped = [],
+            changedFields = [];
+
         vm.unavailableFields = [];
         for(var i in mapping) {
             var key = i,
-                userField = mapping[key],
+                userField = mapping[key];
                 map = {
                     userField: userField, 
                     mappedField: vm.mappedFieldMap[key],
@@ -86,10 +105,17 @@ angular.module('lp.import.wizard.producthierarchy', [])
                     append: false
                 };
             mapped.push(map);
+            changedFields.push(vm.mappedFieldMap[key]);
             if(userField) {
                 vm.unavailableFields.push(userField);
             }
         }
+        vm.fieldMappings.forEach(function(item) {
+            if(item.mappedField && changedFields.indexOf(item.mappedField) === -1) {
+                vm.unavailableFields.push(item.userField);
+            }
+        })
+
         ImportWizardStore.setSaveObjects(mapped, $state.current.name);
         vm.checkValid(form);
     };
