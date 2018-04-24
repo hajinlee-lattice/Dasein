@@ -14,7 +14,6 @@ import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
 import com.latticeengines.modeling.workflow.ModelWorkflow;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
-import com.latticeengines.scoring.workflow.steps.PivotScoreAndEventDataFlow;
 import com.latticeengines.scoring.workflow.steps.SetConfigurationForScoring;
 import com.latticeengines.serviceflows.workflow.export.ExportData;
 import com.latticeengines.serviceflows.workflow.importdata.CreateTableImportReport;
@@ -58,9 +57,6 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
 
     @Inject
     private GenerateAIRatingWorkflow generateRating;
-
-	@Inject
-    private PivotScoreAndEventDataFlow pivotScoreAndEventDataFlow;
     
     @Inject
     private ExportData exportData;
@@ -84,8 +80,6 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(modelWorkflow) //
                 .next(setConfigurationForScoring) //
                 .next(generateRating) //
-                .next(exportData) //
-                .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
                 .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
