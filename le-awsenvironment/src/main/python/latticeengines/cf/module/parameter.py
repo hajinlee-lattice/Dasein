@@ -57,6 +57,8 @@ class InstanceTypeParameter(Parameter):
         "t2.medium",
         "m4.large",
         "m4.xlarge",
+        "m5.large",
+        "m5.xlarge",
         "c4.large",
         "c4.xlarge",
         "c4.2xlarge",
