@@ -124,6 +124,11 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException(String.format("We can't start processAnalyze workflow by dataFeedStatus %s",
                     datafeedStatus.getName()));
         }
+        //The lock step may update the data feed status, we need to get the data feed again
+        datafeed = dataFeedProxy.getDataFeed(customerSpace);
+        datafeedStatus = datafeed.getStatus();
+        log.info(String.format("data feed %s updated status: %s", datafeed.getName(), datafeedStatus.getName()));
+
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
         try {
