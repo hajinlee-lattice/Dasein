@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Query;
 import com.latticeengines.domain.exposed.query.Restriction;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.util.TimeFilterTranslator;
 import com.latticeengines.objectapi.service.TransactionService;
@@ -90,7 +91,8 @@ public class TransactionServiceImpl implements TransactionService {
                 .from(BusinessEntity.Transaction) //
                 .build();
 
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version, queryEvaluatorService);
+        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(customerSpace, version,
+                queryEvaluatorService);
 
         RetryTemplate retry = new RetryTemplate();
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
@@ -119,7 +121,7 @@ public class TransactionServiceImpl implements TransactionService {
             hasTxn = hasTxn || hasTransactionBucket(restriction);
         }
         if (CollectionUtils.isNotEmpty(frontEndQuery.getRatingModels())) {
-            for (RatingModel ratingModel: frontEndQuery.getRatingModels()) {
+            for (RatingModel ratingModel : frontEndQuery.getRatingModels()) {
                 if (ratingModel instanceof RuleBasedModel) {
                     hasTxn = hasTxn || hasTransactionBucket((RuleBasedModel) ratingModel);
                 }
@@ -148,6 +150,9 @@ public class TransactionServiceImpl implements TransactionService {
                     if (!Boolean.TRUE.equals(bucket.getIgnored()) && isTransactionBucket(bucket)) {
                         hasTxn.set(true);
                     }
+                }
+                if (object instanceof TransactionRestriction) {
+                    hasTxn.set(true);
                 }
             });
         }

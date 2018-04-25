@@ -27,6 +27,7 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.RestrictionBuilder;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 
 public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder {
@@ -37,8 +38,11 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected String productIds;
     protected Restriction productTxnRestriction;
     protected EventFrontEndQuery ratingFrontEndQuery;
-    protected int queryEvaluationId;
+    protected int evaluationPeriodId;
     protected String periodTypeName = PeriodStrategy.Template.Month.name();
+
+    private List<ComparisonType> comparisonTypesToBeIgnored = Arrays.asList(ComparisonType.BEFORE, ComparisonType.AFTER,
+            ComparisonType.BETWEEN_DATE);
 
     protected abstract void handleCustomSegment();
 
@@ -49,6 +53,14 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     protected abstract void handleCustomTrainingPeriod();
 
     protected abstract void setQueryEvaluationId();
+
+    protected FrontEndQuery getAccountFiltererSegmentQuery() {
+        return null;
+    }
+
+    protected List<ComparisonType> getComparisonTypesToBeIgnored() {
+        return comparisonTypesToBeIgnored;
+    }
 
     public final EventFrontEndQuery build() {
         handleCustomSegment();
@@ -70,10 +82,10 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                 GraphNode node = (GraphNode) object;
                 if (node instanceof BucketRestriction && ((BucketRestriction) node).getBkt().getTransaction() != null) {
                     Bucket.Transaction transaction = ((BucketRestriction) node).getBkt().getTransaction();
-                    if (transaction.getTimeFilter().getRelation() == ComparisonType.EVER && !transaction.getNegate()) {
-                        ((BucketRestriction) node).setIgnored(false);
-                    } else {
+                    if (getComparisonTypesToBeIgnored().contains(transaction.getTimeFilter().getRelation())) {
                         ((BucketRestriction) node).setIgnored(true);
+                    } else {
+                        ((BucketRestriction) node).setIgnored(false);
                     }
                 }
             });
@@ -101,7 +113,6 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
                                             trxChild.getSpentFilter(), trxChild.getUnitFilter(), trxChild.isNegate()));
                             BucketRestriction bktRestriction = new BucketRestriction(
                                     new AttributeLookup(BusinessEntity.Transaction, trxChild.getProductId()), bkt);
-                            bktRestriction.setIgnored(true);
                             newList.add(bktRestriction);
                             anyChildUpdated = true;
                         } else {
@@ -130,7 +141,8 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
         ratingFrontEndQuery = EventFrontEndQuery.fromSegment(querySegment);
         ratingFrontEndQuery.setPeriodName(periodTypeName);
         ratingFrontEndQuery.setTargetProductIds(getProductsAsList());
-        ratingFrontEndQuery.setEvaluationPeriodId(queryEvaluationId);
+        ratingFrontEndQuery.setEvaluationPeriodId(evaluationPeriodId);
+        ratingFrontEndQuery.setSegmentQuery(getAccountFiltererSegmentQuery());
     }
 
     private List<String> getProductsAsList() {
@@ -154,10 +166,10 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType, int targetPeriodId) {
+            ModelingQueryType modelingQueryType, int targetPeriodId, String maxDateString) {
         switch (modelingQueryType) {
         case TARGET:
-            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
+            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId, maxDateString);
         case TRAINING:
             return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         case EVENT:

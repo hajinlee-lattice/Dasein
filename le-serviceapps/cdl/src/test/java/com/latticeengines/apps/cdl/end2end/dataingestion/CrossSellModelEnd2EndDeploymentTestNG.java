@@ -1,5 +1,6 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -42,8 +43,8 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1524265593258";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "JLM1524510014000";
 
     private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = false;
     private static final boolean E2E_TEST_USE_TRANSACTION_RESTRICTION = false;
@@ -51,6 +52,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private MetadataSegment targetSegment;
     private RatingEngine testRatingEngine;
     private AIModel testAIModel;
+    private String segmentProductId = "A80D4770376C1226C47617C071324C0B";
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -82,7 +84,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         attachProtectedProxy(modelSummaryProxy);
         setupBusinessCalendar();
         setupTestSegment(E2E_TEST_USE_TRANSACTION_RESTRICTION);
-        setupAndRunModeling();
+        setupAndRunModeling(E2E_TEST_USE_TRANSACTION_RESTRICTION);
     }
 
     /**
@@ -103,12 +105,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         setupBusinessCalendar();
 
         setupTestSegment(MANUAL_TEST_USE_TRANSACTION_RESTRICTION);
-        setupAndRunModeling();
+        setupAndRunModeling(MANUAL_TEST_USE_TRANSACTION_RESTRICTION);
     }
 
-    private void setupAndRunModeling() {
+    private void setupAndRunModeling(boolean txnRestrictionsUsed) {
         setupTestRatingEngine();
-        verifyCounts();
+        verifyCounts(txnRestrictionsUsed);
         log.info("Start modeling ...");
         verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
@@ -140,15 +142,13 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     }
 
     private void setupTestSegment(boolean useTrxRestrictions) {
-        if (useTrxRestrictions) {
-            targetSegment = targetSegmentWithTrxRestrictions();
-        } else {
-            targetSegment = constructTargetSegment();
-        }
+        targetSegment = useTrxRestrictions ? targetSegmentWithTrxRestrictions() : constructTargetSegment();
+
         targetSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), targetSegment);
     }
 
     private void setupTestRatingEngine() {
+        log.info("Setting up test artifacts for tenant " + mainTestTenant.getId());
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, targetSegment);
         testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         log.info("Created rating engine " + testRatingEngine.getId());
@@ -159,15 +159,16 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         testAIModel = (AIModel) ratingEngineProxy.updateRatingModel(mainTestTenant.getId(), testRatingEngine.getId(),
                 testAIModel.getId(), testAIModel);
         log.info("Updated rating model " + testAIModel.getId());
+        log.info("/ratingengines/" + testRatingEngine.getId() + "/ratingmodels/" + testAIModel.getId());
     }
 
-    // TODO: will enable this kind of target segment after DP-5868 is fixed
     private MetadataSegment targetSegmentWithTrxRestrictions() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
+        // this filters out this account in the test data 0012400001DO2fqAAD
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
         BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
 
-        TransactionRestriction trxRes = new TransactionRestriction("1E26CD1E01559048FF7B51ADA27EA7AB",
+        TransactionRestriction invalidTrxRes = new TransactionRestriction(segmentProductId,
                 new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
                         Collections.singletonList("2018-04-09")),
                 false,
@@ -176,17 +177,22 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
                 new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
                         Collections.singletonList(1)));
 
+        TransactionRestriction validTrxRes = new TransactionRestriction(segmentProductId,
+                new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(3, 6)),
+                false, null, null);
+
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
         segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountFrontEndRestriction(
-                new FrontEndRestriction(Restriction.builder().and(accountRestriction, trxRes).build()));
-        segment.setAccountRestriction(Restriction.builder().and(trxRes).build());
+        segment.setAccountRestriction(Restriction.builder() //
+                .and(accountRestriction, invalidTrxRes, validTrxRes).build());
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
+
         return segment;
     }
 
-    private void verifyCounts() {
+    private void verifyCounts(boolean txnRestrictionsUsed) {
         targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
@@ -196,9 +202,10 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         String errorMsg = "targetCount=" + targetCount //
                 + " trainingCount=" + trainingCount //
                 + " eventCount=" + eventCount;
+        log.info(errorMsg);
 
-        Assert.assertEquals(targetCount, 87, errorMsg);
-        Assert.assertEquals(trainingCount, 581, errorMsg);
-        Assert.assertEquals(eventCount, 56, errorMsg);
+        Assert.assertEquals(targetCount, txnRestrictionsUsed ? 55 : 81, errorMsg);
+        Assert.assertEquals(trainingCount, txnRestrictionsUsed ? 298 : 557, errorMsg);
+        Assert.assertEquals(eventCount, txnRestrictionsUsed ? 35 : 53, errorMsg);
     }
 }

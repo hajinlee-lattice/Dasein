@@ -8,6 +8,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
@@ -16,8 +17,6 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
@@ -32,7 +31,7 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
     @Override
     protected void handleCustomSegment() {
         if (aiModel.getTrainingSegment() != null) {
-            baseSegment = aiModel.getTrainingSegment();
+            baseSegment = (MetadataSegment) aiModel.getTrainingSegment().clone();
         }
     }
 
@@ -55,7 +54,6 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
 
     @Override
     protected void buildProductTransactionRestrictions() {
-        AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, productIds);
         AggregationFilter unitsFilter = null;
         AggregationFilter spentFilter = null;
 
@@ -113,6 +111,6 @@ public class CrossSellRatingEventQueryBuilder extends CrossSellRatingQueryBuilde
 
     @Override
     protected void setQueryEvaluationId() {
-        queryEvaluationId = getTargetPeriodId() - 1;
+        evaluationPeriodId = getTargetPeriodId() - 1;
     }
 }

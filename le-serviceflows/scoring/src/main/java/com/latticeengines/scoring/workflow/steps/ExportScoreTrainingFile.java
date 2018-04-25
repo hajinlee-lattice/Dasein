@@ -1,6 +1,5 @@
 package com.latticeengines.scoring.workflow.steps;
 
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -9,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportScoreTrainingFileStepConfiguration;
 import com.latticeengines.serviceflows.workflow.export.BaseExportData;
 
-@Component("exportScoreTraingFile")
+@Component("exportScoreTrainingFile")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class ExportScoreTrainingFile extends BaseExportData<ExportScoreTrainingFileStepConfiguration> {
 

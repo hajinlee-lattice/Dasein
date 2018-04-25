@@ -6,6 +6,7 @@ import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
@@ -23,7 +24,7 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
     @Override
     protected void handleCustomSegment() {
         if (aiModel.getTrainingSegment() != null) {
-            baseSegment = aiModel.getTrainingSegment();
+            baseSegment = (MetadataSegment) aiModel.getTrainingSegment().clone();
         }
     }
 
@@ -45,7 +46,6 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
 
     @Override
     protected void buildProductTransactionRestrictions() {
-
         CrossSellModelingConfig advancedConf = getAdvancedConfig();
 
         Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters = //
@@ -70,6 +70,6 @@ public class CrossSellRatingTrainingQueryBuilder extends CrossSellRatingQueryBui
 
     @Override
     protected void setQueryEvaluationId() {
-        queryEvaluationId = getTargetPeriodId() - 1;
+        evaluationPeriodId = getTargetPeriodId() - 1;
     }
 }

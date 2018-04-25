@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingC
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.objectapi.TransactionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 
 @Component("aiModelService")
@@ -64,6 +65,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Inject
     private PeriodService periodService;
+
+    @Inject
+    private TransactionProxy transactionProxy;
 
     private static RatingEngineType[] types = //
             new RatingEngineType[] { //
@@ -105,7 +109,7 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
 
     @Override
     public EventFrontEndQuery getModelingQuery(String customerSpace, RatingEngine ratingEngine, AIModel aiModel,
-                                               ModelingQueryType modelingQueryType, DataCollection.Version version) {
+            ModelingQueryType modelingQueryType, DataCollection.Version version) {
         CrossSellModelingConfig advancedConf = (CrossSellModelingConfig) aiModel.getAdvancedModelingConfig();
 
         if (advancedConf != null
@@ -113,8 +117,9 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
             PeriodStrategy strategy = periodService.getPeriodStrategies().stream()
                     .filter(x -> x.getTemplate() == PeriodStrategy.Template.Month).collect(Collectors.toList()).get(0);
             int maxPeriod = periodService.getMaxPeriodId(customerSpace, strategy, version);
+            String maxDateString = transactionProxy.getMaxTransactionDate(customerSpace, version);
             RatingQueryBuilder ratingQueryBuilder = CrossSellRatingQueryBuilder
-                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod);
+                    .getCrossSellRatingQueryBuilder(ratingEngine, aiModel, modelingQueryType, maxPeriod, maxDateString);
             return ratingQueryBuilder.build();
         } else {
             throw new LedpException(LedpCode.LEDP_40009,
@@ -127,7 +132,6 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
     public void findRatingModelAttributeLookups(AIModel ratingModel) {
         List<MetadataSegment> segments = new ArrayList<>();
         segments.add(ratingModel.getTrainingSegment());
-        ratingModel
-                .setRatingModelAttributes(new HashSet(segmentService.findDependingAttributes(segments)));
+        ratingModel.setRatingModelAttributes(new HashSet(segmentService.findDependingAttributes(segments)));
     }
 }

@@ -4,6 +4,7 @@ import java.util.Map;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.CrossSellModelingConfigKeys;
 import com.latticeengines.domain.exposed.pls.ModelingConfigFilter;
@@ -11,11 +12,18 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CrossSellModelingConfig;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
+import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
 
-    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
+    protected MetadataSegment accountFiltererSegment;
+    private String evaluationDateString;
+
+    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod,
+            String evaluationDateString) {
         super(ratingEngine, aiModel, evaluationPeriod);
+        accountFiltererSegment = (MetadataSegment) ratingEngine.getSegment().clone();
+        this.evaluationDateString = evaluationDateString;
     }
 
     @Override
@@ -25,10 +33,6 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     @Override
     protected void handleProxyProducts() {
     }
-
-    // @Override
-    // protected void removeTimeWindowRestrictions() {
-    // }
 
     @Override
     protected void buildProductTransactionRestrictions() {
@@ -61,7 +65,14 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
     }
 
     @Override
+    protected FrontEndQuery getAccountFiltererSegmentQuery() {
+        FrontEndQuery accountFiltererSegmentQuery = FrontEndQuery.fromSegment(accountFiltererSegment);
+        accountFiltererSegmentQuery.setEvaluationDateStr(evaluationDateString);
+        return accountFiltererSegmentQuery;
+    }
+
+    @Override
     protected void setQueryEvaluationId() {
-        queryEvaluationId = getTargetPeriodId();
+        evaluationPeriodId = getTargetPeriodId();
     }
 }

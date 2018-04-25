@@ -160,8 +160,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_D_COUNT_2_REBUILD = 31;
     static final long RATING_F_COUNT_2_REBUILD = 4;
 
-    static final String TARGET_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
-    static final String TRAINING_PRODUCT = "A80D4770376C1226C47617C071324C0B";
+    static final String TARGET_PRODUCT = "B0829F745A42D18FE77050EC05A51D2F";
+    static final String TRAINING_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
 
     static final int EARLIEST_TRANSACTION = 48033;
     static final int LATEST_TRANSACTION = 48929;
@@ -652,7 +652,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
                 }
 
                 if (entity != BusinessEntity.Product) {
-                    ObjectNode entityNumberNode = (ObjectNode) entityNode.get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
+                    ObjectNode entityNumberNode = (ObjectNode) entityNode
+                            .get(ReportPurpose.ENTITY_STATS_SUMMARY.getKey());
                     Assert.assertNotNull(entityNumberNode);
                     Assert.assertTrue(entityNumberNode.has(ReportConstants.TOTAL));
                 }
@@ -765,9 +766,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     MetadataSegment constructTargetSegment() {
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.EQUAL, Collections.singletonList("No"));
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
         BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "OUT_OF_BUSINESS_INDICATOR"), stateBkt);
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
         MetadataSegment segment = new MetadataSegment();
         segment.setName(SEGMENT_NAME_MODELING);
         segment.setDisplayName("End2End Segment Modeling");
