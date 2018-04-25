@@ -302,10 +302,10 @@ public class Bucket implements Serializable {
         @JsonProperty("Direction")
         private Direction direction;
 
-        @JsonProperty("ComparisonType")
+        @JsonProperty("Cmp")
         private ComparisonType comparisonType;
 
-        @JsonProperty("AbsVals")
+        @JsonProperty("Vals")
         private List<Object> absVals;
 
         public Direction getDirection() {
