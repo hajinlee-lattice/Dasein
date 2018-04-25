@@ -52,13 +52,21 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<ActivityMetrics> findWithType(ActivityType type) { // filter by TenantID
-        return repository.findAllByType(type);
+        List<ActivityMetrics> metrics = repository.findAllByType(type);
+        metrics.forEach(m -> {
+            m.getPeriodsConfig();
+        });
+        return metrics;
     }
 
     @Override
     @Transactional(transactionManager = "transactionManager", readOnly = true)
     public List<ActivityMetrics> findActiveWithType(ActivityType type) { // filter by TenantID
-        return repository.findAllByIsEOLAndType(false, type);
+        List<ActivityMetrics> metrics = repository.findAllByIsEOLAndType(false, type);
+        metrics.forEach(m -> {
+            m.getPeriodsConfig();
+        });
+        return metrics;
     }
 
     @Override
@@ -75,6 +83,7 @@ public class ActivityMetricsEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ac
             metrics.setTenant(tenant);
             metrics.setEOL(false);
             metrics.setDeprecated(null);
+            metrics.setPeriods();
         });
 
         List<ActivityMetrics> existingList = repository.findAllByTenant(tenant);

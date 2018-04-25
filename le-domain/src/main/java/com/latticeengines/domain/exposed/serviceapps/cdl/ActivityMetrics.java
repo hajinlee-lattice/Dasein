@@ -74,12 +74,13 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields, Se
     @JsonProperty("metrics")
     private InterfaceName metrics;
 
-    @JsonProperty("periods")
+    @JsonIgnore
     @Column(name = "PERIODS", nullable = false, length = 1000)
-    private String periods;
+    private String periods; // For DB
 
+    @JsonProperty("periods")
     @Transient
-    private List<TimeFilter> periodsConfig;
+    private List<TimeFilter> periodsConfig; // For Application
 
     @Column(name = "IS_EOL")
     @JsonProperty("IsEOL")
@@ -138,18 +139,16 @@ public class ActivityMetrics implements HasPid, HasTenant, HasAuditingFields, Se
         this.metrics = metrics;
     }
 
-    public String getPeriods() {
-        return periods;
-    }
-
-    public void setPeriods(String periods) {
-        this.periods = periods;
+    public void setPeriods() {
+        if (periodsConfig != null) {
+            periods = JsonUtils.serialize(periodsConfig);
+        }
     }
 
     public List<TimeFilter> getPeriodsConfig() {
-        if (this.periodsConfig == null) {
+        if (periodsConfig == null) {
             List<?> list = JsonUtils.deserialize(periods, List.class);
-            this.periodsConfig = JsonUtils.convertList(list, TimeFilter.class);
+            periodsConfig = JsonUtils.convertList(list, TimeFilter.class);
         }
         return periodsConfig;
     }
