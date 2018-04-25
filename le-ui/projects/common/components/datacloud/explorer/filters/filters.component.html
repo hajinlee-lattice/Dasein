@@ -79,7 +79,7 @@
         </ul>
         <!-- <menu-dropdown config="vm.download_button"></menu-dropdown> -->
     </li>
-    <li ng-if="vm.mode == 'dashboardrules'">
+    <li ng-if="vm.mode == 'dashboardrules' && !vm.inWizard">
         <button
             type="button"
             ng-click="vm.goBackToModelRules()"
