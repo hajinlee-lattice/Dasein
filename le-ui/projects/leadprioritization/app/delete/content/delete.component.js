@@ -2,37 +2,23 @@ angular.module('lp.delete.entry', [])
 .component('deleteEntry', {
     templateUrl: 'app/delete/content/delete.component.html',
     controller: function( 
-        $state, $stateParams, $scope, DeleteDataService, ImportStore, ResourceUtility, ModalStore) 
+        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, ModalStore) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
             EntitiesCount = resolve.EntitiesCount;
 
         angular.extend(vm, {
-            uploaded: false,
             showFromTime: true,
             showToTime: true,
             showTimeFrame: false,
-            showSuccessMsg: false,
-            showWarningMsg: true,
-            enableDelete: true,
-            ResourceUtility: ResourceUtility,
+            submittingJob: true,
             currentTab: 'account',
             deleteWarningMsg: 'Once the delete action is submitted, it can’t be undone.',
-            startTime: '',
-            endTime: '',
+            params: DeleteDataStore.getFileUploadParams(),
             counts: {
                 'accounts': EntitiesCount.Account,
                 'contacts': EntitiesCount.Contact 
-            },
-            params: {
-                infoTemplate: "<div class='row divider'><div class='twelve columns'><h4>What is a Training File?</h4><p>A training set is a CSV file with records of your historical successes. It is used to build your ideal customer profile by leveraging the Lattice Predictive Insights platform. Ideal training set should have at least 7,000 accounts, 150 success events and a conversion rate of less than 10%.</p></div></div><div class='row'><div class='six columns'><h4>Account Model:</h4><p>Upload a CSV file with accounts</p><p>Required: Id (any unique value for each record), Website (domain of company website), Event (1 for success, 0 otherwise)</p><p>Optional fields: Additional internal attributes about the accounts you would like to use as predictive attributes.</p></div><div class='six columns'><h4>Lead Model:</h4><p>Upload a CSV file with leads</p><p>Required: Id (any unique value for each record), Email, Event (1 for success, 0 otherwise)</p><p>Optional: Lead engagement data can be used as predictive attributes. Below are supported attributes:<ul><li>Marketo (4 week counts): Email Bounces (Soft), Email Clicks, Email Opens, Email Unsubscribes, Form Fills, Web-Link Clicks, Webpage Visits, Interesting Moments</li><li>Eloqua (4 week counts): Email Open, Email Send, Email Click Though, Email Subscribe, Email Unsubscribe, Form Submit, Web Visit, Campaign Membership, External Activity</li></ul></p></div></div>",
-                compressed: true,
-                importError: false,
-                importErrorMsg: '',
-                url: '/pls/models/uploadfile/uploaddeletefiletemplate',
-                schema: 'DeleteAccountTemplate',
-                operationType: 'BYUPLOAD_ID'
             },
             periodTimeConf: {
                 from: { name: 'from-time', initial: undefined, position: 0, type: 'Time', visible: true },
@@ -41,18 +27,20 @@ angular.module('lp.delete.entry', [])
             bucketRestriction: {
                "attr":"delete",
             },
-            cleanupOperationType: {
+            uploadOperations: ['BYUPLOAD_ID', 'BYUPLOAD_ACPD', 'BYUPLOAD_MINDATEANDACCOUNT']
+        });
+
+        vm.init = function() {
+            vm.showSuccessMsg = false;
+            vm.showWarningMsg = true;
+            vm.startTime = '';
+            vm.endTime = '';
+            vm.cleanupOperationType = {
                 'account': '',
                 'contact': '',
                 'transaction': ''
-            },
-            isValid: {
-                'account': false,
-                'contact': false,
-                'transaction': false
-            },
-            uploadOperations: ['BYUPLOAD_ID', 'BYUPLOAD_ACPD', 'BYUPLOAD_MINDATEANDACCOUNT'],
-            uploadedFiles: {
+            };
+            vm.uploadedFiles = {
                 'account': {
                     'BYUPLOAD_ID': ''
                 },
@@ -64,11 +52,12 @@ angular.module('lp.delete.entry', [])
                     'BYUPLOAD_ACPD_1': '',
                     'BYUPLOAD_ACPD_2': ''
                 }
-            }
-        });
-
-        vm.init = function() {
-
+            };
+            vm.isValid = {
+                'account': false,
+                'contact': false,
+                'transaction': false
+            };
         }
 
         vm.getForm = function () {
@@ -83,7 +72,7 @@ angular.module('lp.delete.entry', [])
             vm.startTime = position == 0 ? value : vm.startTime;
             vm.endTime = position == 1 ? value : vm.endTime;
 
-            vm.isValid[vm.currentTab] = ($scope.delete_form['from-time'].$valid && $scope.delete_form['to-time'].$valid);
+            // vm.isValid[vm.currentTab] = ($scope.delete_form['from-time'].$valid && $scope.delete_form['to-time'].$valid);
 
         }
 
@@ -97,9 +86,9 @@ angular.module('lp.delete.entry', [])
         }
 
         vm.fileSelect = function(fileName) {
-            vm.params.operationType = vm.getCleanupType();
-            vm.params.schema = vm.getSchema();
-
+            if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
+                vm.params['BYUPLOAD_ID'].schema = vm.getSchema();
+            }
             setTimeout(function() {
                 vm.uploaded = false;
             }, 25);
@@ -110,13 +99,15 @@ angular.module('lp.delete.entry', [])
 
             if (result.Result) {
                 vm.fileName = result.Result.name;
-                vm.cleanupOperationType[vm.currentTab];
                 vm.uploadedFiles[vm.currentTab][vm.cleanupOperationType[vm.currentTab]] = result.Result.name;
                 vm.isValid[vm.currentTab] = vm.uploadedFiles[vm.currentTab][vm.cleanupOperationType[vm.currentTab]] != '';
+            } else {
+                vm.showWarningMsg = false;
             }
         }
         
         vm.fileCancel = function() {
+
             var xhr = ImportStore.Get('cancelXHR', true);
             
             if (xhr) {
@@ -124,10 +115,14 @@ angular.module('lp.delete.entry', [])
             }
         }
 
+        vm.disableSubmit = function() {
+            return vm.getCleanupType() != 'BYDATERANGE' ? !vm.isValid[vm.currentTab] : !$scope.delete_form || ($scope.delete_form['from-time'].$invalid || $scope.delete_form['to-time'].$invalid);
+        }
+
         vm.setCleanupType = function(option) {
             vm.cleanupOperationType[vm.currentTab] = option;
             if (vm.uploadOperations.indexOf(vm.getCleanupType()) >= 0) {
-                vm.isValid[vm.currentTab] = vm.uploadedFiles[vm.currentTab][option]
+                vm.isValid[vm.currentTab] = vm.uploadedFiles[vm.currentTab][option] != '';
             } else if (vm.getCleanupType() == 'BYDATERANGE') {
                 vm.isValid[vm.currentTab] = vm.startTime && vm.endTime && $scope.delete_form['from-time'].$valid;
             } else if (vm.getCleanupType() == 'ALLDATA') {
@@ -171,26 +166,73 @@ angular.module('lp.delete.entry', [])
             }
         }
 
+        vm.getEntityImage = function(entity, ico_name) {
+            ico_name = !ico_name ? entity : ico_name;
+            return vm.currentTab == entity ? '/assets/images/ico-' + ico_name + 's-white.png' : '/assets/images/ico-' + ico_name + 's-dark.png';
+        }
+
         vm.submitCleanupJob = function() {
-            if (vm.uploadOperations.indexOf(vm.getCleanupType()) >= 0) {
-                DeleteDataService.cleanupByUpload(vm.fileName, vm.getSchema(), vm.getCleanupType()).then (function(result) {
-                    if (result && result.Success) {
-                        vm.toggleBannerMsg();
-                    }
-                });
-            } else if (vm.getCleanupType() == 'BYDATERANGE') {
-                DeleteDataService.cleanupByDateRange(vm.startTime, vm.endTime, vm.getSchema()).then (function(result) {
-                    if (result && result.Success) {
-                        vm.toggleBannerMsg();
-                    }
-                });       
-            } else { // ALLDATA
-                DeleteDataService.cleanupAllData(vm.getSchema()).then(function(result) {
-                    if (result && result.Success) {
-                        vm.toggleBannerMsg();
-                    }
-                });                          
+            vm.submittingJob = true;
+            var cleanupType = vm.getCleanupType();
+            var schema = vm.getSchema();
+            var params = {};
+            var url = '';
+
+            switch (cleanupType) {
+                case 'BYUPLOAD_ID':
+                case 'BYUPLOAD_ACPD':
+                case 'BYUPLOAD_MINDATEANDACCOUNT':
+                    url = 'cleanupbyupload';
+                    params = {
+                        fileName: vm.fileName,
+                        schema: schema,
+                        cleanupOperationType: cleanupType
+                    };
+                    break;
+                case 'BYDATERANGE':
+                    url = 'cleanupbyrange';
+                    params =  {
+                        startTime: vm.startTime,
+                        endTime: vm.endTime,
+                        schema: schema
+                    };
+                    break;
+                case 'ALLDATA':
+                    url = 'cleanupall';
+                    params = {
+                        schema: schema
+                    };
+                    break;
             }
+            if (url != '') {
+                DeleteDataService.cleanup(url, params).then(function(result) {
+                    if (result && result.Success) {
+                        vm.setBannerMsg(false, true);
+                        setTimeout(vm.resetMethod, 3000);
+                    } else {
+                        vm.setBannerMsg(false, false); // show default error message
+                    }
+                    vm.submittingJob = false;                
+                });
+            }
+        }
+
+        vm.resetMethod = function() {
+            
+            if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
+                vm.params['BYUPLOAD_ID'].scope.cancel();
+            }
+
+            if (vm.currentTab == 'transaction') {
+                vm.resetDatePicker();
+                for (var type in vm.uploadedFiles['transaction']) {
+                    if (vm.uploadedFiles['transaction'][type]) {
+                        vm.params[type].scope.cancel();
+                    }
+                };
+            }
+
+            vm.init();
         }
 
         vm.initModalWindow = function () {
@@ -220,6 +262,7 @@ angular.module('lp.delete.entry', [])
                 }
             }
 
+
             vm.toggleModal = function () {
                 var modal = ModalStore.get(vm.modalConfig.name);
                 if (modal) {
@@ -227,9 +270,9 @@ angular.module('lp.delete.entry', [])
                 }
             }
 
-            vm.toggleBannerMsg = function() {
-                vm.showSuccessMsg = !vm.showSuccessMsg;
-                vm.showWarningMsg = !vm.showWarningMsg;
+            vm.setBannerMsg = function(showWarning, showSuccess) {
+                vm.showWarningMsg= showWarning;
+                vm.showSuccessMsg = showSuccess;
             }
 
             $scope.$on("$destroy", function () {

@@ -30,7 +30,7 @@
       <hr />
       <div class="section-body with-padding" >
         <div class="button-tabs">
-          <div class="button account {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Account', 'account');">
+<!--           <div class="button account {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Account', 'account');">
             <span>Accounts</span>
             <span>{{$ctrl.counts.accounts}}</span>
           </div>
@@ -40,36 +40,56 @@
           </div>
           <div class="button purchases {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Transaction', 'transaction');">
             <span>Transactions</span>
+          </div> -->
+          <div class="button {{ $ctrl.currentTab == 'account' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Account', 'account');">
+            <span>Accounts</span>
+            <img src="{{$ctrl.getEntityImage('account')}}"/>
+            <span>{{$ctrl.counts.accounts}}</span>
+          </div>
+          <div class="button {{ $ctrl.currentTab == 'contact' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Contact', 'contact');">
+            <span>Contacts</span>
+            <img src="{{$ctrl.getEntityImage('contact')}}"/>
+            <span>{{$ctrl.counts.contacts}}</span>
+          </div>
+          <div class="button {{ $ctrl.currentTab == 'transaction' ? 'blue' : 'white' }}-button" ng-click="$ctrl.changeEntityType('Transaction', 'transaction');">
+            <span>Transactions</span>
+            <img src="{{$ctrl.getEntityImage('transaction', 'purchase')}}"/>
+            <span>0</span>
           </div>
         </div>
 
-        <div ng-if="$ctrl.currentTab == 'account' || $ctrl.currentTab == 'contact'" class="options-text" >
+        <div ng-if="$ctrl.counts[$ctrl.currentTab + 's'] == 0" style="text-align: center; padding-bottom: 20px;">
+              There is no {{$ctrl.currentTab}} data in the system.
+        </div>
+
+        <div ng-if="($ctrl.currentTab == 'account' || $ctrl.currentTab == 'contact') && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text" >
               <ul class="checkbox-list">
                 <li>
                   <label>
-                    <input  type="radio" 
+                    <input  type="radio"
                             data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID'"
                             ng-click="$ctrl.setCleanupType('BYUPLOAD_ID', 'DeleteAccountTemplate')" />
                             Upload a single csv file with {{$ctrl.currentTab == 'account' ? 'Account' : 'Contact'}} IDs
                   </label>
                       <div 
                         file-uploader-container
-
-                        params="$ctrl.params"
+                        params="$ctrl.params['BYUPLOAD_ID']"
                         input-name="csvFileName"
                         file-select="$ctrl.fileSelect(fileName)"
                         file-load="$ctrl.fileLoad(headers)"
                         file-done="$ctrl.fileDone(result)"
                         file-cancel="$ctrl.fileCancel()"
                         class="form-group file-upload file-upload-with-padding" 
-                        ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }"
-                        ng-click="$ctrl.setCleanupType('BYUPLOAD_ID')">
+                        ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID' }"
+                        ng-click="$ctrl.setCleanupType('BYUPLOAD_ID')"
+                        >
                     </div>
 
                 </li>
                 <li>
                   <label>
-                    <input  type="radio" 
+                    <input  type="radio"
+                            name="name"
                             data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'ALLDATA'"
                             ng-click="$ctrl.setCleanupType('ALLDATA')"/>
                     All {{$ctrl.currentTab == 'account' ? 'Accounts' : 'Contacts'}}</label>
@@ -86,7 +106,7 @@
                         Select start and end date </label>
                       <date-range-directive   
                                               config="{{$ctrl.getPeriodTimeConfString()}}"
-                                              vm="vm" 
+                                              vm="$ctrl" 
                                               showfrom="$ctrl.showFromTime"
                                               showto="$ctrl.showToTime"
                                               form="delete_form"
@@ -98,7 +118,9 @@
                                               changed="$ctrl.callbackChangedValue(type, position, value)"
                                               startplaceholder="Start Date"
                                               endplaceholder="End Date"
-                                              ng-click="$ctrl.setCleanupType('BYDATERANGE')" >
+                                              hidepristineerror="true"
+                                              ng-click="$ctrl.setCleanupType('BYDATERANGE')"
+                                              >
                       </date-range-directive>
                   </li>
                   <li>
@@ -109,35 +131,36 @@
                       Upload a single csv file with Account IDs and Transaction Start Dates</label>
                         <div 
                           file-uploader-container
-                          params="$ctrl.params"
+                          params="$ctrl.params['BYUPLOAD_MINDATEANDACCOUNT']"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }"
-                          ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')">
+                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.csvFileName.$touched && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' &&  $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_MINDATEANDACCOUNT'] == ''}"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')"
+                          >
                       </div>
                   </li>
                   <li>
                     <label>
                       <input  type="radio" 
-                              name="segment.name"
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')" />
                       Upload a single csv file with Account IDs, Product, and Transaction Start Dates</label>
                         <div 
                           file-uploader-container
-                          params="$ctrl.params"
+                          params="$ctrl.params['BYUPLOAD_ACPD_1']"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }"
-                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')">
+                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$touched && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' }"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')"
+                          >
                       </div>
                   </li>
                   <li>
@@ -149,15 +172,16 @@
                       Upload a single csv file with Account IDs, Products, Contact IDs, and Transaction Start Dates</label>
                         <div 
                           file-uploader-container
-                          params="$ctrl.params"
+                          params="$ctrl.params['BYUPLOAD_ACPD_2']"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : uploadForm.csvFileName.$invalid && !uploadForm.modelDisplayName.$pristine, 'is-pristine' : uploadForm.csvFileName.$pristine }"
-                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')">
+                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' }"
+                          ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')"
+                          >
                       </div>
                   </li>
                 <li>
@@ -185,7 +209,7 @@
             <button 
                 type="button" 
                 class="button blue-button"
-                ng-disabled="!$ctrl.isValid[$ctrl.currentTab]"
+                ng-disabled="$ctrl.disableSubmit()"
                 ng-click="$ctrl.click()">
               Delete
             </button>

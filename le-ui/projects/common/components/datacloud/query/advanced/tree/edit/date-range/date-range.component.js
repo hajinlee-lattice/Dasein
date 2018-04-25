@@ -25,7 +25,8 @@ angular
                 tolabel: '@',
                 showinline: '@',
                 startplaceholder: '@',
-                endplaceholder: '@'
+                endplaceholder: '@',
+                hidepristineerror: '@'
             },
             templateUrl: '/components/datacloud/query/advanced/tree/edit/date-range/date-range.component.html',
             controller: function ($scope, $element, $timeout, moment) {
@@ -44,6 +45,19 @@ angular
                     var values = JSON.parse($scope.config);
                     var config = values[Object.keys(values)[position]];
                     return config;
+                }
+
+                $scope.vm.resetDatePicker = function() {
+                    var from = document.getElementById($scope.getFromDateId());
+                    if(from){
+                        $scope.fromDate = undefined;
+                        from.value = '';
+                    }
+                    var to = document.getElementById($scope.getToDateId());
+                    if(to){
+                        $scope.toDate = undefined;
+                        to.value = '';
+                    }
                 }
 
 
@@ -270,8 +284,8 @@ angular
                         case 0: {
                             var fromConf = getConfigField(0);
                             // console.timeEnd(fromConf.name);
-                            if(fromConf.visible === true){
-                                return $scope.form[fromConf.name].$error.datefrom;
+                            if(fromConf.visible === true) {
+                                return $scope.form[fromConf.name].$error.datefrom && ($scope.hidepristineerror ? !$scope.form[fromConf.name].$pristine : true);
                                 // myForm.pw.$error.one
                             }else{
                                 return false;
@@ -280,7 +294,7 @@ angular
                         case 1: {
                             var toConf = getConfigField(1);
                             if(toConf.visible === true){
-                                return $scope.form[toConf.name].$error.dateto;
+                                return $scope.form[toConf.name].$error.dateto && ($scope.hidepristineerror ? !$scope.form[toConf.name].$pristine : true);
                                 // myForm.pw.$error.one
                             }else{
                                 return false;
