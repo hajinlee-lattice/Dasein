@@ -39,7 +39,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 })
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-abstract class BaseDocumentEntity<T> implements DocumentEntity<T> {
+public abstract class BaseDocumentEntity<T> implements DocumentEntity<T> {
 
     // column definitions
     static final String JSON_COLUMN = "JSON";
