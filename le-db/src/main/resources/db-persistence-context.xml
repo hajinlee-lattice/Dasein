@@ -15,7 +15,7 @@
         <property name="password" value="${db.datasource.password.encrypted}" />
         <property name="maxPoolSize" value="${db.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${db.datasource.poolsize.max.webapp}"/>
-        <property name="maxPoolSizeForAppMaster" value="${db.datasource.poolsize.max.appmaster}"/>                
+        <property name="maxPoolSizeForAppMaster" value="${db.datasource.poolsize.max.appmaster}"/>
         <property name="enableDebugSlowSql" value="false" />
     </bean>
 	

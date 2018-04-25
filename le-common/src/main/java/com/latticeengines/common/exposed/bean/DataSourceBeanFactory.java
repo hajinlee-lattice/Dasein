@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.jndi.JndiTemplate;
 
+import com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment;
+import com.latticeengines.common.exposed.util.StackTraceUtils;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 public class DataSourceBeanFactory implements FactoryBean<DataSource> {
@@ -35,6 +37,8 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private int maxPoolSizeForAppMaster = -1;
     private int acquireIncrement = -1;
     private int maxIdleTime = -1;
+    private int maxIdleTimeExcessConnections = -1;
+    private int numHelperThreads = -1;
 
     @Override
     public DataSource getObject() {
@@ -75,7 +79,6 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setUser(user);
         cpds.setPassword(password);
 
-        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : 1;
         int maxPoolSize = -1;
         BeanFactoryEnvironment.Environment currentEnv = BeanFactoryEnvironment.getEnvironment();
         switch (currentEnv) {
@@ -91,29 +94,46 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         }
         //If MaxPoolSize is not configured at environment level, then use default MaxPoolSize
         maxPoolSize = maxPoolSize > 0 ? maxPoolSize : this.maxPoolSize;
+        int minPoolSize = this.minPoolSize > 0 ? this.minPoolSize : (Math.max(2, maxPoolSize/10));
         maxPoolSize = maxPoolSize > minPoolSize ? maxPoolSize : Math.max(minPoolSize, 8);
         
         if (log.isInfoEnabled()) {
             log.info("Setting Max Connections to: {},  for Envrionment: {}", maxPoolSize, currentEnv);
         }
         if (log.isDebugEnabled()) {
-            log.debug("Stack Trace: {} ",
-                    Arrays.asList(Thread.currentThread().getStackTrace()).parallelStream()
-                            .filter(st -> st != null && st.toString().startsWith("com.latticeengines"))
-                            .collect(Collectors.toList()));
+            log.debug("Stack Trace: {} ", StackTraceUtils.getCurrentStackTrace());
         }
-        int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : 1;
+        // Give a meaningful name for better troubleshooting
+        
+        String dbName="";
+        try {
+            dbName = jdbcUrl.substring(jdbcUrl.lastIndexOf("/"), jdbcUrl.indexOf("?", jdbcUrl.lastIndexOf("/")));
+        } catch (Exception e) {
+            dbName = jdbcUrl.substring(0, jdbcUrl.lastIndexOf("/"));
+        }
+        cpds.setDataSourceName(String.format("%s-%s", currentEnv, dbName.replaceAll("[^A-Za-z0-9]", "")));
+        
+        int acquireIncrement = this.acquireIncrement > 0 ? this.acquireIncrement : (Math.max(3, maxPoolSize/10));
         cpds.setMinPoolSize(minPoolSize);
         cpds.setInitialPoolSize(minPoolSize);
         cpds.setMaxPoolSize(maxPoolSize);
         cpds.setAcquireIncrement(acquireIncrement);
 
         cpds.setCheckoutTimeout(60000);
-        int maxIdleTime = this.maxIdleTime >= 0 ? this.maxIdleTime : 30;
+        int maxIdleTime = this.maxIdleTime >= 0 ? this.maxIdleTime : 3600;
         cpds.setMaxIdleTime(maxIdleTime);
-        int maxIdleTimeExcessConnections = this.maxIdleTime >= 0 ? this.maxIdleTime : 10;
+        int maxIdleTimeExcessConnections = this.maxIdleTimeExcessConnections >= 0 ? this.maxIdleTimeExcessConnections : 60;
         cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
-
+        
+        cpds.setNumHelperThreads(this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize/10));
+        if (Environment.AppMaster == currentEnv) {
+            // For Yarn jobs, we want to make sure that connection is in good state, because retry of Yarn job will be costly.
+            cpds.setTestConnectionOnCheckout(true);
+        } else {
+            cpds.setIdleConnectionTestPeriod(60);
+            cpds.setTestConnectionOnCheckin(true);
+        }
+        
         Boolean enableDebugSlowSql = this.enableDebugSlowSql == null ? true : this.enableDebugSlowSql;
         if (enableDebugSlowSql) {
             cpds.setUnreturnedConnectionTimeout(30);
@@ -229,5 +249,21 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setMaxIdleTime(int maxIdleTime) {
         this.maxIdleTime = maxIdleTime;
+    }
+
+    public int getMaxIdleTimeExcessConnections() {
+        return maxIdleTimeExcessConnections;
+    }
+
+    public void setMaxIdleTimeExcessConnections(int maxIdleTimeExcessConnections) {
+        this.maxIdleTimeExcessConnections = maxIdleTimeExcessConnections;
+    }
+
+    public int getNumHelperThreads() {
+        return numHelperThreads;
+    }
+
+    public void setNumHelperThreads(int numHelperThreads) {
+        this.numHelperThreads = numHelperThreads;
     }
 }
