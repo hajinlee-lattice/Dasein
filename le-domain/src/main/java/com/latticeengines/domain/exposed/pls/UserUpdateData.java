@@ -54,6 +54,12 @@ public class UserUpdateData {
 
     @Override
     public String toString() {
-        return JsonUtils.serialize(this);
+        // make sure that when this object is logged, we hide user password
+        // (even though it is encrypted). First clone this object and remove
+        // password from that cloned obj
+        UserUpdateData userUpdateDataForLogging = JsonUtils.deserialize(JsonUtils.serialize(this), UserUpdateData.class);
+        userUpdateDataForLogging.setNewPassword("<<password_hidden>>");
+        userUpdateDataForLogging.setOldPassword("<<password_hidden>>");
+        return JsonUtils.serialize(userUpdateDataForLogging);
     }
 }
