@@ -17,6 +17,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -168,6 +169,28 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         } else {
             throw new IllegalArgumentException(String.format("%s is not a valid usage", usage));
         }
+    }
+
+    @Override
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
+        return getAttrConfigSelectionDetails(categoryName, ColumnMetadataKey.State);
+    }
+
+    @Override
+    public AttrConfigSelectionDetail getAttrConfigSelectionDetails(String categoryName, String usage) {
+        AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
+        Category category = resolveCategory(categoryName);
+        String property = translateUsageToProperty(usage);
+
+        return attrConfigSelectionDetail;
+    }
+
+    private Category resolveCategory(String categoryName) {
+        Category category = Category.fromName(categoryName);
+        if (category == null) {
+            throw new IllegalArgumentException("Cannot parse category " + categoryName);
+        }
+        return category;
     }
 
 }
