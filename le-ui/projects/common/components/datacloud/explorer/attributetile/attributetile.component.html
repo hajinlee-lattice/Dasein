@@ -200,7 +200,7 @@
             </div>
         </li>
 
-        <li class="control ratings-selection" ng-if="vm.section == 'wizard.ratingsengine_segment' && vm.mode != 'dashboardrules'">
+        <li class="control ratings-selection" ng-if="vm.section == 'wizard.ratingsengine_segment'">
             <button class="button"
                     ng-class="{'selected': enrichment.IsRatingsEngineAttribute}"
                     ng-click="vm.selectRatingsEngineAttribute(enrichment)">
@@ -210,7 +210,7 @@
             </button>
         </li>
 
-        <li class="control ratings-selection dashboardrules" ng-if="vm.section == 'wizard.ratingsengine_segment' && vm.mode == 'dashboardrules'">
+        <!-- <li class="control ratings-selection dashboardrules" ng-if="vm.section == 'wizard.ratingsengine_segment'">
             <button class="button"
                     ng-class="{'selected': totalcount.length > 0}"
                     ng-click="vm.selectRatingsEngineAttribute(enrichment)">
@@ -218,6 +218,6 @@
                     {{totalcount.length > 0 ? 'Attribute Selected' : 'Select Attribute'}}
                 </span>
             </button>
-        </li>
+        </li> -->
     </ul>
 </div>

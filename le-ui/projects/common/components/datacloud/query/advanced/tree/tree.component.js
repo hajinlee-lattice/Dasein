@@ -61,7 +61,7 @@ angular
 
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
-                            if (vm.item.cube.Bkts) {
+                            if (vm.item.cube && vm.item.cube.Bkts) {
                                 // console.log('=========> ', vm.item);
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {

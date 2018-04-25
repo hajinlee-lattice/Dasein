@@ -1672,8 +1672,8 @@ angular.module('common.datacloud.explorer', [
     vm.selectRatingsEngineAttribute = function(enrichment) {
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
+        if (treeRoot && vm.mode !== 'dashboardrules') {
 
-        if (treeRoot) {
             var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
                 attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
             

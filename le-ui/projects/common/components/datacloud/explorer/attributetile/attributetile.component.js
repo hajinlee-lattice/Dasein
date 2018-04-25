@@ -16,6 +16,7 @@ angular
             ) {
                 var vm = $scope.vm;
                 angular.extend(vm, {});
+
                 vm.booleanStats = function (stats) {
                     var booleans = {};
 
@@ -163,7 +164,7 @@ angular
 
                 vm.getQuerySnippet = function (enrichment, rule, type) {
                     var querySnippet = enrichment.DisplayName + ' ';
-                    if (vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
+                    if (vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId] && vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts) { //bucketable attributes
                         querySnippet += 'is ';
                         querySnippet += (type == 'Enum' && rule.bucketRestriction.bkt.Vals && rule.bucketRestriction.bkt.Vals.length > 1) ? vm.generateBucketLabel(rule.bucketRestriction.bkt) : rule.bucketRestriction.bkt.Lbl;
                     } else { //non-bucketable attributes e.g. pure-string
