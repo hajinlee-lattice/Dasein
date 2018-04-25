@@ -97,4 +97,13 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
         log.info("Deleted " + entities.size() + " documents from " + tenantId);
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttrConfig> findAllByTenantId(String tenantId) {
+        List<AttrConfigEntity> attrConfigEntities = repository.findByTenantId(tenantId);
+        return attrConfigEntities.stream() //
+                .map(AttrConfigEntity::getDocument) //
+                .collect(Collectors.toList());
+    }
+
 }

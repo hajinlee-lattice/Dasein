@@ -35,6 +35,9 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     @JsonProperty("Entity")
     private BusinessEntity entity;
 
+    @JsonProperty("DataLicense")
+    private String DataLicense;
+
     @JsonProperty("Props")
     private Map<String, AttrConfigProp<?>> attrProps;
 
@@ -121,6 +124,14 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
 
     public void setValidationErrors(ValidationErrors validationErrors) {
         this.validationErrors = validationErrors;
+    }
+
+    public String getDataLicense() {
+        return DataLicense;
+    }
+
+    public void setDataLicense(String dataLicense) {
+        DataLicense = dataLicense;
     }
 
     @Override

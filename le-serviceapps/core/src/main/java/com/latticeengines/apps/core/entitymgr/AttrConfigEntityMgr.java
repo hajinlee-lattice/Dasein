@@ -17,4 +17,6 @@ public interface AttrConfigEntityMgr {
 
     void cleanupTenant(String tenantId);
 
+    List<AttrConfig> findAllByTenantId(String tenantId);
+
 }

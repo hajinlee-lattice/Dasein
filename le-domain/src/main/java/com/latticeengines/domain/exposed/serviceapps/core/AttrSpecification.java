@@ -9,12 +9,12 @@ public enum AttrSpecification {
     LDC_PREMIUM("LDC Premium Attributes", true, true, true, true, true, false, false, false, true, false),
     LDC_INTERNAL("LDC Internal Attributes", false, true, false, true, true, false, false, false, true, false),
     CDL_STD("CDL Standard Attributes", true, true, true, true, true, false, false, false, false, false),
-    CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, true, true, true, false),
-    CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, true, true, true, false),
-    CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, true, true, true, false),
+    CDL_LOOKUP_ID("CDL Lookup Ids", true, true, true, true, false, false, false, true, true, false),
+    CDL_ACCOUNT_EXTENSION("CDL Account Extensions", true, true, true, true, true, false, false, true, true, false),
+    CDL_CONTACT_EXTENSION("CDL Contact Extensions", true, true, true, true, true, false, false, true, true, false),
     CDL_DERIVED_PB("CDL Derived Attributes for Product Bundles", true, true, true, true, false, false, false, true, false, false),
     CDL_DERIVED_WBC("CDL Derived Attributes for Website Behavior Categories", true, true, true, true, false, false, false, true, false, false),
-    CDL_RATING("CDL Rating Attributes", true, true, true, true, false, false, true, true, true, false),
+    CDL_RATING("CDL Rating Attributes", true, true, true, true, false, false, true, false, true, false),
     CDL_SEGMENTS("CDL Segments as Attributes", true, true, true, true, false, false, true, true, true, false);
 
     private String specification;

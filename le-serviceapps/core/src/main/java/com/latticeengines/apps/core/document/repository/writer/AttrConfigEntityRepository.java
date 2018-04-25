@@ -18,6 +18,7 @@ public interface AttrConfigEntityRepository extends MultiTenantDocumentRepositor
 
     List<AttrConfigEntity> findByTenantIdAndEntity(String tenantId, BusinessEntity entity);
 
+    List<AttrConfigEntity> findByTenantId(String tenantId);
     @Transactional
     @Modifying
     List<AttrConfigEntity> removeByTenantIdAndEntity(String tenantId, BusinessEntity entity);
