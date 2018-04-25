@@ -4,10 +4,10 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.monitor.exposed.metrics.MetricsAspect;
 import com.latticeengines.monitor.exposed.metrics.impl.BaseMetricsAspectImpl;
 import com.latticeengines.security.exposed.TicketAuthenticationToken;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements MetricsAspect {
 
@@ -17,13 +17,13 @@ public class PlsMetricsAspectImpl extends BaseMetricsAspectImpl implements Metri
         for (Object arg : joinPoint.getArgs()) {
             args.append((arg == null ? " " : arg.toString()) + ";");
         }
-        if (args.length() == 0) {
-            return "";
-        }
-        String metrics = String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
 
         String user = MultiTenantContext.getEmailAddress();
         String tenant = MultiTenantContext.isContextSet() ? MultiTenantContext.getTenant().getId() : "<not set>";
+
+        String metrics = (args.length() == 0) ? ""
+                : String.format(" Arguments=%s", args.deleteCharAt(args.length() - 1));
+
         return metrics + String.format(" User=%s Tenant=%s", user, tenant);
     }
 

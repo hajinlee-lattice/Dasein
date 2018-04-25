@@ -1,6 +1,8 @@
 package com.latticeengines.domain.exposed.saml;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -24,6 +26,7 @@ import org.springframework.util.StringUtils;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.Base64Utils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.auth.GlobalAuthTenant;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -133,5 +136,16 @@ public class IdentityProvider implements HasPid, HasAuditingFields {
     @Override
     public void setCreated(Date created) {
         this.created = created;
+    }
+
+    @Override
+    public String toString() {
+        // we only want to log metadata and entity_id
+        Map<String, String> identityProviderForLog = new HashMap<>();
+        identityProviderForLog.put("metadata", metadata);
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(entityId)) {
+            identityProviderForLog.put("entity_id", entityId);
+        }
+        return JsonUtils.serialize(identityProviderForLog);
     }
 }
