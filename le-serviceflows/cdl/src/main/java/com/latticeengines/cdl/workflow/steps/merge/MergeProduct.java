@@ -189,7 +189,6 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                     inputProduct.setProductLineId(lineId);
                 }
 
-
                 mergeHierarchyProduct(inputProduct, inputProductMap);
             }
 
@@ -257,7 +256,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
 
         Product product = inputProductMap.get(compositeId);
         if (product != null) {
-            log.info(String.format("Found product in inputProductMap. Id=%s, compositeId=%s",
+            log.info(String.format("Found product [productId=%s, compositeId=%s] in inputProductMap.",
                     product.getProductId(), compositeId));
 
             if (!product.getProductType().equals(ProductType.Analytic.name())) {
@@ -268,13 +267,14 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                 throw new RuntimeException(String.format("Failed to merge analytic product. Id=%s, name=%s", id, name));
             }
 
-            if (!product.getProductDescription().equals(description) &&
+            if (StringUtils.compare(product.getProductDescription(), description) != 0 &&
                     !mergeReport.containsKey("Merged_WarnMessage")) {
                 String warnMsg = String.format("Found inconsistent product description with bundle %s.", bundleName);
                 mergeReport.put("Merged_WarnMessage", warnMsg);
             }
         } else {
-            log.info("No product in inputProductMap. A new analytic product will be created.");
+            log.info(String.format("CompositeId=%s is not in inputProductMap. Create analytic product " +
+                    "[productId=%s, compositeId=%s].", compositeId, productId, compositeId));
             Product newProduct = new Product();
             newProduct.setProductId(productId);
             newProduct.setProductName(name);
@@ -294,7 +294,8 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String bundle = inputProduct.getProductBundle();
         String compositeId = ProductUtils.getCompositeId(ProductType.Bundle.name(), id, name, bundle);
 
-        log.info("A new bundle product will be created.");
+        log.info(String.format("Create bundle product [productId=%s, bundle=%s, description=%s], bundleId=%s.",
+                id, bundle, description, inputProduct.getProductBundleId()));
         Product newProduct = new Product();
         newProduct.setProductId(id);
         newProduct.setProductName(name);
@@ -334,7 +335,9 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                 throw new RuntimeException(String.format("Failed to merge spending product. Id=%s, name=%s", id, name));
             }
         } else {
-            log.info("No product in inputProductMap. A new spending product will be created.");
+            log.info(String.format("Create spending product [productId=%s, line=%s, family=%s, category=%s, " +
+                            "lineId=%s, familyId=%s, categoryId=%s].",
+                    productId, line, family, category, lineId, familyId, categoryId));
             Product newProduct = new Product();
             newProduct.setProductId(productId);
             newProduct.setProductName(name);
@@ -357,39 +360,49 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         String name = inputProduct.getProductName();
         String description = inputProduct.getProductDescription();
         String bundle = inputProduct.getProductBundle();
+        String line = inputProduct.getProductLine();
         String lineId = inputProduct.getProductLineId();
         String familyId = inputProduct.getProductFamilyId();
+        String family = inputProduct.getProductFamily();
         String categoryId = inputProduct.getProductCategoryId();
+        String category = inputProduct.getProductCategory();
         String compositeId = ProductUtils.getCompositeId(ProductType.Hierarchy.name(), id, name, bundle);
 
-        Product product = inputProductMap.get(compositeId);
-        if (product != null) {
-            throw new RuntimeException(String.format("Hierarchy product already exists. InputProduct: %s",
-                    JsonUtils.serialize(inputProduct)));
-        } else {
-            if (StringUtils.isNotBlank(lineId)) {
-                if (StringUtils.isBlank(familyId) || StringUtils.isBlank(categoryId)) {
-                    if (!mergeReport.containsKey("Merged_ErrorMessage")) {
-                        String errMsg = String.format(
-                                "Found invalid product hierarchy with id = %s, name = %s", id, name);
-                        mergeReport.put("Merged_ErrorMessage", errMsg);
-                    }
-
-                    throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
-                            JsonUtils.serialize(inputProduct)));
+        Product p = inputProductMap.get(compositeId);
+        if (p != null) {
+            if (StringUtils.compare(line, p.getProductLine()) != 0) {
+                String errMsg = String.format("Product with same SKU [SKU=%s] has different product lines " +
+                                "[Line1=%s, Line2=%s].", id, line, p.getProductLine());
+                if (!mergeReport.containsKey("Merged_ErrorMessage")) {
+                    mergeReport.put("Merged_ErrorMessage", errMsg);
                 }
-            } else if (StringUtils.isNotBlank(familyId)) {
-                if (StringUtils.isBlank(categoryId)) {
-                    if (!mergeReport.containsKey("Merged_ErrorMessage")) {
-                        String errMsg = String.format(
-                                "Found invalid product hierarchy with id = %s, name = %s", id, name);
-                        mergeReport.put("Merged_ErrorMessage", errMsg);
-                    }
 
-                    throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
-                            JsonUtils.serialize(inputProduct)));
+                throw new RuntimeException(errMsg);
+            }
+
+            if (StringUtils.compare(family, p.getProductFamily()) != 0) {
+                String errMsg = String.format("Product with same SKU [SKU=%s] has different product families " +
+                                "[Family1=%s, Family2=%s].", id, family, p.getProductFamily());
+                if (!mergeReport.containsKey("Merged_ErrorMessage")) {
+                    mergeReport.put("Merged_ErrorMessage", errMsg);
                 }
-            } else if (StringUtils.isBlank(categoryId)) {
+
+                throw new RuntimeException(errMsg);
+            }
+
+            if (StringUtils.compare(category, p.getProductCategory()) != 0) {
+                String errMsg = String.format("Product with same SKU [SKU=%s] has different product categories " +
+                                "[Category1=%s, Category2=%s].", id, category, p.getProductCategory());
+                if (!mergeReport.containsKey("Merged_ErrorMessage")) {
+                    mergeReport.put("Merged_ErrorMessage", errMsg);
+                }
+
+                throw new RuntimeException(errMsg);
+            }
+        }
+
+        if (StringUtils.isNotBlank(lineId)) {
+            if (StringUtils.isBlank(familyId) || StringUtils.isBlank(categoryId)) {
                 if (!mergeReport.containsKey("Merged_ErrorMessage")) {
                     String errMsg = String.format(
                             "Found invalid product hierarchy with id = %s, name = %s", id, name);
@@ -399,23 +412,46 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
                 throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
                         JsonUtils.serialize(inputProduct)));
             }
+        } else if (StringUtils.isNotBlank(familyId)) {
+            if (StringUtils.isBlank(categoryId)) {
+                if (!mergeReport.containsKey("Merged_ErrorMessage")) {
+                    String errMsg = String.format(
+                            "Found invalid product hierarchy with id = %s, name = %s", id, name);
+                    mergeReport.put("Merged_ErrorMessage", errMsg);
+                }
 
-            log.info("A new hierarchy product will be created.");
-            Product newProduct = new Product();
-            newProduct.setProductId(id);
-            newProduct.setProductName(name);
-            newProduct.setProductDescription(description);
-            newProduct.setProductLine(inputProduct.getProductLine());
-            newProduct.setProductLineId(lineId);
-            newProduct.setProductFamily(inputProduct.getProductFamily());
-            newProduct.setProductFamilyId(familyId);
-            newProduct.setProductCategory(inputProduct.getProductCategory());
-            newProduct.setProductCategoryId(categoryId);
-            newProduct.setProductType(ProductType.Hierarchy.name());
-            inputProductMap.put(compositeId, newProduct);
+                throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
+                        JsonUtils.serialize(inputProduct)));
+            }
+        } else if (StringUtils.isBlank(categoryId)) {
+            if (!mergeReport.containsKey("Merged_ErrorMessage")) {
+                String errMsg = String.format(
+                        "Found invalid product hierarchy with id = %s, name = %s", id, name);
+                mergeReport.put("Merged_ErrorMessage", errMsg);
+            }
 
-            return newProduct;
+            throw new RuntimeException(String.format("Failed to validate hierarchy for product %s",
+                    JsonUtils.serialize(inputProduct)));
         }
+
+        log.info(String.format("Create hierarchy product [productId=%s, line=%s, family=%s, category=%s, " +
+                        "lineId=%s, familyId=%s, categoryId=%s].",
+                id, inputProduct.getProductLine(), inputProduct.getProductFamily(),
+                inputProduct.getProductCategory(), lineId, familyId, categoryId));
+        Product newProduct = new Product();
+        newProduct.setProductId(id);
+        newProduct.setProductName(name);
+        newProduct.setProductDescription(description);
+        newProduct.setProductLine(inputProduct.getProductLine());
+        newProduct.setProductLineId(lineId);
+        newProduct.setProductFamily(inputProduct.getProductFamily());
+        newProduct.setProductFamilyId(familyId);
+        newProduct.setProductCategory(inputProduct.getProductCategory());
+        newProduct.setProductCategoryId(categoryId);
+        newProduct.setProductType(ProductType.Hierarchy.name());
+        inputProductMap.put(compositeId, newProduct);
+
+        return newProduct;
     }
 
     public Map<String, Integer> countProducts(List<Product> products) {
@@ -463,12 +499,11 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
     private String createProductId(String compositeId, Map<String, Product> currentProductMap, String productName) {
         Product currentProduct = currentProductMap.get(compositeId);
         if (currentProduct != null) {
-            log.info(String.format("Found product with compositeId=%s, productId=%s in currentProductMap.",
+            log.info(String.format("Found [compositeId=%s, productId=%s] in currentProductMap.",
                     compositeId, currentProduct.getProductId()));
             return currentProduct.getProductId();
         } else {
-            log.info(String.format("No product with compositeId=%s found in currentProductMap. " +
-                    "Generating hashed productId based on productName=%s.", compositeId, productName));
+            log.info(String.format("Generating hashed productId by [productName=%s].", productName));
             return HashUtils.getCleanedString(HashUtils.getShortHash(productName));
         }
     }
@@ -549,7 +584,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         mergeReport.put("Current_NumProductSpendings", productCounts.get("nProductSpendings"));
         mergeReport.put("Current_NumObsoleteProducts", productCounts.get("nObsoleteProducts"));
 
-        log.info(String.format("In current product list, there are %s products in total, %s unique product SKUs, " +
+        log.info(String.format("Current product table has %s products in total, %s unique product SKUs, " +
                         "%s product bundles, %s product categories, %s analytic products, %s spending products, " +
                         "%s obsolete products.",
                 mergeReport.get("Current_NumProductsInTotal"), mergeReport.get("Current_NumProductIds"),
@@ -571,6 +606,15 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
         mergeReport.put("Merged_NumProductAnalytics", productCounts.get("nProductAnalytics"));
         mergeReport.put("Merged_NumProductSpendings", productCounts.get("nProductSpendings"));
         mergeReport.put("Merged_NumObsoleteProducts", productCounts.get("nObsoleteProducts"));
+
+        log.info(String.format("%s products are consolidated. After consolidation, product table has " +
+                        "%s products in total, %s invalid products, %s unique product SKUs, %s product bundles, " +
+                        "%s product categories, %s analytic products, %s spending products, %s obsolete products.",
+                mergeReport.get("Merged_NumInputProducts"), mergeReport.get("Merged_NumProductsInTotal"),
+                mergeReport.get("Merged_NumInvalidProducts"), mergeReport.get("Merged_NumProductIds"),
+                mergeReport.get("Merged_NumProductBundles"), mergeReport.get("Merged_NumProductCategories"),
+                mergeReport.get("Merged_NumProductAnalytics"), mergeReport.get("Merged_NumProductSpendings"),
+                mergeReport.get("Merged_NumObsoleteProducts")));
     }
 
     @VisibleForTesting
