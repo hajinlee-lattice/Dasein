@@ -6,7 +6,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import javax.inject.Inject;
@@ -84,7 +84,8 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
         when(workflowJobEntityMgr.findByWorkflowId(anyLong())).thenReturn(job);
         doNothing().when(workflowJobEntityMgr).updateWorkflowJob(any(WorkflowJob.class));
         setConfigurationForScoring.setWorkflowJobEntityMgr(workflowJobEntityMgr);
-        setConfigurationForScoring.setNamespace("ratingEngineImportMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
+        setConfigurationForScoring
+                .setNamespace("ratingEngineImportMatchAndModelWorkflow.SetConfigurationForScoringConfiguration");
         Choreographer choreographer = Choreographer.DEFAULT_CHOREOGRAPHER;
         JobExecution execution = runner.launchStep(
                 workflowTranslator.step(setConfigurationForScoring, choreographer, 0, null), params, executionContext);
@@ -92,10 +93,11 @@ public class SetConfigurationForScoringTestNG extends WorkflowApiFunctionalTestN
             Thread.sleep(5000);
         }
 
-        assertNull(setConfigurationForScoring.getStringValueFromContext("EXPORT_INPUT_PATH"));
-        assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_OUTPUT_PATH")
+        assertNotNull(setConfigurationForScoring.getStringValueFromContext("EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH"));
+        assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH")
                 .contains("score_event_table_output"));
-        assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_OUTPUT_PATH").contains(t2.getName()));
+        assertTrue(setConfigurationForScoring.getStringValueFromContext("EXPORT_SCORE_TRAINING_FILE_OUTPUT_PATH")
+                .contains(t2.getName()));
         assertEquals(setConfigurationForScoring.getObjectFromContext("EVENT_TABLE", Table.class).toString(),
                 t2.toString());
     }
