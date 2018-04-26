@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.Assert;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
@@ -21,6 +22,11 @@ public class AttrConfigEntityMgrImplTestNG extends ServiceAppsFunctionalTestNGBa
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
+
+    @BeforeClass(groups = "functional")
+    public void setup() {
+        setupTestEnvironment();
+    }
 
     @Test(groups = "functional")
     public void testCrud() throws InterruptedException {

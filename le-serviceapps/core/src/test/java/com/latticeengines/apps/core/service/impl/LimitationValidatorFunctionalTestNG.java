@@ -33,7 +33,7 @@ public class LimitationValidatorFunctionalTestNG extends ServiceAppsFunctionalTe
     @Mock
     private AttrConfigEntityMgr attrConfigEntityMgr;
     @Spy
-    private LimitationValidator limitationValidator = new LimitationValidator();
+    private LimitationValidator limitationValidator;
 
     @BeforeClass(groups = "functional")
     public void setup() throws IOException {

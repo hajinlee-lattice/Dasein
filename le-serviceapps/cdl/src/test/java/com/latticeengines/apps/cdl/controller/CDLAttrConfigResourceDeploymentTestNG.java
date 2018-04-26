@@ -79,10 +79,8 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         AttrConfigRequest request;
         // my local always exist redis connection issue when call get api with
         // entity account
-        // request =
-        // cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(),
-        // BusinessEntity.Account);
-        // Assert.assertNotNull(request.getAttrConfigs());
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Account, true);
+        Assert.assertNotNull(request.getAttrConfigs());
 
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, true);
         Assert.assertNotNull(request.getAttrConfigs());
@@ -92,7 +90,6 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.PurchaseHistory,
                 true);
         Assert.assertNotNull(request.getAttrConfigs());
-        System.out.print("Purchase History" + JsonUtils.serialize(request));
     }
 
     @Test(groups = "deployment")
@@ -139,13 +136,18 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Thread.sleep(500L);
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Contact, false);
         customerConfigs = request.getAttrConfigs();
-        customerConfigs = request.getAttrConfigs();
         assertEquals(customerConfigs.size(), 1);
         dateConfig = customerConfigs.get(0);
         assertEquals(dateConfig.getAttrName(), "LastModifiedDate");
         assertEquals(dateConfig.getAttrProps().size(), 1);
         assertEquals(dateConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Segment.name()), false);
 
+    }
+
+    @Test(groups = "deployment", dependsOnMethods = { "testPartialUpdate" })
+    public void testDeleteConfigWhenEmptyProps() throws Exception {
+
+        AttrConfigRequest request = new AttrConfigRequest();
         // save two configs, make sure added and no impacts to existing
         AttrConfig config3 = new AttrConfig();
         config3.setAttrName("Email");
@@ -154,7 +156,6 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         modelProp.setCustomValue(Boolean.TRUE);
         config3.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.Model.name(), modelProp));
 
-        // get an rating object dynamically
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, true);
         Assert.assertEquals(request.getAttrConfigs().size() > 0, true);
         AttrConfig config4 = request.getAttrConfigs().get(0);
@@ -170,6 +171,17 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
         assertEquals(request.getAttrConfigs().size(), 1);
 
+        // db only has one rating object for the tenant, save one config with
+        // entity Rating and TalkingPoint customer value null , at last verify
+        // remove the config
+        talkingPointProp = new AttrConfigProp<>();
+        talkingPointProp.setCustomValue(null);
+        config4.setAttrProps(ImmutableMap.of(ColumnSelection.Predefined.TalkingPoint.name(), talkingPointProp));
+        request.setAttrConfigs(Arrays.asList(config4));
+        cdlAttrConfigProxy.saveAttrConfig(mainTestTenant.getId(), request);
+        Thread.sleep(500L);
+        request = cdlAttrConfigProxy.getAttrConfigByEntity(mainTestTenant.getId(), BusinessEntity.Rating, false);
+        assertEquals(request.getAttrConfigs().size(), 0);
     }
 
     private void testCreate(RatingEngine re) {

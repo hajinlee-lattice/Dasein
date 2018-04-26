@@ -106,4 +106,17 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(propagation = Propagation.REQUIRED)
+    public void deleteConfigs(List<AttrConfigEntity> entities) {
+        repository.deleteInBatch(entities);
+        log.info("Deleted " + entities.size() + "");
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<AttrConfigEntity> findAllByTenantAndEntity(String tenantId, BusinessEntity entity) {
+        return repository.findByTenantIdAndEntity(tenantId, entity);
+    }
+
 }

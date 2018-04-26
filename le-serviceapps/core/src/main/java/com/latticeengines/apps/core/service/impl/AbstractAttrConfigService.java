@@ -29,6 +29,7 @@ import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
@@ -183,7 +184,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         });
 
         String tenantId = MultiTenantContext.getTenantId();
-        mergeConfigWithExisting(tenantId, attrConfigGrps);
+        Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps);
 
         List<AttrConfig> renderedList;
         Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
@@ -244,22 +245,69 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     /**
      * Merge with existing configs in Document DB
      */
-    private void mergeConfigWithExisting(String tenantId, Map<BusinessEntity, List<AttrConfig>> attrConfigGrps) {
+    private Map<String, List<String>> mergeConfigWithExisting(String tenantId,
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrps) {
+        // record the changes between user selected props and existing config
+        // props
+        Map<String, List<String>> diffProperties = new HashMap<>();
+        // attrConfig whose props is empty after merging
+        List<AttrConfigEntity> toDeleteEntities = new ArrayList<>();
+
         attrConfigGrps.forEach((entity, configList) -> {
-            List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            List<AttrConfigEntity> existingConfigEntities = attrConfigEntityMgr.findAllByTenantAndEntity(tenantId,
+                    entity);
+
             Map<String, AttrConfig> existingMap = new HashMap<>();
-            existingConfigs.forEach(config -> existingMap.put(config.getAttrName(), config));
+            Map<String, AttrConfigEntity> existingEntityMap = new HashMap<>();
+            existingConfigEntities.forEach(configEntity -> {
+                AttrConfig config = configEntity.getDocument();
+                if (config != null) {
+                    existingMap.put(config.getAttrName(), config);
+                    existingEntityMap.put(config.getAttrName(), configEntity);
+                }
+            });
             for (AttrConfig config : configList) {
-                AttrConfig existingConfig = existingMap.get(config.getAttrName());
+                String attrName = config.getAttrName();
+                AttrConfig existingConfig = existingMap.get(attrName);
                 if (existingConfig != null) {
-                    existingConfig.getAttrProps().forEach((name, value) -> {
-                        if (!config.getAttrProps().containsKey(name)) {
-                            config.getAttrProps().put(name, value);
+                    // write user newly selected prop
+                    config.getAttrProps().forEach((propName, value) -> {
+                        if (!existingConfig.getAttrProps().containsKey(propName)) {
+                            List<String> diffList = diffProperties.getOrDefault(attrName, new ArrayList<>());
+                            diffList.add(propName);
+                            diffProperties.put(attrName, diffList);
                         }
                     });
+                    // write user changed prop
+                    existingConfig.getAttrProps().forEach((propName, propValue) -> {
+                        AttrConfigProp<?> prop = config.getAttrProps().get(propName);
+                        if (prop != null && propValue != null && propValue.getCustomValue() != prop.getCustomValue()) {
+                            List<String> diffList = diffProperties.getOrDefault(attrName, new ArrayList<>());
+                            diffList.add(propName);
+                            diffProperties.put(attrName, diffList);
+                        }
+                        if (!config.getAttrProps().containsKey(propName)) {
+                            config.getAttrProps().put(propName, propValue);
+                        }
+                    });
+
+                    // count the empty AttrConfig
+                    boolean isEmpty = true;
+                    for (Map.Entry<String, AttrConfigProp<?>> entry : config.getAttrProps().entrySet()) {
+                        AttrConfigProp<?> val = entry.getValue();
+                        if (val.getCustomValue() != null) {
+                            isEmpty = false;
+                            break;
+                        }
+                    }
+                    if (isEmpty) {
+                        toDeleteEntities.add(existingEntityMap.get(attrName));
+                    }
                 }
             }
         });
+        attrConfigEntityMgr.deleteConfigs(toDeleteEntities);
+        return diffProperties;
     }
 
     /**
@@ -382,7 +430,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         for (AttrConfig config : customConfig) {
             Map<String, AttrConfigProp<?>> props = config.getAttrProps();
             AttrState state = (AttrState) (props.get(ColumnMetadataKey.State)).getSystemValue();
-            if (state != null && state.equals(AttrState.Active)) {
+            if (AttrState.Active.equals(state)) {
                 config.getAttrProps().values().removeIf(v -> (v.getCustomValue() == null));
                 if (config.getAttrProps().size() != 0) {
                     results.add(config);
