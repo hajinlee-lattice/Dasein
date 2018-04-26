@@ -53,9 +53,12 @@ import com.latticeengines.workflow.exposed.service.WorkflowService;
 import com.latticeengines.workflow.exposed.service.WorkflowTenantService;
 import com.latticeengines.workflow.exposed.user.WorkflowUser;
 import com.latticeengines.workflow.exposed.util.WorkflowUtils;
+import com.latticeengines.workflow.listener.LEJobCaller;
+import com.latticeengines.workflow.listener.LEJobCallerRegister;
 
 @Component("workflowService")
 public class WorkflowServiceImpl implements WorkflowService {
+
     private static final Logger log = LoggerFactory.getLogger(WorkflowServiceImpl.class);
 
     @Value("${hadoop.yarn.timeline-service.webapp.address}")
@@ -87,6 +90,9 @@ public class WorkflowServiceImpl implements WorkflowService {
 
     @Autowired
     private WorkflowJobUpdateEntityMgr workflowJobUpdateEntityMgr;
+
+    @Autowired
+    private LEJobCallerRegister callerRegister;
 
     @Override
     public <T extends WorkflowConfiguration> void registerJob(T workflowConfig, ApplicationContext context) {
@@ -259,6 +265,18 @@ public class WorkflowServiceImpl implements WorkflowService {
     @Override
     public WorkflowStatus getStatus(WorkflowExecutionId workflowId) {
         JobExecution jobExecution = leJobExecutionRetriever.getJobExecution(workflowId.getId());
+        WorkflowStatus workflowStatus = getStatus(workflowId, jobExecution);
+        return workflowStatus;
+    }
+
+    @Override
+    public JobStatus getJobStatus(WorkflowExecutionId workflowId) {
+        WorkflowJob job = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+        return JobStatus.valueOf(job.getStatus());
+    }
+
+    @Override
+    public WorkflowStatus getStatus(WorkflowExecutionId workflowId, JobExecution jobExecution) {
         WorkflowStatus workflowStatus = new WorkflowStatus();
         workflowStatus.setStatus(jobExecution.getStatus());
         workflowStatus.setStartTime(jobExecution.getStartTime());
@@ -270,7 +288,6 @@ public class WorkflowServiceImpl implements WorkflowService {
         if (!Strings.isNullOrEmpty(customerSpace)) {
             workflowStatus.setCustomerSpace(CustomerSpace.parse(customerSpace));
         }
-
         return workflowStatus;
     }
 
@@ -319,16 +336,12 @@ public class WorkflowServiceImpl implements WorkflowService {
         }
 
         Long workflowPid = workflowJob.getPid();
-
+        WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
         // break label for inner loop
         do {
             try {
                 status = getStatus(workflowId);
-                WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
-                long currentTime = System.currentTimeMillis();
-                jobUpdate.setLastUpdateTime(currentTime);
-                workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
-
+                keepUpdate(workflowPid, jobUpdate);
                 if (status == null) {
                     break;
                 } else if (WorkflowStatus.TERMINAL_BATCH_STATUS.contains(status.getStatus())) {
@@ -349,6 +362,14 @@ public class WorkflowServiceImpl implements WorkflowService {
         return status;
     }
 
+    private void keepUpdate(Long workflowPid, WorkflowJobUpdate jobUpdate) {
+        if (jobUpdate == null)
+            return;
+        long currentTime = System.currentTimeMillis();
+        jobUpdate.setLastUpdateTime(currentTime);
+        workflowJobUpdateEntityMgr.updateLastUpdateTime(jobUpdate);
+    }
+
     @Override
     public Map<String, String> getInputs(Map<String, String> inputContext) {
         Map<String, String> inputs = new HashMap<>();
@@ -358,4 +379,69 @@ public class WorkflowServiceImpl implements WorkflowService {
         return inputs;
     }
 
+    @Override
+    public JobStatus sleepForCompletionWithStatus(WorkflowExecutionId workflowId) {
+        sleepForCompletion(workflowId);
+        return getJobStatus(workflowId);
+    }
+
+    @Override
+    public void sleepForCompletion(WorkflowExecutionId workflowId) {
+        long maxWaitTime = MAX_MILLIS_TO_WAIT;
+        long checkInterval = 1000 * 120;
+        JobWaitCaller caller = new JobWaitCaller(workflowId, maxWaitTime, checkInterval);
+        callerRegister.regisger(Thread.currentThread(), caller);
+        boolean isDone = caller.sleep();
+        if (isDone) {
+            log.info(String.format("Finished waiting for the workflow id= %s", workflowId.getId()));
+        } else {
+            throw new RuntimeException("Timeout when waiting for workflow Id=" + workflowId.getId());
+        }
+    }
+
+    private class JobWaitCaller implements LEJobCaller {
+        private long checkInterval;
+        private long maxWaitTime;
+        private WorkflowExecutionId workflowId;
+        private volatile boolean isDone = false;
+
+        public JobWaitCaller(WorkflowExecutionId workflowId, long maxWaitTime, long checkInterval) {
+            this.maxWaitTime = maxWaitTime;
+            this.checkInterval = checkInterval;
+            this.workflowId = workflowId;
+        }
+
+        public boolean sleep() {
+            long start = System.currentTimeMillis();
+            int retryOnException = 16;
+            WorkflowJob workflowJob = workflowJobEntityMgr.findByWorkflowId(workflowId.getId());
+            long workflowPid = workflowJob.getPid();
+            WorkflowJobUpdate jobUpdate = workflowJobUpdateEntityMgr.findByWorkflowPid(workflowPid);
+            do {
+                if (isDone) {
+                    return true;
+                }
+                try {
+                    Thread.sleep(checkInterval);
+                } catch (Exception e) {
+                    if (isDone) {
+                        keepUpdate(workflowPid, jobUpdate);
+                        return true;
+                    }
+                    log.warn(
+                            String.format("Getting exception when waiting for %s", workflowId.getId(), e.getMessage()));
+                    if (--retryOnException == 0)
+                        throw new RuntimeException(e);
+                }
+                keepUpdate(workflowPid, jobUpdate);
+                log.info("Waiting workflow to finish. workflow Id=" + workflowId.getId());
+            } while (System.currentTimeMillis() - start < maxWaitTime);
+            return false;
+        }
+
+        @Override
+        public void callDone() {
+            isDone = true;
+        }
+    }
 }

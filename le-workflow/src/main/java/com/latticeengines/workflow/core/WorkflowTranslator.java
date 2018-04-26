@@ -39,6 +39,7 @@ import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.build.Workflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
 import com.latticeengines.workflow.listener.FailureReportingListener;
+import com.latticeengines.workflow.listener.FinalJobListener;
 import com.latticeengines.workflow.listener.LEJobListener;
 import com.latticeengines.workflow.listener.LogJobListener;
 
@@ -57,6 +58,9 @@ public class WorkflowTranslator {
 
     @Autowired
     private StepBuilderFactory stepBuilderFactory;
+
+    @Autowired
+    private FinalJobListener finalJobListener;
 
     private BeanValidationService beanValidationService = new BeanValidationServiceImpl();
 
@@ -107,13 +111,15 @@ public class WorkflowTranslator {
             for (LEJobListener listener : workflow.getListeners()) {
                 simpleJobBuilder = simpleJobBuilder.listener(listener);
             }
+            simpleJobBuilder.listener(finalJobListener);
             return simpleJobBuilder.build();
         } else {
             throw new IllegalArgumentException("Cannot translate empty workflow");
         }
     }
 
-    public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq, InjectableFailure injectableFailure) {
+    public Step step(AbstractStep<? extends BaseStepConfiguration> step, Choreographer choreographer, int seq,
+            InjectableFailure injectableFailure) {
         return stepBuilderFactory.get(step.name()) //
                 .tasklet(tasklet(step, choreographer, seq, injectableFailure)) //
                 .allowStartIfComplete(step.isRunAgainWhenComplete()) //

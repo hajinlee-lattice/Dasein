@@ -19,7 +19,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowJob;
 import com.latticeengines.domain.exposed.workflow.WorkflowJobUpdate;
-import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.entitymanager.WorkflowJobEntityMgr;
@@ -100,14 +99,7 @@ public class WorkflowProcessor extends SingleContainerYarnProcessor<WorkflowConf
                 workflowService.registerJob(workflowConfig, appContext);
                 workflowId = workflowService.start(workflowConfig, workflowJob);
             }
-
-            WorkflowStatus workflowStatus = workflowService.waitForCompletion(workflowId);
-            workflowJob.setStatus(JobStatus.fromString(workflowStatus.getStatus().name()).name());
-            log.info(String.format(
-                    "Completed workflow - workflowId:%s batchStatus:%s yarnStatus:%s appId:%s "
-                            + "startTime:%s endTime:%s",
-                    String.valueOf(workflowId.getId()), workflowStatus.getStatus(), workflowStatus.toYarnStatus(),
-                    appId.toString(), workflowStatus.getStartTime(), workflowStatus.getEndTime()));
+            workflowService.sleepForCompletion(workflowId);
         } catch (Exception e) {
             workflowJob.setStatus(JobStatus.FAILED.name());
             workflowJobEntityMgr.updateWorkflowJobStatus(workflowJob);

@@ -11,11 +11,11 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.PumpStreamHandler;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.yarn.api.records.FinalApplicationStatus;
 import org.apache.zookeeper.ZooDefs;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,10 +31,12 @@ import com.latticeengines.baton.exposed.service.impl.BatonServiceImpl;
 import com.latticeengines.camille.exposed.Camille;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.common.exposed.util.URLUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.URLUtils;
 import com.latticeengines.common.exposed.version.VersionManager;
+import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.api.AppSubmission;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
@@ -44,13 +46,12 @@ import com.latticeengines.domain.exposed.camille.lifecycle.CustomerSpaceProperti
 import com.latticeengines.domain.exposed.pls.CrmCredential;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.swlib.SoftwarePackage;
+import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.domain.exposed.workflow.WorkflowStatus;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.remote.exposed.service.CrmCredentialZKService;
-import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.security.functionalframework.SecurityFunctionalTestNGBase;
 import com.latticeengines.swlib.exposed.service.SoftwareLibraryService;
 import com.latticeengines.workflow.functionalframework.WorkflowTestNGBase;
@@ -271,8 +272,7 @@ public class WorkflowApiFunctionalTestNGBase extends WorkflowTestNGBase {
 
     protected void waitForCompletion(WorkflowExecutionId workflowId) throws Exception {
         log.info("Workflow id = " + workflowId.getId());
-        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS).getStatus();
-        assertEquals(status, BatchStatus.COMPLETED);
+        JobStatus status = workflowService.sleepForCompletionWithStatus(workflowId);
+        assertEquals(status, JobStatus.COMPLETED);
     }
-
 }
