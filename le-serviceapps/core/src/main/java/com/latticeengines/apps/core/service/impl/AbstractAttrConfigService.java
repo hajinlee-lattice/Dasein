@@ -3,6 +3,7 @@ package com.latticeengines.apps.core.service.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,14 +184,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrConfigGrps.get(entity).add(attrConfig);
         });
 
-        String tenantId = MultiTenantContext.getTenantId();
-        Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps);
-
-        List<AttrConfig> renderedList;
-        Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
         if (MapUtils.isEmpty(attrConfigGrps)) {
             toReturn = request;
         } else {
+            String tenantId = MultiTenantContext.getTenantId();
+            Map<String, List<String>> diffProperties = mergeConfigWithExisting(tenantId, attrConfigGrps);
+
+            List<AttrConfig> renderedList;
+            Map<BusinessEntity, List<AttrConfig>> attrConfigGrpsForTrim = new HashMap<>();
+
             if (attrConfigGrps.size() == 1) {
                 BusinessEntity entity = new ArrayList<>(attrConfigGrps.keySet()).get(0);
                 renderedList = renderForEntity(attrConfigs, entity);
@@ -237,6 +239,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             attrConfigGrpsForTrim.forEach((entity, configList) -> {
                 attrConfigEntityMgr.save(MultiTenantContext.getTenantId(), entity, trim(configList));
             });
+
+            try {
+                registerAction(diffProperties);
+            } catch (Exception e) {
+                log.error("Cannot register action to action table: " + e.getMessage());
+            }
         }
 
         return toReturn;
@@ -438,6 +446,31 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }
         return results;
+    }
+
+    private void registerAction(Map<String, List<String>> diffProps) {
+        if (diffProps == null) {
+            return;
+        }
+        Set<ActionType> actionTypes = new HashSet<>();
+        for (List<String> props : diffProps.values()) {
+            for (String propName : props) {
+                if (ColumnMetadataKey.DisplayName.equals(propName)) {
+                    actionTypes.add(ActionType.DISPLAY_PROPERTY_CHANGE);
+                } else if (ColumnMetadataKey.State.equals(propName)) {
+                    actionTypes.add(ActionType.LIFE_CYCLE_CHANGE);
+                } else if (ColumnSelection.Predefined.getNames().contains(propName)) {
+                    actionTypes.add(ActionType.USAGE_PROPERTY_CHANGE);
+                }
+                if (actionTypes.size() == ActionType.getAttrManagementTypes().size()) {
+                    break;
+                }
+            }
+            if (actionTypes.size() == ActionType.getAttrManagementTypes().size()) {
+                break;
+            }
+        }
+        actionTypes.forEach(actionType -> registerAction(actionType));
     }
 
     private void registerAction(ActionType actionType) {
