@@ -46,18 +46,21 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.*.find*(..))")
     public void find(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
         enableSoftDeleteFilter(joinPoint, sessionFactory, entityManager);
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayLaunchEntityMgrImpl.delete*(..))")
     public void deletePlayLaunch(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.PlayEntityMgrImpl.delete*(..))")
     public void deletePlay(JoinPoint joinPoint) {
-        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr, Arrays.asList(entityManager, entityManagerReader));
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataFeedEntityMgrImpl.*(..)) && "
@@ -70,6 +73,12 @@ public class CDLMultiTenantEntityMgrAspect extends MultiTenantEntityMgrAspect {
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.DataCollectionEntityMgrImpl.*(..))")
     public void allDataCollectionMethods(JoinPoint joinPoint) {
         enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr);
+    }
+
+    @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.LookupIdMappingEntityMgrImpl.*(..))")
+    public void allLookupIdMappingMethods(JoinPoint joinPoint) {
+        enableMultiTenantFilter(joinPoint, sessionFactory, tenantEntityMgr,
+                Arrays.asList(entityManager, entityManagerReader));
     }
 
     @Before("execution(* com.latticeengines.apps.cdl.entitymgr.impl.StatisticsContainerEntityMgrImpl.*(..))")

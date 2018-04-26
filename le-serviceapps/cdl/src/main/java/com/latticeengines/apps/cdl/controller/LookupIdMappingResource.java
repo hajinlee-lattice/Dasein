@@ -1,10 +1,9 @@
-package com.latticeengines.app.exposed.controller;
+package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,74 +13,74 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.apps.cdl.service.LookupIdMappingService;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
-import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @Api(value = "lookup-id-mapping", description = "Rest resource for lookup Id mapping")
 @RestController
-@RequestMapping(value = "/lookup-id-mapping")
+@RequestMapping("/customerspaces/{customerSpace}/lookup-id-mapping")
 public class LookupIdMappingResource {
 
     @Inject
-    private LookupIdMappingProxy lookupIdMappingProxy;
+    private LookupIdMappingService lookupIdMappingService;
 
     @RequestMapping(value = "", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get mapped configirations of org id and corresponding lookup id per external system type")
-    public Map<String, List<LookupIdMap>> getLookupIdsMapping(HttpServletRequest request, //
+    public Map<String, List<LookupIdMap>> getLookupIdsMapping(@PathVariable String customerSpace, //
             @RequestParam(value = "externalSystemType", required = false) //
             CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingProxy.getLookupIdsMapping(MultiTenantContext.getTenant().getId(), externalSystemType);
+        return lookupIdMappingService.getLookupIdsMapping(externalSystemType);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Register an org")
-    public LookupIdMap registerExternalSystem(HttpServletRequest request, @RequestBody LookupIdMap lookupIdMap) {
-        return lookupIdMappingProxy.registerExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
+    public LookupIdMap registerExternalSystem(@PathVariable String customerSpace,
+            @RequestBody LookupIdMap lookupIdsMap) {
+        return lookupIdMappingService.registerExternalSystem(lookupIdsMap);
     }
 
     @RequestMapping(value = "/config/{id}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get mapped configuration for given config id")
-    public LookupIdMap getLookupIdMap(HttpServletRequest request, @PathVariable String id) {
-        return lookupIdMappingProxy.getLookupIdMap(MultiTenantContext.getTenant().getId(), id);
+    public LookupIdMap getLookupIdMap(@PathVariable String customerSpace, @PathVariable String id) {
+        return lookupIdMappingService.getLookupIdMap(id);
     }
 
     @RequestMapping(value = "/config/{id}", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Update mapped configuration for given config id")
-    public LookupIdMap updateLookupIdMap(HttpServletRequest request, @PathVariable String id,
+    public LookupIdMap updateLookupIdMap(@PathVariable String customerSpace, @PathVariable String id,
             @RequestBody LookupIdMap lookupIdMap) {
-        return lookupIdMappingProxy.updateLookupIdMap(MultiTenantContext.getTenant().getId(), id, lookupIdMap);
+        return lookupIdMappingService.updateLookupIdMap(id, lookupIdMap);
     }
 
     @RequestMapping(value = "/config/{id}", method = RequestMethod.DELETE)
     @ResponseBody
     @ApiOperation(value = "Delete mapped configuration for given config id")
-    public void deleteLookupIdMap(HttpServletRequest request, @PathVariable String id) {
-        lookupIdMappingProxy.deleteLookupIdMap(MultiTenantContext.getTenant().getId(), id);
+    public void deleteLookupIdMap(@PathVariable String customerSpace, @PathVariable String id) {
+        lookupIdMappingService.deleteLookupIdMap(id);
     }
 
     @RequestMapping(value = "/available-lookup-ids", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
-    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(HttpServletRequest request, //
+    public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
             @RequestParam(value = "externalSystemType", required = false) //
             CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingProxy.getAllLookupIds(MultiTenantContext.getTenant().getId(), externalSystemType);
+        return lookupIdMappingService.getAllLookupIds(externalSystemType);
     }
 
     @RequestMapping(value = "/all-external-system-types", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get all external system type")
-    public List<CDLExternalSystemType> getAllCDLExternalSystemType(HttpServletRequest request) {
-        return lookupIdMappingProxy.getAllCDLExternalSystemType(MultiTenantContext.getTenant().getId());
+    public List<CDLExternalSystemType> getAllCDLExternalSystemType(@PathVariable String customerSpace) {
+        return lookupIdMappingService.getAllCDLExternalSystemType();
     }
 }

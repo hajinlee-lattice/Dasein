@@ -17,6 +17,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Index;
@@ -24,6 +25,7 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
@@ -34,7 +36,10 @@ import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
 @Entity
-@Table(name = "LOOKUP_ID_MAP")
+@Table(name = "LOOKUP_ID_MAP", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "ORG_ID", "EXT_SYS_TYPE", "FK_TENANT_ID" }) })
+@JsonIgnoreProperties(ignoreUnknown = true)
+@OnDelete(action = OnDeleteAction.CASCADE)
 @Filter(name = "tenantFilter", condition = "FK_TENANT_ID = :tenantFilterId")
 public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditingFields {
 
