@@ -102,6 +102,9 @@ angular.module('common.datacloud.explorer', [
 //            vm.section = 'segment.analysis';
             vm.inWizard = true;
         }
+        if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add') {
+            vm.inWizard = false;
+        }
 
         QueryStore.setSegmentEnabled = false;
 
@@ -1672,8 +1675,7 @@ angular.module('common.datacloud.explorer', [
     vm.selectRatingsEngineAttribute = function(enrichment) {
         var treeRoot = QueryStore.getAddBucketTreeRoot();
 
-        if (treeRoot && vm.mode !== 'dashboardrules') {
-
+        if (treeRoot) {
             var enrichments = vm.topAttributes[enrichment.Category].Subcategories[enrichment.Subcategory],
                 attribute = enrichments.filter(function(item) { return item.Attribute == enrichment.ColumnId })[0];
             
