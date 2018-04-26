@@ -17,7 +17,7 @@ angular
                 pending = false;
             });
         }
-    }, 45 * 1000);
+    }, 120 * 1000);
 })
 .service('JobsStore', function($q, $filter, JobsService) {
     var JobsStore = this;
