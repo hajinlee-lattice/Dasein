@@ -124,10 +124,10 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new RuntimeException(String.format("We can't start processAnalyze workflow by dataFeedStatus %s",
                     datafeedStatus.getName()));
         }
-        //The lock step may update the data feed status, we need to get the data feed again
-        datafeed = dataFeedProxy.getDataFeed(customerSpace);
-        datafeedStatus = datafeed.getStatus();
-        log.info(String.format("data feed %s updated status: %s", datafeed.getName(), datafeedStatus.getName()));
+
+        Status initialStatus = getInitialDataFeedStatus(datafeedStatus);
+
+        log.info(String.format("data feed %s initial status: %s", datafeed.getName(), initialStatus.getName()));
 
         log.info(String.format("Submitting process and analyze workflow for customer %s", customerSpace));
 
@@ -137,7 +137,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
             String currentDataCloudBuildNumber = columnMetadataProxy.latestVersion(null).getDataCloudBuildNumber();
             ProcessAnalyzeWorkflowConfiguration configuration = generateConfiguration(customerSpace, request,
-                    actionAndJobIds, datafeedStatus, currentDataCloudBuildNumber);
+                    actionAndJobIds, initialStatus, currentDataCloudBuildNumber);
 
             configuration.setFailingStep(request.getFailingStep());
 
@@ -146,6 +146,14 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             log.error(ExceptionUtils.getStackTrace(e));
             dataFeedProxy.failExecution(customerSpace, datafeedStatus.getName());
             throw new RuntimeException(String.format("Failed to submit %s's P&A workflow", customerSpace));
+        }
+    }
+
+    private Status getInitialDataFeedStatus(Status status) {
+        if (status.equals(Status.ProcessAnalyzing)) {
+            return Status.Active;
+        } else {
+            return status;
         }
     }
 
