@@ -62,13 +62,6 @@ public class ProcessAnalyzeListener extends LEJobListener {
         InternalResourceRestApiProxy proxy = new InternalResourceRestApiProxy(hostPort);
         String userId = jobExecution.getJobParameters().getString("User_Id");
         log.info(String.format("tenantId %s, hostPort %s, userId %s", tenantId, hostPort, userId));
-        AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
-        emailInfo.setUserId(userId);
-        try {
-            proxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
-        } catch (Exception e) {
-            log.error("Can not send process analyze email: " + e.getMessage());
-        }
 
         if (jobExecution.getStatus() == BatchStatus.FAILED) {
             log.info(String.format("Workflow failed. Update datafeed status for customer %s with status of %s",
@@ -88,6 +81,14 @@ public class ProcessAnalyzeListener extends LEJobListener {
             cleanupInactiveVersion();
         } else {
             log.warn("Workflow ended in an unknown state.");
+        }
+
+        AdditionalEmailInfo emailInfo = new AdditionalEmailInfo();
+        emailInfo.setUserId(userId);
+        try {
+            proxy.sendCDLProcessAnalyzeEmail(jobExecution.getStatus().name(), tenantId, emailInfo);
+        } catch (Exception e) {
+            log.error("Can not send process analyze email: " + e.getMessage());
         }
     }
 
