@@ -416,10 +416,10 @@ public class EventQueryTranslatorMultiProductTest extends QueryFunctionalTestNGB
     }
 
 
-    //@Test(groups = "functional")
+    @Test(groups = "functional")
     public void testHasEngagedPrior() {
         // DS_Test_1
-        String prodIdList = "tbd";
+        String prodIdList = "3872223C9BA06C649D68E415E23A9446,6B047FF03A59E42A79D1961541C1BF60,FE4D73162629DF254688CC8D553FA52A";
         TransactionRestriction txRestriction = getHasEngagedPriorToFive(prodIdList);
         EventQueryTranslator eventTranslator = getEventQueryTranslator();
         Query query = eventTranslator.translateForScoring(queryFactory, attrRepo, txRestriction,

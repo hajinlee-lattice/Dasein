@@ -236,6 +236,13 @@ public class TranslatorCommon {
     }
 
     static public Restriction translateHasEngagedToLogicalGroup(TransactionRestriction hasEngaged) {
+        // PLS-8016, fix is commented out to match playmaker behavior
+        /*
+        if (hasEngaged.getTimeFilter().getRelation() == ComparisonType.PRIOR_ONLY && !hasEngaged.isNegate()) {
+            return hasEngaged;
+        }
+        */
+
         // no need to translate if it's for single product
         if (hasEngaged.getProductId().split(",").length == 1) {
             return hasEngaged;
