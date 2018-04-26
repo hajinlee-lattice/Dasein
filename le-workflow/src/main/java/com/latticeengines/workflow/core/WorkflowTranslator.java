@@ -111,7 +111,7 @@ public class WorkflowTranslator {
             for (LEJobListener listener : workflow.getListeners()) {
                 simpleJobBuilder = simpleJobBuilder.listener(listener);
             }
-            simpleJobBuilder.listener(finalJobListener);
+            simpleJobBuilder = simpleJobBuilder.listener(finalJobListener);
             return simpleJobBuilder.build();
         } else {
             throw new IllegalArgumentException("Cannot translate empty workflow");
