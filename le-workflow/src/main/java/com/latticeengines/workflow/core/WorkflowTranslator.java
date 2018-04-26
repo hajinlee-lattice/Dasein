@@ -66,7 +66,7 @@ public class WorkflowTranslator {
 
     @PostConstruct
     public void init() {
-        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, new LogJobListener(),
+        jobBuilderFactory = new LEJobBuilderFactory(jobRepository, finalJobListener, new LogJobListener(),
                 new FailureReportingListener(workflowJobEntityMgr));
     }
 
@@ -111,7 +111,6 @@ public class WorkflowTranslator {
             for (LEJobListener listener : workflow.getListeners()) {
                 simpleJobBuilder = simpleJobBuilder.listener(listener);
             }
-            simpleJobBuilder = simpleJobBuilder.listener(finalJobListener);
             return simpleJobBuilder.build();
         } else {
             throw new IllegalArgumentException("Cannot translate empty workflow");
