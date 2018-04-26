@@ -65,15 +65,34 @@
         <div ng-if="($ctrl.currentTab == 'account' || $ctrl.currentTab == 'contact') && $ctrl.counts[$ctrl.currentTab + 's'] > 0" class="options-text" >
               <ul class="checkbox-list">
                 <li>
-                  <label>
+                  <!-- <label> -->
                     <input  type="radio"
                             data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID'"
                             ng-click="$ctrl.setCleanupType('BYUPLOAD_ID', 'DeleteAccountTemplate')" />
-                            Upload a single csv file with {{$ctrl.currentTab == 'account' ? 'Account' : 'Contact'}} IDs
-                  </label>
+                       <!--      Upload a single csv file with {{$ctrl.currentTab == 'account' ? 'Account' : 'Contact'}} IDs
+                  </label> -->
                       <div 
+                        ng-if="$ctrl.currentTab == 'account' "
                         file-uploader-container
                         params="$ctrl.params['BYUPLOAD_ID']"
+                        label="{{$ctrl.params['BYUPLOAD_ID'].accountLabel}}"
+                        info-template="$ctrl.params['BYUPLOAD_ID'].accountInfoTemplate"
+                        input-name="csvFileName"
+                        file-select="$ctrl.fileSelect(fileName)"
+                        file-load="$ctrl.fileLoad(headers)"
+                        file-done="$ctrl.fileDone(result)"
+                        file-cancel="$ctrl.fileCancel()"
+                        class="form-group file-upload file-upload-with-padding" 
+                        ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ID' }"
+                        ng-click="$ctrl.setCleanupType('BYUPLOAD_ID')"
+                        >
+                    </div>
+                      <div 
+                        ng-if="$ctrl.currentTab == 'contact' "
+                        file-uploader-container
+                        params="$ctrl.params['BYUPLOAD_ID']"
+                        label="{{$ctrl.params['BYUPLOAD_ID'].contactLabel}}"
+                        info-template="$ctrl.params['BYUPLOAD_ID'].contactInfoTemplate"
                         input-name="csvFileName"
                         file-select="$ctrl.fileSelect(fileName)"
                         file-load="$ctrl.fileLoad(headers)"
@@ -124,15 +143,17 @@
                       </date-range-directive>
                   </li>
                   <li>
-                    <label>
+                    <!-- <label> -->
                       <input  type="radio" 
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')" />
-                      Upload a single csv file with Account IDs and Transaction Start Dates</label>
+                      <!-- Upload a single csv file with Account IDs and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
+                          label="Upload a single csv file with Account IDs and Transaction Start Dates"
                           params="$ctrl.params['BYUPLOAD_MINDATEANDACCOUNT']"
                           input-name="csvFileName"
+                          info-template="$ctrl.params['BYUPLOAD_MINDATEANDACCOUNT'].infoTemplate"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
                           file-done="$ctrl.fileDone(result)"
@@ -144,14 +165,16 @@
                       </div>
                   </li>
                   <li>
-                    <label>
+                    <!-- <label> -->
                       <input  type="radio" 
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1'"
-                              ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')" />
-                      Upload a single csv file with Account IDs, Product, and Transaction Start Dates</label>
+                              ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')" style="position: relative;"/>
+                      <!-- Upload a single csv file with Account IDs, Product, and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
+                          label="Upload a single csv file with Account IDs, Product, and Transaction Start Dates"
                           params="$ctrl.params['BYUPLOAD_ACPD_1']"
+                          info-template="$ctrl.params['BYUPLOAD_ACPD_1'].infoTemplate"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
@@ -160,19 +183,21 @@
                           class="form-group file-upload file-upload-with-padding" 
                           ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$touched && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' }"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')"
+
                           >
                       </div>
                   </li>
                   <li>
-                    <label>
+                    <!-- <label> -->
                       <input  type="radio" 
-                              name="segment.name"
                               data-ng-checked="$ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2'"
                               ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')" />
-                      Upload a single csv file with Account IDs, Products, Contact IDs, and Transaction Start Dates</label>
+                      <!-- Upload a single csv file with Account IDs, Products, Contact IDs, and Transaction Start Dates</label> -->
                         <div 
                           file-uploader-container
+                          label="Upload a single csv file with Account IDs, Products, Contact IDs, and Transaction Start Dates"
                           params="$ctrl.params['BYUPLOAD_ACPD_2']"
+                          info-template="$ctrl.params['BYUPLOAD_ACPD_2'].infoTemplate"
                           input-name="csvFileName"
                           file-select="$ctrl.fileSelect(fileName)"
                           file-load="$ctrl.fileLoad(headers)"
