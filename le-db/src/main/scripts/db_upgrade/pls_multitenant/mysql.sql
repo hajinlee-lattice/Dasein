@@ -17,12 +17,23 @@ CREATE PROCEDURE `UpdateCDLTables`()
 //
 DELIMITER ;
 
+CREATE PROCEDURE `UpdateDataFeed_Execution`()
+    BEGIN
+        ALTER TABLE PLS_MultiTenant.DATAFEED_EXECUTION ADD WORKFLOW_PID BIGINT(20);
+
+        UPDATE PLS_MultiTenant.DATAFEED_EXECUTION a
+            INNER JOIN PLS_MultiTenant.WORKFLOW_JOB b ON a.WORKFLOW_ID = b.WORKFLOW_ID
+        SET a.WORKFLOW_PID = b.PID;
+    END;
+//
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE `UpdateSchema`()
     BEGIN
         START TRANSACTION;
         CALL `UpdateCDLTables`();
+        CALL `UpdateDataFeed_Execution`();
         COMMIT;
     END;
 //

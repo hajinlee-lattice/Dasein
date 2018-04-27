@@ -62,6 +62,10 @@ public class DataFeedExecution implements HasPid, Serializable {
     @Column(name = "WORKFLOW_ID", nullable = true)
     private Long workflowId;
 
+    @JsonProperty("workflow_pid")
+    @Column(name = "WORKFLOW_PID", nullable = true)
+    private Long workflowPid;
+
     @Column(name = "JOB_TYPE", nullable = false)
     @JsonProperty("job_type")
     @Enumerated(EnumType.STRING)
@@ -119,6 +123,14 @@ public class DataFeedExecution implements HasPid, Serializable {
         this.workflowId = workflowId;
     }
 
+    public Long getWorkflowPid() {
+        return workflowPid;
+    }
+
+    public void setWorkflowPid(Long workflowPid) {
+        this.workflowPid = workflowPid;
+    }
+
     public DataFeedExecutionJobType getDataFeedExecutionJobType() {
         return this.jobType;
     }
@@ -143,7 +155,7 @@ public class DataFeedExecution implements HasPid, Serializable {
         private static Map<String, Status> nameMap;
 
         static {
-            nameMap = new HashMap<String, Status>();
+            nameMap = new HashMap<>();
             for (Status status : Status.values()) {
                 nameMap.put(status.getName(), status);
             }
