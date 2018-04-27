@@ -64,15 +64,25 @@ public class MergeProductFunctionalTestNG {
             new Product("3", "sku_g3p3", null, null,
                     null, null, null, null, null, null, null, null, null));
 
-    private final List<Product> invalidHierarchyProducts1 = Arrays.asList(
-            new Product(null, null, null, null,
-                    null, "l1", null, "c1", null, null, null, null, null),
+    private final List<Product> invalidHierarchyHavingLineButNoFamily = Arrays.asList(
             new Product("1", null, null, null,
                     null, "l1", null, "c1", null, null, null, null, null),
             new Product("2", null, null, null,
                     null, "l2", null, "c2", null, null, null, null, null));
 
-    private final List<Product> invalidHierarchyProducts2 = Arrays.asList(
+    private final List<Product> invalidHierarchySameSkusDifferentLines = Arrays.asList(
+            new Product("1", null, null, null,
+                    null, "l1", null, "c1", null, null, null, null, null),
+            new Product("1", null, null, null,
+                    null, "l2", null, "c1", null, null, null, null, null));
+
+    private final List<Product> invalidHierarchySameSkusDifferentFamilies = Arrays.asList(
+            new Product("1", null, null, null,
+                    null, null, "f1", "c1", null, null, null, null, null),
+            new Product("1", null, null, null,
+                    null, null, "f2", "c1", null, null, null, null, null));
+
+    private final List<Product> invalidHierarchySameSkusDifferentCategories = Arrays.asList(
             new Product("1", null, null, null,
                     null, null, null, "c1", null, null, null, null, null),
             new Product("1", null, null, null,
@@ -433,20 +443,40 @@ public class MergeProductFunctionalTestNG {
     }
 
     @Test(groups = "functional")
-    public void testMergeInvalidProductHierarchy1() {
+    public void testInvalidHierarchyHavingLineButNoFamily() {
         List<Product> result = new ArrayList<>();
         try {
-            step.mergeProducts(invalidHierarchyProducts1, currentProductList, result, report);
+            step.mergeProducts(invalidHierarchyHavingLineButNoFamily, currentProductList, result, report);
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
     }
 
     @Test(groups = "functional")
-    public void testMergeInvalidProductHierarchy2() {
+    public void testInvalidHierarchySameSkusDifferentCategories() {
         List<Product> result = new ArrayList<>();
         try {
-            step.mergeProducts(invalidHierarchyProducts2, currentProductList, result, report);
+            step.mergeProducts(invalidHierarchySameSkusDifferentCategories, currentProductList, result, report);
+        } catch (Exception exc) {
+            Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testInvalidHierarchySameSkusDifferentFamilies() {
+        List<Product> result = new ArrayList<>();
+        try {
+            step.mergeProducts(invalidHierarchySameSkusDifferentFamilies, currentProductList, result, report);
+        } catch (Exception exc) {
+            Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
+        }
+    }
+
+    @Test(groups = "functional")
+    public void testInvalidHierarchySameSkusDifferentLines() {
+        List<Product> result = new ArrayList<>();
+        try {
+            step.mergeProducts(invalidHierarchySameSkusDifferentLines, currentProductList, result, report);
         } catch (Exception exc) {
             Assert.assertTrue(report.containsKey("Merged_ErrorMessage"));
         }
