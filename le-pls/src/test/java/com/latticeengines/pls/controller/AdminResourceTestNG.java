@@ -218,7 +218,7 @@ public class AdminResourceTestNG extends PlsFunctionalTestNGBaseDeprecated {
         HttpHeaders headers = new HttpHeaders();
         headers.add("Content-Type", "application/json");
         headers.add("Accept", "application/json");
-        HttpEntity<String> requestEntity = new HttpEntity<>(data.toString(), headers);
+        HttpEntity<UserUpdateData> requestEntity = new HttpEntity<>(data, headers);
 
         ResponseEntity<ResponseDocument> responseEntity = restTemplate.exchange(getRestAPIHostPort()
                 + "/pls/admin/users?tenant=" + tenant.getId() + "&username=" + username, HttpMethod.PUT, requestEntity,
