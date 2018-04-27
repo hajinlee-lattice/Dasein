@@ -75,36 +75,8 @@ public class ModelingFileUploadResource {
             @RequestParam(value = "schema", required = false) SchemaInterpretation schemaInterpretation, //
             @RequestParam(value = "entity", required = false, defaultValue = "") String entity,
             @RequestParam("file") MultipartFile file) {
-        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
-        try {
-            log.info(String.format("Uploading file %s (csvFileName=%s, compressed=%s)", fileName, csvFileName,
-                    compressed));
-            if (file.getSize() >= maxUploadSize) {
-                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
-            }
-
-            InputStream stream = file.getInputStream();
-
-            if (compressed) {
-                stream = GzipUtils.decompressStream(stream);
-            }
-
-            stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName);
-            if (!StringUtils.isEmpty(entity)) {
-                schemaInterpretation = SchemaInterpretation.getByName(entity);
-            }
-
-            return ResponseDocument.successResponse(
-                    fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream));
-        } catch (IOException e) {
-            throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-        } finally {
-            try {
-                closeableResourcePool.close();
-            } catch (IOException e) {
-                throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
-            }
-        }
+        return ResponseDocument.successResponse(
+                uploadFile(fileName, compressed, csvFileName, schemaInterpretation, entity, file, true));
     }
 
     @RequestMapping(value = "/unnamed", method = RequestMethod.POST)
@@ -211,15 +183,44 @@ public class ModelingFileUploadResource {
             throw new LedpException(LedpCode.LEDP_18173, new String[] { schemaInterpretation.name() });
         }
 
-        ResponseDocument<SourceFile> responseDocument = uploadFile(compressed, csvFileName, schemaInterpretation, "",
-                file);
-
-        if (!responseDocument.isSuccess()) {
-            throw new RuntimeException(
-                    "Upload delete file template failed. " + StringUtils.join(responseDocument.getErrors(), ","));
-        }
+        SourceFile sourceFile = uploadFile("file_" + DateTime.now().getMillis() + ".csv",
+                compressed, csvFileName, schemaInterpretation, "", file, false);
 
         return ResponseDocument.successResponse(fileUploadService
-                .uploadCleanupFileTemplate(responseDocument.getResult(), schemaInterpretation, cleanupOperationType));
+                .uploadCleanupFileTemplate(sourceFile, schemaInterpretation, cleanupOperationType));
+    }
+
+    private SourceFile uploadFile(String fileName, boolean compressed, String csvFileName,
+                                  SchemaInterpretation schemaInterpretation, String entity, MultipartFile file,
+                                  boolean checkHeaderFormat) {
+        CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
+        try {
+            log.info(String.format("Uploading file %s (csvFileName=%s, compressed=%s)", fileName, csvFileName,
+                    compressed));
+            if (file.getSize() >= maxUploadSize) {
+                throw new LedpException(LedpCode.LEDP_18092, new String[] { Long.toString(maxUploadSize) });
+            }
+
+            InputStream stream = file.getInputStream();
+
+            if (compressed) {
+                stream = GzipUtils.decompressStream(stream);
+            }
+
+            stream = modelingFileMetadataService.validateHeaderFields(stream, closeableResourcePool, csvFileName, checkHeaderFormat);
+            if (!StringUtils.isEmpty(entity)) {
+                schemaInterpretation = SchemaInterpretation.getByName(entity);
+            }
+
+            return fileUploadService.uploadFile(fileName, schemaInterpretation, entity, csvFileName, stream);
+        } catch (IOException e) {
+            throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+        } finally {
+            try {
+                closeableResourcePool.close();
+            } catch (IOException e) {
+                throw new LedpException(LedpCode.LEDP_18053, new String[] { csvFileName });
+            }
+        }
     }
 }

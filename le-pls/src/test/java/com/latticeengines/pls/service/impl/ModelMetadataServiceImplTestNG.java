@@ -103,7 +103,8 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool,
+                    dataFile.getName(), true);
             closeableResourcePool.close();
         } catch (Exception e) {
             thrown = true;
@@ -124,7 +125,8 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         boolean thrown = false;
 
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool,
+                    dataFile.getName(), true);
         } catch (Exception e) {
             thrown = true;
             assertTrue(e instanceof LedpException);
@@ -143,7 +145,8 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         fileInputStream = new BufferedInputStream(new FileInputStream(dataFile));
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
 
-        modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
+        modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName(),
+                true);
 
         closeableResourcePool.close();
 
@@ -157,7 +160,8 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool,
+                    dataFile.getName(), true);
         } catch (Exception e) {
             thrown = true;
         } finally {
@@ -174,7 +178,8 @@ public class ModelMetadataServiceImplTestNG extends PlsFunctionalTestNGBase {
         CloseableResourcePool closeableResourcePool = new CloseableResourcePool();
         boolean thrown = false;
         try {
-            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool, dataFile.getName());
+            modelingFileMetadataService.validateHeaderFields(fileInputStream, closeableResourcePool,
+                    dataFile.getName(), true);
         } catch (Exception e) {
             thrown = true;
             assertTrue(e instanceof LedpException);

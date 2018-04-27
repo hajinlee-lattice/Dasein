@@ -272,7 +272,7 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
 
     @Override
     public InputStream validateHeaderFields(InputStream stream, CloseableResourcePool closeableResourcePool,
-            String fileDisplayName) {
+            String fileDisplayName, boolean checkHeaderFormat) {
 
         if (!stream.markSupported()) {
             stream = new BufferedInputStream(stream);
@@ -287,7 +287,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             log.error(e.getMessage(), e);
             throw new LedpException(LedpCode.LEDP_00002, e);
         }
-        ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
+        if (checkHeaderFormat) {
+            ValidateFileHeaderUtils.checkForHeaderFormat(headerFields);
+        }
         ValidateFileHeaderUtils.checkForEmptyHeaders(fileDisplayName, headerFields);
         Collection<String> reservedWords = Arrays.asList(ReservedField.Rating.displayName);
         ValidateFileHeaderUtils.checkForReservedHeaders(fileDisplayName, headerFields, reservedWords);
