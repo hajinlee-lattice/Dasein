@@ -11,9 +11,7 @@ angular
             url: '/leaf',
             params: {
                 pageIcon: '',
-                pageTitle: 'Template's Leaf
-            },
-            resolve: {
+                pageTitle: "Template's Leaf"
             },
             views: {
                 "main@": {

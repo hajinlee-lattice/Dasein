@@ -8,41 +8,33 @@ angular
     'common.datacloud.tabs.subheader',
     'common.datacloud.targettabs',
     'common.datacloud.query',
-    'common.datacloud.explorer.export',
-    'mainApp.core.utilities.BrowserStorageUtility'
+    'common.datacloud.explorer.export'
 ])
-.run(function($rootScope, $state, DataCloudStore, DataCloudService) {
-    $rootScope.$on('$stateChangeStart', function(event, toState, params, fromState, fromParams) {
-        var states = {
-            'home.segments': 'customer',
-            'home.segment.explorer': 'customer', 
-            'home.segment.explorer.attributes': 'customer',
-            'home.segment.explorer.builder': 'customer',
-            'home.segment.accounts': 'customer',
-            'home.segment.contacts': 'customer',
-            'home.model.analysis.explorer': 'customer',
-            'home.model.analysis.explorer.attributes': 'customer',
-            'home.model.analysis.explorer.builder': 'customer',
-            'home.model.analysis.accounts': 'customer',
-            'home.model.analysis.contacts': 'customer',
-            'home.ratingsengine.rulesprospects.segment.attributes': 'customer',
-            'home.ratingsengine.rulesprospects.segment.attributes.rules': 'customer',
-            'home.ratingsengine.dashboard.segment.attributes': 'customer',
-            'home.ratingsengine.dashboard.segment.attributes.add': 'customer',
-            'home.ratingsengine.dashboard.segment.attributes.rules': 'customer',
-            'home.datacloud.explorer': 'lattice',
-            'home.datacloud.insights': 'lattice',
-            'home.datacloud.lookup.form': 'lattice'
-        };
-
-        if (states[toState.name]) {
-            if (DataCloudService.path != DataCloudService.paths[states[toState.name]]) {
-                DataCloudService.path = DataCloudService.paths[states[toState.name]];
-
-                // reset DataCloudStore if context changes
-                DataCloudStore.init();
-            }
+.run(function($transitions) {
+    var setMetadataApiContext = function(trans, context) {
+        var service = trans.injector().get('DataCloudService'),
+            store = trans.injector().get('DataCloudStore'),
+            to = trans.$to();
+        
+        if (service.path !== service.paths[context]) {
+            service.path = service.paths[context];
+            store.init();
         }
+    };
+
+    var states = {
+        'home.datacloud.*': 'lattice',
+        'home.segment.*': 'customer',
+        'home.segments*': 'customer',
+        'home.ratingsengine.*': 'customer'
+    };
+
+    Object.keys(states).forEach(function(state) {
+        var context = states[state];
+        
+        $transitions.onStart({ entering: state }, function(trans) {
+            setMetadataApiContext(trans, context);
+        });
     });
 })
 .provider('DataCloudResolves', function DataCloudResolvesProvider() {
@@ -160,7 +152,7 @@ angular
                 }]
             }
         };
-    }
+    };
 })
 .config(function($stateProvider, DataCloudResolvesProvider) {
     var DataCloudResolves = DataCloudResolvesProvider.$get().main;
@@ -173,34 +165,34 @@ angular
                 pageIcon: 'ico-segments',
                 edit: null
             },
+            resolve: angular.extend({}, DataCloudResolves, {
+                SegmentsList: ['$q', 'SegmentService', 'SegmentStore', function($q, SegmentService, SegmentStore) {
+                    var deferred = $q.defer();
+
+                    SegmentService.GetSegments().then(function(result) {
+                        SegmentStore.setSegments(result);
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;                  
+                }],
+                Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore) {
+                    var deferred = $q.defer();
+
+                    DataCloudStore.getCube().then(function(result) {
+                        if (result.data) {
+                            deferred.resolve(result.data);
+                        }
+                    });
+                
+                    return deferred.promise;
+                }]
+            }),
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
-                    resolve: angular.extend({}, DataCloudResolves, {
-                        SegmentsList: ['$q', 'SegmentService', 'SegmentStore', function($q, SegmentService, SegmentStore) {
-                            var deferred = $q.defer();
-
-                            SegmentService.GetSegments().then(function(result) {
-                                SegmentStore.setSegments(result);
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;                  
-                        }],
-                        Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore) {
-                            var deferred = $q.defer();
-
-                            DataCloudStore.getCube().then(function(result) {
-                                if (result.data) {
-                                    deferred.resolve(result.data);
-                                }
-                            });
-                        
-                            return deferred.promise;
-                        }]
-                    }),
                     controller: 'SegmentationListController',
                     controllerAs: 'vm',
                     templateUrl: 'app/segments/views/SegmentationListView.html'
@@ -212,129 +204,15 @@ angular
             resolve: DataCloudResolves,
             redirectTo: 'home.datacloud.explorer'
         })
-        .state('home.datacloud.lookup', {
-            url: '/lookup',
-            redirectTo: 'home.datacloud.lookup.form'
-        })
-        .state('home.datacloud.lookup.form', {
-            url: '/form',
-            params: {
-                pageIcon: 'ico-enrichment',
-                pageTitle: 'Data Cloud Explorer'
-            },
-            views: {
-                "summary@": {
-                    controller: 'DataCloudTabsController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/tabs/datacloud/datacloud.component.html'
-                },
-                "main@": {
-                    controller: 'LookupController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/lookup/lookup.component.html'
-                }
-            }
-        })
-        .state('home.datacloud.lookup.tabs', {
-            url: '/tabs',
-            params: {
-                pageIcon: 'ico-enrichment',
-                pageTitle: 'Data Cloud Explorer'
-            },
-            onExit: ['DataCloudStore', 'Enrichments', function(DataCloudStore, Enrichments) {
-                DataCloudStore.setEnrichments(Enrichments, false);
-            }],
-            resolve: {
-                LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
-                    var deferred = $q.defer();
-
-                    LookupService.submit(ApiHost).then(function(data) {
-                        var current = new Date().getTime();
-                        var old = LookupStore.get('timestamp');
-
-                        LookupStore.add('elapsedTime', current - old);
-                        LookupStore.add('response', data);
-
-                        deferred.resolve(data);
-                    });
-
-                    return deferred.promise;
-                }
-            },
-            views: {
-                "summary@": {
-                    controller: 'DataCloudTabsController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/tabs/datacloud/datacloud.component.html'
-                },
-                "subsummary@": {
-                    controller: function(LookupResponse, LookupStore, BrowserStorageUtility) {
-                        LookupStore.add('count', 0);//Object.keys(LookupResponse.attributes).length;
-
-                        this.store = LookupStore;
-                        this.ldc_name = LookupResponse.companyInfo
-                            ? LookupResponse.companyInfo.LDC_Name
-                            : '';
-
-                        this.hideLookupAttributesCount = LookupStore.hideLookupResponse(LookupResponse);
-
-                        this.elapsedTime = LookupStore.get('elapsedTime');
-
-                        this.isInternalUser = false;
-                        if (BrowserStorageUtility.getSessionDocument() != null && BrowserStorageUtility.getSessionDocument().User != null
-                            && BrowserStorageUtility.getSessionDocument().User.AccessLevel != null) {
-                            var accessLevel = BrowserStorageUtility.getSessionDocument().User.AccessLevel;
-
-                            if (accessLevel == "INTERNAL_USER" || accessLevel == "INTERNAL_ADMIN" || accessLevel == "SUPER_ADMIN") {
-                                this.isInternalUser = true;
-                            }
-                        }
-                    },
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/lookup/tabs.component.html'
-                }
-            },
-            redirectTo: 'home.datacloud.lookup.tabs.attr'
-        })
-        .state('home.datacloud.lookup.tabs.matching', {
-            url: '/matching',
-            views: {
-                "main@": {
-                    controller: function(LookupResponse, LookupStore) {
-                        var vm = this;
-
-                        angular.extend(vm, {
-                            elapsedTime: LookupStore.get('elapsedTime'),
-                            response: LookupResponse,
-                            matchLogs: LookupStore.syntaxHighlight(LookupResponse.matchLogs)
-                        });
-                    },
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/lookup/matching.component.html'
-                }
-            }
-        })
-        .state('home.datacloud.lookup.tabs.attr', {
-            url: '/attr/:category/:subcategory',
-            params: {
-                section: 'lookup',
-                LoadingText: 'Looking up Company Profile data'
-            },
-            views: {
-                "main@": {
-                    controller: 'DataCloudController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/explorer/explorer.component.html'
-                }
-            }
-        })
         .state('home.datacloud.explorer', {
             url: '/explorer/:section/:category/:subcategory',
             params: {
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
                 LoadingText: 'Loading DataCloud Attributes',
-                section: 'edit'
+                section: 'edit',
+                category: { dynamic: true, value: '' },
+                subcategory: { dynamic: true, value: '' }
             },
             resolve: {
                 LookupResponse: function() {
@@ -360,7 +238,9 @@ angular
                 pageIcon: 'ico-enrichment',
                 pageTitle: 'Data Cloud Explorer',
                 LoadingText: 'Loading DataCloud Attributes',
-                section: 'insights'
+                section: 'insights',
+                category: { dynamic: true, value: '' },
+                subcategory: { dynamic: true, value: '' }
             },
             resolve: {
                 LookupResponse: function($q, LookupService, LookupStore, ApiHost) {
@@ -386,19 +266,25 @@ angular
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
             }
-        });
-
-    var getState = function(type, overwrite) {
-        return angular.extend({}, analysis[type], overwrite);
-    };
-
-    var analysis = {
-        main: {
-            url: '/analysis/:segment',
+        })
+        .state('home.segment', {
+            url: '/segment/:segment',
             params: {
+                section: 'segment.analysis',
                 segment: 'Create',
                 reload: true
             },
+            onExit: ['DataCloudStore', 'QueryStore', function(DataCloudStore, QueryStore) {
+                var enrichments = DataCloudStore.enrichments.filter(function (item) {
+                    return item.SegmentChecked;
+                });
+
+                enrichments.forEach(function(item) {
+                    delete item.SegmentChecked;
+                });
+
+                QueryStore.clear();
+            }],
             resolve: angular.extend({}, DataCloudResolves, {
                 QueryRestriction: ['$stateParams', '$state', '$q', 'QueryStore', 'SegmentStore', function($stateParams, $state, $q, QueryStore, SegmentStore) {
                     var resolveQueryRestriction = function() {
@@ -457,18 +343,45 @@ angular
                     templateUrl: '/components/datacloud/tabs/subheader/subheader.component.html'
                 }
             },
-            redirectTo: 'home.model.analysis.explorer'
-        },
-        explorer: { // no view, just puts attributes and query under same parent state
+            redirectTo: 'home.segment.explorer'
+        })
+        .state('home.segment.explorer', {
             url: '/explorer',
-            redirectTo: 'home.model.analysis.explorer.attributes'
-        },
-        attributes: {
+            params: {
+                section: 'segment.analysis'
+            },
+            redirectTo: 'home.segment.explorer.attributes'
+        })
+        .state('home.segment.explorer.attributes', {
             url: '/attributes/:category/:subcategory',
             params: {
+                segment: 'segment.name',
+                pageTitle: 'My Data',
                 pageIcon: 'ico-analysis',
-                pageTitle: 'Analysis',
-                section: 'segment.analysis'
+                section: 'segment.analysis',
+                category: { dynamic: true, value: '' },
+                subcategory: { dynamic: true, value: '' }
+            },
+            resolve: {
+                LookupResponse: [ function() {
+                    return { attributes: null };
+                }],
+                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', 'QueryService', 'QueryStore', function($state, $stateParams, EnrichmentCount, QueryService, QueryStore) {
+                    var query = {};
+                    if (EnrichmentCount == 0 && QueryStore.counts.accounts.value == 0 && QueryStore.counts.contacts.value == 0) {
+                        QueryService.GetEntitiesCounts(query).then(function(result) {
+                            if ((!result || (result.Account == 0 && result.Contact == 0))) {
+                                $state.go('home.nodata', { 
+                                    tenantName: $stateParams.tenantName,
+                                    segment: $stateParams.segment
+                                });
+                            } else {
+                                QueryStore.counts.accounts.value = result.Account;
+                                QueryStore.counts.contacts.value = result.Contact;
+                            }
+                        });
+                    }
+                }]
             },
             views: {
                 "main@": {
@@ -477,64 +390,8 @@ angular
                     templateUrl: '/components/datacloud/explorer/explorer.component.html'
                 }
             }
-        },
-        builder: {
-            url: '/builder',
-            params: {
-                pageIcon: 'ico-analysis',
-                pageTitle: 'Query Builder'
-            },
-            resolve: {
-                Cube: ['$q', 'DataCloudStore', function($q, DataCloudStore){
-                    var deferred = $q.defer();
-
-                    DataCloudStore.getCube().then(function(result) {
-                        if (result.data) {
-                            deferred.resolve(result.data);
-                        }
-                    });
-                    
-                    return deferred.promise;
-                }],
-                RatingEngineModel: [function() {
-                    return null;
-                }],
-                CurrentRatingEngine: [function() {
-                    return null;
-                }],
-            },
-            views: {
-                "main@": {
-                    controller: 'AdvancedQueryCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/query/advanced/advanced.component.html'
-                }
-            }
-        },
-        enumpicker: {
-            url: '/picker/:entity/:fieldname',
-            resolve: {
-                PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
-                    var deferred = $q.defer();
-                    var entity = $stateParams.entity;
-                    var fieldname = $stateParams.fieldname;
-
-                    QueryTreeService.getPickerCubeData(entity, fieldname).then(function(result) {
-                        deferred.resolve(result.data);
-                    });
-                    
-                    return deferred.promise;
-                }]
-            },
-            views: {
-                "main@": {
-                    controller: 'ValuePickerController',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/picker/picker.component.html'
-                }
-            }
-        },
-        nodata: {
+        })
+        .state('home.nodata', {
             url: '/nodata',
             params: {
                 pageTitle: 'My Data',
@@ -558,147 +415,8 @@ angular
                     templateUrl: '/components/datacloud/explorer/nodata/nodata.component.html'
                 }
             }
-        },
-        accounts: {
-            url: '/accounts',
-            params: {
-                pageIcon: 'ico-analysis',
-                pageTitle: 'Accounts'
-            },
-            resolve: {
-                Accounts: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
-                    var deferred = $q.defer(),
-                        segmentName = $stateParams.segment,
-                        accountRestriction = QueryStore.getAccountRestriction(),
-                        contactRestriction = QueryStore.getContactRestriction();
-
-                    if(segmentName === "Create"){
-                        query = { 
-                            'free_form_text_search': '',
-                            'account_restriction': accountRestriction,
-                            'contact_restriction': contactRestriction,
-                            'preexisting_segment_name': segmentName,
-                            'page_filter': {
-                                'num_rows': 10,
-                                'row_offset': 0
-                            }
-                        };
-
-                        deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
-                    } else {
-
-                        SegmentStore.getSegmentByName(segmentName).then(function(result) {
-
-                            var segment = result;
-                            query = { 
-                                'free_form_text_search': '',
-                                'account_restriction': segment.account_restriction,
-                                'contact_restriction': segment.contact_restriction,
-                                'preexisting_segment_name': segmentName,
-                                'page_filter': {
-                                    'num_rows': 10,
-                                    'row_offset': 0
-                                }
-                            };
-                            deferred.resolve( QueryStore.GetDataByQuery('accounts', query).then(function(data){ return data; }));
-                        });
-                    };
-
-                    return deferred.promise;
-
-                }],
-                AccountsCoverage: [function(){
-                    return null;
-                }],
-                NoSFIdsCount: [function(){
-                    return null;
-                }],
-                Contacts: [function(){
-                    return null;
-                }],
-                Config: [function(){
-                    return null;
-                }],
-            },
-            views: {
-                "main@": {
-                    controller: 'QueryResultsCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                }
-            }
-        },
-        contacts: {
-            url: '/contacts',
-            params: {
-                pageIcon: 'ico-analysis',
-                pageTitle: 'Contacts'
-            },
-            views: {
-                "main@": {
-                    resolve: {
-                        Contacts: ['$q', '$stateParams', 'QueryStore', 'SegmentStore', function($q, $stateParams, QueryStore, SegmentStore) {
-                            var deferred = $q.defer(),
-                                segmentName = $stateParams.segment,
-                                accountRestriction = QueryStore.getAccountRestriction(),
-                                contactRestriction = QueryStore.getContactRestriction();
-
-                            if(segmentName === "Create"){
-                                query = { 
-                                    'free_form_text_search': '',
-                                    'account_restriction': accountRestriction,
-                                    'contact_restriction': contactRestriction,
-                                    'preexisting_segment_name': segmentName,
-                                    'page_filter': {
-                                        'num_rows': 10,
-                                        'row_offset': 0
-                                    }
-                                };
-                                deferred.resolve( QueryStore.GetDataByQuery('contacts', query).then(function(data){ return data.data; }));
-                            } else {
-                                SegmentStore.getSegmentByName(segmentName).then(function(result) {
-                                    var segment = result;
-
-                                    query = { 
-                                        'free_form_text_search': '',
-                                        'account_restriction': segment.account_restriction,
-                                        'contact_restriction': segment.contact_restriction,
-                                        'preexisting_segment_name': segmentName,
-                                        'page_filter': {
-                                            'num_rows': 10,
-                                            'row_offset': 0
-                                        }
-                                    };
-                                    deferred.resolve( QueryStore.GetDataByQuery('contacts', query).then(function(data){ return data.data; }));
-                                });
-                            };
-
-                            return deferred.promise;
-
-                        }],
-                        Accounts: [function(){
-                            return null;
-                        }],
-                        NoSFIdsCount: [function(){
-                            return null;
-                        }],
-                        AccountsCoverage: [function(){
-                            return null;
-                        }],
-                        Config: [function(){
-                            return null;
-                        }],
-                    },
-                    controller: 'QueryResultsCtrl',
-                    controllerAs: 'vm',
-                    templateUrl: '/components/datacloud/query/results/queryresults.component.html'
-                }
-            }
-        },
-        abstract: {
-            abstract: true
-        },
-        exportSegment: {            
+        })
+        .state('home.exportSegment', {            
             url: '/export/:exportID',
             params: {
                 pageTitle: 'Export Segment',
@@ -724,87 +442,5 @@ angular
                     templateUrl: '/components/datacloud/explorer/segmentexport/segmentexport.component.html'
                 }
             }
-        }
-    };
-
-    $stateProvider
-        .state('home.model.analysis', getState('main'))
-        .state('home.model.analysis.explorer', getState('explorer', {
-            resolve: {
-                CurrentConfiguration: ['$q', '$stateParams', 'ModelRatingsService', function($q, $stateParams, ModelRatingsService) {
-                    var deferred = $q.defer(),
-                        id = $stateParams.modelId;
-
-                    ModelRatingsService.MostRecentConfiguration(id).then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
-                }],
-                LookupResponse: [ function() {
-                    return { attributes: null };
-                }]
-            }
-        }))
-        .state('home.model.analysis.explorer.attributes', getState('attributes'))
-        .state('home.model.analysis.explorer.builder', getState('builder'))
-        .state('home.model.analysis.accounts', getState('accounts'))
-        .state('home.model.analysis.contacts', getState('contacts'))
-        .state('home.segment', getState('main', {
-            url: '/segment/:segment',
-            onExit: ['DataCloudStore', 'QueryStore', function(DataCloudStore, QueryStore) {
-                var enrichments = DataCloudStore.enrichments.filter(function (item) {
-                    return item.SegmentChecked;
-                });
-                enrichments.forEach(function(item) {
-                    delete item.SegmentChecked;
-                })
-                QueryStore.clear();
-            }],
-            params: {
-                section: 'segment.analysis'
-            },
-            redirectTo: 'home.segment.explorer'
-        }))
-        .state('home.segment.explorer', getState('explorer', {
-            params: {
-                section: 'segment.analysis'
-            },
-            redirectTo: 'home.segment.explorer.attributes'
-        }))
-        .state('home.segment.explorer.attributes', getState('attributes', {
-            params: {
-                segment: 'segment.name',
-                pageTitle: 'My Data',
-                pageIcon: 'ico-analysis',
-                section: 'segment.analysis'
-            },
-            resolve: {
-                LookupResponse: [ function() {
-                    return { attributes: null };
-                }],
-                RerouteToNoData: ['$state', '$stateParams', 'EnrichmentCount', 'QueryService', 'QueryStore', function($state, $stateParams, EnrichmentCount, QueryService, QueryStore) {
-                    var query = {};
-                    if (EnrichmentCount == 0 && QueryStore.counts.accounts.value == 0 && QueryStore.counts.contacts.value == 0) {
-                        QueryService.GetEntitiesCounts(query).then(function(result) {
-                            if ((!result || (result.Account == 0 && result.Contact == 0))) {
-                                $state.go('home.nodata', { 
-                                    tenantName: $stateParams.tenantName,
-                                    segment: $stateParams.segment
-                                });
-                            } else {
-                                QueryStore.counts.accounts.value = result.Account;
-                                QueryStore.counts.contacts.value = result.Contact;
-                            }
-                        });
-                    }
-                }]
-            }
-        })) 
-        .state('home.segment.explorer.builder', getState('builder'))
-        .state('home.segment.explorer.enumpicker', getState('enumpicker'))
-        .state('home.nodata', getState('nodata'))
-        .state('home.segment.accounts', getState('accounts'))
-        .state('home.segment.contacts', getState('contacts'))
-        .state('home.exportSegment', getState('exportSegment'));
+        });
 });

@@ -1,3 +1,4 @@
+/* jshint -W014 */
 angular
 .module('mainApp')
 .service('StateHistory', function() {
@@ -10,129 +11,129 @@ angular
 
     this.lastTo = function() {
         return this.states.to[this.states.to.length - 1];
-    }
+    };
 
     this.lastToParams = function() {
         return this.states.toParams[this.states.toParams.length - 1];
-    }
+    };
 
     this.lastFrom = function() {
         return this.states.from[this.states.from.length - 1];
-    }
+    };
 
     this.lastFromParams = function() {
         return this.states.fromParams[this.states.fromParams.length - 1];
-    }
+    };
 
     this.isTo = function(name) {
         return this.lastTo().name == name;
-    }
+    };
 
     this.isFrom = function(name) {
         return this.lastFrom().name == name;
-    }
+    };
 
     this.setTo = function(state, params) {
         this.states.to.push(state);
         this.states.toParams.push(params);
-    }
+    };
 
     this.setFrom = function(state, params) {
         this.states.from.push(state);
         this.states.fromParams.push(params);
-    }
+    };
 })
-.run(function($rootScope, $state, ServiceErrorUtility, LookupStore, StateHistory, $urlRouter) {
-    var self = this;
-    $rootScope.$on('$stateChangeStart', function(event, toState, toParams, fromState, fromParams) {
-        StateHistory.setTo(toState, toParams);
-        StateHistory.setFrom(fromState, fromParams);
-        // when user hits browser Back button after app instantiate, send back to login
-        if (fromState.name == 'home.models' && toState.name == 'home') {
-            event.preventDefault();
-            window.open("/login", "_self");
-        }
+.run(function($transitions) {
+    // setup StateHistory service and close any error banners left open
+    $transitions.onStart({}, function(trans) {
+        var StateHistory = trans.injector().get('StateHistory'),
+            ServiceError = trans.injector().get('ServiceErrorUtility'),
+            to = trans.$to(),
+            from = trans.$from();
+        
+        StateHistory.setTo(to, trans.params('to'));
+        StateHistory.setFrom(from, trans.params('from'));
 
-        // detect when a major state change is taking place and ShowSpinner gif
-        var views = toState.views || {},
-            toParams = toParams,
-            LoadingText = toParams ? (toParams.LoadingText || '') : '',
-            split, view, hasMain = false;
-
-        for (view in views) {
-            split = view.split('@');
-
-            if (split[0] == 'main') {
-                hasMain = true;
-            }
-        }
-
-        if (hasMain && toParams && toParams.LoadingSpinner !== false) {
-            ShowSpinner(LoadingText);
-        }
-
-        // implement state redirectTo functionality
-        if (toState.redirectTo) {
-            event.preventDefault();
-            $state.go(toState.redirectTo, toParams);
-        }
-
-        // close any error banner that might be open
-        ServiceErrorUtility.hideBanner();
+        ServiceError.hideBanner();
     });
 
-    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) {
-        var from = fromState.name;
-        var to = toState.name;
+    // when user hits browser Back button after app instantiate, send back to login
+    $transitions.onStart({ 
+        to: 'home', 
+        from: function(state) {
+            return state.name == 'home.models' || state.name == 'home.datacloud';
+        }
+    }, function(trans) {
+        window.open("/login", "_self");
+    });
 
-        // clear LookupStore data when leaving Data-Cloud section
-        if ((from.indexOf('home.lookup') > -1 || from.indexOf('home.data-cloud') > -1) &&
-            !(to.indexOf('home.lookup') > -1 || to.indexOf('home.data-cloud') > -1)) {
+    // ShowSpinner when transitioning states that alter main ui-view
+    $transitions.onStart({ 
+        to: function(state) { 
+            return state.views['main'] || state.views['main@'];
+        } 
+    }, function(trans) {
+        var StateHistory = trans.injector().get('StateHistory'),
+            ServiceError = trans.injector().get('ServiceErrorUtility'),
+            to = trans.$to(),
+            from = trans.$from(),
+            params = trans.params('to') || {};
 
-            LookupStore.reset();
+        if (to.name !== from.name && params.LoadingSpinner !== false) {
+            ShowSpinner(params.LoadingText || '');
         }
     });
 
-    $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error) {
-        console.error('$stateChangeError', event, toState, toParams, fromState, fromParams, error);
+    $transitions.onBefore({}, function(trans) {
+        var params = Object.assign({}, trans.params('to'));
+        var stateService = trans.router.stateService;
+        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility');
+        var ClientSession = BrowserStorageUtility.getClientSession();
+        var tenant = ClientSession.Tenant;
+      
+        if (params.tenantName === '') {
+            params.tenantName = tenant.DisplayName;
 
-        if ($state.current.name != toState.name) {
-            $state.reload();
+            return stateService.target(trans.to(), params);
+        }
+    });
+
+    $transitions.onSuccess({ to: 'home' }, function(trans) {
+        var stateService = trans.router.stateService;
+        var BrowserStorageUtility = trans.injector().get('BrowserStorageUtility');
+        var ClientSession = BrowserStorageUtility.getClientSession();
+        var tenant = ClientSession.Tenant;
+
+        if (trans.$to().params.tenantName != tenant.DisplayName) {
+            var FeatureFlags = trans.injector().get('FeatureFlagService');
+
+            FeatureFlags.GetAllFlags().then(function(result) {
+                var flags = FeatureFlags.Flags();
+                var sref = FeatureFlags.FlagIsEnabled(flags.ENABLE_CDL)
+                    ? 'home.segment.explorer.attributes'
+                    : 'home.models';
+
+                trans.router.stateService.go(sref, {
+                    tenantName: tenant.DisplayName,
+                    segment: 'Create'
+                });
+            });
         }
     });
 })
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {
     $locationProvider.html5Mode(true);
-    $urlRouterProvider.otherwise(function ($injector, $location) {
-        var $state = $injector.get('$state');
-        $state.go('loading');
-    });
+    $urlRouterProvider.otherwise('/tenant/');
     
     $stateProvider
-        .state('loading', {
-            
-            resolve: {
-                ClientSession: function(BrowserStorageUtility) {
-                    return BrowserStorageUtility.getClientSession();
-                },
-                Tenant: function(ClientSession, $state) {
-                    var name = ClientSession.Tenant.DisplayName; 
-                    $state.go('home',{tenantName: name});
-
-                }
-            }
-
-        })
         .state('home', {
             url: '/tenant/:tenantName',
-            
+            params: {
+                tenantName: { dynamic: true, value: '' }
+            },
             resolve: {
-                
                 ClientSession: function(BrowserStorageUtility) {
                     return BrowserStorageUtility.getClientSession();
-                },
-                Tenant: function(ClientSession) {
-                    return ClientSession.Tenant;
                 },
                 WidgetConfig: function($q, ConfigService) {
                     var deferred = $q.defer();
@@ -175,41 +176,6 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "sidebar": {
-                    controller: function($scope, $rootScope, $stateParams, $state, Tenant, FeatureFlagService, DataCloudStore) {
-                        var tenantName = $stateParams.tenantName;
-                        if (tenantName != Tenant.DisplayName) {
-                            $rootScope.tenantName = window.escape(Tenant.DisplayName);
-                            $rootScope.tenantId = window.escape(Tenant.Identifier);
-
-                            FeatureFlagService.GetAllFlags().then(function(result) {
-                                var flags = FeatureFlagService.Flags();
-                                if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-                                    $state.go('home.segment.explorer.attributes', {
-                                        tenantName: Tenant.DisplayName,
-                                        segment: 'Create'
-                                    });
-                                } else {
-                                    $state.go('home.models', {
-                                        tenantName: Tenant.DisplayName
-                                    });
-                                }
-                            });
-                        }else {
-                            var currentState = $state.current.name;
-                            if('home' === currentState){
-                                var flags = FeatureFlagService.Flags();
-                                if(FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL)){
-                                    $state.go('home.segment.explorer.attributes',{
-                                        segment: 'Create'
-                                    });
-                                }else{
-                                    $state.go('home.models', {
-                                        tenantName: Tenant.DisplayName
-                                    });
-                                }
-                            }
-                        }
-                    },
                     templateUrl: 'app/navigation/sidebar/sidebar.component.html'
                 },
                 "navigation@home": {
@@ -266,6 +232,10 @@ angular
         })
         .state('home.model', {
             url: '/model/:modelId/:rating_id',
+            params: {
+                modelId: '',
+                rating_id: ''
+            },
             resolve: {
                 RatingEngine: function($q, $stateParams, RatingsEngineStore) {
                     var deferred = $q.defer(),
@@ -350,7 +320,7 @@ angular
                         $scope.data = ModelStore.data;
                         $compile($('#modelDetailContainer').html('<div id="modelDetailsAttributesTab" class="tab-content" data-top-predictor-widget></div>'))($scope);
 
-                        if(["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
+                        if (["home.ratingsengine.dashboard"].indexOf(lastFrom.name) !== -1 || IsRatingEngine) {
                             $rootScope.$broadcast('model-details', { displayName: RatingEngine.displayName });
                         } else {
                             $rootScope.$broadcast('model-details', { displayName: Model.ModelDetails.DisplayName });
@@ -508,32 +478,32 @@ angular
                 pageIcon: 'ico-alerts',
                 pageTitle: ''
             },
+            resolve: {
+                ModelAlertsTmp: function($q, Model, ModelService) {
+                    var deferred = $q.defer(),
+                        data = Model,
+                        id = data.ModelDetails.ModelID,
+                        result = {};
+
+                    var suppressedCategories = data.SuppressedCategories;
+
+                    ModelService.GetModelAlertsByModelId(id).then(function(result) {
+                        if (result !== null && result.success === true) {
+                            data.ModelAlerts = result.resultObj;
+                            data.SuppressedCategories = suppressedCategories;
+                            deferred.resolve(result);
+                        } else if (result !== null && result.success === false) {
+                            data.ModelAlerts = result.resultObj;
+                            data.SuppressedCategories = null;
+                            deferred.reject('nope');
+                        }
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "main@": {
-                    resolve: {
-                        ModelAlertsTmp: function($q, Model, ModelService) {
-                            var deferred = $q.defer(),
-                                data = Model,
-                                id = data.ModelDetails.ModelID,
-                                result = {};
-
-                            var suppressedCategories = data.SuppressedCategories;
-
-                            ModelService.GetModelAlertsByModelId(id).then(function(result) {
-                                if (result !== null && result.success === true) {
-                                    data.ModelAlerts = result.resultObj;
-                                    data.SuppressedCategories = suppressedCategories;
-                                    deferred.resolve(result);
-                                } else if (result !== null && result.success === false) {
-                                    data.ModelAlerts = result.resultObj;
-                                    data.SuppressedCategories = null;
-                                    deferred.reject('nope');
-                                }
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: function($scope, $rootScope, Model, ModelStore) {
                         $scope.data = ModelStore.data;
 
@@ -732,6 +702,17 @@ angular
                     return deferred.promise;
                 }
             },
+            resolve: {
+                MarketoCredentials: function($q, MarketoService) {
+                    var deferred = $q.defer();
+
+                    MarketoService.GetMarketoCredentials().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "navigation@home": {
                     controller: function($scope, $state, FeatureFlagService, ApiHost, DataCloudStore) {
@@ -754,17 +735,6 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
-                    resolve: {
-                        MarketoCredentials: function($q, MarketoService) {
-                            var deferred = $q.defer();
-
-                            MarketoService.GetMarketoCredentials().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'MarketoCredentialsController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/MarketoCredentialsView.html'
@@ -777,13 +747,13 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles > Create New Marketo Profile'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_APIKEY';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
                     controller: function($scope, $state, ResourceUtility) {
                         $scope.isCreateForm = true;
                         $scope.ResourceUtility = ResourceUtility;
@@ -803,13 +773,23 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles > Edit Profile',
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_APIKEY';
+                },
+                MarketoCredential: function($q, $stateParams, MarketoService) {
+                    var deferred = $q.defer();
+                    var id = $stateParams.id;
+
+                    MarketoService.GetMarketoCredentials(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
                     controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = 'home.marketosettings.edit';
                         $scope.id = $stateParams.id;
@@ -818,18 +798,6 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    resolve: {
-                        MarketoCredential: function($q, $stateParams, MarketoService) {
-                            var deferred = $q.defer();
-                            var id = $stateParams.id;
-
-                            MarketoService.GetMarketoCredentials(id).then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'MarketoCredentialsEditController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/AddCredentialFormView.html'
@@ -842,13 +810,41 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles > Enrichment',
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_APIKEY';
+                },
+                EnrichmentData: function($q, DataCloudStore) {
+                    var deferred = $q.defer();
+                    
+                    DataCloudStore.getEnrichments().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                MarketoCredential: function($q, $stateParams, MarketoService) {
+                    var deferred = $q.defer();
+                    var id = $stateParams.id;
+
+                    MarketoService.GetMarketoCredentials(id).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                },
+                MarketoMatchFields: function($q, MarketoService, MarketoCredential) {
+                    var deferred = $q.defer();
+
+                    MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
                     controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.id;
@@ -857,36 +853,6 @@ angular
                     templateUrl: 'app/navigation/summary/MarketoTabs.html'
                 },
                 "main@": {
-                    resolve: {
-                        EnrichmentData: function($q, DataCloudStore) {
-                            var deferred = $q.defer();
-                            
-                            DataCloudStore.getEnrichments().then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        },
-                        MarketoCredential: function($q, $stateParams, MarketoService) {
-                            var deferred = $q.defer();
-                            var id = $stateParams.id;
-
-                            MarketoService.GetMarketoCredentials(id).then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        },
-                        MarketoMatchFields: function($q, MarketoService, MarketoCredential) {
-                            var deferred = $q.defer();
-
-                            MarketoService.GetMarketoMatchFields(MarketoCredential).then(function(result) {
-                                deferred.resolve(result);
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'MarketoEnrichmentController',
                     controllerAs: 'vm',
                     templateUrl: 'app/marketo/views/MarketoEnrichmentView.html'
@@ -899,13 +865,13 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_MODELS';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_MODELS';
-                        }
-                    },
                     controller: function($scope, $stateParams, $state, ResourceUtility) {
                         $scope.state = $state.current.name;
                         $scope.id = $stateParams.id;
@@ -956,13 +922,13 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_APIKEY';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_APIKEY';
-                        }
-                    },
                     controller: function($scope, $state) {
                         $scope.state = 'home.marketosettings.edit';
                     },
@@ -1009,13 +975,13 @@ angular
                 pageIcon: 'ico-marketo',
                 pageTitle: 'Marketo Profiles'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_MARKETO_MODELS';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_MARKETO_MODELS';
-                        }
-                    },
                     controller: function($scope, $stateParams, $state) {
                         $scope.state = $state.current.name;
                     },
@@ -1103,13 +1069,13 @@ angular
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_ELOQUA_APIKEY';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_ELOQUA_APIKEY';
-                        }
-                    },
                     /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
@@ -1160,13 +1126,13 @@ angular
                 pageIcon: 'ico-eloqua',
                 pageTitle: 'Eloqua Settings'
             },
+            resolve: {
+                ResourceString: function() {
+                    return 'SUMMARY_ELOQUA_MODELS';
+                }
+            },
             views: {
                 "summary@": {
-                    resolve: {
-                        ResourceString: function() {
-                            return 'SUMMARY_ELOQUA_MODELS';
-                        }
-                    },
                     /*
                     controller: 'OneLineController',
                     templateUrl: 'app/navigation/summary/OneLineView.html'
@@ -1373,27 +1339,27 @@ angular
                 pageIcon: 'ico-user',
                 pageTitle: 'Manage Users'
             },
+            resolve: {
+                UserList: function($q, UserManagementService) {
+                    var deferred = $q.defer();
+
+                    UserManagementService.GetUsers().then(function(result) {
+                        if (result.Success) {
+                            deferred.resolve(result.ResultObj);
+                        } else {
+                            deferred.reject(result);
+                        }
+
+                    });
+
+                    return deferred.promise;
+                }
+            },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 "main@": {
-                    resolve: {
-                        UserList: function($q, UserManagementService) {
-                            var deferred = $q.defer();
-
-                            UserManagementService.GetUsers().then(function(result) {
-                                if (result.Success) {
-                                    deferred.resolve(result.ResultObj);
-                                } else {
-                                    deferred.reject(result);
-                                }
-
-                            });
-
-                            return deferred.promise;
-                        }
-                    },
                     controller: 'UserManagementWidgetController',
                     templateUrl: 'app/AppCommon/widgets/userManagementWidget/UserManagementWidgetTemplate.html'
                 }

@@ -1,21 +1,8 @@
 angular.module('insightsApp')
-.run(function($rootScope, $state, ResourceUtility, ServiceErrorUtility) {
-    $rootScope.$on('$stateChangeStart', function(evt, toState, params, fromState, fromParams) {
-        var LoadingString = ResourceUtility.getString("");
-
-        if (toState.redirectTo) {
-            evt.preventDefault();
-            $state.go(toState.redirectTo, params);
-        }
-
+.run(function($transitions) {
+    $transitions.onStart({}, function(trans) {
         ShowSpinner(LoadingString);
-        ServiceErrorUtility.hideBanner();
-    });
-
-    $rootScope.$on('$stateChangeError', function(event, toState, toParams, fromState, fromParams, error){ 
-        console.log('-!- error changing state:', error, event, toState, toParams, fromState, fromParams);
-
-        event.preventDefault();
+        trans.injector().get('ServiceErrorUtility').hideBanner();
     });
 })
 .config(function($stateProvider, $urlRouterProvider, $locationProvider) {

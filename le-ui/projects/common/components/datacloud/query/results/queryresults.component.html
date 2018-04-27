@@ -135,9 +135,9 @@
         </thead>
         <tbody ng-if="!vm.loading">
             <tr 
-                ng-repeat=" account in vm.accounts | 
+                ng-repeat="account in (vm.tmpAccounts = (vm.accounts | 
                             orderBy:sortType:sortReverse | 
-                            filter:vm.search">
+                            filter:vm.search))">
                 <td>{{account.LDC_Name}}</td>
                 <td>{{account.LDC_Domain}}</td>
                 <td>{{account.LDC_City}}</td>
@@ -177,7 +177,7 @@
         </thead>
         <tbody ng-if="!vm.loading && vm.selectedBuckets.length != 0">
             <tr 
-                ng-repeat=" account in vm.accounts | 
+                ng-repeat="account in vm.accounts | 
                             orderBy:sortType:sortReverse ">
                 <td>{{account.LDC_Name}}</td>
                 <td>
@@ -220,9 +220,9 @@
         </thead>
         <tbody ng-if="!vm.loading">
             <tr 
-                ng-repeat=" contact in vm.contacts | 
+                ng-repeat="contact in (vm.tmpContacts = (vm.contacts | 
                             orderBy:sortType:sortReverse | 
-                            filter:vm.search">
+                            filter:vm.search))">
 
                 <td>{{contact.ContactName}}</td>
                 <td>{{contact.LDC_Name}}</td>
@@ -234,7 +234,7 @@
     <div class="loading" ng-if="vm.loading">
          Loading {{vm.page}}...
     </div>
-    <div ng-if="(vm.counts.accounts.value === 0 || vm.counts.contacts.value === 0) && !vm.loading">
+    <div ng-if="vm.showNoResultsText(vm.tmpAccounts, vm.tmpContacts)">
         <p>No {{vm.page != 'Playbook' && vm.page != 'Play Overview' ? vm.page : 'Targets'}} Found<p>
     </div>
 

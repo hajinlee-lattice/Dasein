@@ -18,7 +18,6 @@ angular
     $stateProvider
         .state('home.playbook', {
             url: '/playbook',
-            redirectTo: 'home.playbook.plays',
             resolve: {
                 Model: function(){
                     return null;
@@ -29,7 +28,8 @@ angular
                 HasRatingsAvailable: function(){
                     return null;
                 }
-            }
+            },
+            redirectTo: 'home.playbook.plays'
         })
         .state('home.playbook.plays', {
             url: '/plays',
@@ -109,7 +109,8 @@ angular
             url: '/dashboard/:play_name',
             params: {
                 pageIcon: 'ico-insights',
-                pageTitle: 'Play Overview'
+                pageTitle: 'Play Overview',
+                play_name: ''
             },
             resolve: {
                 Play: function($q, $stateParams, PlaybookWizardStore) {
@@ -287,14 +288,14 @@ angular
                     return deferred.promise;
                 }],
             },
-            redirectTo: 'home.playbook.dashboard.targets.accounts',
             views: {
                 "summary@": {
                     controller: 'TargetTabsController',
                     controllerAs: 'vm',
                     templateUrl: '/components/datacloud/query/results/targettabs.component.html'
                 }
-            }
+            },
+            redirectTo: 'home.playbook.dashboard.targets.accounts'
         })
         .state('home.playbook.dashboard.targets.accounts', {
             url: '/accounts',
@@ -466,7 +467,8 @@ angular
             url: '/create/:play_name',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Playbook',
+                play_name: ''
             },
             resolve: {
                 WizardValidationStore: function(PlaybookWizardStore) {
@@ -483,6 +485,21 @@ angular
                         { label: 'Preview', state: 'rating.targets.insights.preview' },
                         { label: 'Launch', state: 'rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];
+                },
+                WizardControlsOptions: function() {
+                    return { 
+                        backState: 'home.playbook', 
+                        nextState: 'home.playbook' 
+                    };
+                },
+                WizardHeaderTitle: function() {
+                    return 'Create Play';
+                },
+                WizardContainerId: function() {
+                    return 'playbook';
+                },
+                DisableWizardNavOnLastStep: function () {
+                    return null;
                 }
             },
             views: {
@@ -495,23 +512,12 @@ angular
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
                 'main@': {
-                    resolve: {
-                        WizardHeaderTitle: function() {
-                            return 'Create Play';
-                        },
-                        WizardContainerId: function() {
-                            return 'playbook';
-                        }
-                    },
                     controller: 'ImportWizard',
                     controllerAs: 'vm',
                     templateUrl: '/components/wizard/wizard.component.html'
                 },
                 'wizard_progress@home.playbook.create': {
                     resolve: {
-                        DisableWizardNavOnLastStep: function () {
-                            return null;
-                        }
                     },
                     controller: 'ImportWizardProgress',
                     controllerAs: 'vm',
@@ -519,9 +525,6 @@ angular
                 },
                 'wizard_controls@home.playbook.create': {
                     resolve: {
-                        WizardControlsOptions: function() {
-                            return { backState: 'home.playbook', nextState: 'home.playbook' };
-                        }
                     },
                     controller: 'ImportWizardControls',
                     controllerAs: 'vm',
@@ -534,7 +537,8 @@ angular
             url: '/rating/:rating_id',
             params: {
                 pageIcon: 'ico-playbook',
-                pageTitle: 'Playbook'
+                pageTitle: 'Playbook',
+                rating_id: ''
             },
             resolve: {
                 Ratings: function(PlaybookWizardStore) {

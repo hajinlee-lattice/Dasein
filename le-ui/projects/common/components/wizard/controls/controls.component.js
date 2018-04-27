@@ -1,6 +1,6 @@
 angular.module('common.wizard.controls', [])
 .controller('ImportWizardControls', function(
-    $state, $stateParams, $scope, $timeout, $rootScope, ResourceUtility, WizardProgressItems,
+    $state, $stateParams, $scope, $timeout, $transitions, ResourceUtility, WizardProgressItems,
     WizardProgressContext, WizardControlsOptions, WizardValidationStore/*, ImportWizardService, ImportWizardStore*/
 ) {
     var vm = this;
@@ -19,12 +19,23 @@ angular.module('common.wizard.controls', [])
         prevDisabled: false 
     });
 
+    $transitions.onStart({}, function(trans) {
+        var to = trans.$to(),
+            params = trans.params('to'),
+            from = trans.$from();
+
+        angular.element(window).scrollTop(0,0);
+        
+        vm.toState = to;
+        vm.item = vm.itemMap[to.name];
+        vm.nextDisabled = false;
+    });
+
     vm.init = function() {
         vm.rootState = vm.next + '.';
-        // console.log($state);
         vm.setButtons();
 
-        if(WizardControlsOptions.secondaryLink){
+        if (WizardControlsOptions.secondaryLink){
             vm.secondaryLink = true;
         };
 
@@ -70,13 +81,6 @@ angular.module('common.wizard.controls', [])
             $state.go(state, params);
         }
     }
-
-    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams) { 
-        angular.element(window).scrollTop(0,0);
-        vm.toState = toState;
-        vm.item = vm.itemMap[vm.toState.name];
-        vm.nextDisabled = false;
-    })
 
     vm.setButtons = function() {
         var current = $state.current.name,

@@ -175,10 +175,12 @@ angular
             var bucket = map[bucketName];
 
             if (bucket) {
-                //SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);
-                SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
+                if (!keepEmptyBuckets) {
+                    SegmentStore.removeEmptyBuckets([ bucket.account_restriction ]);
+                    SegmentStore.removeEmptyBuckets([ bucket.contact_restriction ]);
+                }
 
-                //SegmentStore.removeEmptyBuckets([ bucket.contact_restriction ]);
+                SegmentStore.sanitizeSegmentRestriction([ bucket.account_restriction ]);
                 SegmentStore.sanitizeSegmentRestriction([ bucket.contact_restriction ]);
             }
         });
@@ -188,11 +190,11 @@ angular
 
     this.sanitizeSegmentRestriction = function(tree) {
         tree.forEach(function(branch) {
-            if (branch && typeof branch.labelGlyph != undefined) {
+            if (branch && typeof branch.labelGlyph !== undefined) {
                 delete branch.labelGlyph;
             }
 
-            if (branch && typeof branch.collapsed != undefined) {
+            if (branch && typeof branch.collapsed !== undefined) {
                 delete branch.collapsed;
             }
 
@@ -215,7 +217,7 @@ angular
             if (branch && branch.logicalRestriction) {
                 SegmentStore.removeEmptyBuckets(branch.logicalRestriction.restrictions);
             }
-        };
+        }
     }
 })
 .service('SegmentService', function($http, $q, $state) {

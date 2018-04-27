@@ -35,6 +35,12 @@
             Import Data
         </button>
     </li>
+    <li class="configure">
+        <button class="button icon-button white-button" 
+                ui-sref="home.admin.attributes.activate">
+            Configure Attributes
+        </button>
+    </li>
     <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
         <button class="button icon-button white-button" 
                 ui-sref="home.delete">

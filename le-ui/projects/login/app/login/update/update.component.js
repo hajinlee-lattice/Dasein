@@ -7,50 +7,52 @@ angular.module('login.update', [
 ])
 .component('loginUpdatePassword', {
     templateUrl: 'app/login/update/update.component.html',
+    bindings: {
+        logindocument: '<'
+    },
     controller: function (
-        $scope, $state, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
+        $state, ResourceUtility, BrowserStorageUtility, PasswordUtility, 
         StringUtility, LoginService, TimestampIntervalUtility
     ) {
-        var vm = this,
-            resolve = $scope.$parent.$resolve,
-            LoginDocument = resolve.LoginDocument;
+        var vm = this;
 
-        angular.element('body').addClass('update-password-body');
-        
-        vm.ResourceUtility = ResourceUtility;
-        vm.isLoggedInWithTempPassword = LoginDocument.MustChangePassword;
-        vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified);
+        vm.$onInit = function() {
+            angular.element('body').addClass('update-password-body');
+            
+            vm.ResourceUtility = ResourceUtility;
+            vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
+            vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
 
-        var loginDocument = BrowserStorageUtility.getLoginDocument(),
-            authenticationRoute = loginDocument.AuthenticationRoute || null,
-            clientSession = BrowserStorageUtility.getClientSession() || {},
-            accessLevel = clientSession.AccessLevel || null;
+            var authenticationRoute = vm.logindocument.AuthenticationRoute || null,
+                clientSession = BrowserStorageUtility.getClientSession() || {},
+                accessLevel = clientSession.AccessLevel || null;
 
-        vm.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
+            vm.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
 
-        vm.oldPassword = null;
-        vm.newPassword = null;
-        vm.confirmPassword = null;
+            vm.oldPassword = null;
+            vm.newPassword = null;
+            vm.confirmPassword = null;
 
-        vm.oldPasswordInputError = "";
-        vm.newPasswordInputError = "";
-        vm.confirmPasswordInputError = "";
-        vm.showPasswordError = false;
-        vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
+            vm.oldPasswordInputError = "";
+            vm.newPasswordInputError = "";
+            vm.confirmPasswordInputError = "";
+            vm.showPasswordError = false;
+            vm.validateErrorMessage = ResourceUtility.getString("CHANGE_PASSWORD_HELP");
 
-        vm.saveInProgess = false;
+            vm.saveInProgess = false;
 
-        $("#validateAlertError, #changePasswordSuccessAlert").hide();
+            $("#validateAlertError, #changePasswordSuccessAlert").hide();
 
-        if (vm.isPasswordOlderThanNinetyDays) {
-            vm.showPasswordError = true;
-            vm.validateErrorMessage = ResourceUtility.getString("NINTY_DAY_OLD_PASSWORD");
-        } else if (vm.isLoggedInWithTempPassword) {
-            vm.showPasswordError = true;
-            vm.validateErrorMessage = ResourceUtility.getString("MUST_CHANGE_TEMP_PASSWORD");
-        }
+            if (vm.isPasswordOlderThanNinetyDays) {
+                vm.showPasswordError = true;
+                vm.validateErrorMessage = ResourceUtility.getString("NINTY_DAY_OLD_PASSWORD");
+            } else if (vm.isLoggedInWithTempPassword) {
+                vm.showPasswordError = true;
+                vm.validateErrorMessage = ResourceUtility.getString("MUST_CHANGE_TEMP_PASSWORD");
+            }
+        };
 
-        function validatePassword () {
+        function validatePassword() {
             $("#validateAlertError, #changePasswordSuccessAlert").fadeOut();
             vm.oldPasswordInputError = StringUtility.IsEmptyString(vm.oldPassword) ? "error" : "";
             vm.newPasswordInputError = StringUtility.IsEmptyString(vm.newPassword) ? "error" : "";
@@ -90,17 +92,17 @@ angular.module('login.update', [
             return true;
         }
         
-        vm.cancelAndLogoutClick = function ($event) {
-            clearChangePasswordField();
-            LoginService.Logout();
-        };
-        
         function clearChangePasswordField() {
             vm.oldPassword = "";
             vm.newPassword = "";
             vm.confirmPassword = "";
         }
         
+        vm.cancelAndLogoutClick = function ($event) {
+            clearChangePasswordField();
+            LoginService.Logout();
+        };
+
         vm.closeErrorClick = function ($event) {
             if ($event != null) {
                 $event.preventDefault();
@@ -113,8 +115,11 @@ angular.module('login.update', [
             if (vm.saveInProgess) {
                 return;
             }
+
             vm.showPasswordError = false;
+
             var isValid = validatePassword();
+
             if (isValid) {
                 vm.saveInProgess = true;
 

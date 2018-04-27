@@ -2,10 +2,11 @@ angular.module('lp.segments.segments', [
     'mainApp.segments.modals.DeleteSegmentModal'
 ])
 .controller('SegmentationListController', function ($scope, $element, $state, $stateParams,
-    SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, QueryStore, RatingsEngineStore, QueryTreeService, 
-    DataCloudStore, LookupResponse, LookupStore) {
-
+    SegmentsList, Enrichments, Cube, DeleteSegmentModal, SegmentStore, SegmentService, RatingsEngineStore, QueryTreeService, 
+    DataCloudStore, LookupResponse, LookupStore
+) {
     var vm = this;
+
     angular.extend(vm, {
         modelId: $stateParams.modelId,
         tenantName: $stateParams.tenantName,
@@ -14,7 +15,7 @@ angular.module('lp.segments.segments', [
         enrichmentsMap: DataCloudStore.getEnrichmentsMap(),
         segmentAttributesMap: {},
         cube: Cube,
-        count: QueryStore.getCounts(),
+        //count: QueryStore.getCounts(),
         filteredItems: [],
         totalLength: SegmentsList.length,
         tileStates: {},
@@ -41,7 +42,6 @@ angular.module('lp.segments.segments', [
     });
 
     vm.init = function() {
-
         vm.processEnrichments(Enrichments);
 
         vm.segmentIds = [];
@@ -198,83 +198,92 @@ angular.module('lp.segments.segments', [
     };
 
     vm.showDeleteSegmentModalClick = function($event, segment){
-
         $event.preventDefault();
         $event.stopPropagation();
 
         DeleteSegmentModal.show(segment, !!vm.modelId);
-
     };
 
     vm.isValid = function(segmentDisplayName){
-        if(!segmentDisplayName || segmentDisplayName.trim().length == 0){
+        if (!segmentDisplayName || segmentDisplayName.trim().length == 0){
             return false;
-        }
-        else{
+        } else {
             return true;
         }
     }
 
     vm.displayAttributes = function(segment, n) {
-        attrs = [];
+        var attrs = [];
         var restrictions = SegmentStore.getTopNAttributes(segment, n);
+        
         restrictions = SegmentStore.sortAttributesByCnt(restrictions);
 
         restrictions.forEach(function(restriction) {
             var bucketEntity = restriction.bucketRestriction.attr.split('.')[0],
                 bucketColumnId = restriction.bucketRestriction.attr.split('.')[1],
                 enrichment = vm.enrichments[vm.enrichmentsMap[bucketColumnId]];
+
             if (enrichment) {
                 var cube = vm.cube[bucketEntity].Stats[bucketColumnId];
+                
                 if (cube.Bkts) {
                     var operatorType = cube.Bkts.Type;
+                    
                     switch (operatorType) {
                         case 'Enum': 
                             var vals = QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType);
+                            
                             if (vals.length > 1) {
                                 attrs.push(enrichment.DisplayName + ': ' + vals.length + ' Values Selected');
                             } else {
                                 attrs.push(enrichment.DisplayName + ': ' + vals);
                             }
+                            
                             break;
+
                         case 'Numerical':
                             if (QueryTreeService.two_inputs.indexOf(restriction.bucketRestriction.bkt.Cmp) < 0) {
                                 attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.numerical_labels[restriction.bucketRestriction.bkt.Cmp] + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0));
                             } else {
                                 attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 0) + '-' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType, 1));
                             }
+                            
                             break;
+
                         case 'Boolean': 
                             attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationValue(restriction.bucketRestriction, operatorType));
+                            
                             break;
+
                         case 'TimeSeries':
                             var value = QueryTreeService.getOperationValue(restriction.bucketRestriction, 'Boolean') ? 'True' : 'False';
                             attrs.push(enrichment.DisplayName + ': ' + value); 
+                            
                             break;
                     }
                 } else {
                     // for pure string attributes
                     attrs.push(enrichment.DisplayName + ': ' + QueryTreeService.getOperationLabel('String', restriction.bucketRestriction) + " '" + QueryTreeService.getOperationValue(restriction.bucketRestriction, 'String') + "'");
-
                 }
-
             }
-        })
+        });
+
         return attrs;
     };
 
     function createOrUpdateSegment(segment) {
         SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
-
             var errorMsg = result.errorMsg;
 
             if (result.success) {
                 var tileState = vm.tileStates[segment.name];
+                
                 if(tileState){
                     tileState.editSegment = !tileState.editSegment;
-                }else{
+                } else {
                     $state.go('home.segments', {}, { reload: true } );
                 }
+
                 vm.saveInProgress = false;
                 vm.showAddSegmentError = false;
                 vm.inEditing = {};

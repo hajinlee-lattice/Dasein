@@ -1,18 +1,11 @@
 angular.module('login.saml.error', [])
 .component('loginSamlError', {
     templateUrl: 'app/login/saml/error/error.component.html',
-    controller: function (
-        $scope, $state
-    ) {
-        var vm = this,
-            resolve = $scope.$parent.$resolve;
+    controller: function () {
+        var vm = this;
 
-        angular.extend(vm, {
-        });
-
-        vm.init = function() {
+        vm.$onInit = function() {
+            
         };
-
-        vm.init();
     }
 });

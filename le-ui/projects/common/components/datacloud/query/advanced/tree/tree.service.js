@@ -121,6 +121,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
          */
         function getService(entity) {
             switch (entity) {
+                case 'LatticeAccount':
                 case 'Account':
                 case 'Contact':
                 case 'Rating': {
@@ -239,7 +240,7 @@ angular.module('common.datacloud.query.builder.tree.service', [
                 var entity = getEntity(bucketRestriction);
                 var service = getService(entity);
                 return service.getValue(bucketRestriction, type, position, subType);
-            }else{
+            } else {
                 return this.getBktValue(bucketRestriction, position);
             }
         }
@@ -712,11 +713,11 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.isBucketUsed = function (bucket) {
-            return typeof bucket.bkt.Id == "number";
+            return bucket.bkt && typeof bucket.bkt.Id == "number";
         }
 
         this.getBktVals = function (bucketRestriction, type) {
-            return bucketRestriction.bkt.Vals;
+            return bucketRestriction.bkt && bucketRestriction.bkt.Vals;
         }
 
         this.getValue = function (bucketRestriction, type, position, subType) { }

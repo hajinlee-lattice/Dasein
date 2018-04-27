@@ -41,22 +41,54 @@
             </div>
         </div>
         <!--[if IE]> <div id="isIE"></div> <![endif]-->
-        <script src="/assets/vendor.min.js"></script>
-        <script src="/assets/js/angulartics/angulartics.min.js"></script>
-        <script src="/assets/js/angulartics/angulartics-mixpanel.js"></script>
-        <script src="/lib/bower/moment.js"></script>
-        <script src="/lib/bower/momentangular-moment.js"></script>
-        <script src="/lib/bower/pikaday.js"></script>
 
         <!-- build:template:dist
+        <script src="/assets/vendor.min.js"></script>
         <script src="/assets/lattice.min.js"></script>
         <script type="text/javascript">(function(e,b){if(!b.__SV){var a,f,i,g;window.mixpanel=b;a=e.createElement("script");a.type="text/javascript";a.async=!0;a.src=("https:"===e.location.protocol?"https:":"http:")+'//cdn.mxpnl.com/libs/mixpanel-2.2.min.js';f=e.getElementsByTagName("script")[0];f.parentNode.insertBefore(a,f);b._i=[];b.init=function(a,e,d){function f(b,h){var a=h.split(".");2==a.length&&(b=b[a[0]],h=a[1]);b[h]=function(){b.push([h].concat(Array.prototype.slice.call(arguments,0)))}}var c=b;"undefined"!==
     typeof d?c=b[d]=[]:d="mixpanel";c.people=c.people||[];c.toString=function(b){var a="mixpanel";"mixpanel"!==d&&(a+="."+d);b||(a+=" (stub)");return a};c.people.toString=function(){return c.toString(1)+".people (stub)"};i="disable track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.track_charge people.clear_charges people.delete_user".split(" ");for(g=0;g<i.length;g++)f(c,i[g]);
     b._i.push([a,e,d])};b.__SV=1.2}})(document,window.mixpanel||[]);
     mixpanel.init("437520632aa664bcb80cc93da9476068");</script>
+        <script>/*<![CDATA[*/window.zE||(function(e,t,s){var n=window.zE=window.zEmbed=function(){n._.push(arguments)}, a=n.s=e.createElement(t),r=e.getElementsByTagName(t)[0];n.set=function(e){ n.set._.push(e)},n._=[],n.set._=[],a.async=true,a.setAttribute("charset","utf-8"), a.src="https://static.zdassets.com/ekr/asset_composer.js?key="+s, n.t=+new Date,a.type="text/javascript",r.parentNode.insertBefore(a,r)})(document,"script","7b73cc63-fb76-4deb-9df8-09130f1d9931");/*]]>*/</script> 
+
+        <script type="text/javascript">
+          (function(n,t,a,e){var i="aptrinsic";n[i]=n[i]||function(){
+              (n[i].q=n[i].q||[]).push(arguments)},n[i].p=e;
+            var r=t.createElement("script");r.async=!0,r.src=a+"?a="+e;
+            var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(r,c)
+          })(window,document,"https://web-sdk.aptrinsic.com/api/aptrinsic.js","AP-RR8EQLTW2VP9-2");
+        </script>
         /build -->
 
         <!-- build:remove:dist -->
+        <script src="/lib/bower/webfontloader.js"></script>
+        <script src="/lib/bower/min/jquery.min.js"></script>
+        <script src="/lib/bower/min/angular.js"></script>
+        <script src="/lib/bower/min/angular-animate.min.js"></script>
+        <script src="/lib/bower/min/angular-resource.min.js"></script>
+        <script src="/lib/bower/min/angular-route.min.js"></script>
+        <script src="/lib/bower/min/angular-sanitize.min.js"></script>
+        <script src="/lib/bower/min/angular-tooltips.min.js"></script>
+        <script src="/lib/bower/min/angular-ui-router.min.js"></script>
+        <script src="/lib/bower/min/bootstrap.min.js"></script>
+        <script src="/lib/bower/min/d3.min.js"></script>
+        <script src="/lib/bower/min/jstorage.min.js"></script>
+        <script src="/lib/bower/min/modernizr.js"></script>
+        <script src="/lib/bower/min/ocLazyLoad.min.js"></script>
+        <script src="/lib/bower/min/pako.min.js"></script>
+        <script src="/lib/bower/min/underscore-min.js"></script>
+        <script src="/lib/bower/core.js"></script>
+        <script src="/lib/bower/date.format.js"></script>
+        <script src="/lib/bower/FileSaver.js"></script>
+        <script src="/lib/bower/includes.js"></script>
+        <script src="/lib/bower/moment.js"></script>
+        <script src="/lib/bower/momentangular-moment.js"></script>
+        <script src="/lib/bower/pikaday.js"></script>
+        <script src="/lib/bower/sha256.js"></script>
+        <script src="/lib/bower/ui-bootstrap-jpls-0.13.0.js"></script>
+        <script src="../common/assets/js/angulartics/angulartics.min.js"></script>
+        <script src="../common/assets/js/angulartics/angulartics-mixpanel.js"></script>
+
         <script src="/app/directives/ArcChartDirective.js"></script>
         <script src="/app/directives/helperMarkDirective.js"></script>
         <script src="/app/directives/ngEnterDirective.js"></script>
@@ -65,7 +97,7 @@
         <script src="/app/directives/input-selection.directive.js"></script>
         <script src="/app/directives/modal-window.directive.js"></script>
         <script src="/app/directives/barchart.directive.js"></script>
-		<script src="/app/directives/bar-chart.component.js"></script>
+        <script src="/app/directives/bar-chart.component.js"></script>
         <script src="/app/directives/formOnChange.directive.js"></script>
 
         <script src="/app/utilities/BrowserStorageUtility.js"></script>
@@ -106,13 +138,17 @@
         <script src="/components/datacloud/tabs/subheader/subheader.component.js"></script>
         <script src="/components/datacloud/tabs/datacloud/datacloud.component.js"></script>
         <script src="/components/datacloud/tabs/mydata/mydata.component.js"></script>
+        <script src="/components/datacloud/lookup/lookup.component.js"></script>
+        <script src="/components/datacloud/lookup/lookup.routes.js"></script>
+        <script src="/components/datacloud/lookup/lookup.service.js"></script>
         <script src="/components/datacloud/picker/picker.component.js"></script>
-        <script src="/components/datacloud/query/factory/restriction.factory.js"></script>
+        <script src="/components/datacloud/picker/picker.routes.js"></script>
         <script src="/components/datacloud/query/query.component.js"></script>
+        <script src="/components/datacloud/query/query.factory.js"></script>
+        <script src="/components/datacloud/query/query.routes.js"></script>
         <script src="/components/datacloud/query/query.service.js"></script>
         <script src="/components/datacloud/query/results/queryresults.component.js"></script>
         <script src="/components/datacloud/query/results/targettabs.component.js"></script>
-        <script src="/components/datacloud/query/builder/querybuilder.component.js"></script>
         <script src="/components/datacloud/query/advanced/advanced.component.js"></script>
         <script src="/components/datacloud/query/advanced/tree/item/tree-item.component.js"></script>
         <script src="/components/datacloud/query/advanced/tree/edit/tree-item-edit.component.js"></script>
@@ -122,13 +158,9 @@
         <script src="/components/datacloud/query/advanced/tree/transaction/transaction-item-edit.component.js"></script>
         <script src="/components/datacloud/query/advanced/tree/transaction/transaction-item.component.js"></script>
         <script src="/components/datacloud/query/advanced/tree/tree.component.js"></script>
-        <script src="/components/datacloud/lookup/lookup.component.js"></script>
-        <script src="/components/datacloud/lookup/lookup.service.js"></script>
-
         <script src="/components/datacloud/query/advanced/tree/tree-purchase-history.service.js"></script>
         <script src="/components/datacloud/query/advanced/tree/tree.service.js"></script>
         <script src="/components/datacloud/query/advanced/input/input.component.js"></script>
-        <script src="/components/datacloud/query/filter/queryfilter.component.js"></script>
 
         <script src="/components/wizard/wizard.component.js"></script>
         <script src="/components/wizard/progress/progress.component.js"></script>
@@ -141,16 +173,6 @@
         /build -->
 
         <!-- build:js app.js -->
-        <script>/*<![CDATA[*/window.zE||(function(e,t,s){var n=window.zE=window.zEmbed=function(){n._.push(arguments)}, a=n.s=e.createElement(t),r=e.getElementsByTagName(t)[0];n.set=function(e){ n.set._.push(e)},n._=[],n.set._=[],a.async=true,a.setAttribute("charset","utf-8"), a.src="https://static.zdassets.com/ekr/asset_composer.js?key="+s, n.t=+new Date,a.type="text/javascript",r.parentNode.insertBefore(a,r)})(document,"script","7b73cc63-fb76-4deb-9df8-09130f1d9931");/*]]>*/</script> 
-
-        <script type="text/javascript">
-          (function(n,t,a,e){var i="aptrinsic";n[i]=n[i]||function(){
-              (n[i].q=n[i].q||[]).push(arguments)},n[i].p=e;
-            var r=t.createElement("script");r.async=!0,r.src=a+"?a="+e;
-            var c=t.getElementsByTagName("script")[0];c.parentNode.insertBefore(r,c)
-          })(window,document,"https://web-sdk.aptrinsic.com/api/aptrinsic.js","AP-RR8EQLTW2VP9-2");
-        </script>
-        
         <script src="../demo/js/bootstrap-select.min.js"></script>
         <script src="app/app.js"></script>
         <script src="app/routes.js"></script>
@@ -203,7 +225,7 @@
         <script src="app/import/content/transactionids/transactionids.component.js"></script>
         <script src="app/import/content/productids/productids.component.js"></script>
         <script src="app/import/content/producthierarchyids/producthierarchyids.component.js"></script>
-a       <script src="app/import/content/producthierarchy/producthierarchy.component.js"></script>
+        <script src="app/import/content/producthierarchy/producthierarchy.component.js"></script>
         <script src="app/import/content/thirdpartyids/thirdpartyids.component.js"></script>
         <script src="app/import/content/latticefields/latticefields.component.js"></script>
         <script src="app/import/content/customfields/customfields.component.js"></script>

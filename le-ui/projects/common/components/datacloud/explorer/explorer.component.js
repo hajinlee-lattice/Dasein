@@ -97,7 +97,7 @@ angular.module('common.datacloud.explorer', [
         if ($state.current.name === 'home.ratingsengine.dashboard.segment.attributes.add' || $state.current.name === 'home.ratingsengine.rulesprospects.segment.attributes.add') {
             vm.mode = 'dashboardrules';
         }
-
+        
         if (vm.section == 'wizard.ratingsengine_segment' && QueryStore.getAddBucketTreeRoot()) {
 //            vm.section = 'segment.analysis';
             vm.inWizard = true;
@@ -270,8 +270,6 @@ angular.module('common.datacloud.explorer', [
         $state.go('.', {
             category: vm.category,
             subcategory: vm.subcategory
-        }, {
-            notify: false
         });
     }
 
@@ -358,7 +356,9 @@ angular.module('common.datacloud.explorer', [
             item.HighlightHidden = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.hidden === true ? true : false);
             item.HighlightHighlighted = (item.AttributeFlagsMap && item.AttributeFlagsMap.CompanyProfile && item.AttributeFlagsMap.CompanyProfile.highlighted ? item.AttributeFlagsMap.CompanyProfile.highlighted : false);
 
-            item.IsRatingsEngineAttribute = ratingsEngineAttributeState(item);
+            if (vm.section == 'wizard.ratingsengine_segment') {
+                item.IsRatingsEngineAttribute = ratingsEngineAttributeState(item);
+            }
 
             obj[category][subcategory].push(index);
         });
@@ -614,9 +614,10 @@ angular.module('common.datacloud.explorer', [
         var rule = getRatingsEngineRule(RatingsEngineModels),
             ratingsEngineAttributes = rule.selectedAttributes || [];
 
-        if(ratingsEngineAttributes.indexOf(item.Entity + '.' + item.ColumnId) >= 0) {
+        if (ratingsEngineAttributes.indexOf(item.Entity + '.' + item.ColumnId) >= 0) {
             return true;
         }
+
         return false;
     }
 
@@ -1163,6 +1164,7 @@ angular.module('common.datacloud.explorer', [
             selected = [],
             deselected = [];
 
+        console.log('saveSelected', dirtyEnrichments, selectedObj, deselectedObj);
         vm.selectDisabled = (selectedObj.length ? 0 : 1);
 
         for (var i in selectedObj) {
@@ -1582,7 +1584,7 @@ angular.module('common.datacloud.explorer', [
             return false;
         }
         var bucketToAdd = entity;
-        if (entity === 'Transaction' || entity === 'Rating'){
+        if (entity === 'LatticeAccount' || entity === 'Transaction' || entity === 'Rating'){
             bucketToAdd = 'Account';
         }
 

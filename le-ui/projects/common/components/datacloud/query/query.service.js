@@ -1,4 +1,4 @@
-angular.module('common.datacloud.query.service', [])
+angular.module('common.datacloud.query')
     .service('QueryStore', function(
         $filter, $q, $stateParams, $timeout, QueryService, BucketRestriction,
         SegmentStore, NumberUtility
@@ -608,7 +608,7 @@ angular.module('common.datacloud.query.service', [])
 
             tree.forEach(function(branch) {
                 if (branch && branch.bucketRestriction && branch.bucketRestriction) {
-                    if (getEmptyBuckets || typeof branch.bucketRestriction.bkt.Id == 'number') {
+                    if (getEmptyBuckets || (branch.bucketRestriction.bkt && typeof branch.bucketRestriction.bkt.Id == 'number')) {
                         restrictions.push(branch);
                     }
                 }

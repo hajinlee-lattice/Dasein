@@ -1,23 +1,13 @@
 angular.module('login.saml', [])
 .component('loginSaml', {
     templateUrl: 'app/login/saml/saml.component.html',
-    controller: function (
-        $scope, $state, $location, $rootScope,
-        LoginService, LoginStore
-    ) {
-        var vm = this,
-            resolve = $scope.$parent.$resolve;
+    controller: function ($state, $location, LoginService) {
+        var vm = this;
 
-        angular.extend(vm, {
-            tenantId: $state.params.tenantId,
-            userDocument: makeUserDocument($location.search().userDocument)
-        });
+        vm.$onInit = function() {
+            vm.tenantId = $state.params.tenantId;
+            vm.userDocument = makeUserDocument($location.search().userDocument);
 
-        function makeUserDocument(rawUserDocument) {
-            return (rawUserDocument ? JSON.parse(rawUserDocument) : []);
-        }
-
-        vm.init = function() {
             LoginService.SamlLogin(vm.userDocument).then(function(result) {
                 /**
                  * This takes the user to the tenants page, which is correct behavior: see below
@@ -28,6 +18,8 @@ angular.module('login.saml', [])
             });
         };
 
-        vm.init();
+        function makeUserDocument(rawUserDocument) {
+            return (rawUserDocument ? JSON.parse(rawUserDocument) : []);
+        }
     }
 });

@@ -244,7 +244,7 @@ angular
             .state('home.ratingsengine.dashboard.segment.attributes', {
                 url: '/attributes',
                 params: {
-                    section: 'wizard.ratingsengine_attributes',
+                    section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
                 resolve: {
@@ -352,7 +352,7 @@ angular
                 params: {
                     pageIcon: 'ico-performance',
                     pageTitle: 'Rules',
-                    section: 'wizard.ratingsengine_attributes',
+                    section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
                 resolve: {
@@ -379,7 +379,6 @@ angular
                         return deferred.promise;
                     },
                     RatingEngineModel: function (DataCloudStore, RatingsEngineModels) {
-                        
                         var selectedAttributes = DataCloudStore.getCurrentRatingsEngineAttributes();
 
                         if (selectedAttributes) {
@@ -571,6 +570,11 @@ angular
                     rating_id: '',
                     wizard_steps: 'rulesprospects'
                 },
+                onExit: function ($state, RatingsEngineStore) {
+                    if (!$state.params.wizard_steps) {
+                        RatingsEngineStore.clear();
+                    }
+                },
                 resolve: {
                     WizardValidationStore: function (RatingsEngineStore) {
                         return RatingsEngineStore;
@@ -582,68 +586,48 @@ angular
                         var rating_id = $stateParams.rating_id || '',
                             wizard_steps = $stateParams.wizard_steps || 'rulesprospects';
 
-                        // console.log(wizard_steps);
-
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
+                    },
+                    WizardContainerId: function () {
+                        return 'ratingsengine';
+                    },
+                    WizardHeaderTitle: function () {
+                        return 'Create Model';
+                    },
+                    WizardCustomHeaderSteps: function() {
+                        return ['segment.attributes', 'segment.attributes.add', 'segment.attributes.rules'];
+                    },
+                    DisableWizardNavOnLastStep: function () {
+                        return null;
+                    },
+                    WizardControlsOptions: function (RatingsEngineStore) {
+                        return {
+                            backState: 'home.ratingsengine',
+                            nextState: 'home.ratingsengine.dashboard'
+                        };
                     }
                 },
                 views: {
                     'summary@': {
-                        controller: function ($state, $scope, RatingsEngineStore) {
-                            $scope.$on('$destroy', function () {
-                                if (!$state.params.wizard_steps) {
-                                    RatingsEngineStore.clear();
-                                }
-                            });
-                        },
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     'main@': {
-                        resolve: {
-                            WizardHeaderTitle: function () {
-                                return false;
-                            },
-                            WizardContainerId: function () {
-                                return 'ratingsengine';
-                            }
-                        },
                         controller: 'ImportWizard',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
                     'wizard_header@home.ratingsengine.rulesprospects': {
-                        resolve: {
-                            WizardHeaderTitle: function () {
-                                return 'Create Model';
-                            },
-                            WizardCustomHeaderSteps: function() {
-                                return ['segment.attributes', 'segment.attributes.add', 'segment.attributes.rules'];
-                            }
-                        },
                         controller:'WizardHeader',
                         controllerAs:'vm',
                         templateUrl: '/components/wizard/header/header.component.html'
                     },
                     'wizard_progress@home.ratingsengine.rulesprospects': {
-                        resolve: {
-                            DisableWizardNavOnLastStep: function () {
-                                return null;
-                            }
-                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
                     'wizard_controls@home.ratingsengine.rulesprospects': {
-                        resolve: {
-                            WizardControlsOptions: function (RatingsEngineStore) {
-                                return {
-                                    backState: 'home.ratingsengine',
-                                    nextState: 'home.ratingsengine.dashboard'
-                                };
-                            }
-                        },
                         controller: 'ImportWizardControls',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/controls/controls.component.html'
@@ -655,8 +639,7 @@ angular
                 url: '/segment',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_segment'
+                    pageTitle: 'Models - Select Segment'
                 },
                 resolve: {
                     Segments: function (SegmentService) {
@@ -688,8 +671,8 @@ angular
                 url: '/attributes',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_attributes',
+                    pageTitle: 'Models - Add Attributes',
+                    section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
                 //resolve: angular.extend({}, DataCloudResolvesProvider.$get().main, {
@@ -786,8 +769,8 @@ angular
                 url: '/add',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models',
-                    section: 'wizard.ratingsengine_attributes',
+                    pageTitle: 'Models - Add Attributes',
+                    section: 'wizard.ratingsengine_segment',
                     gotoNonemptyCategory: true
                 },
                 views: {
@@ -802,7 +785,7 @@ angular
                 url: '/rules',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models'
+                    pageTitle: 'Models - Create Rules'
                 },
                 resolve: {
                     Cube: function ($q, DataCloudStore) {
@@ -861,7 +844,7 @@ angular
                 url: '/summary',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Models',
+                    pageTitle: 'Models - Review Summary',
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -898,11 +881,53 @@ angular
                         return 'ratingsengine.productpurchase';
                     },
                     WizardProgressItems: function ($stateParams, RatingsEngineStore) {
-
                         var rating_id = $stateParams.rating_id || '',
                             wizard_steps = 'productpurchase';
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
+                    },
+                    CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
+                        var deferred = $q.defer(),
+                            ratingId = $stateParams.rating_id;
+
+                        if (ratingId !== '') {
+                            RatingsEngineStore.getRating(ratingId).then(function(engine){
+                                deferred.resolve(engine);
+                            });
+                        } else {
+                            deferred.resolve();
+                        }
+
+                        return deferred.promise;
+                    },
+                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine) {
+                        var engineType = $stateParams.engineType,
+                            currentRating = CurrentRatingEngine,
+                            fromList = $stateParams.fromList,
+                            title = '';
+
+                        if (currentRating !== undefined && fromList){
+                            title = currentRating.displayName;
+                        } else if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
+                            title = 'Create Model: Customers that will purchase a product for the first time';
+                        } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
+                            title = 'Create Model: Customers that will purchase again next quarter';
+                        }
+
+                        return title;
+                    },
+                    WizardContainerId: function () {
+                        return 'ratingsengine';
+                    },
+                    DisableWizardNavOnLastStep: function () {
+                        return null;
+                    },
+                    WizardControlsOptions: function (RatingsEngineStore) {
+                        return {
+                            backState: 'home.ratingsengine',
+                            secondaryLink: true,
+                            nextState: 'home.ratingsengine.dashboard'
+                        };
                     }
                 },
                 views: {
@@ -915,67 +940,17 @@ angular
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     'main@': {
-                        resolve: {
-                            CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
-                                var deferred = $q.defer(),
-                                    ratingId = $stateParams.rating_id;
-
-                                if (ratingId !== '') {
-                                    RatingsEngineStore.getRating(ratingId).then(function(engine){
-                                        deferred.resolve(engine);
-                                    });
-                                } else {
-                                    deferred.resolve();
-                                }
-
-                                return deferred.promise;
-                            },
-                            WizardHeaderTitle: function ($stateParams, CurrentRatingEngine) {
-
-                                var engineType = $stateParams.engineType,
-                                    currentRating = CurrentRatingEngine,
-                                    fromList = $stateParams.fromList,
-                                    title = '';
-
-                                if (currentRating !== undefined && fromList){
-                                    title = currentRating.displayName;
-                                } else if (engineType === 'CROSS_SELL_FIRST_PURCHASE') {
-                                    title = 'Create Model: Customers that will purchase a product for the first time';
-                                } else if (engineType === 'CROSS_SELL_REPEAT_PURCHASE') {
-                                    title = 'Create Model: Customers that will purchase again next quarter';
-                                }
-
-                                return title;
-                            },
-                            WizardContainerId: function () {
-                                return 'ratingsengine';
-                            }
-                        },
                         controller: 'ImportWizard',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
                     'wizard_progress@home.ratingsengine.productpurchase': {
-                        resolve: {
-                            DisableWizardNavOnLastStep: function () {
-                                return null;
-                            }
-                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
                     'wizard_controls@home.ratingsengine.productpurchase': {
-                        resolve: {
-                            WizardControlsOptions: function (RatingsEngineStore) {
-                                return {
-                                    backState: 'home.ratingsengine',
-                                    secondaryLink: true,
-                                    nextState: 'home.ratingsengine.dashboard'
-                                };
-                            }
-                        },
                         controller: 'ImportWizardControls',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/controls/controls.component.html'
@@ -1033,7 +1008,6 @@ angular
                     }
                 },
                 views: {
-
                     'wizard_content@home.ratingsengine.productpurchase': {
                         controller: 'RatingsEngineProducts',
                         controllerAs: 'vm',
@@ -1125,14 +1099,14 @@ angular
                             deferred.resolve(result);
                         });
                         return deferred.promise;
+                    },
+                    DisableWizardNavOnLastStep: function () {
+                        return true;
                     }
                 },
                 views: {
                     'wizard_progress@home.ratingsengine.productpurchase': {
                         resolve: {
-                            DisableWizardNavOnLastStep: function () {
-                                return true;
-                            }
                         },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
@@ -1166,6 +1140,22 @@ angular
                         console.log(wizard_steps);
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
+                    },
+                    WizardHeaderTitle: function () {
+                        return 'Create Custom Event Model';
+                    },
+                    WizardContainerId: function () {
+                        return 'ratingsengine';
+                    },
+                    DisableWizardNavOnLastStep: function () {
+                        return null;
+                    },
+                    WizardControlsOptions: function (RatingsEngineStore) {
+                        return {
+                            backState: 'home.ratingsengine',
+                            secondaryLink: true,
+                            nextState: 'home.ratingsengine.dashboard'
+                        };
                     }
                 },
                 views: {
@@ -1180,39 +1170,17 @@ angular
                         templateUrl: 'app/navigation/summary/BlankLine.html'
                     },
                     'main@': {
-                        resolve: {
-                            WizardHeaderTitle: function () {
-                                return 'Create Custom Event Model';
-                            },
-                            WizardContainerId: function () {
-                                return 'ratingsengine';
-                            }
-                        },
                         controller: 'ImportWizard',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/wizard.component.html'
                     },
                     'wizard_progress@home.ratingsengine.customevent': {
-                        resolve: {
-                            DisableWizardNavOnLastStep: function () {
-                                return null;
-                            }
-                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'
 
                     },
                     'wizard_controls@home.ratingsengine.customevent': {
-                        resolve: {
-                            WizardControlsOptions: function (RatingsEngineStore) {
-                                return {
-                                    backState: 'home.ratingsengine',
-                                    secondaryLink: true,
-                                    nextState: 'home.ratingsengine.dashboard'
-                                };
-                            }
-                        },
                         controller: 'ImportWizardControls',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/controls/controls.component.html'
@@ -1258,7 +1226,7 @@ angular
                 params: {
                     pageIcon: 'ico-model',
                     pageTitle: 'Rating Engines',
-                    section: 'wizard.ratingsengine_attributes'
+                    section: 'wizard.ratingsengine_segment'
                 },
                 resolve: {
                     Rating: function ($q, $stateParams, RatingsEngineStore) {
@@ -1339,15 +1307,13 @@ angular
                     },
                     Products: function () {
                         return [];
+                    },
+                    DisableWizardNavOnLastStep: function () {
+                        return true;
                     }
                 },
                 views: {
                     'wizard_progress@home.ratingsengine.productpurchase': {
-                        resolve: {
-                            DisableWizardNavOnLastStep: function () {
-                                return true;
-                            }
-                        },
                         controller: 'ImportWizardProgress',
                         controllerAs: 'vm',
                         templateUrl: '/components/wizard/progress/progress.component.html'

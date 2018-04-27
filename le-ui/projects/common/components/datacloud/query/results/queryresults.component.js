@@ -40,13 +40,12 @@ angular.module('common.datacloud.query.results', [
         authToken: BrowserStorageUtility.getTokenDocument(),
         saving: false,
         config: Config,
-        currentTargetTab: 'Accounts'
+        currentTargetTab: 'Accounts',
+        tmpAccounts: [],
+        tmpContacts: []
     });
 
     vm.init = function() {
-        
-        console.log(vm.accounts);
-
         if(vm.segment != null && vm.section != 'create.targets'){
             $rootScope.$broadcast('header-back', { 
                 path: '^home.segment.accounts',
@@ -290,9 +289,7 @@ angular.module('common.datacloud.query.results', [
     vm.excludeNonSalesForceCheckbox = function(excludeAccounts){
         excludeAccounts = !excludeAccounts;
 
-        console.log(excludeAccounts);
-
-        if(excludeAccounts){
+        if (excludeAccounts){
             vm.excludeNonSalesForce = true;
         } else {
             vm.excludeNonSalesForce = false;
@@ -303,7 +300,6 @@ angular.module('common.datacloud.query.results', [
     };
 
     vm.bucketClick = function(bucket) {
-
         var index = vm.selectedBuckets.indexOf(bucket.bucket);
 
         if (index > -1) {
@@ -315,6 +311,19 @@ angular.module('common.datacloud.query.results', [
         QueryStore.setBucketsToLaunch(vm.selectedBuckets);
 
         updatePage();
+    }
+
+    vm.showNoResultsText = function(accounts, contacts) {
+        switch (vm.page) {
+            case 'Accounts': 
+                return accounts.length === 0;
+            
+            case 'Contacts': 
+                return contacts.length === 0;
+            
+            default: 
+                return accounts.length === 0 && contacts.length === 0;
+        }
     }
 
     var prevQuery = vm.search;

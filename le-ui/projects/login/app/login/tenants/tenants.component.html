@@ -53,7 +53,7 @@
             </div>
             <div class="row panel-body tenant-selection-list" ng-mouseover="$ctrl.hover()">
                 <div 
-                    ng-repeat="tenant in $ctrl.tenantList | 
+                    ng-repeat="tenant in $ctrl.tenantlist | 
                         filter: { 'UIVersion': $ctrl.version, 'DisplayName': $ctrl.SearchValue } | 
                         orderBy: $ctrl.SortDirection + $ctrl.SortProperty"
                     class="job-td-row tenant-list-item {{$index}}"
@@ -72,7 +72,7 @@
                     </section>
                 </div>
             </div>
-            <span class="tenant-total">Displaying {{ ($ctrl.tenantList | filter: { 'UIVersion': $ctrl.version, 'DisplayName': $ctrl.SearchValue }).length || 0 }} tenants</span>
+            <span class="tenant-total">Displaying {{ ($ctrl.tenantlist | filter: { 'UIVersion': $ctrl.version, 'DisplayName': $ctrl.SearchValue }).length || 0 }} tenants</span>
         </div>
     </div>
 </form>

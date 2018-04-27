@@ -104,6 +104,8 @@ class Server {
         this.app.use(session({
             //name: 'sessionId',
             secret: 'LEs3Cur1ty',
+            resave: false,
+            saveUnitialized: false,
             cookie: {
                 httpOnly: true,
                 secure: true,

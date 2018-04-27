@@ -23,7 +23,7 @@ angular
                     // controller: 'DeleteEntry',
                     // controllerAs: 'vm',
                     // templateUrl: 'app/delete/delete.component.html'
-                    template: '<delete-entry> </delete-entry>'
+                    template: '<delete-entry></delete-entry>'
                 }
             }
         });

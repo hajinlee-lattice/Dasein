@@ -1,35 +1,34 @@
 angular.module('login')
 .component('loginFrame', {
     templateUrl: 'app/login/login.component.html',
+    bindings: {
+        logindocument: '<',
+        clientsession: '<'
+    },
     controller: function(
-        $scope, $state, $timeout, ResourceUtility, LoginService, 
+        $state, $timeout, ResourceUtility, LoginService, 
         SessionTimeoutUtility, BrowserStorageUtility, LoginStore
     ) {
-        var vm = this,
-            resolve = $scope.$parent.$resolve,
-            ClientSession = resolve.ClientSession,
-            LoginDocument = resolve.LoginDocument;
-        
-        angular.extend(vm, {
-            ResourceUtility: ResourceUtility,
-            login: LoginStore.login,
-            state: $state,
-            history: [],
-            loginInProgress: {}
-        });
+        var vm = this;
 
-        vm.init = function() {
-            if (SessionTimeoutUtility.hasSessionTimedOut() && LoginDocument.UserName) {
+        vm.$onInit = function() {
+            vm.ResourceUtility = ResourceUtility;
+            vm.login = LoginStore.login;
+            vm.state = $state;
+            vm.history = [];
+            vm.loginInProgress = {};
+            
+            if (SessionTimeoutUtility.hasSessionTimedOut() && vm.logindocument.UserName) {
                 return LoginService.Logout();
             } else {
                 switch($state.current.name) {
                     case 'login.form': 
-                        if (LoginDocument.UserName) {
+                        if (vm.logindocument.UserName) {
                             $state.go('login.tenants');
                         }
                         break;
                     case 'login.tenants':
-                        if (!LoginDocument.UserName) {
+                        if (!vm.logindocument.UserName) {
                             $state.go('login.form');
                         }
                         break;
@@ -39,20 +38,20 @@ angular.module('login')
                 }
             }
 
-            LoginStore.set(LoginDocument, ClientSession);
+            LoginStore.set(vm.logindocument, vm.clientsession);
 
             angular.element('body').addClass('initialized');
-        }
+        };
 
         vm.getHistory = function(username) {
             vm.history = BrowserStorageUtility.getHistory(username, vm.login.tenant) || [];
 
             return vm.history;
-        }
+        };
 
         vm.clearHistory = function(username) {
             BrowserStorageUtility.clearHistory(username);
-        }
+        };
 
         vm.clickTenant = function(tenant, username) {
             vm.loginInProgress[tenant.DisplayName] = true;
@@ -65,7 +64,7 @@ angular.module('login')
                     showError(ResourceUtility.getString("TENANT_SELECTION_FORM_ERROR"));
                 }
             });
-        }
+        };
 
         vm.clickLogout = function($event) {
             if ($event != null) {
@@ -73,12 +72,10 @@ angular.module('login')
             }
 
             LoginService.Logout();
-        }
+        };
 
         vm.clickToLP = function() {
             LoginStore.redirectToLP();
-        }
-
-        vm.init();
+        };
     }
 });

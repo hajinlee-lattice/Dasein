@@ -291,17 +291,15 @@ angular.module('lp.ratingsengine')
                 rating_id: $stateParams.rating_id,
                 model_id: current.rule.id,
                 model: { 
-                    rule: SegmentStore.sanitizeRuleBuckets(angular.copy(current.rule)) 
+                    rule: SegmentStore.sanitizeRuleBuckets(angular.copy(current.rule), true) 
                 }
             };
-
-        console.log(opts);
 
         RatingsEngineService.saveRules(opts).then(function(rating) {
             if(nextState) {
                 $state.go(nextState, { rating_id: $stateParams.rating_id });
             } else {
-                console.log('!!!!!!!!!!!!!!!!!',rating);
+                //console.log('!!!!!!!!!!!!!!!!!',rating);
             }
         });
     }
@@ -494,16 +492,16 @@ angular.module('lp.ratingsengine')
 
     this.getCoverageMap = function(CurrentRatingsEngine, segmentId, CoverageMap){
         var deferred = $q.defer();
-        var CoverageMap = CoverageMap || {};
+        var rule = SegmentStore.sanitizeRuleBuckets(angular.copy(CurrentRatingsEngine.rule));
 
-        SegmentStore.sanitizeRuleBuckets(CurrentRatingsEngine.rule, true);
+        CoverageMap = CoverageMap || {};
 
         CoverageMap.restrictNotNullSalesforceId = false;
         CoverageMap.segmentIdModelRules = [{
             segmentId: segmentId,
             ratingRule: {
-                bucketToRuleMap: CurrentRatingsEngine.rule.ratingRule.bucketToRuleMap,
-                defaultBucketName: CurrentRatingsEngine.rule.ratingRule.defaultBucketName
+                bucketToRuleMap: rule.ratingRule.bucketToRuleMap,
+                defaultBucketName: rule.ratingRule.defaultBucketName
             }
         }];
 

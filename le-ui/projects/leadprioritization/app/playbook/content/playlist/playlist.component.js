@@ -95,11 +95,12 @@ $stateParams, $interval, PlaybookWizardService, PlaybookWizardStore, TimestampIn
         $event.preventDefault();
         var launchedStatus = PlaybookWizardStore.getLaunchedStatus(play);
         PlaybookWizardStore.setPlay(play);
+        console.log(play);
         
         if(launchedStatus.hasLaunched) {
             $state.go('home.playbook.dashboard', {play_name: play.name} );
-        } else {
-            $state.go('home.playbook.create.rating', {play_name: play.name} );
+        } else if (play.ratingEngine && play.ratingEngine.id) {
+            $state.go('home.playbook.create.rating', { play_name: play.name, rating_id: play.ratingEngine.id } );
         }
     };
 

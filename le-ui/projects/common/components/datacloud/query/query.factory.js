@@ -1,41 +1,22 @@
-angular.module('common.datacloud.query.factory.restriction', [])
+angular.module('common.datacloud.query')
 .factory('BucketRestriction', function() {
     function BucketRestriction(columnName, objectType, range, attr, bkt) {
-
         if (attr === null || attr === undefined) {
             this.attr = objectType + '.' + columnName;
         } else {
             this.attr = attr;
         }
+
         if (bkt === null || attr === undefined) {
             this.bkt = {};
-            //this.bkt.Rng = range;
         } else {
             this.bkt = bkt;
         }
+        
         if (!range) {
             return null;
         }
-
-    };
-
-    // // used to convert bucket range in old data object
-    // function oldFormatRangeToBkt(range) {
-
-    //     if (!range) {
-    //         return null;
-    //     }
-        
-    //     if (range.min = range.max) {
-    //         return {
-    //           'Lbl': bkt.Rng.min
-    //         };
-    //     } else {
-    //         return {
-    //             'Rng': [bkt.Rng.min, bkt.Rng.max]
-    //         };
-    //     }
-    // }
+    }
 
     BucketRestriction.isBucketRestrictionLike = function(bucketRestriction) {
         return bucketRestriction instanceof BucketRestriction ||

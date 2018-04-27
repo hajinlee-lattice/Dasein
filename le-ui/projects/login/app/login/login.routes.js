@@ -1,92 +1,72 @@
 angular.module('login', [
-    'mainApp.appCommon.directives.ngEnterDirective',
-    'mainApp.appCommon.utilities.ResourceUtility',
-    'mainApp.appCommon.utilities.TimestampIntervalUtility',
-    'mainApp.login.services.LoginService',
     'mainApp.core.utilities.BrowserStorageUtility',
     'mainApp.core.services.ResourceStringsService'
 ])
-.config(function($stateProvider, $urlRouterProvider, $locationProvider) {
+.config(function($stateProvider) {
     $stateProvider
         .state('login', {
             url: '/',
+            onEnter: function(ResourceStringsService) {
+                ResourceStringsService.GetExternalResourceStringsForLocale();
+            },
             resolve: {
-                ResourceStrings: function($q, BrowserStorageUtility, ResourceStringsService) {
-                    var deferred = $q.defer(),
-                        session = BrowserStorageUtility.getClientSession();
-
-                    ResourceStringsService.GetExternalResourceStringsForLocale().then(function(result) {
-                        deferred.resolve(result);
-                    });
-
-                    return deferred.promise;
+                logindocument: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getLoginDocument() || {};
+                },
+                clientsession: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getClientSession() || {};
                 }
             },
             views: {
-                "main": {
-                    resolve: {
-                        LoginDocument: function(BrowserStorageUtility) {
-                            return BrowserStorageUtility.getLoginDocument() || {};
-                        },
-                        ClientSession: function(BrowserStorageUtility) {
-                            return BrowserStorageUtility.getClientSession() || {};
-                        }
-                    },
-                    template: '<login-frame></login-frame>'
-                }
+                "main": "loginFrame"
             }
         })
         .state('login.form', {
             url: 'form',
-            views: {
-                "FrameContent": {
-                    template: '<login-form></login-form>'
+            resolve: {
+                logindocument: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getLoginDocument() || {};
                 }
+            },
+            views: {
+                "FrameContent": "loginForm"
             }
         })
         .state('login.tenants', {
             url: 'tenants',
-            views: {
-                "FrameContent": {
-                    resolve: {
-                        LoginDocument: function(BrowserStorageUtility) {
-                            return BrowserStorageUtility.getLoginDocument() || {};
-                        },
-                        TenantList: function(LoginDocument) {
-                            return LoginDocument.Tenants || [];
-                        }
-                    },
-                    template: '<login-tenants></login-tenants>',
+            resolve: {
+                logindocument: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getLoginDocument() || {};
+                },
+                tenantlist: function(logindocument) {
+                    return logindocument.Tenants || [];
                 }
+            },
+            views: {
+                "FrameContent": "loginTenants"
             }
         })
         .state('login.forgot', {
             url: 'forgot',
             views: {
-                "FrameContent": {
-                    template: '<login-forgot-password></login-forgot-password>'
-                }
+                "FrameContent": "loginForgotPassword"
             }
         })
         .state('login.update', {
             url: 'update',
-            views: {
-                "FrameContent": {
-                    resolve: {
-                        LoginDocument: function(BrowserStorageUtility) {
-                            return BrowserStorageUtility.getLoginDocument() || {};
-                        }
-                    }, 
-                    template: '<login-update-password></login-update-password>'
+            resolve: {
+                logindocument: function(BrowserStorageUtility) {
+                    return BrowserStorageUtility.getLoginDocument() || {};
                 }
+            }, 
+            views: {
+                "FrameContent": "loginUpdatePassword"
             }
         })
         .state('login.success', {
             url: 'success',
             views: {
-                "FrameContent": {
-                    template: '<login-update-password-success></login-update-password-success>'
-                }
+                "FrameContent": "loginUpdatePasswordSuccess"
             }
         })
         .state('login.saml', {
@@ -95,9 +75,7 @@ angular.module('login', [
                 disableLogoArea: true
             },
             views: {
-                "FrameContent": {
-                    template: '<login-saml></login-saml>'
-                }
+                "FrameContent": "loginSaml"
             }
         })
         .state('login.saml_logout', { 
@@ -106,9 +84,7 @@ angular.module('login', [
                 disableLogoArea: true
             },
             views: {
-                "FrameContent": {
-                    template: '<login-saml-logout></login-saml-logout>'
-                }
+                "FrameContent": "loginSamlLogout"
             }
         })
         .state('login.saml_error', {
@@ -117,9 +93,7 @@ angular.module('login', [
                 disableLogoArea: true
             },
             views: {
-                "FrameContent": {
-                    template: '<login-saml-error></login-saml-error>'
-                }
+                "FrameContent": "loginSamlError"
             }
         });
 });

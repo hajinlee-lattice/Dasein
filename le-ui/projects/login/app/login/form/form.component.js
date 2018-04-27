@@ -7,30 +7,39 @@ angular.module('login.form', [
 ])
 .component('loginForm', {
     templateUrl: 'app/login/form/form.component.html',
+    bindings: {
+        logindocument: '<'
+    },
     controller: function (
-        $state, ResourceUtility, LoginService, BrowserStorageUtility, SessionTimeoutUtility
+        $state, ResourceUtility, LoginService, BrowserStorageUtility, 
+        SessionTimeoutUtility, TimestampIntervalUtility
     ) {
         var vm = this;
 
-        angular.extend(vm, {
-            ResourceUtility: ResourceUtility,
-            username: "",
-            password: "",
-            visible: false,
-            loginMessage: null,
-            loginErrorMessage: null,
-            showLoginError: false,
-            showSuccessMessage: false,
-            successMessage: "",
-            loginInProgress: false,
-            showForgotPassword: false,
-            forgotPasswordUsername: "",
-            copyrightString: ResourceUtility.getString('LOGIN_COPYRIGHT', ['2010 - ' + (new Date()).getFullYear()]),
-            forgotPasswordErrorMessage: "",
-            history: []
-        })
+        vm.$onInit = function() {
+            vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
+            vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
 
-        vm.init = function() {
+            if (vm.logindocument.UserName && !vm.isLoggedInWithTempPassword && !vm.isPasswordOlderThanNinetyDays) {
+                $state.go('login.tenants');
+                return;
+            }
+
+            vm.ResourceUtility = ResourceUtility;
+            vm.username = "";
+            vm.password = "";
+            vm.visible = false;
+            vm.loginMessage = null;
+            vm.loginErrorMessage = null;
+            vm.showLoginError = false;
+            vm.showSuccessMessage = false;
+            vm.successMessage = "";
+            vm.loginInProgress = false;
+            vm.showForgotPassword = false;
+            vm.forgotPasswordUsername = "";
+            vm.copyrightString = ResourceUtility.getString('LOGIN_COPYRIGHT', ['2010 - ' + (new Date()).getFullYear()]);
+            vm.forgotPasswordErrorMessage = "";
+            vm.history = [];
             vm.visible = true;
 
             $('[autofocus]').focus();
@@ -85,7 +94,5 @@ angular.module('login.form', [
         vm.forgotPasswordClick = function ($event) {
             $state.go('login.forgot');
         };
-
-        vm.init();
     }
 });

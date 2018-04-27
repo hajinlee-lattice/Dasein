@@ -30,7 +30,11 @@
     "angular-route": "^1.4.9",
     "oclazyload": "^1.0.9",
     "pako": "^1.0.1",
-    "angular-ui-router": "^0.3.1",
-    "angular": "^1.5.8"
+    "angular-ui-router": "^1.0.15",
+    "angular": "^1.6.10"
+  },
+  "resolutions": {
+    "angular": "1.5.8",
+    "angular-ui-router": "^1.0.15"
   }
 }

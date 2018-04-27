@@ -116,9 +116,9 @@ angular.module('common.datacloud.query.builder', [
                 
                 vm.setCurrentSavedTree();
 
-                // console.log('[AQB] Restriction:', angular.copy(vm.restriction));
-                // console.log('[AQB] Items:', vm.items);
-                // console.log('[AQB] Cube:', vm.cube);
+                console.log('[AQB] Restriction:', angular.copy(vm.restriction));
+                console.log('[AQB] Items:', vm.items);
+                console.log('[AQB] Cube:', vm.cube);
             }, 1);
         });
 
@@ -458,7 +458,7 @@ angular.module('common.datacloud.query.builder', [
 
     vm.getRatingsAndRecordCounts = function(model, segmentName) {
         var rulesForCounts = vm.getRuleRecordCounts();
-                // console.log('getRatingsAndRecordCounts', segmentName, rulesForCounts, model);
+        //console.log('getRatingsAndRecordCounts', segmentName, rulesForCounts, model);
 
         RatingsEngineStore.getCoverageMap(model, segmentName, rulesForCounts).then(function(result) {
             CoverageMap = vm.initCoverageMap(result);
@@ -536,25 +536,19 @@ angular.module('common.datacloud.query.builder', [
         QueryStore.setPublicProperty('enableSaveSegmentButton', true);
 
         if (vm.mode == 'rules' || vm.mode == 'dashboardrules') {
-
             QueryStore.counts[vm.treeMode + 's'].loading = true;
 
             var RatingEngineCopy = angular.copy(RatingEngineModel),
                 BucketMap = RatingEngineCopy.rule.ratingRule.bucketToRuleMap;
 
             vm.bucketLabels.forEach(function(bucketName, index) {
-                // var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
-
-                //logical.restrictions = logical.restrictions.filter(function(restriction, index) {
-                //    return restriction.bucketRestriction && restriction.bucketRestriction.bkt.Id;
-                //});
-                
                 vm.buckets[vm.bucketsMap[bucketName]].count = -1;
 
-                // SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName][vm.treeMode + '_restriction'] ]);
+                SegmentStore.removeEmptyBuckets([ BucketMap[bucketName]['account_restriction'] ]);
+                SegmentStore.removeEmptyBuckets([ BucketMap[bucketName]['contact_restriction'] ]);
+                
                 SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName]['account_restriction'] ]);
                 SegmentStore.sanitizeSegmentRestriction([ BucketMap[bucketName]['contact_restriction'] ]);
-
             });
 
             $timeout(function() {
@@ -605,10 +599,6 @@ angular.module('common.datacloud.query.builder', [
             restrictions = [];
 
         vm.bucketLabels.forEach(function(bucketName, index) {
-            // var logical = BucketMap[bucketName][vm.treeMode + '_restriction'].logicalRestriction;
-
-            // QueryStore.getAllBuckets(logical.restrictions, restrictions);
-
             var accountLogical = BucketMap[bucketName]['account_restriction'].logicalRestriction;
             var contactLogical = BucketMap[bucketName]['contact_restriction'].logicalRestriction;
 

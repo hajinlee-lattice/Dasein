@@ -58,11 +58,9 @@ angular
                         if (!vm.item || !vm.isBucketUsed(bucket)) {
                             vm.unused = true;
                         }
-
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube && vm.item.cube.Bkts) {
-                                // console.log('=========> ', vm.item);
                                 vm.type = vm.item.cube.Bkts.Type;
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
@@ -71,7 +69,7 @@ angular
                         }
                         // var tmp = vm.enrichmentsMap;
                         // console.log(tmp);
-                        vm.label = vm.tree.bucketRestriction.bkt.Lbl;
+                        vm.label = vm.tree.bucketRestriction.bkt ? vm.tree.bucketRestriction.bkt.Lbl : '';
                         vm.range = QueryTreeService.getBktVals(vm.tree.bucketRestriction, vm.type)//vm.tree.bucketRestriction.bkt.Vals;
                     }
                 });

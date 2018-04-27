@@ -5,47 +5,45 @@ angular.module('login.tenants', [
 ])
 .component('loginTenants', {
     templateUrl: 'app/login/tenants/tenants.component.html',
+    bindings: {
+        tenantlist: '<',
+        logindocument: '<'
+    },
     controller: function (
-        $scope, $state, $timeout, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
+        $state, $timeout, ResourceUtility, BrowserStorageUtility, TimestampIntervalUtility, 
         LoginService, LoginStore, SessionTimeoutUtility
     ) {
-        var vm = this,
-            resolve = $scope.$parent.$resolve,
-            TenantList = resolve.TenantList,
-            LoginDocument = resolve.LoginDocument;
+        var vm = this;
 
-        angular.extend(vm, {
-            ResourceUtility: ResourceUtility,
-            tenantList: TenantList,
-            tenantMap: {},
-            isLoggedInWithTempPassword: LoginDocument.MustChangePassword,
-            isPasswordOlderThanNinetyDays: TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(LoginDocument.PasswordLastModified),
-            SortProperty: 'RegisteredTime',
-            SortDirection: '-',
-            deactivated: false,
-            selected: null,
-            visible: true,
-            initialize: false,
-            version: '3.0'
-        });
+        vm.$onInit = function() {
+            vm.ResourceUtility = ResourceUtility;
+            vm.tenantMap = {};
+            vm.isLoggedInWithTempPassword = vm.logindocument.MustChangePassword;
+            vm.isPasswordOlderThanNinetyDays = TimestampIntervalUtility.isTimestampFartherThanNinetyDaysAgo(vm.logindocument.PasswordLastModified);
+            vm.SortProperty = 'RegisteredTime';
+            vm.SortDirection = '-';
+            vm.deactivated = false;
+            vm.selected = null;
+            vm.visible = true;
+            vm.initialize = false;
+            vm.version = '3.0';
 
-        vm.init = function() {
             var ClientSession = BrowserStorageUtility.getClientSession();
             
-            LoginStore.set(LoginDocument, ClientSession);
+            LoginStore.set(vm.logindocument, ClientSession);
             
             if (vm.isLoggedInWithTempPassword || vm.isPasswordOlderThanNinetyDays) {
                 $state.go('login.update');
                 return;
             }
             
-            if (TenantList.length == 1) {
-                vm.select(TenantList[0]);
+            if (vm.tenantlist.length == 1) {
+                vm.select(vm.tenantlist[0]);
                 return;
             }
 
-            if (TenantList == null || TenantList.length === 0) {
-                if (LoginDocument && !LoginStore.login.username) {
+            if (vm.tenantlist == null || vm.tenantlist.length === 0) {
+                if (vm.logindocument && !LoginStore.login.username) {
                     showError(ResourceUtility.getString("LOGIN_EXPIRED_AUTHENTICATION_CREDENTIALS"));
                 } else {
                     showError(ResourceUtility.getString("NO_TENANT_MESSAGE"));
@@ -53,7 +51,7 @@ angular.module('login.tenants', [
                 return;
             }
 
-            vm.tenantList.forEach(function(tenant) {
+            vm.tenantlist.forEach(function(tenant) {
                 vm.tenantMap[tenant.Identifier] = tenant;
             });
 
@@ -69,7 +67,7 @@ angular.module('login.tenants', [
         vm.select = function (tenant) {
             vm.deactivated = true;
             vm.selected = tenant;
-
+            
             LoginService.GetSessionDocument(tenant, LoginStore.login.username).then(function(data) {
                 if (data != null && data.Success === true) {
                     LoginStore.redirectToLP(tenant);
@@ -177,7 +175,5 @@ angular.module('login.tenants', [
             vm.tenantErrorMessage = message;
             vm.showTenantError = true;
         };
-
-        vm.init();
     }
 });

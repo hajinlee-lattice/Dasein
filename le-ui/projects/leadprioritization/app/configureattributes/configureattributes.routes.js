@@ -10,13 +10,13 @@ angular
         })
         .state('home.configureattributes.spend_change', {
             url: '/spend_change',
+            resolve: {
+                Foo: function() {
+                    return 'Foo';
+                }
+            },
             views: {
                 'main@': {
-                    resolve: {
-                        Foo: function() {
-                            return 'Foo';
-                        }
-                    },
                     template: '<configure-attributes-configure></configure-attributes-configure>'
                 }
             },

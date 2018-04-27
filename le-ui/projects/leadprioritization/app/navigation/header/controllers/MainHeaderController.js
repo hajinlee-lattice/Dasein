@@ -13,10 +13,9 @@ angular.module('pd.navigation.header', [
     'common.utilities.SessionTimeout'
 ])
 .controller('HeaderController', function (
-    $scope, $rootScope, $state, ResourceUtility, BrowserStorageUtility, FeatureFlagService,
-    LoginService, NavUtility, JobsStore, ApiHost
+    $scope, $rootScope, $state, $transitions, ResourceUtility, NavUtility, 
+    BrowserStorageUtility, FeatureFlagService, LoginService, JobsStore, ApiHost
 ) {
-
     $scope.ResourceUtility = ResourceUtility;
     $scope.jobs = JobsStore.data.jobs;
     $scope.importJobs = JobsStore.data.importJobs;
@@ -24,6 +23,24 @@ angular.module('pd.navigation.header', [
     $scope.headerBack = null;
     // $scope.IsRatingEngine = false;
     $scope.isModelDetailsPage = false;
+
+    $transitions.onStart({}, function(trans) {
+        var to = trans.$to(),
+            params = trans.params('to'),
+            from = trans.$from();
+
+        if (params.pageIcon) {
+            setPageTitle(params);
+        }
+
+        if (isModelDetailState(from.name) && !isModelDetailState(to.name)) {
+            $scope.isModelDetailsPage = false;
+        }
+        
+        if (($scope.headerBack && to.name && ($scope.headerBack.path && !to.name.match($scope.headerBack.path)))) {
+            $scope.headerBack = null;
+        }
+    });
 
     $scope.showHeaderBack = function(){
         var ret = !!($scope.headerBack && (($scope.IsRatingEngine === true) || ($scope.isModelDetailsPage === true)));
@@ -37,13 +54,15 @@ angular.module('pd.navigation.header', [
         var state = '';
         var flags = FeatureFlagService.Flags();
         var cdl = FeatureFlagService.FlagIsEnabled(flags.ENABLE_CDL);
-        if(cdl === true){
+        
+        if (cdl === true){
             state = 'home.jobs.data';
-        }else {
+        } else {
             state = 'home.jobs.status';
         }
+
         return state;
-    }
+    };
 
     $scope.statusFilter = function (item) {
         return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
@@ -51,11 +70,11 @@ angular.module('pd.navigation.header', [
 
     $scope.statusImportFilter = function(item){
         return item.jobStatus === 'Running' || item.jobStatus === 'Pending';
-    }
+    };
 
     $scope.getRunningSubJobsDataCount = function(){
         return JobsStore.data.subjobsRunning.length;
-    }
+    };
 
 
     FeatureFlagService.GetAllFlags().then(function(result) {
@@ -83,36 +102,16 @@ angular.module('pd.navigation.header', [
 
     $scope.showProfileNav = false;
 
-        var loginDocument = BrowserStorageUtility.getLoginDocument(),
-            authenticationRoute = loginDocument.AuthenticationRoute || null,
-            clientSession = BrowserStorageUtility.getClientSession() || {},
-            accessLevel = clientSession.AccessLevel || null;
+    var loginDocument = BrowserStorageUtility.getLoginDocument(),
+        authenticationRoute = loginDocument.AuthenticationRoute || null,
+        clientSession = BrowserStorageUtility.getClientSession() || {},
+        accessLevel = clientSession.AccessLevel || null;
 
-        $scope.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
+    $scope.mayChangePassword = (authenticationRoute !== 'SSO' || (authenticationRoute === 'SSO'  && accessLevel === 'SUPER_ADMIN'));
 
     $('body.not-initialized')
         .removeClass('not-initialized')
         .addClass('initialized');
-
-    $rootScope.$on('$stateChangeSuccess', function(e, toState, toParams, fromState, fromParams) {
-        // console.log('STATE CHANGED e --> ', e);
-        // console.log('STATE CHANGED toState --> ', toState);
-        // console.log('STATE CHANGED toParams --> ', toParams);
-        // console.log('STATE CHANGED fromState --> ', fromState.url);
-        // console.log('STATE CHANGED fromParams --> ',fromParams);
-        if (toState.params) {
-            setPageTitle(toState.params);
-        }
-
-        if (isModelDetailState(fromState.name) && !isModelDetailState(toState.name)) {
-            $scope.isModelDetailsPage = false;
-        }
-        
-        if(($scope.headerBack && toState.name && ($scope.headerBack.path && !toState.name.match($scope.headerBack.path)))) {
-            // console.log('HHHHHHH');
-            $scope.headerBack = null;
-        }
-    });
 
     function setPageTitle(params) {
         $scope.pageDisplayIcon = params.pageIcon ? params.pageIcon : null;
@@ -137,7 +136,7 @@ angular.module('pd.navigation.header', [
 
     $scope.$on('header-back', function(event, args) {
         /**
-         * args.path is required.  It's a regex compared to toState.name. When it fails headerBack is destroyed, otherwise your header back stuff will persist.
+         * args.path is required.  It's a regex compared to to.name. When it fails headerBack is destroyed, otherwise your header back stuff will persist.
          */
         // console.log('BACK --> ', args);
         if(args.path) {
@@ -153,7 +152,7 @@ angular.module('pd.navigation.header', [
     $scope.handleSidebarToggle = function ($event) {
         angular.element("body").toggleClass("open-nav");
         angular.element("body").addClass("controlled-nav");  // indicate the user toggled the nav
-    }
+    };
 
     $(document.body).click(function() {
         if ($scope.showProfileNav) {
@@ -188,7 +187,7 @@ angular.module('pd.navigation.header', [
 
     // Handle when the Update Password link is clicked
     $scope.$on(NavUtility.UPDATE_PASSWORD_NAV_EVENT, function (event, data) {
-        if (data != null && data.Success) {
+        if (data !== null && data.Success) {
             createUpdatePasswordSuccessView();
         } else {
             $state.go('home.updatepassword');
