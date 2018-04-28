@@ -111,6 +111,11 @@ public class CSVDataFeedMetadataServiceImpl extends DataFeedMetadataService {
             if (!srcAttrs.containsKey(attr.getName())) {
                 result = false;
                 break;
+            } else {
+                if (!attr.getDisplayName().equals(srcAttrs.get(attr.getName()).getDisplayName())) {
+                    result = false;
+                    break;
+                }
             }
         }
         return result;

@@ -242,6 +242,8 @@ public class DataFeedTaskManagerServiceImpl implements DataFeedTaskManagerServic
                 Attribute newAttr = new Attribute(attr.getName());
                 AttributeUtils.copyPropertiesFromAttribute(attr, newAttr);
                 templateTable.addAttribute(newAttr);
+            } else {
+                templateAttrs.get(attr.getName()).setDisplayName(attr.getDisplayName());
             }
         }
         return templateTable;
