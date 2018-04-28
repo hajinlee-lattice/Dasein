@@ -1,5 +1,6 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -72,16 +73,16 @@ public class AttrConfigSelectionDetail {
     public static class SubcategoryDetail {
 
         @JsonProperty("Selected")
-        private Long selected;
+        private Long selected = 0L;
 
         @JsonProperty("TotalAttrs")
-        private Long totalAttrs;
+        private Long totalAttrs = 0L;
 
         @JsonProperty("HasFrozenAttrs")
-        private Boolean hasFrozenAttrs;
+        private Boolean hasFrozenAttrs = Boolean.FALSE;
 
         @JsonProperty("Attributes")
-        private Map<String, AttrDetail> attributes;
+        private Map<String, AttrDetail> attributes = new HashMap<>();
 
         public Long getSelected() {
             return selected;

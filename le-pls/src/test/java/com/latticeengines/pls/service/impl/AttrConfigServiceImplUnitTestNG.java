@@ -23,6 +23,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
 import com.latticeengines.domain.exposed.pls.AttrConfigUsageOverview;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -201,6 +202,7 @@ public class AttrConfigServiceImplUnitTestNG {
                 .equals(ColumnSelection.Predefined.TalkingPoint.getName()));
         Assert.assertTrue(attrConfigService.translateUsageToProperty("COMPANY PROFILE")
                 .equals(ColumnSelection.Predefined.CompanyProfile.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("State").equals(ColumnMetadataKey.State));
         try {
             attrConfigService.translateUsageToProperty("randome");
         } catch (Exception e) {
@@ -254,6 +256,77 @@ public class AttrConfigServiceImplUnitTestNG {
         log.info("CustomValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue());
         log.info("SystemValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getSystemValue());
         attrConfigs.add(config);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForActivation() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.TECHNOLOGY_PROFILE, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+                .thenReturn(request);
+        AttrConfigSelectionDetail activationDetail = attrConfigService
+                .getAttrConfigSelectionDetailForState(Category.TECHNOLOGY_PROFILE.getName());
+        log.info("testGetAttrConfigUsageOverview activationDetail is " + activationDetail);
+        Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
+        Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
+        Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
+        Assert.assertTrue(activationDetail.getSubcategories().entrySet().parallelStream()
+                .allMatch(entry -> entry.getValue().getHasFrozenAttrs() == false));
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForUsageWithNonPremiumCategory() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.FIRMOGRAPHICS, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.FIRMOGRAPHICS, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName()))
+                .thenReturn(request);
+        AttrConfigSelectionDetail selectionDetail = attrConfigService.getAttrConfigSelectionDetails("Firmographics",
+                "Segmentation");
+        log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 9L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 8);
+        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
+                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForUsageWithPremiumCategory() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.INTENT, true, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.INTENT, true, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.INTENT, true, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.INTENT, true, false), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.INTENT, false, true), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.INTENT, false, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
+        AttrConfigSelectionDetail selectionDetail = attrConfigService
+                .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
+        log.info("testGetDetailAttrForUsageWithPremiumCategoru selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
+        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
+                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
     }
 
 }
