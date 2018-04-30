@@ -25,6 +25,7 @@ import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public abstract class AbstractProcessEntityChoreographer extends BaseChoreographer {
 
@@ -36,6 +37,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean hasSchemaChange = false;
     protected boolean hasActiveServingStore = false;
     protected boolean hasImports = false;
+    protected boolean hasManyUpdate = false;
 
     boolean rebuild = false;
     boolean update = false;
@@ -57,6 +59,7 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
 
         if (isCloneStep(step)) {
             checkSchemaChange(step);
+            checkManyUpdate(step);
             reset = shouldReset();
             rebuild = shouldRebuild();
             update = shouldUpdate();
@@ -182,6 +185,24 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
         }
     }
 
+    void checkManyUpdate(AbstractStep<? extends BaseStepConfiguration> step) {
+        Long existingCount = null;
+        Long updateCount = null;
+        Map<BusinessEntity, Long> existingValueMap = step.getMapObjectFromContext(BaseWorkflowStep.EXISTING_RECORDS,
+                BusinessEntity.class, Long.class);
+        if (existingValueMap != null) {
+            existingCount = existingValueMap.get(mainEntity());
+        }
+        Map<BusinessEntity, Long> updateValueMap = step.getMapObjectFromContext(BaseWorkflowStep.UPDATED_RECORDS,
+                BusinessEntity.class, Long.class);
+        if (updateValueMap != null) {
+            updateCount = updateValueMap.get(mainEntity());
+        }
+        if (existingCount != null && updateCount != null) {
+            hasManyUpdate = (updateCount * 1.0F / existingCount) >= 0.3;
+        }
+    }
+
     protected boolean shouldMerge() {
         return hasImports;
     }
@@ -207,6 +228,9 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return true;
         } else if (hasImports && !hasActiveServingStore) {
             log.info("Has imports but no service store, going to rebuild " + mainEntity());
+            return true;
+        } else if (hasManyUpdate) {
+            log.info("Has more than 30% update, going to rebuild " + mainEntity());
             return true;
         }
         log.info("No reason to rebuild " + mainEntity());
