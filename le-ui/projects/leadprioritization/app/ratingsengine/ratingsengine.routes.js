@@ -414,9 +414,6 @@ angular
             })
             .state('home.ratingsengine.dashboard.segment.attributes.rules.picker', {
                 url: '/picker/:entity/:fieldname',
-                params: {
-                    mode: 'dashboardrules'
-                },
                 resolve: {
                     PickerBuckets: ['$q', '$stateParams', 'QueryTreeService', 'DataCloudStore', function($q, $stateParams, QueryTreeService, DataCloudStore){
                         var deferred = $q.defer();

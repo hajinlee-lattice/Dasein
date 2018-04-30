@@ -22,16 +22,6 @@
         padding-left: 0;
     }
 
-    .form-control.ng-invalid-required.required,
-    .form-control.ng-invalid-required:required,
-    .form-control.required:not(.ng-dirty),
-    .form-control:required:not(.ng-dirty) {
-        border-left-width: 5px;
-        border-left-color: #EF6A30;
-        -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-        box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
-    }
-
     form {
         @include flex-container;
         flex-wrap: wrap;

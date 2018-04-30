@@ -1,0 +1,77 @@
+<div class="container salesforce-settings">
+
+
+    <div class="row">
+        <div class="twelve columns">
+            <div class="global-error local-error" data-ng-show="showTokenMessage && !tokenSucceeded">
+                <div><i class="fa fa-exclamation-circle fa-inverse"></i>&nbsp;Failed to Generate Salesforce Access Token<a href="javascript:void(0)" style="padding-left: 50px"><i class="fa fa-times fa-inverse" data-ng-click="closeSFDCMessage()"></i></a></div>
+            </div>
+            <div data-ng-if="showTokenMessage && tokenSucceeded" class="job-success-message">
+                <div>We have sent you an email with an access token and instructions for authenticating with Salesforce.<a href="javascript:void(0)"><i class="fa fa-times fa-inverse" data-ng-click="closeSFDCMessage()" style="top: 5px"></i></a></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns">
+            <h2>SFDC Org Authentication</h2>
+            <p>Generate a token below to connect the BIS application with the Lattice platform.</p>
+            <button 
+                class="button orange-button" 
+                ng-click="$ctrl.generateAndEmailSFDCAccessTokenClicked()"
+                ng-disabled="loading">
+                Email One-time Authentication Token
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="twelve columns">
+            <h2>SFDC Org ID to Account ID Mapping</h2>
+            <p>This is accounted to ensure the right ID is used when launching plays in your SFDC instances. <br/>Note: Each time a new SFDC Org is authenticated, an ID will be listed here.</p>
+
+            <form name="salesforceOrgsForm" novalidate>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SFDC Org ID</th>
+                            <th>SFDC Org Name</th>
+                            <th>Account ID</th>
+                        </tr>
+                    </thead>
+                    <tbody ng-if="$ctrl.orgs.length === 0">
+                        <tr>
+                            <td colspan="3">Each time you authenticate an SFDC Org in the Salesforce app, it will be listed here.</td>
+                        </tr>
+                    </tbody>
+                    <tbody ng-if="$ctrl.orgs.length > 0">
+                        <tr ng-repeat="org in $ctrl.orgs">
+                            <td>{{ org.orgId }}</td>
+                            <td>{{ org.orgName }}</td>
+                            <td>
+                                <select
+                                    class="form-control"
+                                    name="accountId"
+                                    ng-init="$ctrl.accountids[org.accountId]" 
+                                    ng-model="org.accountId" 
+                                    ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids"
+                                    ng-required="org.accountId === null || org.accountId === ''">
+                                        <option value="" ng-if="org.accountId === null || org.accountId === ''">Select</option>
+                                    </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <button
+                    type="button"
+                    class="button blue-button"
+                    ng-click="$ctrl.saveOrgs()"
+                    ng-disabled="salesforceOrgsForm.accountId.$invalid">Save</button>
+
+            </form>
+        </div>
+    </div>
+
+
+</div>

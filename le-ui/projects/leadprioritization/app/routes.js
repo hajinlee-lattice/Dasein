@@ -1225,19 +1225,55 @@ angular
             }
         })
         .state('home.sfdcsettings', {
-            url: '/sfdcsettings',
+            url: '/salesforce-settings',
             params: {
                 pageIcon: 'ico-salesforce',
                 pageTitle: 'Salesforce Settings'
+            },
+            resolve: {
+                accountids: function($q, sfdcstore) {
+                    // var deferred = $q.defer();
+
+                    // sfdcstore.getAccountIds().then(function (result) {
+                    //     deferred.resolve(result.CRM);
+                    // });
+
+                    // return deferred.promise;
+
+                    var dummyAccountIds = [
+                        {
+                            "fieldName": "CRM_Acc_Id_1",
+                            "fieldType": "String",
+                            "displayName": "Id CRM_Acc_Id_1"
+                        },
+                        {
+                            "fieldName": "CRM_Acc_Id_2",
+                            "fieldType": "String",
+                            "displayName": "Id CRM_Acc_Id_2"
+                        },
+                        {
+                            "fieldName": "CRM_Acc_Id_3",
+                            "fieldType": "String",
+                            "displayName": "Id CRM_Acc_Id_3"
+                        }
+                    ];
+                    return dummyAccountIds;
+                },
+                orgs: function($q, sfdcstore) {
+                    var deferred = $q.defer();
+
+                    sfdcstore.getOrgs().then(function (result) {
+                        deferred.resolve(result.CRM);
+                    });
+
+                    return deferred.promise;
+                }
             },
             views: {
                 "summary@": {
                     templateUrl: 'app/navigation/summary/BlankLine.html'
                 },
-                "main@": {
-                    controller: 'sfdcCredentialsController',
-                    templateUrl: 'app/sfdc/views/SFDCCredentialsView.html'
-                }
+                "main@": 'salesforceSettings'
             }
         })
         .state('home.apiconsole', {
