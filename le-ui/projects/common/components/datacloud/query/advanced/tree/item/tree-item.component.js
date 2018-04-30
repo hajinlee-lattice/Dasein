@@ -22,7 +22,7 @@ angular
                 }
                 vm.showItem = function(typeToShow){
                     var ret = QueryTreeService.showType(vm.tree.bucketRestriction, vm.type, typeToShow);
-                    // console.log('Show Item', typeToShow, ret);
+                    // console.log('Show Item ==> ', vm.type, typeToShow, ret);
                     return ret;
                 }
                 vm.showTo = function(){

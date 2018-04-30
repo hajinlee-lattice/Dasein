@@ -4,7 +4,10 @@ angular
     'common.datacloud.query.builder.tree.info',
     'common.datacloud.query.builder.tree.edit',
     'common.datacloud.query.builder.tree.edit.transaction',
-    'common.datacloud.query.builder.tree.edit.transaction.edit'
+    'common.datacloud.query.builder.tree.edit.transaction.edit',
+    'common.datacloud.query.builder.tree.edit.percent',
+    'common.datacloud.query.builder.tree.edit.percent.edit',
+    'common.datacloud.query.builder.tree.edit.percent.item'
 ])
 .directive('queryTreeDirective',function() {
     return {
@@ -62,6 +65,7 @@ angular
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube && vm.item.cube.Bkts) {
                                 vm.type = vm.item.cube.Bkts.Type;
+                                console.log("Type =============> ",vm.type);
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
                                 vm.type = 'String';
@@ -164,7 +168,8 @@ angular
                     return;
                 }
 
-                if (!vm.editing && !vm.root.draggedItem && (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String')) {
+                if (!vm.editing && !vm.root.draggedItem && 
+                    (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String' || vm.type == 'PercentChange')) {
                     if (vm.unused) {
                         vm.unused = false;
 

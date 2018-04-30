@@ -110,13 +110,15 @@ angular.module('common.datacloud.explorer', [
 
         if (vm.segment != null && vm.segment != "Create"){
             SegmentStore.getSegmentByName(vm.segment).then(function(result) {
-                vm.displayName = result.display_name;
-
-                $rootScope.$broadcast('header-back', { 
-                    path: '^home.segment.accounts',
-                    displayName: vm.displayName,
-                    sref: 'home.segments'
-                });
+                if(result){
+                    vm.displayName = result.display_name;
+                
+                    $rootScope.$broadcast('header-back', { 
+                        path: '^home.segment.accounts',
+                        displayName: vm.displayName,
+                        sref: 'home.segments'
+                    });
+                }
             });    
         }
 

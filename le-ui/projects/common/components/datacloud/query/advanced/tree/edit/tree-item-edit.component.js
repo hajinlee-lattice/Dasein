@@ -13,7 +13,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                 var vm = $scope.vm;
                 vm.booleanChanged = false;
                 vm.presetOperation;
-                console.log(vm.tree.bucketRestriction);
+                // console.log(vm.tree.bucketRestriction);
 
                 function showNumericalRange() {
                     switch (vm.numericalCmpModel) {
@@ -75,7 +75,7 @@ angular.module('common.datacloud.query.builder.tree.edit', [])
                     vm.enumCmpModel = QueryTreeService.getEnumCmpModel(vm.tree.bucketRestriction);
                     vm.stringValue = QueryTreeService.getOperationValue(vm.tree.bucketRestriction, 'String');
                     vm.stringCmpModel = QueryTreeService.getStringCmpModel(vm.tree.bucketRestriction);
-                    // vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
+                    vm.numericalCmpModel = QueryTreeService.getNumericalCmpModel(vm.tree.bucketRestriction);
                     vm.bktVals0 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 0);
                     vm.bktVals1 = QueryTreeService.getBktValue(vm.tree.bucketRestriction, 1);
                     vm.vals = vm.tree.bucketRestriction.bkt.Vals;

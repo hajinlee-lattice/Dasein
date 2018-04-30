@@ -1,4 +1,4 @@
-<span class="query-section-item-operation" ng-if="!vm.unused">
+<span class="query-section-item-operation" ng-if="!vm.unused && !vm.showItem('Percent')">
     <span class="query-section-item-operation">
         <span>{{vm.getOperationLabel()}}</span>
     </span>
@@ -25,5 +25,10 @@
     <strong class="query-section-item-value" ng-if="vm.showItem('Enum')" ng-repeat="value in (values = vm.getOperationValue('Enum'))">{{ vm.getOperationValue('Enum').length > 1 && $index != 0 ? ', ' : ''; }}{{ value }}</strong>
     <span class="query-section-item-value" ng-if="vm.showItem('Transaction')">
         <transaction-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" purchased="vm.getOperationValue('Boolean')"></transaction-directive>
+    </span>
+</span>
+<span class="query-section-item-operation" ng-if="!vm.unused && vm.showItem('Percent')">
+    <span class="query-section-item-value">
+        <percent-attribute bucketrestriction="vm.tree.bucketRestriction"></percent-attribute>
     </span>
 </span>

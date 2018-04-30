@@ -120,6 +120,25 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
                     default: return false;
                 }
+            }else if('PercentChange' === type){ //TO DO: change this with back end value
+                // console.log('IS AverageSeries');
+                switch (typeToShow) {
+                    case 'Percent': {
+                        return true;
+                    }
+                    default: {
+                        return false;
+                    }
+                }
+            }else {
+                switch (typeToShow) {
+                    case 'Numerical': {
+                        return true;
+                    }
+                    default: {
+                        return false;
+                    }
+                }
             }
         }
 
@@ -210,10 +229,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         this.getAttributeRules = function (bkt, bucket, isSameAttribute) {
             // console.log('PurchaseHistory');
             var isSameBucket = true;
-            if (bucket && bucket.Txn) {
+            if (bucket && bucket.Txn && bkt && bkt.Txn) {
                 var qty1 = bucket.Txn.Qty;
-                var amt1 = bucket.Txn.Amt;
                 var qty2 = bkt.Txn.Qty;
+                var amt1 = bucket.Txn.Amt;
                 var amt2 = bkt.Txn.Amt;
 
                 if (!qty1 && !amt1 && !qty2 && !qty2) {
@@ -224,6 +243,18 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     var lbl1 = bucket.Lbl;
                     var lbl2 = bkt.Lbl;
                     isSameBucket = neg1 == neg2 && lbl1 == lbl2;
+                }
+            } else if(bucket && bucket.PctChg && bkt && bkt.PctChg){
+                var direction1 = bucket.PctChg.Direction;
+                var direction2 = bkt.PctChg.Direction;
+                var cmp1 = bucket.PctChg.Cmp;
+                var cmp2 = bkt.PctChg.Cmp;
+
+                idSameBucket = direction1 == direction2 && cmp1 == cmp2;
+            } else{
+                if (bucket && bucket.Vals !== undefined && bucket.Vals != null && bkt.Vals !== undefined && bkt.Vals != null) {
+                    var tmp = bkt.Vals[0] == bucket.Vals[0] && bkt.Vals[1] == bucket.Vals[1] && bkt.Cmp == bucket.Cmp && bkt.Direction == bucket.Direction;
+                    isSameBucket = tmp;
                 }
             }
             var r = isSameAttribute && isSameBucket;
@@ -251,6 +282,31 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     default: {
                         return [];
                     }
+                }
+            }else if (bucketRestriction.bkt.PctChg){
+                switch (type) {
+                    case 'PercentChange': {
+                        var values = bucketRestriction.bkt.PctChg.Vals;        
+                        if (values) {
+                            var listPct = values.toString();
+                            listPct = listPct.replace(/,/g, ' - ');
+                            return listPct;
+                        } else {
+                            return '';
+                        }
+                    }
+                    default: {
+                        return [];
+                    }
+                }
+            }else {
+                var vals = bucketRestriction.bkt;
+                if (vals) {
+                    var list = vals.toString();
+                    list = list.replace(/,/g, ' - ');
+                    return list;
+                } else {
+                    return '';
                 }
             }
         }
@@ -285,6 +341,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return 0;
                     }
                 }
+            }else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
+                return getValsBasedOnPosition(bucketRestriction.bkt.PctChg.Cmp, bucketRestriction.bkt.PctChg.Vals, position);
+            }else{
+                return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
             }
         }
 
@@ -317,8 +377,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return [];
                     }
                 }
+            } else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
+                return bucketRestriction.bkt.PctChg.Vals;
             } else {
-                return [];
+                return bucketRestriction.bkt.Vals;
             }
         }
         //******************** Editing mode *********************************/
@@ -381,6 +443,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
 
                 }
+            }else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
+                setValsBasedOnPosition(bucketRestriction.bkt.PctChg.Cmp, bucketRestriction.bkt.PctChg.Vals, position, value);
+            } else{
+                setValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position, value);
             }
         }
 
@@ -447,6 +513,11 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
 
                 }
             }
+            else if (type === 'PercentChange' && bucketRestriction.bkt.PctChg) {
+                bucketRestriction.bkt.PctChg.Cmp = value;
+            } else{
+                bucketRestriction.bkt.Cmp = value;
+            }
         }
 
         this.removeKey = function (bucketRestriction, type, subType) {
@@ -499,12 +570,16 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
 
                 }
+            }else if (type === 'PercentChange' && bucketRestriction.bkt.PctChg) {
+                bucketRestriction.bkt.PctChg.Vals = [];
+            } else{
+                bucketRestriction.bkt.Vals = [];
             }
         }
 
         this.getBooleanModel = function (bucketRestriction) {
             var txn = bucketRestriction.bkt.Txn;
-            if (txn.Negate != undefined) {
+            if (txn && txn.Negate != undefined) {
                 if (txn.Negate === true) {
                     return 'No';
                 } if (txn.Negate === false) {
@@ -513,8 +588,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 return '';
 
             } else {
-                console.warn('Buket restirction with Boolean Value not set');
-                return '?';
+                // console.warn('Buket restirction with Boolean Value not set');
+                return '';
             }
         }
 
@@ -531,16 +606,19 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
 
         this.getBktValue = function (bucketRestriction, position) {
             var txn = bucketRestriction.bkt.Txn;
-            if (txn.Negate !== undefined) {
-                return (txn.Negate === true) ? 'No' : 'Yes';
+            if(txn){
+                if (txn.Negate !== undefined) {
+                    return (txn.Negate === true) ? 'No' : 'Yes';
+                }
+                if (txn.Qty) {
+                    return txn.Qry.Vals[position];
+                }
+                if (txn.Amt) {
+                    return txn.Amt.Vals[position];
+                }
+            }else{
+                return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
             }
-            if (txn.Qty) {
-                return txn.Qry.Vals[position];
-            }
-            if (txn.Amt) {
-                return txn.Amt.Vals[position];
-            }
-            return '';
         }
 
         this.getCubeBktList = function (cube) {
@@ -562,8 +640,11 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                 case 'TimeSeries': {
                     return getTransacionCmp(bucketRestriction);
                 };
+                case 'PercentChange' : {
+                    return bucketRestriction.bkt.PctChg;
+                }
 
-                default: return '';
+                default: return bucketRestriction.bkt.Cmp;
             }
         }
 
@@ -586,7 +667,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         console.warn('TimeSeries does not have Txn object');
                     }
                 };
-                default: return '';
+                case 'PercentChange' : {
+                    return bucketRestriction.bkt.PctChg.Cmp;
+                }
+                default: return bucketRestriction.bkt.Cmp;
             }
         }
 

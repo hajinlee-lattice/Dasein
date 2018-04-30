@@ -2,7 +2,7 @@
     <div class="le-grid editing-container">
         <div class="le-row">
             <div class="le-col-span-10">
-                <span ng-if="vm.showItem('String')" class="query-section-item-operation">
+                <span ng-if="vm.showItem('String') && !vm.showItem('Percent') && !vm.showItem('Transaction')" class="query-section-item-operation">
                     <select ng-model="vm.stringCmpModel" ng-options="k as v for (k, v) in vm.string_operations" ng-change="vm.changeStringCmpValue()">
                     </select>
 
@@ -10,7 +10,7 @@
                              ng-if="vm.showInput(vm.stringCmpModel)">
                 </span>
 
-                <span ng-if="vm.showItem('Boolean')" class="query-section-item-operation">
+                <span ng-if="vm.showItem('Boolean') && !vm.showItem('Percent')" class="query-section-item-operation">
                     <span class="query-section-item-value" ng-if="vm.showItem('Boolean')">
                         <strong>is</strong>
                     </span>
@@ -22,7 +22,7 @@
                     </select>
                 </span>
 
-                <span ng-if="vm.showItem('Enum')" class="query-section-item-operation">
+                <span ng-if="vm.showItem('Enum') && !vm.showItem('Percent')" class="query-section-item-operation">
                     <!-- PLEASE LEAVE THIS SELECT ALONE -->
                     <select ng-model="vm.enumCmpModel" ng-change="vm.changeEnumCmpValue()">
                         <option ng-selected="vm.enumCmpModel == 'EQUAL' || vm.enumCmpModel == 'IN_COLLECTION'" ng-value="EQUAL" ng-if="vm.vals.length > 0">is</option>
@@ -38,7 +38,7 @@
                     </span>
                 </span>
 
-                <span ng-if="vm.showItem('Numerical')" class="query-section-item-operation">
+                <span ng-if="vm.showItem('Numerical') && !vm.showItem('Percent')" class="query-section-item-operation">
                     <div class="num-edit-row">
                         <div class="button-group" role="group" ng-click="vm.clickEditMode(vm.editMode == 'Custom' ? 'Preset' : 'Custom')" ng-if="vm.getEntity() !== 'PurchaseHistory'">
                             <button type="button" class="button icon-button {{vm.editMode == 'Custom' ? 'white' : 'light-gray'}}-button" value="{{vm.editMode == 'Custom' ? 'Preset' : 'Custom'}}">
@@ -69,8 +69,11 @@
                 </span>
 
 
-                <span ng-if="vm.showItem('Transaction')">
+                <span ng-if="vm.showItem('Transaction')  && !vm.showItem('Percent')">
                     <transaction-edit-directive bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()" purchased="vm.booleanValue" booleanchanged='vm.booleanChanged'></transaction-edit-directive>
+                </span>
+                <span ng-if="vm.showItem('Percent')" class="query-section-item-operation" >
+                    <percent-edit-attribute bucketrestriction="vm.tree.bucketRestriction" type="vm.type" form="vm.getForm()"></percent-edit-attribute>
                 </span>
             </div>
 
