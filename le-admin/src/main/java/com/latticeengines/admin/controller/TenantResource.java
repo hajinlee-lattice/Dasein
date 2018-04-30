@@ -1,10 +1,5 @@
 package com.latticeengines.admin.controller;
 
-
-
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.latticeengines.admin.dynamicopts.DynamicOptionsService;
 import com.latticeengines.admin.service.FeatureFlagService;
 import com.latticeengines.admin.service.TenantService;
+import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.domain.exposed.admin.CRMTopology;
 import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.admin.SerializableDocumentDirectory;
@@ -33,13 +29,15 @@ import com.latticeengines.domain.exposed.admin.TenantDocument;
 import com.latticeengines.domain.exposed.admin.TenantRegistration;
 import com.latticeengines.domain.exposed.camille.bootstrap.BootstrapState;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
-import com.latticeengines.common.exposed.util.CipherUtils;
 import com.latticeengines.security.exposed.Constants;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 
 @Api(value = "tenantadmin", description = "REST resource for managing Lattice tenants across all products")
 @RestController
 @RequestMapping(value = "/tenants")
-@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('QA') or hasRole('TENANT_CONSOLE')")
+@PostAuthorize("hasRole('Platform Operations') or hasRole('DeveloperSupport') or hasRole('TENANT_CONSOLE')")
 public class TenantResource {
 
     @Autowired
@@ -108,7 +106,8 @@ public class TenantResource {
     @RequestMapping(value = "/{tenantId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant for a particular contract id")
-    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId, @PathVariable String tenantId) {
+    public TenantDocument getTenant(@RequestParam(value = "contractId") String contractId,
+            @PathVariable String tenantId) {
         contractId = contractId.replace("?", "");
         return tenantService.getTenant(contractId, tenantId);
     }
