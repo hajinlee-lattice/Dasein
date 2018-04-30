@@ -221,7 +221,7 @@ public class QueryRunnerTestNG extends QueryFunctionalTestNGBase {
     public void testTimeFilter() {
         // This query actually returns all accounts so it doesn't change over time
         Restriction restriction = Restriction.builder() //
-                .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
+            .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
                 .prior(Period.Quarter.name(), 1) //
                 .build();
         Query query = Query.builder() //

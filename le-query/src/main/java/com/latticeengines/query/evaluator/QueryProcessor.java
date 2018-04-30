@@ -2,14 +2,21 @@ package com.latticeengines.query.evaluator;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.graph.traversal.impl.BreadthFirstSearch;
+import com.latticeengines.common.exposed.visitor.Visitor;
+import com.latticeengines.common.exposed.visitor.VisitorContext;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -140,36 +147,77 @@ public class QueryProcessor {
         return sqlQuery;
     }
 
-    private SQLQuery<?> addLookupJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
-        List<BusinessEntity> joinedEntities = new ArrayList<>();
-        joinedEntities.add(query.getMainEntity());
-        List<JoinSpecification> lookupJoins = query.getLookupJoins();
-        List<Predicate> joinKeys = new ArrayList<>();
+    private Set<BusinessEntity> checkAndGetClusteredEntities(BusinessEntity mainEntity,
+                                                             List<JoinSpecification> lookupJoins) {
+        Set<BusinessEntity> clusteredEntities = new HashSet<>();
+
+        if (mainEntity != null) {
+            clusteredEntities.add(mainEntity);
+        }
+
         for (JoinSpecification join : lookupJoins) {
             BusinessEntity target = join.getDestinationEntity();
             // from all seen entities find one can join the current target
-            BusinessEntity.Relationship relationship = joinedEntities.stream() //
-                    .map(e -> e.join(target)) //
-                    .filter(Objects::nonNull) //
-                    .findAny() //
-                    .orElseThrow(() -> new QueryEvaluationException(
-                            "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
-                                    + " to entity " + target + "."));
-            BusinessEntity.Cardinality cardinality = relationship.getCardinality();
-            // JOIN T1
-            EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, target);
-            switch (cardinality) {
+            clusteredEntities.stream() //
+                .map(e -> e.join(target)) //
+                .filter(Objects::nonNull) //
+                .findAny() //
+                .orElseThrow(() -> new QueryEvaluationException(
+                    "Broken Connectivity: Cannot find a connected path from entity " + join.getSourceEntity()
+                    + " to entity " + target + "."));
+
+            clusteredEntities.add(target);
+        }
+
+        return clusteredEntities;
+    }
+
+    private static class JoinedEntityVisitor implements Visitor {
+        private SQLQuery<?> sqlQuery;
+        private BusinessEntity mainEntity;
+        private Set<BusinessEntity> joinedEntities;
+        private AttributeRepository repository;
+
+        JoinedEntityVisitor(SQLQuery<?> sqlQuery, BusinessEntity mainEntity,
+                            Set<BusinessEntity> joinedEntities, AttributeRepository repository) {
+            this.sqlQuery = sqlQuery;
+            this.mainEntity = mainEntity;
+            this.joinedEntities = joinedEntities;
+            this.repository = repository;
+        }
+
+        @Override
+        public void visit(Object object, VisitorContext ctx) {
+            BusinessEntity entity = (BusinessEntity) object;
+            if (object != mainEntity && joinedEntities.contains(entity)) {
+                BusinessEntity parent = (BusinessEntity) ctx.getProperty("parent");
+                BusinessEntity.Relationship relationship = parent.join(entity);
+                BusinessEntity.Cardinality cardinality = relationship.getCardinality();
+                // JOIN T1
+                EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, entity);
+                switch (cardinality) {
                 case ONE_TO_MANY:
-                    sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(target.name()));
+                    sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(entity.name()));
                     break;
                 default:
-                    sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(target.name()));
+                    sqlQuery = sqlQuery.join(targetTableName, Expressions.stringPath(entity.name()));
+                }
+                for (Predicate predicate : QueryUtils.getJoinPredicates(relationship)) {
+                    sqlQuery = sqlQuery.on(predicate);
+                }
             }
-            joinKeys.addAll(QueryUtils.getJoinPredicates(relationship));
-            joinedEntities.add(target);
         }
-        for (Predicate predicate : joinKeys) {
-            sqlQuery = sqlQuery.on(predicate);
+    }
+
+    private SQLQuery<?> addLookupJoins(SQLQuery<?> sqlQuery, AttributeRepository repository, Query query) {
+        // first, we make sure all joined entities are in a cluster and reachable, so we can do a valid join
+        Set<BusinessEntity> joinedEntities = checkAndGetClusteredEntities(query.getMainEntity(),
+                                                                          query.getLookupJoins());
+        // generate join in bfs order, so relationships (join keys) appear only after the entities (tables) are defined
+        if (!joinedEntities.isEmpty()) {
+            BreadthFirstSearch bfs = new BreadthFirstSearch();
+            bfs.run(query.getMainEntity(), new JoinedEntityVisitor(sqlQuery, query.getMainEntity(),
+                                                                   joinedEntities, repository));
         }
         return sqlQuery;
     }

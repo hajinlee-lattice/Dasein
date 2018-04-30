@@ -69,6 +69,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().from(BusinessEntity.Contact)
                 .select(BusinessEntity.Contact, ATTR_CONTACT_ID, ATTR_CONTACT_EMAIL) //
                 .select(BusinessEntity.Account, ATTR_ACCOUNT_NAME) //
+            .select(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE) //
+            .select(BusinessEntity.Transaction, ATTR_PRODUCT_ID) //
                 .where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery,
@@ -76,6 +78,8 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         sqlContains(sqlQuery, String.format("from %s as %s", contactTableName, CONTACT));
         sqlContains(sqlQuery, String.format("join %s as %s", accountTableName, ACCOUNT));
         sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", CONTACT, ATTR_ACCOUNT_ID, ACCOUNT, ATTR_ACCOUNT_ID));
+        sqlContains(sqlQuery, String.format("left join %s as %s", transactionTableName, TRANSACTION));
+        sqlContains(sqlQuery, String.format("on %s.%s = %s.%s", ACCOUNT, ATTR_ACCOUNT_ID, TRANSACTION, ATTR_ACCOUNT_ID));
         sqlContains(sqlQuery, String.format("where lower(%s.%s) = lower(?)", CONTACT, ATTR_CONTACT_ID));
     }
 
@@ -313,7 +317,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         // TODO: restriction based on Transaction (daily aggregated table) is to be deprecated.
         // time restriction
         Restriction inner = Restriction.builder() //
-                .let(BusinessEntity.Transaction, TRS_TRANSACTION_DATE)//
+            .let(BusinessEntity.Transaction, ATTR_TRANSACTION_DATE)//
                 .inCurrentPeriod(Period.Quarter.name()) //
                 .build();
 
@@ -324,7 +328,7 @@ public class QueryEvaluatorTestNG extends QueryFunctionalTestNGBase {
         Query query = Query.builder().from(BusinessEntity.Account).where(restriction).build();
         SQLQuery<?> sqlQuery = queryEvaluator.evaluate(attrRepo, query);
         sqlContains(sqlQuery, String.format("DATE_TRUNC('%s', TO_DATE(%s.%s, 'YYYY-MM-DD')) = ", Period.Quarter.name(),
-                TRANSACTION, TRS_TRANSACTION_DATE));
+                                            TRANSACTION, ATTR_TRANSACTION_DATE));
         sqlContains(sqlQuery, String.format("DATEADD('%1$s', %2$d, DATE_TRUNC('%1$s', GETDATE()))", Period.Quarter.name(), 0));
     }
 
