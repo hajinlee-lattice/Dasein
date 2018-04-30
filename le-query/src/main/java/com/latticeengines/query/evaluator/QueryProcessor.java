@@ -197,6 +197,7 @@ public class QueryProcessor {
                 EntityPath<String> targetTableName = AttrRepoUtils.getTablePathBuilder(repository, entity);
                 switch (cardinality) {
                 case ONE_TO_MANY:
+                case ONE_TO_ONE:
                     sqlQuery = sqlQuery.leftJoin(targetTableName, Expressions.stringPath(entity.name()));
                     break;
                 default:
