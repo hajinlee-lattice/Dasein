@@ -1,5 +1,16 @@
 <div class="container salesforce-settings">
 
+    <le-modal-window 
+        config="$ctrl.config" 
+        callback-function="$ctrl.modalCallback(args)">
+        <p>The changes you made won't apply to the system until you save them. Are you sure you want to leave the page without saving?</p>
+    </le-modal-window>
+
+    <div class="status-alert-box saved fade-element-in" ng-if="$ctrl.showSuccess">
+        <div class="icon"></div>
+        <div class="message">{{$ctrl.successMessage}}</div>
+        <i class="close fa fa-times" ng-click="$ctrl.closeStatusMessage()"></i>
+    </div>
 
     <div class="row">
         <div class="twelve columns">
@@ -55,8 +66,8 @@
                                     ng-init="$ctrl.accountids[org.accountId]" 
                                     ng-model="org.accountId" 
                                     ng-options="accountid.fieldName as accountid.displayName for accountid in $ctrl.accountids"
-                                    ng-required="org.accountId === null || org.accountId === ''">
-                                        <option value="" ng-if="org.accountId === null || org.accountId === ''">Select</option>
+                                    ng-required="org.accountId == null || org.accountId == ''">
+                                        <option value="">Select</option>
                                     </select>
                             </td>
                         </tr>
@@ -66,8 +77,8 @@
                 <button
                     type="button"
                     class="button blue-button"
-                    ng-click="$ctrl.saveOrgs()"
-                    ng-disabled="salesforceOrgsForm.accountId.$invalid">Save</button>
+                    ng-click="$ctrl.saveOrgs(); salesforceOrgsForm.$setPristine()"
+                    ng-disabled="salesforceOrgsForm.$pristine">Save</button>
 
             </form>
         </div>
