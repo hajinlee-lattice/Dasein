@@ -46,12 +46,14 @@ public class CreateCdlTableHelper {
     protected Configuration yarnConfiguration;
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
-                                EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue) {
-        return getFilterTable(customerSpace, recordType, tableSuffix, tableName, query, type, targetTableName, expectedValue, null);
+            EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue) {
+        return getFilterTable(customerSpace, recordType, tableSuffix, tableName, query, type, targetTableName,
+                expectedValue, null);
     }
 
     public Table getFilterTable(CustomerSpace customerSpace, String recordType, String tableSuffix, String tableName,
-                                EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue, DataCollection.Version version) {
+            EventFrontEndQuery query, InterfaceName type, String targetTableName, boolean expectedValue,
+            DataCollection.Version version) {
         Table filterTable = null;
         log.info("Table Name:" + tableName);
         if (StringUtils.isNotBlank(tableName)) {
@@ -111,7 +113,11 @@ public class CreateCdlTableHelper {
             total += rows.size();
             rowNumber += Math.min(rows.size(), pageSize);
         }
-        log.info(type + " total filter rows=" + total);
+        String msg = "Total " + type + " rows=" + total;
+        log.info(msg);
+        if (total <= 0) {
+            throw new RuntimeException(msg);
+        }
         Table table = MetaDataTableUtils.createTable(yarnConfiguration, tableName, filePath);
         table.getExtracts().get(0).setExtractionTimestamp(System.currentTimeMillis());
         return table;
