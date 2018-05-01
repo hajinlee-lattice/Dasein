@@ -1,0 +1,19 @@
+package com.latticeengines.domain.exposed.serviceflows.core.steps;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.common.exposed.validator.annotation.NotNull;
+
+public class ExportToDynamoStepConfiguration extends MicroserviceStepConfiguration {
+
+    @NotNull
+    @JsonProperty("dynamoSignature")
+    private String dynamoSignature;
+
+    public String getDynamoSignature() {
+        return dynamoSignature;
+    }
+
+    public void setDynamoSignature(String dynamoSignature) {
+        this.dynamoSignature = dynamoSignature;
+    }
+}

@@ -2,9 +2,6 @@ package com.latticeengines.datafabric.entitymanager.impl;
 
 import java.util.Map;
 
-import javax.persistence.Id;
-
-import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
@@ -12,11 +9,18 @@ import org.apache.avro.generic.GenericRecordBuilder;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.datafabric.BaseFabricEntity;
+import com.latticeengines.domain.exposed.datafabric.DynamoHashKey;
+import com.latticeengines.domain.exposed.datafabric.DynamoRangeKey;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 
 public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> implements FabricEntity<TestDynamoEntity> {
 
+    public static final String PRIMARY_KEY = "PrimaryKey";
+    public static final String SORT_KEY = "SortKey";
+
     private static final String LATTICE_ACCOUNT_ID = "lattice_account_id";
+    private static final String LATTICE_ACCOUNT_SORT_ID = "lattice_account_sort_id";
     private static final String JSON_ATTRIBUTES = "json_attributes";
     private static final String MAP_ATTRIBUTES = "map_attributes";
     private static final String RECORD_TYPE_TOKEN = "{{RECORD_TYPE}}";
@@ -25,12 +29,17 @@ public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> impleme
             "{\"type\":\"record\",\"name\":\"%s\",\"doc\":\"Testing data\"," + "\"fields\":["
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
+                    + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]},"
                     + "{\"name\":\"%s\",\"type\":[\"string\",\"null\"]}" + "]}",
-            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, JSON_ATTRIBUTES, MAP_ATTRIBUTES);
+            RECORD_TYPE_TOKEN, LATTICE_ACCOUNT_ID, LATTICE_ACCOUNT_SORT_ID, JSON_ATTRIBUTES, MAP_ATTRIBUTES);
 
-    @Id
+    @DynamoHashKey(name = PRIMARY_KEY, field = LATTICE_ACCOUNT_ID)
     @JsonProperty(LATTICE_ACCOUNT_ID)
-    private String id;
+    private String primaryId;
+
+    @DynamoRangeKey(name = SORT_KEY, field = LATTICE_ACCOUNT_SORT_ID)
+    @JsonProperty(LATTICE_ACCOUNT_SORT_ID)
+    private String sortId;
 
     @JsonProperty(JSON_ATTRIBUTES)
     private JsonNode jsonAttributes;
@@ -39,11 +48,26 @@ public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> impleme
     private Map<String, Object> mapAttributes;
 
     public String getId() {
-        return id;
+        return getPrimaryId() + "#" + getSortId();
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setId(String id) {}
+
+    public String getSortId() {
+        return sortId;
+    }
+
+    public void setSortId(String sortId) {
+        this.sortId = sortId;
+    }
+
+
+    public String getPrimaryId() {
+        return primaryId;
+    }
+
+    public void setPrimaryId(String primaryId) {
+        this.primaryId = primaryId;
     }
 
     public JsonNode getJsonAttributes() {
@@ -66,7 +90,8 @@ public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> impleme
     public GenericRecord toFabricAvroRecord(String recordType) {
         Schema schema = new Schema.Parser().parse(SCHEMA_TEMPLATE.replace(RECORD_TYPE_TOKEN, recordType));
         GenericRecordBuilder builder = new GenericRecordBuilder(schema);
-        builder.set(LATTICE_ACCOUNT_ID, getId());
+        builder.set(LATTICE_ACCOUNT_ID, getPrimaryId());
+        builder.set(LATTICE_ACCOUNT_SORT_ID, getSortId());
         try {
             String serializedAttributes = JsonUtils.serialize(getJsonAttributes());
             builder.set(JSON_ATTRIBUTES, serializedAttributes);
@@ -85,7 +110,8 @@ public class TestDynamoEntity extends BaseFabricEntity<TestDynamoEntity> impleme
     @SuppressWarnings("unchecked")
     @Override
     public TestDynamoEntity fromFabricAvroRecord(GenericRecord record) {
-        setId(record.get(LATTICE_ACCOUNT_ID).toString());
+        setPrimaryId(record.get(LATTICE_ACCOUNT_ID).toString());
+        setSortId(record.get(LATTICE_ACCOUNT_SORT_ID).toString());
 
         if (record.get(JSON_ATTRIBUTES) != null) {
             String serializedAttributes = record.get(JSON_ATTRIBUTES).toString();

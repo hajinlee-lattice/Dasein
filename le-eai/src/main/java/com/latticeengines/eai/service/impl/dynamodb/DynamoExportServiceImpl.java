@@ -1,7 +1,17 @@
 package com.latticeengines.eai.service.impl.dynamodb;
 
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_REPOSITORY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_SORT_KEY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
+
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -78,21 +88,20 @@ public class DynamoExportServiceImpl extends ExportService {
 
         context.setProperty(ExportProperty.NUM_MAPPERS, exportConfig.getProperties().get(ExportProperty.NUM_MAPPERS));
 
-        context.setProperty(DynamoExportJob.CONFIG_REPOSITORY,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_REPOSITORY));
-        context.setProperty(DynamoExportJob.CONFIG_RECORD_TYPE,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_RECORD_TYPE));
-        context.setProperty(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME));
+        context.setProperty(CONFIG_REPOSITORY, exportConfig.getProperties().get(CONFIG_REPOSITORY));
+        context.setProperty(CONFIG_RECORD_TYPE, exportConfig.getProperties().get(CONFIG_RECORD_TYPE));
+        context.setProperty(CONFIG_ENTITY_CLASS_NAME, exportConfig.getProperties().get(CONFIG_ENTITY_CLASS_NAME));
 
-        context.setProperty(DynamoExportJob.CONFIG_ENDPOINT,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_ENDPOINT));
-        context.setProperty(DynamoExportJob.CONFIG_AWS_REGION,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_REGION));
-        context.setProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED));
-        context.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
-                exportConfig.getProperties().get(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED));
+        context.setProperty(CONFIG_ENDPOINT, exportConfig.getProperties().get(CONFIG_ENDPOINT));
+        context.setProperty(CONFIG_AWS_REGION, exportConfig.getProperties().get(CONFIG_AWS_REGION));
+        context.setProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
+                exportConfig.getProperties().get(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED));
+        context.setProperty(CONFIG_AWS_SECRET_KEY_ENCRYPTED,
+                exportConfig.getProperties().get(CONFIG_AWS_SECRET_KEY_ENCRYPTED));
+
+        context.setProperty(CONFIG_KEY_PREFIX, exportConfig.getProperties().get(CONFIG_KEY_PREFIX));
+        context.setProperty(CONFIG_PARTITION_KEY, exportConfig.getProperties().get(CONFIG_PARTITION_KEY));
+        context.setProperty(CONFIG_SORT_KEY, exportConfig.getProperties().get(CONFIG_SORT_KEY));
 
         log.info(String.format("Exporting data for table %s at input path %s", table,
                 context.getProperty(ExportProperty.INPUT_FILE_PATH, String.class)));
@@ -118,38 +127,23 @@ public class DynamoExportServiceImpl extends ExportService {
             props.setProperty("eai.table.schema", JsonUtils.serialize(table));
         }
 
-        props.setProperty(DynamoExportJob.CONFIG_RECORD_TYPE,
-                ctx.getProperty(DynamoExportJob.CONFIG_RECORD_TYPE, String.class));
-        props.setProperty(DynamoExportJob.CONFIG_REPOSITORY,
-                ctx.getProperty(DynamoExportJob.CONFIG_REPOSITORY, String.class));
-        props.setProperty(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME,
-                ctx.getProperty(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME, String.class));
+        props.setProperty(CONFIG_RECORD_TYPE, ctx.getProperty(CONFIG_RECORD_TYPE, String.class));
+        props.setProperty(CONFIG_REPOSITORY, ctx.getProperty(CONFIG_REPOSITORY, String.class));
+        props.setProperty(CONFIG_ENTITY_CLASS_NAME, ctx.getProperty(CONFIG_ENTITY_CLASS_NAME, String.class));
 
-        if (ctx.getProperty(DynamoExportJob.CONFIG_ENDPOINT, String.class) != null) {
-            props.setProperty(DynamoExportJob.CONFIG_ENDPOINT,
-                    ctx.getProperty(DynamoExportJob.CONFIG_ENDPOINT, String.class));
-        } else {
-            props.setProperty(DynamoExportJob.CONFIG_ENDPOINT, "");
-        }
-        if (ctx.getProperty(DynamoExportJob.CONFIG_AWS_REGION, String.class) != null) {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_REGION,
-                    ctx.getProperty(DynamoExportJob.CONFIG_AWS_REGION, String.class));
-        } else {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_REGION, "us-east-1");
-        }
-        if (ctx.getProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class) != null) {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
-                    ctx.getProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class));
-        } else {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, "");
-        }
-        if (ctx.getProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED, String.class) != null) {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED,
-                    ctx.getProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED, String.class));
-        } else {
-            props.setProperty(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED, "");
-        }
-        List<String> cacheFiles = new ArrayList<>();
+        props.setProperty(CONFIG_ENDPOINT, ctx.getProperty(CONFIG_ENDPOINT, String.class, ""));
+        props.setProperty(CONFIG_AWS_REGION,
+                ctx.getProperty(CONFIG_ENDPOINT, String.class, "us-east-1"));
+        props.setProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED,
+                ctx.getProperty(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, String.class, ""));
+        props.setProperty(CONFIG_AWS_SECRET_KEY_ENCRYPTED,
+                ctx.getProperty(CONFIG_AWS_SECRET_KEY_ENCRYPTED, String.class, ""));
+
+        props.setProperty(CONFIG_KEY_PREFIX, ctx.getProperty(CONFIG_KEY_PREFIX, String.class, ""));
+        props.setProperty(CONFIG_PARTITION_KEY, ctx.getProperty(CONFIG_PARTITION_KEY, String.class, ""));
+        props.setProperty(CONFIG_SORT_KEY, ctx.getProperty(CONFIG_SORT_KEY, String.class, ""));
+
+        List<String> cacheFiles;
         try {
             cacheFiles = EaiJobUtil.getCacheFiles(ctx.getProperty(ExportProperty.HADOOPCONFIG, Configuration.class),
                     versionManager.getCurrentVersionInStack(stackName));

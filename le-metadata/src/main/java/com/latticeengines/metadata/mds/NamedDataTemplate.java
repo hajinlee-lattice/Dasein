@@ -1,6 +1,6 @@
 package com.latticeengines.metadata.mds;
 
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 
 import reactor.core.scheduler.Scheduler;

@@ -1,10 +1,13 @@
 package com.latticeengines.datafabric.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datafabric.CompositeFabricEntity;
@@ -21,6 +24,13 @@ public class DynamoUtil {
 
     public static final String KEYS = "DYNAMOKEYS";
     public static final String ATTRIBUTES = "DYNAMOATTRIBUTES";
+
+    private static final String REPO = "_REPO_";
+    private static final String RECORD = "_RECORD_";
+
+    public static String buildTableName(String repository, String recordType) {
+        return REPO + repository + RECORD + recordType;
+    }
 
     public static DynamoIndex getIndex(String keyString) {
         if (keyString == null) {
@@ -68,27 +78,48 @@ public class DynamoUtil {
         String rangeKeyField = null;
         String bucketKeyField = null;
         String stampKeyField = null;
-        for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(DynamoHashKey.class)) {
-                DynamoHashKey annotation = field.getAnnotation(DynamoHashKey.class);
-                hashKeyAttr = annotation.name();
-                hashKeyField = field.getName();
+
+        Field keyField = findFieldAnnotatedBy(entityClass, DynamoHashKey.class);
+        if (keyField != null) {
+            DynamoHashKey annotation = keyField.getAnnotation(DynamoHashKey.class);
+            hashKeyAttr = annotation.name();
+            hashKeyField = annotation.field();
+            if (StringUtils.isBlank(hashKeyField)) {
+                hashKeyField = keyField.getName();
             }
-            if (field.isAnnotationPresent(DynamoRangeKey.class)) {
-                DynamoRangeKey annotation = field.getAnnotation(DynamoRangeKey.class);
-                rangeKeyAttr = annotation.name();
-                rangeKeyField = field.getName();
+        }
+
+        keyField = findFieldAnnotatedBy(entityClass, DynamoRangeKey.class);
+        if (keyField != null) {
+            DynamoRangeKey annotation = keyField.getAnnotation(DynamoRangeKey.class);
+            rangeKeyAttr = annotation.name();
+            rangeKeyField = annotation.field();
+            if (StringUtils.isBlank(rangeKeyField)) {
+                rangeKeyField = keyField.getName();
             }
-            if (field.isAnnotationPresent(DynamoBucketKey.class)) {
-                bucketKeyField = field.getName();
-            }
-            if (field.isAnnotationPresent(DynamoStampKey.class)) {
-                stampKeyField = field.getName();
-            }
+        }
+
+        keyField = findFieldAnnotatedBy(entityClass, DynamoBucketKey.class);
+        if (keyField != null) {
+            bucketKeyField = keyField.getName();
+        }
+
+        keyField = findFieldAnnotatedBy(entityClass, DynamoStampKey.class);
+        if (keyField != null) {
+            stampKeyField = keyField.getName();
         }
 
         return new DynamoIndex(hashKeyAttr, hashKeyField, rangeKeyAttr, rangeKeyField,
                                bucketKeyField, stampKeyField);
+    }
+
+    private static Field findFieldAnnotatedBy(Class<?> entityClass, Class<? extends Annotation> annotationCls) {
+        List<Field> fields = FieldUtils.getFieldsListWithAnnotation(entityClass, annotationCls);
+        if (CollectionUtils.isNotEmpty(fields)) {
+            return fields.get(0);
+        } else {
+            return null;
+        }
     }
 
     public static String constructAttributes(Class<?> entityClass) {

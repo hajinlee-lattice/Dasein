@@ -4,11 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -102,27 +98,13 @@ public class ExportDataToRedshift extends BaseWorkflowStep<ExportDataToRedshiftC
             appendFlagMap = configuration.getAppendFlagMap();
         }
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("redshift-export", entityTableMap.size());
-        List<Future<?>> futures = new ArrayList<>();
+        List<Exporter> exporters = new ArrayList<>();
         for (Map.Entry<BusinessEntity, Table> entry : entityTableMap.entrySet()) {
             boolean createNew = !appendFlagMap.getOrDefault(entry.getKey(), false);
             Exporter exporter = new Exporter(createNew, entry.getKey(), entry.getValue());
-            futures.add(executors.submit(exporter));
+            exporters.add(exporter);
         }
-        long startTime = System.currentTimeMillis();
-        while (!futures.isEmpty() && System.currentTimeMillis() - startTime < TimeUnit.DAYS.toMillis(1)) {
-            List<Future<?>> finishedFutures = new ArrayList<>();
-            futures.forEach(future -> {
-                try {
-                    future.get(1, TimeUnit.MINUTES);
-                    finishedFutures.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException("Failed to wait for the EAI job to finish.", e);
-                }
-            });
-            futures.removeAll(finishedFutures);
-        }
+        ThreadPoolUtils.runRunnablesInParallel(executors, exporters, 24 * 60, 10);
     }
 
     private class Exporter implements Runnable {

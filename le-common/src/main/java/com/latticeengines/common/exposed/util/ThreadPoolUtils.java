@@ -45,30 +45,55 @@ public class ThreadPoolUtils {
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 
-    public static <T> List<T> runOnThreadPool(ExecutorService executorService,
-                                              List<Callable<T>> callables) {
+    public static <T> List<T> runCallablesInParallel(ExecutorService executorService, List<Callable<T>> callables,
+            int timeoutInMinutes, int intervalInSeconds) {
         List<Future<T>> futures = callables.stream().map(executorService::submit).collect(Collectors.toList());
         List<T> results = new ArrayList<>();
         long startTime = System.currentTimeMillis();
+        long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
         while (CollectionUtils.isNotEmpty(futures)) {
-            if (System.currentTimeMillis() - startTime > TIMEOUT) {
+            if (System.currentTimeMillis() - startTime > timeout) {
                 throw new RuntimeException("Cannot finish all callables within timeout.");
             }
             List<Future> toBeRemoved = new ArrayList<>();
             futures.forEach(future -> {
                 try {
-                    T result = future.get(1, TimeUnit.SECONDS);
+                    T result = future.get(intervalInSeconds, TimeUnit.SECONDS);
                     results.add(result);
                     toBeRemoved.add(future);
                 } catch (TimeoutException e) {
                     // ignore
-                } catch (InterruptedException|ExecutionException e) {
+                } catch (InterruptedException | ExecutionException e) {
                     throw new RuntimeException(e);
                 }
             });
             toBeRemoved.forEach(futures::remove);
         }
         return results;
+    }
+
+    public static <T extends Runnable> void runRunnablesInParallel(ExecutorService executorService, List<T> runnables,
+            int timeoutInMinutes, int intervalInSeconds) {
+        List<Future<?>> futures = runnables.stream().map(executorService::submit).collect(Collectors.toList());
+        long startTime = System.currentTimeMillis();
+        long timeout = TimeUnit.MINUTES.toMillis(timeoutInMinutes);
+        while (CollectionUtils.isNotEmpty(futures)) {
+            if (System.currentTimeMillis() - startTime > timeout) {
+                throw new RuntimeException("Cannot finish all runnables within timeout.");
+            }
+            List<Future> toBeRemoved = new ArrayList<>();
+            futures.forEach(future -> {
+                try {
+                    future.get(intervalInSeconds, TimeUnit.SECONDS);
+                    toBeRemoved.add(future);
+                } catch (TimeoutException e) {
+                    // ignore
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            toBeRemoved.forEach(futures::remove);
+        }
     }
 
 }

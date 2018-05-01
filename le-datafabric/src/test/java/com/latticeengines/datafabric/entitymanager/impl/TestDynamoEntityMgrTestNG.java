@@ -1,5 +1,7 @@
 package com.latticeengines.datafabric.entitymanager.impl;
 
+import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntity.PRIMARY_KEY;
+import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntity.SORT_KEY;
 import static com.latticeengines.datafabric.entitymanager.impl.TestDynamoEntityMgrImpl.RECORD_TYPE;
 
 import java.util.HashMap;
@@ -40,11 +42,11 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
     @BeforeClass(groups = "dynamo")
     public void setup() throws Exception {
 
-        repo = leEnv + "_" + leStack + "_testRepo";
+        repo = "TestDynamoEntityMgrTestNG_" + leEnv + "_" + leStack;
         tableName = DynamoDataStoreImpl.buildTableName(repo, RECORD_TYPE);
         dynamoService.deleteTable(tableName);
 
-        dynamoService.createTable(tableName, 10, 10, "Id", ScalarAttributeType.S.name(), null, null);
+        dynamoService.createTable(tableName, 10, 10, PRIMARY_KEY, ScalarAttributeType.S.name(), SORT_KEY, ScalarAttributeType.S.name());
         ListTablesResult result = dynamoService.getClient().listTables();
         log.info("Tables: " + result.getTableNames());
 
@@ -68,14 +70,15 @@ public class TestDynamoEntityMgrTestNG extends DataFabricFunctionalTestNGBase {
         JsonNode jsonNode = objectMapper.readTree(objectMapper.writeValueAsString(attributes));
 
         TestDynamoEntity entity = new TestDynamoEntity();
-        entity.setId("12345");
+        entity.setPrimaryId("12345");
+        entity.setSortId("23456");
         entity.setJsonAttributes(jsonNode);
         entity.setMapAttributes(attributes);
         System.out.println(objectMapper.writeValueAsString(entity));
 
         entityMgr.create(entity);
 
-        TestDynamoEntity entity2 = entityMgr.findByKey("12345");
+        TestDynamoEntity entity2 = entityMgr.findByKey("12345#23456");
         System.out.println(objectMapper.writeValueAsString(entity2));
 
         Assert.assertEquals(entity.getId(), entity2.getId());

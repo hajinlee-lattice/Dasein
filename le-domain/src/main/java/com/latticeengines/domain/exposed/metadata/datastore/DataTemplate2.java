@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata.datatemplate;
+package com.latticeengines.domain.exposed.metadata.datastore;
 
 import java.io.Serializable;
 import java.util.List;

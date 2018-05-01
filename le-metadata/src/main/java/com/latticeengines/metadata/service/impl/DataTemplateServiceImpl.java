@@ -10,7 +10,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.metadata.mds.NamedDataTemplate;
 import com.latticeengines.metadata.mds.impl.TableTemplate;

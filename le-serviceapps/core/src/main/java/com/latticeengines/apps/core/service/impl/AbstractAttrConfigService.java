@@ -214,7 +214,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
                 // fork join execution
                 ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config", 4);
-                List<List<AttrConfig>> lists = ThreadPoolUtils.runOnThreadPool(threadPool, callables);
+                List<List<AttrConfig>> lists = ThreadPoolUtils.runCallablesInParallel(threadPool, callables, 30, 1);
                 new Thread(threadPool::shutdown).run();
                 renderedList = lists.stream().flatMap(list -> {
                     if (CollectionUtils.isNotEmpty(list)) {

@@ -1,5 +1,7 @@
 package com.latticeengines.cdl.workflow.steps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -15,6 +17,8 @@ import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 @Component("ldcOnlyAttributesStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class LdcOnlyAttributesStep extends BaseWorkflowStep<LdcOnlyAttributesConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(LdcOnlyAttributesStep.class);
 
     @Autowired
     private MetadataProxy metadataProxy;

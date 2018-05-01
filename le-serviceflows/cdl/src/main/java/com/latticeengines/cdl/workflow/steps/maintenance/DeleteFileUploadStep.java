@@ -3,6 +3,8 @@ package com.latticeengines.cdl.workflow.steps.maintenance;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -26,6 +28,8 @@ import com.latticeengines.serviceflows.workflow.report.BaseReportStep;
 @Component("deleteFileUploadStep")
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class DeleteFileUploadStep extends BaseReportStep<DeleteFileUploadStepConfiguration> {
+
+    private static final Logger log = LoggerFactory.getLogger(DeleteFileUploadStep.class);
 
     @Autowired
     private EaiProxy eaiProxy;

@@ -12,7 +12,7 @@ import org.springframework.data.domain.Sort;
 
 import com.latticeengines.documentdb.entity.ColumnMetadataDocument;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.metadata.repository.document.MetadataStoreRepository;
+import com.latticeengines.metadata.mds.repository.MetadataStoreRepository;
 import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 import reactor.core.publisher.Flux;

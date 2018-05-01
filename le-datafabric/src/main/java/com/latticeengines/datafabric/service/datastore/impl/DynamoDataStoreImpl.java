@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
@@ -33,8 +32,6 @@ import org.slf4j.LoggerFactory;
 import org.xerial.snappy.Snappy;
 
 import com.amazonaws.services.dynamodbv2.document.AttributeUpdate;
-import com.amazonaws.services.dynamodbv2.document.BatchGetItemOutcome;
-import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
 import com.amazonaws.services.dynamodbv2.document.ItemCollection;
@@ -43,12 +40,11 @@ import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
-import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
 import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
-import com.amazonaws.services.dynamodbv2.model.KeysAndAttributes;
-import com.amazonaws.services.dynamodbv2.model.WriteRequest;
+import com.latticeengines.aws.dynamo.DynamoItemService;
 import com.latticeengines.aws.dynamo.DynamoService;
+import com.latticeengines.aws.dynamo.impl.DynamoItemServiceImpl;
 import com.latticeengines.datafabric.service.datastore.FabricDataStore;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.domain.exposed.datafabric.DynamoAttributes;
@@ -60,10 +56,6 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private static final String ERRORMESSAGE = "If you see NoSuchMethodError on jackson json, it might be because to the table name or key attributes are wrong.";
 
-    private static final String REPO = "_REPO_";
-    private static final String RECORD = "_RECORD_";
-
-    private static final long TIMEOUT = TimeUnit.MINUTES.toMillis(30);
     private static final int DYNAMODB_BATCH_LIMIT = 100;
 
     // Default attributes for every table
@@ -74,6 +66,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private String recordType;
     private Schema schema;
     private DynamoService dynamoService;
+    private DynamoItemService dynamoItemService;
     private DynamoDB dynamoDB;
     private Table table;
 
@@ -83,6 +76,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     public DynamoDataStoreImpl(DynamoService dynamoService, String repository, String recordType, Schema schema) {
         this.dynamoService = dynamoService;
+        this.dynamoItemService = new DynamoItemServiceImpl(dynamoService);
         this.repository = repository;
         this.recordType = recordType;
         this.tableName = buildTableName();
@@ -108,6 +102,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     public void useRemoteDynamo(boolean enforce) {
+        dynamoService.switchToLocal(!enforce);
         if (enforce) {
             dynamoDB = new DynamoDB(dynamoService.getRemoteClient());
             log.info("Switch dynamo store repo " + repository + " record " + recordType + " to remote mode.");
@@ -124,7 +119,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             Map<String, GenericRecord> records = new HashMap<>();
             GenericRecord record = (pair == null) ? null : pair.getLeft();
             records.put(id, record);
-            updateBuckets(records);
+            updateRecords(records);
         } else {
             writeRecord(id, pair);
         }
@@ -138,7 +133,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
                 Pair<GenericRecord, Map<String, Object>> pair = entry.getValue();
                 records.put(entry.getKey(), (pair == null) ? null : pair.getLeft());
             });
-            updateBuckets(records);
+            updateRecords(records);
         } else {
             writeRecords(pairs);
         }
@@ -325,7 +320,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
         return bucket;
     }
 
-    private void updateBuckets(Map<String, GenericRecord> records) {
+    private void updateRecords(Map<String, GenericRecord> records) {
         Map<String, Map<String, Map<String, Set<ByteBuffer>>>> buckets = new HashMap<>();
         for (Map.Entry<String, GenericRecord> entry : records.entrySet()) {
             GenericRecord record = entry.getValue();
@@ -377,43 +372,19 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     private void writeRecord(String id, Pair<GenericRecord, Map<String, Object>> pair) {
         Item item = buildItem(id, pair);
         try {
-            table.putItem(item);
-        } catch (NoSuchMethodError e) {
-            log.error(ERRORMESSAGE, e);
+            dynamoItemService.putItem(tableName, item);
         } catch (Exception e) {
             log.error("Unable to save record " + tableName + " id " + id, e);
         }
     }
 
     private void writeRecords(Map<String, Pair<GenericRecord, Map<String, Object>>> pairs) {
-        TableWriteItems writeItems = new TableWriteItems(tableName);
-
+        List<Item> items = new ArrayList<>();
         for (Map.Entry<String, Pair<GenericRecord, Map<String, Object>>> entry : pairs.entrySet()) {
             Item item = buildItem(entry.getKey(), entry.getValue());
-            writeItems = writeItems.addItemToPut(item);
+            items.add(item);
         }
-        submitBatchWrite(dynamoDB, writeItems);
-    }
-
-    private void submitBatchWrite(DynamoDB dynamoDB, TableWriteItems writeItems) {
-        BatchWriteItemOutcome outcome = dynamoDB.batchWriteItem(writeItems);
-        long startTime = System.currentTimeMillis();
-        do {
-            try {
-                // Check for unprocessed keys which could happen if you exceed
-                // provisioned throughput
-                Map<String, List<WriteRequest>> unprocessedItems = outcome.getUnprocessedItems();
-                if (outcome.getUnprocessedItems().size() != 0) {
-                    outcome = dynamoDB.batchWriteItemUnprocessed(unprocessedItems);
-                }
-            } catch (Exception e) {
-                log.error("Unable to batch create records " + tableName, e);
-            }
-
-        } while (outcome.getUnprocessedItems().size() > 0 && System.currentTimeMillis() - startTime < TIMEOUT);
-        if (outcome.getUnprocessedItems().size() > 0) {
-            throw new RuntimeException("Failed to finish a batch write within timeout");
-        }
+        dynamoItemService.batchWrite(tableName, items);
     }
 
     @Override
@@ -473,37 +444,18 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
         List<PrimaryKey> pKs = keys.getPrimaryKeys();
 
-        if ((pKs == null) || (pKs.size() == 0)) {
+        if (CollectionUtils.isEmpty(pKs)) {
             return;
         }
 
         try {
-
-            BatchGetItemOutcome outcome = dynamoDB.batchGetItem(keys);
-            Map<String, KeysAndAttributes> unprocessed = null;
-
-            do {
-                List<Item> items = outcome.getTableItems().get(tableName);
-                for (Item item : items) {
-                    List<Pair<GenericRecord, Map<String, Object>>> recordsFromItem = extractRecords(item);
-                    for (Pair<GenericRecord, Map<String, Object>> pair : recordsFromItem) {
-                        pairs.put(item.getString(ID), pair);
-                    }
+            List<Item> items = dynamoItemService.batchGet(tableName, pKs);
+            for (Item item : items) {
+                List<Pair<GenericRecord, Map<String, Object>>> recordsFromItem = extractRecords(item);
+                for (Pair<GenericRecord, Map<String, Object>> pair : recordsFromItem) {
+                    pairs.put(item.getString(ID), pair);
                 }
-
-                // Check for unprocessed keys which could happen if you exceed
-                // provisioned
-                // throughput or reach the limit on response size.
-                unprocessed = outcome.getUnprocessedKeys();
-
-                if (!unprocessed.isEmpty()) {
-                    outcome = dynamoDB.batchGetItemUnprocessed(unprocessed);
-                }
-            } while (!unprocessed.isEmpty());
-        } catch (NoSuchMethodError e) {
-            log.info("The table name is " + tableName);
-            log.info("The keys are " + idList);
-            throw new RuntimeException(ERRORMESSAGE, e);
+            }
         } catch (Exception e) {
             log.error("Unable to batch get records " + tableName, e);
         }
@@ -544,7 +496,7 @@ public class DynamoDataStoreImpl implements FabricDataStore {
     }
 
     public static String buildTableName(String repository, String recordType) {
-        return REPO + repository + RECORD + recordType;
+        return DynamoUtil.buildTableName(repository, recordType);
     }
 
     @SuppressWarnings({ "unchecked", "rawtypes" })

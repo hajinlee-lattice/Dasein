@@ -1,4 +1,4 @@
-package com.latticeengines.metadata.repository.document.impl;
+package com.latticeengines.metadata.mds.repository.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 
 import com.latticeengines.db.exposed.repository.impl.BaseJpaRepositoryImpl;
 import com.latticeengines.documentdb.entity.NameSpacedDocument;
-import com.latticeengines.metadata.repository.document.MetadataStoreRepository;
+import com.latticeengines.metadata.mds.repository.MetadataStoreRepository;
 
 public class MetadataStoreRepositoryImpl<T extends NameSpacedDocument> extends BaseJpaRepositoryImpl<T, String>
         implements MetadataStoreRepository<T> {

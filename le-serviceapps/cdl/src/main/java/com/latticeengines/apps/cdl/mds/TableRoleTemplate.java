@@ -5,7 +5,7 @@ import java.util.List;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate2;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate2;
 
 public interface TableRoleTemplate extends DataTemplate2<TableRoleInCollection, DataCollection.Version> {
 

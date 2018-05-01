@@ -38,13 +38,14 @@ public class DynamoServiceImpl implements DynamoService {
 
     private DynamoDB dynamoDB;
     private AmazonDynamoDB client;
+    private AmazonDynamoDB remoteClient;
     private AmazonDynamoDB localClient;
 
     @Autowired
     public DynamoServiceImpl(BasicAWSCredentials awsCredentials, @Value("${aws.dynamo.endpoint}") String endpoint,
             @Value("${aws.region}") String region) {
         log.info("Constructing DynamoDB client using BasicAWSCredentials.");
-        client = AmazonDynamoDBClientBuilder.standard()
+        remoteClient = AmazonDynamoDBClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(awsCredentials)) //
                 .withRegion(Regions.fromName(region)) //
                 .build();
@@ -53,15 +54,15 @@ public class DynamoServiceImpl implements DynamoService {
             localClient = AmazonDynamoDBClientBuilder.standard()
                     .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region)) //
                     .build();
-            dynamoDB = new DynamoDB(client);
-        } else {
-            localClient = client;
-            dynamoDB = new DynamoDB(client);
         }
+        client = remoteClient;
+        dynamoDB = new DynamoDB(client);
     }
 
     public DynamoServiceImpl(AmazonDynamoDB client) {
         this.client = client;
+        this.remoteClient = client;
+        this.localClient = client;
         this.dynamoDB = new DynamoDB(client);
     }
 
@@ -75,8 +76,20 @@ public class DynamoServiceImpl implements DynamoService {
         return client;
     }
 
-    public void switchToLocal() {
-        this.client = localClient;
+    @Override
+    public DynamoDB getDynamo() {
+        return this.dynamoDB;
+    }
+
+    @Override
+    public void switchToLocal(boolean local) {
+        if (local) {
+            this.client = localClient;
+            log.info("Switch dynamo service to local mode.");
+        } else {
+            this.client = remoteClient;
+            log.info("Switch dynamo service to remote mode.");
+        }
         this.dynamoDB = new DynamoDB(client);
     }
 

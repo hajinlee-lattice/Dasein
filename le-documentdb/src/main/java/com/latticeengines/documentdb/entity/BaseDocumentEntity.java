@@ -42,7 +42,7 @@ import com.vladmihalcea.hibernate.type.json.JsonStringType;
 public abstract class BaseDocumentEntity<T> implements DocumentEntity<T> {
 
     // column definitions
-    static final String JSON_COLUMN = "JSON";
+    static final String JSON_COLUMN = "'JSON'";
 
     // types
     static final String JSON_TYPE = "json";

@@ -26,6 +26,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.latticeengines.aws.dynamo.DynamoService;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -223,6 +224,18 @@ public class DynamoPublishServiceTestNG extends DataCloudEtlFunctionalTestNGBase
         @Override
         public AmazonDynamoDB getRemoteClient() {
             return null;
+        }
+
+        @Override
+        public DynamoDB getDynamo() { return null; }
+
+        @Override
+        public void switchToLocal(boolean local) {
+            if (local) {
+                log.info("Switch dynamo service to local mode.");
+            } else {
+                log.info("Switch dynamo service to remote mode.");
+            }
         }
 
         @Override

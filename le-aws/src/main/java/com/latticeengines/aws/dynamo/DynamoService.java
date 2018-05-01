@@ -1,6 +1,7 @@
 package com.latticeengines.aws.dynamo;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 
 import java.util.Map;
@@ -18,7 +19,13 @@ public interface DynamoService {
 
     AmazonDynamoDB getRemoteClient();
 
+    DynamoDB getDynamo();
+
     void updateTableThroughput(String tableName, long readCapacity, long writeCapacity);
 
     void tagTable(String tableName, Map<String, String> tags);
+
+    void switchToLocal(boolean local);
+
+
 }

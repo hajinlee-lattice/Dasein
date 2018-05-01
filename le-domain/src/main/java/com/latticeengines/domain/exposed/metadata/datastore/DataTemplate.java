@@ -1,8 +1,9 @@
-package com.latticeengines.domain.exposed.metadata.datatemplate;
+package com.latticeengines.domain.exposed.metadata.datastore;
 
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 

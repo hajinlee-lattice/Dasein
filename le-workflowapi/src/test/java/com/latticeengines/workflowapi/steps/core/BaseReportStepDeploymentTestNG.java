@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.steps;
+package com.latticeengines.workflowapi.steps.core;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -30,7 +30,7 @@ public class BaseReportStepDeploymentTestNG extends WorkflowApiDeploymentTestNGB
     @Autowired
     private ReportService reportService;
 
-    @Test(groups = "workflow")
+    @Test(groups = "deployment")
     public void testRegisterReport() throws Exception {
         TestReportWorkflowConfiguration workflowConfig = generateConfiguration();
         workflowService.registerJob(workflowConfig, applicationContext);

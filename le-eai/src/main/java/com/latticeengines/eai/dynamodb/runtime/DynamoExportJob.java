@@ -1,5 +1,16 @@
 package com.latticeengines.eai.dynamodb.runtime;
 
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_REGION;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_REPOSITORY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_SORT_KEY;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX;
+
 import java.util.Properties;
 
 import org.apache.hadoop.conf.Configuration;
@@ -13,15 +24,6 @@ import com.latticeengines.yarn.exposed.client.mapreduce.MapReduceCustomizationRe
 public class DynamoExportJob extends AvroExportJob {
 
     public static final String DYNAMO_EXPORT_JOB_TYPE = "eaiDynamoExportJob";
-
-    public static final String CONFIG_RECORD_TYPE = "eai.export.dynamo.record.type";
-    public static final String CONFIG_REPOSITORY = "eai.export.dynamo.repository";
-    public static final String CONFIG_ENTITY_CLASS_NAME = "eai.export.dynamo.entity.class";
-
-    public static final String CONFIG_ENDPOINT = "eai.export.dynamo.endpoint";
-    public static final String CONFIG_AWS_REGION = "eai.export.aws.region";
-    public static final String CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED = "eai.export.aws.access.key.id";
-    public static final String CONFIG_AWS_SECRET_KEY_ENCRYPTED = "eai.export.aws.secret.key";
 
     private int numMappers;
 
@@ -67,5 +69,9 @@ public class DynamoExportJob extends AvroExportJob {
         config.set(CONFIG_AWS_REGION, (String) properties.get(CONFIG_AWS_REGION));
         config.set(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED, (String) properties.get(CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED));
         config.set(CONFIG_AWS_SECRET_KEY_ENCRYPTED, (String) properties.get(CONFIG_AWS_SECRET_KEY_ENCRYPTED));
+
+        config.set(CONFIG_KEY_PREFIX, (String) properties.get(CONFIG_KEY_PREFIX));
+        config.set(CONFIG_PARTITION_KEY, (String) properties.get(CONFIG_PARTITION_KEY));
+        config.set(CONFIG_SORT_KEY, (String) properties.get(CONFIG_SORT_KEY));
     }
 }

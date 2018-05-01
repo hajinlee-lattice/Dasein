@@ -19,6 +19,6 @@ public class RatingCoverageProxy extends MicroserviceRestApiProxy {
 
     public RatingsCountResponse getCoverageInfo(String customerSpace, RatingsCountRequest request) {
         String url = constructUrl(URL_PREFIX + "/coverage", shortenCustomerSpace(customerSpace));
-        return post("getRatingsCooverage", url, request, RatingsCountResponse.class);
+        return post("getRatingsCoverage", url, request, RatingsCountResponse.class);
     }
 }

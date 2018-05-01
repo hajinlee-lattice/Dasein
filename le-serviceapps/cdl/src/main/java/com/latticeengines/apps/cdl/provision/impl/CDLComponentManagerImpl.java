@@ -12,6 +12,7 @@ import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.DocumentDirectory;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
+import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 
 @Component
 public class CDLComponentManagerImpl implements CDLComponentManager {
@@ -23,6 +24,9 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
 
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
+
+    @Inject
+    private DataUnitEntityMgr dataUnitEntityMgr;
 
     public void provisionTenant(CustomerSpace space, DocumentDirectory configDir) {
         // get tenant information
@@ -36,8 +40,10 @@ public class CDLComponentManagerImpl implements CDLComponentManager {
                 + " and data feed " + dataFeed.getName());
     }
 
-    public void discardTenant(String tenantId) {
-        attrConfigEntityMgr.cleanupTenant(CustomerSpace.parse(tenantId).getTenantId());
+    public void discardTenant(String customerSpace) {
+        String tenantId = CustomerSpace.parse(customerSpace).getTenantId();
+        attrConfigEntityMgr.cleanupTenant(tenantId);
+        dataUnitEntityMgr.cleanupTenant(tenantId);
     }
 
 }

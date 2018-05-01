@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.FIELD)
 public @interface DynamoRangeKey {
     String name();
+    String field() default "";
 }
 

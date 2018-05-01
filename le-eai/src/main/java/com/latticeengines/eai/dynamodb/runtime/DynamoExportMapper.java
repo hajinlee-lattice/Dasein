@@ -23,16 +23,15 @@ import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.aws.dynamo.impl.DynamoServiceImpl;
 import com.latticeengines.common.exposed.util.CipherUtils;
-import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datafabric.service.datastore.impl.DynamoDataStoreImpl;
 import com.latticeengines.datafabric.util.DynamoUtil;
 import com.latticeengines.domain.exposed.datafabric.FabricEntity;
 import com.latticeengines.domain.exposed.datafabric.FabricEntityFactory;
+import com.latticeengines.domain.exposed.datafabric.GenericTableEntity;
+import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
 import com.latticeengines.domain.exposed.mapreduce.counters.RecordExportCounter;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.runtime.mapreduce.AvroExportMapper;
 import com.latticeengines.eai.runtime.mapreduce.AvroRowHandler;
 
@@ -56,29 +55,26 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     @Override
     protected AvroRowHandler initialize(
             Mapper<AvroKey<GenericData.Record>, NullWritable, NullWritable, NullWritable>.Context context,
-            Schema schema) throws IOException, InterruptedException {
-        Table table = JsonUtils.deserialize(config.get("eai.table.schema"), Table.class);
-        String indented = new ObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(table);
-        log.info("Table:\n" + indented);
-
-        recordType = config.get(DynamoExportJob.CONFIG_RECORD_TYPE);
-        repo = config.get(DynamoExportJob.CONFIG_REPOSITORY);
+            Schema schema) {
+        recordType = config.get(HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE);
+        repo = config.get(HdfsToDynamoConfiguration.CONFIG_REPOSITORY);
 
         log.info("recordType=" + recordType);
         log.info("repo=" + repo);
 
-        String endpoint = config.get(DynamoExportJob.CONFIG_ENDPOINT);
-        String region = config.get(DynamoExportJob.CONFIG_AWS_REGION);
+        String endpoint = config.get(HdfsToDynamoConfiguration.CONFIG_ENDPOINT);
+        String region = config.get(HdfsToDynamoConfiguration.CONFIG_AWS_REGION);
         if (StringUtils.isNotEmpty(endpoint)) {
             log.info("Instantiate AmazonDynamoDBClient using endpoint " + endpoint);
             client = AmazonDynamoDBClientBuilder.standard() //
                     .withEndpointConfiguration(new AwsClientBuilder.EndpointConfiguration(endpoint, region)) //
                     .build();
         } else {
-            String accessKey = CipherUtils.decrypt(config.get(DynamoExportJob.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED))
+            String accessKey = CipherUtils
+                    .decrypt(config.get(HdfsToDynamoConfiguration.CONFIG_AWS_ACCESS_KEY_ID_ENCRYPTED))
                     .replace("\n", "");
-            String secretKey = CipherUtils.decrypt(config.get(DynamoExportJob.CONFIG_AWS_SECRET_KEY_ENCRYPTED))
-                    .replace("\n", "");
+            String secretKey = CipherUtils
+                    .decrypt(config.get(HdfsToDynamoConfiguration.CONFIG_AWS_SECRET_KEY_ENCRYPTED)).replace("\n", "");
             log.info("Instantiate AmazonDynamoDBClient using BasicAWSCredentials");
             AWSCredentialsProvider credsProvider = new AWSStaticCredentialsProvider(
                     new BasicAWSCredentials(accessKey, secretKey));
@@ -95,8 +91,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     @Override
     protected void finalize(
-            Mapper<AvroKey<GenericData.Record>, NullWritable, NullWritable, NullWritable>.Context context)
-            throws IOException, InterruptedException {
+            Mapper<AvroKey<GenericData.Record>, NullWritable, NullWritable, NullWritable>.Context context) {
         if (!recordBuffer.isEmpty()) {
             commitBuffer(context.getCounter(RecordExportCounter.EXPORTED_RECORDS),
                     context.getCounter(RecordExportCounter.ERROR_RECORDS));
@@ -104,8 +99,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     @Override
-    public void map(AvroKey<GenericData.Record> key, NullWritable value, Context context)
-            throws IOException, InterruptedException {
+    public void map(AvroKey<GenericData.Record> key, NullWritable value, Context context) {
         context.getCounter(RecordExportCounter.SCANNED_RECORDS).increment(1);
 
         long totalCount = context.getCounter(RecordExportCounter.SCANNED_RECORDS).getValue();
@@ -128,19 +122,27 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
     }
 
     @Override
-    public void startRecord(GenericData.Record record) throws IOException {
+    public void startRecord(GenericData.Record record) {
     }
 
     @Override
-    public void handleField(GenericData.Record record, Schema.Field field) throws IOException {
+    public void handleField(GenericData.Record record, Schema.Field field) {
     }
 
     @Override
-    public void endRecord(GenericData.Record record) throws IOException {
+    public void endRecord(GenericData.Record record) {
     }
 
     private void loadToBuffer(GenericRecord record) {
-        FabricEntity<?> entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
+        FabricEntity<?> entity;
+        if (GenericTableEntity.class.equals(entityClass)) {
+            String keyPrefix = config.get(HdfsToDynamoConfiguration.CONFIG_KEY_PREFIX);
+            String parititionKey = config.get(HdfsToDynamoConfiguration.CONFIG_PARTITION_KEY);
+            String sortKey = config.get(HdfsToDynamoConfiguration.CONFIG_SORT_KEY);
+            entity = new GenericTableEntity(keyPrefix, parititionKey, sortKey).fromHdfsAvroRecord(record);
+        } else {
+            entity = (FabricEntity<?>) FabricEntityFactory.fromHdfsAvroRecord(record, entityClass);
+        }
         GenericRecord mbusRecord = entity.toFabricAvroRecord(recordType);
         Map<String, Object> tags = entity.getTags();
         recordBuffer.put(entity.getId(), Pair.of(mbusRecord, tags));
@@ -154,6 +156,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
             blackCounter.increment(recordBuffer.size());
             log.error("Failed to commit a buffer of size " + recordBuffer.size() + ". Total failed  = "
                     + blackCounter.getValue(), e);
+            recordBuffer.values().forEach(pair -> log.info(pair.getLeft().toString()));
         } finally {
             recordBuffer.clear();
         }
@@ -161,10 +164,10 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
 
     private void resolveEntityClass() {
         try {
-            entityClass = Class.forName(config.get(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME));
+            entityClass = Class.forName(config.get(HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(
-                    "Cannot find the entity class: " + config.get(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME));
+                    "Cannot find the entity class: " + config.get(HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME));
         }
         log.info("Entity Class: " + entityClass);
 
@@ -185,7 +188,7 @@ public class DynamoExportMapper extends AvroExportMapper implements AvroRowHandl
         if (dynamoProp != null) {
             fabricSchema.addProp(DynamoUtil.ATTRIBUTES, dynamoProp);
         }
-
+        log.info("Fabric schema: " + fabricSchema.toString(true));
         dataStore = new DynamoDataStoreImpl(new DynamoServiceImpl(client), repo, recordType, fabricSchema);
     }
 

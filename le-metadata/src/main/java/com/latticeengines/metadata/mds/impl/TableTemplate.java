@@ -10,17 +10,17 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
+import com.latticeengines.metadata.mds.NamedDataTemplate;
 import com.latticeengines.metadata.repository.db.AttributeRepository;
 import com.latticeengines.metadata.repository.db.TableRepository;
-import com.latticeengines.metadata.mds.NamedDataTemplate;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;

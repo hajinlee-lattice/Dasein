@@ -20,6 +20,8 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
@@ -54,6 +56,8 @@ import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 abstract class BaseRedshiftIngestStep<T extends GenerateRatingStepConfiguration> extends BaseWorkflowStep<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(BaseRedshiftIngestStep.class);
 
     protected static final String MODEL_GUID = "Model_GUID";
 

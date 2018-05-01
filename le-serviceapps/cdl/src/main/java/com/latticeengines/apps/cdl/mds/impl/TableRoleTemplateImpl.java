@@ -16,9 +16,9 @@ import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplate;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataTemplateName;
-import com.latticeengines.domain.exposed.metadata.datatemplate.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplate;
+import com.latticeengines.domain.exposed.metadata.datastore.DataTemplateName;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
 import com.latticeengines.metadata.service.DataTemplateService;
 

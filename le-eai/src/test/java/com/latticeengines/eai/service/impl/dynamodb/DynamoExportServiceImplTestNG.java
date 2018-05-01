@@ -1,5 +1,10 @@
 package com.latticeengines.eai.service.impl.dynamodb;
 
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENDPOINT;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_ENTITY_CLASS_NAME;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_RECORD_TYPE;
+import static com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration.CONFIG_REPOSITORY;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -45,7 +50,6 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.eai.dynamodb.runtime.DynamoExportJob;
 import com.latticeengines.eai.functionalframework.EaiMiniClusterFunctionalTestNGBase;
-import com.latticeengines.eai.service.EaiYarnService;
 import com.latticeengines.eai.service.ExportService;
 import com.latticeengines.yarn.exposed.service.impl.JobServiceImpl;
 
@@ -180,10 +184,10 @@ public class DynamoExportServiceImplTestNG extends EaiMiniClusterFunctionalTestN
         Map<String, String> props = new HashMap<>();
         props.put(ExportProperty.NUM_MAPPERS, "2");
 
-        props.put(DynamoExportJob.CONFIG_REPOSITORY, repo);
-        props.put(DynamoExportJob.CONFIG_RECORD_TYPE, recordType);
-        props.put(DynamoExportJob.CONFIG_ENTITY_CLASS_NAME, entityClz.getName());
-        props.put(DynamoExportJob.CONFIG_ENDPOINT, endpoint);
+        props.put(CONFIG_REPOSITORY, repo);
+        props.put(CONFIG_RECORD_TYPE, recordType);
+        props.put(CONFIG_ENTITY_CLASS_NAME, entityClz.getName());
+        props.put(CONFIG_ENDPOINT, endpoint);
 
         fileExportConfig.setProperties(props);
 

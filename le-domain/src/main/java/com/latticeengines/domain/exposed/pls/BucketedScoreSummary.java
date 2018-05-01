@@ -57,12 +57,12 @@ public class BucketedScoreSummary implements HasPid {
     private double overallLift;
 
     @JsonProperty("bar_lifts")
-    @Column(name = "BAR_LIFTS", nullable = false, columnDefinition = "JSON", precision = 16)
+    @Column(name = "BAR_LIFTS", nullable = false, columnDefinition = "'JSON'", precision = 16)
     @Type(type = "json")
     private double[] barLifts = new double[32];
 
     @JsonProperty("bucketed_scores")
-    @Column(name = "BUCKETED_SCORES", nullable = false, columnDefinition = "JSON")
+    @Column(name = "BUCKETED_SCORES", nullable = false, columnDefinition = "'JSON'")
     @Type(type = "json")
     private BucketedScore[] bucketedScores = new BucketedScore[100];
 

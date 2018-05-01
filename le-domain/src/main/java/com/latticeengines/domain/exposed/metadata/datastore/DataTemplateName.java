@@ -1,4 +1,4 @@
-package com.latticeengines.domain.exposed.metadata.datatemplate;
+package com.latticeengines.domain.exposed.metadata.datastore;
 
 public final class DataTemplateName {
 

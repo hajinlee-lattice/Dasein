@@ -8,22 +8,29 @@ import java.util.regex.Pattern;
 public class MySQLPostProcessor extends PostProcessor {
 
     public MySQLPostProcessor() {
-        registerInnerProcessor(new FixJsonColumnDefinition());
+        registerInnerProcessor(new FixCustomColumnDefinition());
     }
 
-    private static class FixJsonColumnDefinition implements PostProcessor.LineProcessor {
+    static class FixCustomColumnDefinition implements PostProcessor.LineProcessor {
 
-        private static final Pattern REGEX = Pattern.compile(".*`JSON`.*");
+        private static final Pattern REGEX = Pattern.compile("`'.*?(GENERATED|JSON).*?'`");
 
         @Override
         public List<String> processLine(String line) {
-            Matcher matcher = REGEX.matcher(line);
-            if (matcher.find()) {
-                String newLine = line.replace("`JSON`", "JSON");
-                return Collections.singletonList(newLine);
-            }
+            Matcher matcher;
+            do {
+                matcher = REGEX.matcher(line);
+                if (matcher.find()) {
+                    String matched = matcher.group(0);
+                    // remove `' and '`
+                    String formatted = matched.substring(matched.indexOf("`'") + 2);
+                    formatted = formatted.substring(0, formatted.lastIndexOf("'`"));
+                    line = line.replace(matched, formatted);
+                }
+            } while (matcher.find());
             return Collections.singletonList(line);
         }
     }
+
 
 }

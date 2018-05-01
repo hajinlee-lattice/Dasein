@@ -11,15 +11,30 @@ public class PerformanceTimer implements Closeable {
 
     private Date start;
     private String timerMessage;
+    private Logger logger;
 
     public PerformanceTimer() {
         this.start = new Date();
+        this.logger = log;
+    }
+
+    public PerformanceTimer(Logger logger) {
+        this.start = new Date();
+        this.logger = logger;
     }
 
     public PerformanceTimer(String timerMessage) {
         this.start = new Date();
         this.timerMessage = timerMessage;
+        this.logger = log;
     }
+
+    public PerformanceTimer(String timerMessage, Logger logger) {
+        this.start = new Date();
+        this.timerMessage = timerMessage;
+        this.logger = logger;
+    }
+
 
     public void setTimerMessage(String timerMessage) {
         this.timerMessage = timerMessage;
@@ -27,6 +42,6 @@ public class PerformanceTimer implements Closeable {
 
     @Override
     public void close() {
-        log.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));
+        logger.info(String.format("[Metric] %s ElapsedTime=%d ms", timerMessage, new Date().getTime() - start.getTime()));
     }
 }
