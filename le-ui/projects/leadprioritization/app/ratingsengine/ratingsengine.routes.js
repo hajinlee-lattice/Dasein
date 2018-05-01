@@ -98,7 +98,8 @@ angular
                 url: '/dashboard/:modelId/:rating_id',
                 params: {
                     pageIcon: 'ico-model',
-                    pageTitle: 'Model'
+                    pageTitle: 'Model',
+                    modelId: ''
                 },
                 resolve: {
                     Dashboard: function ($q, $stateParams, RatingsEngineStore) {
@@ -868,6 +869,7 @@ angular
                     wizard_steps: 'productpurchase',
                     engineType: 'CROSS_SELL_FIRST_PURCHASE',
                     displayName: '',
+                    rating_id: '',
                     fromList: false
                 },
                 resolve: {
