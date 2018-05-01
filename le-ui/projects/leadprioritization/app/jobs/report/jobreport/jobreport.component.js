@@ -25,7 +25,7 @@ angular
         	'Account': 0,
         	'Contact': 0,
         	'Product': 0,
-        	'Transaction': 0      	
+        	'Transaction': 0
         }
     });
 
@@ -40,8 +40,11 @@ angular
 			if (report['purpose'] == 'PROCESS_ANALYZE_RECORDS_SUMMARY') {
 				if (payload.EntitiesSummary) {
 					vm.entities.forEach(function(entity) {
-						vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'];
+						vm.counts[entity] = payload.EntitiesSummary[entity].EntityStatsSummary ? payload.EntitiesSummary[entity].EntityStatsSummary['TOTAL'] : 0;
 						vm.summaries[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary;
+						if (entity == 'Product') {
+							vm.counts[entity] = payload.EntitiesSummary[entity].ConsolidateRecordsSummary['PRODUCT_ID'] || 0;
+						}
 					});
 				}
 				if (payload['SystemActions']) {

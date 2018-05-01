@@ -34,6 +34,11 @@
             border-left: 5px solid #32CD32; 
             margin: 0 0% 16px;
         }
+        &.curated-attributes-summary-tile {
+            width:100%; 
+            border-left: 5px solid #e9967a; 
+            margin: 0 0% 16px;
+        }
         &.system-action-summary-tile {
             width:100%; 
             border-left: 5px solid #FFD700; 
@@ -42,15 +47,16 @@
         &.mini-tile {
             width:15%; 
             padding: 2px 0 2px;
-            &.left-aligned {
-                margin-left:0px;
-            }
         }
-        &.unmatched-tile {
+        &.extended-tile {
             margin-left:10px;
             padding: 2px 0 2px;
         }
+        li:first-child {
+            margin-left:0px;
+        }
     }
+
 }
 
 

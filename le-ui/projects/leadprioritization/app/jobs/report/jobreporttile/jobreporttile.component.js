@@ -34,8 +34,11 @@ angular
         			vm.updatedRecords = vm.report['UPDATE'] ? vm.report['UPDATE']: 0;
         			vm.deletedRecords = vm.report['DELETE'] ? vm.report['DELETE']: 0;
         			vm.unmatchedRecords = vm.report['UNMATCH'] ? vm.report['UNMATCH'] : 0;
+                    vm.updatedProductHierarchy = vm.report['PRODUCT_HIERARCHY'] ? vm.report['PRODUCT_HIERARCHY'] : 0;
+                    vm.updatedProductBundle = vm.report['PRODUCT_BUNDLE'] ? vm.report['PRODUCT_BUNDLE'] : 0;
         		}
         		vm.setFilteredActions();
+                vm.config = vm.getConfig();
         	}
 
         	vm.format = function(entity) {
@@ -54,9 +57,9 @@ angular
                 	case 'Contact': 
                 		return path + 'ico-contacts-dark.png';
                 	case 'Product':
-                		return path + 'ico-products.png';
+                		return path + 'ico-product_hierarchy-dark.png';
                 	case 'Transaction':
-                		return path + 'ico-transactions.png';
+                		return path + 'ico-purchases-dark.png';
                 	default:
                 		return path + 'enrichments/subcategories/contactattributes.png';
 	            }
@@ -77,12 +80,32 @@ angular
 				return JSON.parse(action.reports[0]['json']['Payload'])[key] || JSON.parse(action.reports[0]['json']['Payload'])[key + '_Deleted'];
 			}
 
-            vm.showUpdateTile = function() {
-                return vm.entity != 'Transaction';
-            }
-
-            vm.showUnmatchTile = function() {
-                return vm.unmatchedRecords && vm.entity == 'Account';
+            vm.getConfig = function() {
+                switch (vm.entity) {
+                    case 'Account': 
+                        return {
+                                'new': true,
+                                'updated': true,
+                                'deleted': true,
+                                'unmatched': vm.unmatchedRecords > 0
+                                };
+                    case 'Contact': 
+                        return {
+                                'new': true,
+                                'updated': true,
+                                'deleted': true
+                                };
+                    case 'Product': 
+                        return {
+                                'product_hierarchy': true,
+                                'product_bundle': true
+                                };
+                    case 'Transaction': 
+                        return {
+                                'new': true,
+                                'deleted': true
+                                };
+                }
             }
         	
 
