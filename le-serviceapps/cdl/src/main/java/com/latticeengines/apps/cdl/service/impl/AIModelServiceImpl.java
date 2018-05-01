@@ -127,11 +127,13 @@ public class AIModelServiceImpl extends RatingModelServiceBase<AIModel> implemen
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void findRatingModelAttributeLookups(AIModel ratingModel) {
         List<MetadataSegment> segments = new ArrayList<>();
-        segments.add(ratingModel.getTrainingSegment());
+        if (ratingModel.getTrainingSegment() != null) {
+            segments.add(ratingModel.getTrainingSegment());
+        }
         ratingModel.setRatingModelAttributes(new HashSet(segmentService.findDependingAttributes(segments)));
     }
 }
