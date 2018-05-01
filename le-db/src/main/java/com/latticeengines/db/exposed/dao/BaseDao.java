@@ -39,4 +39,10 @@ public interface BaseDao<T> {
     List<T> findAllByFields(Object... fieldsAndValues);
 
     T merge(T entity);
+    
+    void flushSession();
+    
+    void clearSession();
+    
+    int getBatchSize();
 }

@@ -103,8 +103,17 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
 
         if (entity.getAttributes() != null) {
+            int batchSize = attributeDao.getBatchSize();
+            int counter = 0;
             for (Attribute attr : entity.getAttributes()) {
                 attributeDao.create(attr);
+                counter++;
+                //Flush the data in batches. So that, we can free up the Hibernate Level-1 cache and reduce the DB round trips
+                //log.info("Creating Attribute {} with Id: {}", counter, attr.getPid());
+                if (counter % batchSize == 0) {
+                    attributeDao.flushSession();
+                    attributeDao.clearSession();
+                }
             }
         }
 

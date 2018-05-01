@@ -24,6 +24,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,9 +51,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Serializable, GraphNode {
 
     private static final long serialVersionUID = -4779448415471374224L;
+    
+    public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 1M
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @TableGenerator(name = "MDAttribute_SEQ_GEN", table = "PLS_MULTITENANT_SEQ_ID", pkColumnName = "SEQUENCE_NAME", valueColumnName = "SEQUENCE_VAL", pkColumnValue = "MDAttribute_SEQUENCE", initialValue = MDATTRIBUTE_INIT_VALUE, allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "MDAttribute_SEQ_GEN")
     @JsonIgnore
     @Basic(optional = false)
     @Column(name = "PID", unique = true, nullable = false)

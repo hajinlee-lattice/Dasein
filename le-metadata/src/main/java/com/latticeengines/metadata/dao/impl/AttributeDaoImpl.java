@@ -1,5 +1,6 @@
 package com.latticeengines.metadata.dao.impl;
 
+import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
@@ -14,4 +15,13 @@ public class AttributeDaoImpl extends BaseDaoImpl<Attribute> implements Attribut
         return Attribute.class;
     }
 
+    @Override
+    protected Session getCurrentSession() {
+        Session locSession = super.getCurrentSession();
+        if (locSession != null) {
+            locSession.setJdbcBatchSize(DEFAULT_JDBC_BATCH_SIZE);
+        }
+        return locSession;
+    }
+    
 }

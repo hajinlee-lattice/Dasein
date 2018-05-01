@@ -6,8 +6,10 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Environment;
 import org.hibernate.query.Query;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.pls.SoftDeletable;
 
 public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T> {
 
+    protected static final int DEFAULT_JDBC_BATCH_SIZE = 50;
     private static final Logger log = LoggerFactory.getLogger(AbstractBaseDaoImpl.class);
 
     protected abstract SessionFactory getSessionFactory();
@@ -32,6 +35,10 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
      */
     protected abstract Class<T> getEntityClass();
 
+    protected Session getCurrentSession() {
+        return getSessionFactory().getCurrentSession();
+    }
+    
     @Deprecated
     // This is a temporary workaround to get the entity class from outside
     // When we migrate to pure JPA, we will delete this method
@@ -46,12 +53,12 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @Override
     public void create(T entity) {
         setAuditingFields(entity);
-        getSessionFactory().getCurrentSession().persist(entity);
+        getCurrentSession().persist(entity);
     }
 
     @Override
     public boolean containInSession(T entity) {
-        boolean bContains = getSessionFactory().getCurrentSession().contains(entity);
+        boolean bContains = getCurrentSession().contains(entity);
 
         return bContains;
     }
@@ -70,7 +77,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @Override
     public void createOrUpdate(T entity) {
         setAuditingFields(entity);
-        getSessionFactory().getCurrentSession().saveOrUpdate(entity);
+        getCurrentSession().saveOrUpdate(entity);
     }
 
     /**
@@ -85,17 +92,17 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     public T findByKey(T entity) {
         Class<?> clz = entity.getClass();
 
-        return (T) getSessionFactory().getCurrentSession().get(clz, entity.getPid());
+        return (T) getCurrentSession().get(clz, entity.getPid());
     }
 
     @Override
     public T findByKey(Class<T> entityClz, Long key) {
-        return (T) getSessionFactory().getCurrentSession().get(entityClz, key);
+        return (T) getCurrentSession().get(entityClz, key);
     }
 
     @SuppressWarnings("unchecked")
     public <F> T findByField(String fieldName, F fieldValue) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
         Query<T> query = session.createQuery(queryStr);
         query.setParameter("value", fieldValue);
@@ -112,7 +119,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @SuppressWarnings("unchecked")
     public <F> List<T> findAllByField(String fieldName, F fieldValue) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         String queryStr = String.format("from %s where %s = :value", getEntityClass().getSimpleName(), fieldName);
         Query<T> query = session.createQuery(queryStr);
         query.setParameter("value", fieldValue);
@@ -140,7 +147,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             throw new RuntimeException("Must specify a value for each field name");
         }
 
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < fieldsAndValues.length / 2; i++) {
             if (i > 0) {
@@ -159,7 +166,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @SuppressWarnings("unchecked")
     @Override
     public List<T> findAll() {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         Class<T> entityClz = getEntityClass();
         Query<T> query = session.createQuery("from " + entityClz.getSimpleName());
         return query.list();
@@ -168,7 +175,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @Override
     public void update(T entity) {
         setAuditingFields(entity);
-        Session currSession = getSessionFactory().getCurrentSession();
+        Session currSession = getCurrentSession();
         currSession.update(entity);
     }
 
@@ -176,7 +183,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     @Override
     public T merge(T entity) {
         setAuditingFields(entity);
-        return (T) getSessionFactory().getCurrentSession().merge(entity);
+        return (T) getCurrentSession().merge(entity);
     }
 
     @Override
@@ -188,7 +195,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
         if (entity == null) {
             return;
         }
-        Session currSession = getSessionFactory().getCurrentSession();
+        Session currSession = getCurrentSession();
         currSession.delete(currSession.contains(entity) ? entity : currSession.merge(entity));
     }
 
@@ -216,7 +223,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     private void hardDelete(String field, Object id) {
         log.info(String.format("Delete entry of %s with %s = %s", getEntityClass().getSimpleName(), field, id));
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         Query<?> query = session
                 .createQuery("delete from " + getEntityClass().getSimpleName() + " where " + field + "= :id")
                 .setParameter("id", id);
@@ -238,7 +245,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
     }
 
     private void updateDeleted(String field, Object id, boolean deleted) {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         if (SoftDeletable.class.isAssignableFrom(getEntityClass())) {
             Query<?> query = session.createQuery(
                     "update " + getEntityClass().getSimpleName() + " set DELETED = :deleted where " + field + "= :id")
@@ -251,7 +258,7 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
 
     @Override
     public void deleteAll() {
-        Session session = getSessionFactory().getCurrentSession();
+        Session session = getCurrentSession();
         Class<T> entityClz = getEntityClass();
         Query<?> query = session.createQuery("delete from " + entityClz.getSimpleName());
         query.executeUpdate();
@@ -269,5 +276,21 @@ public abstract class AbstractBaseDaoImpl<T extends HasPid> implements BaseDao<T
             }
             ((HasAuditingFields) entity).setUpdated(now);
         }
+    }
+
+    @Override
+    public void flushSession() {
+        getCurrentSession().flush();
+    }
+
+    @Override
+    public void clearSession() {
+        getCurrentSession().clear();
+    }
+    
+    @Override
+    public int getBatchSize() {
+        Object batch_size = getSessionFactory().getProperties().get(Environment.STATEMENT_BATCH_SIZE);
+        return NumberUtils.toInt(String.valueOf(batch_size), DEFAULT_JDBC_BATCH_SIZE);
     }
 }

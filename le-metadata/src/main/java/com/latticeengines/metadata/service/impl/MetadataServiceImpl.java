@@ -103,6 +103,7 @@ public class MetadataServiceImpl implements MetadataService {
     public void updateTable(CustomerSpace customerSpace, final Table table) {
         tableTypeHolder.setTableType(table.getTableType());
         try {
+            log.info("Metadata UpdateTable: {}", table.getName());
             DatabaseUtils.retry("updateTable", new Closure() {
                 @Override
                 public void execute(Object input) {

@@ -59,7 +59,8 @@ public abstract class BaseRestApiProxy {
             com.mchange.v2.resourcepool.TimeoutException.class, //
             org.apache.commons.httpclient.util.TimeoutController.TimeoutException.class, //
             io.netty.handler.timeout.TimeoutException.class, //
-            org.apache.http.NoHttpResponseException.class);
+            org.apache.http.NoHttpResponseException.class,
+            org.springframework.web.client.ResourceAccessException.class);
 
     private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset by peer");
 
