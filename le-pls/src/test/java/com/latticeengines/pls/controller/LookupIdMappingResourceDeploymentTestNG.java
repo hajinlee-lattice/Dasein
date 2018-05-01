@@ -37,29 +37,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         Map<String, List<LookupIdMap>> lookupIdConfigs = JsonUtils.convertMapWithListValue(lookupIdConfigsRaw,
                 String.class, LookupIdMap.class);
         Assert.assertNotNull(lookupIdConfigs);
-        Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
-
-        lookupIdConfigs.keySet().stream().forEach(k -> {
-            CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
-            Assert.assertTrue(lookupIdConfigs.get(k).size() > 0);
-            lookupIdConfigs.get(k).stream().forEach(c -> {
-                Assert.assertNotNull(c);
-                Assert.assertEquals(c.getExternalSystemType(), externalSystemType);
-                Assert.assertNotNull(c.getId());
-                Assert.assertNotNull(c.getOrgId());
-                Assert.assertNotNull(c.getOrgName());
-
-                LookupIdMap lookupIdMap = restTemplate.getForObject(
-                        getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + c.getId(), LookupIdMap.class);
-                Assert.assertNotNull(lookupIdMap);
-                Assert.assertEquals(lookupIdMap.getExternalSystemType(), externalSystemType);
-                Assert.assertNotNull(lookupIdMap.getId());
-                Assert.assertNotNull(lookupIdMap.getOrgId());
-                Assert.assertNotNull(lookupIdMap.getOrgName());
-                Assert.assertEquals(lookupIdMap.getId(), c.getId());
-            });
-        });
-
+        Assert.assertTrue(lookupIdConfigs.keySet().size() == 0);
     }
 
     @Test(groups = "deployment")
@@ -76,6 +54,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
         Assert.assertEquals(resultLookupIdMap.getOrgName(), lookupIdsMap.getOrgName());
         Assert.assertEquals(resultLookupIdMap.getExternalSystemType(), lookupIdsMap.getExternalSystemType());
         Assert.assertNotNull(resultLookupIdMap.getId());
+        
+        confirmNonEmptyLookupConfigs();
+
     }
 
     @Test(groups = "deployment")
@@ -143,5 +124,38 @@ public class LookupIdMappingResourceDeploymentTestNG extends PlsDeploymentTestNG
                 CDLExternalSystemType.class);
         Assert.assertNotNull(allCDLExternalSystemType);
         Assert.assertTrue(CollectionUtils.isNotEmpty(allCDLExternalSystemType));
+    }
+    
+    private void confirmNonEmptyLookupConfigs() {
+        @SuppressWarnings({ "rawtypes" })
+        Map lookupIdConfigsRaw = (Map) restTemplate.getForObject(getRestAPIHostPort() + "/pls/lookup-id-mapping",
+                Map.class);
+        Assert.assertNotNull(lookupIdConfigsRaw);
+        @SuppressWarnings({ "unchecked" })
+        Map<String, List<LookupIdMap>> lookupIdConfigs = JsonUtils.convertMapWithListValue(lookupIdConfigsRaw,
+                String.class, LookupIdMap.class);
+        Assert.assertNotNull(lookupIdConfigs);
+        Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
+
+        lookupIdConfigs.keySet().stream().forEach(k -> {
+            CDLExternalSystemType externalSystemType = CDLExternalSystemType.valueOf(k);
+            Assert.assertTrue(lookupIdConfigs.get(k).size() > 0);
+            lookupIdConfigs.get(k).stream().forEach(c -> {
+                Assert.assertNotNull(c);
+                Assert.assertEquals(c.getExternalSystemType(), externalSystemType);
+                Assert.assertNotNull(c.getId());
+                Assert.assertNotNull(c.getOrgId());
+                Assert.assertNotNull(c.getOrgName());
+
+                LookupIdMap lookupIdMap = restTemplate.getForObject(
+                        getRestAPIHostPort() + "/pls/lookup-id-mapping/config/" + c.getId(), LookupIdMap.class);
+                Assert.assertNotNull(lookupIdMap);
+                Assert.assertEquals(lookupIdMap.getExternalSystemType(), externalSystemType);
+                Assert.assertNotNull(lookupIdMap.getId());
+                Assert.assertNotNull(lookupIdMap.getOrgId());
+                Assert.assertNotNull(lookupIdMap.getOrgName());
+                Assert.assertEquals(lookupIdMap.getId(), c.getId());
+            });
+        });
     }
 }
