@@ -36,7 +36,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     private BusinessEntity entity;
 
     @JsonProperty("DataLicense")
-    private String DataLicense;
+    private String dataLicense;
 
     @JsonProperty("Props")
     private Map<String, AttrConfigProp<?>> attrProps;
@@ -127,11 +127,11 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     }
 
     public String getDataLicense() {
-        return DataLicense;
+        return dataLicense;
     }
 
     public void setDataLicense(String dataLicense) {
-        DataLicense = dataLicense;
+        this.dataLicense = dataLicense;
     }
 
     @Override
@@ -142,7 +142,7 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         ColumnMetadata cm = new ColumnMetadata();
         cm.setAttrName(getAttrName());
         cm.setDisplayName(getProperty(ColumnMetadataKey.DisplayName, String.class));
-        for (ColumnSelection.Predefined group: ColumnSelection.Predefined.values()) {
+        for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
             parseUsageGroup(cm, group);
         }
         cm.setAttrState(getProperty(ColumnMetadataKey.State, AttrState.class));

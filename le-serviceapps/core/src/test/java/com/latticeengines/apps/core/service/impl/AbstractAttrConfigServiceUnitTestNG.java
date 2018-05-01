@@ -1,16 +1,25 @@
 package com.latticeengines.apps.core.service.impl;
 
+import static org.mockito.Mockito.doReturn;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
@@ -18,9 +27,30 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 public class AbstractAttrConfigServiceUnitTestNG {
 
+    @InjectMocks
     private AbstractAttrConfigService cdlAttrConfigServiceImpl = new AttrConfigServiceTestImpl();
+
     private static final String displayName1 = "displayName";
     private static final String displayName2 = "displayName2";
+    private static Tenant tenant;
+    private static int intentLimit = 20;
+    private static int technologyLimit = 32;
+
+    @Mock
+    private LimitationValidator limitationValidator;
+
+    @BeforeTest(groups = "unit")
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        tenant = new Tenant("tenantId");
+        tenant.setPid(1L);
+        MultiTenantContext.setTenant(tenant);
+        doReturn(intentLimit).when(limitationValidator).getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(),
+                DataLicense.BOMBORA);
+        MultiTenantContext.setTenant(tenant);
+        doReturn(technologyLimit).when(limitationValidator)
+                .getMaxPremiumLeadEnrichmentAttributesByLicense(tenant.getId(), DataLicense.HG);
+    }
 
     @Test(groups = "unit")
     public void testGetActualValue() {

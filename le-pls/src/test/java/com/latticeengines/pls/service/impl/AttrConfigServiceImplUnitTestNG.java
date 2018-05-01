@@ -1,6 +1,7 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.Map;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -45,9 +47,11 @@ public class AttrConfigServiceImplUnitTestNG {
     private CDLAttrConfigProxy cdlAttrConfigProxy;
 
     @InjectMocks
+    @Spy
     private AttrConfigServiceImpl attrConfigService;
 
     private static final Long intentLimit = 500L;
+    private static final Long ExportLimit = 200L;
     private static final Long activeForIntent = 5000L;
     private static final Long inactiveForIntent = 4000L;
     private static final Long totalIntentAttrs = 90000L;
@@ -95,6 +99,7 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigActivationOverview" })
     public void testGetAttrConfigUsageOverview() {
+        doReturn(ExportLimit).when(attrConfigService).getMaxPremiumLeadEnrichment(anyString());
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
                 ColumnSelection.Predefined.Segment.getName()))
                         .thenReturn(generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.getName()));
@@ -119,6 +124,9 @@ public class AttrConfigServiceImplUnitTestNG {
                 0);
         Assert.assertNotNull(
                 selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
+        Assert.assertEquals(
+                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT),
+                ExportLimit);
     }
 
     private List<AttrConfigOverview<?>> generatePropertyAttrConfigOverview(String propertyName) {

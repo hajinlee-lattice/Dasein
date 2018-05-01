@@ -36,6 +36,7 @@ import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -63,9 +64,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Inject
     private ActionService actionService;
 
+    @Inject
+    private LimitationValidator limitationValidator;
+
     protected abstract List<ColumnMetadata> getSystemMetadata(BusinessEntity entity);
 
     protected abstract List<ColumnMetadata> getSystemMetadata(Category category);
+
+    private static final long DEFAULT_LIMIT = 500L;
 
     @Override
     public List<AttrConfig> getRenderedList(BusinessEntity entity, boolean render) {
@@ -113,8 +119,26 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         propSummary.put(propertyName, valueNumberMap);
         overview.setCategory(category);
         overview.setTotalAttrs((long) renderedList.size());
-        // TODO set the limit for overview
-        overview.setLimit(500L);
+        if (category.isPremium()) {
+            switch (category) {
+            case INTENT:
+                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA));
+                break;
+            case TECHNOLOGY_PROFILE:
+                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                        MultiTenantContext.getTenantId(), DataLicense.HG));
+            case ACCOUNT_ATTRIBUTES:
+                overview.setLimit(DEFAULT_LIMIT);
+                break;
+            case CONTACT_ATTRIBUTES:
+                overview.setLimit(DEFAULT_LIMIT);
+                break;
+            default:
+                log.warn("Unsupported" + category);
+                break;
+            }
+        }
 
         for (AttrConfig attrConfig : renderedList) {
             Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();

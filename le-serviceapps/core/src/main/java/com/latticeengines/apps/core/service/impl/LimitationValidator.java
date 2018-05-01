@@ -27,7 +27,6 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrType;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationErrors;
 import com.latticeengines.domain.exposed.serviceapps.core.ValidationMsg;
 
-
 @Component("limitationValidator")
 public class LimitationValidator extends AttrValidator {
     public static final String VALIDATOR_NAME = "LIMITATION_VALIDATOR";
@@ -35,7 +34,7 @@ public class LimitationValidator extends AttrValidator {
     private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
     private static final String PLS = "PLS";
     private static final String EXPORT = "Export";
-    private static final int LIMIT = 500;
+    private static final int DEFAULT_LIMIT = 500;
     @Inject
     private AttrConfigEntityMgr attrConfigEntityMgr;
 
@@ -47,7 +46,8 @@ public class LimitationValidator extends AttrValidator {
     public void validate(List<AttrConfig> attrConfigs) {
         String tenantId = MultiTenantContext.getTenantId();
         List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllByTenantId(tenantId);
-        existingConfigs.addAll(attrConfigs); // append the user selected configs to existing in DB
+        existingConfigs.addAll(attrConfigs); // append the user selected configs
+                                             // to existing in DB
         checkDataLicense(existingConfigs, attrConfigs);
         checkSystemLimit(existingConfigs, attrConfigs);
     }
@@ -79,8 +79,7 @@ public class LimitationValidator extends AttrValidator {
             userSelectedConfigs.forEach(e -> {
                 if (e.getDataLicense() != null) {
                     addErrorMsg(ValidationErrors.Type.EXCEED_DATA_LICENSE,
-                            String.format(ValidationMsg.Errors.EXCEED_LICENSE_LIMIT, selected, EXPORT, totalLimit),
-                            e);
+                            String.format(ValidationMsg.Errors.EXCEED_LICENSE_LIMIT, selected, EXPORT, totalLimit), e);
                 }
             });
         }
@@ -88,9 +87,9 @@ public class LimitationValidator extends AttrValidator {
 
     private void checkSystemLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedConfigs) {
         checkDetailLimit(configs, userSelectedConfigs, AttrType.Custom, AttrSubType.Extension, BusinessEntity.Account,
-                LIMIT);
+                DEFAULT_LIMIT);
         checkDetailLimit(configs, userSelectedConfigs, AttrType.Custom, AttrSubType.Extension, BusinessEntity.Contact,
-                LIMIT);
+                DEFAULT_LIMIT);
     }
 
     private void checkDetailLimit(List<AttrConfig> configs, List<AttrConfig> userSelectedConfigs, AttrType type,
@@ -111,7 +110,7 @@ public class LimitationValidator extends AttrValidator {
     }
 
     @VisibleForTesting
-    int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, DataLicense dataLicense) {
+    public int getMaxPremiumLeadEnrichmentAttributesByLicense(String tenantId, DataLicense dataLicense) {
         String maxPremiumLeadEnrichmentAttributes;
         Camille camille = CamilleEnvironment.getCamille();
         Path contractPath = null;
