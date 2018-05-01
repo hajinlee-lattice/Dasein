@@ -196,6 +196,33 @@ public class WorkflowProxy extends MicroserviceRestApiProxy {
         return JsonUtils.convertList(get("getJobs", url, List.class), Job.class);
     }
 
+    public List<Job> getWorkflowExecutionsByJobPids(List<String> jobIds, String customerSpace) {
+        checkCustomerSpace(customerSpace);
+        if (CollectionUtils.isEmpty(jobIds)) {
+            return Collections.emptyList();
+        }
+
+        String baseUrl = "/jobsByPid";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", customerSpace);
+        url += url.contains("?customerSpace=") ? "&" : "?";
+        url += buildQueryString("jobId", jobIds);
+        url = constructUrl(url);
+        return JsonUtils.convertList(get("getJobsByPid", url, List.class), Job.class);
+    }
+
+    public List<Job> getWorkflowExecutionsByJobPids(List<String> jobIds, String... params) {
+        if (CollectionUtils.isEmpty(jobIds)) {
+            return Collections.emptyList();
+        }
+
+        String baseUrl = "/jobsByPid";
+        String url = parseOptionalParameter(baseUrl, "customerSpace", params);
+        url += url.contains("?customerSpace=") ? "&" : "?";
+        url += buildQueryString("jobId", jobIds);
+        url = constructUrl(url);
+        return JsonUtils.convertList(get("getJobsByPid", url, List.class), Job.class);
+    }
+
     public List<Job> getWorkflowExecutionsForTenant(Tenant tenant, String... params) {
         String customerSpace = shortenCustomerSpace(CustomerSpace.parse(tenant.getId()).toString());
         checkCustomerSpace(customerSpace);

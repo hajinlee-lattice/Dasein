@@ -31,7 +31,7 @@ public interface WorkflowJobService {
     List<Job> getJobsByWorkflowIds(String customerSpace, List<Long> workflowIds, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);
 
-    List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowIds, List<String> types,
+    List<Job> getJobsByWorkflowPids(String customerSpace, List<Long> workflowPids, List<String> types,
                                    Boolean includeDetails, Boolean hasParentId, Long parentJobId);
 
     List<String> getStepNames(String customerSpace, Long workflowPid);

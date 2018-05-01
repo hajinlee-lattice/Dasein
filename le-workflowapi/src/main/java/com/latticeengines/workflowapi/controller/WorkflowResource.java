@@ -121,6 +121,28 @@ public class WorkflowResource {
         }
     }
 
+    @RequestMapping(value = "/jobsByPid", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ApiOperation(value = "Get list of workflow jobs by given list of workflowPid or job types.")
+    public List<Job> getJobsByPid(@RequestParam(value = "jobId", required = false) List<String> jobIds,
+                                  @RequestParam(value = "type", required = false) List<String> types,
+                                  @RequestParam(value = "includeDetails", required = false) Boolean includeDetails,
+                                  @RequestParam(required = false) String customerSpace) {
+        Optional<List<String>> optionalJobIds = Optional.ofNullable(jobIds);
+        Optional<List<String>> optionalTypes = Optional.ofNullable(types);
+        Optional<Boolean> optionalIncludeDetails = Optional.ofNullable(includeDetails);
+
+        if (optionalJobIds.isPresent()) {
+            List<Long> workflowIds = optionalJobIds.get().stream().map(Long::valueOf).collect(Collectors.toList());
+            return workflowJobService.getJobsByWorkflowPids(customerSpace, workflowIds, optionalTypes.orElse(null),
+                    optionalIncludeDetails.orElse(true), false, -1L);
+        } else if (optionalTypes.isPresent()) {
+            return workflowJobService.getJobsByWorkflowPids(customerSpace, null, optionalTypes.get(),
+                    optionalIncludeDetails.orElse(true), false, -1L);
+        } else {
+            return workflowJobService.getJobsByCustomerSpace(customerSpace, optionalIncludeDetails.orElse(true));
+        }
+    }
+
     @RequestMapping(value = "/jobs", method = RequestMethod.PUT, headers = "Accept=application/json")
     @ApiOperation(value = "Update workflow jobs' parent job Id")
     public void updateParentJobId(@RequestParam(value = "jobId", required = true) List<String> jobIds,
