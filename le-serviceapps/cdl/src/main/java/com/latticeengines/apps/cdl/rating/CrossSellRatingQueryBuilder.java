@@ -166,10 +166,10 @@ public abstract class CrossSellRatingQueryBuilder implements RatingQueryBuilder 
     }
 
     public static RatingQueryBuilder getCrossSellRatingQueryBuilder(RatingEngine ratingEngine, AIModel aiModel,
-            ModelingQueryType modelingQueryType, int targetPeriodId, String maxDateString) {
+            ModelingQueryType modelingQueryType, int targetPeriodId) {
         switch (modelingQueryType) {
         case TARGET:
-            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId, maxDateString);
+            return new CrossSellRatingTargetQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         case TRAINING:
             return new CrossSellRatingTrainingQueryBuilder(ratingEngine, aiModel, targetPeriodId);
         case EVENT:

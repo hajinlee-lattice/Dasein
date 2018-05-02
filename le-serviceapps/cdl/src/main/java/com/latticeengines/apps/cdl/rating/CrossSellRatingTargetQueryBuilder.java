@@ -17,13 +17,10 @@ import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuilder {
 
     protected MetadataSegment accountFiltererSegment;
-    private String evaluationDateString;
 
-    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod,
-            String evaluationDateString) {
+    protected CrossSellRatingTargetQueryBuilder(RatingEngine ratingEngine, AIModel aiModel, int evaluationPeriod) {
         super(ratingEngine, aiModel, evaluationPeriod);
         accountFiltererSegment = (MetadataSegment) ratingEngine.getSegment().clone();
-        this.evaluationDateString = evaluationDateString;
     }
 
     @Override
@@ -66,9 +63,7 @@ public class CrossSellRatingTargetQueryBuilder extends CrossSellRatingQueryBuild
 
     @Override
     protected FrontEndQuery getAccountFiltererSegmentQuery() {
-        FrontEndQuery accountFiltererSegmentQuery = FrontEndQuery.fromSegment(accountFiltererSegment);
-        accountFiltererSegmentQuery.setEvaluationDateStr(evaluationDateString);
-        return accountFiltererSegmentQuery;
+        return FrontEndQuery.fromSegment(accountFiltererSegment);
     }
 
     @Override
