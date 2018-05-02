@@ -80,7 +80,7 @@ public class FuzzyMatchHelper implements DbHelper {
 
     @MatchStep
     private void fetchInternal(MatchContext context, boolean isSync) {
-        boolean fetchOnly = context.getInput().getFetchOnly();
+        boolean fetchOnly = context.getInput().isFetchOnly();
         if (!fetchOnly) {
             try {
                 updateDecisionGraph(context.getInput());

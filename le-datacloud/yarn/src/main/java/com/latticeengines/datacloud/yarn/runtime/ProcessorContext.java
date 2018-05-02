@@ -327,7 +327,7 @@ public class ProcessorContext {
         }
 
         decisionGraph = jobConfiguration.getMatchInput().getDecisionGraph();
-        if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().getFetchOnly())) {
+        if (Boolean.TRUE.equals(jobConfiguration.getMatchInput().isFetchOnly())) {
             useRemoteDnB = false;
         } else {
             if (jobConfiguration.getMatchInput().getUseRemoteDnB() != null) {
@@ -370,7 +370,7 @@ public class ProcessorContext {
             numThreads = actorsThreadPool;
             if (useRemoteDnB) {
                 groupSize = 128;
-            } else if (originalInput.getFetchOnly()) {
+            } else if (originalInput.isFetchOnly()) {
                 groupSize = 100;
                 numThreads = fetchonlyThreadPool;
             }

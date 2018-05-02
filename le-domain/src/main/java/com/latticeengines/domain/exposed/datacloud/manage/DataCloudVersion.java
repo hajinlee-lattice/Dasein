@@ -3,6 +3,8 @@ package com.latticeengines.domain.exposed.datacloud.manage;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
@@ -15,6 +17,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.annotations.Index;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -203,6 +206,36 @@ public class DataCloudVersion implements HasPid, Serializable {
     }
 
     public String getDataCloudBuildNumber() {
-        return version + "." + refreshVersion;
+        if (StringUtils.isBlank(refreshVersion)) {
+            return version;
+        } else {
+            return version + "." + refreshVersion;
+        }
     }
+
+    public static DataCloudVersion parseBuildNumber(String buildNumber) {
+        if (buildNumber == null) {
+            throw new IllegalArgumentException("Cannot parse null build number");
+        }
+
+        Pattern pattern = Pattern.compile("^(\\d+).(\\d+).(\\d+).?(\\d+)?$");
+        Matcher matcher = pattern.matcher(buildNumber);
+
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Malformed build number: " + buildNumber);
+        }
+
+        String x = matcher.group(1);
+        String y = matcher.group(2);
+        String z = matcher.group(3);
+        String r = matcher.group(3);
+
+        DataCloudVersion version = new DataCloudVersion();
+        version.setVersion(String.format("%s.%s.%s", x, y, z));
+        version.setRefreshVersion(r);
+        version.setMajorVersion(String.format("%s.%s", x, y));
+
+        return version;
+    }
+
 }

@@ -1,8 +1,10 @@
 package com.latticeengines.matchapi.controller;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,16 +18,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
+import com.google.common.collect.ImmutableMap;
 import com.latticeengines.datacloud.match.exposed.service.MatchMonitorService;
 import com.latticeengines.datacloud.match.exposed.service.RealTimeMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.MatchCommand;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.BulkMatchOutput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
+import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.match.BulkMatchWorkflowConfiguration;
 import com.latticeengines.matchapi.service.BulkMatchService;
 
@@ -60,6 +64,9 @@ public class MatchResource {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         matchMonitorService.precheck(input.getDataCloudVersion());
+        if (StringUtils.isNotBlank(input.getLookupId())) {
+            input = mockForCDLLookup(input);
+        }
         return realTimeMatchService.match(input);
     }
 
@@ -144,6 +151,16 @@ public class MatchResource {
             }
         }
         throw new LedpException(LedpCode.LEDP_25021, new String[] { matchVersion });
+    }
+
+    private MatchInput mockForCDLLookup(MatchInput input) {
+        input.setCustomSelection(null);
+        input.setUnionSelection(null);
+        input.setPredefinedSelection(ColumnSelection.Predefined.RTS);
+        input.setFetchOnly(true);
+        input.setKeyMap(ImmutableMap.of(MatchKey.LatticeAccountID, Collections.singletonList(input.getLookupId())));
+        input.setSkipKeyResolution(true);
+        return input;
     }
 
 }

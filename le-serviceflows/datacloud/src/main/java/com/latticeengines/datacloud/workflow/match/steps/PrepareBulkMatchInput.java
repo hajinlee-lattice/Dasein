@@ -84,7 +84,7 @@ public class PrepareBulkMatchInput extends BaseWorkflowStep<PrepareBulkMatchInpu
 
     private Integer[] determineBlockSizes(Long count) {
         if (MatchUtils.isValidForAccountMasterBasedMatch(getConfiguration().getMatchInput().getDataCloudVersion())) {
-            if (getConfiguration().getMatchInput().getFetchOnly()) {
+            if (getConfiguration().getMatchInput().isFetchOnly()) {
                 return divideIntoNumBlocks(count, determineNumBlocksForAM(count));
             } else {
                 return new Integer[] { count.intValue() };

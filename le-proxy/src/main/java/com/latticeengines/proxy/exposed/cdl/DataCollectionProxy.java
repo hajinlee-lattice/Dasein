@@ -5,6 +5,9 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -21,6 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 
 @Component("dataCollectionProxy")
 public class DataCollectionProxy extends MicroserviceRestApiProxy {
@@ -28,6 +32,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     private static final Logger log = LoggerFactory.getLogger(DataCollectionProxy.class);
 
     private LocalCacheManager<String, AttributeRepository> attrRepoCache = null;
+
+    @Inject
+    private ColumnMetadataProxy columnMetadataProxy;
 
     protected DataCollectionProxy() {
         super("cdl");
@@ -276,6 +283,11 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     public DataCollection.Version getInactiveVersion(String customerSpace) {
         DataCollection.Version activeVersion = getActiveVersion(customerSpace);
         return activeVersion.complement();
+    }
+
+    //FIXME: to be implemented
+    public DataCloudVersion getDataCloudVersion(String customerSpace, DataCollection.Version version) {
+        return columnMetadataProxy.latestVersion();
     }
 
 }

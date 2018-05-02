@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,15 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Empty list of fields.");
         }
 
+        if (StringUtils.isNotBlank(input.getLookupId()) && !input.getFields().contains(input.getLookupId())) {
+            throw new IllegalArgumentException(
+                    "Specified lookup id " + input.getLookupId() + " does not exists in the provided fields.");
+        }
+
+        if (input.isLookupOnly() && StringUtils.isBlank(input.getLookupId())) {
+            throw new IllegalArgumentException("Must specify a lookup id field in lookup only mode.");
+        }
+
         return resolveKeyMap(input);
     }
 
@@ -145,17 +155,19 @@ public class MatchInputValidator {
 
     private static void validatePredefinedSelection(Predefined selection) {
         if (!Predefined.supportedSelections.contains(selection)) {
-            throw new UnsupportedOperationException("Only Predefined selection "
-                    + Predefined.supportedSelections + " are supported at this time.");
+            throw new UnsupportedOperationException(
+                    "Only Predefined selection " + Predefined.supportedSelections + " are supported at this time.");
         }
     }
 
     private static void validateKeys(Set<MatchKey> keySet) {
-        if (!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name) && !keySet.contains(MatchKey.LatticeAccountID)) {
+        if (!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.Name)
+                && !keySet.contains(MatchKey.LatticeAccountID)) {
             throw new IllegalArgumentException("Neither domain nor name nor lattice account id is provided.");
         }
 
-        if ((!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.LatticeAccountID)) && keySet.contains(MatchKey.Name)
+        if ((!keySet.contains(MatchKey.Domain) && !keySet.contains(MatchKey.LatticeAccountID))
+                && keySet.contains(MatchKey.Name)
                 && (!keySet.contains(MatchKey.Country) || !keySet.contains(MatchKey.State))) {
             throw new IllegalArgumentException("Name location based match must has country and state.");
         }

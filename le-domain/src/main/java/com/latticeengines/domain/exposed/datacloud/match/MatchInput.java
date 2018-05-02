@@ -58,6 +58,12 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("KeyMap")
     private Map<MatchKey, List<String>> keyMap;
 
+    @JsonProperty("LookupId")
+    private String lookupId;
+
+    // =========================
+    // BEGIN: column selections
+    // =========================
     // only one of these is needed, custom selection has higher priority
     @JsonProperty("PredefinedSelection")
     private Predefined predefinedSelection;
@@ -67,6 +73,9 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("UnionSelection")
     private UnionSelection unionSelection;
+    // =========================
+    // END: column selections
+    // =========================
 
     @JsonProperty("TimeOut")
     private Long timeout;
@@ -120,6 +129,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("FetchOnly")
     private boolean fetchOnly;
 
+    // do not try fuzzy match if lookup id is provided
+    @JsonProperty("LookupOnly")
+    private boolean lookupOnly;
+
     @JsonProperty("SkipKeyResolution")
     private boolean skipKeyResolution;
 
@@ -155,7 +168,6 @@ public class MatchInput implements Fact, Dimension {
     
     @JsonProperty("PartialMatchEnabled")
     private boolean partialMatchEnabled;
-
 
     // ====================
     // END FLAGS
@@ -193,12 +205,20 @@ public class MatchInput implements Fact, Dimension {
         this.excludePublicDomain = Boolean.TRUE.equals(excludePublicDomain);
     }
 
-    public boolean getFetchOnly() {
+    public boolean isFetchOnly() {
         return fetchOnly;
     }
 
     public void setFetchOnly(boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
+    }
+
+    public String getLookupId() {
+        return lookupId;
+    }
+
+    public void setLookupId(String lookupId) {
+        this.lookupId = lookupId;
     }
 
     public boolean isPublicDomainAsNormalDomain() {
@@ -471,6 +491,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDisableDunsValidation(boolean disableDunsValidation) {
         this.disableDunsValidation = disableDunsValidation;
+    }
+
+    public boolean isLookupOnly() {
+        return lookupOnly;
+    }
+
+    public void setLookupOnly(boolean lookupOnly) {
+        this.lookupOnly = lookupOnly;
     }
 
     public Integer getSplitsPerBlock() {
