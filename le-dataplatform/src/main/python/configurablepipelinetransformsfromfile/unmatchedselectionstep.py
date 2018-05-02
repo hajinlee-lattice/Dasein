@@ -34,6 +34,10 @@ class UnmatchedSelectionStep(PipelineStep):
         recordCount = dataFrame.shape[0]
         matchCounter = lambda x: 0 if np.isnan(x) else 1
         matchedCount = sum(map(matchCounter, dataFrame[lidColName]))
+        if matchedCount == 0:
+            logger.info("There's no matched record, don't select unmatched.")
+            return dataFrame
+        
         unmatchedRatio = 1.0 - (matchedCount * 1.0 / recordCount)
         if unmatchedRatio <= self.unmatchedRatioThreshold:
             logger.info("Do not do unmatched selection, Total record count:" + str(recordCount) + " Unmatched ratio:" + str(unmatchedRatio))
