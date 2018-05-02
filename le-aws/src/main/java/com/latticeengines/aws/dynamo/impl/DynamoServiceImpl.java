@@ -84,8 +84,12 @@ public class DynamoServiceImpl implements DynamoService {
     @Override
     public void switchToLocal(boolean local) {
         if (local) {
-            this.client = localClient;
-            log.info("Switch dynamo service to local mode.");
+            if (localClient != null) {
+                this.client = localClient;
+                log.info("Switch dynamo service to local mode.");
+            } else {
+                log.info("Local dynamo is not available in this environment.");
+            }
         } else {
             this.client = remoteClient;
             log.info("Switch dynamo service to remote mode.");
