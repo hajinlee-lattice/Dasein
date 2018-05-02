@@ -84,7 +84,7 @@ public class AttrConfigResource {
     @GetMapping(value = "/usage/config/category/{categoryName}")
     @ResponseBody
     @ApiOperation("get usage configuration detail for a specific category")
-    public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryName,
+    public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usage) {
         return attrConfigService.getAttrConfigSelectionDetails(categoryName, usage);
     }

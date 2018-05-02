@@ -1,7 +1,6 @@
 package com.latticeengines.pls.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -99,7 +98,6 @@ public class AttrConfigServiceImplUnitTestNG {
 
     @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigActivationOverview" })
     public void testGetAttrConfigUsageOverview() {
-        doReturn(ExportLimit).when(attrConfigService).getMaxPremiumLeadEnrichment(anyString());
         when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
                 ColumnSelection.Predefined.Segment.getName()))
                         .thenReturn(generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.getName()));
@@ -124,9 +122,6 @@ public class AttrConfigServiceImplUnitTestNG {
                 0);
         Assert.assertNotNull(
                 selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
-        Assert.assertEquals(
-                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT),
-                ExportLimit);
     }
 
     private List<AttrConfigOverview<?>> generatePropertyAttrConfigOverview(String propertyName) {
@@ -308,8 +303,8 @@ public class AttrConfigServiceImplUnitTestNG {
                 "Segmentation");
         log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
         Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 9L, 0);
-        Assert.assertEquals(selectionDetail.getSubcategories().size(), 8);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
         Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
                 .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
     }

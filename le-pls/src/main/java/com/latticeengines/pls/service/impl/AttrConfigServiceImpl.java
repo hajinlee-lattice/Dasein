@@ -11,21 +11,13 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.zookeeper.KeeperException;
-import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import com.latticeengines.camille.exposed.Camille;
-import com.latticeengines.camille.exposed.CamilleEnvironment;
-import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.camille.exposed.util.DocumentUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
@@ -55,9 +47,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     private static final Set<String> usagePropertySet = new HashSet<>(Arrays.asList(usageProperties));
     private static final String defaultDisplayName = "Default Name";
     private static final String defaultDescription = "Default Description";
-    private static final String DATA_CLOUD_LICENSE = "/DataCloudLicense";
-    private static final String MAX_ENRICH_ATTRIBUTES = "/MaxEnrichAttributes";
-    private static final String PLS = "PLS";
+    private static final long defaultExportLimit = 1000L;
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
@@ -92,8 +82,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             log.info("list is " + list);
             Map<String, Long> detailedSelections = new HashMap<>();
             if (property.equals(ColumnSelection.Predefined.Enrichment.getName())) {
-                detailedSelections.put(AttrConfigUsageOverview.LIMIT,
-                        getMaxPremiumLeadEnrichment(MultiTenantContext.getTenantId()));
+                detailedSelections.put(AttrConfigUsageOverview.LIMIT, defaultExportLimit);
             }
             selections.put(property, detailedSelections);
             long num = 0L;
@@ -209,8 +198,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        Category category = resolveCategory(categoryName);
-        return generateSelectionDetails(attrConfigRequest, property, category.isPremium());
+        return generateSelectionDetails(attrConfigRequest, property, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -349,42 +337,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         return configProp.getSystemValue();
-    }
-
-    @VisibleForTesting
-    long getMaxPremiumLeadEnrichment(String tenantId) {
-        String maxPremiumLeadEnrichmentAttributes;
-        Camille camille = CamilleEnvironment.getCamille();
-        Path contractPath = null;
-        Path path = null;
-        try {
-            CustomerSpace customerSpace = CustomerSpace.parse(tenantId);
-            contractPath = PathBuilder.buildCustomerSpaceServicePath(CamilleEnvironment.getPodId(), customerSpace, PLS);
-
-            path = contractPath.append(DATA_CLOUD_LICENSE).append(MAX_ENRICH_ATTRIBUTES);
-
-            maxPremiumLeadEnrichmentAttributes = camille.get(path).getData();
-        } catch (KeeperException.NoNodeException ex) {
-            Path defaultConfigPath = null;
-
-            defaultConfigPath = PathBuilder.buildServiceDefaultConfigPath(CamilleEnvironment.getPodId(), PLS)
-                    .append(new Path(DATA_CLOUD_LICENSE).append(new Path(MAX_ENRICH_ATTRIBUTES)));
-
-            try {
-                maxPremiumLeadEnrichmentAttributes = camille.get(defaultConfigPath).getData();
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot get default value for maximum premium lead enrichment attributes ");
-            }
-            try {
-                camille.upsert(path, DocumentUtils.toRawDocument(maxPremiumLeadEnrichmentAttributes),
-                        ZooDefs.Ids.OPEN_ACL_UNSAFE);
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot update value for maximum premium lead enrichment attributes ");
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Cannot get maximum premium lead enrichment attributes ", e);
-        }
-        return Long.parseLong(maxPremiumLeadEnrichmentAttributes.replaceAll("\"", ""));
     }
 
 }
