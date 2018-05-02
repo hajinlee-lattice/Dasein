@@ -65,7 +65,7 @@ public class ScoringMapperPredictUtil {
         for (String modelGuid : uuidSet) {
             sb.append(modelGuid + " ");
         }
-        String pythonCommand = String.format("./pythonlauncher.sh lattice scoring.py %s ", type);
+        String pythonCommand = String.format("./pythonlauncher.sh lattice_20180301 scoring.py %s ", type);
         if (type.equals(ScoringInputType.Avro.name())) {
             pythonCommand += config.get(ScoringProperty.UNIQUE_KEY_COLUMN.name()) + " ";
         }

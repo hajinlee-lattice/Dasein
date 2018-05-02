@@ -36,7 +36,7 @@ if [ "${BOOTSTRAP_MODE}" = "bootstrap" ]; then
     sudo chown -R $USER $ANACONDA_HOME
 fi
 
-for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
+for CONDAENV in 'lattice_20180301|2.7.13' 'v01_20180301|2.7.13'
     do
         envname=`echo $CONDAENV | cut -d \| -f 1`
         pythonversion=`echo $CONDAENV | cut -d \| -f 2`
@@ -50,7 +50,7 @@ for CONDAENV in 'lattice|2.7.13' 'v01|2.7.13'
         ln -s $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11.8.2 $ANACONDA_HOME/envs/$envname/lib/libgcrypt.so.11
     done
 
-source $ANACONDA_HOME/bin/activate lattice
+source $ANACONDA_HOME/bin/activate lattice_20180301
 
 pip install \
     avro==1.7.7 \
@@ -87,7 +87,7 @@ $ANACONDA_HOME/bin/conda install -y \
 source $ANACONDA_HOME/bin/deactivate
 
 
-source $ANACONDA_HOME/bin/activate v01
+source $ANACONDA_HOME/bin/activate v01_20180301
 
 pip install \
     avro==1.8.1 \

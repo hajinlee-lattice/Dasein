@@ -2,9 +2,9 @@ package com.latticeengines.dataplatform.runtime.mapreduce.python;
 
 import java.util.Map;
 
+import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.apache.hadoop.conf.Configuration;
 
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
@@ -27,7 +27,7 @@ public class PythonInvoker {
         try {
             PythonMRUtils.writeMetadataJsonToLocal(classifier);
             runtimeConfigFile = runtimeConfigFile != null ? runtimeConfigFile : "None";
-            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice",
+            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice_20180301",
                     "launcher.py", "metadata.json", runtimeConfigFile);
             setupEnvironment(pb.environment(), config);
 
