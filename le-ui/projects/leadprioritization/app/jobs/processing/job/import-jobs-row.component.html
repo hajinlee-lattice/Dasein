@@ -37,7 +37,7 @@
     </span>
 </div>
 <div class="le-cell le-col-start-9 le-col-span-3">
-    <button class="button blue-button" ng-if="showRunButton(job)" ng-click="vm.run(job)" ng-disabled="disableRunButton(job)">
+    <button class="button blue-button" ng-if="showRunButton(job)" ng-mousedown="mouseDownRun(job)" ng-disabled="disableRunButton(job)">
         Run Now
     </button>
 

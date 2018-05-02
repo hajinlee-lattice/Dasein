@@ -2,12 +2,37 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
 .service('ModalStore', function () {
     this.modals = {};
 
+
+
+
     this.get = function (name) {
-        return this.modals[name];
+        return this.modals[name].modal;
+    }
+
+    this.getData = function(name){
+        var tmp = this.modals[name].data;
+        if(tmp && tmp !== undefined){
+            return this.modals[name].data ;
+        }else{
+            return {};
+        }
+    }
+    this.setData = function(name, data){
+        var modal = this.modals[name];
+        if(modal){
+            this.modals[name].data = data;
+        }
     }
 
     this.set = function (name, modal) {
-        this.modals[name] = modal;
+        var mod = this.modals[name];
+        if(!mod){
+            var modalObj = {
+                modal: modal
+            };
+            this.modals[name] = modalObj;
+        }
+        // this.modals[name] = modal;
     }
     this.remove = function(name) {
         if(this.modals[name]){
@@ -82,8 +107,9 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
                 "confirmcolor": scope.config.confirmstyle === undefined ? (scope.config.confirmcolor || 'blue-button') : '',
             };
 
-            scope.toggle = function () {
+            scope.toggle = function (data) {
                 scope.opened = !scope.opened;
+                modalStore.setData(name, data);
                 resetWindow();
             }
 
@@ -122,7 +148,8 @@ angular.module('mainApp.appCommon.directives.modal.window', [])
             }
             scope.callCallback = function (value) {
                 if (typeof (scope.callback) != undefined) {
-                    scope.callback({ args: value });
+                    var data = modalStore.getData(name);
+                    scope.callback({ args: {action: value, data: data }});
                 }
             }
 

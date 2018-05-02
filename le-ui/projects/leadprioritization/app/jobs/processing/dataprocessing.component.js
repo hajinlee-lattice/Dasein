@@ -119,17 +119,17 @@ angular.module('lp.jobs.import', [
             };
 
             vm.modalCallback = function (args) {
-                if (vm.config.dischargeaction === args) {
+                if (vm.config.dischargeaction === args.action) {
                     vm.toggleModal();
-                } else if (vm.config.confirmaction === args) {
+                } else if (vm.config.confirmaction === args.action) {
                     vm.toggleModal();
-                    vm.callback({ 'action': 'run' });
+                    vm.callback({ 'action': 'run', 'obj': args.data });
                 }
             }
-            vm.toggleModal = function () {
+            vm.toggleModal = function (data) {
                 var modal = ModalStore.get(vm.config.name);
                 if (modal) {
-                    modal.toggle();
+                    modal.toggle(data);
                 }
             }
 

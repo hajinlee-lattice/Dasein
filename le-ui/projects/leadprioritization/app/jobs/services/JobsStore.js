@@ -228,7 +228,8 @@ angular
         var deferred = $q.defer();
 
         JobsService.runJob(job).then(function(resp){
-            deferred.resolve(job);
+            console.log('Run job resp ',resp);
+            deferred.resolve(resp);
         });
         
         return deferred.promise;

@@ -87,10 +87,10 @@ angular.module('lp.ratingsengine.dashboard', [
         };
     
         vm.modalCallback = function (args) {
-            if('closedForced' === args) {
-            }else if(vm.config.dischargeaction === args){
+            if('closedForced' === args.action) {
+            }else if(vm.config.dischargeaction === args.action){
                 vm.toggleModal();
-            } else if(vm.config.confirmaction === args){
+            } else if(vm.config.confirmaction === args.action){
                 var modal = ModalStore.get(vm.config.name);
                 modal.waiting(true);
                 modal.disableDischargeButton(true);

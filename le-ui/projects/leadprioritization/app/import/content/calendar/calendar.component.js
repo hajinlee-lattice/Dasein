@@ -171,12 +171,12 @@ angular.module('lp.import.calendar', [])
 
         vm.modalCallback = function (args) {
             console.log(args);
-            if (vm.modalConfig.dischargeaction === args) {
+            if (vm.modalConfig.dischargeaction === args.action) {
                 vm.toggleModal();
-            } else if (vm.modalConfig.confirmaction === args) {
+            } else if (vm.modalConfig.confirmaction === args.action) {
                 vm.toggleModal();
             }
-            if(args === 'proceed') {
+            if(args.action === 'proceed') {
                 if(debug) {
                     console.log('valid calendar, 10/10 woudl save', vm.lastFrom.name, vm.calendar);
                 } else {
