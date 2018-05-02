@@ -265,11 +265,10 @@ angular.module('lp.ratingsengine.ratingslist', [
                     RatingsEngineStore.setRating(engine);
                     RatingsEngineStore.getRatingModel(rating.id, engine.activeModel.AI.id).then(function(model){
 
-                        var modelId = model.AI.modelSummary ? model.AI.modelSummary.Id : null,
-                            modelSummary = model.AI.modelSummary,
+                        var modelId = model.AI.modelSummaryId ? model.AI.modelSummaryId : null,
                             modelJobId = model.AI.modelingJobId;
 
-                        if ((modelSummary !== null) || (modelJobId !== null)) {
+                        if ((modelId !== null) || (modelJobId !== null)) {
                             $state.go('home.ratingsengine.dashboard', { 
                                 rating_id: rating.id, 
                                 modelId: modelId

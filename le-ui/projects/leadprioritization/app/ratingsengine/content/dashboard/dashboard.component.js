@@ -267,7 +267,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 vm.ratingEngineType = 'Custom Event';
             }
 
-            vm.modelSummary = model.AI.modelSummary;
+            vm.modelSummary = model.AI.modelSummaryId;
             vm.predictionType = model.AI.predictionType;
             vm.trainingSegment = model.AI.trainingSegment;
 

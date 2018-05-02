@@ -50,7 +50,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
         }
 
         $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
-        $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummary != null) || (ratingEngine.activeModel[$scope.typeContext].modelSummary != undefined));
+        $scope.modelIsReady = ((ratingEngine.activeModel[$scope.typeContext].modelSummaryId != null) || (ratingEngine.activeModel[$scope.typeContext].modelSummaryId != undefined));
         $scope.activeStatus = ratingEngine.status;
 
         $scope.$on('statusChange', function(event, args) {
@@ -99,7 +99,7 @@ angular.module('mainApp.appCommon.widgets.ModelDetailsWidget', [
                 $scope.modelingStrategy = ratingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
             }
             $scope.activeIteration = ratingEngine.activeModel[$scope.typeContext].iteration;
-            $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummary !== null || ratingEngine.activeModel[$scope.typeContext].modelSummary !== undefined);
+            $scope.modelIsReady = (ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== null || ratingEngine.activeModel[$scope.typeContext].modelSummaryId !== undefined);
             $scope.segmentName = ratingEngine.segment.display_name;
             $scope.totalAccounts = ratingEngine.segment.accounts;
             $scope.lastRefreshedDate = ratingEngine.lastRefreshedDate;

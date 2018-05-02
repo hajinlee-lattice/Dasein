@@ -35,7 +35,7 @@
 
                     <button
                         class="button orange-button"
-                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummary.Id, ratingEngine: vm.ratingEngine })"
+                        ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
                         ng-if="!vm.isRulesBased"
                         ng-disabled="vm.modelSummary === null">
                         Activate Scoring

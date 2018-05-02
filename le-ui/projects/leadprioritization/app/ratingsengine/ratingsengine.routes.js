@@ -187,7 +187,7 @@ angular
                                 $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
                             }
                             $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
-                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary != null || RatingEngine.activeModel[$scope.typeContext].modelSummary != undefined);
+                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummaryId != null || RatingEngine.activeModel[$scope.typeContext].modelSummaryId != undefined);
 
                             // console.log(RatingEngine);
 
@@ -490,7 +490,7 @@ angular
                                 $scope.modelingStrategy = RatingEngine.activeModel.AI.advancedModelingConfig[type].modelingStrategy;
                             }
                             $scope.activeIteration = RatingEngine.activeModel[$scope.typeContext].iteration;
-                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummary != null || RatingEngine.activeModel[$scope.typeContext].modelSummary != undefined);
+                            $scope.modelIsReady = (RatingEngine.activeModel[$scope.typeContext].modelSummaryId != null || RatingEngine.activeModel[$scope.typeContext].modelSummaryId != undefined);
 
                             $scope.stateName = function () {
                                 return $state.current.name;
