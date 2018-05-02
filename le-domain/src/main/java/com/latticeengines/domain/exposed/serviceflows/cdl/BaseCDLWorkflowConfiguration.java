@@ -56,7 +56,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
         @Type(value = ProcessRatingWorkflowConfiguration.class, name = "ProcessRatingWorkflowConfiguration"),
 
         @Type(value = RatingEngineScoreWorkflowConfiguration.class, name = "RatingEngineScoreWorkflowConfiguration"),
-        @Type(value = RedshiftPublishWorkflowConfiguration.class, name = "RedshiftPublishWorkflowConfiguration"),
         @Type(value = RatingEngineImportMatchAndModelWorkflowConfiguration.class, name = "RatingEngineImportMatchAndModelWorkflowConfiguration"),
         @Type(value = RatingEngineScoreWorkflowConfiguration.class, name = "RatingEngineScoreWorkflowConfiguration"),
         @Type(value = MatchCdlAccountWorkflowConfiguration.class, name = "MatchCdlAccountWorkflowConfiguration"),
