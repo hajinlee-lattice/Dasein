@@ -9,8 +9,8 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class WorkflowUtilsUnitTestNG {
 
-    @Test(groups = { "unit" })
-    public void test() throws ClassNotFoundException {
+    @Test(groups = { "unit" }, enabled = false)
+    public void test() {
         InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/workflow/config/workflow.conf");
         WorkflowConfiguration workflowConfig = JsonUtils.deserialize(is, WorkflowConfiguration.class);
         System.out.println(WorkflowUtils.getFlattenedConfig(workflowConfig));
