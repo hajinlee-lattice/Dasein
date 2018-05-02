@@ -15,6 +15,7 @@ public class AttributeDaoImpl extends BaseDaoImpl<Attribute> implements Attribut
         return Attribute.class;
     }
 
+    /*
     @Override
     protected Session getCurrentSession() {
         Session locSession = super.getCurrentSession();
@@ -23,5 +24,6 @@ public class AttributeDaoImpl extends BaseDaoImpl<Attribute> implements Attribut
         }
         return locSession;
     }
+    */
     
 }
