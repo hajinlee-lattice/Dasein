@@ -3,8 +3,6 @@ package com.latticeengines.common.exposed.bean;
 import static com.latticeengines.common.exposed.bean.BeanFactoryEnvironment.Environment.WebApp;
 
 import java.beans.PropertyVetoException;
-import java.util.Arrays;
-import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -21,7 +19,9 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     private static final Logger log = LoggerFactory.getLogger(DataSourceBeanFactory.class);
-
+    private static final String WRITE_CONNECTION_TEST_QUERY = "SELECT CASE WHEN @@read_only + @@innodb_read_only < 1 THEN 1 "
+            + "ELSE (SELECT table_name FROM information_schema.tables LIMIT 2) END AS `1`";
+    
     // if use jndi
     private String jndiName;
 
@@ -31,6 +31,7 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
     private String user;
     private String password;
     private Boolean enableDebugSlowSql;
+    private Boolean writerConnection;
     private int minPoolSize = -1;
     private int maxPoolSize = -1;
     private int maxPoolSizeForWebApp = -1;
@@ -124,11 +125,13 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setMaxIdleTime(maxIdleTime);
         int maxIdleTimeExcessConnections = this.maxIdleTimeExcessConnections >= 0 ? this.maxIdleTimeExcessConnections : 60;
         cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
-        
+        //cpds.setPreferredTestQuery(preferredTestQuery);
         cpds.setNumHelperThreads(this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize/10));
-        if (Environment.AppMaster == currentEnv) {
+        if (Environment.AppMaster == currentEnv || (this.writerConnection != null && this.writerConnection)) {
             // For Yarn jobs, we want to make sure that connection is in good state, because retry of Yarn job will be costly.
             cpds.setTestConnectionOnCheckout(true);
+            // For Failover case, we need to evict the old cached connection and get latest writer connection.
+            cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);
         } else {
             cpds.setIdleConnectionTestPeriod(60);
             cpds.setTestConnectionOnCheckin(true);
@@ -241,6 +244,14 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
 
     public void setEnableDebugSlowSql(Boolean enableDebugSlowSql) {
         this.enableDebugSlowSql = enableDebugSlowSql;
+    }
+
+    public Boolean getWriterConnection() {
+        return writerConnection;
+    }
+
+    public void setWriterConnection(Boolean writerConnection) {
+        this.writerConnection = writerConnection;
     }
 
     public int getMaxIdleTime() {

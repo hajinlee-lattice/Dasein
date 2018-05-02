@@ -9,6 +9,7 @@
         <property name="jdbcUrl" value="${datacloud.manage.url}"/>
         <property name="user" value="${datacloud.manage.user}" />
         <property name="password" value="${datacloud.manage.password.encrypted}" />
+        <property name="writerConnection" value="true"/>
         <property name="maxPoolSize" value="${datacloud.manage.poolsize.max}" />
         <property name="maxPoolSizeForWebApp" value="${datacloud.manage.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${datacloud.manage.poolsize.max.appmaster}"/>        

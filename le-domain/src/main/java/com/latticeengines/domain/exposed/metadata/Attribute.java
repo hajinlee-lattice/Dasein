@@ -51,7 +51,7 @@ public class Attribute implements HasName, HasPid, HasProperty, HasTenantId, Ser
 
     private static final long serialVersionUID = -4779448415471374224L;
     
-    public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 1M
+    public static final int MDATTRIBUTE_INIT_VALUE = 300_000_000; // 300M
 
     /*
     For batching to work, we need to make a schema change to take off AutoIncrement from ID column.

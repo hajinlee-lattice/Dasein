@@ -9,6 +9,7 @@
         <property name="jdbcUrl" value="${oauth2.datasource.url}"/>
         <property name="user" value="${oauth2.datasource.user}"/>
         <property name="password" value="${oauth2.datasource.password.encrypted}"/>
+        <property name="writerConnection" value="true"/>
         <property name="maxPoolSize" value="${oauth2.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${oauth2.datasource.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${oauth2.datasource.poolsize.max.appmaster}"/>                

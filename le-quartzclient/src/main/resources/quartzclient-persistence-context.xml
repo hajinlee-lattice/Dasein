@@ -13,6 +13,7 @@
         <property name="jdbcUrl" value="${quartzclient.datasource.url}"/>
         <property name="user" value="${quartzclient.datasource.user}" />
         <property name="password" value="${quartzclient.datasource.password.encrypted}" />
+        <property name="writerConnection" value="true"/>
         <property name="minPoolSize" value="0"/>
         <property name="maxPoolSize" value="${quartzclient.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${quartzclient.datasource.poolsize.max.webapp}"/>

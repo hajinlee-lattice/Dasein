@@ -9,6 +9,7 @@
         <property name="jdbcUrl" value="${documentdb.datasource.url}"/>
         <property name="user" value="${documentdb.datasource.user}"/>
         <property name="password" value="${documentdb.datasource.password.encrypted}"/>
+        <property name="writerConnection" value="true"/>
         <property name="maxPoolSize" value="${documentdb.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${documentdb.datasource.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${documentdb.datasource.poolsize.max.appmaster}"/>

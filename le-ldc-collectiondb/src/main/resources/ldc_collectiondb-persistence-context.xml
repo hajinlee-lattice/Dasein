@@ -11,6 +11,7 @@
         <property name="jdbcUrl" value="${ldc_collectiondb.datasource.url}"/>
         <property name="user" value="${ldc_collectiondb.datasource.user}"/>
         <property name="password" value="${ldc_collectiondb.datasource.password.encrypted}"/>
+        <property name="writerConnection" value="true"/>
         <property name="maxPoolSize" value="${ldc_collectiondb.datasource.poolsize.max}"/>
         <property name="maxPoolSizeForWebApp" value="${ldc_collectiondb.datasource.poolsize.max.webapp}"/>
         <property name="maxPoolSizeForAppMaster" value="${ldc_collectiondb.datasource.poolsize.max.appmaster}"/>
