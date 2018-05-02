@@ -125,7 +125,7 @@ public class BaseFabricEntityMgrImpl<T extends HasId<String>> implements BaseFab
                     ((DynamoDataStoreImpl) dataStore).useRemoteDynamo(enforceRemoteDynamo);
                 }
             } catch (Exception e) {
-                log.error("Failed to create data store " + store);
+                log.error("Failed to create data store " + store, e);
                 disabled = true;
             }
         }
