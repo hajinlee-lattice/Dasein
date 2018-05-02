@@ -45,6 +45,8 @@ public abstract class BaseExportDeploymentTestNG<T extends WorkflowConfiguration
     @Inject
     private MetadataProxy metadataProxy;
 
+    protected String tenantName;
+
     protected abstract T generateCreateConfiguration();
     protected abstract T generateUpdateConfiguration();
     protected abstract void verifyCreateExport();
@@ -55,6 +57,7 @@ public abstract class BaseExportDeploymentTestNG<T extends WorkflowConfiguration
     public void setup() throws Exception {
         super.setup();
         prepareTables();
+        tenantName = mainTestCustomerSpace.getTenantId();
     }
 
     @Test(groups = "deployment")

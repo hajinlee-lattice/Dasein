@@ -13,6 +13,7 @@ public class DataUnitUnitTestNG {
     public void testSerDe() {
         DynamoDataUnit dynamoDataUnit = new DynamoDataUnit();
         String serialized = JsonUtils.serialize(dynamoDataUnit);
+        System.out.println(serialized);
         DataUnit deserialized = JsonUtils.deserialize(serialized, DataUnit.class);
         Assert.assertTrue(deserialized instanceof DynamoDataUnit);
     }

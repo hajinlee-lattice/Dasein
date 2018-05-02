@@ -7,6 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 public class GenericTableEntity extends BaseHdfsAvroFabricEntity<GenericTableEntity>
         implements FabricEntity<GenericTableEntity> {
 
+    public static final String DUMMY_SORT_KEY = "0";
+
     private String keyPrefix;
     private String partitionKeyInHdfsRecord;
     private String sortKeyInHdfsRecord;
@@ -60,7 +62,7 @@ public class GenericTableEntity extends BaseHdfsAvroFabricEntity<GenericTableEnt
                 setSortKey(String.valueOf(skObj));
             }
         } else {
-            setSortKey("0");
+            setSortKey(DUMMY_SORT_KEY);
         }
     }
 

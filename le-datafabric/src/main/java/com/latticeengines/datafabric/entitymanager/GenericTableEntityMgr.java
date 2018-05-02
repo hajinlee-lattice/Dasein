@@ -1,0 +1,14 @@
+package com.latticeengines.datafabric.entitymanager;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+public interface GenericTableEntityMgr {
+
+    Map<String, Object> getByKeyPair(String tenantId, String tableName, Pair<String, String> keyPair);
+
+    List<Map<String, Object>> getByKeyPairs(String tenantId, String tableName, List<Pair<String, String>> keyPairs);
+
+}

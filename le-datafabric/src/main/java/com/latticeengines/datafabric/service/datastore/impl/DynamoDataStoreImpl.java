@@ -26,6 +26,7 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.avro.io.EncoderFactory;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -453,7 +454,8 @@ public class DynamoDataStoreImpl implements FabricDataStore {
             for (Item item : items) {
                 List<Pair<GenericRecord, Map<String, Object>>> recordsFromItem = extractRecords(item);
                 for (Pair<GenericRecord, Map<String, Object>> pair : recordsFromItem) {
-                    pairs.put(item.getString(ID), pair);
+                    String id = getItemID(item);
+                    pairs.put(id, pair);
                 }
             }
         } catch (Exception e) {
@@ -722,6 +724,18 @@ public class DynamoDataStoreImpl implements FabricDataStore {
 
     private boolean isBucketAttr(String key) {
         return key.matches("[0-9]+");
+    }
+
+    private String getItemID(Item item) {
+        String hashKeyAttr = tableIndex.getHashKeyAttr();
+        String ID = item.getString(hashKeyAttr);
+
+        String rangeKeyAttr = tableIndex.getRangeKeyAttr();
+        if (StringUtils.isNotBlank(rangeKeyAttr)) {
+            String rangeKey = item.getString(rangeKeyAttr);
+            ID += "#" + rangeKey;
+        }
+        return ID;
     }
 
     @Override
