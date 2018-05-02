@@ -127,11 +127,14 @@ public class DataSourceBeanFactory implements FactoryBean<DataSource> {
         cpds.setMaxIdleTimeExcessConnections(maxIdleTimeExcessConnections);
         //cpds.setPreferredTestQuery(preferredTestQuery);
         cpds.setNumHelperThreads(this.numHelperThreads > 0 ? this.numHelperThreads : Math.max(3, maxPoolSize/10));
-        if (Environment.AppMaster == currentEnv || (this.writerConnection != null && this.writerConnection)) {
+        
+        if (Boolean.TRUE.equals(this.writerConnection)) {
+            // For Failover case, we need to evict the old cached connection and get latest writer connection.
+            cpds.setTestConnectionOnCheckout(true);
+            cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);    
+        } else if (Environment.AppMaster == currentEnv) {
             // For Yarn jobs, we want to make sure that connection is in good state, because retry of Yarn job will be costly.
             cpds.setTestConnectionOnCheckout(true);
-            // For Failover case, we need to evict the old cached connection and get latest writer connection.
-            cpds.setPreferredTestQuery(WRITE_CONNECTION_TEST_QUERY);
         } else {
             cpds.setIdleConnectionTestPeriod(60);
             cpds.setTestConnectionOnCheckin(true);
