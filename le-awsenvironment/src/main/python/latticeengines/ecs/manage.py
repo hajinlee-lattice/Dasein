@@ -205,7 +205,7 @@ def delete_service(cluster, service):
     for cluster_arn in cluster_arns:
         try:
             service_arn = find_service_by_cluster_arn(cluster, cluster_arn, service)
-            # update_tasks_count(cluster_arn, service_arn, 0)
+            update_tasks_count(cluster_arn, service_arn, 0)
             print "deleting service " + service_arn
             ECS_CLIENT.delete_service(
                 cluster=cluster_arn,
