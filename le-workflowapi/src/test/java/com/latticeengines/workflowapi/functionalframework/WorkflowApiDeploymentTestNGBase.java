@@ -1,10 +1,14 @@
 package com.latticeengines.workflowapi.functionalframework;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
+import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.client.RestTemplate;
@@ -75,6 +79,13 @@ public class WorkflowApiDeploymentTestNGBase extends WorkflowApiFunctionalTestNG
         testBed.switchToSuperAdmin();
         MultiTenantContext.setTenant(mainTestTenant);
         assertNotNull(MultiTenantContext.getTenant());
+    }
+
+    protected void runWorkflow(WorkflowConfiguration workflowConfig) throws Exception {
+        workflowService.registerJob(workflowConfig, applicationContext);
+        WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
+        BatchStatus status = workflowService.waitForCompletion(workflowId, WORKFLOW_WAIT_TIME_IN_MILLIS, 1000).getStatus();
+        assertEquals(status, BatchStatus.COMPLETED);
     }
 
 }

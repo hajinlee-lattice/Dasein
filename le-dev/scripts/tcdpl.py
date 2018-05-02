@@ -49,18 +49,18 @@ LE_APPS = ['admin', 'pls', 'microservice', 'playmaker', 'oauth2', 'scoringapi', 
 MS_MODULES = ['dataflowapi', 'eai', 'metadata', 'modeling', 'propdata', 'scoring', 'workflowapi', 'quartz', 'dellebi',
               'modelquality', 'sqoop', 'datacloudapi', 'objectapi', 'dante', 'cdl', 'lp']
 
-APP_ROOT = "http://localhost"
+APP_ROOT = "https://localhost"
 APP_URL = {
-    'microservice': "%s:8080" % APP_ROOT,
-    'pls': "%s:8081" % APP_ROOT,
-    'admin': "%s:8085" % APP_ROOT,
-    'saml': "%s:8087" % APP_ROOT,
-    'playmaker': "%s:8071" % APP_ROOT,
-    'oauth2': "%s:8072" % APP_ROOT,
-    'scoringapi': "%s:8073" % APP_ROOT,
-    'api': "%s:8074" % APP_ROOT,
-    'ulysses': "%s:8075" % APP_ROOT,
-    'matchapi': "%s:8076" % APP_ROOT
+    'microservice': "%s:9080" % APP_ROOT,
+    'pls': "%s:9081" % APP_ROOT,
+    'admin': "%s:9085" % APP_ROOT,
+    'saml': "%s:9087" % APP_ROOT,
+    'playmaker': "%s:9071" % APP_ROOT,
+    'oauth2': "%s:9072" % APP_ROOT,
+    'scoringapi': "%s:9073" % APP_ROOT,
+    'api': "%s:9074" % APP_ROOT,
+    'ulysses': "%s:9075" % APP_ROOT,
+    'matchapi': "%s:9076" % APP_ROOT
 }
 
 PRESETS = {
@@ -210,8 +210,6 @@ def undeployApp(app, modules):
     deployMgrApp(app, wait=True)
 
     app_url = APP_URL[app]
-    if "USE_HTTPS" in os.environ and os.environ["USE_HTTPS"]:
-        app_url = app_url.replace("http://localhost:8", "https://localhost:9")
 
     mgr_url = app_url + "/manager"
     with no_ssl_verification():

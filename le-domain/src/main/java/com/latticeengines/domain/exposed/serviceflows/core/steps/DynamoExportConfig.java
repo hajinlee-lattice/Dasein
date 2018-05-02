@@ -9,7 +9,10 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-public class DynamoTableConfig {
+public class DynamoExportConfig {
+
+    @JsonProperty("input_path")
+    private String inputPath;
 
     @JsonProperty("table_name")
     private String tableName;
@@ -20,17 +23,12 @@ public class DynamoTableConfig {
     @JsonProperty("sort_key")
     private String sortKey;
 
-    private DynamoTableConfig() {
+    public String getInputPath() {
+        return inputPath;
     }
 
-    public DynamoTableConfig(String tableName, String primaryKey) {
-        this(tableName, primaryKey, "");
-    }
-
-    public DynamoTableConfig(String tableName, String primaryKey, String sortKey) {
-        this.tableName = tableName;
-        this.partitionKey = primaryKey;
-        this.sortKey = sortKey;
+    public void setInputPath(String inputPath) {
+        this.inputPath = inputPath;
     }
 
     public String getTableName() {

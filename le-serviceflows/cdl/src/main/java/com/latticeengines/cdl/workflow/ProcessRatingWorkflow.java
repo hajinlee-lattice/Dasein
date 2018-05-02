@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.export.ExportDataToRedshift;
+import com.latticeengines.cdl.workflow.steps.export.ExportToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
@@ -38,7 +38,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
     private CombineStatistics combineStatistics;
 
     @Inject
-    private ExportDataToRedshift exportDataToRedshift;
+    private ExportToRedshift exportToRedshift;
 
     @Override
     public Workflow defineWorkflow(ProcessRatingWorkflowConfiguration config) {
@@ -48,7 +48,7 @@ public class ProcessRatingWorkflow extends AbstractWorkflow<ProcessRatingWorkflo
                 .next(generateRatingWorkflow) //
                 .next(profileRatingWrapper) //
                 .next(combineStatistics) //
-                .next(exportDataToRedshift) //
+                .next(exportToRedshift) //
                 .build();
     }
 }

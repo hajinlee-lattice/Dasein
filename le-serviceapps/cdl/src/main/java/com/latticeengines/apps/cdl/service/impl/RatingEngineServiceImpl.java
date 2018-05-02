@@ -160,7 +160,9 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
 
     @Override
     public List<String> getAllRatingEngineIdsInSegment(String segmentName) {
-        return ratingEngineEntityMgr.findAllIdsInSegment(segmentName);
+        List<String> ids = ratingEngineEntityMgr.findAllIdsInSegment(segmentName);
+        ids.retainAll(engineIdsAvailableInRedshift());
+        return ids;
     }
 
     @Override

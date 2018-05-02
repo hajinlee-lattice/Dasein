@@ -11,7 +11,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.LdcOnlyAttributesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.importdata.ImportListOfEntitiesConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.maintenance.StartMaintenanceConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.match.MatchConfiguration;
@@ -36,7 +36,7 @@ import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
         @Type(value = BaseReportStepConfiguration.class, name = "BaseReportStepConfiguration"),
         @Type(value = ChooseModelStepConfiguration.class, name = "ChooseModelStepConfiguration"),
         @Type(value = DataFlowStepConfiguration.class, name = "DataFlowStepConfiguration"),
-        @Type(value = ExportDataToRedshiftConfiguration.class, name = "ExportDataToRedshiftConfiguration"),
+        @Type(value = ExportToRedshiftStepConfiguration.class, name = "ExportDataToRedshiftConfiguration"),
         @Type(value = ExportStepConfiguration.class, name = "ExportStepConfiguration"),
         @Type(value = GenerateRatingStepConfiguration.class, name = "GenerateRatingStepConfiguration"),
         @Type(value = ImportListOfEntitiesConfiguration.class, name = "ImportListOfEntitiesConfiguration"),

@@ -31,15 +31,12 @@ import com.latticeengines.domain.exposed.eai.ExportDestination;
 import com.latticeengines.domain.exposed.eai.ExportFormat;
 import com.latticeengines.domain.exposed.eai.ExportProperty;
 import com.latticeengines.domain.exposed.eai.HdfsToDynamoConfiguration;
-import com.latticeengines.domain.exposed.metadata.Extract;
-import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoTableConfig;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
-import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.JobService;
 
@@ -58,9 +55,6 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
     private EaiProxy eaiProxy;
 
     @Inject
-    private MetadataProxy metadataProxy;
-
-    @Inject
     private DataUnitProxy dataUnitProxy;
 
     @Value("${aws.region}")
@@ -77,22 +71,22 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
 
     @Override
     public void execute() {
-        List<DynamoTableConfig> tables = getTableNames();
-        log.info("Going to export tables to dynamo: " + tables);
+        List<DynamoExportConfig> configs = getExportConfigs();
+        log.info("Going to export tables to dynamo: " + configs);
 
         List<Exporter> exporters = new ArrayList<>();
-        tables.forEach(config -> {
+        configs.forEach(config -> {
             Exporter exporter = new Exporter(config);
             exporters.add(exporter);
         });
 
-        int threadPoolSize = Math.min(4, tables.size());
+        int threadPoolSize = Math.min(4, configs.size());
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("dynamo-export", threadPoolSize);
         ThreadPoolUtils.runRunnablesInParallel(executors, exporters, (int) TimeUnit.DAYS.toMinutes(2), 10);
     }
 
-    private List<DynamoTableConfig> getTableNames() {
-        List<DynamoTableConfig> tables = getListObjectFromContext(TABLES_GOING_TO_DYNAMO, DynamoTableConfig.class);
+    private List<DynamoExportConfig> getExportConfigs() {
+        List<DynamoExportConfig> tables = getListObjectFromContext(TABLES_GOING_TO_DYNAMO, DynamoExportConfig.class);
         if (CollectionUtils.isEmpty(tables)) {
             throw new IllegalStateException("Cannot find tables to be published to dynamo.");
         }
@@ -101,8 +95,9 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
 
     private class Exporter implements Runnable {
 
-        private final DynamoTableConfig config;
-        Exporter(DynamoTableConfig config) {
+        private final DynamoExportConfig config;
+
+        Exporter(DynamoExportConfig config) {
             this.config = config;
         }
 
@@ -122,9 +117,9 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             }
         }
 
-        private HdfsToDynamoConfiguration generateEaiConfig(DynamoTableConfig config) {
+        private HdfsToDynamoConfiguration generateEaiConfig(DynamoExportConfig config) {
             String tableName = config.getTableName();
-            String inputPath = getInputPath(tableName);
+            String inputPath = getInputPath(config);
             log.info("Found input path for table " + tableName + ": " + inputPath);
 
             HdfsToDynamoConfiguration eaiConfig = new HdfsToDynamoConfiguration();
@@ -156,24 +151,15 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             return eaiConfig;
         }
 
-        private String getInputPath(String tableName) {
-            Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
-            if (table == null) {
-                throw new IllegalArgumentException("Cannot find table named " + tableName);
-            }
-            List<Extract> extracts = table.getExtracts();
-            if (CollectionUtils.isEmpty(extracts) || extracts.size() != 1) {
-                throw new IllegalArgumentException("Table " + tableName + " does not have single extract");
-            }
-            Extract extract = extracts.get(0);
-            String path = extract.getPath();
-            if (path.endsWith(".avro")) {
+        private String getInputPath(DynamoExportConfig config) {
+            String path = config.getInputPath();
+            if (path.endsWith(".avro") || path.endsWith("/")) {
                 path = path.substring(0, path.lastIndexOf("/"));
             }
             return path;
         }
 
-        private void registerDataUnit(DynamoTableConfig config) {
+        private void registerDataUnit(DynamoExportConfig config) {
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));

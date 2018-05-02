@@ -24,6 +24,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -33,6 +34,7 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -103,37 +105,22 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         String customerSpace = configuration.getCustomerSpace().toString();
         String statsTableName = TableUtils.getFullTableName(statsTablePrefix, pipelineVersion);
         String ratingTableName = TableUtils.getFullTableName(ratingTablePrefix, pipelineVersion);
+        DataCollection.Version inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
 
         Table servingStoreTable = metadataProxy.getTable(customerSpace, ratingTableName);
         enrichTableSchema(servingStoreTable);
         metadataProxy.updateTable(customerSpace, ratingTableName, servingStoreTable);
 
+        ratingTableName = renameServingStoreTable(servingStoreTable);
+        RedshiftExportConfig exportConfig = exportTableRole(ratingTableName, getEntity().getServingStore());
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        dataCollectionProxy.upsertTable(customerSpace, ratingTableName, getEntity().getServingStore(), inactive);
+
         updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
         updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
 
-        if (StringUtils.isNotBlank(ruleBaseRawRating)) {
-            metadataProxy.deleteTable(customerSpace, ruleBaseRawRating);
-        }
-        if (StringUtils.isNotBlank(aiBaseRawRating)) {
-            metadataProxy.deleteTable(customerSpace, aiBaseRawRating);
-        }
-        String filterTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
-        if (StringUtils.isNotBlank(filterTableName)) {
-            metadataProxy.deleteTable(customerSpace, filterTableName);
-        }
-        Table preMatchTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
-        if (preMatchTable != null) {
-            metadataProxy.deleteTable(customerSpace, preMatchTable.getName());
-        }
-        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
-        if (eventTable != null) {
-            metadataProxy.deleteTable(customerSpace, eventTable.getName());
-        }
-        String scoreResultTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
-        if (StringUtils.isNotBlank(scoreResultTableName)) {
-            metadataProxy.deleteTable(customerSpace, scoreResultTableName);
-        }
+        cleanupTemporaryTables();
     }
 
     @Override
@@ -239,6 +226,32 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
             attr.setCategory(Category.RATING);
             attr.removeAllowedDisplayNames();
         });
+    }
+
+    private void cleanupTemporaryTables() {
+        String customerSpace = configuration.getCustomerSpace().toString();
+        if (StringUtils.isNotBlank(ruleBaseRawRating)) {
+            metadataProxy.deleteTable(customerSpace, ruleBaseRawRating);
+        }
+        if (StringUtils.isNotBlank(aiBaseRawRating)) {
+            metadataProxy.deleteTable(customerSpace, aiBaseRawRating);
+        }
+        String filterTableName = getStringValueFromContext(FILTER_EVENT_TARGET_TABLE_NAME);
+        if (StringUtils.isNotBlank(filterTableName)) {
+            metadataProxy.deleteTable(customerSpace, filterTableName);
+        }
+        Table preMatchTable = getObjectFromContext(PREMATCH_UPSTREAM_EVENT_TABLE, Table.class);
+        if (preMatchTable != null) {
+            metadataProxy.deleteTable(customerSpace, preMatchTable.getName());
+        }
+        Table eventTable = getObjectFromContext(EVENT_TABLE, Table.class);
+        if (eventTable != null) {
+            metadataProxy.deleteTable(customerSpace, eventTable.getName());
+        }
+        String scoreResultTableName = getStringValueFromContext(SCORING_RESULT_TABLE_NAME);
+        if (StringUtils.isNotBlank(scoreResultTableName)) {
+            metadataProxy.deleteTable(customerSpace, scoreResultTableName);
+        }
     }
 
 }

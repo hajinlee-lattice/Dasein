@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows.testflows.testdynamo;
+package com.latticeengines.workflowapi.flows.testflows.dynamo;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
@@ -8,6 +8,7 @@ public class TestDynamoWorkflowConfiguration extends WorkflowConfiguration {
 
     public static class Builder {
         private TestDynamoWorkflowConfiguration configuration = new TestDynamoWorkflowConfiguration();
+        private PrepareTestDynamoConfiguration prepare = new PrepareTestDynamoConfiguration();
         private ExportToDynamoStepConfiguration export = new ExportToDynamoStepConfiguration();
 
         public Builder internalResourceHostPort(String internalResourceHostPort) {
@@ -22,6 +23,7 @@ public class TestDynamoWorkflowConfiguration extends WorkflowConfiguration {
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setContainerConfiguration("testDynamoWorkflow", customerSpace, "testDynamoWorkflow");
+            prepare.setCustomerSpace(customerSpace.toString());
             export.setCustomerSpace(customerSpace);
             return this;
         }
@@ -31,7 +33,13 @@ public class TestDynamoWorkflowConfiguration extends WorkflowConfiguration {
             return this;
         }
 
+        public Builder updateMode(boolean updateMode) {
+            prepare.setUpdateMode(updateMode);
+            return this;
+        }
+
         public TestDynamoWorkflowConfiguration build() {
+            configuration.add(prepare);
             configuration.add(export);
             return configuration;
         }

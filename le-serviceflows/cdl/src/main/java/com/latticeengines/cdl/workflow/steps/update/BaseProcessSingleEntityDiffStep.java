@@ -39,6 +39,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -76,8 +77,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         if (redshiftTable == null) {
             throw new RuntimeException("Diff table has not been created.");
         }
-        updateEntityValueMapInContext(entity, TABLE_GOING_TO_REDSHIFT, redshiftTableName, String.class);
-        updateEntityValueMapInContext(entity, APPEND_TO_REDSHIFT_TABLE, true, Boolean.class);
+        redshiftTableName = renameServingStoreTable(redshiftTable);
+        RedshiftExportConfig exportConfig = exportTableRole(redshiftTableName, entity.getServingStore());
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
     }
 
     @Override
@@ -91,8 +93,8 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
             servingStoreSortKeys = servingStore.getForeignKeysAsStringList();
         }
 
-        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES,
-                BusinessEntity.class, String.class);
+        Map<BusinessEntity, String> diffTableNames = getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class,
+                String.class);
         diffTableName = diffTableNames.get(entity);
 
         if (profileTableRole() != null) {
@@ -169,7 +171,8 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
         return retainFields(previousStep, useTargetTable, servingStore);
     }
 
-    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable, TableRoleInCollection role) {
+    protected TransformationStepConfig retainFields(int previousStep, boolean useTargetTable,
+            TableRoleInCollection role) {
         TransformationStepConfig step = new TransformationStepConfig();
         step.setInputSteps(Collections.singletonList(previousStep));
         step.setTransformer(TRANSFORMER_CONSOLIDATE_RETAIN);
@@ -243,5 +246,9 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     }
 
     protected abstract TableRoleInCollection profileTableRole();
+
+    protected String renameServingStoreTable(Table servingStoreTable) {
+        return renameServingStoreTable(entity, servingStoreTable);
+    }
 
 }

@@ -8,7 +8,10 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "StorageType")
-@JsonSubTypes({ @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "DynamoDataUnit") })
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = DynamoDataUnit.class, name = "Dynamo"),
+        @JsonSubTypes.Type(value = RedshiftDataUnit.class, name = "Redshift"),
+})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)

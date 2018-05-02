@@ -58,12 +58,12 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
-import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 
 @Component(ProfilePurchaseHistory.BEAN_NAME)
@@ -88,9 +88,6 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
     @Inject
     private Configuration yarnConfiguration;
-
-    @Inject
-    private DataFeedProxy dataFeedProxy;
 
     @Inject
     private PeriodProxy periodProxy;
@@ -147,10 +144,15 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         if (metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName) == null) {
             throw new IllegalStateException("Cannot find result curated metrics table");
         }
-        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, TABLE_GOING_TO_REDSHIFT,
-                curatedMetricsTableName, String.class);
-        updateEntityValueMapInContext(BusinessEntity.DepivotedPurchaseHistory, APPEND_TO_REDSHIFT_TABLE, false,
-                Boolean.class);
+
+        Table curatedMetricsTable = metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName);
+        curatedMetricsTableName = renameServingStoreTable(BusinessEntity.DepivotedPurchaseHistory, curatedMetricsTable);
+        RedshiftExportConfig exportConfig = exportTableRole(curatedMetricsTableName,
+                BusinessEntity.DepivotedPurchaseHistory.getServingStore());
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,
+                BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
+
         super.onPostTransformationCompleted();
         generateReport();
     }
@@ -470,103 +472,78 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         }
     }
 
-
-    /* Show respect to Yunfeng's code. R.I.P
-    private TransformationStepConfig aggregate(CustomerSpace customerSpace, String transactionTableName, //
-            String accountTableName, Map<String, List<Product>> productMap) {
-        TransformationStepConfig step = new TransformationStepConfig();
-        step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
-
-        String transactionSourceName = "Transaction";
-        String accountSourceName = "Account";
-        SourceTable transactionTable = new SourceTable(transactionTableName, customerSpace);
-        SourceTable accountTable = new SourceTable(accountTableName, customerSpace);
-        List<String> baseSources = new ArrayList<>();
-        baseSources.add(transactionSourceName);
-        baseSources.add(accountSourceName);
-        step.setBaseSources(baseSources);
-
-        Map<String, SourceTable> baseTables = new HashMap<>();
-        baseTables.put(transactionSourceName, transactionTable);
-        baseTables.put(accountSourceName, accountTable);
-        step.setBaseTables(baseTables);
-
-        TransactionAggregateConfig conf = new TransactionAggregateConfig();
-        conf.setProductMap(productMap);
-        conf.setTransactionType("Purchase");
-        conf.setIdField(InterfaceName.AccountId.name());
-        conf.setAccountField(InterfaceName.AccountId.name());
-        conf.setProductField(InterfaceName.ProductId.name());
-        conf.setDateField(InterfaceName.TransactionDate.name());
-        conf.setTypeField(InterfaceName.TransactionType.name());
-        conf.setQuantityField(InterfaceName.TotalQuantity.name());
-        conf.setAmountField(InterfaceName.TotalAmount.name());
-
-        List<String> periods = new ArrayList<>();
-        List<String> metrics = new ArrayList<>();
-
-        periods.add(NamedPeriod.HASEVER.getName());
-        metrics.add(TransactionMetrics.PURCHASED.getName());
-        // TODO: do not support quarter in M16
-        // periods.add(NamedPeriod.LASTQUARTER.getName());
-        // metrics.add(TransactionMetrics.QUANTITY.getName());
-        // periods.add(NamedPeriod.LASTQUARTER.getName());
-        // metrics.add(TransactionMetrics.AMOUNT.getName());
-        conf.setPeriods(periods);
-        conf.setMetrics(metrics);
-
-        TargetTable targetTable = new TargetTable();
-        targetTable.setCustomerSpace(customerSpace);
-        targetTable.setNamePrefix(servingStoreTablePrefix);
-        step.setTargetTable(targetTable);
-    }
-
-
-    private String getDisplayName(NamedPeriod period, TransactionMetrics metric) {
-        switch (metric) {
-        case PURCHASED:
-            return purchasedAttrName(period);
-        case AMOUNT:
-            return amountAttrName(period);
-        case QUANTITY:
-            return quantityAttrName(period);
-        default:
-            throw new UnsupportedOperationException("Transaction metric " + metric + " is not supported for now.");
-        }
-    }
-
-    private String purchasedAttrName(NamedPeriod period) {
-        switch (period) {
-        case HASEVER:
-            return "Has Purchased";
-        default:
-            throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.PURCHASED
-                    + " does not support period " + period + " for now.");
-        }
-    }
-
-    private String amountAttrName(NamedPeriod period) {
-        switch (period) {
-        case HASEVER:
-            return "Total Spend";
-        case LASTQUARTER:
-            return "Last Quarter Spend";
-        default:
-            throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.AMOUNT
-                    + " does not support period " + period + " for now.");
-        }
-    }
-
-    private String quantityAttrName(NamedPeriod period) {
-        switch (period) {
-        case HASEVER:
-            return "Total Purchased";
-        case LASTQUARTER:
-            return "Last Quarter Purchased";
-        default:
-            throw new UnsupportedOperationException("Transaction metric " + TransactionMetrics.QUANTITY
-                    + " does not support period " + period + " for now.");
-        }
-    }
+    /*
+     * Show respect to Yunfeng's code. R.I.P private TransformationStepConfig
+     * aggregate(CustomerSpace customerSpace, String transactionTableName, //
+     * String accountTableName, Map<String, List<Product>> productMap) {
+     * TransformationStepConfig step = new TransformationStepConfig();
+     * step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
+     * 
+     * String transactionSourceName = "Transaction"; String accountSourceName =
+     * "Account"; SourceTable transactionTable = new
+     * SourceTable(transactionTableName, customerSpace); SourceTable
+     * accountTable = new SourceTable(accountTableName, customerSpace);
+     * List<String> baseSources = new ArrayList<>();
+     * baseSources.add(transactionSourceName);
+     * baseSources.add(accountSourceName); step.setBaseSources(baseSources);
+     * 
+     * Map<String, SourceTable> baseTables = new HashMap<>();
+     * baseTables.put(transactionSourceName, transactionTable);
+     * baseTables.put(accountSourceName, accountTable);
+     * step.setBaseTables(baseTables);
+     * 
+     * TransactionAggregateConfig conf = new TransactionAggregateConfig();
+     * conf.setProductMap(productMap); conf.setTransactionType("Purchase");
+     * conf.setIdField(InterfaceName.AccountId.name());
+     * conf.setAccountField(InterfaceName.AccountId.name());
+     * conf.setProductField(InterfaceName.ProductId.name());
+     * conf.setDateField(InterfaceName.TransactionDate.name());
+     * conf.setTypeField(InterfaceName.TransactionType.name());
+     * conf.setQuantityField(InterfaceName.TotalQuantity.name());
+     * conf.setAmountField(InterfaceName.TotalAmount.name());
+     * 
+     * List<String> periods = new ArrayList<>(); List<String> metrics = new
+     * ArrayList<>();
+     * 
+     * periods.add(NamedPeriod.HASEVER.getName());
+     * metrics.add(TransactionMetrics.PURCHASED.getName()); // TODO: do not
+     * support quarter in M16 // periods.add(NamedPeriod.LASTQUARTER.getName());
+     * // metrics.add(TransactionMetrics.QUANTITY.getName()); //
+     * periods.add(NamedPeriod.LASTQUARTER.getName()); //
+     * metrics.add(TransactionMetrics.AMOUNT.getName());
+     * conf.setPeriods(periods); conf.setMetrics(metrics);
+     * 
+     * TargetTable targetTable = new TargetTable();
+     * targetTable.setCustomerSpace(customerSpace);
+     * targetTable.setNamePrefix(servingStoreTablePrefix);
+     * step.setTargetTable(targetTable); }
+     * 
+     * 
+     * private String getDisplayName(NamedPeriod period, TransactionMetrics
+     * metric) { switch (metric) { case PURCHASED: return
+     * purchasedAttrName(period); case AMOUNT: return amountAttrName(period);
+     * case QUANTITY: return quantityAttrName(period); default: throw new
+     * UnsupportedOperationException("Transaction metric " + metric +
+     * " is not supported for now."); } }
+     * 
+     * private String purchasedAttrName(NamedPeriod period) { switch (period) {
+     * case HASEVER: return "Has Purchased"; default: throw new
+     * UnsupportedOperationException("Transaction metric " +
+     * TransactionMetrics.PURCHASED + " does not support period " + period +
+     * " for now."); } }
+     * 
+     * private String amountAttrName(NamedPeriod period) { switch (period) {
+     * case HASEVER: return "Total Spend"; case LASTQUARTER: return
+     * "Last Quarter Spend"; default: throw new
+     * UnsupportedOperationException("Transaction metric " +
+     * TransactionMetrics.AMOUNT + " does not support period " + period +
+     * " for now."); } }
+     * 
+     * private String quantityAttrName(NamedPeriod period) { switch (period) {
+     * case HASEVER: return "Total Purchased"; case LASTQUARTER: return
+     * "Last Quarter Purchased"; default: throw new
+     * UnsupportedOperationException("Transaction metric " +
+     * TransactionMetrics.QUANTITY + " does not support period " + period +
+     * " for now."); } }
      */
 }

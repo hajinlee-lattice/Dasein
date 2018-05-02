@@ -274,7 +274,11 @@ public class DataCollectionServiceImpl implements DataCollectionService {
             // by default get active version
             version = dataCollectionEntityMgr.findActiveVersion();
         }
-        log.info("Getting all table names of role " + tableRole + " in collection " + collectionName);
+        if (tableRole == null) {
+            log.info("Getting all table names in version " + version);
+        } else {
+            log.info("Getting all table names of role " + tableRole + " in version " + version);
+        }
         return dataCollectionEntityMgr.findTableNamesOfRole(collectionName, tableRole, version);
     }
 

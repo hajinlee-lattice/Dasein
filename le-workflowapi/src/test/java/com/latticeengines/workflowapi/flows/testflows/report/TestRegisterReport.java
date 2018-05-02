@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows.testflows.testreport;
+package com.latticeengines.workflowapi.flows.testflows.report;
 
 import org.springframework.stereotype.Component;
 

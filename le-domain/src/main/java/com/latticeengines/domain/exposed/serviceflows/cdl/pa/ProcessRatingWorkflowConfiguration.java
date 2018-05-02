@@ -3,17 +3,17 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 import java.util.List;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.apache.commons.collections4.CollectionUtils;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
 
@@ -26,7 +26,7 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
         private GenerateRatingWorkflowConfiguration.Builder generateRatingWorfklow = new GenerateRatingWorkflowConfiguration.Builder();
         private GenerateRatingStepConfiguration generateRatingStepConfiguration = new GenerateRatingStepConfiguration();
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
-        private ExportDataToRedshiftConfiguration exportDataToRedshiftConfiguration = new ExportDataToRedshiftConfiguration();
+        private ExportToRedshiftStepConfiguration exportDataToRedshiftConfiguration = new ExportToRedshiftStepConfiguration();
 
         public Builder customer(CustomerSpace customerSpace) {
             configuration.setCustomerSpace(customerSpace);
@@ -52,11 +52,6 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder hdfsToRedshiftConfiguration(HdfsToRedshiftConfiguration hdfsToRedshiftConfiguration) {
-            exportDataToRedshiftConfiguration.setHdfsToRedshiftConfiguration(hdfsToRedshiftConfiguration);
-            return this;
-        }
-
         public Builder dataCloudVersion(DataCloudVersion dataCloudVersion) {
             generateRatingWorfklow.dataCloudVersion(dataCloudVersion);
             return this;
@@ -64,26 +59,6 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
 
         public Builder matchYarnQueue(String matchYarnQueue) {
             generateRatingWorfklow.matchYarnQueue(matchYarnQueue);
-            return this;
-        }
-
-        public Builder fetchOnly(boolean fetchOnly) {
-            generateRatingWorfklow.fetchOnly(fetchOnly);
-            return this;
-        }
-
-        public Builder uniqueKeyColumn(String uniqueKeyColumn) {
-            generateRatingWorfklow.uniqueKeyColumn(uniqueKeyColumn);
-            return this;
-        }
-
-        public Builder setUseScorederivation(boolean useScorederivation) {
-            generateRatingWorfklow.setUseScorederivation(useScorederivation);
-            return this;
-        }
-
-        public Builder cdlMultiModel(boolean cdlMultiMode) {
-            generateRatingWorfklow.cdlMultiModel(cdlMultiMode);
             return this;
         }
 
@@ -103,6 +78,11 @@ public class ProcessRatingWorkflowConfiguration extends BaseCDLWorkflowConfigura
         }
 
         public ProcessRatingWorkflowConfiguration build() {
+            generateRatingWorfklow.uniqueKeyColumn(InterfaceName.__Composite_Key__.name());
+            generateRatingWorfklow.setUseScorederivation(false);
+            generateRatingWorfklow.cdlMultiModel(true);
+            generateRatingWorfklow.fetchOnly(true);
+
             configuration.setContainerConfiguration("processRatingWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
 

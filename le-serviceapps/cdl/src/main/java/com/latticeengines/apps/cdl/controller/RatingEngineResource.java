@@ -103,7 +103,7 @@ public class RatingEngineResource {
 
     @GetMapping(value = "/ids")
     @ResponseBody
-    @ApiOperation(value = "Get ids for Rating Engines. Can be filtered by segment name.")
+    @ApiOperation(value = "Get ids for published Rating Engines. Can be filtered by segment name.")
     public List<String> getRatingEngineIds(@PathVariable String customerSpace,
             @RequestParam(value = "segment", required = false) String segment) {
         return ratingEngineService.getAllRatingEngineIdsInSegment(segment);

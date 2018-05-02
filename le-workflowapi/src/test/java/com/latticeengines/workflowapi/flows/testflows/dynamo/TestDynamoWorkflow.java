@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows.testflows.testdynamo;
+package com.latticeengines.workflowapi.flows.testflows.dynamo;
 
 import javax.inject.Inject;
 

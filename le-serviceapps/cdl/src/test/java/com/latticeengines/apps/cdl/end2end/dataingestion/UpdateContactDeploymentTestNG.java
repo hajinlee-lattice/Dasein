@@ -68,7 +68,7 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private void verifyProcess() {
         runCommonPAVerifications();
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+        verifyProcessAnalyzeReport(processAnalyzeAppId);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
         long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
@@ -94,16 +94,6 @@ public class UpdateContactDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 RatingBucketName.D, RATING_D_COUNT_2_REBUILD, //
                 RatingBucketName.F, RATING_F_COUNT_2_REBUILD);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
-    }
-
-    private Map<TableRoleInCollection, Long> getExpectedCnts() {
-        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.SortedContact, (long) CONTACT_IMPORT_SIZE_2);
-        // Because Account is enforced to rebuild
-        expectedCnts.put(TableRoleInCollection.BucketedAccount, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
-        return expectedCnts;
     }
 
 }

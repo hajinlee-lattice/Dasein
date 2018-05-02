@@ -60,7 +60,7 @@ public abstract class BaseSingleEntityMergeImports<T extends BaseProcessEntitySt
             if (table == null) {
                 throw new IllegalStateException("Did not generate new table for " + batchStore);
             }
-//            table = enrichTableSchema(table);
+            table = enrichTableSchema(table);
             dataCollectionProxy.upsertTable(customerSpace.toString(), table.getName(), batchStore, inactive);
         }
     }

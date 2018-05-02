@@ -3,11 +3,11 @@ package com.latticeengines.cdl.workflow.steps.rebuild;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STANDARDIZATION;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
@@ -15,16 +15,19 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.SorterConfig;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
-import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.StandardizationTransformerConfig;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
+import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(ProfileProduct.BEAN_NAME)
 @Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
@@ -40,10 +43,20 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
     }
 
     @Override
+    protected BusinessEntity getEntity() {
+        return BusinessEntity.Product;
+    }
+
+    @Override
     protected void onPostTransformationCompleted() {
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, servingStoreTableName, String.class);
-        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
+        servingStoreTableName = renameServingStoreTable(servingStoreTable);
+
+        RedshiftExportConfig exportConfig = exportTableRole(servingStoreTableName, getEntity().getServingStore());
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
+                inactive);
     }
 
     @Override
@@ -76,18 +89,14 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
         step.setTransformer(TRANSFORMER_STANDARDIZATION);
 
         StandardizationTransformerConfig transformerConfig = new StandardizationTransformerConfig();
-        StandardizationTransformerConfig.StandardizationStrategy[] strategies =
-                new StandardizationTransformerConfig.StandardizationStrategy[]{
-                        StandardizationTransformerConfig.StandardizationStrategy.FILTER
-                };
+        StandardizationTransformerConfig.StandardizationStrategy[] strategies = new StandardizationTransformerConfig.StandardizationStrategy[] {
+                StandardizationTransformerConfig.StandardizationStrategy.FILTER };
         transformerConfig.setSequence(strategies);
-        transformerConfig.setFilterFields(new String[] {
-                InterfaceName.ProductType.name(),
-                InterfaceName.ProductStatus.name()
-        });
+        transformerConfig
+                .setFilterFields(new String[] { InterfaceName.ProductType.name(), InterfaceName.ProductStatus.name() });
         String filterExpression = String.format("%s.equalsIgnoreCase(\"%s\") && !%s.equalsIgnoreCase(\"%s\")",
-                InterfaceName.ProductType.name(), ProductType.Analytic.name(),
-                InterfaceName.ProductStatus.name(), ProductStatus.Obsolete.name());
+                InterfaceName.ProductType.name(), ProductType.Analytic.name(), InterfaceName.ProductStatus.name(),
+                ProductStatus.Obsolete.name());
         transformerConfig.setFilterExpression(filterExpression);
         step.setConfiguration(appendEngineConf(transformerConfig, lightEngineConfig()));
 

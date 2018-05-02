@@ -6,14 +6,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
-import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
-import com.latticeengines.proxy.exposed.ProxyInterface;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystem;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
+import com.latticeengines.proxy.exposed.ProxyInterface;
 
 @Component("cdlExternalSystemProxy")
 public class CDLExternalSystemProxy extends MicroserviceRestApiProxy implements ProxyInterface {
@@ -42,8 +42,7 @@ public class CDLExternalSystemProxy extends MicroserviceRestApiProxy implements 
 
     public Map<String, List<CDLExternalSystemMapping>> getExternalSystemMap(String customerSpace) {
         String url = constructUrl(URL_PREFIX + "/map", shortenCustomerSpace(customerSpace));
-        Map<?, ?> res = get("Get external system mapping map", url, Map.class);
-        @SuppressWarnings("rawtypes")
+        Map res = get("Get external system mapping map", url, Map.class);
         Map<String, List> raw = JsonUtils.convertMap(res, String.class, List.class);
         Map<String, List<CDLExternalSystemMapping>> mappings = new HashMap<>();
         for (String key : raw.keySet()) {

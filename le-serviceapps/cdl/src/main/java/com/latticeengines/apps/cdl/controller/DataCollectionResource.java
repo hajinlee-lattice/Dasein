@@ -119,7 +119,7 @@ public class DataCollectionResource {
     @ResponseBody
     @ApiOperation(value = "Get the default data collection")
     public List<String> getTableNames(@PathVariable String customerSpace,
-            @RequestParam(value = "role") TableRoleInCollection role,
+            @RequestParam(value = "role", required = false) TableRoleInCollection role,
             @RequestParam(value = "version", required = false) DataCollection.Version version) {
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         return dataCollectionService.getTableNames(customerSpace, null, role, version);

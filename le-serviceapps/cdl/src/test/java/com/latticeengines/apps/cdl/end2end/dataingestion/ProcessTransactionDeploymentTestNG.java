@@ -68,7 +68,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     private void verifyProcess() {
         runCommonPAVerifications();
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+        verifyProcessAnalyzeReport(processAnalyzeAppId);
 
         verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
 
@@ -96,15 +96,6 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
                 RatingBucketName.D, 7L, //
                 RatingBucketName.F, RATING_F_COUNT_1);
         verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
-    }
-
-    private Map<TableRoleInCollection, Long> getExpectedCnts() {
-        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.AggregatedTransaction, AGGREGATE_TRANSACTION_SIZE);
-        expectedCnts.put(TableRoleInCollection.AggregatedPeriodTransaction, AGGREGATE_PERIOD_TRANSACTION_SIZE);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
-        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory, (long) ACCOUNT_IMPORT_SIZE_1);
-        return expectedCnts;
     }
 
 }

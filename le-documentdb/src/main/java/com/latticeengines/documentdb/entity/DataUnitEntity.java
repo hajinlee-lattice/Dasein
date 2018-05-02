@@ -4,13 +4,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.latticeengines.documentdb.annotation.TenantIdColumn;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 @Entity
-@Table(name = "DataUnit", indexes = { @Index(name = "IX_NAME", columnList = "TenantId,Name") })
+@Table(name = "DataUnit", //
+        indexes = { @Index(name = "IX_NAME", columnList = "Name") }, //
+        uniqueConstraints = {
+                @UniqueConstraint(name = "UX_NAME_TYPE", columnNames = { "TenantId", "Name", "StorageType" }) })
 public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
 
     @Column(name = "Name", //

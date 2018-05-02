@@ -1,5 +1,7 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -22,15 +24,15 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
-    public DataUnit findByNameFromReader(String name) {
+    public List<DataUnit> findByNameFromReader(String name) {
         String tenantId = MultiTenantContext.getTenantId();
         return entityMgr.findByNameFromReader(tenantId, name);
     }
 
     @Override
-    public void deleteByName(String name) {
+    public void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType) {
         String tenantId = MultiTenantContext.getTenantId();
-        entityMgr.deleteByName(tenantId, name);
+        entityMgr.deleteByName(tenantId, name, storageType);
     }
 
 }

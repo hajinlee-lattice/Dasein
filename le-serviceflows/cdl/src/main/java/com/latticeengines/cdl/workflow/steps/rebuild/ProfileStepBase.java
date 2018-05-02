@@ -6,6 +6,7 @@ import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRA
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_SORTER;
 import static com.latticeengines.domain.exposed.datacloud.DataCloudConstants.TRANSFORMER_STATS_CALCULATOR;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -15,8 +16,11 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.CalculateStatsConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ProfileConfig;
@@ -24,14 +28,20 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
-import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.datacloudapi.TransformationProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.serviceflows.workflow.etl.BaseTransformWrapperStep;
 
 public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> extends BaseTransformWrapperStep<T> {
+
+    private static final Logger log = LoggerFactory.getLogger(ProfileStepBase.class);
 
     @Inject
     protected DataCollectionProxy dataCollectionProxy;
@@ -166,5 +176,50 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected abstract BusinessEntity getEntity();
+
+    protected String renameServingStoreTable(Table servingStoreTable) {
+        return renameServingStoreTable(getEntity(), servingStoreTable);
+    }
+
+    protected String renameServingStoreTable(BusinessEntity servingEntity, Table servingStoreTable) {
+        String prefix = String.join("_", customerSpace.getTenantId(), servingEntity.name());
+        String goodName = NamingUtils.timestamp(prefix);
+        log.info("Renaming table " + servingStoreTable.getName() + " to " + goodName);
+        metadataProxy.updateTable(customerSpace.toString(), goodName, servingStoreTable);
+        servingStoreTable.setName(goodName);
+        return goodName;
+    }
+
+    protected RedshiftExportConfig exportTableRole(String tableName, TableRoleInCollection tableRole) {
+        String distKey = tableRole.getPrimaryKey().name();
+        List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
+        if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
+            sortKeys.add(tableRole.getPrimaryKey().name());
+        }
+        RedshiftExportConfig config = new RedshiftExportConfig();
+        config.setTableName(tableName);
+        config.setDistKey(distKey);
+        config.setSortKeys(sortKeys);
+        config.setInputPath(getInputPath(tableName) + "/*.avro");
+        config.setUpdateMode(false);
+        return config;
+    }
+
+    private String getInputPath(String tableName) {
+        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
+        if (table == null) {
+            throw new IllegalArgumentException("Cannot find table named " + tableName);
+        }
+        List<Extract> extracts = table.getExtracts();
+        if (CollectionUtils.isEmpty(extracts) || extracts.size() != 1) {
+            throw new IllegalArgumentException("Table " + tableName + " does not have single extract");
+        }
+        Extract extract = extracts.get(0);
+        String path = extract.getPath();
+        if (path.endsWith(".avro") || path.endsWith("/")) {
+            path = path.substring(0, path.lastIndexOf("/"));
+        }
+        return path;
+    }
 
 }

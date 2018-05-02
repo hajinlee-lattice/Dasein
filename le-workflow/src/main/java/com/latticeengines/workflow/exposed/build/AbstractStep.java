@@ -1,6 +1,7 @@
 package com.latticeengines.workflow.exposed.build;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,6 +183,17 @@ public abstract class AbstractStep<T> extends AbstractNameAwareBean {
             });
         }
 
+    }
+
+    public <V> void addToListInContext(String key, V object, Class<V> clz) {
+        List<V> list = getListObjectFromContext(key, clz);
+        if (list == null) {
+            list = new ArrayList<>();
+        } else {
+            list = new ArrayList<>(list);
+        }
+        list.add(object);
+        putObjectInContext(key, list);
     }
 
     protected void clearExecutionContext() {

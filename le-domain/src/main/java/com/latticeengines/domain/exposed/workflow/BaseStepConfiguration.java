@@ -30,8 +30,6 @@ import com.latticeengines.domain.exposed.serviceflows.leadprioritization.steps.S
         @Type(value = SegmentExportStepConfiguration.class, name = "SegmentExportStepConfiguration"),
         @Type(value = TransformationStepExecutionConfiguration.class, name = "TransformationStepExecutionConfiguration"), })
 @JsonInclude(JsonInclude.Include.NON_NULL)
-// @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE,
-// getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class BaseStepConfiguration {
 
     @JsonProperty("internal_resource_host_port")

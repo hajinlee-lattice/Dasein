@@ -15,7 +15,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.WorkflowExecutionId;
 import com.latticeengines.workflow.exposed.service.WorkflowService;
-import com.latticeengines.workflowapi.flows.testflows.testreport.TestReportWorkflowConfiguration;
+import com.latticeengines.workflowapi.flows.testflows.report.TestReportWorkflowConfiguration;
 import com.latticeengines.workflowapi.functionalframework.WorkflowApiDeploymentTestNGBase;
 import com.latticeengines.workflowapi.service.WorkflowJobService;
 

@@ -58,7 +58,7 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
     private void verifyProcess() {
         runCommonPAVerifications();
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+        verifyProcessAnalyzeReport(processAnalyzeAppId);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
         long numContacts = CONTACT_IMPORT_SIZE_1;
@@ -77,15 +77,6 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 BusinessEntity.Account, SEGMENT_1_ACCOUNT_2,
                 BusinessEntity.Contact, SEGMENT_1_CONTACT_2);
         verifyTestSegment1Counts(segment1Counts);
-    }
-
-    private Map<TableRoleInCollection, Long> getExpectedCnts() {
-        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.BucketedAccount, Long.valueOf(ACCOUNT_IMPORT_SIZE_2));
-        expectedCnts.put(TableRoleInCollection.CalculatedPurchaseHistory,
-                (long) ACCOUNT_IMPORT_SIZE_TOTAL);
-        expectedCnts.put(TableRoleInCollection.CalculatedDepivotedPurchaseHistory, DEPIVOTED_METRICS_SIZE);
-        return expectedCnts;
     }
 
 }

@@ -34,7 +34,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
@@ -600,13 +599,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
     }
 
-    void verifyProcessAnalyzeReport(String appId, Map<TableRoleInCollection, Long> expectedCounts) {
+    void verifyProcessAnalyzeReport(String appId) {
         List<Report> reports = retrieveReport(appId);
-        assertEquals(reports.size(), 2);
+        assertEquals(reports.size(), 1);
         Report summaryReport = reports.get(0);
         verifyConsolidateSummaryReport(summaryReport);
-        Report publishReport = reports.get(1);
-        verifyExportToRedshiftReport(publishReport, expectedCounts);
     }
 
     void verifyConsolidateSummaryReport(Report summaryReport) {
@@ -661,20 +658,6 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         } catch (IOException e) {
             throw new RuntimeException("Fail to parse report payload: " + summaryReport.getJson().getPayload(), e);
         }
-    }
-
-    private void verifyExportToRedshiftReport(Report publishReport, Map<TableRoleInCollection, Long> expectedCounts) {
-        Map<String, Integer> map = JsonUtils.deserialize(publishReport.getJson().getPayload(),
-                new TypeReference<Map<String, Integer>>() {
-                });
-        logger.info("Redshift report size is " + map.entrySet().size() + ", expected " + expectedCounts.size()
-                + " reports for redshift exporting.");
-        assertEquals(map.entrySet().size(), expectedCounts.size(),
-                "Should have " + expectedCounts.size() + " reports for redshift exporting.");
-        expectedCounts.forEach((role, count) -> logger.info("Redshit report role " + role + " count "
-                + map.get(role.name()).longValue() + " should have " + count));
-        expectedCounts.forEach((role, count) -> assertEquals(map.get(role.name()).longValue(), count.longValue(),
-                "The count of table " + role + " does not meet the expectation."));
     }
 
     void verifyDataFeedStatus(DataFeed.Status expected) {

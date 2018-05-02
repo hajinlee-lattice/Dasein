@@ -17,9 +17,12 @@ import com.amazonaws.services.dynamodbv2.document.BatchGetItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.BatchWriteItemOutcome;
 import com.amazonaws.services.dynamodbv2.document.DynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Item;
+import com.amazonaws.services.dynamodbv2.document.ItemCollection;
 import com.amazonaws.services.dynamodbv2.document.PrimaryKey;
+import com.amazonaws.services.dynamodbv2.document.QueryOutcome;
 import com.amazonaws.services.dynamodbv2.document.TableKeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.document.TableWriteItems;
+import com.amazonaws.services.dynamodbv2.document.spec.QuerySpec;
 import com.amazonaws.services.dynamodbv2.model.KeysAndAttributes;
 import com.amazonaws.services.dynamodbv2.model.WriteRequest;
 import com.latticeengines.aws.dynamo.DynamoItemService;
@@ -37,6 +40,22 @@ public class DynamoItemServiceImpl implements DynamoItemService {
     @Inject
     public DynamoItemServiceImpl(DynamoService dynamoService) {
         this.dynamoService = dynamoService;
+    }
+
+    @Override
+    public List<Item> query(String tableName, QuerySpec spec) {
+        List<Item> items = new ArrayList<>();
+
+        try (PerformanceTimer timer = new PerformanceTimer()) {
+            DynamoDB dynamoDB = dynamoService.getDynamo();
+            ItemCollection<QueryOutcome> itemCollection = dynamoDB.getTable(tableName).query(spec);
+            for (Item anItemCollection : itemCollection) {
+                items.add(anItemCollection);
+            }
+            timer.setTimerMessage("Queried " + items.size() + " items from table " + tableName);
+        }
+
+        return items;
     }
 
     @Override

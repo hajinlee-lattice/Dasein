@@ -1,4 +1,4 @@
-package com.latticeengines.workflowapi.flows.testflows.testreport;
+package com.latticeengines.workflowapi.flows.testflows.report;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.BaseReportStepConfiguration;

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections4.Closure;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
@@ -29,6 +31,8 @@ import com.latticeengines.domain.exposed.camille.Path;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.modelreview.DataRule;
 import com.latticeengines.domain.exposed.security.HasTenantId;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -40,6 +44,7 @@ import com.latticeengines.metadata.dao.ExtractDao;
 import com.latticeengines.metadata.dao.LastModifiedKeyDao;
 import com.latticeengines.metadata.dao.PrimaryKeyDao;
 import com.latticeengines.metadata.dao.TableDao;
+import com.latticeengines.metadata.entitymgr.DataUnitEntityMgr;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.hive.HiveTableDao;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -81,6 +86,9 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Autowired
     private RedshiftService redshiftService;
+
+    @Inject
+    private DataUnitEntityMgr dataUnitEntityMgr;
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
@@ -170,6 +178,23 @@ public class TableEntityMgrImpl implements TableEntityMgr {
                     log.error(String.format("Failed to delete extract schema %s", schemaPath), e);
                 }
             });
+            try {
+                List<DataUnit> dataUnits = dataUnitEntityMgr.deleteAllByName(name);
+                log.info("Deleted " + dataUnits.size() + " data units associated with table " + name);
+                for (DataUnit unit: dataUnits) {
+                    if (DataUnit.StorageType.Redshift.equals(unit.getStorageType())) {
+                        RedshiftDataUnit redshiftDataUnit = (RedshiftDataUnit) unit;
+                        String redshiftTable = redshiftDataUnit.getRedshiftTable();
+                        try {
+                            redshiftService.dropTable(redshiftTable);
+                        } catch (Exception e) {
+                            log.error(String.format("Failed to drop table %s from redshift", redshiftTable), e);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error(String.format("Failed to clean up data unit by table name %s", name), e);
+            }
             try {
                 redshiftService.dropTable(AvroUtils.getAvroFriendlyString(name));
             } catch (Exception e) {

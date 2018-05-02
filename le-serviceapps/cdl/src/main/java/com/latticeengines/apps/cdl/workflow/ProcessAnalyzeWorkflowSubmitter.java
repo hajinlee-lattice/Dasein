@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -34,8 +33,6 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.featureflags.FeatureFlagValueMap;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
-import com.latticeengines.domain.exposed.eai.ExportFormat;
-import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -46,7 +43,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
-import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -56,7 +52,6 @@ import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
-import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 
@@ -93,16 +88,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
-    }
-
-    @Value("${common.pls.url}")
-    private String internalResourceHostPort;
-
-    private InternalResourceRestApiProxy internalResourceProxy;
-
-    @PostConstruct
-    public void init() {
-        internalResourceProxy = new InternalResourceRestApiProxy(internalResourceHostPort);
     }
 
     @WithWorkflowJobPid
@@ -235,7 +220,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(CustomerSpace.parse(customerSpace)) //
                 .internalResourceHostPort(internalResourceHostPort) //
-                .hdfsToRedshiftConfiguration(createExportBaseConfig()) //
                 .initialDataFeedStatus(status) //
                 .importAndDeleteJobIds(actionAndJobIds.getRight()) //
                 .actionIds(actionAndJobIds.getLeft()) //
@@ -243,10 +227,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .userId(request.getUserId()) //
                 .dataCloudVersion(dataCloudVersion) //
                 .matchYarnQueue(scoringQueue) //
-                .fetchOnly(true) //
-                .uniqueKeyColumn(InterfaceName.__Composite_Key__.name()) //
-                .setUseScorederivation(false) //
-                .cdlMultiModel(true) //
                 .inputProperties(ImmutableMap.<String, String> builder() //
                         .put(WorkflowContextConstants.Inputs.INITIAL_DATAFEED_STATUS, status.getName()) //
                         .put(WorkflowContextConstants.Inputs.JOB_TYPE, "processAnalyzeWorkflow") //
@@ -257,18 +237,6 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
                 .build();
-    }
-
-    private HdfsToRedshiftConfiguration createExportBaseConfig() {
-        HdfsToRedshiftConfiguration exportConfig = new HdfsToRedshiftConfiguration();
-        exportConfig.setExportFormat(ExportFormat.AVRO);
-        exportConfig.setCleanupS3(true);
-        exportConfig.setCreateNew(true);
-        exportConfig.setAppend(true);
-        RedshiftTableConfiguration redshiftTableConfig = new RedshiftTableConfiguration();
-        redshiftTableConfig.setS3Bucket(s3Bucket);
-        exportConfig.setRedshiftTableConfiguration(redshiftTableConfig);
-        return exportConfig;
     }
 
     public ApplicationId retryLatestFailed(String customerSpace, Integer memory) {

@@ -1,7 +1,10 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -40,11 +43,11 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
         Assert.assertTrue(unit instanceof DynamoDataUnit);
 
         Thread.sleep(500);
-        DataUnit found = dataUnitService.findByNameFromReader(name);
-        Assert.assertNotNull(found);
-        Assert.assertTrue(found instanceof DynamoDataUnit);
+        List<DataUnit> found = dataUnitService.findByNameFromReader(name);
+        Assert.assertTrue(CollectionUtils.isNotEmpty(found));
+        Assert.assertTrue(found.get(0) instanceof DynamoDataUnit);
 
-        dataUnitService.deleteByName(name);
+        dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
         Thread.sleep(500);
         Assert.assertNull(dataUnitService.findByNameFromReader(name));
     }

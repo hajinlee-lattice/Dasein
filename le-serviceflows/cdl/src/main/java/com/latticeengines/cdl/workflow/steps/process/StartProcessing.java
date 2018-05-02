@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
-import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -38,7 +37,6 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportDataToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -75,9 +73,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private ActionProxy actionProxy;
-
-    @Inject
-    private RedshiftPublishWorkflow redshiftPublishWorkflow;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -136,12 +131,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         createReportJson();
         setRebuildEntities();
         setupInactiveVersion();
-        String namespace = String.format("%s.%s.%s", getParentNamespace(), redshiftPublishWorkflow.name(),
-                ExportDataToRedshiftConfiguration.class.getSimpleName());
-        ExportDataToRedshiftConfiguration exportDataToRedshiftConfig = (ExportDataToRedshiftConfiguration) getConfigurationFromJobParameters(
-                namespace);
-        exportDataToRedshiftConfig.upsertToInactiveVersion();
-        putObjectInContext(namespace, exportDataToRedshiftConfig);
         // clearPhaseForRetry();
     }
 

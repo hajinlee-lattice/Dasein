@@ -1,13 +1,12 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
-import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLE_GOING_TO_REDSHIFT;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,9 +16,9 @@ import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
-import com.latticeengines.cdl.workflow.RedshiftPublishWorkflow;
+import com.latticeengines.cdl.workflow.steps.export.ExportToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -65,7 +64,7 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     private AwsApsGeneratorStep awsApsGeneratorStep;
 
     @Inject
-    private RedshiftPublishWorkflow redshiftPublishWorkflow;
+    private ExportToRedshift exportToRedshiftStep;
 
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
@@ -80,8 +79,8 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = transactionChoreographer.skipStep(step, seq);
         } else if (isApsGenerationStep(step)) {
             skip = skipApsGeneration();
-        } else if (inPublishWorkflow(seq)) {
-            skip = skipPublishWorkflow(step);
+        } else if (isExportToRedshiftStep(step)) {
+            skip = skipExportToRedshiftStep(step);
         } else if (isRatingStep(seq)) {
             skip = ratingChoreographer.skipStep(step, seq);
         }
@@ -123,15 +122,14 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
         return namespace.startsWith(workflow.name());
     }
 
-    private boolean inPublishWorkflow(int seq) {
-        String namespace = getStepNamespace(seq);
-        return namespace.startsWith(redshiftPublishWorkflow.name());
+    private boolean isExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(exportToRedshiftStep.name());
     }
 
-    private boolean skipPublishWorkflow(AbstractStep<? extends BaseStepConfiguration> step) {
-        Map<BusinessEntity, String> entityTableNames = step.getMapObjectFromContext(TABLE_GOING_TO_REDSHIFT,
-                BusinessEntity.class, String.class);
-        return MapUtils.isEmpty(entityTableNames);
+    private boolean skipExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        List<RedshiftExportConfig> redshiftExports = step.getListObjectFromContext(TABLES_GOING_TO_REDSHIFT,
+                RedshiftExportConfig.class);
+        return CollectionUtils.isEmpty(redshiftExports);
     }
 
     private boolean isApsGenerationStep(AbstractStep<? extends BaseStepConfiguration> step) {

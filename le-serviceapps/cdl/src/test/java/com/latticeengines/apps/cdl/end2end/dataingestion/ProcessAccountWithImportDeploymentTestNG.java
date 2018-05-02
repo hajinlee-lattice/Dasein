@@ -68,7 +68,7 @@ public class ProcessAccountWithImportDeploymentTestNG extends DataIngestionEnd2E
         verifyDataFeedStatus(DataFeed.Status.Active);
         verifyActiveVersion(DataCollection.Version.Green);
 
-        verifyProcessAnalyzeReport(processAnalyzeAppId, getExpectedCnts());
+        verifyProcessAnalyzeReport(processAnalyzeAppId);
 
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId());
         Assert.assertNotNull(statisticsContainer, "Should have statistics in active version");
@@ -91,16 +91,5 @@ public class ProcessAccountWithImportDeploymentTestNG extends DataIngestionEnd2E
                 BusinessEntity.Account, SEGMENT_2_ACCOUNT_1, BusinessEntity.Contact, SEGMENT_2_CONTACT_1);
         verifyTestSegment2Counts(segment2Counts);
         verifyUpdateActions();
-    }
-
-    private Map<TableRoleInCollection, Long> getExpectedCnts() {
-        Map<TableRoleInCollection, Long> expectedCnts = new HashMap<>();
-        expectedCnts.put(TableRoleInCollection.BucketedAccount,
-                Long.valueOf(ACCOUNT_IMPORT_SIZE_1_1 + ACCOUNT_IMPORT_SIZE_1_2));
-        expectedCnts.put(TableRoleInCollection.SortedContact,
-                Long.valueOf(CONTACT_IMPORT_SIZE_1_1 + CONTACT_IMPORT_SIZE_1_2));
-        expectedCnts.put(TableRoleInCollection.SortedProduct,
-                Long.valueOf(PRODUCT_IMPORT_SIZE_1_1 + PRODUCT_IMPORT_SIZE_1_2));
-        return expectedCnts;
     }
 }

@@ -51,6 +51,8 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         String rawRatingTableName = NamingUtils.timestamp("RawRating");
         putStringValueInContext(RULE_RAW_RATING_TABLE_NAME, rawRatingTableName);
         readActiveRatingModels();
+        removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
+        removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
         removeObjectFromContext(TABLE_GOING_TO_REDSHIFT);
         removeObjectFromContext(APPEND_TO_REDSHIFT_TABLE);
         removeObjectFromContext(STATS_TABLE_NAMES);
