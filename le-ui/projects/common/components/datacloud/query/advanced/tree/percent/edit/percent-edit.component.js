@@ -62,7 +62,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent.edit', [])
                 this.directionList = PercentStore.getDirectionList();
                 this.periodList = PercentStore.getCmpList();
                 this.numericalConfig = PercentStore.getNumericalPeriodConfig();
-                this.periodModel = this.bucketrestriction.bkt.PctChg.Cmp;
+                this.periodModel = this.bucketrestriction.bkt.Chg.Cmp;
                 this.directionModel = PercentStore.getDirection(this.bucketrestriction.bkt);
                 changePeriodView();
                 initValues();
@@ -77,7 +77,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent.edit', [])
             };
 
             this.callbackChangedValue = function (type, position, value) {
-                PercentStore.changeValue(this.periodModel, this.bucketrestriction.bkt.PctChg.Vals, position, value);
+                PercentStore.changeValue(this.periodModel, this.bucketrestriction.bkt.Chg.Vals, position, value);
             };
 
             this.changeDirection = function () {

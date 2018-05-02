@@ -244,11 +244,11 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     var lbl2 = bkt.Lbl;
                     isSameBucket = neg1 == neg2 && lbl1 == lbl2;
                 }
-            } else if(bucket && bucket.PctChg && bkt && bkt.PctChg){
-                var direction1 = bucket.PctChg.Direction;
-                var direction2 = bkt.PctChg.Direction;
-                var cmp1 = bucket.PctChg.Cmp;
-                var cmp2 = bkt.PctChg.Cmp;
+            } else if(bucket && bucket.Chg && bkt && bkt.Chg){
+                var direction1 = bucket.Chg.Direction;
+                var direction2 = bkt.Chg.Direction;
+                var cmp1 = bucket.Chg.Cmp;
+                var cmp2 = bkt.Chg.Cmp;
 
                 idSameBucket = direction1 == direction2 && cmp1 == cmp2;
             } else{
@@ -283,10 +283,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return [];
                     }
                 }
-            }else if (bucketRestriction.bkt.PctChg){
+            }else if (bucketRestriction.bkt.Chg){
                 switch (type) {
                     case 'PercentChange': {
-                        var values = bucketRestriction.bkt.PctChg.Vals;        
+                        var values = bucketRestriction.bkt.Chg.Vals;        
                         if (values) {
                             var listPct = values.toString();
                             listPct = listPct.replace(/,/g, ' - ');
@@ -341,8 +341,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return 0;
                     }
                 }
-            }else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
-                return getValsBasedOnPosition(bucketRestriction.bkt.PctChg.Cmp, bucketRestriction.bkt.PctChg.Vals, position);
+            }else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+                return getValsBasedOnPosition(bucketRestriction.bkt.Chg.Cmp, bucketRestriction.bkt.Chg.Vals, position);
             }else{
                 return getValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position);
             }
@@ -377,8 +377,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                         return [];
                     }
                 }
-            } else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
-                return bucketRestriction.bkt.PctChg.Vals;
+            } else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+                return bucketRestriction.bkt.Chg.Vals;
             } else {
                 return bucketRestriction.bkt.Vals;
             }
@@ -443,8 +443,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
 
                 }
-            }else if(type === 'PercentChange' && bucketRestriction.bkt.PctChg){
-                setValsBasedOnPosition(bucketRestriction.bkt.PctChg.Cmp, bucketRestriction.bkt.PctChg.Vals, position, value);
+            }else if(type === 'PercentChange' && bucketRestriction.bkt.Chg){
+                setValsBasedOnPosition(bucketRestriction.bkt.Chg.Cmp, bucketRestriction.bkt.Chg.Vals, position, value);
             } else{
                 setValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position, value);
             }
@@ -513,8 +513,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
 
                 }
             }
-            else if (type === 'PercentChange' && bucketRestriction.bkt.PctChg) {
-                bucketRestriction.bkt.PctChg.Cmp = value;
+            else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
+                bucketRestriction.bkt.Chg.Cmp = value;
             } else{
                 bucketRestriction.bkt.Cmp = value;
             }
@@ -570,8 +570,8 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
 
                 }
-            }else if (type === 'PercentChange' && bucketRestriction.bkt.PctChg) {
-                bucketRestriction.bkt.PctChg.Vals = [];
+            }else if (type === 'PercentChange' && bucketRestriction.bkt.Chg) {
+                bucketRestriction.bkt.Chg.Vals = [];
             } else{
                 bucketRestriction.bkt.Vals = [];
             }
@@ -641,7 +641,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     return getTransacionCmp(bucketRestriction);
                 };
                 case 'PercentChange' : {
-                    return bucketRestriction.bkt.PctChg;
+                    return bucketRestriction.bkt.Chg;
                 }
 
                 default: return bucketRestriction.bkt.Cmp;
@@ -668,7 +668,7 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
                     }
                 };
                 case 'PercentChange' : {
-                    return bucketRestriction.bkt.PctChg.Cmp;
+                    return bucketRestriction.bkt.Chg.Cmp;
                 }
                 default: return bucketRestriction.bkt.Cmp;
             }

@@ -91,7 +91,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
             };
         };
         this.restValues = function (bkt) {
-            bkt.PctChg.Vals = [];
+            bkt.Chg.Vals = [];
         };
 
         this.changeValue = function (cmp, valsArray, position, value) {
@@ -108,21 +108,21 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
             }
         };
         this.getDirection = function (bkt) {
-            var direction = bkt.PctChg.Direction;
+            var direction = bkt.Chg.Direction;
             if (direction) {
                 return direction;
             } else {
-                bkt.PctChg.Direction = 'DEC';
+                bkt.Chg.Direction = 'DEC';
                 return 'DEC';
             }
         }
 
         this.setDirection = function (bkt, direction) {
-            bkt.PctChg.Direction = direction;
+            bkt.Chg.Direction = direction;
         }
 
         this.getVal = function (cmp, bkt, position) {
-            var valsArray = bkt.PctChg.Vals;
+            var valsArray = bkt.Chg.Vals;
             switch (cmp) {
                 case 'BETWEEN':
                     {
@@ -145,7 +145,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
         };
 
         this.getDirectionRedable = function (bucketrestriction) {
-            var direction = bucketrestriction.bkt.PctChg.Direction;
+            var direction = bucketrestriction.bkt.Chg.Direction;
             var directionObj = PercentStore.directionMap[direction];
             if (directionObj) {
                 return (directionObj.readable) ? (directionObj.readable) : '';
@@ -155,7 +155,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
         }
 
         this.getCmpRedable = function (bucketrestriction) {
-            var cmp = bucketrestriction.bkt.PctChg.Cmp;
+            var cmp = bucketrestriction.bkt.Chg.Cmp;
             var cmpObj = PercentStore.cmpMap[cmp];
             if (cmpObj) {
                 return (cmpObj.displayName) ? cmpObj.displayName : '';
@@ -166,7 +166,7 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
 
         this.getValuesFormatted = function (bucketrestriction) {
             var bkt = bucketrestriction.bkt;
-            var vals = bkt.PctChg.Vals;
+            var vals = bkt.Chg.Vals;
 
             if (vals) {
                 var list = vals.toString();
@@ -179,11 +179,11 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
         };
 
         this.getCmp = function(bkt){
-            return bkt.PctChg.Cmp;
+            return bkt.Chg.Cmp;
         }
 
         this.changeCmp = function (bkt, cmp) {
-            bkt.PctChg.Cmp = cmp;
+            bkt.Chg.Cmp = cmp;
         };
 
         this.isPeriodRangeValid = function (form) {
@@ -208,8 +208,8 @@ angular.module('common.datacloud.query.builder.tree.edit.percent', [])
         };
         this.updateBkt = function(original, changed){
 
-            original.PctChg.Direction = changed.PctChg.Direction;
-            original.PctChg.Cmp = changed.PctChg.Cmp;
-            original.PctChg.Vals = changed.PctChg.Vals;
+            original.Chg.Direction = changed.Chg.Direction;
+            original.Chg.Cmp = changed.Chg.Cmp;
+            original.Chg.Vals = changed.Chg.Vals;
         }
     }]);
