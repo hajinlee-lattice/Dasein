@@ -98,7 +98,7 @@ public class DynamoItemServiceImpl implements DynamoItemService {
                 }
             }
             if (CollectionUtils.isNotEmpty(batch)) {
-                submitBatchGet(dynamoDB, tableName, batch);
+                results.addAll(submitBatchGet(dynamoDB, tableName, batch));
             }
             timer.setTimerMessage("Get " + primaryKeys.size() + " items from table " + tableName);
         }

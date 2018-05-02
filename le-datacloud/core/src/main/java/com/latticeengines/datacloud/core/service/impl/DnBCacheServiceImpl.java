@@ -155,8 +155,8 @@ public class DnBCacheServiceImpl implements DnBCacheService {
         }
         if (sync) {
             getCacheMgr().create(cache);
-            log.info(String.format("Added Id=%s to %s DnBCache. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s",
-                    cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
+            log.info(String.format("Added Id=%s to %s DnBCache. DUNS=%s, DnBCode=%s, OutOfBusiness=%s, DunsInAM=%s",
+                    cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDuns(), context.getDnbCode(),
                     context.isOutOfBusinessString(), context.isDunsInAMString()));
         } else {
             if (cacheQueue.size() >= queueMaxSize) {
@@ -166,9 +166,10 @@ public class DnBCacheServiceImpl implements DnBCacheService {
                         context.isDunsInAMString()));
             } else {
                 cacheQueue.add(cache);
-                log.info(String.format("Added Id=%s to %s DnBCache queue. DnBCode=%s. OutOfBusiness=%s, DunsInAM=%s",
+                log.info(String.format(
+                        "Added Id=%s to %s DnBCache queue. DUNS=%s, DnBCode=%s, OutOfBusiness=%s, DunsInAM=%s",
                         cache.getId(), cache.isWhiteCache() ? "white" : "black", context.getDnbCode(),
-                        context.isOutOfBusinessString(), context.isDunsInAMString()));
+                        context.getDuns(), context.isOutOfBusinessString(), context.isDunsInAMString()));
             }
         }
         return cache;
