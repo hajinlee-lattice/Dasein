@@ -46,24 +46,27 @@ angular.module('lp.ratingsengine.wizard.training', [
             vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingProducts = null;
 
             RatingsEngineStore.setTrainingSegment(null);
-            vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingSegment = null;
+            vm.ratingEngine.activeModel.AI.trainingSegment = null;
         });
 
     }
 
     vm.getRecordsCount = function(engineId, modelId, ratingEngine) {
+        vm.recordsCountReturned = false;
         RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TRAINING').then(function(count){
             vm.recordsCount = count;
             vm.recordsCountReturned = true;
         });
     }
     vm.getPurchasesCount = function(engineId, modelId, ratingEngine) {
+        vm.purchasesCountReturned = false;
         RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'EVENT').then(function(count){
             vm.purchasesCount = count;
             vm.purchasesCountReturned = true;
         });
     }
     vm.getScoringCount = function(engineId, modelId, ratingEngine) {
+        vm.scoringCountReturned = false;
         RatingsEngineStore.getTrainingCounts(engineId, modelId, ratingEngine, 'TARGET').then(function(count){
             vm.scoringCount = count;
             vm.scoringCountReturned = true;
@@ -73,7 +76,7 @@ angular.module('lp.ratingsengine.wizard.training', [
     vm.segmentCallback = function(selectedSegment) {
         vm.trainingSegment = selectedSegment[0];
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
-        vm.ratingEngine.activeModel.AI.advancedModelingConfig.cross_sell.trainingSegment = vm.trainingSegment;
+        vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
 
         console.log(vm.ratingEngine);
 
