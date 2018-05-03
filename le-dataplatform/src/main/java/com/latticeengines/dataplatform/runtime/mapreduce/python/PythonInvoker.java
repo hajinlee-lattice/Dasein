@@ -27,7 +27,7 @@ public class PythonInvoker {
         try {
             PythonMRUtils.writeMetadataJsonToLocal(classifier);
             runtimeConfigFile = runtimeConfigFile != null ? runtimeConfigFile : "None";
-            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice_20180301",
+            ProcessBuilder pb = new ProcessBuilder().inheritIO().command("./pythonlauncher.sh", "lattice",
                     "launcher.py", "metadata.json", runtimeConfigFile);
             setupEnvironment(pb.environment(), config);
 

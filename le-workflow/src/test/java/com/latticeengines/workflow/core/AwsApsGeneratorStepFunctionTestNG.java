@@ -21,7 +21,7 @@ public class AwsApsGeneratorStepFunctionTestNG extends WorkflowTestNGBase {
         BaseAwsPythonBatchStep<AWSPythonBatchConfiguration> step = new BaseAwsPythonBatchStep<AWSPythonBatchConfiguration>() {
             @Override
             protected String getCondaEnv() {
-                return "v01_20180301";
+                return "v01";
             }
 
             @Override
