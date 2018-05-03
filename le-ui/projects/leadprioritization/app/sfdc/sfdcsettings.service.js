@@ -1,8 +1,8 @@
 angular.module('lp.sfdc', [])
-.service('sfdcstore', function(
-    $q, $state, $stateParams,  $rootScope, sfdcservice
+.service('SfdcStore', function(
+    $q, $state, $stateParams,  $rootScope, SfdcService
 ){
-    var sfdcstore = this;
+    var SfdcStore = this;
     
     this.init = function() {
         this.accountids = [];
@@ -18,8 +18,8 @@ angular.module('lp.sfdc', [])
     this.getAccountIds = function() {
         var deferred = $q.defer();
 
-        sfdcservice.getAccountIds().then(function(data) {
-            sfdcstore.setAccountIds(data);
+        SfdcService.getAccountIds().then(function(data) {
+            SfdcStore.setAccountIds(data);
             deferred.resolve(data);
         });
 
@@ -32,8 +32,8 @@ angular.module('lp.sfdc', [])
     this.getOrgs = function() {
         var deferred = $q.defer();
 
-        sfdcservice.getOrgs().then(function(data) {
-            sfdcstore.setOrgs(data);
+        SfdcService.getOrgs().then(function(data) {
+            SfdcStore.setOrgs(data);
             deferred.resolve(data);
         });
 
@@ -44,7 +44,7 @@ angular.module('lp.sfdc', [])
     }
 
 })
-.service('sfdcservice', function($q, $http, $state) {
+.service('SfdcService', function($q, $http, $state) {
 
     this.generateAuthToken = function(emailAddress, tenantId) {
         var deferred = $q.defer();

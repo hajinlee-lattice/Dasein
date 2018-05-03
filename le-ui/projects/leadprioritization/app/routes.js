@@ -1231,10 +1231,10 @@ angular
                 pageTitle: 'Salesforce Settings'
             },
             resolve: {
-                accountids: function($q, sfdcstore) {
+                accountids: function($q, SfdcStore) {
                     // var deferred = $q.defer();
 
-                    // sfdcstore.getAccountIds().then(function (result) {
+                    // SfdcStore.getAccountIds().then(function (result) {
                     //     deferred.resolve(result.CRM);
                     // });
 
@@ -1259,10 +1259,10 @@ angular
                     ];
                     return dummyAccountIds;
                 },
-                orgs: function($q, sfdcstore) {
+                orgs: function($q, SfdcStore) {
                     var deferred = $q.defer();
 
-                    sfdcstore.getOrgs().then(function (result) {
+                    SfdcStore.getOrgs().then(function (result) {
                         deferred.resolve(result.CRM);
                     });
 

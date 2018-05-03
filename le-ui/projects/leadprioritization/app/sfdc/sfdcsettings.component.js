@@ -2,19 +2,19 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
 .component('salesforceSettings', {
     templateUrl: 'app/sfdc/sfdcsettings.component.html',
     bindings: {
-        orgs: '=',
-        accountids: '='
+        orgs: '<',
+        accountids: '<'
     },
     controller: function(
         $scope, $state, $timeout, 
-        ResourceUtility, BrowserStorageUtility, sfdcservice, ModalStore
+        ResourceUtility, BrowserStorageUtility, SfdcService, ModalStore
     ) {
         var vm = this;
 
         vm.initModalWindow = function () {  
             vm.config = {
                 'name': "leave-with-unsaved-changes",
-                'type': 'sm',
+                'type': 'md',
                 'title': 'Save before leaving?',
                 'titlelength': 100,
                 'dischargetext': 'CANCEL (go back & save)',
@@ -62,8 +62,8 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
 
         vm.uiCanExit = function() {
           if (!angular.equals(vm.orgs, vm.originalData)) {
-            // return window.confirm("Data has changed.  Exit anyway and lose changes?");
-            vm.toggleModal();
+            return window.confirm("Data has changed.  Exit anyway and lose changes?");
+            // vm.toggleModal();
           }
         }
 
@@ -72,7 +72,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 emailAddress = clientSession.EmailAddress,
                 tenantId = clientSession.Tenant.Identifier;
 
-            sfdcservice.generateAuthToken(emailAddress, tenantId).then(function (result) {
+            SfdcService.generateAuthToken(emailAddress, tenantId).then(function (result) {
                 vm.showSuccess = true;
                 vm.successMessage = 'Your one-time authentication token has been sent to your email.';
                 console.log(result);
@@ -85,7 +85,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         vm.saveOrgs = function() {
             var orgs = vm.orgs;
             angular.forEach(orgs, function(value, key) {
-                sfdcservice.saveOrgs(value.configId, value).then(function(result){
+                SfdcService.saveOrgs(value.configId, value).then(function(result){
                     console.log(result);
                     vm.showSuccess = true;
                     vm.successMessage = 'Your changes have been saved.';

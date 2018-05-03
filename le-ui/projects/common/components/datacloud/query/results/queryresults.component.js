@@ -110,6 +110,45 @@ angular.module('common.datacloud.query.results', [
                 "contact_restriction": vm.contactRestriction,
                 "preexisting_segment_name": $stateParams.segment,
                 "restrict_with_sfdcid": vm.excludeNonSalesForce,
+                "lookups": [
+                    {
+                        "attribute": {
+                            "entity": "Account",
+                            "attribute": "AccountId"
+                        }
+                    },
+                    {
+                        "attribute": {
+                            "entity": "Account",
+                            "attribute": "CompanyName"
+                        }
+                    },
+                    {
+                        "attribute": {
+                            "entity": "Account",
+                            "attribute": "City"
+                        }
+                    },
+                    {
+                        "attribute": {
+                            "entity": "Account",
+                            "attribute": "Website"
+                        }
+                    }, 
+                    { 
+                        "attribute": { 
+                            "entity": "Account", 
+                            "attribute": "State" 
+                        } 
+                    }, 
+                    { 
+                        "attribute": { 
+                            "entity": "Account", 
+                            "attribute": "Country" 
+                        } 
+                    } 
+                ],
+                "main_entity": "Account",
                 "page_filter": {
                     "num_rows": vm.pagesize,
                     "row_offset": offset
@@ -125,6 +164,7 @@ angular.module('common.datacloud.query.results', [
             if (vm.page === 'Accounts'){
                 QueryStore.setAccounts(dataQuery).then(function(response) {
                     vm.accounts = response.data;
+                    console.log(vm.accounts);
                     vm.loading = false;
                 });
             } else if (vm.page === 'Contacts'){

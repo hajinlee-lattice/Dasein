@@ -105,30 +105,30 @@
     <table ng-if="vm.page === 'Accounts'">
         <thead ng-class="{'sort-asc': !vm.sortDesc, 'sort-dsc': vm.sortDesc}">
             <tr>
-                <!-- <th class="sortable" ng-click="sortType = 'LDC_Name'; sortReverse = !sortReverse"> -->
+                <!-- <th class="sortable" ng-click="sortType = 'CompanyName'; sortReverse = !sortReverse"> -->
                 <th>
                     Company Name
-                    <span ng-show="sortType == 'LDC_Name' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_Name' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'CompanyName' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'CompanyName' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>Web Address</th>
                 <!-- <th class="sortable" ng-click="sortType = 'LDC_City'; sortReverse = !sortReverse"> -->
                 <th>
                     City
-                    <span ng-show="sortType == 'LDC_City' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_City' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'City' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'City' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <!-- <th class="sortable" ng-click="sortType = 'LDC_State'; sortReverse = !sortReverse"> -->
                 <th>
                     State
-                    <span ng-show="sortType == 'LDC_State' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_State' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'State' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'State' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <!-- <th class="sortable" ng-click="vm.disableSort ? sortType : sortType = 'LDC_Country'; vm.disableSort ? sortReverse : sortReverse = !sortReverse"> -->
                 <th>
                     Country
-                    <span ng-show="sortType == 'LDC_Country' && !sortReverse" class="fa fa-caret-down"></span>
-                    <span ng-show="sortType == 'LDC_Country' && sortReverse" class="fa fa-caret-up"></span>
+                    <span ng-show="sortType == 'Country' && !sortReverse" class="fa fa-caret-down"></span>
+                    <span ng-show="sortType == 'Country' && sortReverse" class="fa fa-caret-up"></span>
                 </th>
                 <th>ID</th>
             </tr>
@@ -138,20 +138,20 @@
                 ng-repeat="account in (vm.tmpAccounts = (vm.accounts | 
                             orderBy:sortType:sortReverse | 
                             filter:vm.search))">
-                <td>{{account.LDC_Name}}</td>
-                <td>{{account.LDC_Domain}}</td>
-                <td>{{account.LDC_City}}</td>
-                <td>{{account.LDC_State}}</td>
-                <td>{{account.LDC_Country}}</td>
+                <td>{{account.CompanyName}}</td>
+                <td>{{account.Website}}</td>
+                <td>{{account.City}}</td>
+                <td>{{account.State}}</td>
+                <td>{{account.Country}}</td>
                 <td>
                     <span 
                         class="gray-text"
-                        ng-if="account.SalesforceAccountID === null">
+                        ng-if="account.AccountId === null">
                         None
                     </span>
                     <span
-                        ng-if="account.SalesforceAccountID != null">
-                        {{account.SalesforceAccountID}}
+                        ng-if="account.AccountId != null">
+                        {{account.AccountId}}
                     </span>
                 </td>
             </tr>

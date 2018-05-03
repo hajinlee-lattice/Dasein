@@ -580,19 +580,26 @@ angular.module('common.datacloud.query')
                 return deferred.promise;
             } else {
 
-                var deferred = $q.defer(),
-                    queryWithRestriction = {
-                        'free_form_text_search': query.free_form_text_search,
-                        'account_restriction': query.account_restriction,
-                        'contact_restriction': query.contact_restriction,
-                        'preexisting_segment_name': query.preexisting_segment_name,
-                        'page_filter': {
-                            'num_rows': query.page_filter.num_rows,
-                            'row_offset': query.page_filter.row_offset
-                        },
-                        'restrict_with_sfdcid': query.restrict_with_sfdcid
-                    };
+                var deferred = $q.defer();
 
+                queryWithRestriction = {
+                    'free_form_text_search': query.free_form_text_search,
+                    'account_restriction': query.account_restriction,
+                    'contact_restriction': query.contact_restriction,
+                    'preexisting_segment_name': query.preexisting_segment_name,
+                    'page_filter': {
+                        'num_rows': query.page_filter.num_rows,
+                        'row_offset': query.page_filter.row_offset
+                    },
+                    'restrict_with_sfdcid': query.restrict_with_sfdcid
+                };
+
+                console.log(resourceType);
+
+                if(resourceType === 'accounts') {
+                    queryWithRestriction.lookups = query.lookups;
+                }
+                    
                 deferred.resolve(QueryService.GetDataByQuery(resourceType, queryWithRestriction));
                 return deferred.promise;
             }

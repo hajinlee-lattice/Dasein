@@ -12,6 +12,45 @@ angular.module('common.datacloud.query')
                             account_restriction: account || store.getAccountRestriction,
                             contact_restriction: contact,
                             preexisting_segment_name: name,
+                            lookups: [
+                                {
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "AccountId"
+                                    }
+                                },
+                                {
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "CompanyName"
+                                    }
+                                },
+                                {
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "City"
+                                    }
+                                },
+                                {
+                                    "attribute": {
+                                        "entity": "Account",
+                                        "attribute": "Website"
+                                    }
+                                }, 
+                                { 
+                                    "attribute": { 
+                                        "entity": "Account", 
+                                        "attribute": "State" 
+                                    } 
+                                }, 
+                                { 
+                                    "attribute": { 
+                                        "entity": "Account", 
+                                        "attribute": "Country" 
+                                    } 
+                                } 
+                            ],
+                            main_entity: "Account",
                             page_filter: {
                                 num_rows: 10,
                                 row_offset: 0

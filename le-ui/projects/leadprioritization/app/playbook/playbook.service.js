@@ -27,6 +27,10 @@ angular.module('lp.playbook')
             segment_selection: ''
         }
 
+        this.crmselection_form = {
+            crm_selection: ''
+        }
+
         this.rating_form = {
             rating_selection: ''
         }
@@ -35,6 +39,7 @@ angular.module('lp.playbook')
             settings: false,
             rating: true,
             targets: true,
+            crmselection: false,
             insights: false,
             preview: true,
             launch: true

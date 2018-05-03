@@ -50,7 +50,7 @@
                             <th>Account ID</th>
                         </tr>
                     </thead>
-                    <tbody ng-if="$ctrl.orgs.length === 0">
+                    <tbody ng-if="$ctrl.orgs.length === 0 || $ctrl.orgs === undefined">
                         <tr>
                             <td colspan="3">Each time you authenticate an SFDC Org in the Salesforce app, it will be listed here.</td>
                         </tr>

@@ -1,0 +1,40 @@
+<div class="playbook-segment playbook-content container">
+    <div class="inner-container">
+        <div class="header">
+            <h2>CRM System Selection</h2>
+            <p>Select the system where the play will be launched, and the right ID will be used for Lattice recommendations to match with appropriate accounts.</p>
+        </div>
+        <div class="content-body">
+            <form name="crmselection_form">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SFDC Org ID</th>
+                            <th>SFDC Org Name</th>
+                            <th>Account ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr 
+                            ng-repeat="org in $ctrl.orgs"
+                            ng-class="{'disabled': org.accountId === null}">
+                            <td>
+                                <input  
+                                    type="radio" 
+                                    id="{{org.orgId}}" 
+                                    name="{{org.orgId}}" 
+                                    ng-value="org.orgId"
+                                    ng-change="vm.checkValid(crmselection_form)" 
+                                    ng-model="vm.stored.crm_selection"
+                                    ng-disabled="org.accountId === null" />
+                                <label for="{{org.orgId}}">{{ org.orgId }}</label>
+                            </td>
+                            <td>{{ org.orgName }}</td>
+                            <td>{{ org.accountId }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>

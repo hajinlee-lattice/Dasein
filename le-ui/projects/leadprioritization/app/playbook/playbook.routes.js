@@ -10,6 +10,7 @@ angular
     'lp.playbook.wizard.settings',
     'lp.playbook.wizard.rating',
     'lp.playbook.wizard.targets',
+    'lp.playbook.wizard.crmselection',
     'lp.playbook.wizard.insights',
     'lp.playbook.wizard.preview',
     'lp.playbook.wizard.launch'
@@ -481,9 +482,10 @@ angular
                     return [
                         { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
                         { label: 'Targets', state: 'rating.targets' },
-                        { label: 'Insights', state: 'rating.targets.insights'},
-                        { label: 'Preview', state: 'rating.targets.insights.preview' },
-                        { label: 'Launch', state: 'rating.targets.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
+                        { label: 'CRM System', state: 'rating.targets.crmselection' },
+                        { label: 'Insights', state: 'rating.targets.crmselection.insights'},
+                        { label: 'Preview', state: 'rating.targets.crmselection.insights.preview' },
+                        { label: 'Launch', state: 'rating.targets.crmselection.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
                     ];
                 },
                 WizardControlsOptions: function() {
@@ -667,7 +669,29 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.insights', {
+        .state('home.playbook.create.rating.targets.crmselection', {
+            url: '/crm-selection',
+            params: {
+                section: 'wizard.insights',
+                pageIcon: 'ico-playbook',
+                pageTitle: 'Playbook'
+            },
+            resolve: {
+                orgs: function($q, SfdcStore) {
+                    var deferred = $q.defer();
+
+                    SfdcStore.getOrgs().then(function (result) {
+                        deferred.resolve(result.CRM);
+                    });
+
+                    return deferred.promise;
+                }
+            },
+            views: {
+                'wizard_content@home.playbook.create': 'crmSelection'
+            }
+        })
+        .state('home.playbook.create.rating.targets.crmselection.insights', {
             url: '/insights',
             params: {
                 section: 'wizard.insights',
@@ -700,7 +724,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.insights.preview', {
+        .state('home.playbook.create.rating.targets.crmselection.insights.preview', {
             url: '/preview',
             params: {
                 pageIcon: 'ico-playbook',
@@ -722,7 +746,7 @@ angular
                 }
             }
         })
-        .state('home.playbook.create.rating.targets.insights.preview.launch', {
+        .state('home.playbook.create.rating.targets.crmselection.insights.preview.launch', {
             url: '/launch',
             views: {
                 'wizard_content@home.playbook.create': {
