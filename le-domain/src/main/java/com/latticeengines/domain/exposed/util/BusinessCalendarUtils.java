@@ -116,7 +116,7 @@ public final class BusinessCalendarUtils {
 
     private static String getStartingDayNote(LocalDate startDate, LocalDate endDate, int evaluationYear) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
-        int days = (int) Duration.between(startDate.atStartOfDay(), endDate.atStartOfDay()).toDays();
+        int days = (int) Duration.between(startDate.atStartOfDay(), endDate.atStartOfDay()).toDays() + 1;
         int weeks = days / 7;
         return String.format("The Fiscal Year **%d** has **%d** weeks, **%s** to **%s**.", evaluationYear, weeks,
                 startDate.format(formatter), endDate.format(formatter));

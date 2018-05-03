@@ -9,7 +9,6 @@ import org.testng.annotations.Test;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
-import com.latticeengines.domain.exposed.util.BusinessCalendarUtils;
 
 public class BusinessCalendarUtilsUnitTestNG {
 
@@ -54,10 +53,18 @@ public class BusinessCalendarUtilsUnitTestNG {
     public Object[][] provideStartingDay() {
         return new Object[][]{ //
                 { "5th-MON-JAN", 2016, null, LedpCode.LEDP_40015 }, //
-                { "1st-MON-JAN", 2016, "The Fiscal Year **2016** has **51** weeks, **04 January 2016** to **01 January 2017**.", null }, //
-                { "1st-FRI-JAN", 2016, "The Fiscal Year **2016** has **52** weeks, **01 January 2016** to **05 January 2017**.", null }, //
-                { "1st-MON-JAN", 2017, "The Fiscal Year **2017** has **51** weeks, **02 January 2017** to **31 December 2017**.", null }, //
-                { "4th-FRI-DEC", 2017, "The Fiscal Year **2017** has **52** weeks, **22 December 2017** to **27 December 2018**.", null }, //
+                { "1st-MON-JAN", 2016,
+                        "The Fiscal Year **2016** has **52** weeks, **04 January 2016** to **01 January 2017**.",
+                        null }, //
+                { "1st-FRI-JAN", 2016,
+                        "The Fiscal Year **2016** has **53** weeks, **01 January 2016** to **05 January 2017**.",
+                        null }, //
+                { "1st-MON-JAN", 2017,
+                        "The Fiscal Year **2017** has **52** weeks, **02 January 2017** to **31 December 2017**.",
+                        null }, //
+                { "4th-FRI-DEC", 2017,
+                        "The Fiscal Year **2017** has **53** weeks, **22 December 2017** to **27 December 2018**.",
+                        null }, //
         };
     }
 
