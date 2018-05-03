@@ -143,7 +143,7 @@ public class PlayServiceImplDeploymentTestNG extends CDLDeploymentTestNGBase {
         // or mock dante server using StandaloneHttpServer
 
         // List<TalkingPointDTO> tps = new ArrayList<>();
-        // talkingPointProxy.createOrUpdate(tps, tenant.getId());
+        // talkingPointProxy.createOrUpdateByNameAndStorageType(tps, tenant.getId());
 
         return play;
     }

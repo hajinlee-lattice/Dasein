@@ -184,7 +184,6 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
                 .fetchOnly(true) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
-                .matchColumnSelection(predefinedSelection, parameters.getSelectedVersion()) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
                 .matchAccountIdColumn(InterfaceName.AccountId.name())

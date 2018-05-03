@@ -53,8 +53,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         readActiveRatingModels();
         removeObjectFromContext(TABLES_GOING_TO_DYNAMO);
         removeObjectFromContext(TABLES_GOING_TO_REDSHIFT);
-        removeObjectFromContext(TABLE_GOING_TO_REDSHIFT);
-        removeObjectFromContext(APPEND_TO_REDSHIFT_TABLE);
         removeObjectFromContext(STATS_TABLE_NAMES);
     }
 

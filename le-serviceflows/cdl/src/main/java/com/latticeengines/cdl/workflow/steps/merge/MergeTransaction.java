@@ -71,6 +71,7 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
     @Override
     protected void onPostTransformationCompleted() {
         String diffTableName = TableUtils.getFullTableName(diffTablePrefix, pipelineVersion);
+        addToListInContext(TEMPORARY_CDL_TABLES, diffTableName, String.class);
         updateEntityValueMapInContext(ENTITY_DIFF_TABLES, diffTableName, String.class);
         generateDiffReport();
         updateEarliestLatestTransaction();

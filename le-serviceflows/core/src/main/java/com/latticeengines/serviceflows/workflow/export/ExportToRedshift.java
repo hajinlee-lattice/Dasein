@@ -1,4 +1,4 @@
-package com.latticeengines.cdl.workflow.steps.export;
+package com.latticeengines.serviceflows.workflow.export;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +29,11 @@ import com.latticeengines.domain.exposed.eai.HdfsToRedshiftConfiguration;
 import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportToRedshiftStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.proxy.exposed.eai.EaiProxy;
 import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.redshiftdb.exposed.utils.RedshiftUtils;
-import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 import com.latticeengines.yarn.exposed.service.JobService;
 

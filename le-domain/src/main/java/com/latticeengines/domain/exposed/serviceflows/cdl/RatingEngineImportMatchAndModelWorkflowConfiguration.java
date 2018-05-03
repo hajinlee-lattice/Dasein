@@ -21,6 +21,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlTargetTableFilterConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.modeling.steps.DedupEventTableConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.ExportBucketToolStepConfiguration;
@@ -352,6 +353,7 @@ public class RatingEngineImportMatchAndModelWorkflowConfiguration extends BaseCD
             exportBucketTool.setUsingDisplayName(Boolean.FALSE);
             generateAIRating.saveBucketMetadata();
             generateAIRating.fetchOnly(Boolean.TRUE);
+            matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
 
             configuration.setContainerConfiguration("ratingEngineImportMatchAndModelWorkflow",
                     configuration.getCustomerSpace(), configuration.getClass().getSimpleName());

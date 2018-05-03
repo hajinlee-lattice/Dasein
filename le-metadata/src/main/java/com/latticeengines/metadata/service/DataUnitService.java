@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface DataUnitService {
 
-    DataUnit createOrUpdateByName(DataUnit dataUnit);
+    DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit);
 
     List<DataUnit> findByNameFromReader(String name);
 

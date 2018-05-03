@@ -35,11 +35,6 @@ public class ProfileContact extends BaseSingleEntityProfileStep<ProcessContactSt
     private List<String> dedupFields = ImmutableList.of(InterfaceName.AccountId.name());
 
     @Override
-    protected void initializeConfiguration() {
-        super.initializeConfiguration();
-    }
-
-    @Override
     protected TableRoleInCollection profileTableRole() {
         return TableRoleInCollection.ContactProfile;
     }

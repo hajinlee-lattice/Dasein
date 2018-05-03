@@ -1,9 +1,7 @@
 package com.latticeengines.cdl.workflow.steps.update;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -21,6 +19,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -54,15 +53,6 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
     protected void onPostTransformationCompleted() {
     }
 
-    protected <V> void updateEntityValueMapInContext(BusinessEntity entity, String key, V value, Class<V> clz) {
-        Map<BusinessEntity, V> entityValueMap = getMapObjectFromContext(key, BusinessEntity.class, clz);
-        if (entityValueMap == null) {
-            entityValueMap = new HashMap<>();
-        }
-        entityValueMap.put(entity, value);
-        putObjectInContext(key, entityValueMap);
-    }
-
     protected void initializeConfiguration() {
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
@@ -85,7 +75,7 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
         return goodName;
     }
 
-    protected RedshiftExportConfig exportTableRole(String tableName, TableRoleInCollection tableRole) {
+    protected void exportTableRoleToRedshift(String tableName, TableRoleInCollection tableRole) {
         String targetTableName = dataCollectionProxy.getTableName(configuration.getCustomerSpace().toString(),
                 tableRole, inactive);
         if (StringUtils.isBlank(targetTableName)) {
@@ -104,7 +94,21 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
         config.setSortKeys(sortKeys);
         config.setInputPath(getInputPath(tableName) + "/*.avro");
         config.setUpdateMode(true);
-        return config;
+
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
+    }
+
+    protected void exportToDynamo(String srcTable, String tgtTable, String partitionKey, String sortKey) {
+        String inputPath = getInputPath(srcTable);
+        DynamoExportConfig config = new DynamoExportConfig();
+        config.setTableName(tgtTable);
+        config.setInputPath(inputPath);
+        config.setPartitionKey(partitionKey);
+        if (StringUtils.isNotBlank(sortKey)) {
+            config.setSortKey(sortKey);
+        }
+
+        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     private String getInputPath(String tableName) {

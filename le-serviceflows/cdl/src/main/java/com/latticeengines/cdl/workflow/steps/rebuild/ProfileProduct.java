@@ -24,9 +24,7 @@ import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessProductStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.util.TableUtils;
 
 @Component(ProfileProduct.BEAN_NAME)
@@ -43,18 +41,12 @@ public class ProfileProduct extends BaseSingleEntityProfileStep<ProcessProductSt
     }
 
     @Override
-    protected BusinessEntity getEntity() {
-        return BusinessEntity.Product;
-    }
-
-    @Override
     protected void onPostTransformationCompleted() {
         String servingStoreTableName = TableUtils.getFullTableName(servingStoreTablePrefix, pipelineVersion);
         Table servingStoreTable = metadataProxy.getTable(customerSpace.toString(), servingStoreTableName);
         servingStoreTableName = renameServingStoreTable(servingStoreTable);
 
-        RedshiftExportConfig exportConfig = exportTableRole(servingStoreTableName, getEntity().getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
         dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName, getEntity().getServingStore(),
                 inactive);
     }

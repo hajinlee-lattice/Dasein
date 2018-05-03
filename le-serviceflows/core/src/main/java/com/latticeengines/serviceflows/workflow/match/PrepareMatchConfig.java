@@ -1,17 +1,17 @@
 package com.latticeengines.serviceflows.workflow.match;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import javax.inject.Inject;
+
 import org.apache.avro.Schema;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -57,10 +57,10 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         MATCH_KEYS_TO_DISPLAY_NAMES.put(MatchKey.ExternalId, InterfaceName.Id.name());
     }
 
-    @Autowired
+    @Inject
     private MatchProxy matchProxy;
 
-    @Autowired
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Override
@@ -106,7 +106,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             if (retainLatticeAccountId) {
                 log.info("Retaining Lattice Account Id in the match result.");
                 ColumnSelection columnSelection = new ColumnSelection();
-                List<Column> columns = Arrays.asList(new Column(InterfaceName.LatticeAccountId.name()));
+                List<Column> columns = Collections.singletonList(new Column(InterfaceName.LatticeAccountId.name()));
                 columnSelection.setColumns(columns);
                 UnionSelection unionSelection = new UnionSelection();
                 unionSelection.setCustomSelection(columnSelection);
@@ -129,7 +129,6 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             matchInput.setCustomSelection(getConfiguration().getCustomizedColumnSelection());
 
             putObjectInContext(MATCH_CUSTOMIZED_SELECTION, getConfiguration().getCustomizedColumnSelection());
-
         }
 
         matchInput.setDataCloudVersion(getConfiguration().getDataCloudVersion());
@@ -178,7 +177,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
             } else {
                 log.info(String.format("attribute: %s is found as: %s", matchKey, JsonUtils
                         .serialize(preMatchEventTable.getAttribute(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)))));
-                matchInputKeys.put(matchKey, Arrays.asList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
+                matchInputKeys.put(matchKey, Collections.singletonList(MATCH_KEYS_TO_DISPLAY_NAMES.get(matchKey)));
             }
         }
         matchInput.setKeyMap(matchInputKeys);

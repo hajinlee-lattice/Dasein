@@ -189,13 +189,14 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
     @Override
     protected void onPostTransformationCompleted() {
         String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
+        Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
+        sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
+        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
+
         String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
-        updateEntityValueMapInContext(BusinessEntity.Transaction, TABLE_GOING_TO_REDSHIFT, sortedDailyTableName,
-                String.class);
-        updateEntityValueMapInContext(BusinessEntity.Transaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, TABLE_GOING_TO_REDSHIFT, sortedPeriodTableName,
-                String.class);
-        updateEntityValueMapInContext(BusinessEntity.PeriodTransaction, APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
+        Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
+        sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
+        exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
     }
 
     @Override

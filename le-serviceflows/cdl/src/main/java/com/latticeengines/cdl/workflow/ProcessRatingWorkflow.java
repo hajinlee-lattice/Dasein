@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.steps.export.ExportToRedshift;
+import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.CombineStatistics;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;

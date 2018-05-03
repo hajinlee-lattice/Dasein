@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -112,12 +111,9 @@ public class ProfileRating extends ProfileStepBase<ProcessRatingStepConfiguratio
         metadataProxy.updateTable(customerSpace, ratingTableName, servingStoreTable);
 
         ratingTableName = renameServingStoreTable(servingStoreTable);
-        RedshiftExportConfig exportConfig = exportTableRole(ratingTableName, getEntity().getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(ratingTableName, getEntity().getServingStore());
         dataCollectionProxy.upsertTable(customerSpace, ratingTableName, getEntity().getServingStore(), inactive);
 
-        updateEntityValueMapInContext(TABLE_GOING_TO_REDSHIFT, ratingTableName, String.class);
-        updateEntityValueMapInContext(APPEND_TO_REDSHIFT_TABLE, false, Boolean.class);
         updateEntityValueMapInContext(STATS_TABLE_NAMES, statsTableName, String.class);
 
         cleanupTemporaryTables();

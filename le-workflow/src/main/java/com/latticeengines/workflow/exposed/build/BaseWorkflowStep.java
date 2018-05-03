@@ -98,7 +98,6 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     public static final String CONSOLIDATE_INPUT_IMPORTS = "CONSOLIDATE_INPUT_IMPORTS";
     public static final String CDL_ACTIVE_VERSION = "CDL_ACTIVE_VERSION";
     public static final String CUSTOMER_SPACE = "CUSTOMER_SPACE";
-    public static final String TABLE_GOING_TO_REDSHIFT = "TABLE_GOING_TO_REDSHIFT";
     public static final String TABLES_GOING_TO_DYNAMO = "TABLES_GOING_TO_DYNAMO";
     public static final String TABLES_GOING_TO_REDSHIFT = "TABLES_GOING_TO_REDSHIFT";
     public static final String ENTITIES_WITH_SCHEMA_CHANGE = "ENTITIES_WITH_SCHEMA_CHANGE";
@@ -106,10 +105,10 @@ public abstract class BaseWorkflowStep<T extends BaseStepConfiguration> extends 
     protected static final String RATING_ENGINE_ID_TO_ACTIVATE = "RATING_ENGINE_ID_TO_ACTIVATE";
     protected static final String RULE_RAW_RATING_TABLE_NAME = "RULE_RAW_RATING_TABLE_NAME";
     protected static final String AI_RAW_RATING_TABLE_NAME = "AI_RAW_RATING_TABLE_NAME";
-    protected static final String APPEND_TO_REDSHIFT_TABLE = "APPEND_TO_REDSHIFT_TABLE";
     protected static final String CDL_INACTIVE_VERSION = "CDL_INACTIVE_VERSION";
     protected static final String CDL_EVALUATION_DATE = "CDL_EVALUATION_DATE";
     protected static final String STATS_TABLE_NAMES = "STATS_TABLE_NAMES";
+    protected static final String TEMPORARY_CDL_TABLES = "TEMPORARY_CDL_TABLES";
     protected static final String ENTITY_DIFF_TABLES = "ENTITY_DIFF_TABLES";
     protected static final String RESET_ENTITIES = "RESET_ENTITIES";
     protected static final String EVALUATION_PERIOD = "EVALUATION_PERIOD";

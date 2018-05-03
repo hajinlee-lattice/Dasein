@@ -20,7 +20,6 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -72,8 +71,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         servingStoreTableName = renameServingStoreTable(servingStoreTable);
 
         if (publishToRedshift) {
-            RedshiftExportConfig exportConfig = exportTableRole(servingStoreTableName, getEntity().getServingStore());
-            addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+            exportTableRoleToRedshift(servingStoreTableName, getEntity().getServingStore());
         }
         dataCollectionProxy.upsertTable(customerSpace.toString(), servingStoreTableName,
                 getEntity().getServingStore(), inactive);
@@ -84,7 +82,7 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         customerSpace = configuration.getCustomerSpace();
         active = getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         inactive = getObjectFromContext(CDL_INACTIVE_VERSION, DataCollection.Version.class);
-        entity = getEntityToBeProfiled();
+        entity = getEntity();
 
         TableRoleInCollection servingStore = entity.getServingStore();
         profileTablePrefix = entity.name() + "Profile";
@@ -99,10 +97,10 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
                 masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getBatchStore(),
                         active);
                 if (StringUtils.isNotBlank(masterTableName)) {
-                    log.info("Found the batch store in active version " + active);
+                    log.info("Found the batch store in active version " + active + ": " + masterTableName);
                 }
             } else {
-                log.info("Found the batch store in inactive version " + inactive);
+                log.info("Found the batch store in inactive version " + inactive + ": " + masterTableName);
             }
             masterTable = metadataProxy.getTable(customerSpace.toString(), masterTableName);
             if (masterTable == null) {
@@ -164,13 +162,9 @@ public abstract class BaseSingleEntityProfileStep<T extends BaseProcessEntitySte
         putObjectInContext(key, entityValueMap);
     }
 
-    protected BusinessEntity getEntityToBeProfiled() {
-        return configuration.getMainEntity();
-    }
-
     @Override
     protected BusinessEntity getEntity() {
-        return getEntityToBeProfiled();
+        return configuration.getMainEntity();
     }
 
     protected abstract TableRoleInCollection profileTableRole();

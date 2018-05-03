@@ -1,9 +1,11 @@
 package com.latticeengines.cdl.workflow.steps.process;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -14,7 +16,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.pls.BucketedScoreSummary;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -80,18 +81,15 @@ public class FinishProcessing extends BaseWorkflowStep<ProcessStepConfiguration>
     }
 
     private void deleteOrphanTables() {
-        cleanupEntityTableMap(getMapObjectFromContext(ENTITY_DIFF_TABLES, BusinessEntity.class, String.class));
-    }
-
-    private void cleanupEntityTableMap(Map<BusinessEntity, String> entityTableNames) {
-        if (MapUtils.isNotEmpty(entityTableNames)) {
-            entityTableNames.forEach((entity, tableName) -> {
-                String servingStoreName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                        entity.getServingStore(), inactive);
-                if (!tableName.equals(servingStoreName)) {
-                    log.info("Removing orphan table " + tableName);
-                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
-                }
+        List<String> tempTables = getListObjectFromContext(TEMPORARY_CDL_TABLES, String.class);
+        if (CollectionUtils.isNotEmpty(tempTables)) {
+            List<String> tablesInCollection = dataCollectionProxy.getTableNames(customerSpace.toString(), inactive);
+            if (tablesInCollection != null) {
+                tempTables.removeAll(tablesInCollection);
+            }
+            tempTables.forEach(table -> {
+                log.info("Removing orphan table " + table);
+                metadataProxy.deleteTable(customerSpace.toString(), table);
             });
         }
     }

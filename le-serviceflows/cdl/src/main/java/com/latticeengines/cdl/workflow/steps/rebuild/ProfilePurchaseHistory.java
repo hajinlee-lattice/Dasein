@@ -58,7 +58,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
@@ -96,7 +95,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private ActivityMetricsProxy metricsProxy;
 
     @Override
-    protected BusinessEntity getEntityToBeProfiled() {
+    protected BusinessEntity getEntity() {
         return BusinessEntity.PurchaseHistory;
     }
 
@@ -147,9 +146,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
 
         Table curatedMetricsTable = metadataProxy.getTable(customerSpace.toString(), curatedMetricsTableName);
         curatedMetricsTableName = renameServingStoreTable(BusinessEntity.DepivotedPurchaseHistory, curatedMetricsTable);
-        RedshiftExportConfig exportConfig = exportTableRole(curatedMetricsTableName,
-                BusinessEntity.DepivotedPurchaseHistory.getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(curatedMetricsTableName, BusinessEntity.DepivotedPurchaseHistory.getServingStore());
         dataCollectionProxy.upsertTable(customerSpace.toString(), curatedMetricsTableName,
                 BusinessEntity.DepivotedPurchaseHistory.getServingStore(), inactive);
 

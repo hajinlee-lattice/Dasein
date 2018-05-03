@@ -39,10 +39,8 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 
 public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntityStepConfiguration>
@@ -51,15 +49,12 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
     protected BusinessEntity entity;
 
     private String sortedTablePrefix;
-    private String diffTableName;
+    protected String diffTableName;
     private String profileTableName;
 
     private TableRoleInCollection servingStore;
     private String servingStorePrimaryKey;
     private List<String> servingStoreSortKeys;
-
-    @Inject
-    private DataCollectionProxy dataCollectionProxy;
 
     @Inject
     private MetadataProxy metadataProxy;
@@ -78,8 +73,8 @@ public abstract class BaseProcessSingleEntityDiffStep<T extends BaseProcessEntit
             throw new RuntimeException("Diff table has not been created.");
         }
         redshiftTableName = renameServingStoreTable(redshiftTable);
-        RedshiftExportConfig exportConfig = exportTableRole(redshiftTableName, entity.getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, exportConfig, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(redshiftTableName, entity.getServingStore());
+        addToListInContext(TEMPORARY_CDL_TABLES, redshiftTableName, String.class);
     }
 
     @Override

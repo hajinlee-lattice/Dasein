@@ -36,7 +36,6 @@ import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed.Status;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
@@ -65,6 +64,9 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     @Value("${cdl.transform.workflow.mem.mb}")
     protected int workflowMemMb;
+
+    @Value("${eai.export.dynamo.signature}")
+    private String signature;
 
     private final DataCollectionProxy dataCollectionProxy;
 
@@ -236,6 +238,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 .workflowContainerMem(workflowMemMb) //
                 .currentDataCloudBuildNumber(currentDataCloudBuildNumber) //
                 .transformationGroup(transformationGroup, stdTransformDefns) //
+                .dynamoSignature(signature) //
                 .build();
     }
 

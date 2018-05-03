@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 
@@ -44,5 +45,17 @@ public class ProcessAccountDiff extends BaseProcessSingleEntityDiffStep<ProcessA
     @Override
     protected TableRoleInCollection profileTableRole() {
         return TableRoleInCollection.Profile;
+    }
+
+    @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        registerDynamoExport();
+    }
+
+    private void registerDynamoExport() {
+        String masterTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                TableRoleInCollection.ConsolidatedAccount, inactive);
+        exportToDynamo(diffTableName, masterTableName, InterfaceName.AccountId.name(), null);
     }
 }

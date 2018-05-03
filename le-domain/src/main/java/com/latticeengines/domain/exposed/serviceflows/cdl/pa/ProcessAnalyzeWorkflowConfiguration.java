@@ -13,8 +13,9 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.scoringapi.TransformDefinition;
 import com.latticeengines.domain.exposed.serviceflows.cdl.BaseCDLWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CombineStatisticsConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportToRedshiftStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToDynamoStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.steps.AWSPythonBatchConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 import com.latticeengines.domain.exposed.transform.TransformationGroup;
@@ -42,6 +43,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
 
         private CombineStatisticsConfiguration combineStatisticsConfiguration = new CombineStatisticsConfiguration();
         private ExportToRedshiftStepConfiguration exportToRedshift = new ExportToRedshiftStepConfiguration();
+        private ExportToDynamoStepConfiguration exportToDynamo = new ExportToDynamoStepConfiguration();
         private AWSPythonBatchConfiguration awsPythonDataConfiguration = new AWSPythonBatchConfiguration();
 
         public Builder initialDataFeedStatus(DataFeed.Status initialDataFeedStatus) {
@@ -59,6 +61,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processRatingWorkflowBuilder.customer(customerSpace);
             combineStatisticsConfiguration.setCustomerSpace(customerSpace);
             exportToRedshift.setCustomerSpace(customerSpace);
+            exportToDynamo.setCustomerSpace(customerSpace);
             awsPythonDataConfiguration.setCustomerSpace(customerSpace);
             return this;
         }
@@ -66,6 +69,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
         public Builder microServiceHostPort(String microServiceHostPort) {
             processStepConfiguration.setMicroServiceHostPort(microServiceHostPort);
             exportToRedshift.setMicroServiceHostPort(microServiceHostPort);
+            exportToDynamo.setMicroServiceHostPort(microServiceHostPort);
             processRatingWorkflowBuilder.microServiceHostPort(microServiceHostPort);
             awsPythonDataConfiguration.setMicroServiceHostPort(microServiceHostPort);
             return this;
@@ -79,6 +83,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             processTransactionWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             processRatingWorkflowBuilder.internalResourceHostPort(internalResourceHostPort);
             exportToRedshift.setInternalResourceHostPort(internalResourceHostPort);
+            exportToDynamo.setInternalResourceHostPort(internalResourceHostPort);
             awsPythonDataConfiguration.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             return this;
@@ -140,6 +145,11 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             return this;
         }
 
+        public Builder dynamoSignature(String signature) {
+            exportToDynamo.setDynamoSignature(signature);
+            return this;
+        }
+
         public ProcessAnalyzeWorkflowConfiguration build() {
             configuration.setContainerConfiguration("processAnalyzeWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
@@ -151,6 +161,7 @@ public class ProcessAnalyzeWorkflowConfiguration extends BaseCDLWorkflowConfigur
             configuration.add(processRatingWorkflowBuilder.build());
             configuration.add(combineStatisticsConfiguration);
             configuration.add(exportToRedshift);
+            configuration.add(exportToDynamo);
             configuration.add(awsPythonDataConfiguration);
             return configuration;
         }

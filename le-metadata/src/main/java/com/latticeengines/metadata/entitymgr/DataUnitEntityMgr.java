@@ -6,7 +6,7 @@ import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
 
 public interface DataUnitEntityMgr {
 
-    DataUnit createOrUpdateByName(String tenantId, DataUnit dataUnit);
+    DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit);
 
     List<DataUnit> findByNameFromReader(String tenantId, String name);
 

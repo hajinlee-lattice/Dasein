@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -18,8 +19,8 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
-import com.latticeengines.workflow.exposed.build.Choreographer;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
+import com.latticeengines.workflow.exposed.build.Choreographer;
 
 @Component
 public class ProcessProductChoreographer extends AbstractProcessEntityChoreographer implements Choreographer {
@@ -68,6 +69,12 @@ public class ProcessProductChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected BusinessEntity mainEntity() {
         return BusinessEntity.Product;
+    }
+
+    @Override
+    protected boolean shouldUpdate() {
+        // product should never enter update mode
+        return false;
     }
 
     @Override

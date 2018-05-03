@@ -7,8 +7,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.datacloud.manage.DataCloudVersion;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -57,10 +58,6 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
                 "/customerspaces/{customerSpace}/datacollection/datacloudbuildnumber/{dataCloudBuildNumber}",
                 shortenCustomerSpace(customerSpace), dataCloudBuildNumber);
         put("update dataCollection datacloudbuildnumber", url);
-    }
-
-    public AttributeRepository getAttrRepo(String customerSpace) {
-        return getAttrRepo(customerSpace, null);
     }
 
     public AttributeRepository getAttrRepo(String customerSpace, DataCollection.Version version) {
@@ -129,17 +126,29 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
         }
     }
 
+    public List<String> getTableNames(String customerSpace, DataCollection.Version version) {
+        return getTableNames(customerSpace, null, version);
+    }
+
     public List<String> getTableNames(String customerSpace, TableRoleInCollection role,
             DataCollection.Version version) {
-        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames?role={role}";
+        String urlPattern = "/customerspaces/{customerSpace}/datacollection/tablenames";
         List<Object> args = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
         args.add(shortenCustomerSpace(customerSpace));
-        args.add(role);
+        if (role != null) {
+            conditions.add("role={role}");
+            args.add(role);
+        }
         if (version != null) {
-            urlPattern += "&version={version}";
+            conditions.add("version={version}");
             args.add(version);
         }
+        if (CollectionUtils.isNotEmpty(conditions)) {
+            urlPattern += "?" + StringUtils.join(conditions, "&");
+        }
         String url = constructUrl(urlPattern, args.toArray(new Object[args.size()]));
+        log.info("url=" + url);
         List<?> list = get("getTableNames", url, List.class);
         return JsonUtils.convertList(list, String.class);
     }

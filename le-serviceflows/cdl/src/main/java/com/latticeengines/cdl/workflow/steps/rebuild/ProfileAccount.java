@@ -73,6 +73,12 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
     }
 
     @Override
+    protected void onPostTransformationCompleted() {
+        super.onPostTransformationCompleted();
+        registerDynamoExport();
+    }
+
+    @Override
     protected PipelineTransformationRequest getTransformRequest() {
         String masterTableName = masterTable.getName();
         try {
@@ -287,6 +293,10 @@ public class ProfileAccount extends BaseSingleEntityProfileStep<ProcessAccountSt
         } else {
             return str;
         }
+    }
+
+    private void registerDynamoExport() {
+        exportToDynamo( masterTable.getName(), InterfaceName.AccountId.name(), null);
     }
 
 }

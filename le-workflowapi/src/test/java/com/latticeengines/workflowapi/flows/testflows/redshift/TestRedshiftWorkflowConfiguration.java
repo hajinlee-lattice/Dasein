@@ -1,7 +1,7 @@
 package com.latticeengines.workflowapi.flows.testflows.redshift;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.export.ExportToRedshiftStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.ExportToRedshiftStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class TestRedshiftWorkflowConfiguration extends WorkflowConfiguration {

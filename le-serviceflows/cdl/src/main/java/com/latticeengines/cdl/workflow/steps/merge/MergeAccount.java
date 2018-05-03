@@ -172,7 +172,4 @@ public class MergeAccount extends BaseSingleEntityMergeImports<ProcessAccountSte
         metadataProxy.updateTable(customerSpace.toString(), table.getName(), table);
         return table;
     }
-
-
-
 }

@@ -42,7 +42,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -117,15 +116,13 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
 
         Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
         sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
-        RedshiftExportConfig sortedDailyTableExport = exportTableRole(sortedDailyTableName,
-                BusinessEntity.Transaction.getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, sortedDailyTableExport, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
+        addToListInContext(TEMPORARY_CDL_TABLES, sortedDailyTableName, String.class);
 
         Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
-        RedshiftExportConfig sortedPeriodTableExport = exportTableRole(sortedPeriodTableName,
-                BusinessEntity.PeriodTransaction.getServingStore());
-        addToListInContext(TABLES_GOING_TO_REDSHIFT, sortedPeriodTableExport, RedshiftExportConfig.class);
+        exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
+        addToListInContext(TEMPORARY_CDL_TABLES, sortedPeriodTableName, String.class);
     }
 
     @Override

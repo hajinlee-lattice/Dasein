@@ -162,5 +162,10 @@ public class MatchDataCloudWorkflowConfiguration extends BaseDataCloudWorkflowCo
             match.setMatchHdfsPod(matchHdfsPod);
             return this;
         }
+
+        public Builder matchType(String matchType) {
+            match.setMatchType(matchType);
+            return this;
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.latticeengines.workflowapi.flows;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -8,13 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
@@ -120,7 +124,7 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .matchAccountIdColumn(InterfaceName.AccountId.name()) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
-                .matchColumnSelection(ColumnSelection.Predefined.getDefaultSelection(), "1.0") //
+                .matchColumnSelection(ColumnSelection.Predefined.Model, "1.0") //
                 .dataCloudVersion(getDataCloudVersion()) //
                 .matchClientDocument(matchClientDocument) //
                 .matchType(MatchCommandType.MATCH_WITH_UNIVERSE) //
@@ -133,7 +137,6 @@ public class CustomEventMatchWorkflowDeploymentTestNG extends ImportMatchAndMode
                 .sourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString()) //
                 .build();
         workflowConfig.setCustomEventModelingType(customEventModelingType);
-
         workflowService.registerJob(workflowConfig, applicationContext);
         WorkflowExecutionId workflowId = workflowService.start(workflowConfig);
         waitForCompletion(workflowId);

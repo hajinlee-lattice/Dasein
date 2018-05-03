@@ -34,11 +34,6 @@ public class UpdateProductWorkflowConfiguration extends BaseCDLWorkflowConfigura
             return this;
         }
 
-        public Builder workflowContainerMem(int mb) {
-            configuration.setContainerMemoryMB(mb);
-            return this;
-        }
-
         public Builder userId(String userId) {
             configuration.setUserId(userId);
             return this;

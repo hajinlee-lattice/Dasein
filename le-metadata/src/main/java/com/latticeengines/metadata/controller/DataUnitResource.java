@@ -24,7 +24,7 @@ public class DataUnitResource {
 
     @PostMapping("")
     public DataUnit create(@PathVariable String customerSpace, @RequestBody DataUnit dataUnit) {
-        return dataUnitService.createOrUpdateByName(dataUnit);
+        return dataUnitService.createOrUpdateByNameAndStorageType(dataUnit);
     }
 
 }

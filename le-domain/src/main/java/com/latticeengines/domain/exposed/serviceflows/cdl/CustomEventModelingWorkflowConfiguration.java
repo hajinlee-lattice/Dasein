@@ -240,12 +240,6 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             return this;
         }
 
-        public Builder matchColumnSelection(Predefined predefinedColumnSelection, String selectionVersion) {
-            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(predefinedColumnSelection,
-                    selectionVersion);
-            return this;
-        }
-
         public Builder dataCloudVersion(String dataCloudVersion) {
             customEventMatchWorkflowConfigurationBuilder.dataCloudVersion(dataCloudVersion);
             modelWorkflowBuilder.dataCloudVersion(dataCloudVersion);
@@ -406,6 +400,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public CustomEventModelingWorkflowConfiguration build() {
+            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.Model, "1.0");
             exportBucketTool.setUsingDisplayName(false);
 
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),

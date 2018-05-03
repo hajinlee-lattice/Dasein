@@ -18,9 +18,9 @@ public class DataUnitServiceImpl implements DataUnitService {
     private DataUnitEntityMgr entityMgr;
 
     @Override
-    public DataUnit createOrUpdateByName(DataUnit dataUnit) {
+    public DataUnit createOrUpdateByNameAndStorageType(DataUnit dataUnit) {
         String tenantId = MultiTenantContext.getTenantId();
-        return entityMgr.createOrUpdateByName(tenantId, dataUnit);
+        return entityMgr.createOrUpdateByNameAndStorageType(tenantId, dataUnit);
     }
 
     @Override

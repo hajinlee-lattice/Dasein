@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_DYNAMO;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.TABLES_GOING_TO_REDSHIFT;
 
 import java.util.List;
@@ -16,10 +17,12 @@ import com.latticeengines.cdl.workflow.ProcessContactWorkflow;
 import com.latticeengines.cdl.workflow.ProcessProductWorkflow;
 import com.latticeengines.cdl.workflow.ProcessRatingWorkflow;
 import com.latticeengines.cdl.workflow.ProcessTransactionWorkflow;
-import com.latticeengines.cdl.workflow.steps.export.ExportToRedshift;
+import com.latticeengines.serviceflows.workflow.export.ExportToRedshift;
 import com.latticeengines.cdl.workflow.steps.process.AwsApsGeneratorStep;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
+import com.latticeengines.serviceflows.workflow.export.ExportToDynamo;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
 import com.latticeengines.workflow.exposed.build.BaseChoreographer;
@@ -66,6 +69,9 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     @Inject
     private ExportToRedshift exportToRedshiftStep;
 
+    @Inject
+    private ExportToDynamo exportToDynamoStep;
+
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         boolean skip = false;
@@ -81,6 +87,8 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
             skip = skipApsGeneration();
         } else if (isExportToRedshiftStep(step)) {
             skip = skipExportToRedshiftStep(step);
+        } else if (isExportToDynamoStep(step)) {
+            skip = skipExportToDynamoStep(step);
         } else if (isRatingStep(seq)) {
             skip = ratingChoreographer.skipStep(step, seq);
         }
@@ -127,9 +135,19 @@ public class ProcessAnalyzeChoreographer extends BaseChoreographer implements Ch
     }
 
     private boolean skipExportToRedshiftStep(AbstractStep<? extends BaseStepConfiguration> step) {
-        List<RedshiftExportConfig> redshiftExports = step.getListObjectFromContext(TABLES_GOING_TO_REDSHIFT,
+        List<RedshiftExportConfig> exportConfigs = step.getListObjectFromContext(TABLES_GOING_TO_REDSHIFT,
                 RedshiftExportConfig.class);
-        return CollectionUtils.isEmpty(redshiftExports);
+        return CollectionUtils.isEmpty(exportConfigs);
+    }
+
+    private boolean isExportToDynamoStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        return step.name().endsWith(exportToDynamoStep.name());
+    }
+
+    private boolean skipExportToDynamoStep(AbstractStep<? extends BaseStepConfiguration> step) {
+        List<DynamoExportConfig> exportConfigs = step.getListObjectFromContext(TABLES_GOING_TO_DYNAMO,
+                DynamoExportConfig.class);
+        return CollectionUtils.isEmpty(exportConfigs);
     }
 
     private boolean isApsGenerationStep(AbstractStep<? extends BaseStepConfiguration> step) {

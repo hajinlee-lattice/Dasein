@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.DynamoExportConfig;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.RedshiftExportConfig;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -190,7 +192,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         return goodName;
     }
 
-    protected RedshiftExportConfig exportTableRole(String tableName, TableRoleInCollection tableRole) {
+    protected void exportTableRoleToRedshift(String tableName, TableRoleInCollection tableRole) {
         String distKey = tableRole.getPrimaryKey().name();
         List<String> sortKeys = new ArrayList<>(tableRole.getForeignKeysAsStringList());
         if (!sortKeys.contains(tableRole.getPrimaryKey().name())) {
@@ -202,7 +204,21 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
         config.setSortKeys(sortKeys);
         config.setInputPath(getInputPath(tableName) + "/*.avro");
         config.setUpdateMode(false);
-        return config;
+
+        addToListInContext(TABLES_GOING_TO_REDSHIFT, config, RedshiftExportConfig.class);
+    }
+
+    protected void exportToDynamo(String tableName, String partitionKey, String sortKey) {
+        String inputPath = getInputPath(tableName);
+        DynamoExportConfig config = new DynamoExportConfig();
+        config.setTableName(tableName);
+        config.setInputPath(inputPath);
+        config.setPartitionKey(partitionKey);
+        if (StringUtils.isNotBlank(sortKey)) {
+            config.setSortKey(sortKey);
+        }
+
+        addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 
     private String getInputPath(String tableName) {

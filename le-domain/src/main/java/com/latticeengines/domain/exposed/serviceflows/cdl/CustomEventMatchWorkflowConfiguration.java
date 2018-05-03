@@ -14,6 +14,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlAccountC
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlMergeConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlSplitConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.MatchCdlStepConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.swlib.SoftwareLibrary;
 
@@ -198,6 +199,8 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public CustomEventMatchWorkflowConfiguration build() {
+            matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
+
             configuration.setContainerConfiguration("customEventMatchWorkflow", configuration.getCustomerSpace(),
                     configuration.getClass().getSimpleName());
             configuration.add(matchDataCloudWorkflowBuilder.build());

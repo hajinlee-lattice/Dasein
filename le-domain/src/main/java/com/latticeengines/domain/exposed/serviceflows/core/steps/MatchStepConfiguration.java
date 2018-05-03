@@ -9,6 +9,9 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public class MatchStepConfiguration extends MicroserviceStepConfiguration {
 
+    public static final String LDC = "LDC";
+    public static final String CDL = "CDL";
+
     private String dbUrl;
 
     private String dbUser;
@@ -45,6 +48,9 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
     private String matchQueue;
 
     private String sourceSchemaInterpretation;
+
+    @JsonProperty("match_type")
+    private String matchType;
 
     @JsonProperty("skip_dedupe")
     private boolean skipDedupe;
@@ -267,4 +273,11 @@ public class MatchStepConfiguration extends MicroserviceStepConfiguration {
         return matchRequestSource;
     }
 
+    public String getMatchType() {
+        return matchType;
+    }
+
+    public void setMatchType(String matchType) {
+        this.matchType = matchType;
+    }
 }
