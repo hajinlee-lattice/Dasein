@@ -24,6 +24,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -140,7 +141,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         try {
             ValidateFileHeaderUtils.checkForReservedHeaders("file",
                     Sets.newHashSet(new String[] { "a", "b", reservedName, "c" }),
-                    Collections.singletonList(reservedName));
+                    Collections.singletonList(reservedName), Collections.emptyList());
         } catch (LedpException e) {
             thrown = e;
         }
@@ -148,10 +149,30 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         assertEquals(thrown.getCode(), LedpCode.LEDP_18122);
     }
 
+    @Test(groups = "unit", dataProvider = "reservedBeginings")
+    public void validateReservedBeginingsInHeaders(String reservedBeginings) throws IOException {
+        LedpException thrown = null;
+        String reservedName = reservedBeginings + "01";
+        try {
+            ValidateFileHeaderUtils.checkForReservedHeaders("file",
+                    Sets.newHashSet(new String[] { "a", "b", reservedName, "c" }),
+                    Collections.emptyList(), Collections.singleton(reservedName));
+        } catch (LedpException e) {
+            thrown = e;
+        }
+        assertNotNull(thrown);
+        assertEquals(thrown.getCode(), LedpCode.LEDP_18183);
+    }
+
     @DataProvider(name = "reservedNames")
     public Object[][] reservedNames() {
         return new Object[][] { new Object[] { ReservedField.Percentile.displayName },
                 new Object[] { ReservedField.Rating.displayName } };
+    }
+
+    @DataProvider(name = "reservedBeginings")
+    public Object[][] reservedBeginings() {
+        return new Object[][] { new Object[] { DataCloudConstants.CEAttr }, new Object[] { DataCloudConstants.EAttr } };
     }
 
 }

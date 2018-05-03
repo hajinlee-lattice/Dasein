@@ -24,6 +24,7 @@ import com.latticeengines.baton.exposed.service.BatonService;
 import com.latticeengines.common.exposed.closeable.resource.CloseableResourcePool;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.ApprovedUsage;
@@ -101,7 +102,8 @@ public class ScoringFileMetadataServiceImpl implements ScoringFileMetadataServic
         ValidateFileHeaderUtils.checkForEmptyHeaders(displayName, headerFields);
         Collection<String> reservedWords = Arrays
                 .asList(new String[] { ReservedField.Percentile.displayName, ReservedField.Rating.displayName });
-        ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords);
+        Collection<String> reservedBeginings = Arrays.asList(DataCloudConstants.CEAttr, DataCloudConstants.EAttr);
+        ValidateFileHeaderUtils.checkForReservedHeaders(displayName, headerFields, reservedWords, reservedBeginings);
         return stream;
     }
 

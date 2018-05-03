@@ -207,7 +207,7 @@ public class ValidateFileHeaderUtils {
     }
 
     public static void checkForReservedHeaders(String displayName, Set<String> headerFields,
-            Collection<String> reservedWords) {
+            Collection<String> reservedWords, Collection<String> reservedBeginings) {
         List<String> overlappedWords = new ArrayList<>();
         for (String reservedWord : reservedWords) {
             if (headerFields.contains(reservedWord)) {
@@ -216,6 +216,13 @@ public class ValidateFileHeaderUtils {
         }
         if (!overlappedWords.isEmpty()) {
             throw new LedpException(LedpCode.LEDP_18122, new String[] { overlappedWords.toString(), displayName });
+        }
+        for (String reservedBegining : reservedBeginings) {
+            for (String header : headerFields) {
+                if (header.startsWith(reservedBegining)) {
+                    throw new LedpException(LedpCode.LEDP_18183, new String[] { header, reservedBegining });
+                }
+            }
         }
 
     }
