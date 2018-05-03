@@ -51,8 +51,8 @@ public class Bucket implements Serializable {
     @JsonProperty("Txn")
     private Transaction transaction;
 
-    @JsonProperty("PctChg")
-    private PercentChange percentChange;
+    @JsonProperty("Chg")
+    private Change change;
 
     public static Bucket nullBkt() {
         return new Bucket();
@@ -225,12 +225,12 @@ public class Bucket implements Serializable {
         this.transaction = transaction;
     }
 
-    public PercentChange getPercentChange() {
-        return percentChange;
+    public Change getChange() {
+        return change;
     }
 
-    public void setPercentChange(PercentChange percentChange) {
-        this.percentChange = percentChange;
+    public void setChange(Change change) {
+        this.change = change;
     }
 
     public int getIdAsInt() {
@@ -295,7 +295,7 @@ public class Bucket implements Serializable {
     @JsonIgnoreProperties(ignoreUnknown = true)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
-    public static class PercentChange implements Serializable {
+    public static class Change implements Serializable {
 
         private static final long serialVersionUID = 5575780996889844007L;
 

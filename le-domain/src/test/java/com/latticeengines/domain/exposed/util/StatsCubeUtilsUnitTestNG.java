@@ -14,6 +14,7 @@ import java.util.zip.GZIPInputStream;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.collections4.CollectionUtils;
 import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -22,6 +23,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.statistics.AttributeStats;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
+import com.latticeengines.domain.exposed.datacloud.statistics.Bucket.Change;
 import com.latticeengines.domain.exposed.datacloud.statistics.BucketType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Buckets;
 import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
@@ -36,6 +38,7 @@ import com.latticeengines.domain.exposed.metadata.statistics.TopAttribute;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.DataPage;
 
 public class StatsCubeUtilsUnitTestNG {
@@ -135,6 +138,51 @@ public class StatsCubeUtilsUnitTestNG {
         verifyTechTopN(topNTree.getCategories().get(Category.WEBSITE_PROFILE), cube);
         verifyTechTopN(topNTree.getCategories().get(Category.TECHNOLOGY_PROFILE), cube);
         verifyPurchaseHistoryTopN(topNTree.getCategories().get(Category.PRODUCT_SPEND));
+    }
+
+    @Test(groups = "unit", dataProvider = "BktsToChgBkts")
+    public void testBktToChgBkt(int id, Object min, Object max, boolean minInclusive, boolean maxInclusive,
+            boolean isValBkt, Bucket.Change.Direction direction, Bucket.Change.ComparisonType comparisonType,
+            Object val1, Object val2) {
+        Bucket bkt;
+        if (isValBkt) {
+            bkt = Bucket.valueBkt(String.valueOf(min));
+        } else {
+            bkt = Bucket.rangeBkt(min, max, minInclusive, maxInclusive);
+        }
+        Bucket chgBkt = StatsCubeUtils.convertBucketToChgBucket(bkt);
+        Assert.assertEquals(chgBkt.getChange().getDirection(), direction);
+        Assert.assertEquals(chgBkt.getChange().getComparisonType(), comparisonType);
+        Assert.assertEquals(chgBkt.getChange().getAbsVals().get(0), val1);
+        if (val2 != null) {
+            Assert.assertNotNull(chgBkt.getChange().getAbsVals().get(1));
+            Assert.assertEquals(chgBkt.getChange().getAbsVals().get(1), val2);
+        }
+    }
+
+    @Test(groups = "unit", dataProvider = "ChgBktsToBkts")
+    public void testChgBktToBkt(int id, Bucket.Change.Direction direction, Bucket.Change.ComparisonType chgCmp,
+            Object chgVal1, Object chgVal2, ComparisonType cmp, Object val1, Object val2) {
+        Bucket chgBkt = new Bucket();
+        Change chg = new Change();
+        chg.setDirection(direction);
+        chg.setComparisonType(chgCmp);
+        List<Object> absVals = new ArrayList<>();
+        absVals.add(chgVal1);
+        if (chgVal2 != null) {
+            absVals.add(chgVal2);
+        }
+        chg.setAbsVals(absVals);
+        chgBkt.setChange(chg);
+        Bucket bkt = StatsCubeUtils.convertChgBucketToBucket(chgBkt);
+        System.out.println(JsonUtils.serialize(bkt));
+        Assert.assertEquals(bkt.getComparisonType(), cmp);
+        Assert.assertEquals(bkt.getValues().get(0), val1);
+        if (val2 != null) {
+            Assert.assertNotNull(bkt.getValues().get(1));
+            Assert.assertEquals(bkt.getValues().get(1), val2);
+        }
+
     }
 
     private void verifyFirmographicsTopN(CategoryTopNTree catTopNTree, StatsCube cube) {
@@ -284,6 +332,82 @@ public class StatsCubeUtilsUnitTestNG {
 
     private InputStream readResource(String fileName) {
         return Thread.currentThread().getContextClassLoader().getResourceAsStream(RESOURCE_ROOT + fileName);
+    }
+
+    // Bucket: ID, min, max, minInclusive, maxInclusive, isValBkt
+    // ChgBucket: Direction, ComparisonType, Val1, Val2
+    @DataProvider(name = "BktsToChgBkts")
+    private Object[][] bktsToChgBkts() {
+        return new Object[][] { //
+                // Numerical INC
+                { 0, 0, 3, true, false, false, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 0.0,
+                        3.0 }, //
+                { 1, 1, 3, true, false, false, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 1.0,
+                        3.0 }, //
+                { 2, 3, null, true, false, false, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST,
+                        3.0, null }, //
+                { 3, null, 3, true, false, false, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AS_MUCH_AS,
+                        3.0, null }, //
+                { 4, 0, null, true, false, false, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST,
+                        0.0, null }, //
+
+                // Numerical DEC
+                { 5, null, 0, true, false, false, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST,
+                        0.0, null }, //
+                { 6, -3, 0, true, false, false, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.BETWEEN, 0.0,
+                        3.0 }, //
+                { 7, -3, -1, true, false, false, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.BETWEEN, 1.0,
+                        3.0 }, //
+                { 8, null, -3, true, false, false, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST,
+                        3.0, null }, //
+                { 9, -3, null, true, false, false, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS,
+                        3.0, null }, //
+
+                // Distinct INC
+                { 10, 3, 3, false, false, true, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 3.0,
+                        3.0 }, //
+                { 11, 0, 0, false, false, true, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 0.0,
+                        0.0 }, //
+
+                // Distinct DEC
+                { 12, -3, -3, false, false, true, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.BETWEEN,
+                        3.0, 3.0 }, //
+        };
+    }
+
+    // ChgBucket: ID, Direction, ComparisonType, Val1, Val2
+    // Bucket: ComparisonType, Val1, Val2
+    @DataProvider(name = "ChgBktsToBkts")
+    private Object[][] chgBktsToBkts() {
+        return new Object[][] {
+                // INC
+                { 0, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AS_MUCH_AS, 0, null,
+                        ComparisonType.GTE_AND_LTE, 0.0, 0.0 }, //
+                { 1, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AS_MUCH_AS, 3, null,
+                        ComparisonType.GTE_AND_LTE, 0.0, 3.0 }, //
+                { 2, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 0, 0,
+                        ComparisonType.GTE_AND_LTE, 0.0, 0.0 }, //
+                { 3, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.BETWEEN, 0, 3,
+                        ComparisonType.GTE_AND_LTE, 0.0, 3.0 }, //
+                { 4, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST, 0, null,
+                        ComparisonType.GREATER_OR_EQUAL, 0.0, null }, //
+                { 5, Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST, 3, null,
+                        ComparisonType.GREATER_OR_EQUAL, 3.0, null }, //
+
+                // DEC
+                { 6, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS, 0, null,
+                        ComparisonType.GTE_AND_LTE, 0.0, 0.0 }, //
+                { 7, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AS_MUCH_AS, 3, null,
+                        ComparisonType.GTE_AND_LTE, -3.0, 0.0 }, //
+                { 8, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.BETWEEN, 0, 0,
+                        ComparisonType.GTE_AND_LTE, 0.0, 0.0 }, //
+                { 9, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.BETWEEN, 0, 3,
+                        ComparisonType.GTE_AND_LTE, -3.0, 0.0 }, //
+                { 10, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST, 0, null,
+                        ComparisonType.LESS_OR_EQUAL, 0.0, null }, //
+                { 11, Bucket.Change.Direction.DEC, Bucket.Change.ComparisonType.AT_LEAST, 3, null,
+                        ComparisonType.LESS_OR_EQUAL, -3.0, null }, //
+        };
     }
 
 }

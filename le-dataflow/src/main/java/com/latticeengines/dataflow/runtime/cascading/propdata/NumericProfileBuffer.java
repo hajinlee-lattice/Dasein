@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.dataflow.exposed.builder.strategy.impl.KVDepivotStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.IntervalBucket;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 import cascading.flow.FlowProcess;
 import cascading.operation.BaseOperation;
@@ -95,6 +96,9 @@ public class NumericProfileBuffer extends BaseOperation implements Buffer {
         if (boundaries.size() == 0) {
             bufferCall.getOutputCollector().add(setupRetainedAttrTuple(bufferCall));
         } else {
+            if (ActivityMetricsUtils.isSpendChangeAttr(bufferCall.getGroup().getString(keyAttr))) {
+                boundaries = ActivityMetricsUtils.insertZeroBndForSpendChangeBkt(boundaries);
+            }
             bufferCall.getOutputCollector().add(setupIntervalBucketTuple(bufferCall, boundaries));
         }
     }

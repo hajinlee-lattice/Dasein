@@ -296,7 +296,7 @@ public class StatsCubeUtils {
         buckets.setType(BucketType.PercentChange);
         List<Bucket> bucketList = new ArrayList<>();
         buckets.getBucketList().forEach(bucket -> {
-            Bucket bucket1 = convertPctChgBucketForSpendChange(bucket);
+            Bucket bucket1 = convertBucketToChgBucket(bucket);
             if (bucket1 != null) {
                 bucketList.add(bucket1);
             }
@@ -309,61 +309,142 @@ public class StatsCubeUtils {
         return attrStats;
     }
 
-    private static Bucket convertPctChgBucketForSpendChange(Bucket bucket) {
+    public static Bucket convertBucketToChgBucket(Bucket bucket) {
         if (CollectionUtils.isEmpty(bucket.getValues())) {
-            return null;
+            return bucket;
         }
-        Bucket.PercentChange pctChg = new Bucket.PercentChange();
+        Bucket.Change chg = new Bucket.Change();
         List<Object> absVals = new ArrayList<>();
-        if (bucket.getComparisonType() == ComparisonType.LESS_THAN) {
-            // Numerical bucket gives Number as value type, Discrete bucket gives String as value type
-            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+        switch (bucket.getComparisonType()) {
+        case LESS_THAN:
+            Double val = valObjToDouble(bucket.getValues().get(0));
             if (val <= 0) {
-                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
-                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
+                chg.setDirection(Bucket.Change.Direction.DEC);
+                chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
             } else {
-                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
-                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AS_MUCH_AS);
+                chg.setDirection(Bucket.Change.Direction.INC);
+                chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
             }
-            absVals.add(Integer.valueOf(Math.abs(val)));
-        } else if (bucket.getComparisonType() == ComparisonType.GREATER_OR_EQUAL) {
-            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            absVals.add(Double.valueOf(Math.abs(val)));
+            break;
+        case GREATER_OR_EQUAL:
+            val = valObjToDouble(bucket.getValues().get(0));
             if (val < 0) {
-                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
-                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AS_MUCH_AS);
+                chg.setDirection(Bucket.Change.Direction.DEC);
+                chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
             } else {
-                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
-                pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
+                chg.setDirection(Bucket.Change.Direction.INC);
+                chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
             }
-            absVals.add(Integer.valueOf(Math.abs(val)));
-        } else if (bucket.getComparisonType() == ComparisonType.EQUAL) {
-            Integer val = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
+            absVals.add(Double.valueOf(Math.abs(val)));
+            break;
+        case EQUAL:
+            val = valObjToDouble(bucket.getValues().get(0));
             if (val < 0) {
-                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
+                chg.setDirection(Bucket.Change.Direction.DEC);
             } else {
-                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
+                chg.setDirection(Bucket.Change.Direction.INC);
             }
-            pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.AT_LEAST);
-            absVals.add(Integer.valueOf(Math.abs(val)));
-        } else { // ComparisonType.GTE_AND_LT
-            Integer val1 = Integer.valueOf(String.valueOf(bucket.getValues().get(0)));
-            Integer val2 = Integer.valueOf(String.valueOf(bucket.getValues().get(1)));
+            chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
+            absVals.add(Double.valueOf(Math.abs(val)));
+            absVals.add(Double.valueOf(Math.abs(val)));
+            break;
+        case GTE_AND_LT:
+            Double val1 = valObjToDouble(bucket.getValues().get(0));
+            Double val2 = valObjToDouble(bucket.getValues().get(1));
             if (val2 > 0) {
-                pctChg.setDirection(Bucket.PercentChange.Direction.INC);
-                absVals.add(Integer.valueOf(0));
-                absVals.add(Integer.valueOf(Math.abs(val2)));
+                chg.setDirection(Bucket.Change.Direction.INC);
+                absVals.add(Double.valueOf(Math.abs(val1)));
+                absVals.add(Double.valueOf(Math.abs(val2)));
             } else {
-                pctChg.setDirection(Bucket.PercentChange.Direction.DEC);
-                absVals.add(Integer.valueOf(Math.abs(val2)));
-                absVals.add(Integer.valueOf(Math.abs(val1)));
+                chg.setDirection(Bucket.Change.Direction.DEC);
+                absVals.add(Double.valueOf(Math.abs(val2)));
+                absVals.add(Double.valueOf(Math.abs(val1)));
             }
-            pctChg.setComparisonType(Bucket.PercentChange.ComparisonType.BETWEEN);
+            chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
+            break;
+        default:
+            throw new UnsupportedOperationException("Unknown comparison type in bucket: " + bucket.getComparisonType());
         }
-        pctChg.setAbsVals(absVals);
-        bucket.setPercentChange(pctChg);
+
+        chg.setAbsVals(absVals);
+        bucket.setChange(chg);
         bucket.setComparisonType(null);
         bucket.setValues(null);
         return bucket;
+    }
+
+    public static Bucket convertChgBucketToBucket(Bucket bucket) {
+        if (bucket.getChange() == null) {
+            return bucket;
+        }
+        Bucket.Change chg = bucket.getChange();
+        List<Object> vals = new ArrayList<>();
+        switch (chg.getDirection()) {
+        case INC:
+            switch (chg.getComparisonType()) {
+            case AT_LEAST:
+                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                bucket.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
+                break;
+            case AS_MUCH_AS:
+                vals.add(Double.valueOf(0));
+                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                break;
+            case BETWEEN:
+                vals.add(valObjToDouble(chg.getAbsVals().get(0)));
+                vals.add(valObjToDouble(chg.getAbsVals().get(1)));
+                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Unknown comparison type in Bucket.Change: " + chg.getComparisonType());
+            }
+            break;
+        case DEC:
+            switch (chg.getComparisonType()) {
+            case AT_LEAST:
+                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                bucket.setComparisonType(ComparisonType.LESS_OR_EQUAL);
+                break;
+            case AS_MUCH_AS:
+                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                vals.add(Double.valueOf(0));
+                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                break;
+            case BETWEEN:
+                vals.add(valObjToDouble(chg.getAbsVals().get(1), true));
+                vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
+                bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
+                break;
+            default:
+                throw new UnsupportedOperationException(
+                        "Unknown comparison type in Bucket.Change: " + chg.getComparisonType());
+            }
+            break;
+        default:
+            throw new UnsupportedOperationException("Unsupported direction in Bucket.Change: " + chg.getDirection());
+        }
+        bucket.setValues(vals);
+        bucket.setChange(null);
+        return bucket;
+    }
+
+    // Numerical bucket gives Number as value type, Discrete bucket gives String
+    // as value type
+    // Not sure what type is passed in. Cast to String first.
+    private static Double valObjToDouble(Object obj) {
+        Double dbl = Double.valueOf(String.valueOf(obj));
+        return dbl;
+    }
+
+    private static Double valObjToDouble(Object obj, boolean neg) {
+        Double dbl = valObjToDouble(obj);
+        if (neg && dbl.doubleValue() != 0.0) {
+            dbl = -dbl;
+        }
+        return dbl;
     }
 
     public static Map<String, StatsCube> filterStatsCube(Map<String, StatsCube> cubes,

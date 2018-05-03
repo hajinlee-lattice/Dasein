@@ -380,6 +380,23 @@ public class ActivityMetricsUtils {
         return true;
     }
 
+    public static List<Number> insertZeroBndForSpendChangeBkt(List<Number> bounds) {
+        if (CollectionUtils.isEmpty(bounds)) {
+            return bounds;
+        }
+        if (bounds.get(0).doubleValue() < 0 && bounds.get(bounds.size() - 1).doubleValue() > 0) {
+            for (int i = 0; i < bounds.size(); i++) {
+                if (bounds.get(i).doubleValue() > 0) {
+                    if (bounds.get(i - 1).doubleValue() < 0) {
+                        bounds.add(i, 0);
+                    }
+                    break;
+                }
+            }
+        }
+        return bounds;
+    }
+
     // Serve the API before UI has finished metrics configuration for tenant
     public static List<ActivityMetrics> fakeMetrics(Tenant tenant) {
         ActivityMetrics margin = createFakedMetrics(tenant);
