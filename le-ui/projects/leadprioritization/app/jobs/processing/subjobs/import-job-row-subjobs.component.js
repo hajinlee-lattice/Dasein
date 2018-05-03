@@ -15,12 +15,20 @@ angular.module('lp.jobs.row.subjobs', [])
                         };
                     case 'cdlOperationWorkflow':
                         {
-                            return $scope.canBeDownload(subjob) ? 'Delete ' + JSON.parse(subjob.outputs.IMPACTED_BUSINESS_ENTITIES)[0] + '(s): ' : 'Delete: ';
+                            return 'Delete' + addEntityType(subjob) + ': ';
                         };
                     default:
                         {
                             return subjob.name;
                         }
+                }
+            }
+
+            function addEntityType(subjob) {
+                if ($scope.canBeDownload(subjob) && subjob.outputs.IMPACTED_BUSINESS_ENTITIES) {
+                    return ' ' + JSON.parse(subjob.outputs.IMPACTED_BUSINESS_ENTITIES)[0] + '(s)';
+                } else {
+                    return '';
                 }
             }
             $scope.getActionName = function (subjob) {
@@ -113,7 +121,7 @@ angular.module('lp.jobs.row.subjobs', [])
             }
 
             $scope.hasErrors = function(subjob) {
-                return subjob.jobType == 'cdlDataFeedImportWorkflow' && subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES;
+                return subjob.jobType == 'cdlDataFeedImportWorkflow' && subjob.outputs && subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES;
             }
 
             init();
