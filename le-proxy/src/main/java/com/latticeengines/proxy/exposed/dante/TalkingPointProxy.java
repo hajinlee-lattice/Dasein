@@ -32,9 +32,13 @@ public class TalkingPointProxy extends MicroserviceRestApiProxy implements Talki
         delete("delete", url);
     }
 
-    @SuppressWarnings("unchecked")
     public List<TalkingPointDTO> findAllByPlayName(String playName) {
-        String url = constructUrl("/play/" + playName);
+        return findAllByPlayName(playName, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<TalkingPointDTO> findAllByPlayName(String playName, boolean publishedOnly) {
+        String url = constructUrl("/play/" + playName) + "?publishedonly=" + publishedOnly;
         return get("findAllByPlayName", url, List.class);
     }
 

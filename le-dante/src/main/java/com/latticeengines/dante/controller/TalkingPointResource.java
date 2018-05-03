@@ -53,8 +53,9 @@ public class TalkingPointResource implements TalkingPointInterface {
     @RequestMapping(value = "/play/{playName}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Find all Talking Points defined for the given play")
-    public List<TalkingPointDTO> findAllByPlayName(@PathVariable String playName) {
-        return talkingPointService.findAllByPlayName(playName);
+    public List<TalkingPointDTO> findAllByPlayName(@PathVariable String playName,
+            @RequestParam(name = "publishedonly", required = false, defaultValue = "false") boolean publishedOnly) {
+        return talkingPointService.findAllByPlayName(playName, publishedOnly);
     }
 
     @RequestMapping(value = "/previewresources", method = RequestMethod.GET)

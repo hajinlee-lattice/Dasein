@@ -32,8 +32,8 @@ public class TalkingPointResource {
 
     @RequestMapping(value = "/playid/{playId}", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
-    @ApiOperation(value = "Get an account by of attributes in a group")
+    @ApiOperation(value = "Get published talking points for the given play")
     public List<TalkingPointDTO> getTalkingPointByPlayId(@PathVariable String playId) {
-        return talkingPointProxy.findAllByPlayName(playId);
+        return talkingPointProxy.findAllByPlayName(playId, true);
     }
 }

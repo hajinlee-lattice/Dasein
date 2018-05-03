@@ -17,14 +17,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.latticeengines.dante.entitymgr.PublishedTalkingPointEntityMgr;
 import com.latticeengines.dante.service.TalkingPointService;
 import com.latticeengines.dante.testFramework.DanteTestNGBase;
 import com.latticeengines.dante.testFramework.testDao.TestPlayDao;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.dante.TalkingPointPreview;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.multitenant.PublishedTalkingPoint;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
@@ -33,9 +31,6 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
     @Autowired
     private TalkingPointService talkingPointService;
-
-    @Autowired
-    private PublishedTalkingPointEntityMgr publishedTalkingPointEntityMgr;
 
     @Autowired
     private TestPlayDao testPlayDao;
@@ -78,7 +73,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         tp = talkingPointService.findByName(tps.get(0).getName());
         Assert.assertNotNull(tp);
 
-        tps = talkingPointService.findAllByPlayName(tp.getPlayName());
+        tps = talkingPointService.findAllByPlayName(tp.getPlayName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 1);
         Assert.assertEquals(tps.get(0).getPid(), tp.getPid());
@@ -110,7 +105,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(1).getBaseExternalID(), tp2.getName());
 
         talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
-        List<PublishedTalkingPoint> dtps = publishedTalkingPointEntityMgr.findAllByPlayName(tp.getPlayName());
+        List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
         Assert.assertEquals(dtps.get(0).getName(), tp.getName());
@@ -120,12 +115,12 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
 
-        tps = talkingPointService.findAllByPlayName(testPlay.getName());
+        tps = talkingPointService.findAllByPlayName(testPlay.getName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);
 
         talkingPointService.revertToLastPublished(testPlay.getName(), mainTestCustomerSpace.toString());
-        tps = talkingPointService.findAllByPlayName(testPlay.getName());
+        tps = talkingPointService.findAllByPlayName(testPlay.getName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertEquals(tps.get(0).getName(), dtps.get(0).getName());
@@ -134,12 +129,12 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         talkingPointService.delete(tp.getName());
         talkingPointService.delete(tp2.getName());
 
-        tps = talkingPointService.findAllByPlayName(tp.getPlayName());
+        tps = talkingPointService.findAllByPlayName(tp.getPlayName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 0);
 
         talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
-        dtps = publishedTalkingPointEntityMgr.findAllByPlayName(tp.getPlayName());
+        dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), 0);
     }
@@ -174,7 +169,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
 
         testtp = talkingPointService.findByName(tps.get(1).getName());
 
-        tps = talkingPointService.findAllByPlayName(tp.getPlayName());
+        tps = talkingPointService.findAllByPlayName(tp.getPlayName(), false);
         Assert.assertNotNull(tps);
         Assert.assertEquals(tps.size(), 2);
         Assert.assertEquals(tps.get(0).getPid(), tp.getPid());
@@ -198,7 +193,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         Assert.assertEquals(preview.getNotionObject().getTalkingPoints().get(0).getBaseExternalID(), testtp.getName());
 
         talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
-        List<PublishedTalkingPoint> dtps = publishedTalkingPointEntityMgr.findAllByPlayName(tp.getPlayName());
+        List<TalkingPointDTO> dtps = talkingPointService.findAllByPlayName(tp.getPlayName(), true);
         Assert.assertNotNull(dtps);
         Assert.assertEquals(dtps.size(), tps.size());
         Assert.assertEquals(dtps.get(0).getName(), tp.getName());
@@ -208,7 +203,7 @@ public class TalkingPointServiceImplTestNG extends DanteTestNGBase {
         talkingPointService.delete(testtp.getName());
         talkingPointService.publish(tp.getPlayName(), mainTestCustomerSpace.toString());
 
-        dtps = publishedTalkingPointEntityMgr.findAllByPlayName(testPlay.getName());
+        dtps = talkingPointService.findAllByPlayName(testPlay.getName(), true);
         Assert.assertEquals(dtps.size(), 0);
     }
 

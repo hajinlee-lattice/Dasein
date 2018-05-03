@@ -12,7 +12,7 @@ public interface TalkingPointInterface {
 
     void delete(String name);
 
-    List<TalkingPointDTO> findAllByPlayName(String playName);
+    List<TalkingPointDTO> findAllByPlayName(String playName, boolean publishedOnly);
 
     TalkingPointDTO findByName(String name);
 

@@ -206,16 +206,12 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId) {
-        return createOrUpdateRE(ratingEngine, tenantId, false);
+        return createOrUpdateRatingEngine(ratingEngine, tenantId, false);
     }
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public RatingEngine createOrUpdateRatingEngine(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
-        return createOrUpdateRE(ratingEngine, tenantId, unlinkSegment);
-    }
-
-    private RatingEngine createOrUpdateRE(RatingEngine ratingEngine, String tenantId, Boolean unlinkSegment) {
         if (ratingEngine.getId() == null) { // create a new Rating Engine
             ratingEngine.setId(RatingEngine.generateIdStr());
             createNewRatingEngine(ratingEngine, tenantId);
@@ -228,7 +224,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                 createNewRatingEngine(ratingEngine, tenantId);
                 return ratingEngine;
             } else { // update an existing one by updating the delta passed from
-                     // front end
+                // front end
                 updateExistingRatingEngine(retrievedRatingEngine, ratingEngine, tenantId, unlinkSegment);
                 return retrievedRatingEngine;
             }
@@ -437,7 +433,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                     ConcreteRestriction cr = (ConcreteRestriction) node;
                     Lookup lookup = cr.getLhs();
                     if (lookup instanceof AttributeLookup) {
-                        usedAttributesInSegment.add(sanitize(((AttributeLookup) lookup).toString()));
+                        usedAttributesInSegment.add(sanitize((lookup).toString()));
                     } else if (lookup instanceof SubQueryAttrLookup) {
                         usedAttributesInSegment.add(sanitize(((SubQueryAttrLookup) lookup).getAttribute()));
                     }

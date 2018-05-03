@@ -115,9 +115,16 @@ public class TalkingPointServiceImpl implements TalkingPointService {
     }
 
     public List<TalkingPointDTO> findAllByPlayName(String playName) {
+        return findAllByPlayName(playName, false);
+    }
+
+    public List<TalkingPointDTO> findAllByPlayName(String playName, boolean publishedOnly) {
         try {
-            return talkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
-                    .collect(Collectors.toList());
+            return publishedOnly //
+                    ? publishedTalkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
+                            .collect(Collectors.toList()) //
+                    : talkingPointEntityMgr.findAllByPlayName(playName).stream().map(TalkingPointDTO::new)
+                            .collect(Collectors.toList());
         } catch (Exception e) {
             throw new LedpException(LedpCode.LEDP_38016, e, new String[] { playName });
         }

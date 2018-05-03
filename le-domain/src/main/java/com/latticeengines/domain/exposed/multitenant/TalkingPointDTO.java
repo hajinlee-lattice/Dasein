@@ -45,6 +45,17 @@ public class TalkingPointDTO {
         updated = tp.getUpdated();
     }
 
+    public TalkingPointDTO(PublishedTalkingPoint tp) {
+        pid = tp.getPid();
+        name = tp.getName();
+        playName = tp.getPlayName();
+        title = tp.getTitle();
+        content = tp.getContent();
+        offset = tp.getOffset();
+        created = tp.getCreated();
+        updated = tp.getUpdated();
+    }
+
     public TalkingPoint convertToTalkingPoint(Play play) {
         TalkingPoint tp = new TalkingPoint();
         tp.setPid(getPid());
