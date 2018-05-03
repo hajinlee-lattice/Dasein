@@ -107,7 +107,7 @@ angular.module('lp.jobs.row.subjobs', [])
 
             $scope.getErrorsLink = function (subjob) {
                 var path = '/files/datafiles/errorscsv?filePath=';
-                var filePath = subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES ? JSON.parse(subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES)[0] || '';
+                var filePath = subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES ? JSON.parse(subjob.outputs.DATAFEEDTASK_IMPORT_ERROR_FILES)[0] : '';
                 var auth = BrowserStorageUtility.getTokenDocument();
                 return path + filePath + '&Authorization=' + auth;
             }
