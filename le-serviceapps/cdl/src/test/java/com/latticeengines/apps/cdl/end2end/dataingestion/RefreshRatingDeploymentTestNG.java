@@ -43,8 +43,8 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     private static final Logger log = LoggerFactory.getLogger(RefreshRatingDeploymentTestNG.class);
 
-    private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "LETest1524102601033";
+    private static final boolean USE_EXISTING_TENANT = true;
+    private static final String EXISTING_TENANT = "LETest1525384230782";
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
@@ -76,7 +76,23 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @BeforeClass(groups = { "end2end" })
     public void setup() throws Exception {
-        if (USE_EXISTING_TENANT) {
+        setup(false, true);
+    }
+
+    @BeforeClass(groups = { "manual" })
+    public void setupForManual() throws Exception {
+        setup(USE_EXISTING_TENANT, ENABLE_AI_RATINGS);
+        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
+    }
+
+    @Test(groups = {"end2end", "manual"})
+    public void runTest() {
+        processAnalyze(constructRequest());
+        verifyProcess();
+    }
+
+    private void setup(boolean useExistingTenant, boolean enableAIRatings) throws Exception {
+        if (useExistingTenant) {
             testBed.useExistingTenantAsMain(EXISTING_TENANT);
             testBed.switchToSuperAdmin();
             mainTestTenant = testBed.getMainTestTenant();
@@ -84,7 +100,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
         } else {
             setupEnd2EndTestEnvironment();
             setupBusinessCalendar();
-            if (ENABLE_AI_RATINGS) {
+            if (enableAIRatings) {
                 new Thread(this::setupAIModels).start();
             }
             resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
@@ -95,7 +111,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 rule2 = createRuleBasedRatingEngine();
                 createAndDeleteRatingEngine();
             }).start();
-            if (ENABLE_AI_RATINGS) {
+            if (enableAIRatings) {
                 createModelingSegment();
                 MetadataSegment segment = segmentProxy.getMetadataSegmentByName(mainTestTenant.getId(),
                         SEGMENT_NAME_MODELING);
@@ -105,25 +121,18 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
                 ai1 = createCrossSellEngine(segment, modelSummary, PredictionType.EXPECTED_VALUE);
                 long targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                         ai1.getId(), ai1.getActiveModel().getId(), ModelingQueryType.TARGET);
-                Assert.assertEquals(targetCount, 87);
+                Assert.assertEquals(targetCount, 81);
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid2);
                 ai2 = createCrossSellEngine(segment, modelSummary, PredictionType.PROPENSITY);
                 targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(), ai2.getId(),
                         ai2.getActiveModel().getId(), ModelingQueryType.TARGET);
-                Assert.assertEquals(targetCount, 87);
+                Assert.assertEquals(targetCount, 81);
 
                 modelSummary = waitToDownloadModelSummaryWithUuid(modelSummaryProxy, uuid3);
                 ai3 = createCustomEventEngine(segment, modelSummary);
             }
         }
-        testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-    }
-
-    @Test(groups = "end2end")
-    public void runTest() throws Exception {
-        processAnalyze(constructRequest());
-        verifyProcess();
     }
 
     private void setupAIModels() {

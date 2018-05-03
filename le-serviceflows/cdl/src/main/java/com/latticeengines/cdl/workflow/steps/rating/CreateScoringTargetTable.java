@@ -10,12 +10,14 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.AIModel;
@@ -75,10 +77,18 @@ public class CreateScoringTargetTable extends BaseRedshiftIngestStep<GenerateRat
             String accountIdAttr = InterfaceName.AccountId.name();
             RatingEngineType ratingEngineType = ratingEngineTypeMap.get(modelGuid);
             try {
-                String accountId = (String) map.get(accountIdAttr.toLowerCase());
+                String accountId;
+                if (RatingEngineType.CROSS_SELL.equals(ratingEngineType)) {
+                    accountId = (String) map.get(accountIdAttr.toLowerCase());
+                } else {
+                    accountId = (String) map.get(accountIdAttr);
+                }
+                if (StringUtils.isBlank(accountId)) {
+                    throw new IllegalArgumentException("Found null account id: " + JsonUtils.serialize(map));
+                }
                 String compositeKey = String.format("%s_%s", accountId, modelId);
                 builder.set(InterfaceName.__Composite_Key__.name(), compositeKey);
-                builder.set(accountIdAttr, map.get(accountIdAttr.toLowerCase()));
+                builder.set(accountIdAttr, accountId);
                 builder.set(InterfaceName.ModelId.name(), modelId);
                 builder.set(MODEL_GUID, modelGuid);
                 builder.set(InterfaceName.CDLUpdatedTime.name(), currentTime);
