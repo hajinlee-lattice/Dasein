@@ -78,8 +78,6 @@ angular.module('lp.ratingsengine.wizard.training', [
         RatingsEngineStore.setTrainingSegment(vm.trainingSegment);
         vm.ratingEngine.activeModel.AI.trainingSegment = vm.trainingSegment;
 
-        console.log(vm.ratingEngine);
-
         vm.autcompleteChange();
     }
 
@@ -100,10 +98,6 @@ angular.module('lp.ratingsengine.wizard.training', [
     };
 
     vm.formOnChange = function(){
-
-
-        console.log($scope.vm.spendValue);
-
         vm.recordsCountReturned = false;
         vm.purchasesCountReturned = false;
 

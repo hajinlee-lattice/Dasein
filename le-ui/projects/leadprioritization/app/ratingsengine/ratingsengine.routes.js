@@ -867,7 +867,7 @@ angular
                 url: '/product/:rating_id/:wizard_steps',
                 params: {
                     wizard_steps: 'productpurchase',
-                    engineType: 'CROSS_SELL_FIRST_PURCHASE',
+                    engineType: '',
                     displayName: '',
                     rating_id: '',
                     fromList: false
@@ -899,11 +899,12 @@ angular
 
                         return deferred.promise;
                     },
-                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine) {
+                    WizardHeaderTitle: function ($stateParams, CurrentRatingEngine, RatingsEngineStore) {
                         var engineType = $stateParams.engineType,
                             currentRating = CurrentRatingEngine,
                             fromList = $stateParams.fromList,
                             title = '';
+
 
                         if (currentRating !== undefined && fromList){
                             title = currentRating.displayName;
@@ -970,7 +971,7 @@ angular
                     },
                     CurrentRatingEngine: function ($q, $stateParams, RatingsEngineStore) {
                         var deferred = $q.defer();
-
+                        // console.log('========> ', $stateParams.rating_id);
                         if (!$stateParams.rating_id) {
                             deferred.resolve(RatingsEngineStore.currentRating);
                         } else {
@@ -1136,7 +1137,7 @@ angular
                         var rating_id = $stateParams.rating_id || '',
                             wizard_steps = $stateParams.wizard_steps || 'customevent';
 
-                        console.log(wizard_steps);
+                        // console.log(wizard_steps);
 
                         return RatingsEngineStore.getWizardProgressItems(wizard_steps, rating_id);
                     },

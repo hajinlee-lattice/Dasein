@@ -65,7 +65,7 @@ angular
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube && vm.item.cube.Bkts) {
                                 vm.type = vm.item.cube.Bkts.Type;
-                                console.log("Type =============> ",vm.type);
+                                // console.log("Type =============> ",vm.type);
                             } else {
                                 //FIXME: if there is no Bkts, it is most likely a non-bucketable text field (YSong, Jan-2018)
                                 vm.type = 'String';

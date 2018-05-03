@@ -274,7 +274,14 @@ angular.module('lp.ratingsengine.ratingslist', [
                                 modelId: modelId
                             });
                         } else {
-                            $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: model.AI.modelingStrategy, fromList: true});
+                            // console.log('TYPE ==> ', rating.type);
+                            if(rating.type === 'CROSS_SELL'){
+                                var strategy = rating.advancedRatingConfig.cross_sell.modelingStrategy;
+                                // console.log('Starategy ', strategy);
+                                $state.go('home.ratingsengine.productpurchase', {rating_id: rating.id, engineType: strategy, fromList: true});
+                            }else {
+                                $state.go('home.ratingsengine.customevent', {rating_id: rating.id});
+                            }
                         }
                     });
                 });                

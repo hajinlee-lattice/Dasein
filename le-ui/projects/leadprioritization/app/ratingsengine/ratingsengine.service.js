@@ -825,6 +825,8 @@ angular.module('lp.ratingsengine')
     }
 
     this.nextSaveRatingEngineAI = function(nextState){
+        var ratingId = $stateParams.rating_id;
+        console.log('ID ', ratingId);
         var engineType = RatingsEngineStore.getModelingStrategy(),
             opts =  {
                 type: "CROSS_SELL",
@@ -843,6 +845,9 @@ angular.module('lp.ratingsengine')
                     }
                 }
             };
+        if(ratingId){
+            opts.id = ratingId;
+        }
 
         RatingsEngineStore.saveRating(opts).then(function(rating) {
             $state.go(nextState, { rating_id: rating.id });
