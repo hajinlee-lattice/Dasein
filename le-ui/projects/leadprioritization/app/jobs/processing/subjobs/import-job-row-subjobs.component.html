@@ -20,7 +20,7 @@
                     <a href="{{getDownloadLink(subjob)}}" title="{{getActionName(subjob)}}" ng-if="canBeDownload(subjob)">
                         <span>{{getActionName(subjob)}}</span>
                     </a>
-                    <span ng-if="!canBeDownload(subjob)">{{getActionName(subjob)}}</span>
+                    <span ng-if="!canBeDownload(subjob)" title="{{getActionName(subjob)}}">{{getActionName(subjob)}}</span>
                 </span>
 
             </div>
@@ -31,7 +31,10 @@
                 {{getRecordFound(subjob)}}
             </div>
             <div class="le-cell le-col-start-7 le-col-span-2">
-                {{getRecordFailed(subjob)}}
+                <a href="{{getErrorsLink(subjob)}}" ng-if="hasErrors(subjob)"> 
+                    <span> {{getRecordFailed(subjob)}} </span>
+                </a>
+                <span ng-if="!hasErrors(subjob)"> {{getRecordFailed(subjob)}} </span>
             </div>
             <div class="le-cell le-col-start-9 le-col-span-2">
                 {{getRecordUploaded(subjob)}}
