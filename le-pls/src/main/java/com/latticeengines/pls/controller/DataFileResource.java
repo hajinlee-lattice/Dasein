@@ -205,4 +205,19 @@ public class DataFileResource {
         }
         return ResponseDocument.successResponse(true);
     }
+
+    @RequestMapping(value = "/errorscsv", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get error file via file path")
+    public ResponseDocument<Boolean> getErrorsCsvFile( //
+            @RequestParam(value = "filePath", required = true) String filePath, //
+            HttpServletRequest request, //
+            HttpServletResponse response) throws IOException {
+        try {
+            dataFileProviderService.downloadFileByPath(request, response, "application/csv", filePath);
+        } catch (Exception e) {
+            throw e;
+        }
+        return ResponseDocument.successResponse(true);
+    }
 }
