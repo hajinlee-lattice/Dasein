@@ -9,7 +9,7 @@ import com.latticeengines.domain.exposed.workflow.WorkflowConfiguration;
 
 public class WorkflowUtilsUnitTestNG {
 
-    @Test(groups = { "unit" }, enabled = false)
+    @Test(groups = { "unit" })
     public void test() {
         InputStream is = ClassLoader.getSystemResourceAsStream("com/latticeengines/workflow/config/workflow.conf");
         WorkflowConfiguration workflowConfig = JsonUtils.deserialize(is, WorkflowConfiguration.class);
