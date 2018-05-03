@@ -149,7 +149,7 @@ public class ValidateFileHeaderUtilsUnitTestNG {
         assertEquals(thrown.getCode(), LedpCode.LEDP_18122);
     }
 
-    @Test(groups = "unit", dataProvider = "reservedBeginings")
+    @Test(groups = "unit", dataProvider = "reservedBeginings", enabled = false)
     public void validateReservedBeginingsInHeaders(String reservedBeginings) throws IOException {
         LedpException thrown = null;
         String reservedName = reservedBeginings + "01";
