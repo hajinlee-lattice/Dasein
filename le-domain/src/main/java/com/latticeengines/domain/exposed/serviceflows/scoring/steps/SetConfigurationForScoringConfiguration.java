@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.validator.annotation.NotEmptyString;
 import com.latticeengines.common.exposed.validator.annotation.NotNull;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.MicroserviceStepConfiguration;
 
 public class SetConfigurationForScoringConfiguration extends MicroserviceStepConfiguration {
@@ -14,6 +15,9 @@ public class SetConfigurationForScoringConfiguration extends MicroserviceStepCon
     @NotNull
     @JsonProperty("modelingServiceHdfsBaseDir")
     private String modelingServiceHdfsBaseDir;
+
+    @JsonProperty("customEventModelingType")
+    private CustomEventModelingType customEventModelingType;
 
     @JsonProperty("inputProperties")
     private Map<String, String> inputProperties = new HashMap<>();
@@ -32,6 +36,14 @@ public class SetConfigurationForScoringConfiguration extends MicroserviceStepCon
 
     public void setModelingServiceHdfsBaseDir(String modelingServiceHdfsBaseDir) {
         this.modelingServiceHdfsBaseDir = modelingServiceHdfsBaseDir;
+    }
+
+    public CustomEventModelingType getCustomEventModelingType() {
+        return customEventModelingType;
+    }
+
+    public void setCustomEventModelingType(CustomEventModelingType customEventModelingType) {
+        this.customEventModelingType = customEventModelingType;
     }
 
 }

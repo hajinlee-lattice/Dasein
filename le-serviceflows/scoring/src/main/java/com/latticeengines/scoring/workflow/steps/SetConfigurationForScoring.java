@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
@@ -59,6 +60,10 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
     }
 
     private void setRatingModelsContext() {
+        if (configuration.getCustomEventModelingType() == null
+                || CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
+            return;
+        }
         String engineId = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
         if (StringUtils.isNotBlank(engineId)) {
             String modelId = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.RATING_MODEL_ID);
