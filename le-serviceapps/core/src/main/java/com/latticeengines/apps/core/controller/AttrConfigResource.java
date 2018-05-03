@@ -1,6 +1,9 @@
 package com.latticeengines.apps.core.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -17,6 +20,7 @@ import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 
@@ -64,6 +68,17 @@ public class AttrConfigResource {
         Category category = categoryName != null ? resolveCategory(categoryName) : null;
         List<AttrConfigOverview<?>> list = attrConfigService.getAttrConfigOverview(category, propertyName);
         return list;
+    }
+
+    @PostMapping(value = "/overview")
+    public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
+            @RequestParam(value = "category", required = false) List<String> categoryNames, //
+            @RequestParam(value = "onlyActive", required = false, defaultValue = "0") boolean onlyActive, //
+            @RequestBody List<String> propertyNames) {
+        List<Category> categories = categoryNames != null
+                ? categoryNames.stream().map(categoryName -> resolveCategory(categoryName)).collect(Collectors.toList())
+                : Arrays.asList(Category.values());
+        return attrConfigService.getAttrConfigOverview(categories, propertyNames, onlyActive);
     }
 
     @PostMapping(value = "")

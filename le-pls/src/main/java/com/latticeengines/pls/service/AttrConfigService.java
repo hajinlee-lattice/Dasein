@@ -1,5 +1,7 @@
 package com.latticeengines.pls.service;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
@@ -10,7 +12,11 @@ public interface AttrConfigService {
 
     AttrConfigActivationOverview getAttrConfigActivationOverview(Category category);
 
+    Map<String, AttrConfigActivationOverview> getOverallAttrConfigActivationOverview();
+
     AttrConfigUsageOverview getAttrConfigUsageOverview();
+
+    AttrConfigUsageOverview getOverallAttrConfigUsageOverview();
 
     AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName);
 

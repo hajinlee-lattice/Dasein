@@ -41,6 +41,7 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigCategoryOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
@@ -106,6 +107,103 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             results.add(getAttrConfigOverview(getRenderedList(category), category, propertyName));
         }
         return results;
+    }
+
+    @Override
+    public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
+            List<String> propertyNames, boolean onlyActive) {
+        Map<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new HashMap<>();
+        log.info("categories are" + categories + ", propertyNames are " + propertyNames);
+        final Tenant tenant = MultiTenantContext.getTenant();
+        List<Callable<AttrConfigCategoryOverview<?>>> callables = new ArrayList<>();
+        categories.forEach(category -> {
+            Callable<AttrConfigCategoryOverview<?>> callable = () -> {
+                MultiTenantContext.setTenant(tenant);
+                AttrConfigCategoryOverview<?> attrConfigCategoryOverview = getAttrConfigOverview(
+                        getRenderedList(category), category, propertyNames, onlyActive);
+                attrConfigOverview.put(category.getName(), attrConfigCategoryOverview);
+                return attrConfigCategoryOverview;
+            };
+            callables.add(callable);
+        });
+
+        // fork join execution
+        ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config-overview", 4);
+        ThreadPoolUtils.runCallablesInParallel(threadPool, callables, 30, 1);
+        new Thread(threadPool::shutdown).run();
+        return attrConfigOverview;
+    }
+
+    @SuppressWarnings("unchecked")
+    @VisibleForTesting
+    <T extends Serializable> AttrConfigCategoryOverview<T> getAttrConfigOverview(@NonNull List<AttrConfig> renderedList,
+            Category category, List<String> propertyNames, boolean onlyActiveAttrs) {
+
+        AttrConfigCategoryOverview<T> overview = new AttrConfigCategoryOverview<T>();
+        Map<String, Map<T, Long>> propSummary = new HashMap<>();
+        overview.setPropSummary(propSummary);
+        if (category.isPremium()) {
+            switch (category) {
+            case INTENT:
+                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                        MultiTenantContext.getTenantId(), DataLicense.BOMBORA));
+                break;
+            case TECHNOLOGY_PROFILE:
+                overview.setLimit((long) limitationValidator.getMaxPremiumLeadEnrichmentAttributesByLicense(
+                        MultiTenantContext.getTenantId(), DataLicense.HG));
+            case ACCOUNT_ATTRIBUTES:
+                overview.setLimit(DEFAULT_LIMIT);
+                break;
+            case CONTACT_ATTRIBUTES:
+                overview.setLimit(DEFAULT_LIMIT);
+                break;
+            default:
+                log.warn("Unsupported" + category);
+                break;
+            }
+        }
+
+        // TODO multithreading
+        log.info("Trying to get detailed config for " + category + " with properties: " + propertyNames);
+        for (String propertyName : propertyNames) {
+            Map<T, Long> valueNumberMap = new HashMap<>();
+            propSummary.put(propertyName, valueNumberMap);
+            long totalAttrs = 0;
+            for (AttrConfig attrConfig : renderedList) {
+                Map<String, AttrConfigProp<?>> attrProps = attrConfig.getAttrProps();
+                if (attrProps != null) {
+                    boolean includeCurrentAttr = true;
+                    if (onlyActiveAttrs) {
+                        AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
+                                .get(ColumnMetadataKey.State);
+                        if (getActualValue(attrConfigProp) == null
+                                || getActualValue(attrConfigProp) == AttrState.Inactive) {
+                            includeCurrentAttr = false;
+                        }
+                    }
+                    if (includeCurrentAttr) {
+                        totalAttrs++;
+                        AttrConfigProp<?> configProp = attrProps.get(propertyName);
+                        if (configProp != null) {
+                            Object actualValue = getActualValue(configProp);
+                            if (actualValue == null) {
+                                log.warn(String.format("configProp %s does not have proper value", configProp));
+                                continue;
+                            }
+                            Long count = valueNumberMap.getOrDefault(actualValue, 0L);
+                            valueNumberMap.put((T) actualValue, count + 1);
+                        } else {
+                            log.warn(String.format("Attr %s does not have property %s", attrConfig.getAttrName(),
+                                    propertyName));
+                        }
+                    }
+                } else {
+                    log.warn(String.format("Attr %s does not have properties", attrConfig.getAttrName()));
+                }
+            }
+            overview.setTotalAttrs(totalAttrs);
+        }
+        return overview;
     }
 
     @SuppressWarnings("unchecked")

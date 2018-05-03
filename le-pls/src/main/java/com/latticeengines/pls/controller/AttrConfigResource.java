@@ -1,7 +1,6 @@
 package com.latticeengines.pls.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -18,7 +17,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionRequest;
@@ -41,20 +39,15 @@ public class AttrConfigResource {
     @GetMapping(value = "/activation/overview")
     @ResponseBody
     @ApiOperation("get activation overview")
-    public List<AttrConfigActivationOverview> getActivationOverview() {
-        List<AttrConfigActivationOverview> list = new ArrayList<>();
-        for (Category category : Category.getPremiunCategories()) {
-            list.add(attrConfigService.getAttrConfigActivationOverview(category));
-        }
-        return list;
+    public Map<String, AttrConfigActivationOverview> getActivationOverview() {
+        return attrConfigService.getOverallAttrConfigActivationOverview();
     }
 
     @GetMapping(value = "/usage/overview")
     @ResponseBody
     @ApiOperation("get usage overview")
     public AttrConfigUsageOverview getUsageOverview() {
-        AttrConfigUsageOverview usageOverview = attrConfigService.getAttrConfigUsageOverview();
-        return usageOverview;
+        return attrConfigService.getOverallAttrConfigUsageOverview();
     }
 
     @PutMapping(value = "/activation/config/category/{categoryName}")
