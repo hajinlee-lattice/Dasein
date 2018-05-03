@@ -308,8 +308,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
                 ratingEngine.getId(), tenantId));
         Tenant tenant = tenantEntityMgr.findByTenantId(tenantId);
         ratingEngine.setTenant(tenant);
-        ratingEngine.setDisplayName(
-                String.format(RatingEngine.DEFAULT_NAME_PATTERN, RatingEngine.DATE_FORMAT.format(new Date())));
+        ratingEngine.setDisplayName(ratingEngine.generateDefaultName());
         RatingEngineType type = ratingEngine.getType();
         if (type == null) {
             throw new LedpException(LedpCode.LEDP_18154, new String[] { ratingEngine.toString() });

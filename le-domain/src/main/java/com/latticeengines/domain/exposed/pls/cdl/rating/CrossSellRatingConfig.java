@@ -24,6 +24,13 @@ public class CrossSellRatingConfig implements AdvancedRatingConfig {
     @JsonProperty("filters")
     private Map<CrossSellModelingConfigKeys, ModelingConfigFilter> filters;
 
+    public CrossSellRatingConfig() {
+    }
+
+    public CrossSellRatingConfig(ModelingStrategy modelingStrategy) {
+        this.modelingStrategy = modelingStrategy;
+    }
+
     public List<String> getTargetProducts() {
         return targetProducts;
     }

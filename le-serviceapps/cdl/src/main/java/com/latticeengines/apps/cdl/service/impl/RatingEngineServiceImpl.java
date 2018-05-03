@@ -374,6 +374,7 @@ public class RatingEngineServiceImpl extends RatingEngineTemplate implements Rat
             if (aiModel.getPredictionType() == PredictionType.EXPECTED_VALUE) {
                 parameters.setExpectedValue(true);
             }
+            parameters.setExcludePropDataColumns(true); // PLS-8163
 
             log.info(String.format("Cross-sell modelling job submitted with parameters %s", parameters.toString()));
             jobId = ratingEngineImportMatchAndModelWorkflowSubmitter.submit(parameters);

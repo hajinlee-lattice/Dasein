@@ -37,6 +37,8 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.ParamDef;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -46,11 +48,15 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.UuidUtils;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
+import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.cdl.rating.AdvancedRatingConfig;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
 import com.latticeengines.domain.exposed.security.HasTenant;
 import com.latticeengines.domain.exposed.security.Tenant;
 
@@ -66,10 +72,15 @@ import com.latticeengines.domain.exposed.security.Tenant;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE)
 public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditingFields, SoftDeletable {
 
+    private static final Logger log = LoggerFactory.getLogger(RatingEngine.class);
+
     public static final String RATING_ENGINE_PREFIX = "engine";
     public static final String RATING_ENGINE_FORMAT = "%s_%s";
-    public static final String DEFAULT_NAME_PATTERN = "RATING ENGINE -- %s";
+    public static final String DEFAULT_NAME_PATTERN = "New Model - %s";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static final String RULES_BASED_NAME_PATTERN = "Rules %s - %s";
+    private static final String CROSS_SELL_NAME_PATTERN = "%s Purchase - %s";
+    private static final String CUSTOM_EVENT_NAME_PATTERN = "Custom Event - %s";
 
     public static final Map<ScoreType, String> SCORE_ATTR_SUFFIX = ImmutableMap.of( //
             ScoreType.Probability, "prob", //
@@ -409,6 +420,33 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Override
     public String toString() {
         return JsonUtils.serialize(this);
+    }
+
+    public String generateDefaultName() {
+        String datePart = RatingEngine.DATE_FORMAT.format(new Date());
+        String defaultName = String.format(DEFAULT_NAME_PATTERN, datePart);
+        try {
+            switch (getType()) {
+            case RULE_BASED:
+                defaultName = String.format(RULES_BASED_NAME_PATTERN, getSegment().getDisplayName(), datePart);
+                break;
+            case CUSTOM_EVENT:
+                defaultName = String.format(CUSTOM_EVENT_NAME_PATTERN, datePart);
+                break;
+            case CROSS_SELL:
+                defaultName = String.format(CROSS_SELL_NAME_PATTERN, //
+                        ((CrossSellRatingConfig) getAdvancedRatingConfig())
+                                .getModelingStrategy() == ModelingStrategy.CROSS_SELL_FIRST_PURCHASE ? "First"
+                                        : "Repeat",
+                        datePart);
+                break;
+            case PROSPECTING:
+            default:
+            }
+        } catch (Exception e) {
+            log.error(new LedpException(LedpCode.LEDP_40021, e, new String[] { defaultName }).getMessage(), e);
+        }
+        return defaultName;
     }
 
     public enum ScoreType {

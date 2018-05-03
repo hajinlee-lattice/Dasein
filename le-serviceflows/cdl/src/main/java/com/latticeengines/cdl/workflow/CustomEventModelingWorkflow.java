@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import com.latticeengines.cdl.workflow.steps.LdcOnlyAttributesStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.CustomEventModelingWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.ModelDataValidationWorkflow;
@@ -68,9 +67,6 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
-    @Inject
-    private ActivateRatingEngineListener activateRatingEngineListener;
-
     @Override
     public Workflow defineWorkflow(CustomEventModelingWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -86,7 +82,6 @@ public class CustomEventModelingWorkflow extends AbstractWorkflow<CustomEventMod
                 .next(generateRating) //
                 .next(exportScoreTrainingFile) //
                 .next(exportBucketTool) //
-                .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

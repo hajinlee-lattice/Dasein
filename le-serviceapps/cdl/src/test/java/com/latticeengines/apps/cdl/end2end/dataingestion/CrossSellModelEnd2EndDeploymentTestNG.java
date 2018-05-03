@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
+import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -22,7 +23,9 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
@@ -43,10 +46,10 @@ import com.latticeengines.testframework.exposed.proxy.pls.ModelSummaryProxy;
 public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
 
     private static final Logger log = LoggerFactory.getLogger(CrossSellModelEnd2EndDeploymentTestNG.class);
-    private static final boolean USE_EXISTING_TENANT = true;
-    private static final String EXISTING_TENANT = "JLM1524510014000";
+    private static final boolean USE_EXISTING_TENANT = false;
+    private static final String EXISTING_TENANT = "JLM1525220846205";
 
-    private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = false;
+    private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = true;
     private static final boolean E2E_TEST_USE_TRANSACTION_RESTRICTION = false;
 
     private MetadataSegment targetSegment;
@@ -120,6 +123,9 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated();
+        Assert.assertEquals(
+                ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
+                RatingEngineStatus.INACTIVE);
     }
 
     private void verifyBucketMetadataNotGenerated() {
@@ -150,6 +156,8 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private void setupTestRatingEngine() {
         log.info("Setting up test artifacts for tenant " + mainTestTenant.getId());
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, targetSegment);
+        CrossSellRatingConfig ratingConfig = new CrossSellRatingConfig(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
+        ratingEngine.setAdvancedRatingConfig(ratingConfig);
         testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         log.info("Created rating engine " + testRatingEngine.getId());
 

@@ -663,16 +663,16 @@ public enum LedpCode {
     LEDP_38007("Failed to populate account attributes"), //
     LEDP_38008("No tenant not found for the request"), //
     LEDP_38009("Invalid Customer space {0}"), //
-    LEDP_38010("Unable to compile talking point preview resources"), //
+    LEDP_38010("Unable to compile resources for the talking point preview"), //
     LEDP_38011("PlayName should be same for all talking points"), //
     LEDP_38012("Failed to find the play by name {0}"), //
     LEDP_38013("Failed to retrieve the play"), //
-    LEDP_38014("Failed to publish Talkingpoints for the play {0}, CustomerSpace {1}"), //
+    LEDP_38014("Failed to publish Talking Points for the play {0}, CustomerSpace {1}"), //
     LEDP_38015("Failed to populate TalkingPoint preview for the play {0}, CustomerSpace {1}"), //
-    LEDP_38016("Failed to retrieve Talkingpoints for the play {0}"), //
-    LEDP_38017("Unable to delete Talkingpoints {0} due to an internal error"), //
+    LEDP_38016("Failed to retrieve Talking Points for the play {0}"), //
+    LEDP_38017("Unable to delete Talking points {0} due to an internal error"), //
     LEDP_38018("Talking point not associated with any Play"), //
-    LEDP_38019("Failed to revert Talkingpoints for the play {0}, CustomerSpace {1}"), //
+    LEDP_38019("Failed to revert Talking points for the play {0}, CustomerSpace {1}"), //
     LEDP_38020("Unable to create lead in Dante for the recommendation {0}, play {1} ,CustomerSpace {2}"), //
     LEDP_38021("Empty or null recommendation, Failed to create lead in dante for CustomerSpace {0}"), //
     LEDP_38022("Empty or null play, Failed to create lead in dante for CustomerSpace {0}"), //
@@ -705,6 +705,7 @@ public enum LedpCode {
     LEDP_40018("Unable to submit modeling job for RatingEngine {0}, No target segment set"), //
     LEDP_40019("Unsupported Custom Event Modeling Type {0}"), //
     LEDP_40020("Unable to find a Model Summary for the AIModel {0} of the RatingEngine {1}, Customer Space {2}"), //
+    LEDP_40021("Unable to set the default model name correctly, setting it to {0}"), //
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //

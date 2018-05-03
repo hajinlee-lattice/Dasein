@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineMatchAndModelWorkflowConfiguration;
 import com.latticeengines.modeling.workflow.listeners.SendEmailAfterModelCompletionListener;
 import com.latticeengines.modeling.workflow.steps.DedupEventTable;
@@ -62,9 +61,6 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
-    @Inject
-    private ActivateRatingEngineListener activateRatingEngineListener;
-
     @Override
     public Workflow defineWorkflow(RatingEngineMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -77,7 +73,6 @@ public class RatingEngineMatchAndModelAndEmailWorkflow
                 .next(scoreWorkflow) //
                 .next(pivotScoreAndEventDataFlow) //
                 .next(exportData) //
-                .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }

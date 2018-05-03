@@ -4,17 +4,16 @@ public enum RatingEngineType {
     RULE_BASED("RuleBased"), //
     CROSS_SELL("Cross-Sell"), //
     CUSTOM_EVENT("Custom-Event", false), //
-    ACCOUNT_PROSPECTING("Account-Prospecting"), //
-    PRODUCT_PROSPECTING("Product-Prospecting");
+    PROSPECTING("Prospecting");
 
     private String name;
     private boolean isTargetSegmentMandatory;
 
-    private RatingEngineType(String name) {
+    RatingEngineType(String name) {
         this(name, true);
     }
 
-    private RatingEngineType(String name, boolean isTargetSegmentMandatory) {
+    RatingEngineType(String name, boolean isTargetSegmentMandatory) {
         this.name = name;
         this.isTargetSegmentMandatory = isTargetSegmentMandatory;
     }

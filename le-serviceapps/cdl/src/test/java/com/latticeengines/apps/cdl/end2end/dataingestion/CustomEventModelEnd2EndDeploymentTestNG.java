@@ -18,6 +18,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.pls.SourceFile;
@@ -34,7 +35,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
 
     private static final Logger log = LoggerFactory.getLogger(CustomEventModelEnd2EndDeploymentTestNG.class);
     private static final boolean USE_EXISTING_TENANT = false;
-    private static final String EXISTING_TENANT = "JLM1522370380609";
+    private static final String EXISTING_TENANT = "JLM1525220846205";
 
     private MetadataSegment testSegment;
     private RatingEngine testRatingEngine;
@@ -97,6 +98,9 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         JobStatus completedStatus = waitForWorkflowStatus(modelingWorkflowApplicationId, false);
         Assert.assertEquals(completedStatus, JobStatus.COMPLETED);
         verifyBucketMetadataGenerated();
+        Assert.assertEquals(
+                ratingEngineProxy.getRatingEngine(mainTestTenant.getId(), testRatingEngine.getId()).getStatus(),
+                RatingEngineStatus.INACTIVE);
     }
 
     private void bootstrap() {
@@ -119,6 +123,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
         Assert.assertEquals(bucketMetadataHistory.size(), 1);
         log.info("time is " + bucketMetadataHistory.keySet().toString());
     }
+
     private void setupTestSegment() {
         testSegment = constructTargetSegment();
         testSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), testSegment);

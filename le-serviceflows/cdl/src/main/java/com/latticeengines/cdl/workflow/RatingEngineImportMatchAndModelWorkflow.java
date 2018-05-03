@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.workflow.listeners.ActivateRatingEngineListener;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableFilterStep;
 import com.latticeengines.cdl.workflow.steps.CreateCdlEventTableStep;
 import com.latticeengines.domain.exposed.serviceflows.cdl.RatingEngineImportMatchAndModelWorkflowConfiguration;
@@ -61,9 +60,6 @@ public class RatingEngineImportMatchAndModelWorkflow
     @Inject
     private SendEmailAfterModelCompletionListener sendEmailAfterModelCompletionListener;
 
-    @Inject
-    private ActivateRatingEngineListener activateRatingEngineListener;
-
     @Override
     public Workflow defineWorkflow(RatingEngineImportMatchAndModelWorkflowConfiguration config) {
         return new WorkflowBuilder(name(), config) //
@@ -77,7 +73,6 @@ public class RatingEngineImportMatchAndModelWorkflow
                 .next(generateRating) //
                 .next(exportScoreTrainingFile) //
                 .next(exportBucketTool) //
-                .listener(activateRatingEngineListener) //
                 .listener(sendEmailAfterModelCompletionListener) //
                 .build();
     }
