@@ -96,7 +96,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         try {
             testProxy.getMonoAtEndpoint(endPoint).block();
         } catch (Exception e) {
-            log.info(e.getMessage());
+            log.info(e.getClass() + ": " + e.getMessage());
             thrown = true;
         }
         assertTrue(thrown);
@@ -172,7 +172,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         }
 
         @Override
-        public void handleRequest(final HttpServerExchange exchange) throws Exception {
+        public void handleRequest(final HttpServerExchange exchange) {
             try {
                 next.handleRequest(exchange);
             } catch (Exception e) {

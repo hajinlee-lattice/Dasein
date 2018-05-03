@@ -502,8 +502,10 @@ public abstract class BaseRestApiProxy {
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {
         return mono //
                 .doOnCancel(() -> log.info(String.format("Cancel reading %s mono from %s", channel, url)))
-                .onErrorResume(throwable -> Mono.error(new RuntimeException(
-                        String.format("Failed to read %s mono from %s", channel, url), throwable)));
+                .onErrorResume(throwable -> {
+                    log.warn(String.format("Failed to read %s mono from %s", channel, url));
+                    return Mono.error(throwable);
+                });
     }
 
     private <P> WebClient.RequestHeadersSpec prepareKryoReactiveRequest(String url, HttpMethod method, P payload) {
