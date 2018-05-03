@@ -220,7 +220,8 @@ public class ValidateFileHeaderUtils {
         for (String reservedBegining : reservedBeginings) {
             for (String header : headerFields) {
                 if (header.startsWith(reservedBegining)) {
-                    throw new LedpException(LedpCode.LEDP_18183, new String[] { header, reservedBegining });
+                    // throw new LedpException(LedpCode.LEDP_18183, new String[] { header, reservedBegining });
+                    throw new RuntimeException("LEDP_18183");
                 }
             }
         }
