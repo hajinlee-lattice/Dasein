@@ -31,6 +31,7 @@ angular
                 saved: false
             });
 
+            vm.hasDeleteAccessRights = vm.$resolve.ClientSession.AccessLevel != 'EXTERNAL_USER';
 
             // remove highlighting
             if (!vm.showHighlighting()) {

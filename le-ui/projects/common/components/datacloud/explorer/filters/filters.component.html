@@ -41,7 +41,7 @@
             Attribute Admin
         </button>
     </li>
-    <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard">
+    <li class="import" ng-if="['segment.analysis'].indexOf(vm.section) != -1 && !vm.inWizard && vm.hasDeleteAccessRights">
         <button class="button icon-button white-button" 
                 ui-sref="home.delete">
             Delete Data

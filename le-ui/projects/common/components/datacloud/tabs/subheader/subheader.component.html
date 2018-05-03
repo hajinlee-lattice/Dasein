@@ -22,32 +22,6 @@
     </ul>
     <ul class="subheader-tabs-buttons">
         <li class="save-segment">
-            <!--button class="save button white-button dropdown-container" ng-click="vm.toggleExportDropdown($event)" ng-mouseover="vm.showExportDropdown=true"> 
-                <div> 
-                    Export 
-                    <span class="fa fa-chevron-down" ng-class="{'fa-rotate-180' : vm.showExportDropdown}"></span>
-                    <div>
-                </div>
-                <div ng-show="vm.showExportDropdown">
-                    <ul class="model-menu">
-                        <li data-ng-click="vm.exportSegment('ACCOUNT')">
-                            <a href="javascript:void(0)"> Accounts
-                                <i class="fa fa-building-o"></i> 
-                            </a>
-                        </li>
-                        <li data-ng-click="vm.exportSegment('CONTACT')">
-                            <a href="javascript:void(0)"> Contacts
-                                <i class="fa fa-users"></i>
-                            </a>
-                        </li>
-                        <li data-ng-click="vm.exportSegment('ACCOUNT_AND_CONTACT')">
-                            <a href="javascript:void(0)"> Accounts and Contacts 
-                                <i class="fa fa-briefcase"></i>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </button> -->
             <span ng-if="vm.enableSaveSegmentMsg" class="confirmation-title"><i class="fa fa-check confermation-ok" aria-hidden="true"></i>Segment Saved</span>
             <menu-dropdown config="vm.header.exportSegment" class="button export-button" ng-click="vm.disableExport()"></menu-dropdown>
             &nbsp;

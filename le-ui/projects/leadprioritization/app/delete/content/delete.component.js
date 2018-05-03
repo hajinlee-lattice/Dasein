@@ -2,13 +2,16 @@ angular.module('lp.delete.entry', [])
 .component('deleteEntry', {
     templateUrl: 'app/delete/content/delete.component.html',
     controller: function( 
-        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, ModalStore) 
+        $state, $stateParams, $scope, DeleteDataStore, DeleteDataService, ImportStore, ModalStore, BrowserStorageUtility) 
     { 
         var vm = this,
             resolve = $scope.$parent.$resolve,
             EntitiesCount = resolve.EntitiesCount;
 
         angular.extend(vm, {
+            uploading: false,
+            showSuccessMsg: false,
+            showWarningMsg: true,
             showFromTime: true,
             showToTime: true,
             showTimeFrame: false,
@@ -27,12 +30,11 @@ angular.module('lp.delete.entry', [])
             bucketRestriction: {
                "attr":"delete",
             },
-            uploadOperations: ['BYUPLOAD_ID', 'BYUPLOAD_ACPD', 'BYUPLOAD_MINDATEANDACCOUNT']
+            uploadOperations: ['BYUPLOAD_ID', 'BYUPLOAD_ACPD', 'BYUPLOAD_MINDATEANDACCOUNT'],
+            ClientSession: BrowserStorageUtility.getClientSession()
         });
 
         vm.init = function() {
-            vm.showSuccessMsg = false;
-            vm.showWarningMsg = true;
             vm.startTime = '';
             vm.endTime = '';
             vm.cleanupOperationType = {
@@ -77,25 +79,30 @@ angular.module('lp.delete.entry', [])
         }
 
         vm.changeEntityType = function(type, goState) {
-            vm.currentTab = goState || type.toLowerCase();
-            
+            if (!vm.uploading) { // prevent changing tabs when file is uploading
+                vm.clearUploadedFiles(vm.currentTab);
+                vm.cleanupOperationType[vm.currentTab] = '';
+                vm.isValid[vm.currentTab] = false;
+                
+                vm.currentTab = goState || type.toLowerCase();
+                vm.isValid[vm.currentTab] = false;
+                
+            }
         }
 
         vm.fileLoad = function(headers) {
             // console.log('headers', headers);
+            vm.uploading = true;
         }
 
         vm.fileSelect = function(fileName) {
             if (vm.currentTab == 'account' || vm.currentTab == 'contact') {
                 vm.params['BYUPLOAD_ID'].schema = vm.getSchema();
             }
-            setTimeout(function() {
-                vm.uploaded = false;
-            }, 25);
         }
 
         vm.fileDone = function(result) {
-            vm.uploaded = true;
+            vm.uploading = false;
 
             if (result.Result) {
                 vm.fileName = result.Result.name;
@@ -107,7 +114,7 @@ angular.module('lp.delete.entry', [])
         }
         
         vm.fileCancel = function() {
-
+            vm.uploading = false;
             var xhr = ImportStore.Get('cancelXHR', true);
             
             if (xhr) {
@@ -116,10 +123,14 @@ angular.module('lp.delete.entry', [])
         }
 
         vm.disableSubmit = function() {
-            if (vm.submittingJob) {
+            if (!vm.hasAccessRights() || vm.submittingJob) {
                 return true;
             }
             return vm.getCleanupType() != 'BYDATERANGE' ? !vm.isValid[vm.currentTab] : !$scope.delete_form || ($scope.delete_form['from-time'].$invalid || $scope.delete_form['to-time'].$invalid);
+        }
+
+        vm.hasAccessRights = function() {
+            return vm.ClientSession.AccessLevel == 'INTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'EXTERNAL_ADMIN' || vm.ClientSession.AccessLevel == 'SUPER_ADMIN';
         }
 
         vm.setCleanupType = function(option) {
@@ -211,7 +222,7 @@ angular.module('lp.delete.entry', [])
                 DeleteDataService.cleanup(url, params).then(function(result) {
                     if (result && result.Success) {
                         vm.setBannerMsg(false, true);
-                        setTimeout(vm.resetMethod, 3000);
+                        setTimeout(vm.resetMethod, 0);
                     } else {
                         vm.setBannerMsg(false, false); // show default error message
                     }
@@ -236,6 +247,14 @@ angular.module('lp.delete.entry', [])
             }
 
             vm.init();
+
+            $scope.$apply();
+        }
+
+        vm.clearUploadedFiles = function(entity) {
+            for (var type in vm.uploadedFiles[entity]) {
+                vm.uploadedFiles[entity][type] = '';
+            }; 
         }
 
         vm.initModalWindow = function () {

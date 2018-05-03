@@ -159,7 +159,7 @@
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.csvFileName.$touched && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' &&  $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_MINDATEANDACCOUNT'] == ''}"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_MINDATEANDACCOUNT' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_MINDATEANDACCOUNT'] == '' }"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_MINDATEANDACCOUNT')"
                           >
                       </div>
@@ -181,7 +181,7 @@
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$touched && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' }"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_1' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_ACPD_1'] == ''}"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_1')"
 
                           >
@@ -204,7 +204,7 @@
                           file-done="$ctrl.fileDone(result)"
                           file-cancel="$ctrl.fileCancel()"
                           class="form-group file-upload file-upload-with-padding" 
-                          ng-class="{ 'has-error' : delete_form.csvFileName.$invalid && !delete_form.modelDisplayName.$pristine && $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' }"
+                          ng-class="{ 'has-error' : $ctrl.cleanupOperationType[$ctrl.currentTab] == 'BYUPLOAD_ACPD_2' && $ctrl.uploadedFiles[$ctrl.currentTab]['BYUPLOAD_ACPD_2'] == '' }"
                           ng-click="$ctrl.setCleanupType('BYUPLOAD_ACPD_2')"
                           >
                       </div>
