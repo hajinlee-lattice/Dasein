@@ -17,7 +17,7 @@ angular.module('lp.delete')
                 operationType: 'BYUPLOAD_ID'
             },
             BYUPLOAD_MINDATEANDACCOUNT: {
-                infoTemplate: "<div class='row divider'> <div class='twelve columns'> <h4>Sample File Format</h4> <p>Upload a CSV file using the following data format to delete your Transaction Data. All the fields are required.</p> </div></div><div class='row'> <div style='margin-top: 0px;'> <table> <thead> <tr> <th>Account ID</th> <th>Transaction Date</th> </tr> </thead> <tbody> <tr> <td>1</td> <td>4/1/17 0:00</td> </tr> <tr> <td>2</td> <td>11/1/15 0:00</td> </tr> <tr> <td>3</td> <td>8/1/15 0:00</td> </tr> </tbody> </table> </div></div>",
+                infoTemplate: "<div class='row divider'> <div class='twelve columns'> <h4>Sample File Format</h4> <p>Upload a CSV file using the following data format to delete your Transaction Data. All the fields are required.</p> </div></div><div class='row'> <div style='margin-top: 0px;'> <table> <thead> <tr> <th>Account ID</th> <th>TransactionTime</th> </tr> </thead> <tbody> <tr> <td>1</td> <td>4/1/17 0:00</td> </tr> <tr> <td>2</td> <td>11/1/15 0:00</td> </tr> <tr> <td>3</td> <td>8/1/15 0:00</td> </tr> </tbody> </table> </div></div>",
                 compressed: true,
                 importError: false,
                 importErrorMsg: '',
@@ -26,7 +26,7 @@ angular.module('lp.delete')
                 operationType: 'BYUPLOAD_MINDATEANDACCOUNT'
             },
             BYUPLOAD_ACPD_1: {
-                infoTemplate: "<div class='row divider'> <div class='twelve columns'> <h4>Sample File Format</h4> <p>Upload a CSV file using the following data format to delete your Transaction Data. All the fields are required.</p> </div></div><div class='row'> <div style='margin-top: 0px;'> <table> <thead> <tr> <th>Account ID</th> <th>Product ID</th> <th>Transaction Date</th> </tr> </thead> <tbody> <tr> <td>1</td> <td>1</td> <td>4/1/17 0:00</td> </tr> <tr> <td>1</td> <td>2</td> <td>11/1/15 0:00</td> </tr> <tr> <td>1</td> <td>3</td> <td>8/1/15 0:00</td> </tr> </tbody> </table> </div></div>",
+                infoTemplate: "<div class='row divider'> <div class='twelve columns'> <h4>Sample File Format</h4> <p>Upload a CSV file using the following data format to delete your Transaction Data. All the fields are required.</p> </div></div><div class='row'> <div style='margin-top: 0px;'> <table> <thead> <tr> <th>Account ID</th> <th>Product ID</th> <th>TransactionTime</th> </tr> </thead> <tbody> <tr> <td>1</td> <td>1</td> <td>4/1/17 0:00</td> </tr> <tr> <td>1</td> <td>2</td> <td>11/1/15 0:00</td> </tr> <tr> <td>1</td> <td>3</td> <td>8/1/15 0:00</td> </tr> </tbody> </table> </div></div>",
                 compressed: true,
                 importError: false,
                 importErrorMsg: '',

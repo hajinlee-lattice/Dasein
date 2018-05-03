@@ -237,6 +237,7 @@
                 ng-disabled="$ctrl.disableSubmit()"
                 ng-click="$ctrl.click()">
               Delete
+              <i class="fa fa-spinner fa-spin fa-fw" ng-if="$ctrl.submittingJob"></i>
             </button>
         </div>
       </div>

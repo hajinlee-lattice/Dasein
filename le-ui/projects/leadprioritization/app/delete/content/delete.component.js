@@ -12,7 +12,7 @@ angular.module('lp.delete.entry', [])
             showFromTime: true,
             showToTime: true,
             showTimeFrame: false,
-            submittingJob: true,
+            submittingJob: false,
             currentTab: 'account',
             deleteWarningMsg: 'Once the delete action is submitted, it can’t be undone.',
             params: DeleteDataStore.getFileUploadParams(),
@@ -116,6 +116,9 @@ angular.module('lp.delete.entry', [])
         }
 
         vm.disableSubmit = function() {
+            if (vm.submittingJob) {
+                return true;
+            }
             return vm.getCleanupType() != 'BYDATERANGE' ? !vm.isValid[vm.currentTab] : !$scope.delete_form || ($scope.delete_form['from-time'].$invalid || $scope.delete_form['to-time'].$invalid);
         }
 
