@@ -75,6 +75,16 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     }
 
     @Override
+    public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
+        DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType.name());
+        if (entity != null) {
+            return entity.getDocument();
+        } else {
+            return null;
+        }
+    }
+
+    @Override
     public void deleteByName(String tenantId, String name, DataUnit.StorageType storageType) {
         DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType.name());
         if (existing != null) {

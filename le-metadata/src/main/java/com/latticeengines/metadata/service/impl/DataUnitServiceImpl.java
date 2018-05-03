@@ -30,6 +30,13 @@ public class DataUnitServiceImpl implements DataUnitService {
     }
 
     @Override
+    public DataUnit findByNameTypeFromReader(String name, DataUnit.StorageType storageType) {
+        String tenantId = MultiTenantContext.getTenantId();
+        return entityMgr.findByNameTypeFromReader(tenantId, name, storageType);
+    }
+
+
+    @Override
     public void deleteByNameAndStorageType(String name, DataUnit.StorageType storageType) {
         String tenantId = MultiTenantContext.getTenantId();
         entityMgr.deleteByName(tenantId, name, storageType);

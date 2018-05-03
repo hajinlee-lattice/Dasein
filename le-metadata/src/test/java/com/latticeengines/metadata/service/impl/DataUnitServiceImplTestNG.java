@@ -49,7 +49,7 @@ public class DataUnitServiceImplTestNG extends MetadataFunctionalTestNGBase {
 
         dataUnitService.deleteByNameAndStorageType(name, DataUnit.StorageType.Dynamo);
         Thread.sleep(500);
-        Assert.assertNull(dataUnitService.findByNameFromReader(name));
+        Assert.assertNull(dataUnitService.findByNameTypeFromReader(name, DataUnit.StorageType.Dynamo));
     }
 
     private DynamoDataUnit createDynamoUnit(String name) {
