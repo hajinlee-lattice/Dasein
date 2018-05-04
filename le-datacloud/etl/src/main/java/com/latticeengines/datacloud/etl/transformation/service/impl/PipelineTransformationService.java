@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -98,6 +99,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     private final String PIPELINE = DataCloudConstants.PIPELINE_TEMPSRC_PREFIX;
     private final String VERSION = "_version_";
     private final String STEP = "_step_";
+    private final String SUFFIX = "_suffix_" + ThreadLocalRandom.current().nextInt(0, 10000);
 
     @Override
     Logger getLogger() {
@@ -195,7 +197,7 @@ public class PipelineTransformationService extends AbstractTransformationService
     }
 
     private String getTempSourceName(String pipelineName, String version, int step) {
-        return PIPELINE + pipelineName + VERSION + version + STEP + step;
+        return PIPELINE + pipelineName + VERSION + version + STEP + step + SUFFIX;
     }
 
     private boolean isTempSource(Source source) {
