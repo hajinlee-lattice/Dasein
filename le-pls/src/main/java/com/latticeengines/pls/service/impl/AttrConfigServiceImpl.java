@@ -84,7 +84,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             categoryOverview.setLimit(activationOverview.getLimit());
             categoryOverview.setTotalAttrs(activationOverview.getTotalAttrs());
             categoryOverview.setSelected(
-                    activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active));
+                    activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active) != null
+                            ? activationOverview.getPropSummary().get(ColumnMetadataKey.State).get(AttrState.Active)
+                            : 0L);
             result.put(category.getName(), categoryOverview);
         }
         return result;
@@ -354,7 +356,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
             }
         }
         // TODO change to real limit
-//        attrConfigSelectionDetail.setLimit(500L);
+        // attrConfigSelectionDetail.setLimit(500L);
         attrConfigSelectionDetail.setTotalAttrs(totalAttrs);
         attrConfigSelectionDetail.setSelected(selected);
         attrConfigSelectionDetail.setEntity(BusinessEntity.Account);
