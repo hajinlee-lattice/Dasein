@@ -60,8 +60,7 @@ public class SetConfigurationForScoring extends BaseWorkflowStep<SetConfiguratio
     }
 
     private void setRatingModelsContext() {
-        if (configuration.getCustomEventModelingType() == null
-                || CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
+        if (CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
             return;
         }
         String engineId = configuration.getInputProperties().get(WorkflowContextConstants.Inputs.RATING_ENGINE_ID);
