@@ -398,6 +398,10 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
             metadata.setCanEnrich(false);
         }
 
+        if (metadata.isEnabledFor(ColumnSelection.Predefined.Segment)) {
+            metadata.setCanSegment(true);
+        }
+
         // deprecated properties
         metadata.setMatchDestination(getMatchDestination());
         metadata.setColumnName(getAmColumnId());

@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Enrichment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -107,23 +109,49 @@ public class SystemMetadataStoreImpl extends
                     Set<String> internalAttributes = SchemaRepository.getSystemAttributes(entity).stream()
                             .map(InterfaceName::name).collect(Collectors.toSet());
 
+                    Set<String> exportAttributes = SchemaRepository.getDefaultExportAttributes(entity).stream()
+                            .map(InterfaceName::name).collect(Collectors.toSet());
+
                     servingStore = servingStore //
                             .map(cm -> {
                                 if (cm.getCategory() == null) {
                                     cm.setCategory(category);
                                 }
                                 cm.setEntity(entity);
+
                                 if (internalAttributes.contains(cm.getAttrName())) {
                                     cm.setGroups(null);
                                 } else {
+                                    // all non-LDC attributes can be
+                                    // enabled/disabled for Segmentation
+                                    cm.setCanSegment(true);
+
+                                    // all non-LDC attributes are enabled for Segmentation
+                                    // unless otherwise specified in upstream
                                     cm.enableGroupIfNotPresent(Segment);
-                                    if (BusinessEntity.Account.equals(entity)) {
+
+                                    // all custom account and contact attributes
+                                    // can be enabled/disabled for Export
+                                    if (BusinessEntity.Account.equals(entity)
+                                            || BusinessEntity.Contact.equals(entity)) {
                                         cm.setCanEnrich(true);
+                                    }
+
+                                    // all custom account attributes enabled for following groups
+                                    // unless otherwise specified in upstream
+                                    if (BusinessEntity.Account.equals(entity)) {
                                         cm.enableGroupIfNotPresent(Model);
                                         cm.enableGroupIfNotPresent(TalkingPoint);
                                         cm.enableGroupIfNotPresent(CompanyProfile);
                                     }
                                 }
+
+                                // only enabled a list of default attributes for Export
+                                if (exportAttributes.contains(cm.getAttrName())) {
+                                    cm.setCanEnrich(true);
+                                    cm.enableGroup(Enrichment);
+                                }
+
                                 return cm;
                             }) //
                             .doOnNext(cm -> {
@@ -152,6 +180,14 @@ public class SystemMetadataStoreImpl extends
                             .filter(cm -> !InterfaceName.LatticeAccountId.name().equals(cm.getAttrName())) //
                             .map(cm -> {
                                 cm.setEntity(BusinessEntity.Account);
+
+                                if (Category.FIRMOGRAPHICS.equals(cm.getCategory())
+                                        || StringUtils.isNotBlank(cm.getDataLicense())) {
+                                    cm.enableGroup(Enrichment);
+                                } else {
+                                    cm.disableGroup(Enrichment);
+                                }
+
                                 return cm;
                             }).doOnNext(cm -> {
                                 if (amCounter.get() == null) {

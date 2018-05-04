@@ -81,6 +81,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Boolean isPremium;
     @JsonProperty("CanEnrich")
     private Boolean canEnrich;
+    @JsonProperty("CanSegment")
+    private Boolean canSegment;
     @JsonProperty("CanInternalEnrich")
     private Boolean canInternalEnrich;
     @JsonProperty("DataLicense")
@@ -259,6 +261,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setCanEnrich(Boolean canExternalEnrich) {
         this.canEnrich = canExternalEnrich;
+    }
+
+    public Boolean getCanSegment() {
+        return canSegment;
+    }
+
+    public void setCanSegment(Boolean canSegment) {
+        this.canSegment = canSegment;
     }
 
     public String getDataLicense() {

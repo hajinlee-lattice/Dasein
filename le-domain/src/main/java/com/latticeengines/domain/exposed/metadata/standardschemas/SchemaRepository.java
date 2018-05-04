@@ -1420,6 +1420,31 @@ public class SchemaRepository {
         return stdAttrs;
     }
 
+    public static Set<InterfaceName> getDefaultExportAttributes(BusinessEntity entity) {
+        Set<InterfaceName> attrs = new HashSet<>();
+        switch (entity) {
+            case Account:
+                attrs.add(InterfaceName.AccountId);
+                attrs.add(InterfaceName.LDC_Name);
+                attrs.add(InterfaceName.Website);
+                attrs.add(InterfaceName.Address_Street_1);
+                attrs.add(InterfaceName.City);
+                attrs.add(InterfaceName.State);
+                attrs.add(InterfaceName.PostalCode);
+                attrs.add(InterfaceName.Country);
+                attrs.add(InterfaceName.PhoneNumber);
+                break;
+            case Contact:
+                attrs.add(InterfaceName.ContactId);
+                attrs.add(InterfaceName.ContactName);
+                attrs.add(InterfaceName.Email);
+                attrs.add(InterfaceName.PhoneNumber);
+                attrs.add(InterfaceName.AccountId);
+            default:
+        }
+        return attrs;
+    }
+
     private static class AttributeBuilder {
         private Attribute attribute = new Attribute();
 
