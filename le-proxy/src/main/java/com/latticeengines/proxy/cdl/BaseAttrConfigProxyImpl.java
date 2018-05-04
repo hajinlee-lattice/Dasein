@@ -57,7 +57,7 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         log.info("customerSpace is " + customerSpace + ", categoryName is " + categoryNames + ", propertyName is "
                 + propertyNames + " activeOnly " + activeOnly);
         String url = contructUrlForGetAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly);
-        log.info("url is " + url);
+        log.info("getAttrConfigOverview url is " + url);
         return postKryo("get Attribute Configuration Overview", url.toString(), propertyNames, Map.class);
     }
 
@@ -77,13 +77,14 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
             url.append("?");
         }
         url.append("activeOnly=" + activeOnly);
-        log.info("url is " + url);
         return url.toString();
     }
 
     public AttrConfigRequest getAttrConfigByCategory(String customerSpace, String categoryName) {
-        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/categories/{categoryName}", //
-                shortenCustomerSpace(customerSpace), categoryName);
+        String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/categories/", //
+                shortenCustomerSpace(customerSpace));
+        url += categoryName;
+        log.info("getAttrConfigByCategory url is " + url);
         return getKryo("get attr config by category", url, AttrConfigRequest.class);
     }
 
