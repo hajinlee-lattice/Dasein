@@ -86,16 +86,6 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Type(type = "text")
     private String contactRestrictionString;
 
-    @JsonProperty("account_restriction")
-    @Transient
-    @ApiModelProperty("Account restriction for use in the front end")
-    private FrontEndRestriction accountFrontEndRestriction;
-
-    @JsonProperty("contact_restriction")
-    @Transient
-    @ApiModelProperty("Contact restriction for use in the front end")
-    private FrontEndRestriction contactFrontEndRestriction;
-
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "FK_COLLECTION_ID", nullable = false)
@@ -191,23 +181,37 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
         this.contactRestrictionString = JsonUtils.serialize(restriction);
     }
 
+    @JsonProperty("account_restriction")
+    @ApiModelProperty("Account restriction for use in the front end")
     public FrontEndRestriction getAccountFrontEndRestriction() {
-        return accountFrontEndRestriction;
+        return new FrontEndRestriction(getAccountRestriction());
     }
 
+    @JsonProperty("account_restriction")
+    @ApiModelProperty("Account restriction for use in the front end")
     public void setAccountFrontEndRestriction(FrontEndRestriction accountFrontEndRestriction) {
-        this.accountFrontEndRestriction = accountFrontEndRestriction;
+        if (accountFrontEndRestriction != null) {
+            setAccountRestriction(accountFrontEndRestriction.getRestriction());
+        }
     }
 
+    @JsonProperty("contact_restriction")
+    @ApiModelProperty("Contact restriction for use in the front end")
     public FrontEndRestriction getContactFrontEndRestriction() {
-        return contactFrontEndRestriction;
+        return new FrontEndRestriction(getAccountRestriction());
     }
 
+    @JsonProperty("contact_restriction")
+    @ApiModelProperty("Contact restriction for use in the front end")
     public void setContactFrontEndRestriction(FrontEndRestriction contactFrontEndRestriction) {
-        this.contactFrontEndRestriction = contactFrontEndRestriction;
+        if (contactFrontEndRestriction != null) {
+            this.setContactRestriction(contactFrontEndRestriction.getRestriction());
+        }
     }
 
-    public Set<AttributeLookup> getSegmentAttributes() { return segmentAttributes; }
+    public Set<AttributeLookup> getSegmentAttributes() {
+        return segmentAttributes;
+    }
 
     public void setSegmentAttributes(Set<AttributeLookup> segmentAttributes) {
         this.segmentAttributes = segmentAttributes;
