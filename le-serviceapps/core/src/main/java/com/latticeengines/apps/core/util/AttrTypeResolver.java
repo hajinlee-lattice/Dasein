@@ -49,7 +49,7 @@ public class AttrTypeResolver {
         case DataCloud:
             if (StringUtils.isNotBlank(metadata.getDataLicense())) {
                 subType = AttrSubType.Premium;
-            } else if (Boolean.TRUE.equals(metadata.isCanInternalEnrich())) {
+            } else if (Boolean.TRUE.equals(metadata.getCanInternalEnrich())) {
                 subType = AttrSubType.InternalEnrich;
             } else {
                 subType = AttrSubType.Normal;

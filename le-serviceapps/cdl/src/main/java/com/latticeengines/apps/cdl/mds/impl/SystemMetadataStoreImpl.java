@@ -107,7 +107,7 @@ public class SystemMetadataStoreImpl extends
                                 cm.setEntity(entity);
                                 cm.enableGroupIfNotPresent(Segment);
                                 if (BusinessEntity.Account.equals(entity)) {
-                                    cm.setCanExternalEnrich(true);
+                                    cm.setCanEnrich(true);
                                     cm.enableGroupIfNotPresent(TalkingPoint);
                                     cm.enableGroupIfNotPresent(CompanyProfile);
                                 }

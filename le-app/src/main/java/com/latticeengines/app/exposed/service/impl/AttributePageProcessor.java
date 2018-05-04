@@ -168,7 +168,7 @@ public class AttributePageProcessor {
             }
 
             if (considerInternalAttributes != Boolean.TRUE //
-                    && Boolean.TRUE.equals(column.isCanInternalEnrich())) {
+                    && Boolean.TRUE.equals(column.getCanInternalEnrich())) {
                 continue;
             }
 
@@ -263,7 +263,7 @@ public class AttributePageProcessor {
         attr.setIsPremium(column.isPremium());
         attr.setCategory(column.getCategory().getName());
         attr.setSubcategory(column.getSubcategory());
-        attr.setIsInternal(Boolean.TRUE.equals(column.isCanInternalEnrich()));
+        attr.setIsInternal(Boolean.TRUE.equals(column.getCanInternalEnrich()));
         attr.setDataLicense(column.getDataLicense());
         return attr;
     }

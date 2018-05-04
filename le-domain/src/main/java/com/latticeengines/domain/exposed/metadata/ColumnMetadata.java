@@ -79,8 +79,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     @JsonProperty("IsPremium")
     private Boolean isPremium;
-    @JsonProperty("CanExternalEnrich")
-    private Boolean canExternalEnrich;
+    @JsonProperty("CanEnrich")
+    private Boolean canEnrich;
     @JsonProperty("CanInternalEnrich")
     private Boolean canInternalEnrich;
     @JsonProperty("DataLicense")
@@ -245,7 +245,7 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.isPremium = isPremium;
     }
 
-    public Boolean isCanInternalEnrich() {
+    public Boolean getCanInternalEnrich() {
         return canInternalEnrich;
     }
 
@@ -253,12 +253,12 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
         this.canInternalEnrich = canInternalEnrich;
     }
 
-    public Boolean getCanExternalEnrich() {
-        return canExternalEnrich;
+    public Boolean getCanEnrich() {
+        return canEnrich;
     }
 
-    public void setCanExternalEnrich(Boolean canExternalEnrich) {
-        this.canExternalEnrich = canExternalEnrich;
+    public void setCanEnrich(Boolean canExternalEnrich) {
+        this.canEnrich = canExternalEnrich;
     }
 
     public String getDataLicense() {

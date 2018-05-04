@@ -394,11 +394,11 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         }
 
         if (metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
-            metadata.setCanExternalEnrich(true);
+            metadata.setCanEnrich(true);
             metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
             metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
         } else {
-            metadata.setCanExternalEnrich(false);
+            metadata.setCanEnrich(false);
         }
 
         // deprecated properties
