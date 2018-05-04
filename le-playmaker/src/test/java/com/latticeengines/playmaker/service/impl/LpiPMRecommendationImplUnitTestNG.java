@@ -77,14 +77,14 @@ public class LpiPMRecommendationImplUnitTestNG {
     @Test(groups = "unit")
     public void testGetRecommendationCount() {
         int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList,
-                null);
-        Assert.assertEquals(TOTAL_REC_COUNT, count);
+                new HashMap<String, String>());
+        Assert.assertEquals(count, TOTAL_REC_COUNT);
     }
 
     @Test(groups = "unit")
     public void testGetRecommendations() {
         List<Map<String, Object>> recommendations = lpiPMRecommendationImpl.getRecommendations(0, 0,
-                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList, null);
+                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList, new HashMap<String, String>());
         Assert.assertTrue(recommendations != null);
         Assert.assertFalse(recommendations.isEmpty());
         Assert.assertEquals(TOTAL_REC_COUNT, recommendations.size());
@@ -108,13 +108,13 @@ public class LpiPMRecommendationImplUnitTestNG {
 
     }
 
-    @SuppressWarnings("deprecation")
+    @SuppressWarnings({ "deprecation", "unchecked" })
     private void mockRecommendationEntityMgr(long pageSize) {
         when(recommendationEntityMgr //
                 .findRecommendationCount( //
                         any(Date.class), //
                         anyString(), //
-                        anyListOf(String.class), null)) //
+                        anyListOf(String.class), any(Map.class))) //
                                 .thenReturn(TOTAL_REC_COUNT);
 
         when(recommendationEntityMgr //
@@ -123,7 +123,7 @@ public class LpiPMRecommendationImplUnitTestNG {
                         anyInt(), //
                         anyInt(), //
                         anyString(), //
-                        anyListOf(String.class), null)) //
+                        anyListOf(String.class), any(Map.class))) //
                                 .thenReturn(resultMaps);
     }
 
