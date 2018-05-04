@@ -1,4 +1,4 @@
-<div class="configure-attributes-content container">
+<div class="configure-attributes-content container {{vm.step}}">
     <div class="configuration">
         <div class="header">
             <h2>
@@ -6,9 +6,21 @@
             </h2>
         </div>
         <ul class="steps">
-            <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name}">
+            <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name}" class="{{name}}">
                 <strong>{{item.label}}</strong>
             </li>
         </ul>
+        <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"></div>
+        <div class="save-button">
+            <button type="button" class="button blue-button" ng-click="vm.save()" ng-disabled="!vm.enableSave()">
+                Save
+            </button>
+        </div>
+        <pre>
+            {{vm.saveObj|json}}
+        </pre>
+        <pre>
+            {{vm.steps[vm.step].data|json}}
+        </pre>
     </div>
 </div>

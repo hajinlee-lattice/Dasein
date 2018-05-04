@@ -6,15 +6,24 @@ angular
     $stateProvider
         .state('home.configureattributes', {
             url: '/configureattributes',
+            onExit: function(ConfigureAttributesStore) {
+               ConfigureAttributesStore.clear();
+            },
+            resolve: {
+                PurchaseHistory: function($q, ConfigureAttributesStore) {
+                    var deferred = $q.defer();
+
+                    ConfigureAttributesStore.getPurchaseHistory().then(function(result) {
+                        deferred.resolve(result);
+                    });
+
+                    return deferred.promise;
+                }
+            },
             redirectTo: 'home.configureattributes.spend_change'
         })
         .state('home.configureattributes.spend_change', {
             url: '/spend_change',
-            resolve: {
-                Foo: function() {
-                    return 'Foo';
-                }
-            },
             views: {
                 'main@': {
                     template: '<configure-attributes-configure></configure-attributes-configure>'
