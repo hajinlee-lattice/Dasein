@@ -116,8 +116,6 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             for (Attribute attr : entity.getAttributes()) {
                 attributeDao.create(attr);
                 counter++;
-                //Flush the data in batches. So that, we can free up the Hibernate Level-1 cache and reduce the DB round trips
-                //log.info("Creating Attribute {} with Id: {}", counter, attr.getPid());
                 if (counter % batchSize == 0) {
                     attributeDao.flushSession();
                     attributeDao.clearSession();
@@ -138,6 +136,32 @@ public class TableEntityMgrImpl implements TableEntityMgr {
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
+    public void addAttributes(String name, List<Attribute> attributes) {
+        if (attributes == null || attributes.isEmpty()) {
+            return;
+        }
+        Table existingTable = findByName(name, false);
+        if (existingTable == null) {
+            throw new RuntimeException(String.format("No such table with name %d", name));
+        }
+        
+        Long tenantId = existingTable.getTenantId();
+        int batchSize = attributeDao.getBatchSize();
+        int counter = 0;
+        for(Attribute attr: attributes) {
+            counter++;
+            attr.setTable(existingTable);
+            attr.setTenantId(tenantId);
+            attributeDao.create(attr);
+            if (counter % batchSize == 0) {
+                attributeDao.flushSession();
+                attributeDao.clearSession();
+            }
+        }
+    }
+    
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public void addExtract(Table table, Extract extract) {
         table.addExtract(extract);
         extractDao.create(extract);
@@ -146,7 +170,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     @Override
     public void deleteByName(String name) {
-        final Table entity = findByName(name);
+        final Table entity = findByName(name, false);
         if (entity != null) {
             tableDao.delete(entity);
             if (hiveEnabled) {
@@ -213,8 +237,16 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name) {
+        return findByName(name, true);
+    }
+    
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Table findByName(String name, boolean inflate) {
         Table table = tableDao.findByName(name);
-        TableEntityMgr.inflateTable(table);
+        if (inflate) {
+            TableEntityMgr.inflateTable(table);
+        }
         return table;
     }
 
@@ -334,7 +366,7 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
     public Table rename(String oldName, String newName) {
-        Table existing = findByName(oldName);
+        Table existing = findByName(oldName, false);
         if (existing == null) {
             throw new RuntimeException(String.format("No such table with name %s", oldName));
         }

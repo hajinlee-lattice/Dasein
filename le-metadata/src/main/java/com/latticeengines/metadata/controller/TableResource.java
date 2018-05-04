@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -73,6 +74,15 @@ public class TableResource {
             @PathVariable String tableName, //
             @RequestBody Table table) {
         return tableResourceHelper.createTable(customerSpace, tableName, table);
+    }
+    
+    @PostMapping(value = "/tables/{tableName}/attributes")
+    @ResponseBody
+    @ApiOperation(value = "Add table attributes")
+    public Boolean createTableAttributes(@PathVariable String customerSpace, //
+            @PathVariable String tableName, //
+            @RequestBody List<Attribute> attributes) {
+        return tableResourceHelper.createTableAttributes(customerSpace, tableName, attributes);
     }
 
     @PutMapping(value = "/tables/{tableName}")

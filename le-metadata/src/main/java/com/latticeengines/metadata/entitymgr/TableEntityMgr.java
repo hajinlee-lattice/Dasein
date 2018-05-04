@@ -5,6 +5,7 @@ import java.util.List;
 import org.hibernate.Hibernate;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 
@@ -12,7 +13,11 @@ public interface TableEntityMgr {
 
     Table findByName(String name);
 
+    Table findByName(String name, boolean inflate);
+    
     void create(Table entity);
+    
+    void addAttributes(String name, List<Attribute> attributes);
 
     List<Table> findAll();
 

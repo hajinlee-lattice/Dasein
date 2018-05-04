@@ -168,7 +168,7 @@ public class Table implements HasPid, HasName, HasTenantId, GraphNode {
     public void postConstruct() {
         setTableTypeCode(TableType.DATATABLE.getCode());
     }
-
+    
     public Table(TableType tableType) {
         setTableTypeCode(tableType.getCode());
     }

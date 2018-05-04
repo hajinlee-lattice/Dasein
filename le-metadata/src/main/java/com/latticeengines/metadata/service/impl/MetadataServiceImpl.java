@@ -18,6 +18,7 @@ import com.latticeengines.common.exposed.validator.impl.BeanValidationServiceImp
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -107,7 +108,7 @@ public class MetadataServiceImpl implements MetadataService {
             DatabaseUtils.retry("updateTable", new Closure() {
                 @Override
                 public void execute(Object input) {
-                    Table found = tableEntityMgr.findByName(table.getName());
+                    Table found = tableEntityMgr.findByName(table.getName(), false);
                     if (found != null) {
                         log.info(String.format("Table %s already exists.  Deleting first.", table.getName()));
                         tableEntityMgr.deleteByName(found.getName());
@@ -167,5 +168,17 @@ public class MetadataServiceImpl implements MetadataService {
                 updateTable(customerSpace, found);
             }
         });
+    }
+
+    @Override
+    public Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes) {
+        DatabaseUtils.retry("addAttributes", new Closure() {
+            @Override
+            public void execute(Object input) {
+                tableEntityMgr.addAttributes(tableName, attributes);
+            }
+        });
+        
+        return true;
     }
 }

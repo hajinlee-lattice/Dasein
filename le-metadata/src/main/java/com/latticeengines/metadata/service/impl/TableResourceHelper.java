@@ -164,4 +164,10 @@ public class TableResourceHelper {
         mdService.setStorageMechanism(CustomerSpace.parse(customerSpace), tableName, storageMechanism);
     }
 
+    public Boolean createTableAttributes(String customerSpace, String tableName, List<Attribute> attributes) {
+        log.info(String.format("createTableAttributes(%s, %s, %d)", customerSpace, tableName, (attributes!=null ? attributes.size() : 0)));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.addAttributes(space, tableName, attributes);
+    }
+
 }

@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -22,6 +24,7 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
@@ -84,7 +87,34 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void createTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        post("createTable", url, table, null);
+        List<Attribute> attributes = null;
+        try {
+            if (table.getAttributes() != null && table.getAttributes().size() > 4000) {
+                attributes = table.getAttributes();
+                table.setAttributes(null);
+            }
+            post("createTable", url, table, null);
+            addTableAttributes(customerSpace, tableName, attributes);
+        } catch(Exception e) {
+            deleteTable(customerSpace, tableName);
+            throw e;
+        } finally {
+            if (attributes != null) {
+                table.setAttributes(attributes);
+            }
+        }
+    }
+
+    private void addTableAttributes(String customerSpace, String tableName, List<Attribute> attributes) {
+        if (attributes == null) {
+            return;
+        }
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
+        int chunkSize = 4000;
+        for (int i = 0; (i * chunkSize) < attributes.size(); i++) {
+            List<Attribute> subList = attributes.subList(i * chunkSize, Math.min(i * chunkSize + chunkSize, attributes.size()));
+            post("addTableAttributes", url, subList, null);
+        }
     }
 
     public Boolean resetTables(String customerSpace) {
@@ -94,7 +124,22 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
 
     public void updateTable(String customerSpace, String tableName, Table table) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
-        put("updateTable", url, table);
+        List<Attribute> attributes = null;
+        try {
+            if (table.getAttributes() != null && table.getAttributes().size() > 4000) {
+                attributes = table.getAttributes();
+                table.setAttributes(null);
+            }
+            put("updateTable", url, table);
+            addTableAttributes(customerSpace, tableName, attributes);
+        } catch(Exception e) {
+            deleteTable(customerSpace, tableName);
+            throw e;
+        } finally {
+            if (attributes != null) {
+                table.setAttributes(attributes);
+            }
+        }
     }
 
     public Table cloneTable(String customerSpace, String tableName) {

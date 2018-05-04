@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -38,4 +39,6 @@ public interface MetadataService {
     Table copyTable(CustomerSpace customerSpace, CustomerSpace targetCustomerSpace, String tableName);
 
     void setStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
+
+    Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes);
 }
