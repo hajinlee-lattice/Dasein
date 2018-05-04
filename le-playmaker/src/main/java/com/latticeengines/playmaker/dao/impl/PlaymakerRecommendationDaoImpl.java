@@ -31,7 +31,7 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<String> idStrList) {
+            List<String> idStrList, Map<String, String> orgInfo) {
         List<Integer> playIds = idStrListToIntList(idStrList);
 
         String sql = "SELECT * FROM (SELECT L.[PreLead_ID] AS ID, L.Account_ID AS AccountID, L.[LaunchRun_ID] AS LaunchID, "
@@ -116,7 +116,8 @@ public class PlaymakerRecommendationDaoImpl extends BaseGenericDaoImpl implement
     }
 
     @Override
-    public long getRecommendationCount(long start, int syncDestination, List<String> idStrList) {
+    public long getRecommendationCount(long start, int syncDestination, List<String> idStrList,
+            Map<String, String> orgInfo) {
         List<Integer> playIds = idStrListToIntList(idStrList);
 
         String sql = "SELECT COUNT(*) " + getRecommendationFromWhereClause(syncDestination, playIds);

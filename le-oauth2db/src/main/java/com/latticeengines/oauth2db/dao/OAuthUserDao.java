@@ -1,5 +1,7 @@
 package com.latticeengines.oauth2db.dao;
 
+import java.util.Map;
+
 import com.latticeengines.domain.exposed.oauth.OAuthUser;
 
 public interface OAuthUserDao {
@@ -15,4 +17,6 @@ public interface OAuthUserDao {
     OAuthUser getByAccessToken(String token);
 
     String getAppIdByAccessToken(String token);
+
+    Map<String, String> getOrgInfoByAccessToken(String token);
 }

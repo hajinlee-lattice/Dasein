@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.cdl.workflow.steps.play.PlayLaunchInitStepTestHelper;
 import com.latticeengines.db.exposed.entitymgr.TenantEntityMgr;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -148,7 +149,6 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
 
     @AfterClass(groups = { "deployment" })
     public void teardown() throws Exception {
-
         testPlayCreationHelper.cleanupArtifacts();
 
         List<Recommendation> recommendations = recommendationService.findByLaunchId(playLaunch.getId());
@@ -201,6 +201,11 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
             Assert.assertNotNull(rec.getPid());
             Assert.assertNotNull(rec.getPlayId());
             Assert.assertNotNull(rec.getTenantId());
+            Assert.assertNotNull(rec.getDestinationOrgId());
+            Assert.assertNotNull(rec.getDestinationSysType());
+            Assert.assertEquals(rec.getDestinationOrgId(), playLaunch.getDestinationOrgId());
+            Assert.assertEquals(CDLExternalSystemType.valueOf(rec.getDestinationSysType()),
+                    playLaunch.getDestinationSysType());
 
             Assert.assertEquals(rec.getPlayId(), play.getName());
             Assert.assertEquals(rec.getLaunchId(), playLaunch.getId());
@@ -208,9 +213,7 @@ public class PlayLaunchInitStepDeploymentTestNG extends AbstractTestNGSpringCont
                 contactCounts.addAndGet(rec.getExpandedContacts().size());
             }
 
-            // TODO - Anoop - enable this back once fix is ready
-            //
-            // Assert.assertFalse(accountIds.contains(rec.getAccountId()));
+            Assert.assertFalse(accountIds.contains(rec.getAccountId()));
             accountIds.add(rec.getAccountId());
         });
 

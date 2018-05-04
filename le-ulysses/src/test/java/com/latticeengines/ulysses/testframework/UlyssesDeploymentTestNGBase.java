@@ -75,7 +75,7 @@ public abstract class UlyssesDeploymentTestNGBase extends UlyssesTestNGBase {
         oAuthTenant.setGwApiKey(GW_API_KEY);
         oAuthTenant.setJdbcDriver("");
         oAuthTenant.setJdbcUrl("");
-        oauth2RestApiProxy.createOAuthTenant(oAuthTenant);
+        oauth2RestApiProxy.createTenant(oAuthTenant);
 
         Thread.sleep(500); // wait for replication lag
 

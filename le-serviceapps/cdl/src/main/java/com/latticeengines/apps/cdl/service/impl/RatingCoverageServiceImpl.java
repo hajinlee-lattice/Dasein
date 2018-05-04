@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,22 +32,23 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.CoverageInfo;
-import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingModel;
-import com.latticeengines.domain.exposed.pls.RatingModelIdPair;
-import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
-import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
-import com.latticeengines.domain.exposed.pls.SegmentIdAndModelRulesPair;
-import com.latticeengines.domain.exposed.pls.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.query.frontend.RatingEngineFrontEndQuery;
+import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingIdLookupColumnPair;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingModelIdPair;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
+import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndModelRulesPair;
+import com.latticeengines.domain.exposed.ratings.coverage.SegmentIdAndSingleRulePair;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.proxy.exposed.objectapi.RatingProxy;
@@ -88,27 +91,64 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
         Map<String, Map<String, String>> uberErrorMap = new ConcurrentHashMap<>();
         result.setErrorMap(uberErrorMap);
 
-        if (request.getRatingEngineIds() != null) {
+        if (CollectionUtils.isNotEmpty(request.getRatingEngineIds())) {
             processRatingIds(request, result);
         }
 
-        if (request.getSegmentIds() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSegmentIds())) {
             processSegmentIds(request, result);
         }
 
-        if (request.getRatingEngineModelIds() != null) {
+        if (CollectionUtils.isNotEmpty(request.getRatingEngineModelIds())) {
             processRatingEngineModelIds(request, result);
         }
 
-        if (request.getSegmentIdModelRules() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSegmentIdModelRules())) {
             processSegmentIdModelRules(request, result);
         }
 
-        if (request.getSegmentIdAndSingleRules() != null) {
+        if (CollectionUtils.isNotEmpty(request.getSegmentIdAndSingleRules())) {
             processSegmentIdSingleRules(request, result);
         }
 
+        if (CollectionUtils.isNotEmpty(request.getRatingIdLookupColumnPairs())) {
+            processRatingIdLookupColumnPairs(request, result);
+        }
+
+        errorMapCleanup(result, uberErrorMap);
+
         return result;
+    }
+
+    private void processRatingIdLookupColumnPairs(RatingsCountRequest request, RatingsCountResponse result) {
+        Tenant tenant = MultiTenantContext.getTenant();
+
+        Map<String, CoverageInfo> ratingIdLookupColumnPairsCoverageMap = new ConcurrentHashMap<>();
+        result.setRatingIdLookupColumnPairsCoverageMap(ratingIdLookupColumnPairsCoverageMap);
+        Map<String, String> errorMap = new ConcurrentHashMap<>();
+        result.getErrorMap().put(RATING_ID_LOOKUP_COL_PAIR_ERROR_MAP_KEY, errorMap);
+
+        if (request.getRatingIdLookupColumnPairs().size() < thresholdForParallelProcessing) {
+            // it is more efficient to use sequential stream (will use current
+            // thread) if collection size is small. It also ensures that small
+            // requests are not blocked if threadpool is used by bigger requests
+            Stream<RatingIdLookupColumnPair> stream = //
+                    request.getRatingIdLookupColumnPairs().stream();
+            ratingIdLookupColumnStreamProcessing(request, tenant, ratingIdLookupColumnPairsCoverageMap, errorMap,
+                    stream);
+        } else {
+            tpForParallelStream.submit(//
+                    () -> //
+                    {
+                        Stream<RatingIdLookupColumnPair> parallelStream = //
+                                request.getRatingIdLookupColumnPairs().stream() //
+                                        .parallel();
+
+                        ratingIdLookupColumnStreamProcessing(request, tenant, ratingIdLookupColumnPairsCoverageMap,
+                                errorMap, parallelStream);
+                    }) //
+                    .join();
+        }
     }
 
     private void processRatingIds(RatingsCountRequest request, RatingsCountResponse result) {
@@ -264,6 +304,17 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
     }
 
     // this method can accept parallel or sequential stream
+    private void ratingIdLookupColumnStreamProcessing(RatingsCountRequest request, Tenant tenant,
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap,
+            Stream<RatingIdLookupColumnPair> stream) {
+        stream //
+                .forEach( //
+                        ratingIdLookupColumnPair -> //
+                        processSingleRatingIdLookupColumnPair(tenant, ratingEngineIdCoverageMap, errorMap, //
+                                ratingIdLookupColumnPair, request.isRestrictNotNullSalesforceId()));
+    }
+
+    // this method can accept parallel or sequential stream
     private void ratingEngineStreamProcessing(RatingsCountRequest request, Tenant tenant,
             Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap, Stream<String> stream) {
         stream //
@@ -360,6 +411,78 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
                     + segmentIdSingleRulePair, ex);
             logInErrorMap(errorMap, segmentIdSingleRulePair.getResponseKeyId(), ex.getMessage());
         }
+    }
+
+    private void processSingleRatingIdLookupColumnPair(Tenant tenant,
+            Map<String, CoverageInfo> ratingEngineIdCoverageMap, Map<String, String> errorMap,
+            RatingIdLookupColumnPair ratingIdLookupColumnPair, boolean isRestrictNotNullSalesforceId) {
+        try {
+            MultiTenantContext.setTenant(tenant);
+
+            if (StringUtils.isBlank(ratingIdLookupColumnPair.getResponseKeyId())
+                    || StringUtils.isBlank(ratingIdLookupColumnPair.getRatingEngineId())
+                    || StringUtils.isBlank(ratingIdLookupColumnPair.getLookupColumn())) {
+                String key = ratingIdLookupColumnPair.getResponseKeyId();
+                if (StringUtils.isBlank(key)) {
+                    key = "NULL_KEY";
+                }
+                logInErrorMap(errorMap, key,
+                        String.format(
+                                "Make sure to pass non-empty values for "
+                                        + "responseKeyId = %s, ratingEngineId = %s, lookupColumn = %s",
+                                ratingIdLookupColumnPair.getResponseKeyId(), //
+                                ratingIdLookupColumnPair.getRatingEngineId(), //
+                                ratingIdLookupColumnPair.getLookupColumn()));
+                return;
+            }
+
+            RatingEngine ratingEngine = ratingEngineService
+                    .getRatingEngineById(ratingIdLookupColumnPair.getRatingEngineId(), true, true);
+
+            if (ratingEngine == null || ratingEngine.getSegment() == null) {
+                logInErrorMap(errorMap, ratingIdLookupColumnPair.getResponseKeyId(), "Invalid rating engine");
+                return;
+            }
+
+            MetadataSegment segment = ratingEngine.getSegment();
+
+            FrontEndQuery accountFrontEndQuery0 = //
+                    createEntityFronEndQuery(BusinessEntity.Account, //
+                            isRestrictNotNullSalesforceId, segment, ratingIdLookupColumnPair.getLookupColumn());
+            FrontEndQuery contactFrontEndQuery = //
+                    createEntityFronEndQuery(BusinessEntity.Contact, //
+                            isRestrictNotNullSalesforceId, segment, ratingIdLookupColumnPair.getLookupColumn());
+
+            RatingEngineFrontEndQuery accountFrontEndQuery = RatingEngineFrontEndQuery
+                    .fromFrontEndQuery(accountFrontEndQuery0);
+            accountFrontEndQuery.setRatingEngineId(ratingIdLookupColumnPair.getRatingEngineId());
+
+            log.info("Front end query for Account: " + JsonUtils.serialize(accountFrontEndQuery));
+            Map<String, Long> countInfo = entityProxy.getRatingCount( //
+                    tenant.getId(), //
+                    accountFrontEndQuery);
+
+            Optional<Long> accountCountOption = countInfo.entrySet().stream().map(e -> e.getValue())
+                    .reduce((x, y) -> x + y);
+
+            CoverageInfo coverageInfo = new CoverageInfo();
+
+            Long accountCount = accountCountOption.orElse(0L);
+            coverageInfo.setAccountCount(accountCount);
+
+            try {
+                Long contactCount = getContactCount(tenant, contactFrontEndQuery);
+                coverageInfo.setContactCount(contactCount);
+            } catch (Exception ex) {
+                log.info("Got error in fetching contact count", ex);
+            }
+
+            ratingEngineIdCoverageMap.put(ratingIdLookupColumnPair.getResponseKeyId(), coverageInfo);
+        } catch (Exception ex) {
+            log.info("Ignoring exception in getting coverage info for rating id: " + ratingIdLookupColumnPair, ex);
+            logInErrorMap(errorMap, ratingIdLookupColumnPair.getResponseKeyId(), ex.getMessage());
+        }
+
     }
 
     private void processSingleRatingId(Tenant tenant, Map<String, CoverageInfo> ratingEngineIdCoverageMap,
@@ -559,16 +682,35 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
 
     private FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,
             MetadataSegment segment) {
+        return createEntityFronEndQuery(entityType, isRestrictNotNullSalesforceId, segment, null);
+    }
+
+    private FrontEndQuery createEntityFronEndQuery(BusinessEntity entityType, boolean isRestrictNotNullSalesforceId,
+            MetadataSegment segment, String lookupColumn) {
         FrontEndQuery entityFrontEndQuery = new FrontEndQuery();
 
         entityFrontEndQuery.setMainEntity(entityType);
 
-        FrontEndRestriction accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        FrontEndRestriction accountRestriction = null;
+        if (StringUtils.isBlank(lookupColumn)) {
+            accountRestriction = new FrontEndRestriction(segment.getAccountRestriction());
+        } else {
+            Restriction lookupColumnNotNullRestriction = //
+                    Restriction.builder()//
+                            .let(BusinessEntity.Account, lookupColumn).isNotNull()//
+                            .build();
+            accountRestriction = prepareFronEndRestriction(
+                    prepareRestrctionList(segment.getAccountRestriction(), lookupColumnNotNullRestriction));
+        }
         FrontEndRestriction contactRestriction = new FrontEndRestriction(segment.getContactRestriction());
 
         entityFrontEndQuery.setAccountRestriction(accountRestriction);
         entityFrontEndQuery.setContactRestriction(contactRestriction);
-        entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+
+        if (entityType != BusinessEntity.Account || StringUtils.isBlank(lookupColumn)) {
+            entityFrontEndQuery.setRestrictNotNullSalesforceId(isRestrictNotNullSalesforceId);
+        }
+
         return entityFrontEndQuery;
     }
 
@@ -664,6 +806,20 @@ public class RatingCoverageServiceImpl implements RatingCoverageService {
             errorMap.put(key, msg);
         } catch (Exception ex) {
             log.info("Ignoring unexpected error while putting msg in error map for key: " + key, ex);
+        }
+    }
+
+    private void errorMapCleanup(RatingsCountResponse result, Map<String, Map<String, String>> uberErrorMap) {
+        if (MapUtils.isNotEmpty(uberErrorMap)) {
+            Set<String> keySet = new HashSet<>();
+            keySet.addAll(uberErrorMap.keySet());
+
+            keySet.stream() //
+                    .filter(k -> MapUtils.isEmpty(uberErrorMap.get(k))) //
+                    .forEach(k -> uberErrorMap.remove(k));
+        }
+        if (MapUtils.isEmpty(uberErrorMap)) {
+            result.setErrorMap(null);
         }
     }
 

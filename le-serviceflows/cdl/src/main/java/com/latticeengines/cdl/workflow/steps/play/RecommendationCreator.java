@@ -13,15 +13,17 @@ import org.apache.avro.file.DataFileWriter;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
-import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
+import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -136,7 +138,12 @@ public class RecommendationCreator {
 
         recommendation.setAccountId(accountId.toString());
         recommendation.setLeAccountExternalID(accountId.toString());
-        recommendation.setSfdcAccountID(checkAndGet(account, InterfaceName.SalesforceAccountID.name()));
+
+        String destinationAccountId = InterfaceName.SalesforceAccountID.name();
+        if (StringUtils.isNotBlank(playLaunch.getDestinationAccountId())) {
+            destinationAccountId = playLaunch.getDestinationAccountId();
+        }
+        recommendation.setSfdcAccountID(checkAndGet(account, destinationAccountId));
         Double value = 0D;
         recommendation.setMonetaryValue(value);
 
@@ -149,7 +156,8 @@ public class RecommendationCreator {
 
         recommendation.setTenantId(tenant.getPid());
         recommendation.setLikelihood(getDefaultLikelihood(bucket));
-        recommendation.setSynchronizationDestination(PlaymakerConstants.SFDC);
+
+        setSyncDestination(playLaunch, recommendation);
 
         recommendation.setPriorityID(bucket);
         recommendation.setPriorityDisplayName(bucket.getName());
@@ -163,26 +171,48 @@ public class RecommendationCreator {
         return recommendation;
     }
 
+    private void setSyncDestination(PlayLaunch playLaunch, Recommendation recommendation) {
+        String synchronizationDestination = null;
+        String destinationSysType = null;
+        if (playLaunch.getDestinationSysType() == null
+                || playLaunch.getDestinationSysType() == CDLExternalSystemType.CRM) {
+            synchronizationDestination = SynchronizationDestinationEnum.SFDC.name();
+            destinationSysType = CDLExternalSystemType.CRM.name();
+        } else if (playLaunch.getDestinationSysType() == CDLExternalSystemType.MAP) {
+            synchronizationDestination = SynchronizationDestinationEnum.MAP.name();
+            destinationSysType = CDLExternalSystemType.MAP.name();
+        } else {
+            throw new RuntimeException(String.format("Destination type %s is not supported yet",
+                    playLaunch.getDestinationSysType().name()));
+        }
+
+        recommendation.setSynchronizationDestination(synchronizationDestination);
+        if (StringUtils.isNotBlank(playLaunch.getDestinationOrgId())) {
+            recommendation.setDestinationOrgId(playLaunch.getDestinationOrgId());
+            recommendation.setDestinationSysType(destinationSysType);
+        }
+    }
+
     private String checkAndGet(Map<String, Object> account, String columnName) {
         return account.get(columnName) != null ? account.get(columnName).toString() : null;
     }
 
     private static double getDefaultLikelihood(RatingBucketName bucket) {
         switch (bucket) {
-            case A:
-                return 95.0D;
-            case B:
-                return 70.0D;
-            case C:
-                return 40.0D;
-            case D:
-                return 20.0D;
-            case E:
-                return 10.0D;
-            case F:
-                return 5.0D;
-            default:
-                throw new UnsupportedOperationException("Unknown bucket " + bucket);
+        case A:
+            return 95.0D;
+        case B:
+            return 70.0D;
+        case C:
+            return 40.0D;
+        case D:
+            return 20.0D;
+        case E:
+            return 10.0D;
+        case F:
+            return 5.0D;
+        default:
+            throw new UnsupportedOperationException("Unknown bucket " + bucket);
         }
     }
 

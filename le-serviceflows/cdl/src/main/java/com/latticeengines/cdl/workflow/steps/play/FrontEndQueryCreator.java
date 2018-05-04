@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -66,7 +67,7 @@ public class FrontEndQueryCreator {
         accountFrontEndQuery.setMainEntity(BusinessEntity.Account);
         contactFrontEndQuery.setMainEntity(BusinessEntity.Contact);
 
-        prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery);
+        prepareLookupsForFrontEndQueries(accountFrontEndQuery, contactFrontEndQuery, launch.getDestinationAccountId());
 
         RatingEngine ratingEngine = play.getRatingEngine();
 
@@ -87,12 +88,25 @@ public class FrontEndQueryCreator {
     }
 
     private void prepareLookupsForFrontEndQueries(FrontEndQuery accountFrontEndQuery,
-            FrontEndQuery contactFrontEndQuery) {
+            FrontEndQuery contactFrontEndQuery, String destinationAccountId) {
+        Map<BusinessEntity, List<String>> tempAccLookupFields = null;
+        if (StringUtils.isBlank(destinationAccountId)) {
+            destinationAccountId = InterfaceName.SalesforceAccountID.name();
+            tempAccLookupFields = accountLookupFields;
+        } else {
+            tempAccLookupFields = new HashMap<>();
+            List<String> colList = accountLookupFields.get(BusinessEntity.Account).stream()
+                    .filter(c -> !InterfaceName.SalesforceAccountID.name().equals(c)) //
+                    .collect(Collectors.toList());
+            colList.add(destinationAccountId);
+            tempAccLookupFields.put(BusinessEntity.Account, colList);
+        }
+        final Map<BusinessEntity, List<String>> accLookupFields = tempAccLookupFields;
         List<Lookup> accountLookups = new ArrayList<>();
         accountLookupFields //
                 .keySet().stream() //
                 .forEach( //
-                        businessEntity -> prepareLookups(businessEntity, accountLookups, accountLookupFields));
+                        businessEntity -> prepareLookups(businessEntity, accountLookups, accLookupFields));
 
         List<Lookup> contactLookups = new ArrayList<>();
         contactLookupFields //

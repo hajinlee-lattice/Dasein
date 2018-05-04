@@ -31,13 +31,20 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
     private LookupIdMappingEntityMgr lookupIdMappingEntityMgr;
 
     @Override
-    public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType);
+    public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
+            boolean descending) {
+        return lookupIdMappingEntityMgr.getLookupIdsMapping(externalSystemType, sortby, descending);
     }
 
     @Override
     public LookupIdMap registerExternalSystem(LookupIdMap lookupIdsMap) {
-        return lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
+        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
+                lookupIdsMap.getExternalSystemType());
+        if (existingLookupIdMap == null) {
+            return lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
+        } else {
+            return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
+        }
     }
 
     @Override

@@ -14,6 +14,10 @@ CREATE PROCEDURE `UpdateCDLTables`()
     ALTER TABLE `PLS_MultiTenant`.`LOOKUP_ID_MAP` add constraint `UK_sf0jp00syg0wvgudux06p4owu` unique (`ID`);
     ALTER TABLE `PLS_MultiTenant`.`LOOKUP_ID_MAP` add constraint `FK_LOOKUPIDMAP_FKTENANTID_TENANT` foreign key (`FK_TENANT_ID`) references `PLS_MultiTenant`.`TENANT` (`TENANT_PID`) on delete cascade;
     END;
+
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_ACC_ID` varchar(255);
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_ORG_ID` varchar(255);
+    ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_SYS_TYPE` varchar(255);
 //
 DELIMITER ;
 

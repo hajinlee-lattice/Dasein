@@ -31,7 +31,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null);
+        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
@@ -60,7 +60,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
     public void testFind() {
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null);
+        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
         Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
 
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);

@@ -43,15 +43,16 @@ public class LpiPMRecommendationDaoAdapterImpl extends BaseGenericDaoImpl implem
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum, int syncDestination,
-            List<String> playIds) {
+            List<String> playIds, Map<String, String> orgInfo) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds);
+        return lpiPMRecommendation.getRecommendations(start, offset, maximum, syncDestEnum, playIds, orgInfo);
     }
 
     @Override
-    public long getRecommendationCount(long start, int syncDestination, List<String> playIds) {
+    public long getRecommendationCount(long start, int syncDestination, List<String> playIds,
+            Map<String, String> orgInfo) {
         SynchronizationDestinationEnum syncDestEnum = SynchronizationDestinationEnum.fromIntValue(syncDestination);
-        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds);
+        return lpiPMRecommendation.getRecommendationCount(start, syncDestEnum, playIds, orgInfo);
     }
 
     @Override

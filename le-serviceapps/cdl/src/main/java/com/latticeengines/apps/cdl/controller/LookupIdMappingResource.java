@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.LookupIdMappingService;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "lookup-id-mapping", description = "Rest resource for lookup Id mapping")
 @RestController
@@ -33,9 +35,13 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Get mapped configirations of org id and corresponding lookup id per external system type")
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(@PathVariable String customerSpace, //
-            @RequestParam(value = "externalSystemType", required = false) //
-            CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingService.getLookupIdsMapping(externalSystemType);
+            @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
+            CDLExternalSystemType externalSystemType, //
+            @ApiParam(value = "Sort by", required = false) //
+            @RequestParam(value = "sortby", required = false) String sortby, //
+            @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
+            @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending) {
+        return lookupIdMappingService.getLookupIdsMapping(externalSystemType, sortby, descending);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -72,7 +78,7 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(@PathVariable String customerSpace, //
-            @RequestParam(value = "externalSystemType", required = false) //
+            @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingService.getAllLookupIds(externalSystemType);
     }

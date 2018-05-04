@@ -1,5 +1,7 @@
 package com.latticeengines.playmaker.controller;
 
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +75,14 @@ public class TenantResource {
     @RequestMapping(value = "/oauthtoappid", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get tenant info from OAuth token")
-    public String getAppIdFromOauthToken(HttpServletRequest request) {
+    public Map<String, String> getAppIdFromOauthToken(HttpServletRequest request) {
         return OAuth2Utils.getAppId(request, oAuthUserEntityMgr);
+    }
+
+    @RequestMapping(value = "/oauthtoorginfo", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get tenant info from OAuth token")
+    public Map<String, String> getOrgInfoFromOauthToken(HttpServletRequest request) {
+        return OAuth2Utils.getOrgInfo(request, oAuthUserEntityMgr);
     }
 }

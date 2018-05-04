@@ -1,6 +1,7 @@
 package com.latticeengines.apps.core.aspect;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
@@ -17,9 +18,15 @@ public class ResourceAspect {
     @Inject
     private TenantEntityMgr tenantEntityMgr;
 
-    @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) " +
-            "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
+    @Before("execution(* com.latticeengines.apps.*.controller.*.*(..)) "
+            + "&& !@annotation(com.latticeengines.apps.core.annotation.NoCustomerSpace)")
     public void allControllerMethods(JoinPoint joinPoint) {
+        if (joinPoint.getArgs().length > 0 && joinPoint.getArgs()[0] instanceof HttpServletRequest) {
+            // for certain microservice endpoints (PlaymakerTenantResource -
+            // authToken to *) we do not have mandatory customer space in URL
+            // path. Skip setting multi tenant context for suck calls
+            return;
+        }
         String customerSpace = (String) joinPoint.getArgs()[0];
         customerSpace = CustomerSpace.parse(customerSpace).toString();
         setMultiTenantContext(customerSpace);

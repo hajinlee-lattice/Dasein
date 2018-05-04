@@ -13,10 +13,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.oauth.OauthClientType;
 import com.latticeengines.network.exposed.oauth.Oauth2Interface;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +46,7 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Access for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token_External')")
     public String createOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "app_id", required = false) String appId,
+            @RequestParam(value = CDLConstants.AUTH_APP_ID, required = false) String appId,
             @RequestParam(value = "clientType", required = false) String clientType) {
         OauthClientType client = OauthClientType.LP;
         if (StringUtils.isNotBlank(clientType)) {
@@ -67,7 +68,7 @@ public class Oauth2Resource {
     @ApiOperation(value = "Generate an Oauth2 Access token for a tenant")
     @PreAuthorize("hasRole('Create_PLS_Oauth2Token')")
     public String createJsonOAuth2AccessToken(@RequestParam(value = "tenantId") String tenantId,
-            @RequestParam(value = "app_id", required = false) String appId) {
+            @RequestParam(value = CDLConstants.AUTH_APP_ID, required = false) String appId) {
         String targetTenantId = getTargetTenantId(tenantId);
         log.info("Generating access token for tenant " + targetTenantId + ", app_id '" + appId + "'");
         String token = oauth2Service.createOAuth2AccessToken(targetTenantId, appId).getValue();

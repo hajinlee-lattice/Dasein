@@ -28,6 +28,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
@@ -55,15 +56,15 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @Column(name = "ID", unique = true, nullable = false)
     private String id;
 
-    @JsonProperty("orgId")
+    @JsonProperty(CDLConstants.ORG_ID)
     @Column(name = "ORG_ID", nullable = false)
     private String orgId;
 
-    @JsonProperty("orgName")
+    @JsonProperty(CDLConstants.ORG_NAME)
     @Column(name = "ORG_NAME", nullable = false)
     private String orgName;
 
-    @JsonProperty("externalSystemType")
+    @JsonProperty(CDLConstants.EXTERNAL_SYSTEM_TYPE)
     @Column(name = "EXT_SYS_TYPE", nullable = false)
     @Enumerated(EnumType.STRING)
     private CDLExternalSystemType externalSystemType;

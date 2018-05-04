@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
@@ -29,7 +30,6 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.LpiPMRecommendation;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 @Component("lpiPMRecommendation")
 public class LpiPMRecommendationImpl implements LpiPMRecommendation {
@@ -47,9 +47,9 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
 
     @Override
     public List<Map<String, Object>> getRecommendations(long start, int offset, int maximum,
-            SynchronizationDestinationEnum syncDestination, List<String> playIds) {
+            SynchronizationDestinationEnum syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         return postProcess(recommendationEntityMgr.findRecommendationsAsMap(PlaymakerUtils.dateFromEpochSeconds(start),
-                offset, maximum, syncDestination.name(), playIds), offset);
+                offset, maximum, syncDestination.name(), playIds, orgInfo), offset);
     }
 
     private List<Map<String, Object>> postProcess(List<Map<String, Object>> data, int offset) {
@@ -146,15 +146,20 @@ public class LpiPMRecommendationImpl implements LpiPMRecommendation {
     }
 
     @Override
-    public int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination,
-            List<String> playIds) {
+    public int getRecommendationCount(long start, SynchronizationDestinationEnum syncDestination, List<String> playIds,
+            Map<String, String> orgInfo) {
         return recommendationEntityMgr.findRecommendationCount(PlaymakerUtils.dateFromEpochSeconds(start),
-                syncDestination.name(), playIds);
+                syncDestination.name(), playIds, orgInfo);
     }
 
     @Override
     public Recommendation getRecommendationById(String recommendationId) {
         return recommendationEntityMgr.findByRecommendationId(recommendationId);
+    }
+
+    @Override
+    public void cleanupRecommendations(String playId) {
+        recommendationEntityMgr.deleteInBulkByPlayId(playId, null);
     }
 
     @VisibleForTesting

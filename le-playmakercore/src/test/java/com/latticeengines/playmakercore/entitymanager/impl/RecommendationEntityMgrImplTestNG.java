@@ -1,10 +1,13 @@
 package com.latticeengines.playmakercore.entitymanager.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -15,11 +18,14 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerUtils;
 import com.latticeengines.domain.exposed.playmakercore.Recommendation;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 
@@ -30,7 +36,9 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
     @Autowired
     private RecommendationEntityMgr recommendationEntityMgr;
 
-    private Recommendation recommendation;
+    private Recommendation recommendationWithoutOrgInfo;
+    private Recommendation recommendationWithOrg1;
+    private Recommendation recommendationWithOrg2;
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -38,24 +46,103 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
 
     private String PLAY_ID = "play__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_ID = "launch__" + CURRENT_TIME_MILLIS;
+    private String LAUNCH_ID_1 = "launch1__" + CURRENT_TIME_MILLIS;
+    private String LAUNCH_ID_2 = "launch2__" + CURRENT_TIME_MILLIS;
     private String ACCOUNT_ID = "account__" + CURRENT_TIME_MILLIS;
+    private String SFDC_ACCOUNT_ID = "sfdcAcc__" + CURRENT_TIME_MILLIS;
+    private String SFDC_ACCOUNT_ID_1 = "sfdcAcc1__" + CURRENT_TIME_MILLIS;
+    private String SFDC_ACCOUNT_ID_2 = "sfdcAcc2__" + CURRENT_TIME_MILLIS;
     private String LAUNCH_DESCRIPTION = "Recommendation done on " + CURRENT_TIME_MILLIS;
-    private long TENANT_PID = -1L;
+    private long TENANT_PID = CURRENT_TIME_MILLIS;
     private String CUSTOMER_SPACE = "LocalTest.LocalTest.Production";
     private String DUMMY_EMAIL = "FirstName5763@com";
     private String DUMMY_ZIP = "48098-2815";
+    private String DESTINATION_SYS_TYPE_1 = "destinationSysType_1";
+    private String DESTINATION_ORG_ID_1 = "destinationOrgId_1";
+    private String DESTINATION_SYS_TYPE_2 = "destinationSysType_2";
+    private String DESTINATION_ORG_ID_2 = "destinationOrgId_2";
+
+    private List<Recommendation> allRecommendationsAcrossAllLaunches = null;
 
     private Tenant tenant;
 
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
-        recommendation = new Recommendation();
+
+        recommendationWithoutOrgInfo = createRecommendationObject(LAUNCH_ID, SFDC_ACCOUNT_ID, null, null, "A");
+        recommendationWithOrg1 = createRecommendationObject(LAUNCH_ID_1, SFDC_ACCOUNT_ID_1, DESTINATION_ORG_ID_1,
+                DESTINATION_SYS_TYPE_1, "B");
+        recommendationWithOrg2 = createRecommendationObject(LAUNCH_ID_2, SFDC_ACCOUNT_ID_2, DESTINATION_ORG_ID_2,
+                DESTINATION_SYS_TYPE_2, "C");
+
+        allRecommendationsAcrossAllLaunches = Arrays.asList(recommendationWithoutOrgInfo, recommendationWithOrg1,
+                recommendationWithOrg2);
+        tenant = new Tenant(CUSTOMER_SPACE);
+        tenant.setPid(TENANT_PID);
+        MultiTenantContext.setTenant(tenant);
+    }
+
+    @AfterClass(groups = "functional")
+    public void teardown() {
+        allRecommendationsAcrossAllLaunches.stream().forEach(rec -> {
+            try {
+                if (rec.getPid() != null) {
+                    recommendationEntityMgr.delete(rec);
+                }
+            } catch (Exception ex) {
+                // ignore error in cleanup
+            }
+        });
+    }
+
+    @Test(groups = "functional")
+    public void testCreateRecommendation() {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testCreateRecommendation(rec));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
+    public void testGetRecommendationById() throws InterruptedException {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testGetRecommendationById(rec));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
+    public void testGetRecommendationByLaunchId() {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testGetRecommendationByLaunchId(rec));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByLaunchId" })
+    public void testGetRecommendationByPlayId() {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testGetRecommendationByPlayId(rec));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByPlayId" })
+    public void testGetRecommendationAsMapByPlayId() {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testGetRecommendationAsMapByPlayId(rec));
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
+    public void testGetRecommendationWithoutPlayId() {
+        allRecommendationsAcrossAllLaunches.stream()//
+                .forEach(rec -> testGetRecommendationWithoutPlayId(rec));
+    }
+
+    private Recommendation createRecommendationObject(String launchId, String sfdcAccountID, String destinationOrgId,
+            String destinationSysType, String priorityDisplayName) {
+        Recommendation recommendation = new Recommendation();
         recommendation.setDescription(LAUNCH_DESCRIPTION);
-        recommendation.setLaunchId(LAUNCH_ID);
+        recommendation.setLaunchId(launchId);
         recommendation.setLaunchDate(CURRENT_DATE);
         recommendation.setPlayId(PLAY_ID);
         recommendation.setAccountId(ACCOUNT_ID);
+        recommendation.setSfdcAccountID(sfdcAccountID);
         recommendation.setLeAccountExternalID(ACCOUNT_ID);
+        recommendation.setPriorityDisplayName(priorityDisplayName);
+        recommendation.setPriorityID(RatingBucketName.valueOf(priorityDisplayName));
         recommendation.setTenantId(TENANT_PID);
         String contacts = //
                 " [ " //
@@ -74,90 +161,96 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                         + " ] ";
         recommendation.setContacts(contacts);
         recommendation.setSynchronizationDestination(SynchronizationDestinationEnum.SFDC.toString());
-
-        tenant = new Tenant(CUSTOMER_SPACE);
-        tenant.setPid(TENANT_PID);
-        MultiTenantContext.setTenant(tenant);
+        recommendation.setDestinationOrgId(destinationOrgId);
+        recommendation.setDestinationSysType(destinationSysType);
+        return recommendation;
     }
 
-    @Test(groups = "functional")
-    public void testGetPreCreate() {
-    }
-
-    @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
-    public void testCreateRecommendation() {
+    private void testCreateRecommendation(Recommendation recommendation) {
+        Assert.assertNotNull(recommendation.getPriorityDisplayName());
+        Assert.assertNotNull(recommendation.getPriorityID());
         recommendationEntityMgr.create(recommendation);
         Assert.assertNotNull(recommendation.getRecommendationId());
         Assert.assertNotNull(recommendation.getPid());
+        Assert.assertNotNull(recommendation.getPriorityDisplayName());
+        Assert.assertNotNull(recommendation.getPriorityID());
+
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
-    public void testGetRecommendationById() throws InterruptedException {
+    private void testGetRecommendationById(Recommendation originalRec) {
         MultiTenantContext.setTenant(tenant);
-        Thread.sleep(500); // wait for replication lag
-        Recommendation result = recommendationEntityMgr.findByRecommendationId(recommendation.getRecommendationId());
-        Assert.assertEquals(result.getAccountId(), recommendation.getAccountId());
-        Assert.assertEquals(result.getPid(), recommendation.getPid());
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        // wait for replication lag
+        Recommendation recommendation = recommendationEntityMgr
+                .findByRecommendationId(originalRec.getRecommendationId());
+        compareOriginalAndExtractedRecommendations(originalRec, recommendation);
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
-    public void testGetRecommendationByLaunchId() {
+    private void testGetRecommendationByLaunchId(Recommendation originalRec) {
         MultiTenantContext.setTenant(tenant);
 
-        List<Recommendation> recommendations = recommendationEntityMgr.findByLaunchId(LAUNCH_ID);
+        List<Recommendation> recommendations = recommendationEntityMgr.findByLaunchId(originalRec.getLaunchId());
         Assert.assertNotNull(recommendations);
         Assert.assertEquals(recommendations.size(), 1);
 
         for (Recommendation recommendation : recommendations) {
-            Assert.assertNotNull(recommendation.getRecommendationId());
-            Assert.assertNotNull(recommendation.getPid());
-            Assert.assertNotNull(recommendation.getContacts());
-            List<Map<String, String>> contactList = recommendation.getExpandedContacts();
-            Assert.assertNotNull(contactList);
-            Assert.assertTrue(contactList.size() == 1);
-            Assert.assertEquals(contactList.get(0).get("Email"), DUMMY_EMAIL);
-            Assert.assertEquals(contactList.get(0).get("ZipCode"), DUMMY_ZIP);
+            compareOriginalAndExtractedRecommendations(originalRec, recommendation);
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByLaunchId" })
-    public void testGetRecommendationByPlayId() {
+    private void testGetRecommendationByPlayId(Recommendation originalRecommendation) {
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
-        playIds.add(PLAY_ID);
+        playIds.add(originalRecommendation.getPlayId());
+        Map<String, String> orgInfo = null;
+        if (StringUtils.isNotBlank(originalRecommendation.getDestinationOrgId())) {
+            orgInfo = new HashMap<>();
+            orgInfo.put(CDLConstants.ORG_ID, originalRecommendation.getDestinationOrgId());
+            orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, originalRecommendation.getDestinationSysType());
+        }
 
         int recommendationCount = recommendationEntityMgr.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
 
         Assert.assertEquals(1, recommendationCount);
 
         List<Recommendation> recommendations = recommendationEntityMgr.findRecommendations(new Date(0L), //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
+
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), recommendationCount);
 
         for (Recommendation recommendation : recommendations) {
-            Assert.assertNotNull(recommendation.getRecommendationId());
-            Assert.assertNotNull(recommendation.getPid());
+            compareOriginalAndExtractedRecommendations(originalRecommendation, recommendation);
         }
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationByPlayId" })
-    public void testGetRecommendationAsMapByPlayId() {
+    private void testGetRecommendationAsMapByPlayId(Recommendation originalRecommendation) {
         MultiTenantContext.setTenant(tenant);
 
         List<String> playIds = new ArrayList<>();
-        playIds.add(PLAY_ID);
+        playIds.add(originalRecommendation.getPlayId());
+        Map<String, String> orgInfo = null;
+        if (StringUtils.isNotBlank(originalRecommendation.getDestinationOrgId())) {
+            orgInfo = new HashMap<>();
+            orgInfo.put(CDLConstants.ORG_ID, originalRecommendation.getDestinationOrgId());
+            orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, originalRecommendation.getDestinationSysType());
+        }
 
         int recommendationCount = recommendationEntityMgr.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
 
         Assert.assertEquals(1, recommendationCount);
 
         List<Map<String, Object>> recommendations = recommendationEntityMgr.findRecommendationsAsMap(new Date(0L), //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), recommendationCount);
@@ -173,6 +266,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
             if ((Long) timestamp > lastModificationDate) {
                 lastModificationDate = (Long) timestamp;
             }
+            compareOriginalAndExtractedRecommendations(originalRecommendation, recommendation);
         }
 
         Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
@@ -183,37 +277,46 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         System.out.println("lastModificationDate3 = " + lastModificationDate3.getTime());
 
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
         Assert.assertEquals(0, recommendationCount);
 
         recommendations = recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate2, //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
         Assert.assertNotNull(recommendations);
-        Assert.assertTrue(recommendations.size() == 0);
-
-        recommendations = recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate3, //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
-        Assert.assertNotNull(recommendations);
-        //Assert.assertTrue(recommendations.size() > 0);
+        Assert.assertEquals(recommendations.size(), recommendationCount);
 
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate3, //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
         Assert.assertTrue(recommendationCount > 0);
+
+        recommendations = recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate3, //
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
+        Assert.assertNotNull(recommendations);
+        Assert.assertEquals(recommendations.size(), recommendationCount);
+        compareOriginalAndExtractedRecommendations(originalRecommendation, recommendations.get(0));
+
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationAsMapByPlayId" })
-    public void testGetRecommendationWithoutPlayId() {
+    private void testGetRecommendationWithoutPlayId(Recommendation originalRecommendation) {
         MultiTenantContext.setTenant(tenant);
+        Map<String, String> orgInfo = null;
+        if (StringUtils.isNotBlank(originalRecommendation.getDestinationOrgId())) {
+            orgInfo = new HashMap<>();
+            orgInfo.put(CDLConstants.ORG_ID, originalRecommendation.getDestinationOrgId());
+            orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, originalRecommendation.getDestinationSysType());
+        }
 
         int recommendationCount = recommendationEntityMgr.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), null);
+                SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
 
         Assert.assertTrue(recommendationCount > 0);
+        Assert.assertEquals(recommendationCount, 1);
 
         int minPageSize = Math.min(10, recommendationCount);
 
         List<Recommendation> recommendations = recommendationEntityMgr.findRecommendations(new Date(0L), //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
+                orgInfo);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), minPageSize);
@@ -231,6 +334,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
             if ((Long) timestamp > lastModificationDate) {
                 lastModificationDate = (Long) timestamp;
             }
+            compareOriginalAndExtractedRecommendations(originalRecommendation, recommendation);
         }
         lastModificationDate = lastModificationDate / 1000;
 
@@ -242,18 +346,22 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         System.out.println("lastModificationDate3 = " + lastModificationDate3.getTime());
 
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
-                SynchronizationDestinationEnum.SFDC.toString(), null);
+                SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
 
         Assert.assertEquals(0, recommendationCount);
 
         recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate2, //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
+                orgInfo);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
 
         recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate3, //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
+                orgInfo);
         Assert.assertNotNull(recommendations);
+        compareOriginalAndExtractedRecommendations(originalRecommendation, recommendations.get(0));
+
         // TODO - enable it once fixed
         // Assert.assertTrue(recommendations.size() > 0);
         //
@@ -264,7 +372,87 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         // Assert.assertTrue(recommendationCount > 0);
     }
 
-    @AfterClass(groups = "functional")
-    public void teardown() throws Exception {
+    private void compareOriginalAndExtractedRecommendations(Recommendation originalRec,
+            Map<String, Object> recommendation) {
+        Map<String, String> orgInfo = null;
+        if (StringUtils.isNotBlank(originalRec.getDestinationOrgId())) {
+            orgInfo = new HashMap<>();
+            orgInfo.put(CDLConstants.ORG_ID, originalRec.getDestinationOrgId());
+            orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, originalRec.getDestinationSysType());
+        }
+
+        try {
+
+            Assert.assertNotNull(recommendation.get(PlaymakerConstants.ID));
+            Assert.assertNotNull(recommendation.get(PlaymakerConstants.Contacts));
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.ID), originalRec.getRecommendationId());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.AccountID), originalRec.getAccountId());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.Description), originalRec.getDescription());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.ID), originalRec.getId());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.LaunchID), originalRec.getLaunchId());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.LEAccountExternalID),
+                    originalRec.getLeAccountExternalID());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.MonetaryValueIso4217ID),
+                    originalRec.getMonetaryValueIso4217ID());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.PlayID), originalRec.getPlayId());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.PriorityDisplayName),
+                    originalRec.getPriorityDisplayName());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.SfdcAccountID), originalRec.getSfdcAccountID());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.Likelihood), originalRec.getLikelihood());
+            Assert.assertEquals(recommendation.get(PlaymakerConstants.MonetaryValue), originalRec.getMonetaryValue());
+            Assert.assertEquals(RatingBucketName.valueOf(recommendation.get(PlaymakerConstants.PriorityID).toString()),
+                    originalRec.getPriorityID());
+            List<Map<String, String>> contactList = PlaymakerUtils
+                    .getExpandedContacts(recommendation.get(PlaymakerConstants.Contacts).toString());
+            Assert.assertNotNull(contactList);
+            Assert.assertTrue(contactList.size() == 1);
+            Assert.assertEquals(contactList.get(0).get("Email"), DUMMY_EMAIL);
+            Assert.assertEquals(contactList.get(0).get("ZipCode"), DUMMY_ZIP);
+        } catch (AssertionError | Exception ex) {
+            throw new RuntimeException(
+                    String.format("Exception = %s, orgInfo = %s", ex.getMessage(), JsonUtils.serialize(orgInfo)), ex);
+        }
+    }
+
+    private void compareOriginalAndExtractedRecommendations(Recommendation originalRec, Recommendation recommendation) {
+        Map<String, String> orgInfo = null;
+        if (StringUtils.isNotBlank(originalRec.getDestinationOrgId())) {
+            orgInfo = new HashMap<>();
+            orgInfo.put(CDLConstants.ORG_ID, originalRec.getDestinationOrgId());
+            orgInfo.put(CDLConstants.EXTERNAL_SYSTEM_TYPE, originalRec.getDestinationSysType());
+        }
+
+        try {
+            Assert.assertNotNull(recommendation.getRecommendationId());
+            Assert.assertNotNull(recommendation.getPid());
+            Assert.assertNotNull(recommendation.getContacts());
+            Assert.assertEquals(recommendation.getRecommendationId(), originalRec.getRecommendationId());
+            Assert.assertEquals(recommendation.getPid(), originalRec.getPid());
+            Assert.assertEquals(recommendation.getAccountId(), originalRec.getAccountId());
+            Assert.assertEquals(recommendation.getDescription(), originalRec.getDescription());
+            Assert.assertEquals(recommendation.getDestinationOrgId(), originalRec.getDestinationOrgId());
+            Assert.assertEquals(recommendation.getDestinationSysType(), originalRec.getDestinationSysType());
+            Assert.assertEquals(recommendation.getId(), originalRec.getId());
+            Assert.assertEquals(recommendation.getLaunchId(), originalRec.getLaunchId());
+            Assert.assertEquals(recommendation.getLeAccountExternalID(), originalRec.getLeAccountExternalID());
+            Assert.assertEquals(recommendation.getMonetaryValueIso4217ID(), originalRec.getMonetaryValueIso4217ID());
+            Assert.assertEquals(recommendation.getPlayId(), originalRec.getPlayId());
+            Assert.assertEquals(recommendation.getPriorityDisplayName(), originalRec.getPriorityDisplayName());
+            Assert.assertEquals(recommendation.getSfdcAccountID(), originalRec.getSfdcAccountID());
+            Assert.assertEquals(recommendation.getSynchronizationDestination(),
+                    originalRec.getSynchronizationDestination());
+            Assert.assertEquals(recommendation.getLikelihood(), originalRec.getLikelihood());
+            Assert.assertEquals(recommendation.getMonetaryValue(), originalRec.getMonetaryValue());
+            Assert.assertEquals(recommendation.getPriorityID(), originalRec.getPriorityID());
+            Assert.assertEquals(recommendation.getTenantId(), originalRec.getTenantId());
+            List<Map<String, String>> contactList = recommendation.getExpandedContacts();
+            Assert.assertNotNull(contactList);
+            Assert.assertTrue(contactList.size() == 1);
+            Assert.assertEquals(contactList.get(0).get("Email"), DUMMY_EMAIL);
+            Assert.assertEquals(contactList.get(0).get("ZipCode"), DUMMY_ZIP);
+        } catch (AssertionError | Exception ex) {
+            throw new RuntimeException(
+                    String.format("Exception = %s, orgInfo = %s", ex.getMessage(), JsonUtils.serialize(orgInfo)), ex);
+        }
     }
 }

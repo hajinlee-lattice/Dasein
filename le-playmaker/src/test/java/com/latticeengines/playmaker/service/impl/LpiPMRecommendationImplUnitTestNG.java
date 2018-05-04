@@ -21,6 +21,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.playmaker.PlaymakerConstants;
 import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinationEnum;
@@ -30,7 +31,6 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.playmakercore.entitymanager.RecommendationEntityMgr;
 import com.latticeengines.playmakercore.service.impl.LpiPMRecommendationImpl;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 public class LpiPMRecommendationImplUnitTestNG {
 
@@ -76,14 +76,15 @@ public class LpiPMRecommendationImplUnitTestNG {
 
     @Test(groups = "unit")
     public void testGetRecommendationCount() {
-        int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList);
+        int count = lpiPMRecommendationImpl.getRecommendationCount(0, SynchronizationDestinationEnum.SFDC, idList,
+                null);
         Assert.assertEquals(TOTAL_REC_COUNT, count);
     }
 
     @Test(groups = "unit")
     public void testGetRecommendations() {
         List<Map<String, Object>> recommendations = lpiPMRecommendationImpl.getRecommendations(0, 0,
-                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList);
+                TOTAL_REC_COUNT + 5, SynchronizationDestinationEnum.SFDC, idList, null);
         Assert.assertTrue(recommendations != null);
         Assert.assertFalse(recommendations.isEmpty());
         Assert.assertEquals(TOTAL_REC_COUNT, recommendations.size());
@@ -113,7 +114,7 @@ public class LpiPMRecommendationImplUnitTestNG {
                 .findRecommendationCount( //
                         any(Date.class), //
                         anyString(), //
-                        anyListOf(String.class))) //
+                        anyListOf(String.class), null)) //
                                 .thenReturn(TOTAL_REC_COUNT);
 
         when(recommendationEntityMgr //
@@ -122,7 +123,7 @@ public class LpiPMRecommendationImplUnitTestNG {
                         anyInt(), //
                         anyInt(), //
                         anyString(), //
-                        anyListOf(String.class))) //
+                        anyListOf(String.class), null)) //
                                 .thenReturn(resultMaps);
     }
 

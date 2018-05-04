@@ -29,6 +29,7 @@ import org.springframework.security.oauth2.common.util.RandomValueStringGenerato
 import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.SSLUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -37,7 +38,6 @@ import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 public class OAuth2Utils {
 
     private static final Logger log = LoggerFactory.getLogger(OAuth2Utils.class);
-    private static final String APP_ID = "app_id";
 
     @SuppressWarnings("unchecked")
     public static String extractHeaderToken(HttpServletRequest request) {
@@ -98,20 +98,35 @@ public class OAuth2Utils {
         }
     }
 
-    public static String getAppId(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+    public static Map<String, String> getAppId(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
         try {
             String token = OAuth2Utils.extractHeaderToken(request);
             if (token == null) {
                 throw new LedpException(LedpCode.LEDP_23001);
             }
-            String app_id = oAuthUserEntityMgr.findAppIdByAccessToken(token);
-            if (app_id == null || app_id.isEmpty()) {
-                throw new LedpException(LedpCode.LEDP_23006);
+            Map<String, String> res = new HashMap<>();
+
+            String appId = oAuthUserEntityMgr.findAppIdByAccessToken(token);
+            if (StringUtils.isNotBlank(appId)) {
+                res.put(CDLConstants.AUTH_APP_ID, appId);
             }
-            return app_id;
+            return res;
         } catch (Exception ex) {
             log.error("Unable to find app_id");
             throw new LedpException(LedpCode.LEDP_23006, ex);
+        }
+    }
+
+    public static Map<String, String> getOrgInfo(HttpServletRequest request, OAuthUserEntityMgr oAuthUserEntityMgr) {
+        try {
+            String token = OAuth2Utils.extractHeaderToken(request);
+            if (token == null) {
+                throw new LedpException(LedpCode.LEDP_23001);
+            }
+            return oAuthUserEntityMgr.findOrgInfoByAccessToken(token);
+        } catch (Exception ex) {
+            log.error("Unable to find org info");
+            throw new LedpException(LedpCode.LEDP_23007, ex);
         }
     }
 
@@ -134,6 +149,11 @@ public class OAuth2Utils {
 
     public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
             String clientId, String appId) {
+        return getOauthTemplate(authHostPort, username, password, clientId, appId, null, null);
+    }
+
+    public static OAuth2RestTemplate getOauthTemplate(String authHostPort, String username, String password,
+            String clientId, String appId, String orgId, String externalSystemType) {
         ResourceOwnerPasswordResourceDetails resource = new ResourceOwnerPasswordResourceDetails();
         resource.setUsername(username);
         resource.setPassword(password);
@@ -145,13 +165,18 @@ public class OAuth2Utils {
 
         DefaultAccessTokenRequest accessTokenRequest = new DefaultAccessTokenRequest();
 
-        if (!StringUtils.isEmpty(appId)) {
+        if (StringUtils.isNotBlank(appId)) {
             Map<String, List<String>> headers = new HashMap<>();
             List<String> appList = new ArrayList<>();
             appList.add(appId);
-            headers.put(APP_ID, appList);
+            headers.put(CDLConstants.AUTH_APP_ID, appList);
             accessTokenRequest.setHeaders(headers);
-            accessTokenRequest.add(APP_ID, appId);
+            accessTokenRequest.add(CDLConstants.AUTH_APP_ID, appId);
+        }
+
+        if (StringUtils.isNotBlank(orgId) && StringUtils.isNotBlank(externalSystemType)) {
+            accessTokenRequest.add(CDLConstants.ORG_ID, orgId);
+            accessTokenRequest.add(CDLConstants.EXTERNAL_SYSTEM_TYPE, externalSystemType);
         }
         OAuth2ClientContext context = new DefaultOAuth2ClientContext(accessTokenRequest);
         OAuth2RestTemplate newRestTemplate = new OAuth2RestTemplate(resource, context);

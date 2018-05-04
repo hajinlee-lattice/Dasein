@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.ResponseDocument;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.pls.Oauth2AccessToken;
 import com.latticeengines.domain.exposed.pls.SureShotUrls;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.entitymanager.Oauth2AccessTokenEntityMgr;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -43,7 +44,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Configure Credentials")
     public String getCredentialAuthenticationLink(@RequestParam(value = "crmType") String crmType,
-            @RequestParam(value = "app_id", required = false) String appId) {
+            @RequestParam(value = CDLConstants.AUTH_APP_ID, required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");
@@ -59,7 +60,7 @@ public class SureShotResource {
     @ResponseBody
     @ApiOperation(value = "Get SureShot Urls")
     public ResponseDocument<SureShotUrls> getSureShotUrls(@RequestParam(value = "crmType") String crmType,
-            @RequestParam(value = "app_id", required = false) String appId) {
+            @RequestParam(value = CDLConstants.AUTH_APP_ID, required = false) String appId) {
         Tenant tenant = MultiTenantContext.getTenant();
         if (tenant == null) {
             log.error("Not able to get the tenant from SecurityContext");

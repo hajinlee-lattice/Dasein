@@ -121,6 +121,16 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
     @JsonProperty("synchronizationDestination")
     private String synchronizationDestination;
 
+    @Index(name = "DESTINATION_ORG_ID")
+    @Column(name = "DESTINATION_ORG_ID", nullable = true)
+    @JsonProperty("destinationOrgId")
+    private String destinationOrgId;
+
+    @Index(name = "DESTINATION_SYS_TYPE")
+    @Column(name = "DESTINATION_SYS_TYPE", nullable = true)
+    @JsonProperty("destinationSysType")
+    private String destinationSysType;
+
     @Index(name = "REC_TENANT_ID")
     @Column(name = "TENANT_ID", nullable = false)
     @JsonProperty("tenant_id")
@@ -278,6 +288,22 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         this.synchronizationDestination = synchronizationDestination;
     }
 
+    public String getDestinationOrgId() {
+        return destinationOrgId;
+    }
+
+    public void setDestinationOrgId(String destinationOrgId) {
+        this.destinationOrgId = destinationOrgId;
+    }
+
+    public String getDestinationSysType() {
+        return destinationSysType;
+    }
+
+    public void setDestinationSysType(String destinationSysType) {
+        this.destinationSysType = destinationSysType;
+    }
+
     public Long getTenantId() {
         return tenantId;
     }
@@ -318,6 +344,8 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
         setAttribute(schema, index++, "MONETARY_VALUE_ISO4217_ID", Schema.Type.STRING);
         setAttribute(schema, index++, "CONTACTS", Schema.Type.STRING);
         setAttribute(schema, index++, "SYNC_DESTINATION", Schema.Type.STRING);
+        setAttribute(schema, index++, "DESTINATION_ORG_ID", Schema.Type.STRING);
+        setAttribute(schema, index++, "DESTINATION_SYS_TYPE", Schema.Type.STRING);
         setAttribute(schema, index++, "TENANT_ID", Schema.Type.LONG);
 
         return schema;
@@ -350,6 +378,8 @@ public class Recommendation implements HasPid, HasId<String>, HasTenantId {
             recMap.put("MONETARY_VALUE_ISO4217_ID", rec.getMonetaryValueIso4217ID());
             recMap.put("CONTACTS", rec.getContacts());
             recMap.put("SYNC_DESTINATION", rec.getSynchronizationDestination());
+            recMap.put("DESTINATION_ORG_ID", rec.getDestinationOrgId());
+            recMap.put("DESTINATION_SYS_TYPE", rec.getDestinationSysType());
             recMap.put("TENANT_ID", rec.getTenantId());
         }
 

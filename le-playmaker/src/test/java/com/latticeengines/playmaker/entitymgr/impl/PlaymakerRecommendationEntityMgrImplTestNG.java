@@ -50,7 +50,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationsSFDC() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(), null,
-                1000, 0, 100, 0, null);
+                1000, 0, 100, 0, null, null);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
@@ -63,7 +63,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationsMap() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(), null,
-                1000, 0, 100, 1, null);
+                1000, 0, 100, 1, null, null);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
@@ -76,7 +76,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationsSfdcAndMap() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(), null,
-                1000, 0, 100, 2, null);
+                1000, 0, 100, 2, null, null);
         Assert.assertNotNull(result);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) result
@@ -88,7 +88,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationCountSFDC() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
-                null, 1000, 0, null);
+                null, 1000, 0, null, null);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -96,7 +96,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationCountMap() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
-                null, 1000, 1, null);
+                null, 1000, 1, null, null);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -104,7 +104,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
     public void getRecommendationCountSfdcAndMap() throws Exception {
 
         Map<String, Object> result = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
-                null, 1000, 2, null);
+                null, 1000, 2, null, null);
         Assert.assertTrue(((Long) result.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -587,7 +587,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         playIds.add("24");
         playIds.add("43");
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getRecommendationCount(tenant.getTenantName(),
-                null, 0, 1, playIds);
+                null, 0, 1, playIds, null);
         Assert.assertTrue(((Long) mapResult.get(PlaymakerRecommendationEntityMgr.COUNT_KEY)) > 0L);
     }
 
@@ -598,7 +598,7 @@ public class PlaymakerRecommendationEntityMgrImplTestNG extends PlaymakerTestNGB
         playIds.add("24");
         playIds.add("43");
         Map<String, Object> mapResult = playMakerRecommendationEntityMgr.getRecommendations(tenant.getTenantName(),
-                null, 0, 0, 100, 1, playIds);
+                null, 0, 0, 100, 1, playIds, null);
         Assert.assertNotNull(mapResult);
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> recomendations = (List<Map<String, Object>>) mapResult

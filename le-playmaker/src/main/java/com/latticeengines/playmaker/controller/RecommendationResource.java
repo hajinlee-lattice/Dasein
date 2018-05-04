@@ -3,9 +3,10 @@ package com.latticeengines.playmaker.controller;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -17,6 +18,7 @@ import com.latticeengines.domain.exposed.playmakercore.SynchronizationDestinatio
 import com.latticeengines.oauth2db.exposed.entitymgr.OAuthUserEntityMgr;
 import com.latticeengines.oauth2db.exposed.util.OAuth2Utils;
 import com.latticeengines.playmaker.entitymgr.PlaymakerRecommendationEntityMgr;
+import com.latticeengines.proxy.exposed.oauth2.Oauth2RestApiProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,16 +29,19 @@ import io.swagger.annotations.ApiParam;
 @RequestMapping(value = "/playmaker")
 public class RecommendationResource {
 
-    @Autowired
+    @Inject
     private PlaymakerRecommendationEntityMgr playmakerRecommendationMgr;
 
-    @Autowired
+    @Inject
     private OAuthUserEntityMgr oAuthUserEntityMgr;
+
+    @Inject
+    private Oauth2RestApiProxy tenantProxy;
 
     @RequestMapping(value = "/recommendations", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get recommendations")
-    public Map<String, Object> getRecommendations(HttpServletRequest request,
+    public Map<String, Object> getRecommendations(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "First record number from start", required = true) @RequestParam(value = "offset", required = true) int offset,
@@ -46,13 +51,14 @@ public class RecommendationResource {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendations(tenantName, lookupSource, start, offset, maximum,
-                SynchronizationDestinationEnum.mapToIntType(destination), playIds);
+                SynchronizationDestinationEnum.mapToIntType(destination), playIds,
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/recommendationcount", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get recommendation count")
-    public Map<String, Object> getRecommendationCount(HttpServletRequest request,
+    public Map<String, Object> getRecommendationCount(HttpServletRequest request, RequestEntity<String> requestEntity,
             @RequestHeader(value = "PREDICTIVE_PLATFORM", required = false) String lookupSource,
             @ApiParam(value = "Last Modification date in Unix timestamp", required = true) @RequestParam(value = "start", required = true) long start,
             @ApiParam(value = "Synchronization Destination: SFDC | MAP | SFDC_AND_MAP", required = true) @RequestParam(value = "destination", required = true) String destination,
@@ -60,7 +66,8 @@ public class RecommendationResource {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
         return playmakerRecommendationMgr.getRecommendationCount(tenantName, lookupSource, start,
-                SynchronizationDestinationEnum.mapToIntType(destination), playIds);
+                SynchronizationDestinationEnum.mapToIntType(destination), playIds,
+                tenantProxy.getOrgInfoFromOAuthRequest(requestEntity));
     }
 
     @RequestMapping(value = "/plays", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -106,6 +113,7 @@ public class RecommendationResource {
             @ApiParam(value = "true - populate column SfdcContactId, false - does NOT populate column SfdcContactId", required = false) @RequestParam(value = "hasSfdcContactId", required = false) String hasSfdcContactId) {
 
         String tenantName = OAuth2Utils.getTenantName(request, oAuthUserEntityMgr);
+
         Map<String, Object> accountExtensions = playmakerRecommendationMgr.getAccountExtensions(tenantName,
                 lookupSource, start, offset, maximum, accountIds, filterBy, recStart, columns,
                 "true".equals(hasSfdcContactId));

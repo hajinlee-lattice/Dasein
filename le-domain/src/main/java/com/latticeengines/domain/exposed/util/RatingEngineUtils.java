@@ -8,9 +8,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.collections4.MapUtils;
 
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
-import com.latticeengines.domain.exposed.pls.CoverageInfo;
-import com.latticeengines.domain.exposed.pls.RatingBucketCoverage;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.ratings.coverage.CoverageInfo;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingBucketCoverage;
 
 public class RatingEngineUtils {
 

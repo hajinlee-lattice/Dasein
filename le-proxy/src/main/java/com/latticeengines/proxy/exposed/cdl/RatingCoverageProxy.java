@@ -4,8 +4,8 @@ import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.domain.exposed.pls.RatingsCountRequest;
-import com.latticeengines.domain.exposed.pls.RatingsCountResponse;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
+import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("ratingCoverageProxy")

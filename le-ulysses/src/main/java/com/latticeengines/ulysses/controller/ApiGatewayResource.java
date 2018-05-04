@@ -31,7 +31,7 @@ public class ApiGatewayResource {
             throw new LedpException(LedpCode.LEDP_39002);
         }
         
-        PlaymakerTenant oAuthTenant = oauth2RestApiProxy.getOAuthTenant(tenantName);
+        PlaymakerTenant oAuthTenant = oauth2RestApiProxy.getTenant(tenantName);
         
         GatewayPolicyConfiguration gwPolicyConfig = new GatewayPolicyConfiguration();
         gwPolicyConfig.setPrincipal(tenantName);

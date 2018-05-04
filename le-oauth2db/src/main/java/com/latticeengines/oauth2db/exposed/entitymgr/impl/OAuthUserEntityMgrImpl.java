@@ -1,6 +1,7 @@
 package com.latticeengines.oauth2db.exposed.entitymgr.impl;
 
 import java.util.Date;
+import java.util.Map;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -78,6 +79,11 @@ public class OAuthUserEntityMgrImpl implements OAuthUserEntityMgr {
     @Override
     public String findAppIdByAccessToken(String token) {
         return userDao.getAppIdByAccessToken(token);
+    }
+
+    @Override
+    public Map<String, String> findOrgInfoByAccessToken(String token) {
+        return userDao.getOrgInfoByAccessToken(token);
     }
 
     @Override

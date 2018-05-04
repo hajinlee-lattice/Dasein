@@ -20,7 +20,9 @@ import org.testng.annotations.Test;
 
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.multitenant.TalkingPointDTO;
 import com.latticeengines.domain.exposed.pls.LaunchState;
@@ -410,6 +412,9 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
     private PlayLaunch createDefaultPlayLaunch() {
         PlayLaunch playLaunch = new PlayLaunch();
         playLaunch.setBucketsToLaunch(new HashSet<>(Arrays.asList(RatingBucketName.values())));
+        playLaunch.setDestinationOrgId("o_" + System.currentTimeMillis());
+        playLaunch.setDestinationSysType(CDLExternalSystemType.CRM);
+        playLaunch.setDestinationAccountId(InterfaceName.SalesforceAccountID.name());
         return playLaunch;
     }
 

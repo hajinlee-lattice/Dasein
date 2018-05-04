@@ -1,16 +1,13 @@
-USE `Data_MultiTenant`;
-
-DROP PROCEDURE IF EXISTS `UpdateSchema`;
-DROP PROCEDURE IF EXISTS `UpdateRecommendation`;
-
-DELIMITER //
 CREATE PROCEDURE `UpdateRecommendation`()
   BEGIN
-    ALTER TABLE `Recommendation`
-    DROP COLUMN `CONTACTS`;
+    ALTER TABLE `Data_MultiTenant`.`Recommendation`
+    ADD `DESTINATION_ORG_ID` varchar(255);
 
-    ALTER TABLE `Recommendation`
-    ADD `CONTACTS` LONGTEXT;
+    ALTER TABLE `Data_MultiTenant`.`Recommendation`
+    ADD `DESTINATION_SYS_TYPE` varchar(255);
+
+    CREATE INDEX DESTINATION_ORG_ID ON `Data_MultiTenant`.`Recommendation` (`DESTINATION_ORG_ID`);
+    CREATE INDEX DESTINATION_SYS_TYPE ON `Data_MultiTenant`.`Recommendation` (`DESTINATION_SYS_TYPE`);
   END;
 //
 DELIMITER ;

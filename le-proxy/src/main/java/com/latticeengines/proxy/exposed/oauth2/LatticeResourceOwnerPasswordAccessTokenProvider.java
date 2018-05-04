@@ -15,9 +15,9 @@ import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-public class LatticeResourceOwnerPasswordAccessTokenProvider extends ResourceOwnerPasswordAccessTokenProvider {
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 
-    private static final String APP_ID = "app_id";
+public class LatticeResourceOwnerPasswordAccessTokenProvider extends ResourceOwnerPasswordAccessTokenProvider {
 
     @Override
     public OAuth2AccessToken obtainAccessToken(OAuth2ProtectedResourceDetails details, AccessTokenRequest request)
@@ -36,7 +36,7 @@ public class LatticeResourceOwnerPasswordAccessTokenProvider extends ResourceOwn
 
         form.set("username", resource.getUsername());
         form.set("password", resource.getPassword());
-        form.set(APP_ID, request.getHeaders().get(APP_ID).get(0));
+        form.set(CDLConstants.AUTH_APP_ID, request.getHeaders().get(CDLConstants.AUTH_APP_ID).get(0));
         form.putAll(request);
 
         if (resource.isScoped()) {

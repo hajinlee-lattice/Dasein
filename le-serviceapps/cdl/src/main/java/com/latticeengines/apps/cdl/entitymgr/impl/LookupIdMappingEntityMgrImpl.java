@@ -10,6 +10,9 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,8 +50,15 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-    public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType) {
-        List<LookupIdMap> configs = lookupIdMappingRepository.findAll();
+    public Map<String, List<LookupIdMap>> getLookupIdsMapping(CDLExternalSystemType externalSystemType, String sortby,
+            boolean descending) {
+        if (StringUtils.isNotEmpty(sortby)) {
+            sortby = sortby.trim();
+        } else {
+            sortby = "updated";
+        }
+        Sort sort = new Sort(descending ? Direction.DESC : Direction.ASC, sortby);
+        List<LookupIdMap> configs = lookupIdMappingRepository.findAll(sort);
         Map<String, List<LookupIdMap>> result = new HashMap<>();
         if (CollectionUtils.isNotEmpty(configs)) {
             configs.stream() //
@@ -83,6 +93,12 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
     @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public LookupIdMap getLookupIdMap(String id) {
         return lookupIdMappingRepository.findById(id);
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public LookupIdMap getLookupIdMap(String orgId, CDLExternalSystemType externalSystemType) {
+        return lookupIdMappingRepository.findByOrgIdAndExternalSystemType(orgId, externalSystemType);
     }
 
     @Override

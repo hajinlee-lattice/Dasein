@@ -29,7 +29,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     @Test(groups = "deployment")
     public void getLookupIdsMapping() {
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
-                null);
+                null, null, true);
         Assert.assertNotNull(lookupIdConfigs);
         Assert.assertTrue(lookupIdConfigs.keySet().size() == 0);
     }
@@ -55,7 +55,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     public void updateLookupIdMap() {
 
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
-                null);
+                null, null, true);
         Assert.assertNotNull(lookupIdConfigs);
         Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
 
@@ -116,7 +116,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
 
     private void confirmNonEmptyLookupConfigs() {
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
-                null);
+                null, null, true);
         Assert.assertNotNull(lookupIdConfigs);
         Assert.assertTrue(lookupIdConfigs.keySet().size() > 0);
 

@@ -33,19 +33,21 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     @Override
     public List<Recommendation> findRecommendations(Date lastModificationDate, int offset, int max,
-            String syncDestination, List<String> playIds) {
-        return recommendationEntityMgr.findRecommendations(lastModificationDate, offset, max, syncDestination, playIds);
+            String syncDestination, List<String> playIds, Map<String, String> orgInfo) {
+        return recommendationEntityMgr.findRecommendations(lastModificationDate, offset, max, syncDestination, playIds,
+                orgInfo);
     }
 
     @Override
-    public int findRecommendationCount(Date lastModificationDate, String syncDestination, List<String> playIds) {
-        return recommendationEntityMgr.findRecommendationCount(lastModificationDate, syncDestination, playIds);
+    public int findRecommendationCount(Date lastModificationDate, String syncDestination, List<String> playIds,
+            Map<String, String> orgInfo) {
+        return recommendationEntityMgr.findRecommendationCount(lastModificationDate, syncDestination, playIds, orgInfo);
     }
 
     @Override
     public List<Map<String, Object>> findRecommendationsAsMap(Date lastModificationDate, int offset, int max,
-            String syncDestination, List<String> playIds) {
+            String syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         return recommendationEntityMgr.findRecommendationsAsMap(lastModificationDate, offset, max, syncDestination,
-                playIds);
+                playIds, orgInfo);
     }
 }

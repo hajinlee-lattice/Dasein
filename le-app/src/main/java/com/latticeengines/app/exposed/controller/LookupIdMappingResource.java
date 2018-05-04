@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLConstants;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
@@ -22,6 +23,7 @@ import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 
 @Api(value = "lookup-id-mapping", description = "Rest resource for lookup Id mapping")
 @RestController
@@ -35,9 +37,14 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Get mapped configirations of org id and corresponding lookup id per external system type")
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(HttpServletRequest request, //
-            @RequestParam(value = "externalSystemType", required = false) //
-            CDLExternalSystemType externalSystemType) {
-        return lookupIdMappingProxy.getLookupIdsMapping(MultiTenantContext.getTenant().getId(), externalSystemType);
+            @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
+            CDLExternalSystemType externalSystemType, //
+            @ApiParam(value = "Sort by", required = false) //
+            @RequestParam(value = "sortby", required = false) String sortby, //
+            @ApiParam(value = "Sort in descending order", required = false, defaultValue = "true") //
+            @RequestParam(value = "descending", required = false, defaultValue = "true") boolean descending) {
+        return lookupIdMappingProxy.getLookupIdsMapping(MultiTenantContext.getTenant().getId(), externalSystemType,
+                sortby, descending);
     }
 
     @RequestMapping(value = "/register", method = RequestMethod.POST, headers = "Accept=application/json")
@@ -73,7 +80,7 @@ public class LookupIdMappingResource {
     @ResponseBody
     @ApiOperation(value = "Get available lookup ids per external system type")
     public Map<String, List<CDLExternalSystemMapping>> getAllLookupIds(HttpServletRequest request, //
-            @RequestParam(value = "externalSystemType", required = false) //
+            @RequestParam(value = CDLConstants.EXTERNAL_SYSTEM_TYPE, required = false) //
             CDLExternalSystemType externalSystemType) {
         return lookupIdMappingProxy.getAllLookupIds(MultiTenantContext.getTenant().getId(), externalSystemType);
     }

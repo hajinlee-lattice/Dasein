@@ -19,21 +19,21 @@ public class PlaymakerRecommendationEntityMgrImpl implements PlaymakerRecommenda
 
     @Override
     public Map<String, Object> getRecommendations(String tenantName, String lookupSource, long start, int offset,
-            int maximum, int syncDestination, List<String> playIds) {
+            int maximum, int syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
 
         List<Map<String, Object>> recommendations = dao.getRecommendations(start, offset, maximum, syncDestination,
-                playIds);
+                playIds, orgInfo);
         Map<String, Object> result = wrapResult(recommendations);
         return result;
     }
 
     @Override
     public Map<String, Object> getRecommendationCount(String tenantName, String lookupSource, long start,
-            int syncDestination, List<String> playIds) {
+            int syncDestination, List<String> playIds, Map<String, String> orgInfo) {
         PlaymakerRecommendationDao dao = daoFactory.getRecommendationDao(tenantName, lookupSource);
         Map<String, Object> result = new HashMap<>();
-        result.put(COUNT_KEY, dao.getRecommendationCount(start, syncDestination, playIds));
+        result.put(COUNT_KEY, dao.getRecommendationCount(start, syncDestination, playIds, orgInfo));
         return result;
     }
 

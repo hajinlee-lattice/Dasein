@@ -32,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.dataplatform.HasId;
 import com.latticeengines.domain.exposed.dataplatform.HasPid;
 import com.latticeengines.domain.exposed.db.HasAuditingFields;
@@ -138,6 +139,19 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
     @JsonProperty("table_name")
     @Column(name = "TABLE_NAME", nullable = true)
     private String tableName;
+
+    @JsonProperty("destinationOrgId")
+    @Column(name = "DESTINATION_ORG_ID", nullable = true)
+    private String destinationOrgId;
+
+    @JsonProperty("destinationSysType")
+    @Column(name = "DESTINATION_SYS_TYPE", nullable = true)
+    @Enumerated(EnumType.STRING)
+    private CDLExternalSystemType destinationSysType;
+
+    @JsonProperty("destinationAccountId")
+    @Column(name = "DESTINATION_ACC_ID", nullable = true)
+    private String destinationAccountId;
 
     @Override
     public Long getPid() {
@@ -315,6 +329,30 @@ public class PlayLaunch implements HasPid, HasId<String>, HasTenantId, HasAuditi
 
     public void setTopNCount(Long topNCount) {
         this.topNCount = topNCount;
+    }
+
+    public String getDestinationOrgId() {
+        return destinationOrgId;
+    }
+
+    public void setDestinationOrgId(String destinationOrgId) {
+        this.destinationOrgId = destinationOrgId;
+    }
+
+    public CDLExternalSystemType getDestinationSysType() {
+        return destinationSysType;
+    }
+
+    public void setDestinationSysType(CDLExternalSystemType destinationSysType) {
+        this.destinationSysType = destinationSysType;
+    }
+
+    public String getDestinationAccountId() {
+        return destinationAccountId;
+    }
+
+    public void setDestinationAccountId(String destinationAccountId) {
+        this.destinationAccountId = destinationAccountId;
     }
 
     @Override

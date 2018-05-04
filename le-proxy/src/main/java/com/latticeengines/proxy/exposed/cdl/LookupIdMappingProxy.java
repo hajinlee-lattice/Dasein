@@ -32,12 +32,17 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Map<String, List<LookupIdMap>> getLookupIdsMapping(String customerSpace,
-            CDLExternalSystemType externalSystemType) {
+            CDLExternalSystemType externalSystemType, String sortby, boolean descending) {
         String url = constructUrl(URL_PREFIX, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (externalSystemType != null) {
             params.add("externalSystemType=" + externalSystemType);
         }
+        if (StringUtils.isNotEmpty(sortby)) {
+            params.add("sortby=" + sortby.trim());
+        }
+        params.add("descending=" + descending);
+
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");
         }

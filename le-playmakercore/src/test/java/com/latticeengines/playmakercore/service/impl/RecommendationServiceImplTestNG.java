@@ -97,12 +97,12 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
         playIds.add(PLAY_ID);
 
         int recommendationCount = recommendationService.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
 
         Assert.assertEquals(1, recommendationCount);
 
         List<Recommendation> recommendations = recommendationService.findRecommendations(new Date(0L), //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), recommendationCount);
@@ -121,12 +121,12 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
         playIds.add(PLAY_ID);
 
         int recommendationCount = recommendationService.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
 
         Assert.assertEquals(1, recommendationCount);
 
         List<Map<String, Object>> recommendations = recommendationService.findRecommendationsAsMap(new Date(0L), //
-                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds);
+                0, recommendationCount, SynchronizationDestinationEnum.SFDC.toString(), playIds, null);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), recommendationCount);
@@ -141,14 +141,15 @@ public class RecommendationServiceImplTestNG extends AbstractTestNGSpringContext
         MultiTenantContext.setTenant(tenant);
 
         int recommendationCount = recommendationService.findRecommendationCount(new Date(0L), //
-                SynchronizationDestinationEnum.SFDC.toString(), null);
+                SynchronizationDestinationEnum.SFDC.toString(), null, null);
 
         Assert.assertTrue(recommendationCount > 0);
 
         int minPageSize = Math.min(10, recommendationCount);
 
         List<Recommendation> recommendations = recommendationService.findRecommendations(new Date(0L), //
-                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null);
+                (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
+                null);
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() > 0);
         Assert.assertEquals(recommendations.size(), minPageSize);
