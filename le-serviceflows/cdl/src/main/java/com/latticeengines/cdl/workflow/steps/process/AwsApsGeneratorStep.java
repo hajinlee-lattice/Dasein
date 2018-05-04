@@ -69,7 +69,7 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
 
     @Override
     protected String getCondaEnv() {
-        return "v01_20180301";
+        return "v01";
     }
 
     @Override
