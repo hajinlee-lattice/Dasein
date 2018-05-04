@@ -1,6 +1,5 @@
 package com.latticeengines.dataflow.runtime.cascading.propdata;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,32 +15,29 @@ import org.apache.commons.lang3.StringUtils;
 
 public class ContactNameConcatenateFunction extends BaseOperation implements Function {
     private Map<String, Integer> positionMap;
-    private List<String> retainFields;
     private List<String> concatenateFields;
     private String resultField;
 
-    public ContactNameConcatenateFunction(Fields fieldsDeclaration, List<String> retainFields,
-                                          List<String> concatenateFields,
+    public ContactNameConcatenateFunction(Fields fieldsDeclaration, List<String> concatenateFields,
                                           String resultField) {
         super(fieldsDeclaration);
         this.positionMap = getPositionMap(fieldsDeclaration);
-        this.retainFields = new ArrayList<>(retainFields);
-        this.concatenateFields = new ArrayList<>(concatenateFields);
+        this.concatenateFields = concatenateFields;
         this.resultField = resultField;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-        Tuple tuple = Tuple.size(getFieldDeclaration().size());
         TupleEntry arguments = functionCall.getArguments();
-        for (String field : retainFields) {
-            tuple.set(positionMap.get(field), arguments.getString(field));
-        }
+        Tuple tuple = arguments.getTupleCopy();
 
-        if (StringUtils.isEmpty(arguments.getString(resultField))) {
+        if (arguments.getString(resultField) == null) {
             StringBuilder sb = new StringBuilder();
             for (String field : concatenateFields) {
-                sb.append(arguments.getString(field)).append(" ");
+                String fieldValue = arguments.getString(field);
+                if (StringUtils.isNotEmpty(fieldValue)) {
+                    sb.append(fieldValue).append(" ");
+                }
             }
             tuple.set(positionMap.get(resultField), sb.toString().trim());
         } else {

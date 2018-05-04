@@ -1,7 +1,11 @@
 package com.latticeengines.datacloud.etl.transformation.service.impl;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
@@ -17,8 +21,8 @@ import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.datacloud.core.source.Source;
 import com.latticeengines.datacloud.core.source.impl.GeneralSource;
+import com.latticeengines.datacloud.dataflow.transformation.ContactNameConcatenate;
 import com.latticeengines.datacloud.etl.transformation.service.TransformationService;
-import com.latticeengines.datacloud.etl.transformation.transformer.impl.ContactNameConcatenater;
 import com.latticeengines.domain.exposed.datacloud.manage.TransformationProgress;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ContactNameConcatenateConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.PipelineTransformationConfiguration;
@@ -30,7 +34,6 @@ public class ContactNameConcatenaterTestNG
     private GeneralSource baseSource = new GeneralSource("AccountMaster");
     private GeneralSource source = new GeneralSource("ContactNameConcatenated");
     private static final String VERSION = "2017-12-22_00-00-00_UTC";
-    private static final String DATA_CLOUD_VERSION = "2.0.8";
     private boolean isNameProvided = false;
 
     private final String RESULT_FIELD_NAME = "FullName";
@@ -41,13 +44,17 @@ public class ContactNameConcatenaterTestNG
     private Object[][] inputData = new Object[][] {
             {"Google", "MountainView", "CA", "USA", "google.com", "google_fname", "google_lname"},
             {"Twitter", "San Francisco", "CA", "USA", "twitter.com", "twitter_fname", "twitter_lname"},
-            {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname", "amazon_lname"}
+            {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname", "amazon_lname"},
+            {"Apple", "Cupertino", "CA", "USA", "apple.com", "", "apple_lname"},
+            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname", null}
     };
 
     private Object[][] expectedData = new Object[][] {
             {"Google", "MountainView", "CA", "USA", "google.com", "google_fname google_lname"},
             {"Twitter", "San Francisco", "CA", "USA", "twitter.com", "twitter_fname twitter_lname"},
-            {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname amazon_lname"}
+            {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname amazon_lname"},
+            {"Apple", "Cupertino", "CA", "USA", "apple.com", "apple_lname"},
+            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname"}
     };
 
     private Object[][] inputDataWithName = new Object[][] {
@@ -58,7 +65,7 @@ public class ContactNameConcatenaterTestNG
 
     private Object[][] expectedDataWithName = new Object[][] {
             {"Google", "MountainView", "CA", "USA", "google.com", "google_full_name"},
-            {"Twitter", "San Francisco", "CA", "USA", "twitter.com", "twitter_fname twitter_lname"},
+            {"Twitter", "San Francisco", "CA", "USA", "twitter.com", ""},
             {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname amazon_lname"}
     };
 
@@ -109,7 +116,7 @@ public class ContactNameConcatenaterTestNG
         List<String> baseSources = new ArrayList<>();
         baseSources.add(baseSource.getSourceName());
         singleStep.setBaseSources(baseSources);
-        singleStep.setTransformer(ContactNameConcatenater.TRANSFORMER_NAME);
+        singleStep.setTransformer(ContactNameConcatenate.TRANSFORMER_NAME);
         singleStep.setTargetSource(source.getSourceName());
         String configString = getContactNameConcatenateConfig();
         singleStep.setConfiguration(configString);
@@ -169,14 +176,12 @@ public class ContactNameConcatenaterTestNG
                 Assert.assertTrue(isObjEquals(record.get(RESULT_FIELD_NAME), expectedResult[5]));
                 rowNum++;
             }
-            Assert.assertEquals(rowNum, 3);
+            Assert.assertEquals(rowNum, 5);
         }
-
     }
 
     private String getContactNameConcatenateConfig() {
         ContactNameConcatenateConfig conf = new ContactNameConcatenateConfig();
-        conf.setRetainFields(retainedFields);
         conf.setConcatenateFields(concatenateFields);
         conf.setResultField(RESULT_FIELD_NAME);
         return JsonUtils.serialize(conf);
@@ -208,8 +213,6 @@ public class ContactNameConcatenaterTestNG
             String avroDir = hdfsPathBuilder.constructTransformationSourceDir(baseSource, VERSION).toString();
             List<String> src2Files = HdfsUtils.getFilesByGlob(yarnConfiguration, avroDir + "/*.avro");
             Schema schema = AvroUtils.getSchema(yarnConfiguration, new Path(src2Files.get(0)));
-            schema.addProp(ContactNameConcatenater.DATA_CLOUD_VERSION_NAME, DATA_CLOUD_VERSION);
-
             String avscPath = hdfsPathBuilder.constructSchemaFile(baseSource.getSourceName(), VERSION).toString();
             HdfsUtils.writeToFile(yarnConfiguration, avscPath, schema.toString());
         } catch (IOException exc) {

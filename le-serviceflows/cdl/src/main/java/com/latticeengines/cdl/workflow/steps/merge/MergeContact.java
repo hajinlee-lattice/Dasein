@@ -1,8 +1,12 @@
 package com.latticeengines.cdl.workflow.steps.merge;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
+import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ContactNameConcatenateConfig;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -36,12 +40,14 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
             diffStep = 2;
 
             TransformationStepConfig merge = mergeInputs(false, true, false);
+            TransformationStepConfig concatenate = concatenateContactName(mergeStep);
             TransformationStepConfig upsertMaster = mergeMaster(mergeStep);
             TransformationStepConfig diff = diff(mergeStep, upsertMasterStep);
             TransformationStepConfig report = reportDiff(diffStep);
 
             List<TransformationStepConfig> steps = new ArrayList<>();
             steps.add(merge);
+            steps.add(concatenate);
             steps.add(upsertMaster);
             steps.add(diff);
             steps.add(report);
@@ -54,4 +60,14 @@ public class MergeContact extends BaseSingleEntityMergeImports<ProcessContactSte
         }
     }
 
+    private TransformationStepConfig concatenateContactName(int mergeStep) {
+        TransformationStepConfig step = new TransformationStepConfig();
+        step.setInputSteps(Collections.singletonList(mergeStep));
+        step.setTransformer(DataCloudConstants.TRANSFORMER_CONTACT_NAME_CONCATENATER);
+        ContactNameConcatenateConfig config = new ContactNameConcatenateConfig();
+        config.setConcatenateFields(new String[] { InterfaceName.FirstName.name(), InterfaceName.LastName.name() });
+        config.setResultField(InterfaceName.ContactName.name());
+        step.setConfiguration(appendEngineConf(config, lightEngineConfig()));
+        return step;
+    }
 }
