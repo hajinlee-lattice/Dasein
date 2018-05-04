@@ -1,0 +1,21 @@
+<form name="form">
+    <ul class="fields">
+        <li>
+            <label for="options">% Share of Wallet in last</label>
+            <select id="options"
+                class="form-control"
+                required="true"
+                ng-class="{'required': true}"
+                ng-init="vm.options['ShareOfWallet']['WITHIN']['Val'] = vm.getVals('WITHIN', vm.steps[vm.step].data.ShareOfWallet)" 
+                ng-model="vm.options['ShareOfWallet']['WITHIN']['Val']" 
+                ng-change="vm.setOptions()"
+                ng-options="option for option in vm.newArray(vm.periods[vm.options['ShareOfWallet']['WITHIN']['Period']])"></select>
+            <select id="options"
+                class="form-control"
+                ng-init="vm.options['ShareOfWallet']['WITHIN']['Period'] = vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet, null, 's')" 
+                ng-model="vm.options['ShareOfWallet']['WITHIN']['Period']" 
+                ng-change="vm.setOptions()"
+                ng-options="key as key for (key, value) in vm.periods"></select>
+        </li>
+    </ul>
+</form>

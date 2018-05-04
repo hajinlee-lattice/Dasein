@@ -24,9 +24,8 @@
         }
     }
     .configuration {
-        padding: 50px 0;
-        margin: 0 auto;
         display: table;
+        margin: 0 auto;
         .header {
             margin-bottom: 40px;
             h2 {
@@ -34,7 +33,7 @@
                 font-weight: bold;
                 text-align: center;
                 em {
-                    color: green;
+                    color: #6abe44;
                 }
                 em, strong {
                     font-weight: bold;
@@ -84,28 +83,6 @@
                 &[href] {
                     cursor: pointer;
                 }
-                &:hover {
-                    color: blue;
-                    &:before {
-                        border-color: blue;
-                    }
-                }
-                &.active {
-                    color: orange;
-                    &:before {
-                        border-color: orange;
-                    }
-                    &:after {
-                        display: block;
-                    }
-                }
-                &.completed {
-                    color: green;
-                    &:before {
-                        border-color: green;
-                        background-image: url(/assets/images/purchasehistory/checkmark.png);
-                    }
-                }
                 &.spend_change {
                     &:before {
                         background-image: url(/assets/images/purchasehistory/spendchange.png);
@@ -124,6 +101,28 @@
                 &.margin {
                     &:before {
                         background-image: url(/assets/images/purchasehistory/margin.png);
+                    }
+                }
+                &:hover {
+                    color: blue;
+                    &:before {
+                        border-color: blue;
+                    }
+                }
+                &.active {
+                    color: orange;
+                    &:before {
+                        border-color: orange;
+                    }
+                    &:after {
+                        display: block;
+                    }
+                }
+                &.completed {
+                    color: #6abe44;
+                    &:before {
+                        border-color: #6abe44;
+                        background-image: url(/assets/images/purchasehistory/checkmark.png);
                     }
                 }
             }
@@ -166,6 +165,27 @@
                 }
             }
             &.step-spend_over_time {
+                .button {
+                    &.add,
+                    &.remove {
+                        border: none;
+                        padding: 0;
+                        & >  i {
+                            color: #aaa;
+                            border: 1px solid #aaa;
+                            border-radius: 50%;
+                            font-size: 10px;
+                            width: 14px;
+                            height: 14px;
+                            text-align: center;
+                            line-height: 14px;
+                            margin-right: 5px;
+                        }
+                    }
+                    &[disabled] {
+                        opacity: .5;
+                    }
+                }
                 & > form {
                     @include flex-container;
                     & > .fields {

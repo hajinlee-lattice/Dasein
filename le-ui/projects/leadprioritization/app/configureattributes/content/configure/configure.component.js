@@ -39,6 +39,7 @@ angular.module('lp.configureattributes.configure', [])
                 Quarters: totalMonths / 3 // 3 quaters a month
             },
             options: vm.options || {},
+            completed: ConfigureAttributesStore.getSaved(),
             PurchaseHistory: PurchaseHistory
         });
 
@@ -49,6 +50,9 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.getVals = function(type, data, index) {
+            if(!type) {
+                return false;
+            }
             var index = index || 0,
                 periods = data[index].periods,
                 valObj = periods.find(function(item) {
@@ -65,14 +69,17 @@ angular.module('lp.configureattributes.configure', [])
             return val;
         }
 
-        vm.getPeriod = function(type, data, index) {
+        vm.getPeriod = function(type, data, index, append) {
+            if(!type) {
+                return false;
+            }
             var index = index || 0,
                 periods = data[index].periods,
                 valObj = periods.find(function(item) {
                     return item.Cmp === type;
                 }),
                 period = valObj.Period;
-            return period;
+            return period + (period.slice(-1) !== 's' ? append : '');
         }
 
         vm.setOptions = function() {
@@ -87,9 +94,9 @@ angular.module('lp.configureattributes.configure', [])
                     type: "PurchaseHistory",
                     created: timestamp,
                     updated: timestamp,
-                    metrics: array[0].metrics,
+                    metrics: null,
                     periods: [{
-                        Cmp: array[0].periods[0].Cmp,
+                        Cmp: null,
                         Vals: [],
                         Period: null
                     }]
@@ -98,17 +105,46 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.removePeriod = function(array, key, index) {
-            vm.spendOvertime[key] = array[key].filter(function(value, _index) { 
+            var tmp = array[key].filter(function(value, _index) { 
                 return _index !== index;
             });
-            console.log(vm.spendOvertime[key]);
+            vm.spendOvertime[key] = tmp;
+            delete vm.options[key][index];
         }
 
-        vm.save = function(type) {
-            ConfigureAttributesStore.saveOptions(type);
+        vm.nextStep = function(step) {
+            var steps = Object.keys(vm.steps),
+                currentIndex = steps.indexOf(step);
+
+            if(steps[currentIndex + 1]) {
+                return steps[currentIndex + 1];
+            }
+            return null;
+        }
+
+        vm.gotoNextStep = function(step) {
+            var nextStep = vm.nextStep(step);
+            if(nextStep) {
+                $state.go('home.configureattributes.' + nextStep);
+            }
+
+        }
+
+        vm.goto = function(name) {
+            $state.go('home.configureattributes.' + name);
+        }
+
+        vm.save = function() {
+            ConfigureAttributesStore.saveOptions(vm.step);
             ConfigureAttributesStore.getPurchaseHistory().then(function(result) {
                 vm.saveObj = result;
             });
+            vm.steps[vm.step].completed = true;
+            //vm.gotoNextStep(vm.step);
+        }
+
+        vm.submit = function() {
+            
         }
 
         vm.enableSave = function() {
@@ -116,17 +152,21 @@ angular.module('lp.configureattributes.configure', [])
             return (options ? true : false);
         }
 
+        vm.checkValid = function(form) {
+            console.log(form);
+        }
+
         vm.init = function() {
+            var completedSteps = ConfigureAttributesStore.getSaved();
+            completedSteps.forEach(function(step) {
+                vm.steps[step].completed = true;
+            });
             vm.steps = ConfigureAttributesStore.getSteps(PurchaseHistory, vm.steps);
             vm.spendOvertime = {
                 TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime,
                 AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime
             };
         };
-
-        vm.goto = function(name) {
-            $state.go('home.configureattributes.' + name);
-        }
 
         vm.init();
     }

@@ -6,6 +6,7 @@ angular.module('lp.configureattributes')
         this.purchaseHistory = null;
         this.steps = null;
         this.options = null;
+        this.saved = [];
     }
 
     this.init();
@@ -76,23 +77,23 @@ angular.module('lp.configureattributes')
                 var cmp = j,
                     option = _option[i][cmp],
                     period = {
-                        Cmp: cmp,
+                        Cmp: (cmp !== 'null' ? cmp : 'WITHIN'),
                         Vals: [option.Val],
                         Period: option.Period
+                    },
+                    timestamp = + new Date(),
+                    obj = {
+                        metrics: metric,
+                        periods: [period],
+                        type: "PurchaseHistory",
+                        created: timestamp,
+                        updated: timestamp,
+                        eol: false,
+                        IsEOL: false
                     };
-                periods.push(period);
+
+                ConfigureAttributesStore.purchaseHistory.push(obj);
             }
-            var timestamp = + new Date(),
-            obj = {
-                metrics: metric,
-                periods: periods,
-                type: "PurchaseHistory",
-                created: timestamp,
-                updated: timestamp,
-                eol: false,
-                IsEOL: false
-            };
-            ConfigureAttributesStore.purchaseHistory.push(obj);
         }
     }
 
@@ -139,8 +140,17 @@ angular.module('lp.configureattributes')
         ConfigureAttributesStore.purchaseHistory = _purchaseHistory;
     }
 
-    this.saveOptions = function() {
-        console.log(this.options);
+    this.setSaved = function(step) {
+        if(this.saved.indexOf(step) === -1) {
+            this.saved.push(step);
+        }
+    }
+
+    this.getSaved = function() {
+        return this.saved;
+    }
+
+    this.saveOptions = function(step) {
         for(var i in this.options) {
             var metric = i;
                 _option = this.options[metric];
@@ -167,7 +177,9 @@ angular.module('lp.configureattributes')
             }
         }
         cleanPurchaseHistory();
+        ConfigureAttributesStore.setSaved(step);
         console.log(this.purchaseHistory);
+        //ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory);
     }
 })
 .service('ConfigureAttributesService', function($q, $http, $state, ResourceUtility) {
