@@ -125,22 +125,32 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             throw new NullPointerException("jobId cannot be null.");
         }
         Job job = null;
+        String customerSpace = null;
         // For unfinished ProcessAnalyze job
         if (Long.parseLong(jobId) == UNSTARTED_PROCESS_ANALYZE_ID) {
             return generateUnstartedProcessAnalyzeJob(true);
         } else {
             if (useCustomerSpace) {
-                String customerSpace = MultiTenantContext.getCustomerSpace().toString();
+                customerSpace = MultiTenantContext.getCustomerSpace().toString();
                 log.info("Getting job with id=" + jobId + ", customerSpace=" + customerSpace);
                 job = workflowProxy.getWorkflowExecution(jobId, customerSpace);
             } else {
                 log.info("Getting job with id=" + jobId);
                 job = workflowProxy.getWorkflowExecution(jobId);
             }
-            updateJobWithModelSummary(job);
-            updateStepDisplayNameAndNumSteps(job);
-            updateJobDisplayNameAndDescription(job);
-            updateJobWithSubJobsIfIsPnA(job);
+
+            if (job != null) {
+                updateJobWithModelSummary(job);
+                updateStepDisplayNameAndNumSteps(job);
+                updateJobDisplayNameAndDescription(job);
+                updateJobWithSubJobsIfIsPnA(job);
+            } else {
+                if (useCustomerSpace) {
+                    log.error(String.format("Job of jobId=%s is null for customerSpace=%s", jobId, customerSpace));
+                } else {
+                    log.error(String.format("Job of jobId=%s is null", jobId));
+                }
+            }
         }
 
         return job;
