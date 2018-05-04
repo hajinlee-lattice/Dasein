@@ -1,10 +1,12 @@
-package com.latticeengines.domain.exposed.pls;
+package com.latticeengines.domain.exposed.ratings.coverage;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RatingsCountRequest {
     private List<String> segmentIds;
 
@@ -15,6 +17,8 @@ public class RatingsCountRequest {
     private List<SegmentIdAndModelRulesPair> segmentIdModelRules;
 
     private List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules;
+
+    private List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs;
 
     private boolean restrictNotNullSalesforceId;
 
@@ -56,6 +60,14 @@ public class RatingsCountRequest {
 
     public void setSegmentIdAndSingleRules(List<SegmentIdAndSingleRulePair> segmentIdAndSingleRules) {
         this.segmentIdAndSingleRules = segmentIdAndSingleRules;
+    }
+
+    public List<RatingIdLookupColumnPair> getRatingIdLookupColumnPairs() {
+        return ratingIdLookupColumnPairs;
+    }
+
+    public void setRatingIdLookupColumnPairs(List<RatingIdLookupColumnPair> ratingIdLookupColumnPairs) {
+        this.ratingIdLookupColumnPairs = ratingIdLookupColumnPairs;
     }
 
     public boolean isRestrictNotNullSalesforceId() {
