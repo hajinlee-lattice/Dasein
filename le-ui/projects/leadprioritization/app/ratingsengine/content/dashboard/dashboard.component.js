@@ -201,7 +201,7 @@ angular.module('lp.ratingsengine.dashboard', [
                 "dummy": true
             }];
 
-        if(vm.dashboard.summary.bucketMetadata) {
+        if(vm.dashboard.summary.bucketMetadata && vm.dashboard.summary.bucketMetadata.length > 0) {
             angular.forEach(vm.dashboard.summary.bucketMetadata, function(rating, key) {
                 rating.lift = (Math.round( rating.lift * 10) / 10).toString();
                 if(rating.num_leads > 0) {

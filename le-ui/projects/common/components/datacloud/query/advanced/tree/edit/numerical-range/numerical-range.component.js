@@ -22,9 +22,14 @@ angular
                 showto: '=',
                 changed: '&',
                 fromlabel: '@',
-                tolabel: '@'
-
+                tolabel: '@',
+                showtolabel: '@?',
+                invalidcallback: '@?',
+                fromdisabled: "=?",
+                todisabled: "=?",
+                initialvalidation: '@?'
             },
+
             templateUrl: '/components/datacloud/query/advanced/tree/edit/numerical-range/numerical-range.component.html',
             controller: function ($scope, $element) {
 
@@ -37,6 +42,22 @@ angular
 
                 $scope.init = function () {
                     var conf = $scope.config;
+                    if($scope.initialvalidation === undefined){
+                        $scope.initialvalidation = true;
+                    }else {
+                        $scope.initialvalidation = !!$scope.initialvalidation;
+                    }
+                    if($scope.fromdisabled === undefined){
+                        $scope.fromdisabled = false;
+                    }else{
+                        $scope.fromdisabled = !!$scope.fromdisabled;
+                    }
+                    if($scope.todisabled === undefined){
+                        $scope.todisabled = false;
+                    } else {
+                        $scope.todisabled = !!$scope.todisabled;
+                    }
+
                     $scope.values = JSON.parse($scope.config);
                 }
 
@@ -156,7 +177,7 @@ angular
                  */
                 $scope.changeValue = function (position) {
                     var conf = getConfigField(position);
-                    if ($scope.isValValid(position)) {
+                    if ($scope.isValValid(position) || ($scope.invalidcallback && !!$scope.invalidcallback == true)) {
                         switch (position) {
                             case 0: {
                                 var value = $scope.values.from.value;
@@ -188,8 +209,11 @@ angular
                 $scope.isValValid = function (position) {
                     var conf = getConfigField(position);
                     var valid = true;
-                    if ($scope.form[conf.name]) {
-                        valid = $scope.form[conf.name].$valid;
+                    if($scope.form[conf.name]){
+                        if ($scope.form[conf.name].$dirty === true || 
+                            ($scope.form[conf.name].$dirty === false) && $scope.initialvalidation === true) {
+                            valid = $scope.form[conf.name].$valid;
+                        }
                     }
                     return valid;
                 }
@@ -203,7 +227,16 @@ angular
                 }
 
                 $scope.showErrorMessage = function() {
-                    var ret = $scope.showmessage != undefined ? $scope.showmessage : true;
+                    if($scope.fromdisabled === true || $scope.todisabled === true){
+                        return false;
+                    }
+                    var ret = false;
+                    var show = $scope.showmessage != undefined ? $scope.showmessage : true;
+                    // && (!isValValid(0) || !isValValid(1))) && (fromdisabled === false && todisable === false
+
+                    if(show && !$scope.isValValid(0) || !$scope.isValValid(1)){
+                        ret = true;
+                    }
                     return ret;
                 }
 

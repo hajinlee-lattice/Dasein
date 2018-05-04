@@ -1,26 +1,30 @@
 <div class="numerical-container range-container">
         <span ng-if="showFromLabel() && showFrom()"> {{fromlabel}} </span>
-        <input type="number" 
+        <input type="number"
+                ng-disabled="fromdisabled"
                 name="{{getName(0)}}" 
                 pattern="{{getPattern(0)}}"
                 min="{{getMinVal(0)}}"
                 max="{{getMaxVal(0)}}"
                 ng-if="showFrom()"        
                 ng-model="values.from.value" 
+                ng-model-options="{ debounce: 500 }"
                 ng-change="changeValue(0)"
-                ng-class="!isValValid(0) ? 'invalid-field' : ''" 
-                required>
+                ng-class="{'invalid-field': !isValValid(0), 'field-disabled': fromdisabled}" 
+                ng-required="!fromdisabled">
         <span ng-if="showFrom() && showTo()"> - </span>
-        <span ng-if="showFromLabel() && showTo()"> {{tolabel}} </span>
+        <span ng-if="showFromLabel() && showTo() || !!showtolabel==true">{{tolabel}} </span>
         <input type="number" 
+                ng-disabled="todisabled"      
                 name="{{getName(1)}}"
                 pattern="{{getPattern(1)}}" 
                 min="{{getMinVal(1)}}"
                 max="{{getMaxVal(1)}}"
                 ng-if="showTo()" 
                 ng-model="values.to.value"
+                ng-model-options="{ debounce: 500 }"
                 ng-change="changeValue(1)"
-                ng-class="!isValValid(1) ? 'invalid-field' : ''" 
-                required>
-        <span class="error-message" ng-if="showErrorMessage() && (!isValValid(0) || !isValValid(1))">{{getErrorMsg()}}</span>
+                ng-class="{'invalid-field' : !isValValid(1), 'field-disabled': fromdisabled }" 
+                ng-required="!todisabled">
+        <span class="error-message" ng-if="(showErrorMessage())">{{getErrorMsg()}}</span>
 </div>

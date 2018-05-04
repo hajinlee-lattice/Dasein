@@ -11,4 +11,7 @@
         border-left: 3px solid #B50A20;
         padding-left: 4px;
     }
+    input[type=number].field-disabled{
+        background-color: rgba(238, 238, 238, 1);
+    }
 }
