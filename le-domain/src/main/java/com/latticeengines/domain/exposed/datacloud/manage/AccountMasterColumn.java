@@ -381,16 +381,13 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         metadata.setDataLicense(getDataLicense());
         metadata.setCanInternalEnrich(isInternalEnrichment());
         metadata.setGroups(getPredefinedGroups());
+
         if (StringUtils.isNotBlank(metadata.getDataLicense())) {
             metadata.setAttrState(AttrState.Inactive);
         }
+
         if (isEol()) {
             metadata.setAttrState(AttrState.Deprecated);
-        }
-
-        if (Category.INTENT.equals(metadata.getCategory())
-                || Category.TECHNOLOGY_PROFILE.equals(metadata.getCategory())) {
-            metadata.setAttrState(AttrState.Inactive);
         }
 
         if (metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {

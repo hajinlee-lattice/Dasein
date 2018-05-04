@@ -1367,7 +1367,7 @@ public class SchemaRepository {
         return Collections.emptyList();
     }
 
-    public Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
+    public static Set<InterfaceName> getSystemAttributes(BusinessEntity entity) {
         Set<InterfaceName> sysAttrs = new HashSet<>();
         if (BusinessEntity.LatticeAccount.equals(entity)) {
             sysAttrs.add(InterfaceName.LatticeAccountId);
@@ -1393,7 +1393,7 @@ public class SchemaRepository {
         return sysAttrs;
     }
 
-    public Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
+    public static Set<InterfaceName> getStandardAttributes(BusinessEntity entity) {
         Set<InterfaceName> stdAttrs = new HashSet<>();
         // only account and contact has standard attrs
         if (BusinessEntity.Account.equals(entity) || BusinessEntity.Contact.equals(entity)) {

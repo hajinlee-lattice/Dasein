@@ -1,12 +1,15 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Model;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
 import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -36,6 +39,7 @@ import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
+import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
@@ -99,17 +103,26 @@ public class SystemMetadataStoreImpl extends
                     if (usingAccountServingStore) {
                         servingStore = servingStore.filter(cm -> Category.ACCOUNT_ATTRIBUTES.equals(cm.getCategory()));
                     }
+
+                    Set<String> internalAttributes = SchemaRepository.getSystemAttributes(entity).stream()
+                            .map(InterfaceName::name).collect(Collectors.toSet());
+
                     servingStore = servingStore //
                             .map(cm -> {
                                 if (cm.getCategory() == null) {
                                     cm.setCategory(category);
                                 }
                                 cm.setEntity(entity);
-                                cm.enableGroupIfNotPresent(Segment);
-                                if (BusinessEntity.Account.equals(entity)) {
-                                    cm.setCanEnrich(true);
-                                    cm.enableGroupIfNotPresent(TalkingPoint);
-                                    cm.enableGroupIfNotPresent(CompanyProfile);
+                                if (internalAttributes.contains(cm.getAttrName())) {
+                                    cm.setGroups(null);
+                                } else {
+                                    cm.enableGroupIfNotPresent(Segment);
+                                    if (BusinessEntity.Account.equals(entity)) {
+                                        cm.setCanEnrich(true);
+                                        cm.enableGroupIfNotPresent(Model);
+                                        cm.enableGroupIfNotPresent(TalkingPoint);
+                                        cm.enableGroupIfNotPresent(CompanyProfile);
+                                    }
                                 }
                                 return cm;
                             }) //

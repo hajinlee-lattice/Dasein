@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -19,10 +20,10 @@ public class AttrTypeResolver {
     private static Map<BusinessEntity, Set<String>> internalMap = new HashMap<>();
     private static Map<BusinessEntity, Set<String>> standardMap = new HashMap<>();
     static {
-        BusinessEntity.SEGMENT_ENTITIES.forEach(e -> internalMap.put(e, SchemaRepository.instance()
-                .getSystemAttributes(e).stream().map(v -> v.name()).collect(Collectors.toSet())));
-        BusinessEntity.SEGMENT_ENTITIES.forEach(e -> standardMap.put(e, SchemaRepository.instance()
-                .getStandardAttributes(e).stream().map(v -> v.name()).collect(Collectors.toSet())));
+        BusinessEntity.SEGMENT_ENTITIES.forEach(e -> internalMap.put(e, SchemaRepository
+                .getSystemAttributes(e).stream().map(InterfaceName::name).collect(Collectors.toSet())));
+        BusinessEntity.SEGMENT_ENTITIES.forEach(e -> standardMap.put(e, SchemaRepository
+                .getStandardAttributes(e).stream().map(InterfaceName::name).collect(Collectors.toSet())));
     }
     public static AttrType resolveType(ColumnMetadata metadata) {
         BusinessEntity entity = metadata.getEntity();
