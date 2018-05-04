@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.cdl.CSVImportConfig;
 import com.latticeengines.domain.exposed.cdl.CSVImportFileInfo;
 import com.latticeengines.domain.exposed.cdl.CleanupOperationType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
 import com.latticeengines.domain.exposed.cdl.ProcessAnalyzeRequest;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
@@ -87,12 +88,16 @@ import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelin
 import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
+import com.latticeengines.domain.exposed.query.AggregationFilter;
+import com.latticeengines.domain.exposed.query.AggregationSelector;
+import com.latticeengines.domain.exposed.query.AggregationType;
 import com.latticeengines.domain.exposed.query.AttributeLookup;
 import com.latticeengines.domain.exposed.query.BucketRestriction;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.ComparisonType;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
+import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
@@ -124,7 +129,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     private static final String S3_VDB_VERSION = "2";
 
     private static final String S3_CSV_DIR = "le-serviceapps/cdl/end2end/csv";
-    private static final String S3_CSV_VERSION = "1";
+    private static final String S3_CSV_VERSION = "2";
 
     private static final String SEGMENT_NAME_1 = NamingUtils.timestamp("E2ESegment1");
     static final long SEGMENT_1_ACCOUNT_1 = 21;
@@ -159,6 +164,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     static final long RATING_D_COUNT_2_REBUILD = 31;
     static final long RATING_F_COUNT_2_REBUILD = 4;
 
+    static final String SEGMENT_PRODUCT_ID = "A80D4770376C1226C47617C071324C0B";
     static final String TARGET_PRODUCT = "B0829F745A42D18FE77050EC05A51D2F";
     static final String TRAINING_PRODUCT = "6368494B622E0CB60F9C80FEB1D0F95F";
 
@@ -342,9 +348,13 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     void importData(BusinessEntity entity, int offset, int limit) {
         String templateName = String.format("%s_%d_%d.csv", entity.name(), offset, limit);
-        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(templateName), templateName);
+        importData(entity, templateName);
+    }
 
-        SourceFile template = fileUploadProxy.uploadFile(templateName, false, templateName, entity.name(), csvResource);
+    void importData(BusinessEntity entity, String s3FileName) {
+        Resource csvResource = new MultipartFileResource(readCSVInputStreamFromS3(s3FileName), s3FileName);
+        logger.info("Streaming S3 file " + s3FileName + " as a template file for " + entity);
+        SourceFile template = fileUploadProxy.uploadFile(s3FileName, false, s3FileName, entity.name(), csvResource);
         FieldMappingDocument fieldMappingDocument = fileUploadProxy.getFieldMappings(template.getName(), entity.name());
         for (FieldMapping fieldMapping : fieldMappingDocument.getFieldMappings()) {
             if (fieldMapping.getMappedField() == null) {
@@ -353,10 +363,12 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
             }
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
+        logger.info("Modified field mapping document is saved, start importing ...");
         ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(),
                 entity.name() + "Schema", template, template, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
+        logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
     private ApplicationId submitImport(String customerSpace, String source, String entity, String feedType,
@@ -845,6 +857,36 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         ruleBasedModel.setRatingRule(ratingRule);
         ruleBasedModel.setId(modelId);
         return ruleBasedModel;
+    }
+
+    MetadataSegment targetSegmentWithTrxRestrictions() {
+        // this filters out this account in the test data 0012400001DO2fqAAD
+        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
+        BucketRestriction accountRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
+
+        TransactionRestriction invalidTrxRes = new TransactionRestriction(SEGMENT_PRODUCT_ID,
+                new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
+                        Collections.singletonList("2018-04-09")),
+                false,
+                new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, ComparisonType.GREATER_THAN,
+                        Collections.singletonList(1)),
+                new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
+                        Collections.singletonList(1)));
+
+        TransactionRestriction validTrxRes = new TransactionRestriction(SEGMENT_PRODUCT_ID,
+                new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(3, 6)),
+                false, null, null);
+
+        MetadataSegment segment = new MetadataSegment();
+        segment.setName(SEGMENT_NAME_MODELING);
+        segment.setDisplayName("End2End Segment Modeling");
+        segment.setDescription("A test segment for CDL end2end modeling test.");
+        segment.setAccountRestriction(Restriction.builder() //
+                .and(accountRestriction, invalidTrxRes, validTrxRes).build());
+        segment.setAccountFrontEndRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
+
+        return segment;
     }
 
     RatingEngine constructRatingEngine(RatingEngineType engineType, MetadataSegment targetSegment) {

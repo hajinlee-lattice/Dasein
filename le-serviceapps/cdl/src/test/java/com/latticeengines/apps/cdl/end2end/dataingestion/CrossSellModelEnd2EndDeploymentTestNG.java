@@ -1,6 +1,5 @@
 package com.latticeengines.apps.cdl.end2end.dataingestion;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,9 +15,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.cdl.ModelingQueryType;
 import com.latticeengines.domain.exposed.cdl.ModelingStrategy;
-import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.cdl.PredictionType;
-import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
@@ -26,17 +23,6 @@ import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.cdl.rating.CrossSellRatingConfig;
-import com.latticeengines.domain.exposed.query.AggregationFilter;
-import com.latticeengines.domain.exposed.query.AggregationSelector;
-import com.latticeengines.domain.exposed.query.AggregationType;
-import com.latticeengines.domain.exposed.query.AttributeLookup;
-import com.latticeengines.domain.exposed.query.BucketRestriction;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.ComparisonType;
-import com.latticeengines.domain.exposed.query.Restriction;
-import com.latticeengines.domain.exposed.query.TimeFilter;
-import com.latticeengines.domain.exposed.query.TransactionRestriction;
-import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
@@ -49,13 +35,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private static final boolean USE_EXISTING_TENANT = false;
     private static final String EXISTING_TENANT = "JLM1525220846205";
 
-    private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = true;
+    private static final boolean MANUAL_TEST_USE_TRANSACTION_RESTRICTION = false;
     private static final boolean E2E_TEST_USE_TRANSACTION_RESTRICTION = false;
 
     private MetadataSegment targetSegment;
     private RatingEngine testRatingEngine;
     private AIModel testAIModel;
-    private String segmentProductId = "A80D4770376C1226C47617C071324C0B";
 
     @Inject
     private ModelSummaryProxy modelSummaryProxy;
@@ -168,36 +153,6 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
                 testAIModel.getId(), testAIModel);
         log.info("Updated rating model " + testAIModel.getId());
         log.info("/ratingengines/" + testRatingEngine.getId() + "/ratingmodels/" + testAIModel.getId());
-    }
-
-    private MetadataSegment targetSegmentWithTrxRestrictions() {
-        // this filters out this account in the test data 0012400001DO2fqAAD
-        Bucket stateBkt = Bucket.valueBkt(ComparisonType.NOT_IN_COLLECTION, Arrays.asList("VT"));
-        BucketRestriction accountRestriction = new BucketRestriction(
-                new AttributeLookup(BusinessEntity.Account, "State"), stateBkt);
-
-        TransactionRestriction invalidTrxRes = new TransactionRestriction(segmentProductId,
-                new TimeFilter(ComparisonType.BEFORE, PeriodStrategy.Template.Date.name(),
-                        Collections.singletonList("2018-04-09")),
-                false,
-                new AggregationFilter(AggregationSelector.SPENT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Collections.singletonList(1)),
-                new AggregationFilter(AggregationSelector.UNIT, AggregationType.SUM, ComparisonType.GREATER_THAN,
-                        Collections.singletonList(1)));
-
-        TransactionRestriction validTrxRes = new TransactionRestriction(segmentProductId,
-                new TimeFilter(ComparisonType.BETWEEN, PeriodStrategy.Template.Month.name(), Arrays.asList(3, 6)),
-                false, null, null);
-
-        MetadataSegment segment = new MetadataSegment();
-        segment.setName(SEGMENT_NAME_MODELING);
-        segment.setDisplayName("End2End Segment Modeling");
-        segment.setDescription("A test segment for CDL end2end modeling test.");
-        segment.setAccountRestriction(Restriction.builder() //
-                .and(accountRestriction, invalidTrxRes, validTrxRes).build());
-        segment.setAccountFrontEndRestriction(new FrontEndRestriction(segment.getAccountRestriction()));
-
-        return segment;
     }
 
     private void verifyCounts(boolean txnRestrictionsUsed) {
