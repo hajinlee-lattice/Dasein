@@ -7,6 +7,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -26,10 +27,10 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     @JsonProperty(ColumnMetadataKey.AttrName)
     private String attrName;
 
-    @JsonProperty("Type")
+    @JsonIgnore
     private AttrType attrType;
 
-    @JsonProperty("SubType")
+    @JsonIgnore
     private AttrSubType attrSubType;
 
     @JsonProperty("Entity")

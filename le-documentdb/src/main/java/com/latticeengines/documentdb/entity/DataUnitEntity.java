@@ -2,6 +2,8 @@ package com.latticeengines.documentdb.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -20,9 +22,10 @@ public class DataUnitEntity extends BaseMultiTenantDocEntity<DataUnit> {
             insertable = false, updatable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "StorageType", //
             columnDefinition = "'VARCHAR(20) GENERATED ALWAYS AS (`Document` ->> '$.StorageType')'", //
             insertable = false, updatable = false)
-    private String storageType;
+    private DataUnit.StorageType storageType;
 
 }

@@ -56,8 +56,8 @@ public class AttrConfigEntityMgrImpl extends BaseDocumentEntityMgrImpl<AttrConfi
                 attrConfigEntity = new AttrConfigEntity();
                 attrConfigEntity.setUuid(UUID.randomUUID().toString());
                 attrConfigEntity.setTenantId(tenantId);
-                attrConfigEntity.setEntity(entity);
             }
+            attrConfig.setEntity(entity);
             attrConfigEntity.setDocument(attrConfig);
             toCreateOrUpdate.add(attrConfigEntity);
         }

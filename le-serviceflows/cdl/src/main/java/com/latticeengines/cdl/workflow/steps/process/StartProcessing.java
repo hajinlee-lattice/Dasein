@@ -196,10 +196,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setEntityImportsMap(DataFeedExecution execution) {
         Map<BusinessEntity, List<DataFeedImport>> entityImportsMap = new HashMap<>();
-        execution.getImports().forEach(i -> {
-            BusinessEntity entity = BusinessEntity.valueOf(i.getEntity());
+        execution.getImports().forEach(imp -> {
+            BusinessEntity entity = BusinessEntity.valueOf(imp.getEntity());
             entityImportsMap.putIfAbsent(entity, new ArrayList<>());
-            entityImportsMap.get(entity).add(i);
+            entityImportsMap.get(entity).add(imp);
         });
         putObjectInContext(CONSOLIDATE_INPUT_IMPORTS, entityImportsMap);
     }

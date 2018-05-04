@@ -9,28 +9,30 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Index;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 
 @Entity
 @Table(name = "AttributeConfiguration", //
-        indexes = {@Index(name = "IX_NAMESPACE", columnList = "TenantId,Entity")})
-public class AttrConfigEntity extends BaseMultiTenantDocEntity<AttrConfig> implements ColumnMetadataDocument<AttrConfig> {
+        indexes = { @Index(name = "IX_NAMESPACE", columnList = "TenantId,Entity") }, //
+        uniqueConstraints = { @UniqueConstraint(name = "UX_NAME", columnNames = { "TenantId", "Entity", "AttrName" }) })
+public class AttrConfigEntity extends BaseMultiTenantDocEntity<AttrConfig>
+        implements ColumnMetadataDocument<AttrConfig> {
 
-    @JsonProperty("Entity")
     @Enumerated(EnumType.STRING)
-    @Column(name = "Entity", nullable = false)
+    @Column(name = "Entity", //
+            columnDefinition = "'VARCHAR(20) GENERATED ALWAYS AS (`Document` ->> '$.Entity')'", //
+            insertable = false, updatable = false)
     private BusinessEntity entity;
 
-    public BusinessEntity getEntity() {
-        return entity;
-    }
-
-    public void setEntity(BusinessEntity entity) {
-        this.entity = entity;
-    }
+    @Column(name = "AttrName", //
+            columnDefinition = "'VARCHAR(100) GENERATED ALWAYS AS (`Document` ->> '$." + ColumnMetadataKey.AttrName
+                    + "')'", //
+            insertable = false, updatable = false)
+    private String attrName;
 
     @Override
     public List<String> getnamespaceKeys() {

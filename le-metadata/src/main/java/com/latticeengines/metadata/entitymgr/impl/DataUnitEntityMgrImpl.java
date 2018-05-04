@@ -45,7 +45,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
             name = NamingUtils.timestamp(dataUnit.getStorageType().name());
             dataUnit.setName(name);
         }
-        DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType.name());
+        DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing == null) {
             return createNewDataUnit(tenantId, dataUnit);
         } else {
@@ -76,7 +76,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Override
     public DataUnit findByNameTypeFromReader(String tenantId, String name, DataUnit.StorageType storageType) {
-        DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType.name());
+        DataUnitEntity entity = readerRepository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (entity != null) {
             return entity.getDocument();
         } else {
@@ -86,7 +86,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
 
     @Override
     public void deleteByName(String tenantId, String name, DataUnit.StorageType storageType) {
-        DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType.name());
+        DataUnitEntity existing = repository.findByTenantIdAndNameAndStorageType(tenantId, name, storageType);
         if (existing != null) {
             repository.delete(existing);
         }
