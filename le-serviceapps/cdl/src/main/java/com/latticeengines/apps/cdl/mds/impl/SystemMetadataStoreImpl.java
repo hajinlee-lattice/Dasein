@@ -1,5 +1,9 @@
 package com.latticeengines.apps.cdl.mds.impl;
 
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.CompanyProfile;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.Segment;
+import static com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined.TalkingPoint;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,7 +36,6 @@ import com.latticeengines.domain.exposed.metadata.mds.MetadataStore;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace1;
 import com.latticeengines.domain.exposed.metadata.namespace.Namespace2;
-import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
 
@@ -102,10 +105,11 @@ public class SystemMetadataStoreImpl extends
                                     cm.setCategory(category);
                                 }
                                 cm.setEntity(entity);
-                                cm.enableGroupIfNotPresent(ColumnSelection.Predefined.Segment);
+                                cm.enableGroupIfNotPresent(Segment);
                                 if (BusinessEntity.Account.equals(entity)) {
-                                    cm.enableGroupIfNotPresent(ColumnSelection.Predefined.TalkingPoint);
-                                    cm.enableGroupIfNotPresent(ColumnSelection.Predefined.CompanyProfile);
+                                    cm.setCanExternalEnrich(true);
+                                    cm.enableGroupIfNotPresent(TalkingPoint);
+                                    cm.enableGroupIfNotPresent(CompanyProfile);
                                 }
                                 return cm;
                             }) //

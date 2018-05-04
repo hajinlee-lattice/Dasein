@@ -392,8 +392,14 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
                 || Category.TECHNOLOGY_PROFILE.equals(metadata.getCategory())) {
             metadata.setAttrState(AttrState.Inactive);
         }
-        metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-        metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+
+        if (metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
+            metadata.setCanExternalEnrich(true);
+            metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+            metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
+        } else {
+            metadata.setCanExternalEnrich(false);
+        }
 
         // deprecated properties
         metadata.setMatchDestination(getMatchDestination());
