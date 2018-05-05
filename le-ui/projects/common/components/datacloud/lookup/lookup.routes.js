@@ -111,7 +111,9 @@ angular
             url: '/attr/:category/:subcategory',
             params: {
                 section: 'lookup',
-                LoadingText: 'Looking up Company Profile data'
+                LoadingText: 'Looking up Company Profile data',
+                category: '',
+                subcategory: ''
             },
             views: {
                 "main@": {
