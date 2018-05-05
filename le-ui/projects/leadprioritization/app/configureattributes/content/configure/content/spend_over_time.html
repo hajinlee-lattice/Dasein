@@ -1,10 +1,10 @@
-<form name="form">
+<div class="spend-over-time">
     <ul class="fields">
         <li>
             <label for="options">Total spend in last</label>
         </li>
         <li ng-repeat="(index,item) in vm.spendOvertime.TotalSpendOvertime">
-            <button type="button" class="remove button white-button" ng-click="vm.removePeriod(vm.spendOvertime, 'TotalSpendOvertime', index)"  ng-disabled="vm.spendOvertime.TotalSpendOvertime.length <= 1">
+            <button type="button" class="remove button white-button" ng-click="vm.removePeriod(vm.spendOvertime, 'TotalSpendOvertime', index, form)"  ng-disabled="vm.spendOvertime.TotalSpendOvertime.length <= 1">
                 <i class="fa fa-minus"></i>
             </button>
             <select id="options"
@@ -28,7 +28,7 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime)" ng-disabled="vm.spendOvertime.TotalSpendOvertime.length >= 5 && vm.checkValid(form)">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime, form)" ng-disabled="vm.spendOvertime.TotalSpendOvertime.length >= 5 && vm.checkValid(form)">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>
@@ -39,7 +39,7 @@
             <label for="options">Average spend in last</label>
         </li>
         <li ng-repeat="(index,item) in vm.spendOvertime.AvgSpendOvertime">
-            <button type="button" class="remove button white-button" ng-click="vm.removePeriod(vm.spendOvertime, 'AvgSpendOvertime', index)" ng-disabled="vm.spendOvertime.AvgSpendOvertime.length <= 1">
+            <button type="button" class="remove button white-button" ng-click="vm.removePeriod(vm.spendOvertime, 'AvgSpendOvertime', index, form)" ng-disabled="vm.spendOvertime.AvgSpendOvertime.length <= 1">
                 <i class="fa fa-minus"></i>
             </button>
             <select id="options"
@@ -64,9 +64,9 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime)" ng-disabled="vm.spendOvertime.AvgSpendOvertime.length >= 5">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime, form)" ng-disabled="vm.spendOvertime.AvgSpendOvertime.length >= 5">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>
     </ul>
-</form>
+</div>

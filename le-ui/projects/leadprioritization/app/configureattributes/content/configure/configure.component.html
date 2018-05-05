@@ -21,20 +21,14 @@
                                     <strong>{{item.label}}</strong> 
                                 </li>
                             </ul>
-                            <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"></div>
-                            <div class="save-button">
-                                <button type="button" class="button blue-button" ng-click="vm.save()" ng-disabled="!vm.enableSave()">
-                                    Save
-                                </button>
-                            </div>
-                    <!-- 
-                            <pre>
-                                {{vm.saveObj|json}}
-                            </pre>
-                            <pre>
-                                {{vm.steps[vm.step].data|json}}
-                            </pre>
-                     -->        
+                            <form name="form">
+                                <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"></div>
+                                <div class="save-button">
+                                    <button type="button" class="button blue-button" ng-click="vm.save()" ng-disabled="!vm.enableSave(form)">
+                                        Save
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
 

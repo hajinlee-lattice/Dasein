@@ -38,7 +38,7 @@ angular.module('lp.configureattributes.configure', [])
                 Years: totalMonths / 12,
                 Quarters: totalMonths / 3 // 3 quaters a month
             },
-            options: vm.options || {},
+            options: ConfigureAttributesStore.getOptions() || {},
             completed: ConfigureAttributesStore.getSaved(),
             PurchaseHistory: PurchaseHistory
         });
@@ -86,7 +86,7 @@ angular.module('lp.configureattributes.configure', [])
             ConfigureAttributesStore.setOptions(vm.options);
         }
 
-        vm.addPeriod = function(array) {
+        vm.addPeriod = function(array, form) {
             var timestamp = new Date().valueOf(),
                 obj = {
                     eol: false,
@@ -102,14 +102,26 @@ angular.module('lp.configureattributes.configure', [])
                     }]
             };
             array.push(obj);
+
+            ConfigureAttributesStore.setOptions(vm.options);
+
+            if(form) {
+                form.$setDirty();
+            }
         }
 
-        vm.removePeriod = function(array, key, index) {
+        vm.removePeriod = function(array, key, index, form) {
             var tmp = array[key].filter(function(value, _index) { 
                 return _index !== index;
             });
             vm.spendOvertime[key] = tmp;
             delete vm.options[key][index];
+
+            ConfigureAttributesStore.setOptions(vm.options);
+
+            if(form) {
+                form.$setDirty();
+            }
         }
 
         vm.nextStep = function(step) {
@@ -144,12 +156,28 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.submit = function() {
-            
+
         }
 
-        vm.enableSave = function() {
-            var options = ConfigureAttributesStore.getOptions();
-            return (options ? true : false);
+        vm.enableSave = function(form) {
+            var options = ConfigureAttributesStore.getOptions(),
+                hasOptions = false;
+
+            if(form) {
+                var valid = form.$valid, 
+                    dirty = form.$dirty;
+            }
+
+            if(options) {
+                var types = vm.steps[vm.step].type.split(',');
+                types.forEach(function(type, key) {
+                    if(options[type] && dirty) {
+                        hasOptions = true;
+                    }
+                });
+            }
+
+            return (hasOptions ? true : false);
         }
 
         vm.checkValid = function(form) {
@@ -161,7 +189,7 @@ angular.module('lp.configureattributes.configure', [])
             completedSteps.forEach(function(step) {
                 vm.steps[step].completed = true;
             });
-            vm.steps = ConfigureAttributesStore.getSteps(PurchaseHistory, vm.steps);
+            vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
             vm.spendOvertime = {
                 TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime,
                 AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime

@@ -5,7 +5,7 @@ angular.module('lp.configureattributes')
     this.init = function() {
         this.purchaseHistory = null;
         this.steps = null;
-        this.options = null;
+        this.options = {};
         this.saved = [];
     }
 
@@ -57,12 +57,10 @@ angular.module('lp.configureattributes')
     }
 
     this.setOptions = function(options) {
-        this.options = this.options || {};
         for(var i in options) {
             var key = i,
                 option = options[key];
-
-            this.options[key] = options[key];
+            ConfigureAttributesStore.options[key] = options[key];
         }
     }
 
@@ -70,7 +68,7 @@ angular.module('lp.configureattributes')
         return this.options;
     }
 
-    addSpendOvertimeSaveObject = function(metric, _option) {
+    var addSpendOvertimeSaveObject = function(metric, _option) {
         var periods = [];
         for(var i in _option) {
             for(var j in _option[i]) {
@@ -91,8 +89,9 @@ angular.module('lp.configureattributes')
                         eol: false,
                         IsEOL: false
                     };
-
-                ConfigureAttributesStore.purchaseHistory.push(obj);
+                if(period.Vals && Number.isInteger(period.Vals[0])) {
+                    ConfigureAttributesStore.purchaseHistory.push(obj);
+                }
             }
         }
     }
@@ -152,7 +151,7 @@ angular.module('lp.configureattributes')
 
     this.saveOptions = function(step) {
         for(var i in this.options) {
-            var metric = i;
+            var metric = i,
                 _option = this.options[metric];
 
             this.purchaseHistory.forEach(function(item, key) { // delete previous obejcts for this kind
@@ -160,7 +159,6 @@ angular.module('lp.configureattributes')
                     delete ConfigureAttributesStore.purchaseHistory[key];
                 }
             });
-
             switch(metric) {
                 case 'TotalSpendOvertime':
                 case 'AvgSpendOvertime':

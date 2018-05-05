@@ -169,6 +169,7 @@
                     &.add,
                     &.remove {
                         border: none;
+                        background: none;
                         padding: 0;
                         & >  i {
                             color: #aaa;
@@ -180,13 +181,17 @@
                             text-align: center;
                             line-height: 14px;
                             margin-right: 5px;
+                            &:hover {
+                                color: #111;
+                                border-color: #111;
+                            }
                         }
                     }
                     &[disabled] {
                         opacity: .5;
                     }
                 }
-                & > form {
+                & > div {
                     @include flex-container;
                     & > .fields {
                         @include flex-item(1 1 auto);
