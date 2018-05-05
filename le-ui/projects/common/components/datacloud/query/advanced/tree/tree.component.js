@@ -52,15 +52,23 @@ angular
                 DataCloudStore.getEnrichments().then(function(enrichments) {
                     vm.enrichments = enrichments;
                     if (vm.tree.bucketRestriction) {
+                        // console.log('BUCKET ',vm.tree.bucketRestriction.ignored);
+                        if(vm.tree.bucketRestriction.ignored === undefined){
+                            vm.tree.bucketRestriction.ignored = true;
+                        }
+
                         var bucket = vm.tree.bucketRestriction,
                             bucketEntity = bucket.attr.split('.')[0],
                             bucketColumnId = bucket.attr.split('.')[1];
-
+                       
                         vm.item = $filter('filter')(vm.enrichments, {Entity: bucketEntity, ColumnId: bucketColumnId}, true)[0];
-
-                        if (!vm.item || !vm.isBucketUsed(bucket)) {
+                        // console.log('ITEM ', vm.item);
+                        if (!vm.item || bucket.ignored === true) {
                             vm.unused = true;
+                        }else{
+                            vm.unused = bucket.ignored;
                         }
+                        // console.log('IGNORE ', vm.unused);
                         if (vm.item) {
                             vm.root.pushItem(vm.item, vm.tree.bucketRestriction, vm);
                             if (vm.item.cube && vm.item.cube.Bkts) {
@@ -146,8 +154,10 @@ angular
                 if (unset) {
                     vm.unused = true;
                     vm.tree.bucketRestriction.bkt = {};
+                    vm.tree.bucketRestriction.ignored = true;
                 } else {
                     vm.unused = false;
+                    vm.tree.bucketRestriction.ignored = false;
                 }
 
                 vm.records_updating = true;
@@ -172,7 +182,7 @@ angular
                     (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String' || vm.type == 'PercentChange')) {
                     if (vm.unused) {
                         vm.unused = false;
-
+                        
                         if (vm.type != 'String') {
                             vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
                             vm.tree.bucketRestriction.bkt = angular.copy(vm.item.cube.Bkts.List[0]);

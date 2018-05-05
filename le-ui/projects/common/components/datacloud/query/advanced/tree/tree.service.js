@@ -259,6 +259,8 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.isBucketUsed = function (bucket) {
+            // console.log('Service ', bucket);
+            // return bucket.ignored;
             var entity = getEntity(bucket);
             var service = getService(entity);
             return service.isBucketUsed(bucket);

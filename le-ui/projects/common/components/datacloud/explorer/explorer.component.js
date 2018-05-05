@@ -1166,7 +1166,7 @@ angular.module('common.datacloud.explorer', [
             selected = [],
             deselected = [];
 
-        console.log('saveSelected', dirtyEnrichments, selectedObj, deselectedObj);
+        // console.log('saveSelected', dirtyEnrichments, selectedObj, deselectedObj);
         vm.selectDisabled = (selectedObj.length ? 0 : 1);
 
         for (var i in selectedObj) {
@@ -1638,7 +1638,7 @@ angular.module('common.datacloud.explorer', [
 
     vm.segmentBucketInput = getSegmentBucketInputs();
     vm.selectBucketInput = function(id, bucket) {
-
+        // console.log('Explorer ', id, ' === ',bucket);
         var bucketId = id + bucket,
             range = {min: bucket, max: bucket, is_null_only: false};
 

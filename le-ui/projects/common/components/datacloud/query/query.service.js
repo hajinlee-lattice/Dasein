@@ -303,7 +303,26 @@ angular.module('common.datacloud.query')
             this.removeRestriction('contact', attribute);
         }
 
+        function setBucketRestrictionUsed (bucketRestriction){
+            // console.log('==================> Addded restriction ',QueryStore.mode, bucketRestriction.bkt);
+            if(!bucketRestriction.bkt || bucketRestriction.bkt == {}){
+                if((QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules')){
+                        bucketRestriction.ignored = true;
+                }else{
+                    bucketRestriction.ignored = bucketRestriction.ignored ? bucketRestriction.ignored : false;
+                }
+            }else{
+                if((QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules')){
+                        bucketRestriction.ignored = true;
+                }else{
+                    bucketRestriction.ignored = bucketRestriction.ignored ? bucketRestriction.ignored : false;
+                }
+            } 
+            // console.log('Addded restriction ',bucketRestriction);
+        }
+
         this.addRestriction = function(type, attribute, forceTreeRoot) {
+            
             attribute = this.setAttributeAttr(type, attribute);
 
             var treeRoot = this.getAddBucketTreeRoot(),
@@ -315,6 +334,7 @@ angular.module('common.datacloud.query')
                     attribute.attr,
                     (attribute.bkt ? attribute.bkt : null)
                 );
+            setBucketRestrictionUsed(bucketRestriction);
 
             if (QueryStore.mode == 'rules' || QueryStore.mode == 'dashboardrules') {
                 restrictions = this[type + 'BucketTreeRoot'].logicalRestriction.restrictions;
