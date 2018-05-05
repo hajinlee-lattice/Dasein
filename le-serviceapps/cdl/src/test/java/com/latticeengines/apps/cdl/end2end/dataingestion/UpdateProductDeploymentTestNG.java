@@ -6,7 +6,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_2;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public class UpdateProductDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeVdbCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
         long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
         Assert.assertEquals(countTableRole(BusinessEntity.Account.getBatchStore()), numAccounts);

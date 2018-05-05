@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
@@ -61,7 +62,6 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -81,7 +81,6 @@ public class CheckpointService {
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
     private static final String S3_CHECKPOINTS_VERSION = "13";
     static final String CHECKPOINT_DATASET_VDB = "vdb";
-    static final String CHECKPOINT_DATASET_CSV = "csv";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 400;
@@ -143,7 +142,7 @@ public class CheckpointService {
         this.mainTestTenant = mainTestTenant;
     }
 
-    void resumeCheckpoint(String checkpoint, String dataset) throws IOException {
+    void resumeCheckpoint(String checkpoint) throws IOException {
         unzipCheckpoint(checkpoint);
 
         dataFeedProxy.getDataFeed(mainTestTenant.getId());

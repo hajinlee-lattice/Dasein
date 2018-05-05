@@ -45,7 +45,7 @@ public class CleanupByUploadTransactionDeploymentTestNG extends DataIngestionEnd
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
         masterTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedRawTransaction);

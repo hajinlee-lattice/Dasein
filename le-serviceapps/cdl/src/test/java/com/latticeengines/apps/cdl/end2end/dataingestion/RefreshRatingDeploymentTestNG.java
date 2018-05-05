@@ -103,7 +103,7 @@ public class RefreshRatingDeploymentTestNG extends DataIngestionEnd2EndDeploymen
             if (enableAIRatings) {
                 new Thread(this::setupAIModels).start();
             }
-            resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
             verifyStats(BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.PurchaseHistory);
             new Thread(() -> {
                 createTestSegment2();

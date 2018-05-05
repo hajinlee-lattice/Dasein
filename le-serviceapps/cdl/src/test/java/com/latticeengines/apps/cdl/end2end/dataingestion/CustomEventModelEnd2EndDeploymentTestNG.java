@@ -65,7 +65,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
     @Test(groups = "end2end")
     public void end2endTest() throws Exception {
         setupEnd2EndTestEnvironment();
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         bootstrap();
         runTest();
     }
@@ -81,7 +81,7 @@ public class CustomEventModelEnd2EndDeploymentTestNG extends DataIngestionEnd2En
             mainTestTenant = testBed.getMainTestTenant();
         } else {
             setupEnd2EndTestEnvironment();
-            resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         bootstrap();

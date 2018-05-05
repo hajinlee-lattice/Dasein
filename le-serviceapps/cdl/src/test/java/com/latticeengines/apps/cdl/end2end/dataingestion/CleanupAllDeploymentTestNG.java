@@ -34,7 +34,7 @@ public class CleanupAllDeploymentTestNG extends DataIngestionEnd2EndDeploymentTe
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
 
         verifyCleanup(BusinessEntity.Contact);

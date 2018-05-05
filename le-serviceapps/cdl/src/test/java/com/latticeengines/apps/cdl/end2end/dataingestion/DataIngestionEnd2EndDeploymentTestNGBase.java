@@ -364,17 +364,19 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
         logger.info("Modified field mapping document is saved, start importing ...");
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(),
-                entity.name() + "Schema", template, template, INITIATOR);
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), entity.name() + "Schema",
+                template, template, INITIATOR);
         JobStatus status = waitForWorkflowStatus(applicationId.toString(), false);
         Assert.assertEquals(status, JobStatus.COMPLETED);
         logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
-    private ApplicationId submitImport(String customerSpace, String source, String entity, String feedType,
+    private synchronized ApplicationId submitImport(String customerSpace, String entity, String feedType,
             SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
+        String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
-        String taskId = cdlProxy.createDataFeedTask(customerSpace, source, entity, feedType, metaData);
+        String taskId = cdlProxy.createDataFeedTask(customerSpace, SourceType.FILE.getName(), entity, feedType, metaData);
+        logger.info("Creating a data feed task for " + entity + " with id " + taskId);
         if (StringUtils.isEmpty(taskId)) {
             throw new LedpException(LedpCode.LEDP_18162, new String[] { entity, source, feedType });
         }
@@ -477,7 +479,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         }
         fileUploadProxy.saveFieldMappingDocument(template.getName(), fieldMappingDocument);
         long startTime = System.currentTimeMillis();
-        ApplicationId applicationId = submitImport(mainTestTenant.getId(), "File", entity.name(), "e2etest", template,
+        ApplicationId applicationId = submitImport(mainTestTenant.getId(), entity.name(), "e2etest", template,
                 data, INITIATOR);
         com.latticeengines.domain.exposed.workflow.JobStatus completedStatus = waitForWorkflowStatus(
                 applicationId.toString(), false);
@@ -580,13 +582,8 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         return dataCollectionProxy.getTableName(customerSpace.toString(), role);
     }
 
-    void resumeVdbCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_VDB);
-        initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
-    }
-
-    void resumeCsvCheckpoint(String checkpoint) throws IOException {
-        checkpointService.resumeCheckpoint(checkpoint, CheckpointService.CHECKPOINT_DATASET_CSV);
+    void resumeCheckpoint(String checkpoint) throws IOException {
+        checkpointService.resumeCheckpoint(checkpoint);
         initialVersion = dataCollectionProxy.getActiveVersion(mainTestTenant.getId());
     }
 

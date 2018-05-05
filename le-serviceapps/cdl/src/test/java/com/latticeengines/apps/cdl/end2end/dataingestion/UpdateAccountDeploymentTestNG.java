@@ -8,7 +8,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -30,7 +29,7 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
 
         // For the test scenario of non-1st profile purchase history

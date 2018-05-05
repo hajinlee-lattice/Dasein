@@ -7,7 +7,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_2;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -37,7 +36,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeVdbCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
         dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;

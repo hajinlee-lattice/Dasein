@@ -5,7 +5,6 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.PRODUCT_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -40,7 +39,7 @@ public class ProcessTransactionDeploymentTestNG extends DataIngestionEnd2EndDepl
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         Assert.assertEquals(TRANSACTION_IMPORT_SIZE_1_1 + TRANSACTION_IMPORT_SIZE_1_2, TRANSACTION_IMPORT_SIZE_1);
-        resumeVdbCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessAccountDeploymentTestNG.CHECK_POINT);
 
         new Thread(() -> {
             createTestSegment1();

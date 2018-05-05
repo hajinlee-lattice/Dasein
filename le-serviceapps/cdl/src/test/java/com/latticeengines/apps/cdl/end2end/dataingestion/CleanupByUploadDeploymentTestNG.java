@@ -46,7 +46,7 @@ public class CleanupByUploadDeploymentTestNG extends DataIngestionEnd2EndDeploym
     @Test(groups = "end2end")
     public void testDeleteContactByUpload() throws Exception {
         customerSpace = CustomerSpace.parse(mainTestTenant.getId()).toString();
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         cleanupByUpload();
         verifyCleanup();
         processAnalyze();

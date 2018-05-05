@@ -68,7 +68,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         setupEnd2EndTestEnvironment();
-        resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         attachProtectedProxy(modelSummaryProxy);
         setupBusinessCalendar();
         setupTestSegment(E2E_TEST_USE_TRANSACTION_RESTRICTION);
@@ -86,7 +86,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
             mainTestTenant = testBed.getMainTestTenant();
         } else {
             setupEnd2EndTestEnvironment();
-            resumeVdbCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+            resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         }
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
         attachProtectedProxy(modelSummaryProxy);
