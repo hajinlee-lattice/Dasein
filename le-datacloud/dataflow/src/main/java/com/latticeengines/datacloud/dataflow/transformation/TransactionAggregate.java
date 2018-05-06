@@ -114,7 +114,7 @@ public class TransactionAggregate extends ConfigurableFlowBase<TransactionAggreg
             accountIds = accountIds.rename(new FieldList(idField), new FieldList(accountField));
         }
         if (isLongId) {
-            TypeConvertFunction function = new TypeConvertFunction(accountField, TypeConvertStrategy.LONG_TO_STRING);
+            TypeConvertFunction function = new TypeConvertFunction(accountField, TypeConvertStrategy.ANY_TO_STRING);
             accountIds = accountIds.apply(function, new FieldList(accountField),
                            new FieldMetadata(accountField, String.class));
             transactionHistory = transactionHistory.leftJoin(accountField, accountIds, accountField);

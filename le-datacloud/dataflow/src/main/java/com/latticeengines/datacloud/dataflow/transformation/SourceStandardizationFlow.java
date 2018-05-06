@@ -473,6 +473,10 @@ public class SourceStandardizationFlow
                 TypeConvertStrategy strategy = strategies[i];
                 TypeConvertFunction function = new TypeConvertFunction(convertTypeField, strategy);
                 switch (strategy) {
+                case ANY_TO_STRING:
+                    source = source.apply(function, new FieldList(convertTypeField),
+                            new FieldMetadata(convertTypeField, String.class));
+                    break;
                 case STRING_TO_INT:
                     source = source.apply(function, new FieldList(convertTypeField),
                             new FieldMetadata(convertTypeField, Integer.class));

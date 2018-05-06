@@ -29,10 +29,14 @@ public class TypeConvertFunction extends BaseOperation implements Function {
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
         TupleEntry arguments = functionCall.getArguments();
         switch (strategy) {
-        case LONG_TO_STRING:
+        case ANY_TO_STRING:
             try {
-                String value = arguments.getLong(this.field) + "";
-                functionCall.getOutputCollector().add(new Tuple(value));
+                if (arguments.getObject(this.field) == null) {
+                    functionCall.getOutputCollector().add(Tuple.size(1));
+                } else {
+                    String value = String.valueOf(arguments.getObject(this.field));
+                    functionCall.getOutputCollector().add(new Tuple(value));
+                }
             } catch (Exception e) {
                 functionCall.getOutputCollector().add(Tuple.size(1));
             }
