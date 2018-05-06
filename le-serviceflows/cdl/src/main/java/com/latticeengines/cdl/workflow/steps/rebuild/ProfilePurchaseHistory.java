@@ -241,7 +241,13 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     }
 
     private String findEvaluationDate() {
-        return periodProxy.getEvaluationDate(customerSpace.toString());
+        String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
+        if (StringUtils.isBlank(evaluationDate)) {
+            log.error("Fail to find evaluation date from workflow context");
+            evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
+        }
+        log.info("Evaluation date for purchase history profiling: " + evaluationDate);
+        return evaluationDate;
     }
 
     private void loadProductMap() {

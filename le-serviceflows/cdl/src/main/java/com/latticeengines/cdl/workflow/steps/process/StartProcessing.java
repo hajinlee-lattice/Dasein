@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -232,16 +233,23 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     private void setupInactiveVersion() {
         for (TableRoleInCollection role : TableRoleInCollection.values()) {
-            String tableName = dataCollectionProxy.getTableName(customerSpace.toString(), role, inactiveVersion);
-            if (StringUtils.isNotBlank(tableName)) {
-                String activeTableName = dataCollectionProxy.getTableName(customerSpace.toString(), role,
+            List<String> tableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role,
+                    inactiveVersion);
+            if (CollectionUtils.isNotEmpty(tableNames)) {
+                List<String> activeTableNames = dataCollectionProxy.getTableNames(customerSpace.toString(), role,
                         activeVersion);
-                if (tableName.equalsIgnoreCase(activeTableName)) {
-                    log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
-                    dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
-                } else {
-                    log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);
-                    metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                Set<String> activeTableNameSet = new HashSet<>();
+                activeTableNames.forEach(t -> {
+                    activeTableNameSet.add(t.toLowerCase());
+                });
+                for (String tableName : tableNames) {
+                    if (activeTableNameSet.contains(tableName.toLowerCase())) {
+                        log.info("Unlink table " + tableName + " as " + role + " in " + inactiveVersion);
+                        dataCollectionProxy.unlinkTable(customerSpace.toString(), tableName, role, inactiveVersion);
+                    } else {
+                        log.info("Removing table " + tableName + " as " + role + " in " + inactiveVersion);
+                        metadataProxy.deleteTable(customerSpace.toString(), tableName);
+                    }
                 }
             }
         }
