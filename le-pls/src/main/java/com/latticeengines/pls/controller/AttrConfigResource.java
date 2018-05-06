@@ -71,6 +71,7 @@ public class AttrConfigResource {
     @ResponseBody
     @ApiOperation("get activation configuration detail for a specific category")
     public AttrConfigSelectionDetail getActivationConfiguration(@PathVariable String categoryName) {
+        log.info("get activation configuration detail for " + categoryName);
         return attrConfigService.getAttrConfigSelectionDetailForState(categoryName);
     }
 
@@ -79,6 +80,7 @@ public class AttrConfigResource {
     @ApiOperation("get usage configuration detail for a specific category")
     public AttrConfigSelectionDetail getUsageConfiguration(@PathVariable String categoryName,
             @RequestParam(value = "usage", required = true) String usage) {
+        log.info("get usage configuration detail for " + categoryName);
         return attrConfigService.getAttrConfigSelectionDetails(categoryName, usage);
     }
 

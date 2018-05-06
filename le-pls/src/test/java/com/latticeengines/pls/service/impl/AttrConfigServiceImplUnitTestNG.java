@@ -123,6 +123,191 @@ public class AttrConfigServiceImplUnitTestNG {
 
     }
 
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigActivationOverview" })
+    public void testGetAttrConfigUsageOverview() {
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
+                ColumnSelection.Predefined.Segment.getName()))
+                        .thenReturn(generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.getName()));
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
+                ColumnSelection.Predefined.Enrichment.getName())).thenReturn(
+                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Enrichment.getName()));
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
+                ColumnSelection.Predefined.CompanyProfile.getName())).thenReturn(
+                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.CompanyProfile.getName()));
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
+                ColumnSelection.Predefined.TalkingPoint.getName())).thenReturn(
+                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.TalkingPoint.getName()));
+        AttrConfigUsageOverview usageOverview = attrConfigService.getAttrConfigUsageOverview();
+        log.info("usageOverview is " + usageOverview);
+        Map<String, Long> attrNums = usageOverview.getAttrNums();
+        Assert.assertEquals(attrNums.size(), 6);
+        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - activeForIntent, 0);
+        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
+        Assert.assertEquals(
+                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
+                        - 3677,
+                0);
+        Assert.assertNotNull(
+                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetOverallAttrConfigActivationOverview" })
+    public void testGetOverallAttrConfigUsageOverview() {
+        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
+                Arrays.asList(AttrConfigServiceImpl.usageProperties), true))
+                        .thenReturn(generatePropertyAttrConfigOverviewForUsage(
+                                Arrays.asList(AttrConfigServiceImpl.usageProperties)));
+        AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
+        log.info("overall usageOverview is " + usageOverview);
+        Map<String, Long> attrNums = usageOverview.getAttrNums();
+        Assert.assertEquals(attrNums.size(), 6);
+        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
+        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
+        Assert.assertEquals(
+                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
+                        - 3677,
+                0);
+        Assert.assertNotNull(
+                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
+    }
+
+    @Test(groups = "unit")
+    public void testTranslateUsageToProperty() {
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("SEGMENTATION")
+                .equals(ColumnSelection.Predefined.Segment.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("EXPoRT")
+                .equals(ColumnSelection.Predefined.Enrichment.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("TALKING pOINTS")
+                .equals(ColumnSelection.Predefined.TalkingPoint.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("COMPANY PROFILE")
+                .equals(ColumnSelection.Predefined.CompanyProfile.getName()));
+        Assert.assertTrue(attrConfigService.translateUsageToProperty("State").equals(ColumnMetadataKey.State));
+        try {
+            attrConfigService.translateUsageToProperty("randome");
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGenerateAttrConfigRequestForUsage() {
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(deselect));
+        request.setSelect(Arrays.asList(select));
+        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(usage, request);
+        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
+        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        for (AttrConfig attrConfig : attrConfigs) {
+            Assert.assertNotNull(attrConfig.getAttrName());
+            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
+            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Enrichment.getName()));
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testGenerateAttrConfigRequestForActivation() {
+        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
+        request.setDeselect(Arrays.asList(deselect));
+        request.setSelect(Arrays.asList(select));
+        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForActivation(request);
+        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
+        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
+        for (AttrConfig attrConfig : attrConfigs) {
+            Assert.assertNotNull(attrConfig.getAttrName());
+            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
+            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
+            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
+        }
+    }
+
+    @Test(groups = "unit")
+    public void testAttrConfig() {
+        List<AttrConfig> attrConfigs = new ArrayList<>();
+        AttrConfig config = new AttrConfig();
+        config.setAttrName("a");
+        config.setEntity(BusinessEntity.Account);
+        AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
+        enrichProp.setCustomValue(Boolean.TRUE);
+        config.setAttrProps(ImmutableMap.of(ColumnMetadataKey.State, enrichProp));
+        log.info("isAllowCustomization() is "
+                + config.getAttrProps().get(ColumnMetadataKey.State).isAllowCustomization());
+        log.info("CustomValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue());
+        log.info("SystemValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getSystemValue());
+        attrConfigs.add(config);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForActivation() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.TECHNOLOGY_PROFILE, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.TECHNOLOGY_PROFILE, true), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
+                .thenReturn(request);
+        AttrConfigSelectionDetail activationDetail = attrConfigService
+                .getAttrConfigSelectionDetailForState(Category.TECHNOLOGY_PROFILE.getName());
+        log.info("testGetAttrConfigUsageOverview activationDetail is " + activationDetail);
+        Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
+        Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
+        Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
+        Assert.assertTrue(activationDetail.getSubcategories().entrySet().parallelStream()
+                .allMatch(entry -> entry.getValue().getHasFrozenAttrs() == false));
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForUsageWithNonPremiumCategory() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.FIRMOGRAPHICS, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.FIRMOGRAPHICS, true), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.FIRMOGRAPHICS, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.FIRMOGRAPHICS, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName()))
+                .thenReturn(request);
+        AttrConfigSelectionDetail selectionDetail = attrConfigService.getAttrConfigSelectionDetails("Firmographics",
+                "Segmentation");
+        log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
+        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
+                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
+    }
+
+    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
+    public void testGetDetailAttrForUsageWithPremiumCategory() {
+        AttrConfigRequest request = new AttrConfigRequest();
+        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.INTENT, true, true),
+                AttrConfigServiceImplTestUtils.getAttr2(Category.INTENT, true, true), //
+                AttrConfigServiceImplTestUtils.getAttr3(Category.INTENT, true, true), //
+                AttrConfigServiceImplTestUtils.getAttr4(Category.INTENT, true, false), //
+                AttrConfigServiceImplTestUtils.getAttr5(Category.INTENT, false, true), //
+                AttrConfigServiceImplTestUtils.getAttr6(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr7(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr8(Category.INTENT, false, false), //
+                AttrConfigServiceImplTestUtils.getAttr9(Category.INTENT, false, false)));
+        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
+        AttrConfigSelectionDetail selectionDetail = attrConfigService
+                .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
+        log.info("testGetDetailAttrForUsageWithPremiumCategoru selectionDetail is " + selectionDetail);
+        Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
+        Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
+        Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
+        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
+                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
+    }
+
     private AttrConfigOverview<AttrState> generateIntentAttrConfigOverview() {
         AttrConfigOverview<AttrState> intentCategoryAttrConfigOverview = new AttrConfigOverview<>();
         intentCategoryAttrConfigOverview.setCategory(Category.INTENT);
@@ -189,54 +374,6 @@ public class AttrConfigServiceImplUnitTestNG {
 
         log.info("map is " + map);
         return map;
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigActivationOverview" })
-    public void testGetAttrConfigUsageOverview() {
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.Segment.getName()))
-                        .thenReturn(generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Segment.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.Enrichment.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.Enrichment.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.CompanyProfile.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.CompanyProfile.getName()));
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                ColumnSelection.Predefined.TalkingPoint.getName())).thenReturn(
-                        generatePropertyAttrConfigOverview(ColumnSelection.Predefined.TalkingPoint.getName()));
-        AttrConfigUsageOverview usageOverview = attrConfigService.getAttrConfigUsageOverview();
-        log.info("usageOverview is " + usageOverview);
-        Map<String, Long> attrNums = usageOverview.getAttrNums();
-        Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - activeForIntent, 0);
-        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
-        Assert.assertEquals(
-                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
-                        - 3677,
-                0);
-        Assert.assertNotNull(
-                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetOverallAttrConfigActivationOverview" })
-    public void testGetOverallAttrConfigUsageOverview() {
-        when(cdlAttrConfigProxy.getAttrConfigOverview(tenant.getId(), null,
-                Arrays.asList(AttrConfigServiceImpl.usageProperties), true))
-                        .thenReturn(generatePropertyAttrConfigOverviewForUsage(
-                                Arrays.asList(AttrConfigServiceImpl.usageProperties)));
-        AttrConfigUsageOverview usageOverview = attrConfigService.getOverallAttrConfigUsageOverview();
-        log.info("overall usageOverview is " + usageOverview);
-        Map<String, Long> attrNums = usageOverview.getAttrNums();
-        Assert.assertEquals(attrNums.size(), 6);
-        Assert.assertEquals(attrNums.get(Category.INTENT.getName()) - 10960L, 0);
-        Map<String, Map<String, Long>> selections = usageOverview.getSelections();
-        Assert.assertEquals(
-                selections.get(ColumnSelection.Predefined.Segment.getName()).get(AttrConfigUsageOverview.SELECTED)
-                        - 3677,
-                0);
-        Assert.assertNotNull(
-                selections.get(ColumnSelection.Predefined.Enrichment.getName()).get(AttrConfigUsageOverview.LIMIT));
     }
 
     private Map<String, AttrConfigCategoryOverview<?>> generatePropertyAttrConfigOverviewForUsage(
@@ -386,143 +523,6 @@ public class AttrConfigServiceImplUnitTestNG {
         propSummary6.put(propertyName, propDetails6);
         result.add(attrConfig6);
         return result;
-    }
-
-    @Test(groups = "unit")
-    public void testTranslateUsageToProperty() {
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("SEGMENTATION")
-                .equals(ColumnSelection.Predefined.Segment.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("EXPoRT")
-                .equals(ColumnSelection.Predefined.Enrichment.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("TALKING pOINTS")
-                .equals(ColumnSelection.Predefined.TalkingPoint.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("COMPANY PROFILE")
-                .equals(ColumnSelection.Predefined.CompanyProfile.getName()));
-        Assert.assertTrue(attrConfigService.translateUsageToProperty("State").equals(ColumnMetadataKey.State));
-        try {
-            attrConfigService.translateUsageToProperty("randome");
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof IllegalArgumentException);
-        }
-    }
-
-    @Test(groups = "unit")
-    public void testGenerateAttrConfigRequestForUsage() {
-        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
-        request.setDeselect(Arrays.asList(deselect));
-        request.setSelect(Arrays.asList(select));
-        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForUsage(usage, request);
-        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
-        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
-        for (AttrConfig attrConfig : attrConfigs) {
-            Assert.assertNotNull(attrConfig.getAttrName());
-            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
-            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnSelection.Predefined.Enrichment.getName()));
-            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
-        }
-    }
-
-    @Test(groups = "unit")
-    public void testGenerateAttrConfigRequestForActivation() {
-        AttrConfigSelectionRequest request = new AttrConfigSelectionRequest();
-        request.setDeselect(Arrays.asList(deselect));
-        request.setSelect(Arrays.asList(select));
-        AttrConfigRequest attrConfigRequest = attrConfigService.generateAttrConfigRequestForActivation(request);
-        List<AttrConfig> attrConfigs = attrConfigRequest.getAttrConfigs();
-        Assert.assertEquals(attrConfigs.size(), select.length + deselect.length);
-        for (AttrConfig attrConfig : attrConfigs) {
-            Assert.assertNotNull(attrConfig.getAttrName());
-            Assert.assertEquals(attrConfig.getEntity(), BusinessEntity.Account);
-            Assert.assertTrue(attrConfig.getAttrProps().containsKey(ColumnMetadataKey.State));
-            log.info("attrConfig is " + JsonUtils.serialize(attrConfig));
-        }
-    }
-
-    @Test(groups = "unit")
-    public void testAttrConfig() {
-        List<AttrConfig> attrConfigs = new ArrayList<>();
-        AttrConfig config = new AttrConfig();
-        config.setAttrName("a");
-        config.setEntity(BusinessEntity.Account);
-        AttrConfigProp<Boolean> enrichProp = new AttrConfigProp<>();
-        enrichProp.setCustomValue(Boolean.TRUE);
-        config.setAttrProps(ImmutableMap.of(ColumnMetadataKey.State, enrichProp));
-        log.info("isAllowCustomization() is "
-                + config.getAttrProps().get(ColumnMetadataKey.State).isAllowCustomization());
-        log.info("CustomValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getCustomValue());
-        log.info("SystemValue() is " + config.getAttrProps().get(ColumnMetadataKey.State).getSystemValue());
-        attrConfigs.add(config);
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
-    public void testGetDetailAttrForActivation() {
-        AttrConfigRequest request = new AttrConfigRequest();
-        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.TECHNOLOGY_PROFILE, true),
-                AttrConfigServiceImplTestUtils.getAttr2(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr3(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr4(Category.TECHNOLOGY_PROFILE, true), //
-                AttrConfigServiceImplTestUtils.getAttr5(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr6(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr7(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr8(Category.TECHNOLOGY_PROFILE, false), //
-                AttrConfigServiceImplTestUtils.getAttr9(Category.TECHNOLOGY_PROFILE, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.TECHNOLOGY_PROFILE.getName()))
-                .thenReturn(request);
-        AttrConfigSelectionDetail activationDetail = attrConfigService
-                .getAttrConfigSelectionDetailForState(Category.TECHNOLOGY_PROFILE.getName());
-        log.info("testGetAttrConfigUsageOverview activationDetail is " + activationDetail);
-        Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
-        Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
-        Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
-        Assert.assertTrue(activationDetail.getSubcategories().entrySet().parallelStream()
-                .allMatch(entry -> entry.getValue().getHasFrozenAttrs() == false));
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
-    public void testGetDetailAttrForUsageWithNonPremiumCategory() {
-        AttrConfigRequest request = new AttrConfigRequest();
-        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.FIRMOGRAPHICS, true),
-                AttrConfigServiceImplTestUtils.getAttr2(Category.FIRMOGRAPHICS, true), //
-                AttrConfigServiceImplTestUtils.getAttr3(Category.FIRMOGRAPHICS, true), //
-                AttrConfigServiceImplTestUtils.getAttr4(Category.FIRMOGRAPHICS, true), //
-                AttrConfigServiceImplTestUtils.getAttr5(Category.FIRMOGRAPHICS, false), //
-                AttrConfigServiceImplTestUtils.getAttr6(Category.FIRMOGRAPHICS, false), //
-                AttrConfigServiceImplTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //
-                AttrConfigServiceImplTestUtils.getAttr8(Category.FIRMOGRAPHICS, false), //
-                AttrConfigServiceImplTestUtils.getAttr9(Category.FIRMOGRAPHICS, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.FIRMOGRAPHICS.getName()))
-                .thenReturn(request);
-        AttrConfigSelectionDetail selectionDetail = attrConfigService.getAttrConfigSelectionDetails("Firmographics",
-                "Segmentation");
-        log.info("testGetDetailAttrForUsageWithNonPremiumCategory selectionDetail is " + selectionDetail);
-        Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
-        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
-        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
-                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
-    }
-
-    @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
-    public void testGetDetailAttrForUsageWithPremiumCategory() {
-        AttrConfigRequest request = new AttrConfigRequest();
-        request.setAttrConfigs(Arrays.asList(AttrConfigServiceImplTestUtils.getAttr1(Category.INTENT, true, true),
-                AttrConfigServiceImplTestUtils.getAttr2(Category.INTENT, true, true), //
-                AttrConfigServiceImplTestUtils.getAttr3(Category.INTENT, true, true), //
-                AttrConfigServiceImplTestUtils.getAttr4(Category.INTENT, true, false), //
-                AttrConfigServiceImplTestUtils.getAttr5(Category.INTENT, false, true), //
-                AttrConfigServiceImplTestUtils.getAttr6(Category.INTENT, false, false), //
-                AttrConfigServiceImplTestUtils.getAttr7(Category.INTENT, false, false), //
-                AttrConfigServiceImplTestUtils.getAttr8(Category.INTENT, false, false), //
-                AttrConfigServiceImplTestUtils.getAttr9(Category.INTENT, false, false)));
-        when(cdlAttrConfigProxy.getAttrConfigByCategory(tenant.getId(), Category.INTENT.getName())).thenReturn(request);
-        AttrConfigSelectionDetail selectionDetail = attrConfigService
-                .getAttrConfigSelectionDetails(Category.INTENT.getName(), "Segmentation");
-        log.info("testGetDetailAttrForUsageWithPremiumCategoru selectionDetail is " + selectionDetail);
-        Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
-        Assert.assertEquals(selectionDetail.getTotalAttrs() - 4L, 0);
-        Assert.assertEquals(selectionDetail.getSubcategories().size(), 4);
-        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
-                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
     }
 
 }

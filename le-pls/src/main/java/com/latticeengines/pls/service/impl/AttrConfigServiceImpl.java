@@ -249,7 +249,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
     public AttrConfigSelectionDetail getAttrConfigSelectionDetailForState(String categoryName) {
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(attrConfigRequest, ColumnMetadataKey.State, false);
+        return generateSelectionDetails(attrConfigRequest, ColumnMetadataKey.State, false, false);
     }
 
     @Override
@@ -257,13 +257,18 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String property = translateUsageToProperty(usage);
         AttrConfigRequest attrConfigRequest = cdlAttrConfigProxy
                 .getAttrConfigByCategory(MultiTenantContext.getTenantId(), categoryName);
-        return generateSelectionDetails(attrConfigRequest, property, true);
+        return generateSelectionDetails(attrConfigRequest, property, true, true);
     }
 
-    @SuppressWarnings("unchecked")
     @VisibleForTesting
     AttrConfigSelectionDetail generateSelectionDetails(AttrConfigRequest attrConfigRequest, String property,
             boolean applyActivationFilter) {
+        return generateSelectionDetails(attrConfigRequest, property, applyActivationFilter, false);
+    }
+
+    @SuppressWarnings("unchecked")
+    AttrConfigSelectionDetail generateSelectionDetails(AttrConfigRequest attrConfigRequest, String property,
+            boolean applyActivationFilter, boolean filterOutNonCustomizedAttrs) {
         AttrConfigSelectionDetail attrConfigSelectionDetail = new AttrConfigSelectionDetail();
         long totalAttrs = 0L;
         long selected = 0L;
@@ -279,11 +284,26 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     if (applyActivationFilter) {
                         AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                                 .get(ColumnMetadataKey.State);
-                        if (attrConfigProp == null || attrConfigProp.getCustomValue() == null
-                                || attrConfigProp.getCustomValue() == AttrState.Inactive) {
+                        if (getActualValue(attrConfigProp) == null
+                                || getActualValue(attrConfigProp) == AttrState.Inactive) {
                             includeCurrentAttr = false;
                         }
                     }
+                    // PLS-8199 --------------
+                    if (includeCurrentAttr && filterOutNonCustomizedAttrs) {
+                        if (usagePropertySet.contains(property)) {
+                            AttrConfigProp<Boolean> attrConfigProp = (AttrConfigProp<Boolean>) attrProps.get(property);
+                            if (!attrConfigProp.isAllowCustomization()
+                                    && (Boolean) attrConfigProp.getSystemValue() == Boolean.FALSE) {
+                                log.warn(String.format("property %s by default cannot be shown in UI", property));
+                                includeCurrentAttr = false;
+                            }
+                        } else {
+                            log.warn(String.format("Current property %s cannot apply filterOutNonCustomizedAttrs",
+                                    property));
+                        }
+                    }
+                    // --------------
 
                     if (includeCurrentAttr) {
                         // check subcategory property
