@@ -1,0 +1,9 @@
+.crm-selection {
+	label {
+		display: inline;
+	}
+	tr.disabled {
+		background: #f1f1f1;
+    	color: #a5a5a5;
+	}
+}

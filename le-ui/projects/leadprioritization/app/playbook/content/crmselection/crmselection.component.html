@@ -1,4 +1,4 @@
-<div class="playbook-segment playbook-content container">
+<div class="playbook-content crm-selection container">
     <div class="inner-container">
         <div class="header">
             <h2>CRM System Selection</h2>
@@ -24,8 +24,8 @@
                                     id="{{org.orgId}}" 
                                     name="{{org.orgId}}" 
                                     ng-value="org.orgId"
-                                    ng-change="vm.checkValid(crmselection_form)" 
-                                    ng-model="vm.stored.crm_selection"
+                                    ng-change="$ctrl.checkValid(crmselection_form)" 
+                                    ng-model="$ctrl.stored.crm_selection"
                                     ng-disabled="org.accountId === null" />
                                 <label for="{{org.orgId}}">{{ org.orgId }}</label>
                             </td>
