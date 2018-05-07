@@ -2,6 +2,7 @@ CREATE PROCEDURE `UpdateCDLTables`()
     BEGIN
 
     ALTER TABLE `PLS_MultiTenant`.`AI_MODEL` add column `MODEL_SUMMARY_ID` varchar(255);
+    ALTER TABLE `PLS_MultiTenant`.`RATING_ENGINE` add column `JUST_CREATED` bit;
 
     UPDATE `PLS_MultiTenant`.`AI_MODEL` a
     INNER JOIN `PLS_MultiTenant`.`MODEL_SUMMARY` m ON m.`PID` = a.`FK_MODEL_SUMMARY_ID`
