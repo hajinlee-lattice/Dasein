@@ -200,4 +200,21 @@
             }
         }
     }
+    &.done {
+        .configuration {
+            ul.steps {
+                border-bottom: none;
+                // li {
+                //     color: #6abe44;
+                //     &:before {
+                //         border-color: #6abe44;
+                //         background-image: url(/assets/images/purchasehistory/checkmark.png);
+                //     }
+                // }
+            }
+            .step-content {
+                max-width: 600px;
+            }
+        }
+    }
 }

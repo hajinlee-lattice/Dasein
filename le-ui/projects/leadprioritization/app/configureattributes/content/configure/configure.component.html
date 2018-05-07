@@ -23,7 +23,7 @@
                             </ul>
                             <form name="form">
                                 <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"></div>
-                                <div class="save-button">
+                                <div class="save-button" ng-if="['done'].indexOf(vm.step) === -1">
                                     <button type="button" class="button blue-button" ng-click="vm.save()" ng-disabled="!vm.enableSave(form)">
                                         Save
                                     </button>
@@ -40,8 +40,11 @@
                     <div class="pull-left">
                     </div>
                     <div class="pull-right">
-                        <button type="button" class="button white-button" ng-click="vm.submit()" ng-disabled="!vm.enableSave()">
+                        <button ng-if="vm.step !== 'done'" type="button" class="button white-button" ng-click="vm.submit()" ng-disabled="!vm.enableSubmit()">
                             Submit
+                        </button>
+                        <button ng-if="vm.step === 'done'" type="button" class="button blue-button" ui-sref="home.jobs.data">
+                            Done
                         </button>
                     </div>
                 </div>

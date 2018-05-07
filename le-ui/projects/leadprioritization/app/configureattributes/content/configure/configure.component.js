@@ -147,7 +147,7 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.save = function() {
-            ConfigureAttributesStore.saveOptions(vm.step);
+            ConfigureAttributesStore.saveSteps(vm.step);
             ConfigureAttributesStore.getPurchaseHistory().then(function(result) {
                 vm.saveObj = result;
             });
@@ -156,7 +156,9 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.submit = function() {
-
+            ConfigureAttributesStore.savePurchaseHistory(vm.step).then(function() {
+                $state.go('home.configureattributes.done');
+            });
         }
 
         vm.enableSave = function(form) {
@@ -180,8 +182,13 @@ angular.module('lp.configureattributes.configure', [])
             return (hasOptions ? true : false);
         }
 
+        vm.enableSubmit = function() {
+            var completed = ConfigureAttributesStore.getSaved();
+            return completed.length;
+        }
+
         vm.checkValid = function(form) {
-            console.log(form);
+            //console.log(form);
         }
 
         vm.init = function() {

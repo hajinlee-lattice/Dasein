@@ -53,5 +53,13 @@ angular
                     template: '<configure-attributes-configure></configure-attributes-configure>'
                 }
             },
+        })
+        .state('home.configureattributes.done', {
+            url: '/done',
+            views: {
+                'main@': {
+                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                }
+            },
         });
 });

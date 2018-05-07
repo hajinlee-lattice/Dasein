@@ -149,7 +149,7 @@ angular.module('lp.configureattributes')
         return this.saved;
     }
 
-    this.saveOptions = function(step) {
+    this.saveSteps = function(step) {
         for(var i in this.options) {
             var metric = i,
                 _option = this.options[metric];
@@ -176,8 +176,18 @@ angular.module('lp.configureattributes')
         }
         cleanPurchaseHistory();
         ConfigureAttributesStore.setSaved(step);
+    }
+
+    this.savePurchaseHistory = function() {
+        var deferred = $q.defer();
+
+        // ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
+        //     deferred.resolve(result);
+        // });
+        deferred.resolve(this.purchaseHistory);
         console.log(this.purchaseHistory);
-        //ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory);
+        
+        return deferred.promise;
     }
 })
 .service('ConfigureAttributesService', function($q, $http, $state, ResourceUtility) {
