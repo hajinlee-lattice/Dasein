@@ -134,6 +134,8 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
 
     private Date lastRefreshedDate;
 
+    private Boolean justCreated = true;
+
     private AdvancedRatingConfig advancedRatingConfig;
 
     @Override
@@ -260,6 +262,16 @@ public class RatingEngine implements HasPid, HasId<String>, HasTenant, HasAuditi
     @Override
     public void setDeleted(Boolean deleted) {
         this.deleted = deleted;
+    }
+
+    @Column(name = "JUST_CREATED", nullable = true)
+    @JsonProperty("justCreated")
+    public Boolean getJustCreated() {
+        return this.justCreated;
+    }
+
+    public void setJustCreated(Boolean justCreated) {
+        this.justCreated = justCreated;
     }
 
     @JsonProperty("segment")

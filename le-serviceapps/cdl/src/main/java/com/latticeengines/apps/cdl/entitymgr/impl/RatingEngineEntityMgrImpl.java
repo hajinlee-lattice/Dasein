@@ -247,6 +247,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
             if (retrievedRatingEngine.getStatus() == RatingEngineStatus.INACTIVE
                     && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
                 setActivationActionContext(retrievedRatingEngine);
+                retrievedRatingEngine.setJustCreated(false);
             }
             retrievedRatingEngine.setStatus(ratingEngine.getStatus());
         }
@@ -360,12 +361,13 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         }
 
         ratingEngine.setAdvancedRatingConfig(advancedRatingConfig);
-        ratingEngineDao.create(ratingEngine);
 
         // set Activation Action Context
         if (ratingEngine.getStatus() != null && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
             setActivationActionContext(ratingEngine);
+            ratingEngine.setJustCreated(false);
         }
+        ratingEngineDao.create(ratingEngine);
 
         if (type == RatingEngineType.RULE_BASED) {
             createRuleBasedModel(ratingEngine);
