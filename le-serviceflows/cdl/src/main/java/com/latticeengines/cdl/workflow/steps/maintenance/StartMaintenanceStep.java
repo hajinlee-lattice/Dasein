@@ -24,7 +24,8 @@ public class StartMaintenanceStep extends BaseWorkflowStep<StartMaintenanceConfi
         String customerSpaceStr = configuration.getCustomerSpace().toString();
         DataFeed dataFeed = dataFeedProxy.getDataFeed(customerSpaceStr);
         if (dataFeed.isMaintenanceMode()) {
-            throw new RuntimeException(String.format("Tenant %s already in maintenance mode", customerSpaceStr));
+            //todo: Remove the maintenance Mode flag. Already has a status lock in DataFeed.
+            log.warn(String.format("Tenant %s already in maintenance mode", customerSpaceStr));
         } else {
             dataFeedProxy.updateDataFeedMaintenanceMode(customerSpaceStr, true);
         }
