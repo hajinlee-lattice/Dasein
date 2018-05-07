@@ -219,11 +219,15 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         AttrConfigRequest attrConfigRequest = new AttrConfigRequest();
         List<AttrConfig> attrConfigs = new ArrayList<>();
         attrConfigRequest.setAttrConfigs(attrConfigs);
-        for (String attr : request.getSelect()) {
-            updateAttrConfigs(attrConfigs, attr, property, Boolean.TRUE);
+        if (request.getSelect() != null) {
+            for (String attr : request.getSelect()) {
+                updateAttrConfigs(attrConfigs, attr, property, Boolean.TRUE);
+            }
         }
-        for (String attr : request.getDeselect()) {
-            updateAttrConfigs(attrConfigs, attr, property, Boolean.FALSE);
+        if (request.getDeselect() != null) {
+            for (String attr : request.getDeselect()) {
+                updateAttrConfigs(attrConfigs, attr, property, Boolean.FALSE);
+            }
         }
         return attrConfigRequest;
     }
