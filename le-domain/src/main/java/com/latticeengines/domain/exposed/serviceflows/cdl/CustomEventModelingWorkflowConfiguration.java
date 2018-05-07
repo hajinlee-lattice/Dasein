@@ -400,7 +400,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
         }
 
         public CustomEventModelingWorkflowConfiguration build() {
-            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.Model, "1.0");
+            customEventMatchWorkflowConfigurationBuilder.matchColumnSelection(Predefined.RTS, "1.0");
             exportBucketTool.setUsingDisplayName(false);
 
             configuration.setContainerConfiguration("customEventModelingWorkflow", configuration.getCustomerSpace(),
