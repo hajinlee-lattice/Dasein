@@ -132,7 +132,7 @@ public class AttrConfigSelectionDetail {
         @JsonProperty("Description")
         private String description;
 
-        @JsonProperty("selected")
+        @JsonProperty("Selected")
         private Boolean selected;
 
         @JsonProperty("IsFrozen")
