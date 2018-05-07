@@ -69,7 +69,7 @@
             background-color: #fff;
         }
 
-        &:not(.current):after {
+        &:not(.current):not(:last-child):after {
             @include font-awesome-inline("\f00c");
             color: #0f9e4d;
             left: 4px;
