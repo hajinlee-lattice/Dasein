@@ -62,8 +62,8 @@ angular.module('lp.configureattributes.configure', [])
             if (type === 'WITHIN') {
                 val = valObj.Vals[0];
             } else if (type === 'BETWEEN') {
-                var max = Math.max(...valObj.Vals),
-                    min = Math.min(...valObj.Vals);
+                var max = Math.max.apply(null, valObj.Vals),
+                    min = Math.min.apply(null, valObj.Vals);
                 val = max - min + 1;
             }
             return val;
