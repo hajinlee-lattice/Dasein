@@ -244,7 +244,7 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
         for (Attribute attr : table.getAttributes()) {
             Object avroFieldValue = null;
             String csvColumnName = attr.getDisplayName();
-            if (headers.contains(csvColumnName)) {
+            if (headers.contains(csvColumnName) || attr.getDefaultValueStr() != null) {
                 Type avroType = schema.getField(attr.getName()).schema().getTypes().get(0).getType();
                 String csvFieldValue = null;
                 try {
@@ -288,7 +288,11 @@ public class CSVImportMapper extends Mapper<LongWritable, Text, NullWritable, Nu
                     errorMap.put(attr.getDisplayName(), e.getMessage());
                 }
             } else {
-                avroRecord.put(attr.getName(), avroFieldValue);
+                if (attr.getRequired() || !attr.isNullable()) {
+                    errorMap.put(attr.getName(), String.format("%s cannot be empty!", attr.getName()));
+                } else {
+                    avroRecord.put(attr.getName(), avroFieldValue);
+                }
             }
         }
         avroRecord.put(InterfaceName.InternalId.name(), lineNum);

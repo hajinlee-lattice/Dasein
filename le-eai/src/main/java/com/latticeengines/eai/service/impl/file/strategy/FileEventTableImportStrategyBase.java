@@ -180,6 +180,7 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         internalId.setSourceLogicalDataType("");
         internalId.setLogicalDataType(LogicalDataType.InternalId);
         internalId.setApprovedUsage(ModelingMetadata.NONE_APPROVED_USAGE);
+        internalId.setNullable(true);
         table.addAttribute(internalId);
     }
 
