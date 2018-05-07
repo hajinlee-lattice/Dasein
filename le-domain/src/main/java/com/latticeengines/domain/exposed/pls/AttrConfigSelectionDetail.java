@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -82,7 +83,7 @@ public class AttrConfigSelectionDetail {
         private Boolean hasFrozenAttrs = Boolean.FALSE;
 
         @JsonProperty("Attributes")
-        private Map<String, AttrDetail> attributes = new HashMap<>();
+        private List<AttrDetail> attributes = new ArrayList<>();
 
         public Long getSelected() {
             return selected;
@@ -108,11 +109,11 @@ public class AttrConfigSelectionDetail {
             hasFrozenAttrs = hasFrozenAttrsValue;
         }
 
-        public Map<String, AttrDetail> getAttributes() {
+        public List<AttrDetail> getAttributes() {
             return attributes;
         }
 
-        public void setAttributes(Map<String, AttrDetail> attributesValue) {
+        public void setAttributes(List<AttrDetail> attributesValue) {
             attributes = attributesValue;
         }
 
@@ -121,6 +122,9 @@ public class AttrConfigSelectionDetail {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class AttrDetail {
+
+        @JsonProperty("Attribute")
+        private String attribute;
 
         @JsonProperty("DisplayName")
         private String displayName;
@@ -133,6 +137,14 @@ public class AttrConfigSelectionDetail {
 
         @JsonProperty("IsFrozen")
         private Boolean isFrozen;
+
+        public String getAttribute() {
+            return attribute;
+        }
+
+        public void setAttribute(String attributeVal) {
+            attribute = attributeVal;
+        }
 
         public String getDisplayName() {
             return displayName;

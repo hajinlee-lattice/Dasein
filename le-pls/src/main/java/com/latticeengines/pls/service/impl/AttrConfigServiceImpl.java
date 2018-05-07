@@ -327,6 +327,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                         AttrConfigProp<?> attrConfigProp = attrProps.get(property);
                         if (attrConfigProp != null) {
                             AttrDetail attrDetail = new AttrDetail();
+                            attrDetail.setAttribute(attrConfig.getAttrName());
                             attrDetail.setDisplayName(getDisplayName(attrProps));
                             attrDetail.setDescription(getDescription(attrProps));
 
@@ -362,7 +363,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             }
 
                             subcategoryDetail.setTotalAttrs(subcategoryDetail.getTotalAttrs() + 1);
-                            subcategoryDetail.getAttributes().put(attrConfig.getAttrName(), attrDetail);
+                            subcategoryDetail.getAttributes().add(attrDetail);
                             subcategories.put(subcategory, subcategoryDetail);
                             totalAttrs++;
                         } else {

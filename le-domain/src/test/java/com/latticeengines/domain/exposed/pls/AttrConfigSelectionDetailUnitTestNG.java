@@ -1,10 +1,13 @@
 package com.latticeengines.domain.exposed.pls;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 
 public class AttrConfigSelectionDetailUnitTestNG {
@@ -23,29 +26,33 @@ public class AttrConfigSelectionDetailUnitTestNG {
         subcategoryDetail1.setSelected(100L);
         subcategoryDetail1.setTotalAttrs(200L);
         subcategoryDetail1.setHasFrozenAttrs(Boolean.TRUE);
-        Map<String, AttrConfigSelectionDetail.AttrDetail> attributes1 = new HashMap<>();
+        List<AttrDetail> attributes1 = new ArrayList<>();
         subcategoryDetail1.setAttributes(attributes1);
         AttrConfigSelectionDetail.AttrDetail attr11Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes1.put("Attr11", attr11Detail);
+        attr11Detail.setAttribute("attr11");
+        attributes1.add(attr11Detail);
         attr11Detail.setDisplayName("Attr 1-1");
         attr11Detail.setDescription("Attr 1 1");
         attr11Detail.setSelected(Boolean.FALSE);
 
         AttrConfigSelectionDetail.AttrDetail attr12Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes1.put("Attr12", attr12Detail);
+        attributes1.add(attr12Detail);
+        attr12Detail.setAttribute("attr12");
         attr12Detail.setDisplayName("Attr 1-2");
         attr12Detail.setDescription("Attr 1 2");
         attr12Detail.setSelected(Boolean.TRUE);
 
         AttrConfigSelectionDetail.AttrDetail attr13Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes1.put("Attr13", attr13Detail);
+        attributes1.add(attr13Detail);
+        attr13Detail.setAttribute("Attr13");
         attr13Detail.setDisplayName("Attr 1-3");
         attr13Detail.setDescription("Attr 1 3");
         attr13Detail.setSelected(Boolean.TRUE);
         attr13Detail.setIsFrozen(Boolean.TRUE);
 
         AttrConfigSelectionDetail.AttrDetail attr14Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes1.put("Attr14", attr14Detail);
+        attributes1.add(attr14Detail);
+        attr14Detail.setAttribute("Attr14");
         attr14Detail.setDisplayName("Attr 1-4");
         attr14Detail.setDescription("Attr 1 4");
         attr14Detail.setSelected(Boolean.FALSE);
@@ -55,16 +62,18 @@ public class AttrConfigSelectionDetailUnitTestNG {
         subcategoryDetail2.setSelected(2L);
         subcategoryDetail2.setTotalAttrs(2L);
         subcategoryDetail2.setHasFrozenAttrs(Boolean.FALSE);
-        Map<String, AttrConfigSelectionDetail.AttrDetail> attributes2 = new HashMap<>();
+        List<AttrDetail> attributes2 = new ArrayList<>();
         subcategoryDetail2.setAttributes(attributes2);
         AttrConfigSelectionDetail.AttrDetail attr21Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes2.put("Attr21", attr21Detail);
+        attributes2.add(attr21Detail);
+        attr21Detail.setAttribute("Attr21");
         attr21Detail.setDisplayName("Attr 2-1");
         attr21Detail.setDescription("Attr 2 1");
         attr21Detail.setSelected(Boolean.FALSE);
 
         AttrConfigSelectionDetail.AttrDetail attr22Detail = new AttrConfigSelectionDetail.AttrDetail();
-        attributes2.put("Attr22", attr22Detail);
+        attributes2.add(attr22Detail);
+        attr22Detail.setAttribute("Attr22");
         attr22Detail.setDisplayName("Attr 2-2");
         attr22Detail.setDescription("Attr 2 2");
         attr22Detail.setSelected(Boolean.TRUE);
