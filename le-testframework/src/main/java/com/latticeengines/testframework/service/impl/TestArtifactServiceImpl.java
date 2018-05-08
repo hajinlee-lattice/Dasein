@@ -54,15 +54,19 @@ public class TestArtifactServiceImpl implements TestArtifactService {
 
     public InputStream readTestArtifactAsStream(String objectDir, String version, String fileName) {
         String objectKey = objectKey(objectDir, version, fileName);
-        GetObjectRequest getObjectRequest = new GetObjectRequest(S3_BUCKET, objectKey);
-        try {
-            S3Object s3Object = S3.getObject(getObjectRequest);
-            log.info(String.format("Reading the test artifact %s of type %s and size %s", objectKey,
-                    s3Object.getObjectMetadata().getContentType(),
-                    FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
-            return s3Object.getObjectContent();
-        } catch (AmazonS3Exception e) {
-            throw new RuntimeException("Failed to get object " + objectKey + " from S3 bucket " + S3_BUCKET, e);
+        if (S3.doesObjectExist(S3_BUCKET, objectKey)) {
+            GetObjectRequest getObjectRequest = new GetObjectRequest(S3_BUCKET, objectKey);
+            try {
+                S3Object s3Object = S3.getObject(getObjectRequest);
+                log.info(String.format("Reading the test artifact %s of type %s and size %s", objectKey,
+                        s3Object.getObjectMetadata().getContentType(),
+                        FileUtils.byteCountToDisplaySize(s3Object.getObjectMetadata().getContentLength())));
+                return s3Object.getObjectContent();
+            } catch (AmazonS3Exception e) {
+                throw new RuntimeException("Failed to get object " + objectKey + " from S3 bucket " + S3_BUCKET, e);
+            }
+        } else {
+            return null;
         }
     }
 

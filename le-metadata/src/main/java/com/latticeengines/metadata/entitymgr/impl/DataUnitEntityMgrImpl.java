@@ -40,6 +40,7 @@ public class DataUnitEntityMgrImpl extends BaseDocumentEntityMgrImpl<DataUnitEnt
     @Override
     public DataUnit createOrUpdateByNameAndStorageType(String tenantId, DataUnit dataUnit) {
         String name = dataUnit.getName();
+        dataUnit.setTenant(tenantId);
         DataUnit.StorageType storageType = dataUnit.getStorageType();
         if (StringUtils.isBlank(name)) {
             name = NamingUtils.timestamp(dataUnit.getStorageType().name());
