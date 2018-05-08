@@ -1,27 +1,36 @@
 package com.latticeengines.domain.exposed.util;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import com.latticeengines.common.exposed.util.JsonUtils;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.tracing.TraceAdminPB;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.common.exposed.util.AvroUtils;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 public class ProductUtils {
     private static final Logger log = LoggerFactory.getLogger(ProductUtils.class);
@@ -212,6 +221,34 @@ public class ProductUtils {
         });
 
         return productMap;
+    }
+
+    public static ObjectNode appendMessageToProductReport(ObjectNode reportNode, String message,
+                                                          boolean isWarningMessage) {
+        JsonNode entitiesSummaryNode = reportNode.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        if (entitiesSummaryNode == null) {
+            entitiesSummaryNode = reportNode.putObject(ReportPurpose.ENTITIES_SUMMARY.getKey());
+        }
+        JsonNode entityNode = entitiesSummaryNode.get(BusinessEntity.Product.name());
+        if (entityNode == null) {
+            entityNode = ((ObjectNode) entitiesSummaryNode).putObject(BusinessEntity.Product.name());
+        }
+        JsonNode consolidateSummaryNode = entityNode.get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+        if (consolidateSummaryNode == null) {
+            consolidateSummaryNode = ((ObjectNode) entityNode)
+                    .putObject(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+        }
+
+        String nodeKey = isWarningMessage ? ReportConstants.WARN_MESSAGE : ReportConstants.ERROR_MESSAGE;
+        JsonNode messageNode = consolidateSummaryNode.get(nodeKey);
+        if (messageNode == null) {
+            ((ObjectNode) consolidateSummaryNode).put(nodeKey, message);
+        } else {
+            String msg = messageNode.asText() + " " + message;
+            ((ObjectNode) consolidateSummaryNode).put(nodeKey, msg);
+        }
+
+        return reportNode;
     }
 
     private static String getString(GenericRecord record, String field) {

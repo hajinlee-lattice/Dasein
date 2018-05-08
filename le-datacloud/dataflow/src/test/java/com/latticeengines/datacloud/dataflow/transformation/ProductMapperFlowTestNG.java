@@ -23,12 +23,46 @@ import com.latticeengines.domain.exposed.metadata.transaction.ProductStatus;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 
 public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBase {
+    private String[] randomUUIDs = { UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(), UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(), UUID.randomUUID().toString()};
+
+    private List<Product> productList = Arrays.asList(
+            // cases of products having differnet ids and same types
+            new Product("1", "sku1", "Soap", ProductType.Hierarchy.name(),
+                    null, null, "Family1", "Category1",
+                    null, null, randomUUIDs[0], null, ProductStatus.Active.name()),
+            new Product("2", "sku2", "Dishwasher", ProductType.Hierarchy.name(),
+                    null, "Line1", "Family1", "Category1",
+                    null, randomUUIDs[1], null, null, ProductStatus.Active.name()),
+
+            // cases of products having same Ids but different types
+            new Product("3", "sku3", "Pencil", ProductType.Hierarchy.name(),
+                    null, "Line3", "Family3", "Category3",
+                    null, randomUUIDs[2], null, null, ProductStatus.Active.name()),
+            new Product("3", "sku4", "Mouse", ProductType.Bundle.name(),
+                    "Bundle1", null, null, null,
+                    randomUUIDs[3], null, null, null, ProductStatus.Active.name()),
+            new Product("3", "sku5", "Monitor", ProductType.Bundle.name(),
+                    "Bundle2", null, null, null,
+                    randomUUIDs[4], null, null, null, ProductStatus.Active.name()),
+
+            // cases of products having different ids and types
+            new Product("4", "sku6", "T-shirt", ProductType.Analytic.name(),
+                    null, "Line999", "Family999", "Category999",
+                    null, randomUUIDs[5], null, null, ProductStatus.Active.name()),
+            new Product("5", "sku7", "Printer", ProductType.Spending.name(),
+                    "Bundle999", null, null, null,
+                    randomUUIDs[6], null, null, null, ProductStatus.Active.name())
+    );
+
     private String[] transactionFields = new String[] {
             "TransactionId", "TransactionTime", "TransactionType", "AccountId", "Amount", "ExtensionAttr1", "Quantity",
             "ContactId", "OrderId", "ProductId"
     };
 
-    private Object[][] transactionData = new Object[][] {
+    private Object[][] inputTransactionData = new Object[][] {
+            // cases of transactions having productIds in productList
             { 1, 1502755200000L, "PurchaseHistory", 1, 10.0, "Ext1", 1, "Contact1", "Order1", "1" },
             { 2, 1502755200000L, "PurchaseHistory", 2, 10.0, "Ext1", 1, "Contact1", "Order1", "1" },
             { 3, 1503001576000L, "PurchaseHistory", 3, 10.0, "Ext2", 1, "Contact1", "Order1", "2" },
@@ -37,32 +71,45 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
             { 6, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext1", 1, "Contact1", "Order1", "3" },
             { 7, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext2", 1, "Contact1", "Order1", "3" },
             { 8, 1503001576000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "4" },
-            { 9, 1503001578000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "5" }
+            { 9, 1503001578000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "5" },
+
+            // cases of transactions having productIds not in productList (a dummy product will be generated instead)
+            { 10, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext888", 1, "Contact888", "Order888", "888"},
+            { 11, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext999", 1, "Contact999", "Order999", "999"}
     };
 
-    private List<Product> productList = Arrays.asList(
-            new Product("1", "sku1", "Soap", ProductType.Hierarchy.name(),
-                    null, null, "Family1", "Category1",
-                    null, null, UUID.randomUUID().toString(), null, ProductStatus.Active.name()),
-            new Product("2", "sku2", "Dishwasher", ProductType.Hierarchy.name(),
-                    null, "Line1", "Family1", "Category1",
-                    null, UUID.randomUUID().toString(), null, null, ProductStatus.Active.name()),
-            new Product("3", "sku3", "Pencil", ProductType.Hierarchy.name(),
-                    null, "Line3", "Family3", "Category3",
-                    null, UUID.randomUUID().toString(), null, null, ProductStatus.Active.name()),
-            new Product("3", "sku4", "Mouse", ProductType.Bundle.name(),
-                    "Bundle1", null, null, null,
-                    UUID.randomUUID().toString(), null, null, null, ProductStatus.Active.name()),
-            new Product("3", "sku5", "Monitor", ProductType.Bundle.name(),
-                    "Bundle2", null, null, null,
-                    UUID.randomUUID().toString(), null, null, null, ProductStatus.Active.name()),
-            new Product("4", "sku6", "T-shirt", ProductType.Analytic.name(),
-                    null, "Line999", "Family999", "Category999",
-                    null, UUID.randomUUID().toString(), null, null, ProductStatus.Active.name()),
-            new Product("5", "sku7", "Printer", ProductType.Spending.name(),
-                    "Bundle999", null, null, null,
-                    UUID.randomUUID().toString(), null, null, null, ProductStatus.Active.name())
-    );
+    private Object[][] expectedTransactionData = new Object[][] {
+            { 1, 1502755200000L, "PurchaseHistory", 1, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[0],
+                    ProductType.Spending.name() },
+            { 2, 1502755200000L, "PurchaseHistory", 2, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[0],
+                    ProductType.Spending.name() },
+            { 3, 1503001576000L, "PurchaseHistory", 3, 10.0, "Ext2", 1, "Contact1", "Order1", randomUUIDs[1],
+                    ProductType.Spending.name() },
+            { 4, 1503001577000L, "PurchaseHistory", 3, 10.0, "Ext3", 1, "Contact1", "Order1", randomUUIDs[1],
+                    ProductType.Spending.name() },
+            { 5, 1503001578000L, "PurchaseHistory", 3, 10.0, "Ext3", 1, "Contact1", "Order1", randomUUIDs[1],
+                    ProductType.Spending.name() },
+            { 6, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[2],
+                    ProductType.Spending.name() },
+            { 6, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[3],
+                    ProductType.Analytic.name() },
+            { 6, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext1", 1, "Contact1", "Order1", randomUUIDs[4],
+                    ProductType.Analytic.name() },
+            { 7, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext2", 1, "Contact1", "Order1", randomUUIDs[2],
+                    ProductType.Spending.name() },
+            { 7, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext2", 1, "Contact1", "Order1", randomUUIDs[3],
+                    ProductType.Analytic.name() },
+            { 7, 1502755200000L, "PurchaseHistory", 4, 10.0, "Ext2", 1, "Contact1", "Order1", randomUUIDs[4],
+                    ProductType.Analytic.name() },
+            { 8, 1503001576000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "4",
+                    ProductType.Analytic.name() },
+            { 9, 1503001578000L, "PurchaseHistory", 4, 10.0, "Ext3", 1, "Contact1", "Order1", "5",
+                    ProductType.Spending.name() },
+            { 10, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext888", 1, "Contact888", "Order888",
+                    Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name() },
+            { 11, 1503001579000L, "PurchaseHistory", 5, 999.0, "Ext999", 1, "Contact999", "Order999",
+                    Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name() }
+    };
 
     @Override
     protected String getFlowBeanName() {
@@ -93,7 +140,7 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
         columns.add(Pair.of(transactionFields[7], String.class));
         columns.add(Pair.of(transactionFields[8], String.class));
         columns.add(Pair.of(transactionFields[9], String.class));
-        uploadDataToSharedAvroInput(transactionData, columns);
+        uploadDataToSharedAvroInput(inputTransactionData, columns);
 
         TransformationFlowParameters parameters = new TransformationFlowParameters();
         parameters.setBaseTables(Collections.singletonList(AVRO_INPUT));
@@ -111,31 +158,20 @@ public class ProductMapperFlowTestNG extends DataCloudDataFlowFunctionalTestNGBa
 
     private void verifyWithAvro() {
         List<GenericRecord> records = readOutput();
-        Assert.assertEquals(records.size(), 13);
-        for (GenericRecord record: records) {
-            Integer transactionId = Integer.valueOf(record.get("TransactionId").toString());
+        Assert.assertEquals(records.size(), expectedTransactionData.length);
+        for (int i = 0; i < records.size(); i++) {
+            GenericRecord record = records.get(i);
+            Object[] expectedRecord = expectedTransactionData[i];
+
+            Integer transactionId = (Integer) record.get("TransactionId");
+            Long transactionTime = (Long) record.get("TransactionTime");
             String productId = String.valueOf(record.get(InterfaceName.ProductId.name()));
             String productType = String.valueOf(record.get(InterfaceName.ProductType.name()));
 
-            if (transactionId >= 1 && transactionId <= 2) {
-                Assert.assertTrue(productId.equals(productList.get(0).getProductFamilyId()));
-                Assert.assertTrue(productType.equals(ProductType.Spending.name()));
-            } else if (transactionId >= 3 && transactionId <= 5) {
-                Assert.assertTrue(productId.equals(productList.get(1).getProductLineId()));
-                Assert.assertTrue(productType.equals(ProductType.Spending.name()));
-            } else if (transactionId >= 6 && transactionId <= 7) {
-                Assert.assertTrue(productId.equals(productList.get(2).getProductLineId()) ||
-                        productId.equals(productList.get(3).getProductBundleId()) ||
-                        productId.equals(productList.get(4).getProductBundleId()));
-                Assert.assertTrue(productType.equals(ProductType.Spending.name()) ||
-                        productType.equals(ProductType.Analytic.name()));
-            } else if (transactionId == 8) {
-                Assert.assertTrue(productId.equals(productList.get(5).getProductId()));
-                Assert.assertTrue(productType.equals(ProductType.Analytic.name()));
-            } else if (transactionId == 9) {
-                Assert.assertTrue(productId.equals(productList.get(6).getProductId()));
-                Assert.assertTrue(productType.equals(ProductType.Spending.name()));
-            }
+            Assert.assertEquals(transactionId, expectedRecord[0]);
+            Assert.assertEquals(transactionTime, expectedRecord[1]);
+            Assert.assertEquals(productId, expectedRecord[expectedRecord.length - 2]);
+            Assert.assertEquals(productType, expectedRecord[expectedRecord.length - 1]);
         }
     }
 }

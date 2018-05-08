@@ -77,6 +77,11 @@ public class ProductMapperFunction extends BaseOperation implements Function {
                         break;
                 }
             }
+        } else {
+            Tuple tuple = arguments.getTupleCopy();
+            updateTuple(tuple, rolledUpFields,
+                    Arrays.asList(Product.UNKNOWN_PRODUCT_ID, ProductType.Spending.name()));
+            functionCall.getOutputCollector().add(tuple);
         }
     }
 

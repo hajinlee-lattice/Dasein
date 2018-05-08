@@ -5,7 +5,10 @@ import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import com.latticeengines.common.exposed.util.HashUtils;
+
 public class Product implements Serializable {
+    private static final String UNKNOWN_PRODUCT_INTERNAL_ID = "c4ca1e5e-1018-4619-9f6b-bb23b7578b6a";
     private static final String PRODUCT_ID = "Id";
     private static final String PRODUCT_NAME = "ProductName";
     private static final String PRODUCT_DESCRIPTION = "Description";
@@ -33,6 +36,9 @@ public class Product implements Serializable {
     private String lineId;
     private String familyId;
     private String categoryId;
+
+    public static final String UNKNOWN_PRODUCT_ID =
+            HashUtils.getCleanedString(HashUtils.getShortHash(UNKNOWN_PRODUCT_INTERNAL_ID));
 
     public Product() {}
 
