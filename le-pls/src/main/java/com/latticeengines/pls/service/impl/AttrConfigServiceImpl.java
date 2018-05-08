@@ -184,15 +184,26 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         attrConfigRequest.setAttrConfigs(attrConfigs);
         if (request.getSelect() != null) {
             for (String attr : request.getSelect()) {
-                updateAttrConfigs(attrConfigs, attr, ColumnMetadataKey.State, Boolean.TRUE);
+                updateAttrConfigsForState(attrConfigs, attr, ColumnMetadataKey.State, AttrState.Active);
             }
         }
         if (request.getDeselect() != null) {
             for (String attr : request.getDeselect()) {
-                updateAttrConfigs(attrConfigs, attr, ColumnMetadataKey.State, Boolean.FALSE);
+                updateAttrConfigsForState(attrConfigs, attr, ColumnMetadataKey.State, AttrState.Inactive);
             }
         }
         return attrConfigRequest;
+    }
+
+    private void updateAttrConfigsForState(List<AttrConfig> attrConfigs, String attrName, String property,
+            AttrState selectThisAttr) {
+        AttrConfig config = new AttrConfig();
+        config.setAttrName(attrName);
+        config.setEntity(BusinessEntity.Account);
+        AttrConfigProp<AttrState> enrichProp = new AttrConfigProp<>();
+        enrichProp.setCustomValue(selectThisAttr);
+        config.setAttrProps(ImmutableMap.of(property, enrichProp));
+        attrConfigs.add(config);
     }
 
     private void updateAttrConfigs(List<AttrConfig> attrConfigs, String attrName, String property,
