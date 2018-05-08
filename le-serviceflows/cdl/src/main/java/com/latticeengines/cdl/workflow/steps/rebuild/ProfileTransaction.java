@@ -26,7 +26,6 @@ import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.transformation.PipelineTransformationRequest;
@@ -63,7 +62,6 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
 
     public static final String BEAN_NAME = "profileTransaction";
 
-    private CustomerSpace customerSpace;
     private DataCollection.Version inactive;
     private DataCollection.Version active;
     private int productAgrStep, periodedStep, dailyAgrStep, dayPeriodStep, periodAgrStep, periodsStep, mergePeriodStep;
