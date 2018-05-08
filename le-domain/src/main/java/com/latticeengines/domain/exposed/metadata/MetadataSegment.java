@@ -76,12 +76,10 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @Column(name = "CREATED_BY")
     private String createdBy;
 
-    @JsonIgnore
     @Column(name = "RESTRICTION")
     @Type(type = "text")
     private String restrictionString;
 
-    @JsonIgnore
     @Column(name = "CONTACT_RESTRICTION")
     @Type(type = "text")
     private String contactRestrictionString;
