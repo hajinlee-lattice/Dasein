@@ -86,18 +86,15 @@ angular
                     });
                     return deferred.promise;
                 },
-                InitJobs: function($q, JobsStore){
-                    var deferred = $q.defer();
-                    if(JobsStore.isJobsEverFetched() == false){
-                        JobsStore.getJobs(false).then(function(res){
-                            deferred.resolve();
-                        });
-                    }else{
-                        deferred.resolve();
-                    }
+                // InitJobs: function($q, JobsStore){
+                //     var deferred = $q.defer();
+                //         JobsStore.getJobs(false).then(function(res){
+                //             console.log('CALLBACK');
+                //             deferred.resolve();
+                //         });
 
-                    return deferred.promise;
-                },
+                //     return deferred.promise;
+                // },
                 ModelConfig: function() {
                     return {};
                 }
@@ -148,13 +145,13 @@ angular
                 InitJobs: function($q, JobsStore){
                     var deferred = $q.defer();
 
-                    if (JobsStore.isJobsEverFetched() == false) {
+                    // if (JobsStore.isJobsEverFetched() == false) {
                         JobsStore.getJobs(false).then(function(res){
                             deferred.resolve();
                         });
-                    } else {
-                        deferred.resolve();
-                    }
+                    // } else {
+                        // deferred.resolve();
+                    // }
 
                     return deferred.promise;
                 }

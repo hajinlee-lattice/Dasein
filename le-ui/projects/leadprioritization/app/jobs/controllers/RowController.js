@@ -216,7 +216,8 @@ angular
 
                 if ($scope.jobType.toLowerCase() === "importmatchandscoreworkflow" ||
                     $scope.jobType.toLowerCase() === "importandrtsbulkscoreworkflow" ||
-                    $scope.jobType.toLowerCase() === "importmatchandmodelworkflow") {
+                    $scope.jobType.toLowerCase() === "importmatchandmodelworkflow" ||
+                    $scope.jobType.toLowerCase() === "customeventmodelingworkflow") {
                     if (jobStatus.applicationId != null && jobStatus.source != null) {
                         $scope.showFileName = true;
                     }

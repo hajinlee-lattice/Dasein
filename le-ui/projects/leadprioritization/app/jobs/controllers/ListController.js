@@ -123,7 +123,7 @@ angular.module('lp.jobs.model', [
 
         // this stuff happens only on Model Bulk Scoring page
         // getAllJobs();Call done in the JobsRoutes.js
-
+        getAllJobs();
         if (modelId) {
             BULK_SCORING_ID = $interval( function() {
                 getAllJobs();
