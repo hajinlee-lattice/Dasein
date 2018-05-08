@@ -254,16 +254,6 @@ public class StandardActivityMetricsAgg extends BaseAggregator<StandardActivityM
             spendChange = 100;
         }
         result.set(namePositionMap.get(ActivityMetricsUtils.getNameWithPeriod(metrics)), spendChange);
-        if ((context.groupByVals.get(0).equals("AID4") && context.groupByVals.get(1).equals("PID1"))
-                || (context.groupByVals.get(1).equals("AID4") && context.groupByVals.get(0).equals("PID1"))) {
-            log.info(String.format(
-                    "ZDD: last_total = %f, prior_total = %f, last_avg = %f, prior_avg = %f, last_periods = %d, prior_period = %d",
-                    context.spendChangeContext.lastPeriodTotalSpend, context.spendChangeContext.priorPeriodTotalSpend,
-                    lastPeriodAvgSpend, priorPeriodAvgSpend, (context.spendChangeContext.lastPeriodRange.getRight()
-                            - context.spendChangeContext.lastPeriodRange.getLeft() + 1),
-                    (context.spendChangeContext.priorPeriodRange.getRight()
-                            - context.spendChangeContext.priorPeriodRange.getLeft() + 1)));
-        }
         return result;
     }
 

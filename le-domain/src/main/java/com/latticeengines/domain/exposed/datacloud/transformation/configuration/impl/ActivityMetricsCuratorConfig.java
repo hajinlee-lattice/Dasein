@@ -29,6 +29,9 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
                                      // false: DepivotedMetrics only has AID + PID
                                      // which exist in Transaction
 
+    @JsonProperty("AccountHasSegment")
+    private boolean accountHasSegment = false;
+
     public List<ActivityMetrics> getMetrics() {
         return metrics;
     }
@@ -76,4 +79,13 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
     public void setReduced(boolean reduced) {
         this.reduced = reduced;
     }
+
+    public boolean isAccountHasSegment() {
+        return accountHasSegment;
+    }
+
+    public void setAccountHasSegment(boolean accountHasSegment) {
+        this.accountHasSegment = accountHasSegment;
+    }
+
 }

@@ -45,6 +45,7 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.Category;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -82,6 +83,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
     private List<PeriodStrategy> periodStrategies;
     private List<ActivityMetrics> purchaseMetrics;
     private String evaluationDate;
+    private boolean accountHasSegment = false;
 
     private String curatedMetricsTablePrefix;
 
@@ -169,6 +171,8 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find account master table.");
         }
 
+        accountHasSegment = isAccountHasSegment();
+
         evaluationDate = findEvaluationDate();
         if (StringUtils.isBlank(evaluationDate)) {
             DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE;
@@ -223,6 +227,23 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             log.info("Found account batch store in inactive version " + inactive);
         }
         return accountTableName;
+    }
+
+    private boolean isAccountHasSegment() {
+        if (StringUtils.isBlank(accountTableName)) {
+            accountTableName = getAccountTableName();
+        }
+        List<ColumnMetadata> cms = metadataProxy.getTableColumns(customerSpace.toString(), accountTableName);
+        for (ColumnMetadata cm : cms) {
+            if (cm.getAttrName().equals(InterfaceName.SpendAnalyticsSegment.name())) {
+                log.info(
+                        "Account table has SpendAnalyticsSegment field which is needed in ShareOfWallet calculation");
+                return true;
+            }
+        }
+        log.info(
+                "Account table does not have SpendAnalyticsSegment field which is needed in ShareOfWallet calculation");
+        return false;
     }
 
     private List<String> getPeriodTableNames() {
@@ -299,6 +320,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setPeriodStrategies(periodStrategies);
         conf.setType(ActivityType.PurchaseHistory);
         conf.setReduced(true);
+        conf.setAccountHasSegment(accountHasSegment);
 
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
@@ -474,79 +496,4 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new RuntimeException("Fail to update report payload", e);
         }
     }
-
-    /*
-     * Show respect to Yunfeng's code. R.I.P private TransformationStepConfig
-     * aggregate(CustomerSpace customerSpace, String transactionTableName, //
-     * String accountTableName, Map<String, List<Product>> productMap) {
-     * TransformationStepConfig step = new TransformationStepConfig();
-     * step.setTransformer(TRANSFORMER_TRANSACTION_AGGREGATOR);
-     * 
-     * String transactionSourceName = "Transaction"; String accountSourceName =
-     * "Account"; SourceTable transactionTable = new
-     * SourceTable(transactionTableName, customerSpace); SourceTable
-     * accountTable = new SourceTable(accountTableName, customerSpace);
-     * List<String> baseSources = new ArrayList<>();
-     * baseSources.add(transactionSourceName);
-     * baseSources.add(accountSourceName); step.setBaseSources(baseSources);
-     * 
-     * Map<String, SourceTable> baseTables = new HashMap<>();
-     * baseTables.put(transactionSourceName, transactionTable);
-     * baseTables.put(accountSourceName, accountTable);
-     * step.setBaseTables(baseTables);
-     * 
-     * TransactionAggregateConfig conf = new TransactionAggregateConfig();
-     * conf.setProductMap(productMap); conf.setTransactionType("Purchase");
-     * conf.setIdField(InterfaceName.AccountId.name());
-     * conf.setAccountField(InterfaceName.AccountId.name());
-     * conf.setProductField(InterfaceName.ProductId.name());
-     * conf.setDateField(InterfaceName.TransactionDate.name());
-     * conf.setTypeField(InterfaceName.TransactionType.name());
-     * conf.setQuantityField(InterfaceName.TotalQuantity.name());
-     * conf.setAmountField(InterfaceName.TotalAmount.name());
-     * 
-     * List<String> periods = new ArrayList<>(); List<String> metrics = new
-     * ArrayList<>();
-     * 
-     * periods.add(NamedPeriod.HASEVER.getName());
-     * metrics.add(TransactionMetrics.PURCHASED.getName()); // TODO: do not
-     * support quarter in M16 // periods.add(NamedPeriod.LASTQUARTER.getName());
-     * // metrics.add(TransactionMetrics.QUANTITY.getName()); //
-     * periods.add(NamedPeriod.LASTQUARTER.getName()); //
-     * metrics.add(TransactionMetrics.AMOUNT.getName());
-     * conf.setPeriods(periods); conf.setMetrics(metrics);
-     * 
-     * TargetTable targetTable = new TargetTable();
-     * targetTable.setCustomerSpace(customerSpace);
-     * targetTable.setNamePrefix(servingStoreTablePrefix);
-     * step.setTargetTable(targetTable); }
-     * 
-     * 
-     * private String getDisplayName(NamedPeriod period, TransactionMetrics
-     * metric) { switch (metric) { case PURCHASED: return
-     * purchasedAttrName(period); case AMOUNT: return amountAttrName(period);
-     * case QUANTITY: return quantityAttrName(period); default: throw new
-     * UnsupportedOperationException("Transaction metric " + metric +
-     * " is not supported for now."); } }
-     * 
-     * private String purchasedAttrName(NamedPeriod period) { switch (period) {
-     * case HASEVER: return "Has Purchased"; default: throw new
-     * UnsupportedOperationException("Transaction metric " +
-     * TransactionMetrics.PURCHASED + " does not support period " + period +
-     * " for now."); } }
-     * 
-     * private String amountAttrName(NamedPeriod period) { switch (period) {
-     * case HASEVER: return "Total Spend"; case LASTQUARTER: return
-     * "Last Quarter Spend"; default: throw new
-     * UnsupportedOperationException("Transaction metric " +
-     * TransactionMetrics.AMOUNT + " does not support period " + period +
-     * " for now."); } }
-     * 
-     * private String quantityAttrName(NamedPeriod period) { switch (period) {
-     * case HASEVER: return "Total Purchased"; case LASTQUARTER: return
-     * "Last Quarter Purchased"; default: throw new
-     * UnsupportedOperationException("Transaction metric " +
-     * TransactionMetrics.QUANTITY + " does not support period " + period +
-     * " for now."); } }
-     */
 }

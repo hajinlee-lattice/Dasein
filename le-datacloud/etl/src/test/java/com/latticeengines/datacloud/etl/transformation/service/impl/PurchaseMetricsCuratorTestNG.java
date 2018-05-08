@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,14 +40,16 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
     private static final Logger log = LoggerFactory.getLogger(PurchaseMetricsCuratorTestNG.class);
 
     private GeneralSource account = new GeneralSource("Account");
+    private GeneralSource accountNoSegment = new GeneralSource("AccountNoSegment");
     private GeneralSource product = new GeneralSource("Product");
     private GeneralSource weekTable = new GeneralSource("WeekTable");
     private GeneralSource depivotedMetrics = new GeneralSource("DepivotedMetrics");
     private GeneralSource pivotMetrics = new GeneralSource("PivotMetrics");
     private GeneralSource reducedDepivotedMetrics = new GeneralSource("ReducedDepivotedMetrics");
     private GeneralSource expandedPivotMetrics = new GeneralSource("ExpandedPivotMetrics");
+    private GeneralSource depivotedMetricsNoSegment = new GeneralSource("DepivotedMetricsNoSegment");
 
-    private GeneralSource source = expandedPivotMetrics;
+    private GeneralSource source = depivotedMetricsNoSegment;
 
     private String MAX_TXN_DATE = "2018-01-01";
 
@@ -71,6 +74,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         confirmIntermediateSource(pivotMetrics, null);
         confirmIntermediateSource(reducedDepivotedMetrics, null);
         confirmIntermediateSource(expandedPivotMetrics, null);
+        confirmIntermediateSource(depivotedMetricsNoSegment, null);
         confirmResultFile(progress);
         cleanupProgressTables();
     }
@@ -104,7 +108,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step10.setBaseSources(baseSources);
         step10.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step10.setTargetSource(depivotedMetrics.getSourceName());
-        step10.setConfiguration(getActivityMetricsCuratorConfig(false));
+        step10.setConfiguration(getActivityMetricsCuratorConfig(false, true));
 
         TransformationStepConfig step20 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -122,7 +126,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step30.setBaseSources(baseSources);
         step30.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
         step30.setTargetSource(reducedDepivotedMetrics.getSourceName());
-        step30.setConfiguration(getActivityMetricsCuratorConfig(true));
+        step30.setConfiguration(getActivityMetricsCuratorConfig(true, true));
 
         TransformationStepConfig step40 = new TransformationStepConfig();
         baseSources = new ArrayList<>();
@@ -133,12 +137,23 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         step40.setTargetSource(expandedPivotMetrics.getSourceName());
         step40.setConfiguration(getActivityMetricsPivotConfig(true));
 
+        TransformationStepConfig step50 = new TransformationStepConfig();
+        baseSources = new ArrayList<>();
+        baseSources.add(weekTable.getSourceName());
+        baseSources.add(accountNoSegment.getSourceName());
+        baseSources.add(product.getSourceName());
+        step50.setBaseSources(baseSources);
+        step50.setTransformer(DataCloudConstants.ACTIVITY_METRICS_CURATOR);
+        step50.setTargetSource(depivotedMetricsNoSegment.getSourceName());
+        step50.setConfiguration(getActivityMetricsCuratorConfig(true, false));
+
         // -----------
         List<TransformationStepConfig> steps = new ArrayList<TransformationStepConfig>();
         steps.add(step10);
         steps.add(step20);
         steps.add(step30);
         steps.add(step40);
+        steps.add(step50);
 
         // -----------
         configuration.setSteps(steps);
@@ -147,7 +162,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         return configuration;
     }
 
-    private String getActivityMetricsCuratorConfig(boolean reduced) {
+    private String getActivityMetricsCuratorConfig(boolean reduced, boolean accountHasSegment) {
         ActivityMetricsCuratorConfig conf = new ActivityMetricsCuratorConfig();
         conf.setGroupByFields(Arrays.asList(InterfaceName.AccountId.name(), InterfaceName.ProductId.name()));
         conf.setCurrentDate(MAX_TXN_DATE);
@@ -180,6 +195,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         conf.setPeriodStrategies(Arrays.asList(PeriodStrategy.CalendarWeek));
         conf.setType(ActivityType.PurchaseHistory);
         conf.setReduced(reduced);
+        conf.setAccountHasSegment(accountHasSegment);
         return JsonUtils.serialize(conf);
     }
 
@@ -212,6 +228,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID8", "SEG8" }, //
     };
 
+    private Object[][] accountDataNoSegment = new Object[][] { //
+            { "AID1" }, //
+            { "AID2" }, //
+    };
+
     private void prepareAccount() {
         List<Pair<String, Class<?>>> schema = new ArrayList<>();
         schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
@@ -224,6 +245,19 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         } catch (Exception e) {
             log.error(String.format("Fail to extract schema for source %s at version %s", account.getSourceName(),
                     baseSourceVersion));
+        }
+
+        List<Pair<String, Class<?>>> schemaNoSegment = new ArrayList<>();
+        schema.add(Pair.of(InterfaceName.AccountId.name(), String.class));
+
+        uploadBaseSourceData(accountNoSegment.getSourceName(), baseSourceVersion, schemaNoSegment,
+                accountDataNoSegment);
+        try {
+            extractSchema(accountNoSegment, baseSourceVersion, hdfsPathBuilder
+                    .constructSnapshotDir(accountNoSegment.getSourceName(), baseSourceVersion).toString());
+        } catch (Exception e) {
+            log.error(String.format("Fail to extract schema for source %s at version %s",
+                    accountNoSegment.getSourceName(), baseSourceVersion));
         }
     }
 
@@ -523,6 +557,9 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             case "ExpandedPivotMetrics":
                 verifyPivotMetrics(records, pivotMetricsData);
                 break;
+            case "DepivotedMetricsNoSegment":
+                verifyDepivotedMetricsNoSegment(records);
+                break;
             default:
                 throw new UnsupportedOperationException(String.format("Unknown intermediate source %s", source));
             }
@@ -596,6 +633,17 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             cnt++;
         }
         Assert.assertEquals(cnt, pivotMetricsData.length);
+    }
+
+    private void verifyDepivotedMetricsNoSegment(Iterator<GenericRecord> records) {
+        log.info("Verifying depivoted metrics without segment in Account");
+        ActivityMetrics shareOfWallet = metricsList.stream().filter(m -> m.getMetrics() == InterfaceName.ShareOfWallet)
+                .collect(Collectors.toList()).get(0);
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            log.info(record.toString());
+            Assert.assertNull(record.get(ActivityMetricsUtils.getNameWithPeriod(shareOfWallet)));
+        }
     }
 
     @Override

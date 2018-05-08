@@ -251,7 +251,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
     }
 
     private Node shareOfWallet(Node periodTable, ActivityMetrics metrics) {
-        periodTable = appendSegment(periodTable, account);
+        periodTable = appendSegment(periodTable);
         periodTable = filterPeriod(periodTable, metrics.getPeriodsConfig().get(0), null)
                 .filter(String.format("%s != null", InterfaceName.SpendAnalyticsSegment.name()),
                         new FieldList(InterfaceName.SpendAnalyticsSegment.name()));
@@ -296,8 +296,8 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         return periodTable.renamePipe("_shareofwallet_node_" + periodTable.getPipeName());
     }
 
-    private Node appendSegment(Node periodTable, Node account) {
-        if (account.getSchema(InterfaceName.SpendAnalyticsSegment.name()) == null) {
+    private Node appendSegment(Node periodTable) {
+        if (!config.isAccountHasSegment()) {
             return periodTable.addColumnWithFixedValue(InterfaceName.SpendAnalyticsSegment.name(), null, String.class);
         }
         List<String> retainFields = new ArrayList<>(periodTable.getFieldNames());
@@ -400,7 +400,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
             return false;
         }
         for (ActivityMetrics m : config.getMetrics()) {
-            if (m.getMetrics() == InterfaceName.ShareOfWallet) {
+            if (m.getMetrics() == InterfaceName.ShareOfWallet && config.isAccountHasSegment()) {
                 return true;
             }
         }
