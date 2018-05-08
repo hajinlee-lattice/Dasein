@@ -227,6 +227,39 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         return model;
     }
 
+    @Test(groups = "functional")
+    public void testScoreDataWithEmptyRuleMap() {
+        RuleBasedModel model = new RuleBasedModel();
+        model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));
+        RatingRule rule = RatingRule.constructDefaultRule();
+        rule.setDefaultBucketName(RatingBucketName.C.getName());
+        model.setRatingRule(rule);
+
+        FrontEndQuery frontEndQuery = new FrontEndQuery();
+        frontEndQuery.setMainEntity(BusinessEntity.Account);
+        frontEndQuery.setEvaluationDateStr(maxTransactionDate);
+        frontEndQuery.setRatingModels(Collections.singletonList(model));
+        frontEndQuery.setPageFilter(new PageFilter(0, 10));
+        frontEndQuery.setSort(new FrontEndSort(
+                Collections.singletonList(new AttributeLookup(BusinessEntity.Account, ATTR_ACCOUNT_NAME)), false));
+
+        FrontEndRestriction frontEndRestriction = new FrontEndRestriction();
+        Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
+        frontEndRestriction.setRestriction(restriction);
+        frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(dataPage);
+        List<Map<String, Object>> data = dataPage.getData();
+        Assert.assertFalse(data.isEmpty());
+        data.forEach(row -> {
+            Assert.assertTrue(row.containsKey("Score"));
+            String score = (String) row.get("Score");
+            Assert.assertNotNull(score);
+            Assert.assertEquals(score, RatingBucketName.C.name());
+        });
+    }
+
     private RuleBasedModel ruleBasedModelWithTxn() {
         RuleBasedModel model = new RuleBasedModel();
         model.setId(UuidUtils.shortenUuid(UUID.randomUUID()));

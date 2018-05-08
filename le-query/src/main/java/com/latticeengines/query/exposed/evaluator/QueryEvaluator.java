@@ -19,6 +19,7 @@ import com.latticeengines.query.evaluator.QueryProcessor;
 import com.querydsl.sql.SQLQuery;
 
 import reactor.core.publisher.Flux;
+import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
 @Component("queryEvaluator")
@@ -28,6 +29,8 @@ public class QueryEvaluator {
 
     public static final String SCORE = "Score";
     private static final int MAX_CARDINALITY = 1_000_000;
+
+    private static Scheduler scheduler = null;
 
     @Autowired
     private QueryProcessor processor;
@@ -91,7 +94,7 @@ public class QueryEvaluator {
             }
             return results;
         });
-        return flux.subscribeOn(Schedulers.newSingle("fetch-redshift"));
+        return flux.subscribeOn(getScheduler());
     }
 
     private static Map<String, Object> readRow(Map<String, String> attrNames, ResultSet results) throws SQLException {
@@ -109,4 +112,16 @@ public class QueryEvaluator {
     private static int getFetchSize(int columnCount) {
         return Math.max(10, MAX_CARDINALITY / columnCount);
     }
+
+    private Scheduler getScheduler() {
+        if (scheduler == null) {
+            createScheduler();
+        }
+        return scheduler;
+    }
+
+    private synchronized void createScheduler() {
+        scheduler = Schedulers.newParallel("fetch-redshift", 16);
+    }
+
 }
