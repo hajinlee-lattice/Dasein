@@ -247,18 +247,16 @@ public class FuzzyMatchHelper implements DbHelper {
         Map<String, Object> amAttributes = (account == null) ? new HashMap<>() : account.getAttributes();
         amAttributes.put(MatchConstants.LID_FIELD, (account == null) ? null : account.getId());
 
-        Set<String> attrMask = new HashSet<>();
-        attrMask.addAll(columnSelection.getColumnIds());
+        Set<String> attrMask = new HashSet<>(columnSelection.getColumnIds());
         Map<String, Object> decodedAttributes = decodeAttributes(parameters, amAttributes, attrMask);
         for (Column column : columnSelection.getColumns()) {
             String columnId = column.getExternalColumnId();
             String columnName = column.getColumnName();
             if (amAttributes.containsKey(columnId)) {
                 queryResult.put(columnName, amAttributes.get(columnId));
-            } else if (decodedAttributes.containsKey(columnId)) {
-                queryResult.put(columnName, decodedAttributes.get(columnId));
             } else {
-                queryResult.put(columnName, null);
+                Object value = decodedAttributes.getOrDefault(columnId, null);
+                queryResult.put(columnName, value);
             }
         }
 

@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -77,11 +78,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
     }
 
     @Override
-    public List<String> getMatchedColumns(ColumnSelection selection) {
-        return selection.getColumnIds();
-    }
-
-    @Override
     public Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection) {
         throw new UnsupportedOperationException();
     }
@@ -132,41 +128,6 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         return toReturn;
     }
 
-    @Override
-    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection, String dataCloudVersion) {
-
-        if (StringUtils.isEmpty(dataCloudVersion)) {
-            dataCloudVersion = getLatestVersion();
-        }
-
-        Pair<Map<String, String>, Map<String, BitCodeBook>> pair = codeBookCache.get(dataCloudVersion);
-        if (pair == null) {
-            throw new RuntimeException("Cannot find code book info for version " + dataCloudVersion + " in cache.");
-        }
-        Map<String, String> codeBookLookup = pair.getLeft();
-        Map<String, BitCodeBook> codeBookMap = pair.getRight();
-
-        Map<String, List<String>> decodeFieldMap = new HashMap<>();
-        for (String columnId : columnSelection.getColumnIds()) {
-            // This cannot handle user overwriting column name and assume it is
-            // the same as ColumnID.
-            // It is fine because there is no such use case for now
-
-            if (codeBookMap.containsKey(columnId)) {
-                for (String decodedField : codeBookLookup.keySet()) {
-                    if (codeBookLookup.get(decodedField).equals(columnId)) {
-                        if (!decodeFieldMap.containsKey(columnId)) {
-                            decodeFieldMap.put(columnId, new ArrayList<String>());
-                        }
-                        decodeFieldMap.get(columnId).add(decodedField);
-                    }
-                }
-            }
-        }
-
-        return decodeFieldMap;
-    }
-
     private void constructCodeBookMap(Map<String, BitCodeBook> codeBookMap, Map<String, String> codeBookLookup,
             String dataCloudVersion) {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -174,55 +135,59 @@ public class AccountMasterColumnSelectionServiceImpl implements ColumnSelectionS
         Map<String, BitCodeBook.DecodeStrategy> decodeStrategyMap = new HashMap<>();
         Map<String, Map<String, Object>> valueDictRevMap = new HashMap<>();
         Map<String, Integer> bitUnitMap = new HashMap<>();
-        for (AccountMasterColumn column : accountMasterColumnService.scan(dataCloudVersion, null, null).sequential().collectList().block()) {
-            String decodeStrategyStr = column.getDecodeStrategy();
-            if (StringUtils.isEmpty(decodeStrategyStr)) {
-                continue;
-            }
-            JsonNode jsonNode;
-            try {
-                jsonNode = objectMapper.readTree(decodeStrategyStr);
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to parse decodeStrategy " + decodeStrategyStr);
-            }
-            String encodedColumn = jsonNode.has("EncodedColumn") ? jsonNode.get("EncodedColumn").asText() : null;
-            String columnName = column.getColumnId();
-            Integer bitPos = jsonNode.get("BitPosition").asInt();
-            if (!bitPosMap.containsKey(encodedColumn)) {
-                bitPosMap.put(encodedColumn, new HashMap<>());
-            }
-            bitPosMap.get(encodedColumn).put(columnName, bitPos);
-            if (!decodeStrategyMap.containsKey(encodedColumn)) {
-                String decodeStr = jsonNode.get("BitInterpretation").asText();
-                try {
-                    BitCodeBook.DecodeStrategy decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(decodeStr);
-                    decodeStrategyMap.put(encodedColumn, decodeStrategy);
-                    switch (decodeStrategy) {
-                    case ENUM_STRING:
-                        String valueDictStr = jsonNode.get("ValueDict").asText();
-                        String[] valueDictArr = valueDictStr.split("\\|\\|");
-                        Map<String, Object> valueDictRev = new HashMap<>();
-                        for (int i = 0; i < valueDictArr.length; i++) {
-                            valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
-                        }
-                        valueDictRevMap.put(encodedColumn, valueDictRev);
-                    case NUMERIC_INT:
-                    case NUMERIC_UNSIGNED_INT:
-                        Integer bitUnit = jsonNode.get("BitUnit").asInt();
-                        bitUnitMap.put(encodedColumn, bitUnit);
-                        break;
-                    default:
-                        break;
-                    }
-                } catch (Exception e) {
-                    log.error("Could not understand decode strategy", e);
+        List<AccountMasterColumn> columns = accountMasterColumnService.scan(dataCloudVersion, null, null) //
+                .sequential().collectList().block();
+        if (CollectionUtils.isNotEmpty(columns)) {
+            for (AccountMasterColumn column : columns) {
+                String decodeStrategyStr = column.getDecodeStrategy();
+                if (StringUtils.isEmpty(decodeStrategyStr)) {
+                    continue;
                 }
+                JsonNode jsonNode;
+                try {
+                    jsonNode = objectMapper.readTree(decodeStrategyStr);
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to parse decodeStrategy " + decodeStrategyStr);
+                }
+                String encodedColumn = jsonNode.has("EncodedColumn") ? jsonNode.get("EncodedColumn").asText() : null;
+                String columnName = column.getColumnId();
+                Integer bitPos = jsonNode.get("BitPosition").asInt();
+                if (!bitPosMap.containsKey(encodedColumn)) {
+                    bitPosMap.put(encodedColumn, new HashMap<>());
+                }
+                bitPosMap.get(encodedColumn).put(columnName, bitPos);
+                if (!decodeStrategyMap.containsKey(encodedColumn)) {
+                    String decodeStr = jsonNode.get("BitInterpretation").asText();
+                    try {
+                        BitCodeBook.DecodeStrategy decodeStrategy = BitCodeBook.DecodeStrategy.valueOf(decodeStr);
+                        decodeStrategyMap.put(encodedColumn, decodeStrategy);
+                        switch (decodeStrategy) {
+                        case ENUM_STRING:
+                            String valueDictStr = jsonNode.get("ValueDict").asText();
+                            String[] valueDictArr = valueDictStr.split("\\|\\|");
+                            Map<String, Object> valueDictRev = new HashMap<>();
+                            for (int i = 0; i < valueDictArr.length; i++) {
+                                valueDictRev.put(Integer.toBinaryString(i + 1), valueDictArr[i]);
+                            }
+                            valueDictRevMap.put(encodedColumn, valueDictRev);
+                        case NUMERIC_INT:
+                        case NUMERIC_UNSIGNED_INT:
+                            Integer bitUnit = jsonNode.get("BitUnit").asInt();
+                            bitUnitMap.put(encodedColumn, bitUnit);
+                            break;
+                        default:
+                            break;
+                        }
+                    } catch (Exception e) {
+                        log.error("Could not understand decode strategy", e);
+                    }
+                }
+                if (codeBookLookup.containsKey(columnName)) {
+                    throw new RuntimeException("Column " + columnName + " is already defined to use encoded column "
+                            + codeBookLookup.get(columnName) + ", but now it is tried to use " + encodedColumn);
+                }
+                codeBookLookup.put(columnName, encodedColumn);
             }
-            if (codeBookLookup.containsKey(columnName)) {
-                throw new RuntimeException("Column " + columnName + " is already defined to use encoded column "
-                        + codeBookLookup.get(columnName) + ", but now it is tried to use " + encodedColumn);
-            }
-            codeBookLookup.put(columnName, encodedColumn);
         }
 
         for (Map.Entry<String, Map<String, Integer>> entry : bitPosMap.entrySet()) {

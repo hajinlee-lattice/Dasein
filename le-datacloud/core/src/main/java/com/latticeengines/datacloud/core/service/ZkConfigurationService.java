@@ -14,4 +14,6 @@ public interface ZkConfigurationService {
 
     boolean useRemoteDnBGlobal();
 
+    boolean isCDLTenant(CustomerSpace customerSpace);
+
 }

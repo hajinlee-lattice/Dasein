@@ -58,11 +58,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     }
 
     @Override
-    public List<String> getMatchedColumns(ColumnSelection selection) {
-        return selection.getColumnIds();
-    }
-
-    @Override
     public Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection) {
         Map<String, Set<String>> partitionColumnMap = new HashMap<>();
         for (Column column : selection.getColumns()) {
@@ -88,11 +83,6 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
     @Override
     public Map<String, Pair<BitCodeBook, List<String>>> getDecodeParameters(ColumnSelection columnSelection,
             String dataCloudVersion) {
-        return Collections.emptyMap();
-    }
-
-    @Override
-    public Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection, String dataCloudVersion) {
         return Collections.emptyMap();
     }
 

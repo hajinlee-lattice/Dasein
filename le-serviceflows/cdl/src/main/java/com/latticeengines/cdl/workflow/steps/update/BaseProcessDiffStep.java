@@ -102,12 +102,12 @@ public abstract class BaseProcessDiffStep<T extends BaseProcessEntityStepConfigu
         String inputPath = getInputPath(srcTable);
         DynamoExportConfig config = new DynamoExportConfig();
         config.setTableName(tgtTable);
+        config.setSrcTableName(srcTable);
         config.setInputPath(inputPath);
         config.setPartitionKey(partitionKey);
         if (StringUtils.isNotBlank(sortKey)) {
             config.setSortKey(sortKey);
         }
-
         addToListInContext(TABLES_GOING_TO_DYNAMO, config, DynamoExportConfig.class);
     }
 

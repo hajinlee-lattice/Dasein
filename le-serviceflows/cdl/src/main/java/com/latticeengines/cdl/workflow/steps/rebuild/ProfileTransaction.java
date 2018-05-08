@@ -100,9 +100,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         if (rawTable == null) {
             throw new RuntimeException("Cannot find raw transaction table.");
         }
-        
-        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
 
+        periodStrategies = periodProxy.getPeriodStrategies(customerSpace.toString());
 
         buildPeriodStore(TableRoleInCollection.ConsolidatedDailyTransaction);
         buildPeriodStore(TableRoleInCollection.ConsolidatedPeriodTransaction);
@@ -180,23 +179,31 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
             tableNames.add(table.getName());
         }
 
-
         dataCollectionProxy.upsertTables(customerSpace.toString(), tableNames, role, inactive);
         log.info("Upsert tables " + String.join(",", tableNames) + " to role " + role + "version" + inactive);
     }
-
 
     @Override
     protected void onPostTransformationCompleted() {
         String sortedDailyTableName = TableUtils.getFullTableName(sortedDailyTablePrefix, pipelineVersion);
         Table sortedDailyTable = metadataProxy.getTable(customerSpace.toString(), sortedDailyTableName);
+        if (sortedDailyTable == null) {
+            throw new IllegalStateException("sortedDailyTable is null.");
+        }
         sortedDailyTableName = renameServingStoreTable(BusinessEntity.Transaction, sortedDailyTable);
         exportTableRoleToRedshift(sortedDailyTableName, BusinessEntity.Transaction.getServingStore());
+        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
+                BusinessEntity.Transaction.getServingStore(), inactive);
 
         String sortedPeriodTableName = TableUtils.getFullTableName(sortedPeriodTablePrefix, pipelineVersion);
         Table sortedPeriodTable = metadataProxy.getTable(customerSpace.toString(), sortedPeriodTableName);
+        if (sortedPeriodTable == null) {
+            throw new IllegalStateException("sortedPeriodTable is null.");
+        }
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
         exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
+        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
+                BusinessEntity.Transaction.getServingStore(), inactive);
     }
 
     @Override
@@ -274,8 +281,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
                 productTable.getName()));
 
         List<Product> productList = new ArrayList<>();
-        productTable.getExtracts().forEach(extract ->
-            productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
+        productTable.getExtracts().forEach(
+                extract -> productList.addAll(ProductUtils.loadProducts(yarnConfiguration, extract.getPath())));
         productMap = ProductUtils.getActiveProductMap(productList);
     }
 
@@ -317,12 +324,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(
-                InterfaceName.Amount.name(),
-                InterfaceName.Cost.name()));
-        config.setSumOutputFields(Arrays.asList(
-                InterfaceName.TotalAmount.name(),
-                InterfaceName.TotalCost.name()));
+        config.setSumFields(Arrays.asList(InterfaceName.Amount.name(), InterfaceName.Cost.name()));
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.Quantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setCountField(Collections.singletonList(InterfaceName.TransactionTime.name()));
@@ -376,13 +379,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         step.setTransformer(DataCloudConstants.PERIOD_DATA_AGGREGATER);
         step.setInputSteps(Collections.singletonList(periodedStep));
         PeriodDataAggregaterConfig config = new PeriodDataAggregaterConfig();
-        config.setSumFields(Arrays.asList(
-                InterfaceName.TotalAmount.name(),
-                InterfaceName.TotalCost.name(),
+        config.setSumFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name()));
-        config.setSumOutputFields(Arrays.asList(
-                InterfaceName.TotalAmount.name(),
-                InterfaceName.TotalCost.name(),
+        config.setSumOutputFields(Arrays.asList(InterfaceName.TotalAmount.name(), InterfaceName.TotalCost.name(),
                 InterfaceName.TransactionCount.name()));
         config.setSumLongFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));

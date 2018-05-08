@@ -183,8 +183,24 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
         matchInput.setKeyMap(matchInputKeys);
         matchInput.setPrepareForDedupe(!getConfiguration().isSkipDedupe());
 
-        String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
+        AvroInputBuffer inputBuffer = inputBuffer(preMatchEventTable);
+        matchInput.setInputBuffer(inputBuffer);
+
+        matchInput.setExcludePublicDomain(getConfiguration().isExcludePublicDomain());
+        matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
+        if (MatchStepConfiguration.LDC.equals(getConfiguration().getMatchType())) {
+            matchInput.setDataCloudOnly(true);
+        }
+
+        checkFetchOnly(matchInput);
+
+        return matchInput;
+    }
+
+    private AvroInputBuffer inputBuffer(Table preMatchEventTable) {
         AvroInputBuffer inputBuffer = new AvroInputBuffer();
+
+        String avroDir = ExtractUtils.getSingleExtractPath(yarnConfiguration, preMatchEventTable);
         inputBuffer.setAvroDir(avroDir);
         inputBuffer.setTableName(preMatchEventTable.getName());
 
@@ -212,15 +228,7 @@ public class PrepareMatchConfig extends BaseWorkflowStep<MatchStepConfiguration>
 
         inputBuffer.setSchema(schema);
 
-        matchInput.setInputBuffer(inputBuffer);
-
-        matchInput.setExcludePublicDomain(getConfiguration().isExcludePublicDomain());
-
-        matchInput.setPublicDomainAsNormalDomain(getConfiguration().isPublicDomainAsNormalDomain());
-
-        checkFetchOnly(matchInput);
-
-        return matchInput;
+        return inputBuffer;
     }
 
     private void checkFetchOnly(MatchInput matchInput) {

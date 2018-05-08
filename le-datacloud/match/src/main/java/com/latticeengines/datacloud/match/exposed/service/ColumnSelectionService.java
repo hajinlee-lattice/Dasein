@@ -12,8 +12,6 @@ import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefi
 
 public interface ColumnSelectionService extends HasDataCloudVersion {
 
-    List<String> getMatchedColumns(ColumnSelection selection);
-
     ColumnSelection parsePredefinedColumnSelection(Predefined predefined, String dataCloudVersion);
 
     Map<String, Set<String>> getPartitionColumnMap(ColumnSelection selection);
@@ -21,7 +19,4 @@ public interface ColumnSelectionService extends HasDataCloudVersion {
     Map<String, Pair<BitCodeBook, List<String>>> getDecodeParameters(ColumnSelection columnSelection, String dataCloudVersion);
 
     String getCurrentVersion(Predefined predefined);
-
-    Map<String, List<String>> getEncodedColumnMapping(ColumnSelection columnSelection,
-            String dataCloudVersion);
 }

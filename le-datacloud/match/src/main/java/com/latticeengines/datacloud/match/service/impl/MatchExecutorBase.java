@@ -2,12 +2,12 @@ package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.Collections;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -20,15 +20,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
-import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
 import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
@@ -168,12 +167,11 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @VisibleForTesting
     @MatchStep
     MatchContext mergeResults(MatchContext matchContext) {
-        ColumnSelectionService columnSelectionService = beanDispatcher.getColumnSelectionService(matchContext);
         MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher
                 .getMetadataColumnService(matchContext);
 
         List<InternalOutputRecord> records = matchContext.getInternalResults();
-        List<String> columnNames = columnSelectionService.getMatchedColumns(matchContext.getColumnSelection());
+        List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
         boolean returnUnmatched = matchContext.isReturnUnmatched();
         boolean excludeUnmatchedPublicDomain = Boolean.TRUE.equals(matchContext.getInput()

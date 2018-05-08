@@ -6,4 +6,6 @@ public interface DataUnitProxy {
 
     DataUnit create(String customerSpace, DataUnit dataUnit);
 
+    DataUnit getByNameAndType(String customerSpace, String name, DataUnit.StorageType type);
+
 }

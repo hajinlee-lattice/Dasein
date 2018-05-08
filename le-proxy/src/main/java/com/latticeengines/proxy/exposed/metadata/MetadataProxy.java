@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
@@ -12,11 +13,11 @@ import org.springframework.stereotype.Component;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.cache.CacheName;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Artifact;
 import com.latticeengines.domain.exposed.metadata.ArtifactType;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
+import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Module;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
@@ -24,7 +25,6 @@ import com.latticeengines.domain.exposed.modelreview.ColumnRuleResult;
 import com.latticeengines.domain.exposed.modelreview.ModelReviewData;
 import com.latticeengines.domain.exposed.modelreview.RowRuleResult;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 
 @Component("metadataProxy")
@@ -163,6 +163,23 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     public Table getTable(String customerSpace, String tableName) {
         String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
         return get("getTable", url, Table.class);
+    }
+
+    public String getAvroDir(String customerSpace, String tableName) {
+        Table table = getTable(customerSpace, tableName);
+        if (table == null) {
+            throw new IllegalArgumentException("Cannot find table named " + tableName);
+        }
+        List<Extract> extracts = table.getExtracts();
+        if (CollectionUtils.isEmpty(extracts) || extracts.size() != 1) {
+            throw new IllegalArgumentException("Table " + tableName + " does not have single extract");
+        }
+        Extract extract = extracts.get(0);
+        String path = extract.getPath();
+        if (path.endsWith(".avro") || path.endsWith("/")) {
+            path = path.substring(0, path.lastIndexOf("/"));
+        }
+        return path;
     }
 
     @SuppressWarnings("unchecked")

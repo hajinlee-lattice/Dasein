@@ -17,6 +17,9 @@ public class DynamoExportConfig {
     @JsonProperty("table_name")
     private String tableName;
 
+    @JsonProperty("src_table_name")
+    private String srcTableName;
+
     @JsonProperty("partition_key")
     private String partitionKey;
 
@@ -37,6 +40,14 @@ public class DynamoExportConfig {
 
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+    public String getSrcTableName() {
+        return srcTableName;
+    }
+
+    public void setSrcTableName(String srcTableName) {
+        this.srcTableName = srcTableName;
     }
 
     public String getPartitionKey() {

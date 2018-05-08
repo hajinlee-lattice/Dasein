@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.avro.util.Utf8;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,22 +90,12 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         List<ColumnSelection> selections = new ArrayList<>();
         for (Map.Entry<Predefined, String> entry : unionSelection.getPredefinedSelections().entrySet()) {
             Predefined predefined = entry.getKey();
-            validateOrAssignPredefinedVersion(columnSelectionService, predefined, entry.getValue());
             selections.add(columnSelectionService.parsePredefinedColumnSelection(predefined, dataCloudVersion));
         }
         if (unionSelection.getCustomSelection() != null && !unionSelection.getCustomSelection().isEmpty()) {
             selections.add(unionSelection.getCustomSelection());
         }
         return ColumnSelection.combine(selections);
-    }
-
-    protected String validateOrAssignPredefinedVersion(ColumnSelectionService columnSelectionService,
-            Predefined predefined, String version) {
-        if (StringUtils.isEmpty(version)) {
-            version = columnSelectionService.getCurrentVersion(predefined);
-            log.debug("Assign version " + version + " to column selection " + predefined);
-        }
-        return version;
     }
 
     // this is a dispatcher method
@@ -157,7 +148,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         output.setInputFields(input.getFields());
         output.setKeyMap(input.getKeyMap());
         output.setSubmittedBy(input.getTenant());
-        if (metadatas != null && !metadatas.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(metadatas)) {
             output = appendMetadata(output, metadatas);
         } else {
             output = appendMetadata(output, columnSelection, input.getDataCloudVersion());

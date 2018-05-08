@@ -133,6 +133,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("LookupOnly")
     private boolean lookupOnly;
 
+    // only match to LDC even for a CDL tenant
+    @JsonProperty("DataCloudOnly")
+    private Boolean dataCloudOnly;
+
     @JsonProperty("SkipKeyResolution")
     private boolean skipKeyResolution;
 
@@ -219,6 +223,14 @@ public class MatchInput implements Fact, Dimension {
 
     public void setLookupId(String lookupId) {
         this.lookupId = lookupId;
+    }
+
+    public Boolean getDataCloudOnly() {
+        return dataCloudOnly;
+    }
+
+    public void setDataCloudOnly(Boolean dataCloudOnly) {
+        this.dataCloudOnly = dataCloudOnly;
     }
 
     public boolean isPublicDomainAsNormalDomain() {

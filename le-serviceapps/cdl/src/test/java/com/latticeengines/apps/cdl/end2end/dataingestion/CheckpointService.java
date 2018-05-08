@@ -59,11 +59,15 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobType;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.RedshiftDataUnit;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndQuery;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
 import com.latticeengines.redshiftdb.exposed.service.RedshiftService;
@@ -79,8 +83,7 @@ public class CheckpointService {
     private static final Logger logger = LoggerFactory.getLogger(CheckpointService.class);
 
     private static final String S3_CHECKPOINTS_DIR = "le-serviceapps/cdl/end2end/checkpoints";
-    private static final String S3_CHECKPOINTS_VERSION = "13";
-    static final String CHECKPOINT_DATASET_VDB = "vdb";
+    private static final String S3_CHECKPOINTS_VERSION = "14";
 
     static final int ACCOUNT_IMPORT_SIZE_1 = 500;
     static final int ACCOUNT_IMPORT_SIZE_2 = 400;
@@ -120,6 +123,9 @@ public class CheckpointService {
 
     @Inject
     private RedshiftService redshiftService;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     @Resource(name = "jdbcTemplate")
     private JdbcTemplate jdbcTemplate;
@@ -172,6 +178,19 @@ public class CheckpointService {
                                 if (redshiftService.hasTable(redshiftTable)) {
                                     redshiftTablesToClone.put(redshiftTable, table.getName());
                                 }
+                                DynamoDataUnit dynamoDataUnit = parseDynamoDataUnit(checkpoint, role.name(), version);
+                                if (dynamoDataUnit != null) {
+                                    if (StringUtils.isBlank(dynamoDataUnit.getLinkedTable())) {
+                                        dynamoDataUnit.setLinkedTable(dynamoDataUnit.getName());
+                                    }
+                                    if (StringUtils.isBlank(dynamoDataUnit.getLinkedTenant())) {
+                                        dynamoDataUnit.setLinkedTenant(dynamoDataUnit.getTenant());
+                                    }
+                                    dynamoDataUnit.setName(table.getName());
+                                    dynamoDataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+                                    logger.info("Creating data unit " + JsonUtils.serialize(dynamoDataUnit));
+                                    dataUnitProxy.create(mainTestTenant.getId(), dynamoDataUnit);
+                                }
                             }
                         }
                     }
@@ -214,6 +233,11 @@ public class CheckpointService {
                 String msg = "Clone redshift table " + src + " to " + tgt;
                 try (PerformanceTimer timer = new PerformanceTimer(msg)) {
                     redshiftService.cloneTable(src, tgt);
+                    RedshiftDataUnit dataUnit = new RedshiftDataUnit();
+                    dataUnit.setTenant(CustomerSpace.shortenCustomerSpace(mainTestTenant.getId()));
+                    dataUnit.setName(tgt);
+                    dataUnit.setRedshiftTable(tgt.toLowerCase());
+                    dataUnitProxy.create(mainTestTenant.getId(), dataUnit);
                 }
             });
             futures.add(future);
@@ -322,6 +346,18 @@ public class CheckpointService {
         String versionFile = String.format("%s/%s/_VERSION_", checkpointDir, checkpoint);
         String version = FileUtils.readFileToString(new File(versionFile), "UTF-8").trim();
         return DataCollection.Version.valueOf(version);
+    }
+
+    private DynamoDataUnit parseDynamoDataUnit(String checkpoint, String roleName, DataCollection.Version version) throws IOException {
+        DynamoDataUnit dynamoDataUnit = null;
+        String jsonFilePath = String.format("%s/%s/%s/%s_Dynamo.json", checkpointDir, checkpoint, version.name(),
+                roleName);
+        File jsonFile = new File(jsonFilePath);
+        if (jsonFile.exists()) {
+            logger.info("Found dynamo data unit for " + roleName + " in " + version);
+            dynamoDataUnit = om.readValue(jsonFile, DynamoDataUnit.class);
+        }
+        return dynamoDataUnit;
     }
 
     private List<Table> parseCheckpointTable(String checkpoint, String roleName, DataCollection.Version version,
@@ -477,6 +513,7 @@ public class CheckpointService {
                 saveTableIfExists(role, version, checkpoint);
                 if (active.equals(version)) {
                     saveRedshiftTableIfExists(role, version);
+                    saveDynamoTableIfExists(checkpoint, role, version);
                 }
             }
 
@@ -501,7 +538,7 @@ public class CheckpointService {
         CustomerSpace cs = CustomerSpace.parse(mainTestTenant.getId());
         String targetPath = PathBuilder.buildCustomerSpacePath(podId, cs).append("Data").toString();
         HdfsUtils.copyHdfsToLocal(yarnConfiguration, targetPath, localDir);
-        logger.info("Downloaded hdfs path " + targetPath + " to " + localDir);
+        logger.info("Downloaded HDFS path " + targetPath + " to " + localDir);
         Collection<File> crcFiles = FileUtils.listFiles(new File(localDir), new String[] { "crc" }, true);
         crcFiles.forEach(FileUtils::deleteQuietly);
     }
@@ -514,7 +551,6 @@ public class CheckpointService {
         } else {
             tables.add(dataCollectionProxy.getTable(mainTestTenant.getId(), role, version));
         }
-        //Table table = dataCollectionProxy.getTable(mainTestTenant.getId(), role, version);
         if (CollectionUtils.isNotEmpty(tables) && tables.get(0) != null) {
             String jsonFile = String.format("checkpoints/%s/%s/tables/%s.json", checkpoint, version.name(),
                     role.name());
@@ -544,6 +580,19 @@ public class CheckpointService {
         }
     }
 
+    private void saveDynamoTableIfExists(String checkpoint, TableRoleInCollection role, DataCollection.Version version) throws IOException {
+        String tableName = dataCollectionProxy.getTableName(mainTestTenant.getId(), role, version);
+        if (StringUtils.isNotBlank(tableName)) {
+            DataUnit dataUnit = dataUnitProxy.getByNameAndType(mainTestTenant.getId(), tableName, DataUnit.StorageType.Dynamo);
+            if (dataUnit != null) {
+                DynamoDataUnit dynamoDataUnit = (DynamoDataUnit) dataUnit;
+                String jsonFile = String.format("checkpoints/%s/%s/%s_Dynamo.json", checkpoint, version.name(), role.name());
+                om.writeValue(new File(jsonFile), dynamoDataUnit);
+                logger.info("Save DynamoDataUnit for " + role + " at version " + version + " to " + jsonFile);
+            }
+        }
+    }
+
     private void saveStatsIfExists(DataCollection.Version version, String checkpoint) throws IOException {
         StatisticsContainer statisticsContainer = dataCollectionProxy.getStats(mainTestTenant.getId(), version);
         if (statisticsContainer != null) {
@@ -558,8 +607,8 @@ public class CheckpointService {
     private void printSaveRedshiftStatements(String checkpoint) {
         if (MapUtils.isNotEmpty(savedRedshiftTables)) {
             String nextVersion = String.valueOf(Integer.valueOf(S3_CHECKPOINTS_VERSION) + 1);
-            String msg = "If you are going to save the checkpoint to version " + nextVersion;
-            msg += ", you can run following statements in redshift:\n\n";
+            StringBuilder msg = new StringBuilder("If you are going to save the checkpoint to version " + nextVersion);
+            msg.append(", you can run following statements in redshift:\n\n");
             List<String> dropTables = new ArrayList<>();
             List<String> renameTables = new ArrayList<>();
             savedRedshiftTables.forEach((role, table) -> {
@@ -568,12 +617,12 @@ public class CheckpointService {
                 renameTables.add(String.format("alter table %s rename to %s;", table, tgtTable));
             });
             for (String statement : dropTables) {
-                msg += statement + "\n";
+                msg.append(statement).append("\n");
             }
             for (String statement : renameTables) {
-                msg += statement + "\n";
+                msg.append(statement).append("\n");
             }
-            logger.info(msg);
+            logger.info(msg.toString());
         }
     }
 

@@ -24,6 +24,7 @@ import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.datacloud.core.datasource.DataSourceConnection;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.domain.exposed.admin.LatticeFeatureFlag;
+import com.latticeengines.domain.exposed.admin.LatticeProduct;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.camille.Document;
 import com.latticeengines.domain.exposed.camille.Path;
@@ -126,12 +127,23 @@ public class ZkConfigurationServiceImpl implements ZkConfigurationService {
             if (!camille.exists(useRemoteDnBPath) || StringUtils.isBlank(camille.get(useRemoteDnBPath).getData())) {
                 camille.upsert(useRemoteDnBPath, new Document(useRemoteDnBGlobal), ZooDefs.Ids.OPEN_ACL_UNSAFE);
             }
-            return Boolean.valueOf(camille.get(useRemoteDnBPath).getData()).booleanValue();
+            return Boolean.valueOf(camille.get(useRemoteDnBPath).getData());
         } catch (Exception e) {
             log.error("Failed to get UseRemoteDnBGlobal flag", e);
             return Boolean.valueOf(useRemoteDnBGlobal);
         }
     }
+
+    @Override
+    public boolean isCDLTenant(CustomerSpace customerSpace) {
+        try {
+            return batonService.hasProduct(customerSpace, LatticeProduct.CG);
+        } catch (Exception e) {
+            log.error("Error when check CDL product for " + customerSpace, e);
+            return false;
+        }
+    }
+
 
     private Path matchServicePath() {
         return PathBuilder.buildServicePath(podId, PROPDATA_SERVICE).append(MATCH_SERVICE);

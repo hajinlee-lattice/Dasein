@@ -163,7 +163,11 @@ public class ExportToDynamo extends BaseWorkflowStep<ExportToDynamoStepConfigura
             String customerSpace = configuration.getCustomerSpace().toString();
             DynamoDataUnit unit = new DynamoDataUnit();
             unit.setTenant(CustomerSpace.shortenCustomerSpace(customerSpace));
-            unit.setName(config.getTableName());
+            String srcTbl = StringUtils.isNotBlank(config.getSrcTableName()) ? config.getSrcTableName() : config.getTableName();
+            unit.setName(srcTbl);
+            if (!unit.getName().equals(config.getTableName())) {
+                unit.setLinkedTable(config.getTableName());
+            }
             unit.setPartitionKey(config.getPartitionKey());
             if (StringUtils.isNotBlank(config.getSortKey())){
                 unit.setSortKey(config.getSortKey());

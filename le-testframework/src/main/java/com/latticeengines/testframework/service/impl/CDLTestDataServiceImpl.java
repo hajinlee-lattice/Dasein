@@ -8,15 +8,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Resource;
@@ -38,6 +33,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -58,7 +54,6 @@ import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.redshift.RedshiftTableConfiguration;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -116,43 +111,17 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             dataCollectionProxy.switchVersion(shortTenantId, active.complement());
         }
         ExecutorService executors = ThreadPoolUtils.getFixedSizeThreadPool("cdl-test-data", 4);
-        Set<Future> futures = new HashSet<>();
-        futures.add(executors.submit(() -> {
-            populateStats(shortTenantId);
-            return true;
-        }));
+        List<Runnable> tasks = new ArrayList<>();
+        tasks.add(() -> populateStats(shortTenantId));
         for (BusinessEntity entity : BusinessEntity.values()) {
-            futures.add(executors.submit(() -> {
+            tasks.add(() -> {
                 try (PerformanceTimer timer = new PerformanceTimer("Clone redshift table for " + entity)) {
                     cloneRedshiftTables(shortTenantId, entity);
                 }
-                return true;
-            }));
-            futures.add(executors.submit(() -> {
-                populateServingStore(shortTenantId, entity);
-                return true;
-            }));
-        }
-        while (!futures.isEmpty()) {
-            Set<Future> toBeDeleted = new HashSet<>();
-            futures.forEach(future -> {
-                try {
-                    future.get(10, TimeUnit.SECONDS);
-                    toBeDeleted.add(future);
-                } catch (TimeoutException e) {
-                    // ignore
-                } catch (Exception e) {
-                    throw new RuntimeException("One of the future is failed", e);
-                }
             });
-
-            futures.removeAll(toBeDeleted);
-            try {
-                Thread.sleep(1000L);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
+            tasks.add(() -> populateServingStore(shortTenantId, entity));
         }
+        ThreadPoolUtils.runRunnablesInParallel(executors, tasks, 30, 5);
     }
 
     public void mockRatingTableWithSingleEngine(String tenantId, String engineId, //
@@ -381,7 +350,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
                 BusinessEntity.Transaction, //
                 BusinessEntity.PeriodTransaction).contains(entity)) {
             String customerSpace = CustomerSpace.parse(tenantId).toString();
-            Table table = readTableFromS3(entity);
+            Table table = readTableFromS3(entity.getServingStore());
             String tableName = servingStoreName(tenantId, entity);
             table.setName(tableName);
             table.setDisplayName(entity.getServingStore().name());
@@ -391,8 +360,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         }
     }
 
-    private Table readTableFromS3(BusinessEntity entity) {
-        TableRoleInCollection role = entity.getServingStore();
+    private Table readTableFromS3(TableRoleInCollection role ) {
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json.gz");
         Table table;
         try {

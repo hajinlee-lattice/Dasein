@@ -163,31 +163,30 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
                 ? Collections.emptyList()
                 : importAndDeleteJobs.stream().filter(
                         job -> job.getJobStatus() != JobStatus.PENDING && job.getJobStatus() != JobStatus.RUNNING)
-                        .map(job -> job.getId()).collect(Collectors.toList());
+                        .map(Job::getId).collect(Collectors.toList());
 
         log.info(String.format("Jobs that associated with the current consolidate job are: %s",
                 completedImportAndDeleteJobIds));
 
         List<Long> completedActionIds = actions.stream()
                 .filter(action -> isCompleteAction(action, importAndDeleteTypes, completedImportAndDeleteJobIds))
-                .map(action -> action.getPid()).collect(Collectors.toList());
+                .map(Action::getPid).collect(Collectors.toList());
         log.info(String.format("Actions that associated with the current consolidate job are: %s", completedActionIds));
 
         List<Long> attrManagementActionIds = actions.stream()
                 .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
-                .map(action -> action.getPid()).collect(Collectors.toList());
+                .map(Action::getPid).collect(Collectors.toList());
         if (CollectionUtils.isNotEmpty(attrManagementActionIds)) {
             log.info(String.format("Actions that associated with the Attr management are: %s", attrManagementActionIds));
             completedActionIds.addAll(attrManagementActionIds);
         }
 
         List<Long> ratingEngineActionIds = actions.stream()
-                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(action -> action.getPid())
+                .filter(action -> action.getType() == ActionType.RATING_ENGINE_CHANGE).map(Action::getPid)
                 .collect(Collectors.toList());
         log.info(String.format("RatingEngine related Actions are: %s", ratingEngineActionIds));
 
-        Pair<List<Long>, List<Long>> idPair = new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
-        return idPair;
+        return new ImmutablePair<>(completedActionIds, completedImportAndDeleteJobIds);
     }
 
     private void updateActions(String customerSpace, List<Long> actionIds, Long workflowPid) {

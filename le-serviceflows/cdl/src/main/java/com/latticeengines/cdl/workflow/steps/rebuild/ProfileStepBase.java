@@ -29,7 +29,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.configuration.
 import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
-import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -184,6 +183,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     protected String renameServingStoreTable(BusinessEntity servingEntity, Table servingStoreTable) {
+        CustomerSpace customerSpace = configuration.getCustomerSpace();
         String prefix = String.join("_", customerSpace.getTenantId(), servingEntity.name());
         String goodName = NamingUtils.timestamp(prefix);
         log.info("Renaming table " + servingStoreTable.getName() + " to " + goodName);
@@ -222,20 +222,7 @@ public abstract class ProfileStepBase<T extends BaseWrapperStepConfiguration> ex
     }
 
     private String getInputPath(String tableName) {
-        Table table = metadataProxy.getTable(configuration.getCustomerSpace().toString(), tableName);
-        if (table == null) {
-            throw new IllegalArgumentException("Cannot find table named " + tableName);
-        }
-        List<Extract> extracts = table.getExtracts();
-        if (CollectionUtils.isEmpty(extracts) || extracts.size() != 1) {
-            throw new IllegalArgumentException("Table " + tableName + " does not have single extract");
-        }
-        Extract extract = extracts.get(0);
-        String path = extract.getPath();
-        if (path.endsWith(".avro") || path.endsWith("/")) {
-            path = path.substring(0, path.lastIndexOf("/"));
-        }
-        return path;
+        return metadataProxy.getAvroDir(configuration.getCustomerSpace().toString(), tableName);
     }
 
 }
