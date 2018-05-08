@@ -277,16 +277,23 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
                 .stream() //
                 .forEach(row -> {
                     String rating = (String) row.get(RATING_BUCKET_FIELD);
-                    Assert.assertNotNull(rating);
+                    if (rating != null) {
+                        actualRatingBucketsInSegment.add(rating);
+                    }
                     Assert.assertNotNull(row.get(InterfaceName.AccountId.name()));
                     Assert.assertFalse(accIds.contains(row.get(InterfaceName.AccountId.name()).toString()));
                     accIds.add(row.get(InterfaceName.AccountId.name()).toString());
-                    actualRatingBucketsInSegment.add(rating);
                     String accountName = (String) row.get(InterfaceName.CompanyName.name());
                     if (actualNameInOneOfTheAccounts == null && StringUtils.isNotBlank(accountName)) {
                         actualNameInOneOfTheAccounts = accountName.trim();
                     }
                 });
+
+        if (actualRatingBucketsInSegment.size() > 0) {
+            actualRatingBucketsInSegment.stream().forEach(bucket -> {
+                Assert.assertNotNull(RatingBucketName.valueOf(bucket), bucket);
+            });
+        }
         return accIds;
     }
 }
