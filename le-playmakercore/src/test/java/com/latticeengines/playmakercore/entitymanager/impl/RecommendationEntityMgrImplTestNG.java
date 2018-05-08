@@ -107,7 +107,7 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
                 .forEach(rec -> testGetRecommendationById(rec));
     }
 
-    @Test(groups = "functional", dependsOnMethods = { "testCreateRecommendation" })
+    @Test(groups = "functional", dependsOnMethods = { "testGetRecommendationById" })
     public void testGetRecommendationByLaunchId() {
         allRecommendationsAcrossAllLaunches.stream()//
                 .forEach(rec -> testGetRecommendationByLaunchId(rec));
@@ -272,10 +272,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
         Date lastModificationDate3 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate - 1);
 
-        System.out.println("lastModificationDate = " + lastModificationDate);
-        System.out.println("lastModificationDate2 = " + lastModificationDate2.getTime());
-        System.out.println("lastModificationDate3 = " + lastModificationDate3.getTime());
-
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
                 SynchronizationDestinationEnum.SFDC.toString(), playIds, orgInfo);
         Assert.assertEquals(0, recommendationCount);
@@ -341,10 +337,6 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Date lastModificationDate2 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate + 1);
         Date lastModificationDate3 = PlaymakerUtils.dateFromEpochSeconds(lastModificationDate - 1);
 
-        System.out.println("lastModificationDate = " + lastModificationDate);
-        System.out.println("lastModificationDate2 = " + lastModificationDate2.getTime());
-        System.out.println("lastModificationDate3 = " + lastModificationDate3.getTime());
-
         recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate2, //
                 SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
 
@@ -356,10 +348,21 @@ public class RecommendationEntityMgrImplTestNG extends AbstractTestNGSpringConte
         Assert.assertNotNull(recommendations);
         Assert.assertTrue(recommendations.size() == 0);
 
+        recommendationCount = recommendationEntityMgr.findRecommendationCount(lastModificationDate3, //
+                SynchronizationDestinationEnum.SFDC.toString(), null, orgInfo);
+
+        Assert.assertEquals(recommendationCount, 1);
+
         recommendations = recommendationEntityMgr.findRecommendations(lastModificationDate3, //
                 (recommendationCount - minPageSize), minPageSize, SynchronizationDestinationEnum.SFDC.toString(), null,
                 orgInfo);
         Assert.assertNotNull(recommendations);
+        Assert.assertTrue(recommendations.size() > 0,
+                String.format(
+                        "lastModificationDate3 = %s, (recommendationCount - minPageSize) = %d, "
+                                + "minPageSize = %d, orgInfo = %s, recommendations.size() = %d",
+                        lastModificationDate3.toString(), (recommendationCount - minPageSize), minPageSize, orgInfo,
+                        recommendations.size()));
         compareOriginalAndExtractedRecommendations(originalRecommendation, recommendations.get(0));
 
         // TODO - enable it once fixed
