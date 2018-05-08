@@ -17,8 +17,6 @@ angular.module('lp.playbook.wizard.crmselection', [])
             if($stateParams.play_name) {
                 // PlaybookWizardStore.setValidation('settings', true);
                 PlaybookWizardStore.getPlay($stateParams.play_name).then(function(play){
-
-                    console.log(play);
                     vm.savedSegment = play.crmselection;
                     vm.stored.crm_selection = play.crmselection;
                     if(play.crmselection) {
@@ -32,7 +30,9 @@ angular.module('lp.playbook.wizard.crmselection', [])
             PlaybookWizardStore.setValidation('crmselection', form.$valid);
             if(vm.stored.crm_selection) {
                 PlaybookWizardStore.setSettings({
-                    crm_selection: vm.stored.crm_selection
+                    destinationOrgId: vm.stored.crm_selection.orgId,
+                    destinationSysType: vm.stored.crm_selection.externalSystemType,
+                    destinationAccountId: vm.stored.crm_selection.accountId
                 });
             }
         }

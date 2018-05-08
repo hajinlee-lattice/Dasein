@@ -184,7 +184,6 @@ angular.module('lp.playbook')
     this.nextLaunch = function() {
         var play = PlaybookWizardStore.currentPlay;
 
-
         PlaybookWizardStore.launchPlay(play).then(function(data) {
             $state.go('home.playbook.dashboard.launch_job', {play_name: play.name, applicationId: data.applicationId});
         });
@@ -573,8 +572,8 @@ angular.module('lp.playbook')
             bucketsToLaunch = QueryStore.getBucketsToLaunch(),
             ratedTargetsLimit = QueryStore.getRatedTargetsLimit();
 
-        console.log(bucketsToLaunch);
-        console.log(ratedTargetsLimit);
+        // console.log(bucketsToLaunch);
+        // console.log(ratedTargetsLimit);
 
         $http({
             method: 'POST',

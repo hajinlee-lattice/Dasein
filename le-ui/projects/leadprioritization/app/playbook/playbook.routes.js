@@ -482,7 +482,7 @@ angular
                     return [
                         { label: 'Rating', state: 'rating', nextFn: PlaybookWizardStore.nextSaveGeneric },
                         { label: 'Targets', state: 'rating.targets' },
-                        { label: 'CRM System', state: 'rating.targets.crmselection' },
+                        { label: 'CRM System', state: 'rating.targets.crmselection', nextFn: PlaybookWizardStore.nextSaveGeneric },
                         { label: 'Insights', state: 'rating.targets.crmselection.insights'},
                         { label: 'Preview', state: 'rating.targets.crmselection.insights.preview' },
                         { label: 'Launch', state: 'rating.targets.crmselection.insights.preview.launch', nextFn: PlaybookWizardStore.nextLaunch }
