@@ -71,7 +71,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
         createLocalTestTenant();
         bootstrapDataCollection();
         registerTables();
-        registerDynamoDataUnit();
+        registerAccountBatchStore();
     }
 
     private void createLocalTestTenant() {
@@ -111,39 +111,47 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
         InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json");
         if (is != null) {
             return () -> {
-                Table table;
-                try {
-                    ObjectMapper om = new ObjectMapper();
-                    List list = om.readValue(is, List.class);
-                    table = JsonUtils.convertList(list, Table.class).get(0);
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to parse table from " + role.name() + ".json.", e);
-                }
                 String tableName = servingStoreName(entity);
-                table.setName(tableName);
-                table.setTableType(TableType.DATATABLE);
-                if (mdService.getTable(CustomerSpace.parse(LOCALTEST_TENANT), tableName) == null) {
-                    mdService.createTable(CustomerSpace.parse(LOCALTEST_TENANT), table);
-                } else {
-                    mdService.updateTable(CustomerSpace.parse(LOCALTEST_TENANT), table);
-                }
-                Table tableFromDB = mdService.getTable(CustomerSpace.parse(LOCALTEST_TENANT), tableName);
-                Assert.assertEquals(table.getAttributes().size(), tableFromDB.getAttributes().size());
-                DataCollection.Version version = dataCollectionService.getDataCollection(customerSpace, "")
-                        .getVersion();
-                dataCollectionService.upsertTable(customerSpace, "", tableName, role, version);
+                downloadTable(is, role, tableName);
             };
         } else {
             return null;
         }
     }
 
-    private void registerDynamoDataUnit() throws IOException {
-        InputStream is = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION,
-                "ConsolidatedAccount_Dynamo.json");
-        if (is != null) {
+    private void downloadTable(InputStream is, TableRoleInCollection role, String tableName) {
+        Table table;
+        try {
             ObjectMapper om = new ObjectMapper();
-            DynamoDataUnit unit = om.readValue(is, DynamoDataUnit.class);
+            List list = om.readValue(is, List.class);
+            table = JsonUtils.convertList(list, Table.class).get(0);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to parse table from " + role.name() + ".json.", e);
+        }
+        table.setName(tableName);
+        table.setTableType(TableType.DATATABLE);
+        if (mdService.getTable(CustomerSpace.parse(LOCALTEST_TENANT), tableName) == null) {
+            mdService.createTable(CustomerSpace.parse(LOCALTEST_TENANT), table);
+        } else {
+            mdService.updateTable(CustomerSpace.parse(LOCALTEST_TENANT), table);
+        }
+        Table tableFromDB = mdService.getTable(CustomerSpace.parse(LOCALTEST_TENANT), tableName);
+        Assert.assertEquals(table.getAttributes().size(), tableFromDB.getAttributes().size());
+        DataCollection.Version version = dataCollectionService.getDataCollection(customerSpace, "")
+                .getVersion();
+        dataCollectionService.upsertTable(customerSpace, "", tableName, role, version);
+    }
+
+    private void registerAccountBatchStore() throws IOException {
+        TableRoleInCollection role = TableRoleInCollection.ConsolidatedAccount;
+        InputStream tableIs = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION, role.name() + ".json");
+        String tableName = LOCALTEST_TENANT + "_" + role.name();
+        downloadTable(tableIs, role, tableName);
+        InputStream dynamoIs = testArtifactService.readTestArtifactAsStream(S3_DIR, S3_VERSION,
+                role.name() + "_Dynamo.json");
+        if (dynamoIs != null) {
+            ObjectMapper om = new ObjectMapper();
+            DynamoDataUnit unit = om.readValue(dynamoIs, DynamoDataUnit.class);
             if (StringUtils.isBlank(unit.getLinkedTable())) {
                 unit.setLinkedTable(unit.getName());
             }
