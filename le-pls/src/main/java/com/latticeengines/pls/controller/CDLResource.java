@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "cdl consolidate and profile", description = "REST resource for cdl")
 @RestController
 @RequestMapping("/cdl")
-@PreAuthorize("hasRole('View_PLS_CDL_Data')")
+@PreAuthorize("hasRole('Edit_PLS_CDL_Data')")
 public class CDLResource {
 
     private static final Logger log = LoggerFactory.getLogger(CDLResource.class);
