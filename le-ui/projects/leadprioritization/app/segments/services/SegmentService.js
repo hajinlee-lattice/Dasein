@@ -16,7 +16,12 @@ angular
 
     this.flattenSegmentRestrictions = function(segment) {
         restrictions = [];
-        if (segment.account_restriction.restriction.logicalRestriction && segment.contact_restriction.restriction.logicalRestriction) {
+        if (segment.account_restriction != null && 
+            segment.account_restriction.restriction !== null  && 
+            segment.account_restriction.restriction.logicalRestriction && 
+            segment.contact_restriction != null && 
+            segment.contact_restriction.restriction !== null &&
+            segment.contact_restriction.restriction.logicalRestriction) {
             segment.account_restriction.restriction.logicalRestriction.restrictions.forEach(function(restriction) {
                 SegmentStore.flattenRestriction(restriction, restrictions);
             });
@@ -24,6 +29,11 @@ angular
                 SegmentStore.flattenRestriction(restriction, restrictions);
             });
         }
+        // else {
+        //     console.log('Segment restrictions null ');
+        //     console.log(segment);
+        //     console.log('============================');
+        // }
         return restrictions;
     }
 
