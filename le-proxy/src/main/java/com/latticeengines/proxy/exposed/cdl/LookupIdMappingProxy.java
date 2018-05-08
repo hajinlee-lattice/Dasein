@@ -59,6 +59,11 @@ public class LookupIdMappingProxy extends MicroserviceRestApiProxy implements Pr
         return post("registerExternalSystem", url, lookupIdMap, LookupIdMap.class);
     }
 
+    public void deregisterExternalSystem(String customerSpace, LookupIdMap lookupIdMap) {
+        String url = constructUrl(URL_PREFIX + "/deregister", shortenCustomerSpace(customerSpace));
+        put("deregisterExternalSystem", url, lookupIdMap);
+    }
+
     public LookupIdMap getLookupIdMap(String customerSpace, String id) {
         String url = constructUrl(URL_PREFIX + "/config/{id}", shortenCustomerSpace(customerSpace), id);
         return get("getLookupIdMap", url, LookupIdMap.class);

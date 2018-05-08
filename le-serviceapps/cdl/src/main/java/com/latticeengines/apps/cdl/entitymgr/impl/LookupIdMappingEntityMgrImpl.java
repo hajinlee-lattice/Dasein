@@ -85,6 +85,7 @@ public class LookupIdMappingEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Lo
         Date time = new Date(System.currentTimeMillis());
         lookupIdsMap.setCreated(time);
         lookupIdsMap.setUpdated(time);
+        lookupIdsMap.setIsRegistered(true);
         getDao().create(lookupIdsMap);
         return lookupIdsMap;
     }

@@ -43,7 +43,24 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
         if (existingLookupIdMap == null) {
             return lookupIdMappingEntityMgr.createExternalSystem(lookupIdsMap);
         } else {
+            existingLookupIdMap.setIsRegistered(true);
             return lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
+        }
+    }
+
+    @Override
+    public void deregisterExternalSystem(LookupIdMap lookupIdsMap) {
+        if (lookupIdsMap == null) {
+            return;
+        }
+
+        LookupIdMap existingLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(lookupIdsMap.getOrgId(),
+                lookupIdsMap.getExternalSystemType());
+        if (existingLookupIdMap == null || !existingLookupIdMap.getIsRegistered()) {
+            return;
+        } else {
+            existingLookupIdMap.setIsRegistered(false);
+            lookupIdMappingEntityMgr.updateLookupIdMap(existingLookupIdMap.getId(), existingLookupIdMap);
         }
     }
 

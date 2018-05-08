@@ -30,43 +30,21 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
     public void testBasicOperations() {
         Assert.assertTrue(CollectionUtils.isNotEmpty(lookupIdMappingLaunchService.getAllCDLExternalSystemType()));
         Assert.assertTrue(MapUtils.isNotEmpty(lookupIdMappingLaunchService.getAllLookupIds(null)));
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null, true);
+        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null,
+                true);
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap("some_bad_id"));
         String orgId = "ABC_s";
         String orgName = "n1234_1";
-        LookupIdMap lookupIdMap = new LookupIdMap();
-        lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
-        lookupIdMap.setOrgId(orgId);
-        lookupIdMap.setOrgName(orgName);
-        lookupIdMap = lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
-        Assert.assertNotNull(lookupIdMap);
-        Assert.assertNull(lookupIdMap.getAccountId());
-        Assert.assertNull(lookupIdMap.getDescription());
-        Assert.assertNotNull(lookupIdMap.getId());
-        Assert.assertNotNull(lookupIdMap.getCreated());
-        Assert.assertNotNull(lookupIdMap.getUpdated());
-        Assert.assertEquals(lookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
-        Assert.assertEquals(lookupIdMap.getOrgId(), orgId);
-        Assert.assertEquals(lookupIdMap.getOrgName(), orgName);
 
-        String configId = lookupIdMap.getId();
+        LookupIdMap extractedLookupIdMap = testRegisterDeregister(orgId, orgName, true, null);
 
-        lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null, true);
-        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
+        String configId = extractedLookupIdMap.getId();
 
-        LookupIdMap extractedLookupIdMap = lookupIdMappingLaunchService.getLookupIdMap(configId);
-        Assert.assertNotNull(extractedLookupIdMap);
-        Assert.assertNull(extractedLookupIdMap.getAccountId());
-        Assert.assertNull(extractedLookupIdMap.getDescription());
-        Assert.assertEquals(extractedLookupIdMap.getId(), lookupIdMap.getId());
-        Assert.assertNotNull(extractedLookupIdMap.getCreated());
-        Assert.assertNotNull(extractedLookupIdMap.getUpdated());
-        Assert.assertEquals(extractedLookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
-        Assert.assertEquals(extractedLookupIdMap.getOrgId(), orgId);
-        Assert.assertEquals(extractedLookupIdMap.getOrgName(), orgName);
+        extractedLookupIdMap = testRegisterDeregister(orgId, orgName, false, configId);
+        extractedLookupIdMap = testRegisterDeregister(orgId, orgName, true, null);
 
         LookupIdMap duplicateLookupIdMap = new LookupIdMap();
         duplicateLookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
@@ -80,6 +58,7 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(duplicateLookupIdMap2.getOrgId(), duplicateLookupIdMap.getOrgId());
         Assert.assertEquals(duplicateLookupIdMap2.getOrgName(), duplicateLookupIdMap.getOrgName());
         Assert.assertEquals(duplicateLookupIdMap2.getCreated(), extractedLookupIdMap.getCreated());
+        Assert.assertEquals(duplicateLookupIdMap2.getIsRegistered(), extractedLookupIdMap.getIsRegistered());
         Assert.assertEquals(duplicateLookupIdMap2.getExternalSystemType(),
                 duplicateLookupIdMap.getExternalSystemType());
         Assert.assertNotEquals(duplicateLookupIdMap2.getUpdated(), extractedLookupIdMap.getUpdated());
@@ -105,5 +84,48 @@ public class LookupIdMappingServiceImplTestNG extends CDLFunctionalTestNGBase {
 
         lookupIdMappingLaunchService.deleteLookupIdMap(configId);
         Assert.assertNull(lookupIdMappingLaunchService.getLookupIdMap(configId));
+    }
+
+    private LookupIdMap testRegisterDeregister(String orgId, String orgName, boolean doRegister, String configId) {
+        Map<String, List<LookupIdMap>> lookupIdsMapping;
+        LookupIdMap lookupIdMap = new LookupIdMap();
+        lookupIdMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdMap.setOrgId(orgId);
+        lookupIdMap.setOrgName(orgName);
+        if (doRegister) {
+            lookupIdMap = lookupIdMappingLaunchService.registerExternalSystem(lookupIdMap);
+
+            Assert.assertNotNull(lookupIdMap);
+            Assert.assertNull(lookupIdMap.getAccountId());
+            Assert.assertNull(lookupIdMap.getDescription());
+            Assert.assertNotNull(lookupIdMap.getId());
+            Assert.assertNotNull(lookupIdMap.getCreated());
+            Assert.assertNotNull(lookupIdMap.getUpdated());
+            Assert.assertEquals(lookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
+            Assert.assertEquals(lookupIdMap.getOrgId(), orgId);
+            Assert.assertEquals(lookupIdMap.getOrgName(), orgName);
+            Assert.assertNotNull(lookupIdMap.getIsRegistered());
+            Assert.assertEquals(lookupIdMap.getIsRegistered(), Boolean.TRUE);
+        } else {
+            lookupIdMappingLaunchService.deregisterExternalSystem(lookupIdMap);
+        }
+
+        lookupIdsMapping = lookupIdMappingLaunchService.getLookupIdsMapping(null, null, true);
+        Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
+
+        LookupIdMap extractedLookupIdMap = lookupIdMappingLaunchService
+                .getLookupIdMap(doRegister ? lookupIdMap.getId() : configId);
+        Assert.assertNotNull(extractedLookupIdMap);
+        Assert.assertNull(extractedLookupIdMap.getAccountId());
+        Assert.assertNull(extractedLookupIdMap.getDescription());
+        Assert.assertEquals(extractedLookupIdMap.getId(), doRegister ? lookupIdMap.getId() : configId);
+        Assert.assertNotNull(extractedLookupIdMap.getCreated());
+        Assert.assertNotNull(extractedLookupIdMap.getUpdated());
+        Assert.assertEquals(extractedLookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
+        Assert.assertEquals(extractedLookupIdMap.getOrgId(), orgId);
+        Assert.assertEquals(extractedLookupIdMap.getOrgName(), orgName);
+        Assert.assertNotNull(extractedLookupIdMap.getIsRegistered());
+        Assert.assertEquals(extractedLookupIdMap.getIsRegistered(), doRegister ? Boolean.TRUE : Boolean.FALSE);
+        return extractedLookupIdMap;
     }
 }

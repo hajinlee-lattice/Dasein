@@ -93,6 +93,10 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated;
 
+    @JsonProperty("isRegistered")
+    @Column(name = "IS_REGISTERED", nullable = false)
+    private Boolean isRegistered;
+
     @Override
     public Long getPid() {
         return this.pid;
@@ -181,6 +185,14 @@ public class LookupIdMap implements HasPid, HasId<String>, HasTenant, HasAuditin
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Boolean getIsRegistered() {
+        return isRegistered;
+    }
+
+    public void setIsRegistered(Boolean isRegistered) {
+        this.isRegistered = isRegistered;
     }
 
     @Override

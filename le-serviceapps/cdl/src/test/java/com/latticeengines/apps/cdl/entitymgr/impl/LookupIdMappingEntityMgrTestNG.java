@@ -31,7 +31,8 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
     @BeforeClass(groups = "functional")
     public void setup() throws Exception {
         setupTestEnvironment();
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
+                true);
         Assert.assertNotNull(lookupIdsMapping);
         Assert.assertTrue(lookupIdsMapping.size() == 0, JsonUtils.serialize(lookupIdsMapping));
         Assert.assertTrue(MapUtils.isEmpty(lookupIdsMapping));
@@ -54,13 +55,15 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(lookupIdMap.getExternalSystemType(), CDLExternalSystemType.CRM);
         Assert.assertEquals(lookupIdMap.getOrgId(), orgId);
         Assert.assertEquals(lookupIdMap.getOrgName(), orgName);
+        Assert.assertEquals(lookupIdMap.getIsRegistered(), Boolean.TRUE);
 
         configId = lookupIdMap.getId();
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreate" })
     public void testFind() {
-        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null, true);
+        Map<String, List<LookupIdMap>> lookupIdsMapping = lookupIdMappingEntityMgr.getLookupIdsMapping(null, null,
+                true);
         Assert.assertTrue(MapUtils.isNotEmpty(lookupIdsMapping));
 
         LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
@@ -95,7 +98,7 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         anotherLookupIdMap.setOrgId(orgId + "_different");
         anotherLookupIdMap.setOrgName(orgName);
         Assert.assertNotNull(lookupIdMappingEntityMgr.createExternalSystem(anotherLookupIdMap));
-
+        Assert.assertEquals(anotherLookupIdMap.getIsRegistered(), Boolean.TRUE);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateAnother" })
@@ -115,10 +118,31 @@ public class LookupIdMappingEntityMgrTestNG extends CDLFunctionalTestNGBase {
         Assert.assertEquals(extractedLookupIdMap2.getExternalSystemType(), CDLExternalSystemType.CRM);
         Assert.assertEquals(extractedLookupIdMap2.getOrgId(), orgId);
         Assert.assertEquals(extractedLookupIdMap2.getOrgName(), orgName);
-
+        Assert.assertEquals(extractedLookupIdMap2.getIsRegistered(), Boolean.TRUE);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdate" })
+    public void testUpdate2() {
+        LookupIdMap extractedLookupIdMap = lookupIdMappingEntityMgr.getLookupIdMap(configId);
+
+        extractedLookupIdMap.setAccountId(accountId);
+        extractedLookupIdMap.setDescription(description);
+        extractedLookupIdMap.setIsRegistered(Boolean.FALSE);
+        lookupIdMappingEntityMgr.updateLookupIdMap(configId, extractedLookupIdMap);
+        LookupIdMap extractedLookupIdMap2 = lookupIdMappingEntityMgr.getLookupIdMap(configId);
+        Assert.assertNotNull(extractedLookupIdMap2);
+        Assert.assertEquals(extractedLookupIdMap2.getAccountId(), accountId);
+        Assert.assertEquals(extractedLookupIdMap2.getDescription(), description);
+        Assert.assertEquals(extractedLookupIdMap2.getId(), extractedLookupIdMap.getId());
+        Assert.assertNotNull(extractedLookupIdMap2.getCreated());
+        Assert.assertNotNull(extractedLookupIdMap2.getUpdated());
+        Assert.assertEquals(extractedLookupIdMap2.getExternalSystemType(), CDLExternalSystemType.CRM);
+        Assert.assertEquals(extractedLookupIdMap2.getOrgId(), orgId);
+        Assert.assertEquals(extractedLookupIdMap2.getOrgName(), orgName);
+        Assert.assertEquals(extractedLookupIdMap2.getIsRegistered(), Boolean.FALSE);
+    }
+
+    @Test(groups = "functional", dependsOnMethods = { "testUpdate2" })
     public void testDelete() {
         lookupIdMappingEntityMgr.deleteLookupIdMap(configId);
         Assert.assertNull(lookupIdMappingEntityMgr.getLookupIdMap(configId));

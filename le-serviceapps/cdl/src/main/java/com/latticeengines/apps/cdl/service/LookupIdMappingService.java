@@ -14,6 +14,8 @@ public interface LookupIdMappingService {
 
     LookupIdMap registerExternalSystem(LookupIdMap lookupIdsMap);
 
+    void deregisterExternalSystem(LookupIdMap lookupIdMap);
+
     LookupIdMap getLookupIdMap(String id);
 
     LookupIdMap updateLookupIdMap(String id, LookupIdMap lookupIdMap);

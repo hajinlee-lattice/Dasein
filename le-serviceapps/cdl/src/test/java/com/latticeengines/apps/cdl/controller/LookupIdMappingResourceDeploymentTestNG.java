@@ -21,6 +21,11 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     @Inject
     private LookupIdMappingProxy lookupIdMappingProxy;
 
+    private String orgId = "Org_" + System.currentTimeMillis();
+    private String orgName = "Dummy name";
+    private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
+    private String configId = null;
+
     @BeforeClass(groups = "deployment")
     public void setup() throws Exception {
         setupTestEnvironment();
@@ -37,9 +42,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
     @Test(groups = "deployment")
     public void registerExternalSystem() {
         LookupIdMap lookupIdsMap = new LookupIdMap();
-        lookupIdsMap.setOrgId("Org_" + System.currentTimeMillis());
-        lookupIdsMap.setOrgName("Dummy name");
-        lookupIdsMap.setExternalSystemType(CDLExternalSystemType.CRM);
+        lookupIdsMap.setOrgId(orgId);
+        lookupIdsMap.setOrgName(orgName);
+        lookupIdsMap.setExternalSystemType(externalSystemType);
 
         LookupIdMap resultLookupIdMap = lookupIdMappingProxy.registerExternalSystem(mainCustomerSpace, lookupIdsMap);
         Assert.assertNotNull(resultLookupIdMap);
@@ -47,8 +52,12 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertEquals(resultLookupIdMap.getOrgName(), lookupIdsMap.getOrgName());
         Assert.assertEquals(resultLookupIdMap.getExternalSystemType(), lookupIdsMap.getExternalSystemType());
         Assert.assertNotNull(resultLookupIdMap.getId());
+        Assert.assertNotNull(resultLookupIdMap.getIsRegistered());
+        Assert.assertEquals(resultLookupIdMap.getIsRegistered(), Boolean.TRUE);
 
-        confirmNonEmptyLookupConfigs();
+        configId = resultLookupIdMap.getId();
+
+        confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
 
     @Test(groups = "deployment")
@@ -66,6 +75,9 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
                 Assert.assertNotNull(c.getId());
                 Assert.assertNotNull(c.getOrgId());
                 Assert.assertNotNull(c.getOrgName());
+                Assert.assertNotNull(c.getIsRegistered());
+                Assert.assertEquals(c.getIsRegistered(), Boolean.TRUE);
+
                 String accountId = "Acc_" + System.currentTimeMillis();
                 String description = "Some desc";
                 c.setAccountId(accountId);
@@ -80,9 +92,56 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
                 Assert.assertEquals(lookupIdMap.getId(), c.getId());
                 Assert.assertEquals(lookupIdMap.getAccountId(), accountId);
                 Assert.assertEquals(lookupIdMap.getDescription(), description);
+                Assert.assertNotNull(lookupIdMap.getIsRegistered());
+                Assert.assertEquals(lookupIdMap.getIsRegistered(), c.getIsRegistered());
+
             });
         });
 
+    }
+
+    @Test(groups = "deployment")
+    public void testDeregisterExternalSystem() {
+        LookupIdMap configBeforeDeregister = lookupIdMappingProxy.getLookupIdMap(mainCustomerSpace, configId);
+        Assert.assertEquals(configBeforeDeregister.getExternalSystemType(), externalSystemType);
+        Assert.assertEquals(configBeforeDeregister.getId(), configId);
+        Assert.assertEquals(configBeforeDeregister.getOrgId(), orgId);
+        Assert.assertEquals(configBeforeDeregister.getOrgName(), orgName);
+        Assert.assertEquals(configBeforeDeregister.getIsRegistered(), Boolean.TRUE);
+
+        LookupIdMap lookupIdsMap = new LookupIdMap();
+        lookupIdsMap.setOrgId(orgId);
+        lookupIdsMap.setOrgName(orgName);
+        lookupIdsMap.setExternalSystemType(externalSystemType);
+
+        lookupIdMappingProxy.deregisterExternalSystem(mainCustomerSpace, lookupIdsMap);
+
+        LookupIdMap configAfterDeregister = lookupIdMappingProxy.getLookupIdMap(mainCustomerSpace, configId);
+        Assert.assertEquals(configAfterDeregister.getExternalSystemType(), externalSystemType);
+        Assert.assertEquals(configAfterDeregister.getId(), configId);
+        Assert.assertEquals(configAfterDeregister.getOrgId(), orgId);
+        Assert.assertEquals(configAfterDeregister.getOrgName(), orgName);
+        Assert.assertEquals(configAfterDeregister.getIsRegistered(), Boolean.FALSE);
+
+        confirmNonEmptyLookupConfigs(Boolean.FALSE);
+
+        LookupIdMap resultLookupIdMap = lookupIdMappingProxy.registerExternalSystem(mainCustomerSpace, lookupIdsMap);
+        Assert.assertNotNull(resultLookupIdMap);
+        Assert.assertEquals(resultLookupIdMap.getOrgId(), lookupIdsMap.getOrgId());
+        Assert.assertEquals(resultLookupIdMap.getOrgName(), lookupIdsMap.getOrgName());
+        Assert.assertEquals(resultLookupIdMap.getExternalSystemType(), lookupIdsMap.getExternalSystemType());
+        Assert.assertNotNull(resultLookupIdMap.getId());
+        Assert.assertNotNull(resultLookupIdMap.getIsRegistered());
+        Assert.assertEquals(resultLookupIdMap.getIsRegistered(), Boolean.TRUE);
+
+        LookupIdMap configAfterAnotherRegister = lookupIdMappingProxy.getLookupIdMap(mainCustomerSpace, configId);
+        Assert.assertEquals(configAfterAnotherRegister.getExternalSystemType(), externalSystemType);
+        Assert.assertEquals(configAfterAnotherRegister.getId(), configId);
+        Assert.assertEquals(configAfterAnotherRegister.getOrgId(), orgId);
+        Assert.assertEquals(configAfterAnotherRegister.getOrgName(), orgName);
+        Assert.assertEquals(configAfterAnotherRegister.getIsRegistered(), Boolean.TRUE);
+
+        confirmNonEmptyLookupConfigs(Boolean.TRUE);
     }
 
     @Test(groups = "deployment")
@@ -114,7 +173,7 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
         Assert.assertTrue(CollectionUtils.isNotEmpty(allCDLExternalSystemType));
     }
 
-    private void confirmNonEmptyLookupConfigs() {
+    private void confirmNonEmptyLookupConfigs(Boolean isMarkedRegistered) {
         Map<String, List<LookupIdMap>> lookupIdConfigs = lookupIdMappingProxy.getLookupIdsMapping(mainCustomerSpace,
                 null, null, true);
         Assert.assertNotNull(lookupIdConfigs);
@@ -137,6 +196,8 @@ public class LookupIdMappingResourceDeploymentTestNG extends CDLDeploymentTestNG
                 Assert.assertNotNull(lookupIdMap.getOrgId());
                 Assert.assertNotNull(lookupIdMap.getOrgName());
                 Assert.assertEquals(lookupIdMap.getId(), c.getId());
+                Assert.assertNotNull(lookupIdMap.getIsRegistered());
+                Assert.assertEquals(lookupIdMap.getIsRegistered(), isMarkedRegistered);
             });
         });
     }

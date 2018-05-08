@@ -54,6 +54,13 @@ public class LookupIdMappingResource {
         return lookupIdMappingProxy.registerExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
     }
 
+    @RequestMapping(value = "/deregister", method = RequestMethod.PUT, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Register an org")
+    public void deregisterExternalSystem(HttpServletRequest request, @RequestBody LookupIdMap lookupIdMap) {
+        lookupIdMappingProxy.deregisterExternalSystem(MultiTenantContext.getTenant().getId(), lookupIdMap);
+    }
+
     @RequestMapping(value = "/config/{id}", method = RequestMethod.GET)
     @ResponseBody
     @ApiOperation(value = "Get mapped configuration for given config id")
