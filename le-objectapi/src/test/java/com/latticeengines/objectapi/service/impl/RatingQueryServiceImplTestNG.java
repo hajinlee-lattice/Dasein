@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -247,6 +248,15 @@ public class RatingQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         Restriction restriction = Restriction.builder().let(BusinessEntity.Account, ATTR_ACCOUNT_NAME).gte("D").build();
         frontEndRestriction.setRestriction(restriction);
         frontEndQuery.setAccountRestriction(frontEndRestriction);
+
+        Long count = queryService.getCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+
+        Map<String, Long> coverage = queryService.getRatingCount(frontEndQuery, DataCollection.Version.Blue);
+        Assert.assertTrue(MapUtils.isNotEmpty(coverage));
+        Assert.assertEquals(coverage.size(), 1);
+        Assert.assertTrue(coverage.keySet().contains(RatingBucketName.C.name()));
+        Assert.assertEquals(coverage.get(RatingBucketName.C.name()), count);
 
         DataPage dataPage = queryService.getData(frontEndQuery, DataCollection.Version.Blue);
         Assert.assertNotNull(dataPage);
