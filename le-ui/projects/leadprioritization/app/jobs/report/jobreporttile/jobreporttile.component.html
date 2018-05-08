@@ -1,4 +1,11 @@
-    <div class="jobs-tile-body columns two panel ">
+
+     <div ng-if="vm.hasErrorMessage" class="tile-error-header">
+        <span class="error-header-text">
+            {{vm.report['ERROR_MESSAGE']}}
+        </span>
+    </div>
+
+    <div class="jobs-tile-body columns two panel" ng-class="{'left-align-tile': vm.hasErrorMessage}">
         <h2> {{vm.format(vm.entity)}} </h2>
         <h2> 
             <img ng-src="{{vm.entityIcon(vm.entity)}}"/>

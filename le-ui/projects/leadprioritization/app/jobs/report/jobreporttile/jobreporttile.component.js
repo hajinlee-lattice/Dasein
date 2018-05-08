@@ -25,7 +25,8 @@ angular
         		updatedRecords: 0,
         		matchedRecords: 0,
         		deletedRecords: 0,
-        		unmatchedRecords: 0
+        		unmatchedRecords: 0,
+                hasErrorMessage: false
         	});
         	
         	vm.init = function() {
@@ -36,6 +37,7 @@ angular
         			vm.unmatchedRecords = vm.report['UNMATCH'] ? vm.report['UNMATCH'] : 0;
                     vm.updatedProductHierarchy = vm.report['PRODUCT_HIERARCHY'] ? vm.report['PRODUCT_HIERARCHY'] : 0;
                     vm.updatedProductBundle = vm.report['PRODUCT_BUNDLE'] ? vm.report['PRODUCT_BUNDLE'] : 0;
+                    vm.hasErrorMessage = vm.report['ERROR_MESSAGE'] != undefined ? vm.report['ERROR_MESSAGE'] : false; 
         		}
         		vm.setFilteredActions();
                 vm.config = vm.getConfig();
@@ -79,6 +81,11 @@ angular
 			vm.parsePayload = function(action, key) {
 				return JSON.parse(action.reports[0]['json']['Payload'])[key] || JSON.parse(action.reports[0]['json']['Payload'])[key + '_Deleted'];
 			}
+
+            vm.hasErrorMessage = function() {
+                console.log(vm.report);
+                return vm.entity == 'Product' && vm.report['ERROR_MESSAGE'];
+            }
 
             vm.getConfig = function() {
                 switch (vm.entity) {
