@@ -21,7 +21,10 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
+import com.latticeengines.domain.exposed.pls.Action;
+import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.AttrConfigActivationOverview;
+import com.latticeengines.domain.exposed.pls.AttrConfigLifeCycleChangeConfiguration;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.AttrDetail;
 import com.latticeengines.domain.exposed.pls.AttrConfigSelectionDetail.SubcategoryDetail;
@@ -35,6 +38,7 @@ import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigOverview;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigProp;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfigRequest;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
+import com.latticeengines.pls.service.ActionService;
 import com.latticeengines.pls.service.AttrConfigService;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 
@@ -53,6 +57,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
     @Inject
     private CDLAttrConfigProxy cdlAttrConfigProxy;
+
+    @Inject
+    private ActionService actionService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -175,6 +182,34 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         String tenantId = MultiTenantContext.getTenantId();
         AttrConfigRequest attrConfigRequest = generateAttrConfigRequestForActivation(request);
         cdlAttrConfigProxy.saveAttrConfig(tenantId, attrConfigRequest);
+        createUpdateActivationActions(categoryName, request);
+    }
+
+    private void createUpdateActivationActions(String categoryName, AttrConfigSelectionRequest request) {
+        if (request.getSelect() != null) {
+            Action activationAction = new Action();
+            activationAction.setActionInitiator(MultiTenantContext.getEmailAddress());
+            activationAction.setType(ActionType.ATTRIBUTE_MANAGEMENT_ACTIVATION);
+            AttrConfigLifeCycleChangeConfiguration ac = new AttrConfigLifeCycleChangeConfiguration();
+            ac.setAttrNums((long) request.getSelect().size());
+            ac.setCategoryName(categoryName);
+            ac.setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.ACTIVATION);
+            activationAction.setActionConfiguration(ac);
+            activationAction.setDescription(ac.serialize());
+            actionService.create(activationAction);
+        }
+        if (request.getDeselect() != null) {
+            Action deActivationAction = new Action();
+            deActivationAction.setActionInitiator(MultiTenantContext.getEmailAddress());
+            deActivationAction.setType(ActionType.ATTRIBUTE_MANAGEMENT_DEACTIVATION);
+            AttrConfigLifeCycleChangeConfiguration ac = new AttrConfigLifeCycleChangeConfiguration();
+            ac.setAttrNums((long) request.getDeselect().size());
+            ac.setCategoryName(categoryName);
+            ac.setSubType(AttrConfigLifeCycleChangeConfiguration.SubType.DEACTIVATION);
+            deActivationAction.setActionConfiguration(ac);
+            deActivationAction.setDescription(ac.serialize());
+            actionService.create(deActivationAction);
+        }
     }
 
     @VisibleForTesting

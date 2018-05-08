@@ -362,11 +362,12 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 attrConfigEntityMgr.save(MultiTenantContext.getTenantId(), entity, trim(configList));
             });
 
-            try {
-                registerAction(diffProperties);
-            } catch (Exception e) {
-                log.error("Cannot register action to action table: " + e.getMessage());
-            }
+            // try {
+            // registerAction(diffProperties);
+            // } catch (Exception e) {
+            // log.error("Cannot register action to action table: " +
+            // e.getMessage());
+            // }
         }
 
         return toReturn;
