@@ -196,7 +196,7 @@ public class MetadataSegment implements HasName, HasPid, HasAuditingFields, HasT
     @JsonProperty("contact_restriction")
     @ApiModelProperty("Contact restriction for use in the front end")
     public FrontEndRestriction getContactFrontEndRestriction() {
-        return new FrontEndRestriction(getAccountRestriction());
+        return new FrontEndRestriction(getContactRestriction());
     }
 
     @JsonProperty("contact_restriction")
