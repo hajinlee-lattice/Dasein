@@ -1,6 +1,14 @@
 {
   "RootPath": "/",
   "Nodes": [
-    { "Node": "InvokeTime", "Data": {"Type": "number", "Required": false}}
+    { "Node": "InvokeTime", "Data": {"Type": "number", "Required": false}},
+    { "Node": "DefaultAPSRollupPeriod",
+      "Data": {
+        "Type": "options",
+        "Options": [
+              "Business Year", "Business Quarter", "Business Month", "Business Week"
+            ]
+        }
+    }
   ]
 }

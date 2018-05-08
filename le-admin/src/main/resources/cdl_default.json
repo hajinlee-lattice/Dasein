@@ -8,6 +8,10 @@
     {
       "Node": "InvokeTime",
       "Data": -1
+    },
+    {
+      "Node": "DefaultAPSRollupPeriod",
+      "Data": "Business Quarter"
     }
   ]
 }
