@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,11 +18,11 @@ import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.BucketMetadata;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineStatus;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
-import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
 import com.latticeengines.domain.exposed.pls.cdl.rating.model.CustomEventModelingConfig;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessRatingStepConfiguration;
@@ -86,26 +85,27 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private RatingModelContainer getValidRatingModel(RatingEngineSummary summary) {
         RatingModelContainer container = new RatingModelContainer(null, summary);
         String engineId = summary.getId();
+        String engineName = summary.getDisplayName();
         RatingEngine engine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
-        RatingModel ratingModel = engine.getActiveModel();
-        if (ratingModel != null && !Boolean.TRUE.equals(engine.getDeleted()) && StringUtils.isNotBlank(summary.getSegmentName())) {
+        if (isValidRatingEngine(engine)) {
+            RatingModel ratingModel = engine.getActiveModel();
             boolean isValid = false;
             if (RatingEngineType.CROSS_SELL.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCrossSellModel(aiModel);
                 if (!isValid) {
-                    log.warn("Cross sell rating model " + aiModel.getId() + " is not ready for scoring.");
+                    log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineName + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.CUSTOM_EVENT.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCustomEventModel(aiModel);
                 if (!isValid) {
-                    log.warn("Custom event rating model " + aiModel.getId() + " is not ready for scoring.");
+                    log.warn("Custom event rating model " + aiModel.getId() + " of " + engineName + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
-                    log.warn("Rule based rating model " + ratingModel.getId() + " is not ready for scoring.");
+                    log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineName + " is not ready for scoring.");
                 }
             }
             if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
@@ -117,6 +117,25 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             }
         }
         return container;
+    }
+
+    private boolean isValidRatingEngine(RatingEngine engine) {
+        String engineName = engine.getDisplayName();
+        boolean valid = true;
+        if (Boolean.TRUE.equals(engine.getDeleted())) {
+            log.info("Skip rating engine " + engineName + " because it is deleted.");
+            valid = false;
+        } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus()) && Boolean.TRUE.equals(engine.getJustCreated())) {
+            log.info("Skip rating engine " + engineName + " because it is just created.");
+            valid = false;
+        } else if (engine.getSegment() == null) {
+            log.info("Skip rating engine " + engineName + " because it belongs to an invalid segment.");
+            valid = false;
+        } else if (engine.getActiveModel() == null) {
+            log.info("Skip rating engine " + engineName + " because it does not have an active model.");
+            valid = false;
+        }
+        return valid;
     }
 
     private boolean isValidCrossSellModel(AIModel model) {
@@ -143,15 +162,6 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     private boolean isValidRuleBasedModel(RuleBasedModel model) {
         if (model.getRatingRule() == null) {
             log.warn("Rule based model " + model.getId() + " has null rating rule.");
-            return false;
-        }
-        RatingRule ratingRule = model.getRatingRule();
-        if (MapUtils.isEmpty(ratingRule.getBucketToRuleMap())) {
-            log.warn("Rule based model " + model.getId() + " has empty bucket to rule map.");
-            return false;
-        }
-        if (StringUtils.isBlank(ratingRule.getDefaultBucketName())) {
-            log.warn("Rule based model " + model.getId() + " has blank default bucket name.");
             return false;
         }
         return true;
