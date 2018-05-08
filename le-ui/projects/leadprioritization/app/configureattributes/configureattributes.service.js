@@ -60,6 +60,7 @@ angular.module('lp.configureattributes')
         for(var i in options) {
             var key = i,
                 option = options[key];
+
             ConfigureAttributesStore.options[key] = options[key];
         }
     }
@@ -72,8 +73,15 @@ angular.module('lp.configureattributes')
         var periods = [];
         for(var i in _option) {
             for(var j in _option[i]) {
-                var cmp = j,
-                    option = _option[i][cmp],
+                var cmp = j;
+                if(Object.keys(_option[i]).length > 1) { //fixes weird behavior where options can become duplicated
+                    if(j !== 'null') {
+                        return false;
+                    } else {
+                        cmp = 'WITHIN';
+                    }
+                }
+                var option = _option[i][cmp],
                     period = {
                         Cmp: (cmp !== 'null' ? cmp : 'WITHIN'),
                         Vals: [option.Val],
@@ -89,6 +97,7 @@ angular.module('lp.configureattributes')
                         eol: false,
                         IsEOL: false
                     };
+
                 if(period.Vals && Number.isInteger(period.Vals[0])) {
                     ConfigureAttributesStore.purchaseHistory.push(obj);
                 }

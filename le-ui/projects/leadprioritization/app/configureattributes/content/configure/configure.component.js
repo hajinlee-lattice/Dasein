@@ -73,12 +73,14 @@ angular.module('lp.configureattributes.configure', [])
             if(!type) {
                 return false;
             }
+
             var index = index || 0,
                 periods = data[index].periods,
                 valObj = periods.find(function(item) {
                     return item.Cmp === type;
                 }),
                 period = valObj.Period;
+
             return period + (period.slice(-1) !== 's' ? append : '');
         }
 
@@ -101,6 +103,7 @@ angular.module('lp.configureattributes.configure', [])
                         Period: null
                     }]
             };
+
             array.push(obj);
 
             ConfigureAttributesStore.setOptions(vm.options);
@@ -110,14 +113,35 @@ angular.module('lp.configureattributes.configure', [])
             }
         }
 
+        /**
+         * Used to rebuild the model because the ngRepeat doesn't like 
+         * it if you delete objects from it's array and the indexes are
+         * weird or something
+         */
+        var rebuildModel = function(key) {
+            var newOptions = [];
+            for(var i in vm.options[key]) {
+                var newCmp = [];
+                for(var j in vm.options[key][i]) {
+                    newCmp[j] = vm.options[key][i][j];
+                }
+                newOptions.push(newCmp);
+            }
+            vm.options[key] = newOptions;
+        }
+
         vm.removePeriod = function(array, key, index, form) {
             var tmp = array[key].filter(function(value, _index) { 
-                return _index !== index;
-            });
+                    return _index !== index;
+                });
+
             vm.spendOvertime[key] = tmp;
+
             delete vm.options[key][index];
 
             ConfigureAttributesStore.setOptions(vm.options);
+
+            rebuildModel(key);
 
             if(form) {
                 form.$setDirty();
@@ -146,13 +170,17 @@ angular.module('lp.configureattributes.configure', [])
             $state.go('home.configureattributes.' + name);
         }
 
-        vm.save = function() {
+        vm.save = function(form) {
             ConfigureAttributesStore.saveSteps(vm.step);
             ConfigureAttributesStore.getPurchaseHistory().then(function(result) {
                 vm.saveObj = result;
             });
             vm.steps[vm.step].completed = true;
             //vm.gotoNextStep(vm.step);
+            
+            if(form) {
+                form.$setPristine();
+            }
         }
 
         vm.submit = function() {
