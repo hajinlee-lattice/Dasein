@@ -363,7 +363,7 @@ public class RatingEngineEntityMgrImpl extends BaseEntityMgrRepositoryImpl<Ratin
         ratingEngine.setAdvancedRatingConfig(advancedRatingConfig);
 
         // set Activation Action Context
-        if (ratingEngine.getStatus() != null && ratingEngine.getStatus() == RatingEngineStatus.ACTIVE) {
+        if (RatingEngineStatus.ACTIVE.equals(ratingEngine.getStatus())) {
             setActivationActionContext(ratingEngine);
             ratingEngine.setJustCreated(false);
         }
