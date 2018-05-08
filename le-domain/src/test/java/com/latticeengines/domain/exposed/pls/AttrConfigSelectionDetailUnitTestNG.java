@@ -1,9 +1,7 @@
 package com.latticeengines.domain.exposed.pls;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.testng.annotations.Test;
 
@@ -20,10 +18,11 @@ public class AttrConfigSelectionDetailUnitTestNG {
         selectionDetail.setSelected(500L);
         selectionDetail.setLimit(500L);
         selectionDetail.setTotalAttrs(3000L);
-        Map<String, AttrConfigSelectionDetail.SubcategoryDetail> subcategories = new HashMap<>();
+        List<AttrConfigSelectionDetail.SubcategoryDetail> subcategories = new ArrayList<>();
         selectionDetail.setSubcategories(subcategories);
         AttrConfigSelectionDetail.SubcategoryDetail subcategoryDetail1 = new AttrConfigSelectionDetail.SubcategoryDetail();
-        subcategoryDetail1.setSelected(100L);
+        subcategoryDetail1.setSubCategory("Subcategory1");
+        subcategoryDetail1.setSelected(true);
         subcategoryDetail1.setTotalAttrs(200L);
         subcategoryDetail1.setHasFrozenAttrs(Boolean.TRUE);
         List<AttrDetail> attributes1 = new ArrayList<>();
@@ -59,7 +58,8 @@ public class AttrConfigSelectionDetailUnitTestNG {
         attr14Detail.setIsFrozen(Boolean.TRUE);
 
         AttrConfigSelectionDetail.SubcategoryDetail subcategoryDetail2 = new AttrConfigSelectionDetail.SubcategoryDetail();
-        subcategoryDetail2.setSelected(2L);
+        subcategoryDetail2.setSubCategory("Subcategory2");
+        subcategoryDetail2.setSelected(true);
         subcategoryDetail2.setTotalAttrs(2L);
         subcategoryDetail2.setHasFrozenAttrs(Boolean.FALSE);
         List<AttrDetail> attributes2 = new ArrayList<>();
@@ -78,8 +78,8 @@ public class AttrConfigSelectionDetailUnitTestNG {
         attr22Detail.setDescription("Attr 2 2");
         attr22Detail.setSelected(Boolean.TRUE);
 
-        subcategories.put("Subcategory1", subcategoryDetail1);
-        subcategories.put("Subcategory2", subcategoryDetail2);
+        subcategories.add(subcategoryDetail1);
+        subcategories.add(subcategoryDetail2);
 
         System.out.println(selectionDetail);
     }

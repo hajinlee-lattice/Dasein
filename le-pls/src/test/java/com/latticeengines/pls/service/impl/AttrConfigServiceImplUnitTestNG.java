@@ -257,8 +257,8 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(activationDetail.getSelected() - 4L, 0);
         Assert.assertEquals(activationDetail.getTotalAttrs() - 9L, 0);
         Assert.assertEquals(activationDetail.getSubcategories().size(), 8);
-        Assert.assertTrue(activationDetail.getSubcategories().entrySet().parallelStream()
-                .allMatch(entry -> entry.getValue().getHasFrozenAttrs() == false));
+        Assert.assertTrue(activationDetail.getSubcategories().parallelStream()
+                .allMatch(entry -> entry.getHasFrozenAttrs() == false));
     }
 
     @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
@@ -281,8 +281,8 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(selectionDetail.getSelected() - 0L, 0);
         Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
-        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
-                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
+        Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
     }
 
     @Test(groups = "unit", dependsOnMethods = { "testGetAttrConfigUsageOverview" })
@@ -304,8 +304,8 @@ public class AttrConfigServiceImplUnitTestNG {
         Assert.assertEquals(selectionDetail.getSelected() - 1L, 0);
         Assert.assertEquals(selectionDetail.getTotalAttrs() - 1L, 0);
         Assert.assertEquals(selectionDetail.getSubcategories().size(), 1);
-        Assert.assertEquals(selectionDetail.getSubcategories().entrySet().parallelStream()
-                .filter(entry -> entry.getValue().getHasFrozenAttrs() == false).count(), 1);
+        Assert.assertEquals(selectionDetail.getSubcategories().parallelStream()
+                .filter(entry -> entry.getHasFrozenAttrs() == false).count(), 1);
     }
 
     private AttrConfigOverview<AttrState> generateIntentAttrConfigOverview() {

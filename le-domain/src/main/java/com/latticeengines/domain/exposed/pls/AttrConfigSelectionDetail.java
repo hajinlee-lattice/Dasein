@@ -2,7 +2,6 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -27,7 +26,7 @@ public class AttrConfigSelectionDetail {
     private BusinessEntity entity;
 
     @JsonProperty("Subcategories")
-    private Map<String, SubcategoryDetail> subcategories;
+    private List<SubcategoryDetail> subcategories;
 
     public Long getSelected() {
         return this.selected;
@@ -61,11 +60,11 @@ public class AttrConfigSelectionDetail {
         this.entity = entity;
     }
 
-    public Map<String, SubcategoryDetail> getSubcategories() {
+    public List<SubcategoryDetail> getSubcategories() {
         return this.subcategories;
     }
 
-    public void setSubcategories(Map<String, SubcategoryDetail> subcategories) {
+    public void setSubcategories(List<SubcategoryDetail> subcategories) {
         this.subcategories = subcategories;
     }
 
@@ -73,8 +72,11 @@ public class AttrConfigSelectionDetail {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SubcategoryDetail {
 
+        @JsonProperty("SubCategory")
+        private String subCategory;
+
         @JsonProperty("Selected")
-        private Long selected = 0L;
+        private Boolean selected = Boolean.FALSE;
 
         @JsonProperty("TotalAttrs")
         private Long totalAttrs = 0L;
@@ -85,11 +87,19 @@ public class AttrConfigSelectionDetail {
         @JsonProperty("Attributes")
         private List<AttrDetail> attributes = new ArrayList<>();
 
-        public Long getSelected() {
+        public String getSubCategory() {
+            return subCategory;
+        }
+
+        public void setSubCategory(String subCategoryVal) {
+            subCategory = subCategoryVal;
+        }
+
+        public Boolean getSelected() {
             return selected;
         }
 
-        public void setSelected(Long selectedValue) {
+        public void setSelected(Boolean selectedValue) {
             selected = selectedValue;
         }
 

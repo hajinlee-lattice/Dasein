@@ -323,7 +323,9 @@ public class AttrConfigServiceImpl implements AttrConfigService {
         long totalAttrs = 0L;
         long selected = 0L;
 
-        Map<String, SubcategoryDetail> subcategories = new HashMap<>();
+        List<SubcategoryDetail> subcategories = new ArrayList<>();
+        // key: subcategory, value: index in the subcategories
+        Map<String, Integer> subCategoryToIndexMap = new HashMap<>();
         attrConfigSelectionDetail.setSubcategories(subcategories);
         if (attrConfigRequest.getAttrConfigs() != null) {
             for (AttrConfig attrConfig : attrConfigRequest.getAttrConfigs()) {
@@ -367,7 +369,14 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 log.warn(String.format("subcategory value for %s is null", attrConfig.getAttrName()));
                                 continue;
                             }
-                            subcategoryDetail = subcategories.getOrDefault(subcategory, new SubcategoryDetail());
+                            if (subCategoryToIndexMap.containsKey(subcategory)) {
+                                subcategoryDetail = subcategories.get(subCategoryToIndexMap.get(subcategory));
+                            } else {
+                                subCategoryToIndexMap.put(subcategory, subcategories.size());
+                                subcategoryDetail = new SubcategoryDetail();
+                                subcategoryDetail.setSubCategory(subcategory);
+                                subcategories.add(subcategoryDetail);
+                            }
                         } else {
                             log.warn(String.format("%s does not have subcategory property", attrConfig.getAttrName()));
                             continue;
@@ -387,7 +396,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 if (AttrState.Active == actualState) {
                                     selected++;
                                     attrDetail.setSelected(true);
-                                    subcategoryDetail.setSelected(subcategoryDetail.getSelected() + 1);
+                                    subcategoryDetail.setSelected(true);
                                 } else {
                                     attrDetail.setSelected(false);
                                 }
@@ -396,7 +405,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 if (actualState) {
                                     selected++;
                                     attrDetail.setSelected(true);
-                                    subcategoryDetail.setSelected(subcategoryDetail.getSelected() + 1);
+                                    subcategoryDetail.setSelected(true);
                                 } else {
                                     attrDetail.setSelected(false);
                                 }
@@ -414,7 +423,6 @@ public class AttrConfigServiceImpl implements AttrConfigService {
 
                             subcategoryDetail.setTotalAttrs(subcategoryDetail.getTotalAttrs() + 1);
                             subcategoryDetail.getAttributes().add(attrDetail);
-                            subcategories.put(subcategory, subcategoryDetail);
                             totalAttrs++;
                         } else {
                             log.warn(String.format("%s does not have property %s", attrConfig.getAttrName(), property));
