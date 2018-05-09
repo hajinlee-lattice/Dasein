@@ -38,6 +38,7 @@ import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.dante.TalkingPointProxy;
+import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
@@ -59,6 +60,9 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
     private MetadataSegment segment;
 
     @Inject
+    private CDLTestDataService cdlTestDataService;
+
+    @Inject
     private RatingEngineProxy ratingEngineProxy;
 
     @Inject
@@ -78,6 +82,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
             tenant = testBed.getMainTestTenant();
         }
 
+        cdlTestDataService.populateData(tenant.getId());
+
         MetadataSegment retrievedSegment = createSegment();
 
         createRatingEngine(retrievedSegment, new RatingRule());
@@ -96,6 +102,7 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
         RatingEngine createdRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(tenant.getId(), ratingEngine1);
         Assert.assertNotNull(createdRatingEngine);
+        cdlTestDataService.mockRatingTableWithSingleEngine(tenant.getId(), createdRatingEngine.getId(), null);
         ratingEngine1.setId(createdRatingEngine.getId());
 
         List<RatingModel> models = ratingEngineProxy.getRatingModels(tenant.getId(), ratingEngine1.getId());
