@@ -95,20 +95,20 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCrossSellModel(aiModel);
                 if (!isValid) {
-                    log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineId + ":" + engineName
+                    log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.CUSTOM_EVENT.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCustomEventModel(aiModel);
                 if (!isValid) {
-                    log.warn("Custom event rating model " + aiModel.getId() + " of " + engineId + ":" + engineName
+                    log.warn("Custom event rating model " + aiModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
-                    log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineId + ":" + engineName
+                    log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineId + " : " + engineName
                             + " is not ready for scoring.");
                 }
             }
@@ -128,19 +128,19 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
         String engineName = engine.getDisplayName();
         boolean valid = true;
         if (Boolean.TRUE.equals(engine.getDeleted())) {
-            log.info("Skip rating engine " + engineId + ":" + engineName + " because it is deleted.");
+            log.info("Skip rating engine " + engineId + " : " + engineName + " because it is deleted.");
             valid = false;
         } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus())
                 && Boolean.TRUE.equals(engine.getJustCreated())) {
-            log.info("Skip rating engine " + engineId + ":" + engineName + " because it is just created.");
+            log.info("Skip rating engine " + engineId + " : " + engineName + " because it is just created.");
             valid = false;
         } else if (engine.getSegment() == null) {
             log.info(
-                    "Skip rating engine " + engineId + ":" + engineName + " because it belongs to an invalid segment.");
+                    "Skip rating engine " + engineId + " : " + engineName + " because it belongs to an invalid segment.");
             valid = false;
         } else if (engine.getActiveModel() == null) {
             log.info(
-                    "Skip rating engine " + engineId + ":" + engineName + " because it does not have an active model.");
+                    "Skip rating engine " + engineId + " : " + engineName + " because it does not have an active model.");
             valid = false;
         }
         return valid;
