@@ -39,7 +39,7 @@ public class LifecycleValidator extends AttrValidator {
         AttrConfigProp stateProp = attrConfig.getProperty(ColumnMetadataKey.State);
         if(stateProp != null) {
             if(stateProp.getCustomValue() != null) {
-                AttrState customState = AttrState.class.cast(stateProp.getCustomValue());
+                AttrState customState = AttrState.valueOf(stateProp.getCustomValue().toString());
                 if (customState.equals(AttrState.Inactive)) {
                     addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,
                             String.format(ValidationMsg.Errors.FORBID_SET_INACTIVE, attrConfig.getAttrName()),
@@ -47,7 +47,7 @@ public class LifecycleValidator extends AttrValidator {
                 }
             }
             if (stateProp.getSystemValue() != null) {
-                AttrState systemState = AttrState.class.cast(stateProp.getSystemValue());
+                AttrState systemState = AttrState.valueOf(stateProp.getSystemValue().toString());
                 if (systemState.equals(AttrState.Inactive)) {
                     for (ColumnSelection.Predefined group: ColumnSelection.Predefined.values()) {
                         AttrConfigProp groupUsageProp = attrConfig.getProperty(group.name());
@@ -59,7 +59,7 @@ public class LifecycleValidator extends AttrValidator {
                                         attrConfig);
                             }
                             if (groupUsageProp.getSystemValue() != null) {
-                                Boolean groupUsage = Boolean.class.cast(groupUsageProp.getSystemValue());
+                                Boolean groupUsage = Boolean.valueOf(groupUsageProp.getSystemValue().toString());
                                 if (groupUsage) {
                                     addErrorMsg(ValidationErrors.Type.INVALID_USAGE_CHANGE,
                                             String.format(ValidationMsg.Errors.INACTIVE_USAGE,
@@ -71,7 +71,7 @@ public class LifecycleValidator extends AttrValidator {
                     }
                 } else if (systemState.equals(AttrState.Deprecated)) {
                     if (stateProp.getCustomValue() != null) {
-                        AttrState customState = AttrState.class.cast(stateProp.getCustomValue());
+                        AttrState customState = AttrState.valueOf(stateProp.getCustomValue().toString());
                         if (customState.equals(AttrState.Active)) {
                             addErrorMsg(ValidationErrors.Type.INVALID_ACTIVATION,
                                     String.format(ValidationMsg.Errors.FORBID_SET_ACTIVE, attrConfig.getAttrName()),
