@@ -1,7 +1,6 @@
 package com.latticeengines.apps.core.service;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +27,8 @@ public abstract class AttrValidator {
         ValidationErrors error = attrConfig.getValidationErrors();
         if (error == null) {
             error = new ValidationErrors();
-            error.getErrors().put(errorType, new ArrayList<>(Arrays.asList(message)));
+            error.getErrors().put(errorType, new ArrayList<>());
+            error.getErrors().get(errorType).add(message);
             attrConfig.setValidationErrors(error);
         } else {
             if (error.getErrors().containsKey(errorType)) {
@@ -36,7 +36,8 @@ public abstract class AttrValidator {
                     error.getErrors().get(errorType).add(message);
                 }
             } else {
-                error.getErrors().put(errorType, new ArrayList<>(Arrays.asList(message)));
+                error.getErrors().put(errorType, new ArrayList<>());
+                error.getErrors().get(errorType).add(message);
             }
         }
     }
@@ -45,7 +46,8 @@ public abstract class AttrValidator {
         ImpactWarnings warning = attrConfig.getImpactWarnings();
         if (warning == null) {
             warning = new ImpactWarnings();
-            warning.getWarnings().put(warningType, new ArrayList<>(Arrays.asList(message)));
+            warning.getWarnings().put(warningType, new ArrayList<>());
+            warning.getWarnings().get(warningType).add(message);
             attrConfig.setImpactWarnings(warning);
         } else {
             if (warning.getWarnings().containsKey(warningType)) {
@@ -53,7 +55,8 @@ public abstract class AttrValidator {
                     warning.getWarnings().get(warningType).add(message);
                 }
             } else {
-                warning.getWarnings().put(warningType, new ArrayList<>(Arrays.asList(message)));
+                warning.getWarnings().put(warningType, new ArrayList<>());
+                warning.getWarnings().get(warningType).add(message);
             }
         }
     }

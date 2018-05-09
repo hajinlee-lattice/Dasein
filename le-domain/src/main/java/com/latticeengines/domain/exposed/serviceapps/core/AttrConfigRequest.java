@@ -2,6 +2,8 @@ package com.latticeengines.domain.exposed.serviceapps.core;
 
 import java.util.List;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AttrConfigRequest {
@@ -30,6 +32,12 @@ public class AttrConfigRequest {
 
     public boolean hasError() {
         return details != null && details.hasError();
+    }
+
+    public void fixJsonDeserialization() {
+        if (CollectionUtils.isNotEmpty(attrConfigs)) {
+            attrConfigs.forEach(AttrConfig::fixJsonDeserialization);
+        }
     }
 
 }

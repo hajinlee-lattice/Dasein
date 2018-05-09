@@ -30,9 +30,11 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig/entities/{entity}", //
                 shortenCustomerSpace(customerSpace), entity));
         if (!render) {
-            url.append("?render=" + render);
+            url.append("?render=0");
         }
-        return getKryo("get attr config by entity", url.toString(), AttrConfigRequest.class);
+        AttrConfigRequest result = getKryo("get attr config by entity", url.toString(), AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
     }
 
     @SuppressWarnings({ "unchecked" })
@@ -43,9 +45,9 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         StringBuilder url = new StringBuilder();
         url.append(constructUrl("/customerspaces/{customerSpace}/attrconfig", //
                 shortenCustomerSpace(customerSpace)));
-        url.append("?property=" + propertyName);
+        url.append("?property=").append(propertyName);
         if (categoryName != null) {
-            url.append("&category=" + categoryName);
+            url.append("&category=").append(categoryName);
         }
         log.info("url is " + url);
         return getKryo("get Attribute Configuration Overview", url.toString(), List.class);
@@ -58,7 +60,7 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
                 + propertyNames + " activeOnly " + activeOnly);
         String url = contructUrlForGetAttrConfigOverview(customerSpace, categoryNames, propertyNames, activeOnly);
         log.info("getAttrConfigOverview url is " + url);
-        return postKryo("get Attribute Configuration Overview", url.toString(), propertyNames, Map.class);
+        return postKryo("get Attribute Configuration Overview", url, propertyNames, Map.class);
     }
 
     @VisibleForTesting
@@ -70,13 +72,13 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
         if (categoryNames != null) {
             url.append("?");
             for (String categoryName : categoryNames) {
-                url.append("category=" + categoryName + "&");
+                url.append("category=").append(categoryName).append("&");
             }
         }
         if (!url.toString().endsWith("&")) {
             url.append("?");
         }
-        url.append("activeOnly=" + activeOnly);
+        url.append("activeOnly=").append(activeOnly);
         return url.toString();
     }
 
@@ -85,19 +87,25 @@ public abstract class BaseAttrConfigProxyImpl extends MicroserviceRestApiProxy {
                 shortenCustomerSpace(customerSpace));
         url += categoryName;
         log.info("getAttrConfigByCategory url is " + url);
-        return getKryo("get attr config by category", url, AttrConfigRequest.class);
+        AttrConfigRequest result =  getKryo("get attr config by category", url, AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
     }
 
     public AttrConfigRequest saveAttrConfig(String customerSpace, AttrConfigRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/", //
                 shortenCustomerSpace(customerSpace));
-        return post("save attr config", url, request, AttrConfigRequest.class);
+        AttrConfigRequest result =  post("save attr config", url, request, AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
     }
 
     public AttrConfigRequest validateAttrConfig(String customerSpace, AttrConfigRequest request) {
         String url = constructUrl("/customerspaces/{customerSpace}/attrconfig/validate", //
                 shortenCustomerSpace(customerSpace));
-        return post("validate attr config request", url, request, AttrConfigRequest.class);
+        AttrConfigRequest result =  post("validate attr config request", url, request, AttrConfigRequest.class);
+        result.fixJsonDeserialization();
+        return result;
     }
 
 }

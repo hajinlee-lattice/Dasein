@@ -500,13 +500,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             AttrConfigProp<Category> cateProp = (AttrConfigProp<Category>) attrProps
                     .getOrDefault(ColumnMetadataKey.Category, new AttrConfigProp<Category>());
             cateProp.setSystemValue(metadata.getCategory());
-            cateProp.setAllowCustomization(attrSpec == null ? true : attrSpec.categoryNameChange());
+            cateProp.setAllowCustomization(attrSpec == null || attrSpec.categoryNameChange());
             mergeConfig.putProperty(ColumnMetadataKey.Category, cateProp);
 
             AttrConfigProp<String> subCateProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.Subcategory, new AttrConfigProp<String>());
             subCateProp.setSystemValue(metadata.getSubcategory());
-            subCateProp.setAllowCustomization(attrSpec == null ? true : attrSpec.categoryNameChange());
+            subCateProp.setAllowCustomization(attrSpec == null || attrSpec.categoryNameChange());
             mergeConfig.putProperty(ColumnMetadataKey.Subcategory, subCateProp);
 
             AttrConfigProp<AttrState> statsProp = (AttrConfigProp<AttrState>) attrProps
@@ -524,13 +524,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
             displayNameProp.setSystemValue(metadata.getDisplayName());
-            displayNameProp.setAllowCustomization(attrSpec == null ? true : attrSpec.displayNameChange());
+            displayNameProp.setAllowCustomization(attrSpec == null || attrSpec.displayNameChange());
             mergeConfig.putProperty(ColumnMetadataKey.DisplayName, displayNameProp);
 
             AttrConfigProp<String> descriptionProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.Description, new AttrConfigProp<String>());
             descriptionProp.setSystemValue(metadata.getDescription());
-            descriptionProp.setAllowCustomization(attrSpec == null ? true : attrSpec.descriptionChange());
+            descriptionProp.setAllowCustomization(attrSpec == null || attrSpec.descriptionChange());
             mergeConfig.putProperty(ColumnMetadataKey.Description, descriptionProp);
 
             for (ColumnSelection.Predefined group : ColumnSelection.Predefined.values()) {
@@ -544,7 +544,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     usageProp = (AttrConfigProp<Boolean>) attrProps.getOrDefault(group.name(),
                             new AttrConfigProp<Boolean>());
                     usageProp.setSystemValue(metadata.isEnabledFor(group));
-                    usageProp.setAllowCustomization(attrSpec == null ? true : attrSpec.allowChange(group));
+                    usageProp.setAllowCustomization(attrSpec == null || attrSpec.allowChange(group));
                     break;
                 default:
                     continue;
@@ -557,13 +557,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     }
 
     public List<AttrConfig> trim(List<AttrConfig> customConfig) {
-        List<AttrConfig> results = new ArrayList<AttrConfig>();
+        List<AttrConfig> results = new ArrayList<>();
         for (AttrConfig config : customConfig) {
-            Map<String, AttrConfigProp<?>> props = config.getAttrProps();
-            AttrState state = (AttrState) (props.get(ColumnMetadataKey.State)).getSystemValue();
+            AttrState state = config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
             if (AttrState.Active.equals(state)) {
                 config.getAttrProps().values().removeIf(v -> (v.getCustomValue() == null));
                 if (config.getAttrProps().size() != 0) {
+                    config.getAttrProps().values().forEach(prop -> {
+                        prop.setSystemValue(null);
+                        prop.setAllowCustomization(null);
+                    });
                     results.add(config);
                 }
             }
@@ -593,7 +596,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                 break;
             }
         }
-        actionTypes.forEach(actionType -> registerAction(actionType));
+        actionTypes.forEach(this::registerAction);
     }
 
     private void registerAction(ActionType actionType) {

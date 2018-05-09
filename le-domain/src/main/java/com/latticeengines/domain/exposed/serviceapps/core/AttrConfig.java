@@ -103,6 +103,19 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
         return null;
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> T getPropertyFinalValue(String key, Class<T> valueClz) {
+        AttrConfigProp prop = getProperty(key);
+        if (prop != null) {
+            if (Boolean.TRUE.equals(prop.isAllowCustomization()) && prop.getCustomValue() != null) {
+                return valueClz.cast(prop.getCustomValue());
+            } else {
+                return valueClz.cast(prop.getSystemValue());
+            }
+        }
+        return null;
+    }
+
     private <T> T getProperty(String key, Class<T> valueClz) {
         AttrConfigProp prop = getProperty(key);
         if (prop != null && prop.getCustomValue() != null) {
@@ -157,6 +170,19 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
                 cm.enableGroup(group);
             } else {
                 cm.disableGroup(group);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void fixJsonDeserialization() {
+        if (attrProps.containsKey(ColumnMetadataKey.State)) {
+            AttrConfigProp prop = attrProps.get(ColumnMetadataKey.State);
+            if (prop.getCustomValue() != null && prop.getCustomValue() instanceof String) {
+                prop.setCustomValue(AttrState.valueOf((String) prop.getCustomValue()));
+            }
+            if (prop.getSystemValue() != null && prop.getSystemValue() instanceof String) {
+                prop.setSystemValue(AttrState.valueOf((String) prop.getSystemValue()));
             }
         }
     }

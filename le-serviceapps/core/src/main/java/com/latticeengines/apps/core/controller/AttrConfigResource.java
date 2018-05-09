@@ -76,7 +76,7 @@ public class AttrConfigResource {
             @RequestParam(value = "onlyActive", required = false, defaultValue = "0") boolean onlyActive, //
             @RequestBody List<String> propertyNames) {
         List<Category> categories = categoryNames != null
-                ? categoryNames.stream().map(categoryName -> resolveCategory(categoryName)).collect(Collectors.toList())
+                ? categoryNames.stream().map(this::resolveCategory).collect(Collectors.toList())
                 : Arrays.asList(Category.values());
         return attrConfigService.getAttrConfigOverview(categories, propertyNames, onlyActive);
     }
@@ -86,6 +86,7 @@ public class AttrConfigResource {
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
             @RequestBody AttrConfigRequest request) {
+        request.fixJsonDeserialization();
         return attrConfigService.saveRequest(request);
     }
 
@@ -94,6 +95,7 @@ public class AttrConfigResource {
     @ApiOperation("get cdl attribute config request")
     public AttrConfigRequest validateAttrConfig(@PathVariable String customerSpace,
             @RequestBody AttrConfigRequest request) {
+        request.fixJsonDeserialization();
         return attrConfigService.validateRequest(request);
     }
 
