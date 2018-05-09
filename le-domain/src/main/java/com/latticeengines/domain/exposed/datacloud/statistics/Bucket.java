@@ -135,6 +135,16 @@ public class Bucket implements Serializable {
         return bucket;
     }
 
+    public static Bucket chgBkt(Change.Direction direction, Change.ComparisonType comparator, List<Object> values) {
+        Bucket bucket = new Bucket();
+        Change change = new Change();
+        change.setDirection(direction);
+        change.setComparisonType(comparator);
+        change.setAbsVals(values);
+        bucket.setChange(change);
+        return bucket;
+    }
+
     public Bucket() {
     }
 
