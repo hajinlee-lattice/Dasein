@@ -90,9 +90,11 @@ public enum BusinessEntity implements GraphNode {
 
         Contact.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
 
+        Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
+        Product.addRelationship(PurchaseHistory, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
+
         Transaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         PeriodTransaction.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
-        Product.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         ProductHierarchy.addRelationship(Transaction, Cardinality.ONE_TO_MANY, InterfaceName.ProductId);
         PurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
         DepivotedPurchaseHistory.addRelationship(Account, Cardinality.MANY_TO_ONE, InterfaceName.AccountId);
