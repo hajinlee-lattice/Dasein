@@ -199,4 +199,20 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertEquals(transactionRestriction.getUnitFilter().getSelector(), AggregationSelector.UNIT);
     }
 
+    @Test(groups = "unit")
+    public void testPurchaseHistoryWithZeroImputation() {
+        Bucket bkt = Bucket.chgBkt(Bucket.Change.Direction.INC, Bucket.Change.ComparisonType.AT_LEAST, Collections.singletonList(0));
+        BucketRestriction bucketRestriction = new BucketRestriction(
+                new AttributeLookup(BusinessEntity.PurchaseHistory, "AM_A80D4770376C1226C47617C071324C0B__M_1__M_2_3__SC"), bkt);
+        String serialized = JsonUtils.serialize(bucketRestriction);
+        BucketRestriction deserialized = JsonUtils.deserialize(serialized, BucketRestriction.class);
+        Assert.assertNotNull(deserialized);
+        Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
+        Assert.assertNotNull(convertedRestriction);
+        System.out.println(JsonUtils.pprint(convertedRestriction));
+        Assert.assertTrue(convertedRestriction instanceof LogicalRestriction);
+        LogicalRestriction logicalRestriction = (LogicalRestriction) convertedRestriction;
+        Assert.assertEquals(logicalRestriction.getOperator(), LogicalOperator.OR);
+    }
+
 }
