@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.LogicalDataType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
@@ -44,7 +46,7 @@ public class VdbMetadataUtils {
             attr.setDataSource(metadata.getDataSource());
             attr.setFundamentalType(resolveFundamentalType(metadata));
             attr.setStatisticalType(resolveStatisticalType(metadata));
-            attr.setTags(metadata.getTags());
+            attr.setTags(getTags(metadata.getTags()));
             attr.setApprovedUsage(metadata.getApprovedUsage());
             attr.setDisplayDiscretizationStrategy(metadata.getDisplayDiscretizationStrategy());
             if (metadata.getDataQuality() != null && metadata.getDataQuality().size() > 0) {
@@ -67,6 +69,18 @@ public class VdbMetadataUtils {
             throw new RuntimeException(String.format("Failed to parse vdb metadata %s", JsonUtils.serialize(metadata)),
                     e);
         }
+    }
+
+    private static List<String> getTags(List<String> tags) {
+        List<String> defaultTags = new ArrayList<>(Arrays.asList(Tag.INTERNAL.getName()));
+        if (CollectionUtils.isNotEmpty(tags)) {
+            tags.forEach(tag -> {
+                if (!tag.equalsIgnoreCase(Tag.INTERNAL.getName())) {
+                    defaultTags.add(tag);
+                }
+            });
+        }
+        return defaultTags;
     }
 
     private static void setAttributeExtensions(Attribute attribute, List<VdbMetadataExtension> vdbMetadataExtensions) {

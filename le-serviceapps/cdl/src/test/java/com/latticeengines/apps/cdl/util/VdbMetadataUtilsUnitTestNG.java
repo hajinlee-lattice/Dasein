@@ -2,6 +2,7 @@ package com.latticeengines.apps.cdl.util;
 
 import java.util.Collections;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
@@ -13,6 +14,7 @@ import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.FundamentalType;
 import com.latticeengines.domain.exposed.metadata.StatisticalType;
 import com.latticeengines.domain.exposed.metadata.Table;
+import com.latticeengines.domain.exposed.metadata.Tag;
 import com.latticeengines.domain.exposed.pls.VdbMetadataExtension;
 import com.latticeengines.domain.exposed.pls.VdbSpecMetadata;
 
@@ -176,5 +178,7 @@ public class VdbMetadataUtilsUnitTestNG {
         Assert.assertNotNull(attribute);
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getName()));
         Assert.assertTrue(StringUtils.isNotBlank(attribute.getDisplayName()));
+        Assert.assertTrue(CollectionUtils.isNotEmpty(attribute.getTags()));
+        Assert.assertTrue(attribute.getTags().get(0).equals(Tag.INTERNAL.getName()));
     }
 }
