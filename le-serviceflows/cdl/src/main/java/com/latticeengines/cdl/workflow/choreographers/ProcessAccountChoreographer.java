@@ -33,6 +33,8 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Inject
     private RebuildAccountWorkflow rebuildAccountWorkflow;
 
+    protected boolean commonRebuild = false;
+
     @Override
     public boolean skipStep(AbstractStep<? extends BaseStepConfiguration> step, int seq) {
         return isCommonSkip(step, seq);
@@ -66,6 +68,12 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected BusinessEntity mainEntity() {
         return BusinessEntity.Account;
+    }
+
+    @Override
+    protected boolean shouldRebuild() {
+        commonRebuild = super.shouldRebuild();
+        return commonRebuild || dataCloudChanged;
     }
 
 }

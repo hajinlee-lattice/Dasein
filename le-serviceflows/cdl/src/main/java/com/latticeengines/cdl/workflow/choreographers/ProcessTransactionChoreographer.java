@@ -19,7 +19,6 @@ import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
-import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistoryWrapper;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
@@ -72,7 +71,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
         hasActiveServingStore = true;
-        for (TableRoleInCollection servingStore: Arrays.asList( //
+        for (TableRoleInCollection servingStore : Arrays.asList( //
                 BusinessEntity.Transaction.getServingStore(), //
                 BusinessEntity.PeriodTransaction.getServingStore() //
         )) {
@@ -250,7 +249,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
             // do nothing
         }
         if (hasProducts && hasAccounts) {
-            if (hasRawStore && (accountChoreographer.update || accountChoreographer.rebuild)) {
+            if (hasRawStore && (accountChoreographer.update || (accountChoreographer.commonRebuild))) {
                 log.info("Need to rebuild purchase history due to Account changes.");
                 shouldCalc = true;
             }
@@ -270,16 +269,15 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         return shouldCalc;
     }
 
-
     private boolean hasAnalyticProduct(AbstractStep<? extends BaseStepConfiguration> step) {
         DataCollection.Version active = step.getObjectFromContext(CDL_ACTIVE_VERSION, DataCollection.Version.class);
         String customerSpace = step.getStringValueFromContext(CUSTOMER_SPACE);
-        Table productTable = dataCollectionProxy.getTable(customerSpace,
-                TableRoleInCollection.ConsolidatedProduct, active.complement());
+        Table productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
+                active.complement());
         if (productTable == null) {
             log.info("Did not find product table in inactive version.");
-            productTable = dataCollectionProxy.getTable(customerSpace,
-                    TableRoleInCollection.ConsolidatedProduct, active);
+            productTable = dataCollectionProxy.getTable(customerSpace, TableRoleInCollection.ConsolidatedProduct,
+                    active);
             if (productTable == null) {
                 throw new IllegalStateException("Cannot find the product table in both versions");
             }
@@ -289,7 +287,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
         for (Product product : productList) {
             if (ProductType.Analytic.name().equals(product.getProductType())) {
-                 return true;
+                return true;
             }
         }
         return false;

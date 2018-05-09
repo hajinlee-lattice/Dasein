@@ -23,11 +23,11 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
@@ -38,7 +38,6 @@ import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
-import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.domain.exposed.workflow.BaseWrapperStepConfiguration;
@@ -83,6 +82,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private DataCollection.Version inactiveVersion;
     private InternalResourceRestApiProxy internalResourceProxy;
     private ObjectNode reportJson;
+
+    private ChoreographerContext grapherContext = new ChoreographerContext();;
 
     @PostConstruct
     public void init() {
@@ -130,7 +131,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
 
         createReportJson();
-        setRebuildEntities();
+        setGrapherContext();
         setupInactiveVersion();
         // clearPhaseForRetry();
     }
@@ -151,26 +152,31 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 });
     }
 
-    private void setRebuildEntities() {
-        Set<BusinessEntity> rebuildEntities = RebuildEntitiesProvider.getRebuildEntities(this);
-        Map<String, BaseStepConfiguration> stepConfigMap = getStepConfigMapInWorkflow("", "",
-                ProcessAnalyzeWorkflowConfiguration.class);
-        if (stepConfigMap.isEmpty()) {
-            log.info("stepConfigMap is Empty!!!");
-        }
+    protected void setGrapherContext() {
+        grapherContext.setDataCloudChanged(checkDataCloudChange());
+        Set<BusinessEntity> impactedEntities = getImpactedEntities();
+        grapherContext.setJobImpactedEntities(impactedEntities);
+        putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
+    }
 
-        stepConfigMap.entrySet().stream().filter(e -> (e.getValue() instanceof BaseProcessEntityStepConfiguration
-                && (rebuildEntities.contains(((BaseProcessEntityStepConfiguration) e.getValue()).getMainEntity()))))
-                .forEach(e -> {
-                    log.info("enabled rebuilding step of:" + e.getKey());
-                    ((BaseProcessEntityStepConfiguration) e.getValue()).setRebuild(Boolean.TRUE);
-                    putObjectInContext(e.getKey(), e.getValue());
-                });
+    protected Set<BusinessEntity> getImpactedEntities() {
+        return RebuildEntitiesProvider.getRebuildEntities(this);
+    }
+
+    private boolean checkDataCloudChange() {
+        boolean changed = false;
+        String currentBuildNumber = configuration.getDataCloudBuildNumber();
+        DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
+        if (dataCollection != null && (dataCollection.getDataCloudBuildNumber() == null
+                || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))) {
+            changed = true;
+        }
+        log.info("Data cloud version changed=" + changed);
+        return changed;
     }
 
     private List<Action> getAttrManagementActions() {
-        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds())
-                .stream()
+        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
                 .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
                 .collect(Collectors.toList());
     }
@@ -261,7 +267,7 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         public static Set<BusinessEntity> getRebuildEntities(StartProcessing st) {
             Set<BusinessEntity> rebuildEntities = new HashSet<>();
             Collection<Class<? extends RebuildEntitiesTemplate>> decrators = Arrays
-                    .asList(RebuildOnDCBuildNumberTemplate.class, RebuildOnDeleteJobTemplate.class);
+                    .asList(RebuildOnDeleteJobTemplate.class);
             for (Class<? extends RebuildEntitiesTemplate> c : decrators) {
                 try {
                     RebuildEntitiesTemplate template = ((RebuildEntitiesTemplate) c
@@ -295,29 +301,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         }
 
         public void executeRebuildAction() {
-        }
-    }
-
-    class RebuildOnDCBuildNumberTemplate extends RebuildEntitiesTemplate {
-
-        @Override
-        public Set<BusinessEntity> getRebuildEntities() {
-            Set<BusinessEntity> rebuildEntities = new HashSet<>();
-            String currentBuildNumber = configuration.getDataCloudBuildNumber();
-            DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-            if (dataCollection != null && (dataCollection.getDataCloudBuildNumber() == null
-                    || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))) {
-                rebuildEntities.add(BusinessEntity.Account);
-                setEntityToRebuild();
-            }
-            return rebuildEntities;
-        }
-
-        @Override
-        public void executeRebuildAction() {
-            ArrayNode systemActionsNode = reportJson.putArray(ReportPurpose.SYSTEM_ACTIONS.getKey());
-            systemActionsNode.add("Rebuild due to Data Cloud Version Changed");
-            putObjectInContext(ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY.getKey(), reportJson);
         }
     }
 

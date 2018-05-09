@@ -1,6 +1,7 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CDL_ACTIVE_VERSION;
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CONSOLIDATE_INPUT_IMPORTS;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOMER_SPACE;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.ENTITIES_WITH_SCHEMA_CHANGE;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -38,6 +40,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
     protected boolean hasActiveServingStore = false;
     protected boolean hasImports = false;
     protected boolean hasManyUpdate = false;
+    protected boolean dataCloudChanged = false;
+    protected boolean jobImpacted = false;
 
     boolean rebuild = false;
     boolean update = false;
@@ -124,8 +128,28 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             checkImports(step);
             checkActiveServingStore(step);
             checkHasBatchStore(step);
+            checkDataCloudChange(step);
+            checkJobImpactedEntity(step);
             initialized = true;
         }
+    }
+
+    void checkDataCloudChange(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        dataCloudChanged = grapherContext.isDataCloudChanged();
+        log.info("Data cloud verision changed=" + dataCloudChanged + " for " + mainEntity());
+
+    }
+
+    void checkJobImpactedEntity(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        if (CollectionUtils.isNotEmpty(grapherContext.getJobImpactedEntities())
+                && grapherContext.getJobImpactedEntities().contains(mainEntity())) {
+            jobImpacted = true;
+        }
+        log.info("Job impacted=" + jobImpacted + " for " + mainEntity());
     }
 
     private void checkEnforcedRebuild(AbstractStep<? extends BaseStepConfiguration> step) {
@@ -231,6 +255,8 @@ public abstract class AbstractProcessEntityChoreographer extends BaseChoreograph
             return true;
         } else if (hasManyUpdate) {
             log.info("Has more than 30% update, going to rebuild " + mainEntity());
+            return true;
+        } else if (jobImpacted) {
             return true;
         }
         log.info("No reason to rebuild " + mainEntity());

@@ -1,12 +1,17 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
+
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.springframework.batch.item.ExecutionContext;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessAccountStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
@@ -41,6 +46,44 @@ public class ProcessAccountChoreographerUnitTestNG {
         choreographer.checkManyUpdate(step);
         Assert.assertEquals(choreographer.hasManyUpdate, true);
 
+    }
+
+    @Test(groups = "unit")
+    public void checkDataCloudChange() {
+        ProcessAccountChoreographer choreographer = new ProcessAccountChoreographer();
+        AbstractStep<ProcessAccountStepConfiguration> step = new AbstractStep<ProcessAccountStepConfiguration>() {
+            @Override
+            public void execute() {
+            }
+        };
+        step.setExecutionContext(new ExecutionContext());
+        ChoreographerContext grapherContext = new ChoreographerContext();
+        grapherContext.setDataCloudChanged(true);
+        step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
+        choreographer.checkDataCloudChange(step);
+        Assert.assertEquals(choreographer.dataCloudChanged, true);
+    }
+
+    @Test(groups = "unit")
+    public void checkJobImpactedEntity() {
+        ProcessAccountChoreographer choreographer = new ProcessAccountChoreographer();
+        AbstractStep<ProcessAccountStepConfiguration> step = new AbstractStep<ProcessAccountStepConfiguration>() {
+            @Override
+            public void execute() {
+            }
+        };
+        step.setExecutionContext(new ExecutionContext());
+        ChoreographerContext grapherContext = new ChoreographerContext();
+        grapherContext.setJobImpactedEntities(new HashSet<BusinessEntity>(Arrays.asList(BusinessEntity.Contact)));
+        step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
+        choreographer.checkJobImpactedEntity(step);
+        Assert.assertEquals(choreographer.jobImpacted, false);
+
+        grapherContext.setJobImpactedEntities(
+                new HashSet<BusinessEntity>(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)));
+        step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
+        choreographer.checkJobImpactedEntity(step);
+        Assert.assertEquals(choreographer.jobImpacted, true);
     }
 
 }

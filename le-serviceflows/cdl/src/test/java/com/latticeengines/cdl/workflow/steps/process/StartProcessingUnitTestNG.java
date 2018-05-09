@@ -2,7 +2,9 @@ package com.latticeengines.cdl.workflow.steps.process;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -18,7 +20,7 @@ import org.testng.annotations.Test;
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -26,11 +28,12 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
+import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
 
 public class StartProcessingUnitTestNG {
 
     @Test(groups = { "unit" })
-    public void testRebuildOnDLVersionTemplate() {
+    public void testRebuildOnDLVersionChange() {
         DataCollection dataCollection = new DataCollection();
         dataCollection.setDataCloudBuildNumber("1001");
         DataCollectionProxy dataCollectionProxy = mock(DataCollectionProxy.class);
@@ -42,9 +45,13 @@ public class StartProcessingUnitTestNG {
         ProcessStepConfiguration config = new ProcessStepConfiguration();
         config.setDataCloudBuildNumber("1000");
         startProcessing.setConfiguration(config);
-        Set<BusinessEntity> entities = startProcessing.new RebuildOnDCBuildNumberTemplate().getRebuildEntities();
-        assertTrue(entities.contains(BusinessEntity.Account));
-        assertEquals(entities.size(), 1);
+
+        StartProcessing spy = spy(startProcessing);
+        doReturn(null).when(spy).getImpactedEntities();
+        spy.setGrapherContext();
+        ChoreographerContext context = spy.getObjectFromContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        assertTrue(context.isDataCloudChanged());
     }
 
     @Test(groups = { "unit" })
