@@ -70,7 +70,8 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
             if (CollectionUtils.isNotEmpty(activeModels)) {
                 List<String> modelGuids = activeModels.stream().filter(container -> {
                     RatingEngineType engineType = container.getEngineSummary().getType();
-                    return RatingEngineType.CUSTOM_EVENT.equals(engineType) || RatingEngineType.CROSS_SELL.equals(engineType);
+                    return RatingEngineType.CUSTOM_EVENT.equals(engineType)
+                            || RatingEngineType.CROSS_SELL.equals(engineType);
                 }).map(container -> {
                     AIModel aiModel = (AIModel) container.getModel();
                     return aiModel.getModelSummaryId();
@@ -94,18 +95,21 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCrossSellModel(aiModel);
                 if (!isValid) {
-                    log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineName + " is not ready for scoring.");
+                    log.warn("Cross sell rating model " + aiModel.getId() + " of " + engineId + ":" + engineName
+                            + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.CUSTOM_EVENT.equals(summary.getType())) {
                 AIModel aiModel = (AIModel) ratingModel;
                 isValid = isValidCustomEventModel(aiModel);
                 if (!isValid) {
-                    log.warn("Custom event rating model " + aiModel.getId() + " of " + engineName + " is not ready for scoring.");
+                    log.warn("Custom event rating model " + aiModel.getId() + " of " + engineId + ":" + engineName
+                            + " is not ready for scoring.");
                 }
             } else if (RatingEngineType.RULE_BASED.equals(summary.getType())) {
                 isValid = isValidRuleBasedModel((RuleBasedModel) ratingModel);
                 if (!isValid) {
-                    log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineName + " is not ready for scoring.");
+                    log.warn("Rule based rating model " + ratingModel.getId() + " of " + engineId + ":" + engineName
+                            + " is not ready for scoring.");
                 }
             }
             if (CollectionUtils.isEmpty(summary.getBucketMetadata())) {
@@ -120,19 +124,23 @@ public class PrepareForRating extends BaseWorkflowStep<ProcessRatingStepConfigur
     }
 
     private boolean isValidRatingEngine(RatingEngine engine) {
+        String engineId = engine.getId();
         String engineName = engine.getDisplayName();
         boolean valid = true;
         if (Boolean.TRUE.equals(engine.getDeleted())) {
-            log.info("Skip rating engine " + engineName + " because it is deleted.");
+            log.info("Skip rating engine " + engineId + ":" + engineName + " because it is deleted.");
             valid = false;
-        } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus()) && Boolean.TRUE.equals(engine.getJustCreated())) {
-            log.info("Skip rating engine " + engineName + " because it is just created.");
+        } else if (RatingEngineStatus.INACTIVE.equals(engine.getStatus())
+                && Boolean.TRUE.equals(engine.getJustCreated())) {
+            log.info("Skip rating engine " + engineId + ":" + engineName + " because it is just created.");
             valid = false;
         } else if (engine.getSegment() == null) {
-            log.info("Skip rating engine " + engineName + " because it belongs to an invalid segment.");
+            log.info(
+                    "Skip rating engine " + engineId + ":" + engineName + " because it belongs to an invalid segment.");
             valid = false;
         } else if (engine.getActiveModel() == null) {
-            log.info("Skip rating engine " + engineName + " because it does not have an active model.");
+            log.info(
+                    "Skip rating engine " + engineId + ":" + engineName + " because it does not have an active model.");
             valid = false;
         }
         return valid;
