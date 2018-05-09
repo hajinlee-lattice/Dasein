@@ -209,7 +209,6 @@ public class BucketRestrictionUnitTestNG {
         Assert.assertNotNull(deserialized);
         Restriction convertedRestriction = RestrictionUtils.convertBucketRestriction(deserialized);
         Assert.assertNotNull(convertedRestriction);
-        System.out.println(JsonUtils.pprint(convertedRestriction));
         Assert.assertTrue(convertedRestriction instanceof LogicalRestriction);
         LogicalRestriction logicalRestriction = (LogicalRestriction) convertedRestriction;
         Assert.assertEquals(logicalRestriction.getOperator(), LogicalOperator.OR);
