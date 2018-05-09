@@ -37,7 +37,8 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
     private final ServingStoreCacheService servingStoreCacheService;
 
     @Inject
-    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService, ServingStoreCacheService servingStoreCacheService) {
+    public MetadataSegmentServiceImpl(SegmentProxy segmentProxy, ActionService actionService,
+            ServingStoreCacheService servingStoreCacheService) {
         this.segmentProxy = segmentProxy;
         this.actionService = actionService;
         this.servingStoreCacheService = servingStoreCacheService;
@@ -140,21 +141,11 @@ public class MetadataSegmentServiceImpl implements MetadataSegmentService {
         }
         try {
             Restriction accountRestriction = segment.getAccountRestriction();
-            if (accountRestriction != null) {
-                FrontEndRestriction accountFrontEndRestriction = new FrontEndRestriction();
-                accountFrontEndRestriction.setRestriction(accountRestriction);
-                segment.setAccountFrontEndRestriction(accountFrontEndRestriction);
-                segment.setAccountRestriction(null);
-            } else {
+            if (accountRestriction == null) {
                 segment.setAccountFrontEndRestriction(emptyFrontEndRestriction());
             }
             Restriction contactRestriction = segment.getContactRestriction();
-            if (contactRestriction != null) {
-                FrontEndRestriction contactFrontEndRestriction = new FrontEndRestriction();
-                contactFrontEndRestriction.setRestriction(contactRestriction);
-                segment.setContactFrontEndRestriction(contactFrontEndRestriction);
-                segment.setContactRestriction(null);
-            } else {
+            if (contactRestriction == null) {
                 segment.setContactFrontEndRestriction(emptyFrontEndRestriction());
             }
             if (Boolean.FALSE.equals(segment.getMasterSegment())) {
