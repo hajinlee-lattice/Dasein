@@ -75,7 +75,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
 
     @Test(groups = "deployment", dependsOnMethods = { "testGetPlayCountAfterCreatingPlayWithoutLaunch" })
     public void testGetPlayCountAfterCreatingPlayWithLaunch() throws Exception {
-        testPlayCreationHelper.createPlayLaunch();
+        testPlayCreationHelper.createPlayLaunch(true);
 
         int playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 1);
@@ -88,7 +88,7 @@ public class LpiPMPlayImplDeploymentTestNG extends AbstractTestNGSpringContextTe
         int playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 1);
 
-        testPlayCreationHelper.createPlayLaunch();
+        testPlayCreationHelper.createPlayLaunch(true);
 
         playCount = lpiPMPlayImpl.getPlayCount(0, null);
         Assert.assertEquals(playCount, 2);
