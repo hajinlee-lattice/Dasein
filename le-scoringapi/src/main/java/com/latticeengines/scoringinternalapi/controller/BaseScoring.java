@@ -292,8 +292,19 @@ public abstract class BaseScoring extends CommonBase {
 
         try (LogContext context = new LogContext(MDC_CUSTOMERSPACE, customerSpace)) {
             httpStopWatch.split(GET_TENANT_FROM_OAUTH);
-            if (log.isInfoEnabled()) {
-                log.info(JsonUtils.serialize(scoreRequests));
+            if (forceSkipMatching) {
+                // In case forceSkipMatching flag is true, it usually means
+                // caller is passing entire post matched data for each record
+                // which could be huge.
+                // To avoid huge amount of splunk logging, we are changing
+                // logging level to debug for logging input payload
+                if (log.isDebugEnabled()) {
+                    log.debug(JsonUtils.serialize(scoreRequests));
+                }
+            } else {
+                if (log.isInfoEnabled()) {
+                    log.info(JsonUtils.serialize(scoreRequests));
+                }
             }
             AdditionalScoreConfig additionalScoreConfig = AdditionalScoreConfig.instance() //
                     .setSpace(customerSpace) //
