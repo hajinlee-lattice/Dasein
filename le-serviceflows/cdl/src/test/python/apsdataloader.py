@@ -88,7 +88,7 @@ class ApsDataLoader(object):
         for outputFile in outputFiles:
             logger.info("Uploading file from local=%s to remote=%s" % (outputFile, self.outputPath))
             filePath, fileName = os.path.split(outputFile)
-            #self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
+            # self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
             try:
                 self.hdfs.copyFromLocal(outputFile, self.outputPath + "/" + fileName)
             except Exception:
@@ -142,7 +142,11 @@ class ApsDataLoader(object):
         logger.info("Frame shape:" + str(dataFrame.shape))
         schemaStr = self._getSchema(dataFrame)
         schema = json.loads(schemaStr)
-        dfs = np.array_split(dataFrame, parallel)
+        logger.info("Start to split Dataframe.")
+#         dfs = np.array_split(dataFrame, parallel)
+        chunkSize = 200000
+        dfs = [dataFrame[i:i + chunkSize] for i in range(0, dataFrame.shape[0], chunkSize)]
+        logger.info("Finished splitting Dataframe.")
 
         index = 0;
         params = []
@@ -150,7 +154,7 @@ class ApsDataLoader(object):
         for df in dfs:
             params.append([df, schema, localDir, "%s/part-0000%d.avro" % (localDir, index), self.webHdfsHostPort, self.outputPath, userId])
             index += 1
-        self.parallelExecutePool(fileWriterFunc, params, 8)
+        self.parallelExecutePool(fileWriterFunc, params, 4)
 
         files = [localDir + '/' + file for file in os.listdir(localDir)]
         for file in files:

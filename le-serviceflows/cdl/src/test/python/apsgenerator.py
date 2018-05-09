@@ -90,6 +90,7 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
     #unstack product_id columns, using nan as a filler
     #this is equivalent to keeping account and period ids as index, and pivot on product id
     apState = apState.unstack('Product_ID', float('nan'))
+    
     #now we need to add intermediate periods even if there is no purchase
     maxPid = trxnSlim['Period_ID'].max()
     minPid = trxnSlim['Period_ID'].min()
@@ -113,6 +114,7 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
     #minPos={a:i for i, a in enumerate(accts) if i==0 or accts[i]!=accts[i-1]}
     # add 6 period rolling sum, 3 period momentum and span for each product
     for prodID in transactionDf['Product_ID'].unique():
+        logger.info("Populating Aps for Product Id:" + str(prodID))
         amts = apState['Revenue', prodID].tolist()
         isna = apState['Revenue', prodID].isnull().tolist()
         apState['RevenueRollingSum6', prodID] = getRollingsum(newacct, amts, isna, winlen=6)
@@ -120,11 +122,13 @@ def createAnalyticPurchaseState(transactionDf, numPeriodsAdded=2):
         apState['Span', prodID] = getSpan(newacct, amts, isna)
     
     # rename columns to playmaker style
+    logger.info("Starting to map column names")
     apState.columns = apState.columns.map('Product_{0[1]}_{0[0]}'.format)
         
     #put accountId and periodId back as columns
+    logger.info("Starting to re-index")
     apState = apState.reset_index(level=[0,1], inplace=False)
-
+    
     return apState
 
 
@@ -144,11 +148,18 @@ if __name__ == '__main__':
     loader = ApsDataLoader()
     loader.downloadToLocal()
     df = loader.readDataFrameFromAvro()
-    logger.info(df.shape)
+    logger.info("df type:" + str(type(df)))
+    logger.info("df shape:" + str(df.shape))
+    logger.info("df memoryn usage:" + str(df.memory_usage().sum()))
     df.rename(columns={'AccountId':'Account_ID', 'PeriodId':'Period_ID', 'ProductId':'Product_ID',
                        'TotalAmount':'Amount', 'TotalQuantity':'Quantity' }, inplace=True) 
  
     apState = createAps(df)
+    logger.info("aps type:" + str(type(apState)))
+    logger.info("aps shape:" + str(apState.shape))
+    logger.info("aps memoryn usage:" + str(apState.memory_usage().sum()))
+#     logger.info("aps density:" + str(apState.density))
+    
     apState.insert(0, 'AnalyticPurchaseState_ID', range(len(apState)))
     shutil.rmtree("./input", ignore_errors=True)
     loader.parallelWriteDataFrameToAvro(apState)
