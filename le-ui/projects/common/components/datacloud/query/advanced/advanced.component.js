@@ -371,14 +371,15 @@ angular.module('common.datacloud.query.builder', [
             vm.labelIncrementor = 0;
             QueryStore.setPublicProperty('resetLabelIncrementor', false);
         }
-
+        
         if (bucket && bucket.labelGlyph) {
             return bucket.labelGlyph;
         } else {
             vm.labelIncrementor += 1;
-
+            if(vm.labelIncrementor === 0){
+                vm.labelIncrementor += 1;
+            }
             bucket.labelGlyph = vm.labelIncrementor;
-            
             return vm.labelIncrementor;
         }
     }
@@ -464,13 +465,16 @@ angular.module('common.datacloud.query.builder', [
             CoverageMap = vm.initCoverageMap(result);
 
             var buckets = result.segmentIdAndSingleRulesCoverageMap;
-            
-            Object.keys(buckets).forEach(function(key) {
-                var label = vm.RuleRecordMap[key].bucketRestriction.attr,
-                    type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
-                
-                vm.RuleRecordMap[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
-            });
+            if(buckets){
+                Object.keys(buckets).forEach(function(key) {
+                    if(vm.RuleRecordMap[key]){
+                        var label = vm.RuleRecordMap[key].bucketRestriction.attr,
+                            type = label.split('.')[0] == 'Contact' ? 'contact' : 'account';
+                        
+                        vm.RuleRecordMap[key].bucketRestriction.bkt.Cnt = buckets[key][type + 'Count'];
+                    }
+                });
+            }
         });
     }
     

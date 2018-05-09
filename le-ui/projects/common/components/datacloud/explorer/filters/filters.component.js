@@ -7,7 +7,7 @@ angular
             vm:'='
         },
         templateUrl: '/components/datacloud/explorer/filters/filters.component.html',
-        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore) {
+        controller: function ($scope, $stateParams, $document, $state, $timeout, $interval, DataCloudStore, QueryStore, SegmentStore, RatingsEngineStore) {
             var vm = $scope.vm;
 
             angular.extend(vm, {
@@ -286,6 +286,7 @@ angular
             }
 
             vm.goBackToModelRules = function() {
+                SegmentStore.sanitizeRuleBuckets( RatingsEngineStore.getRule().rule, true)
                 $state.go('home.ratingsengine.dashboard.segment.attributes.rules');
             }
 

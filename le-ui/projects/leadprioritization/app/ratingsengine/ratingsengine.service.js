@@ -73,18 +73,40 @@ angular.module('lp.ratingsengine')
                 },{ 
                     label: 'Attributes', 
                     state: 'segment.attributes', 
-                    nextLabel: 'Next, Set Rules'
+                    nextLabel: 'Next, Set Rules',
+                    nextFn: function(nextState){
+                        var current = RatingsEngineStore.getRule();
+                        if(current && current.rule){
+                            SegmentStore.sanitizeRuleBuckets(current.rule, true)
+                        }
+                        
+                        $state.go(nextState);
+                    }
                 },{ 
                     hide: true,
                     label: 'Add',
                     state: 'segment.attributes.add', 
-                    nextLabel: 'Next, Rules'
+                    nextLabel: 'Next, Rules',
+                    nextFn: function(nextState){
+                        var current = RatingsEngineStore.getRule();
+                        if(current){
+                            SegmentStore.sanitizeRuleBuckets( current.rule, true)
+                        }
+                        $state.go(nextState);
+                    }
                 },{ 
                     hide: true,
                     hideBack: true,
                     label: 'Picker',
                     state: 'segment.attributes.rules.picker', 
-                    nextLabel: 'Back to Rules'
+                    nextLabel: 'Back to Rules',
+                    nextFn: function(nextState){
+                        var current = RatingsEngineStore.getRule();
+                        if(current){
+                            SegmentStore.sanitizeRuleBuckets( current.rule, true)
+                        }
+                        $state.go(nextState);
+                    }
                 },{ 
                     label: 'Rules', 
                     state: 'segment.attributes.rules', 

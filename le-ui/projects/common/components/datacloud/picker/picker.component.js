@@ -75,7 +75,6 @@ angular.module('common.datacloud.valuepicker', [])
                     "collapsed": false,
                     "labelGlyph": restrictions.length
                 }
-
                 bkt = vm.bucketRestriction.bkt;
                 vals = bkt.Vals;
             } else {

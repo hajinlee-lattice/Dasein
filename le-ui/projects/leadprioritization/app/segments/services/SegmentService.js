@@ -10,7 +10,6 @@ angular
     }
 
     this.getSegments = function() {
-        console.log(this.segments);
         return this.segments;
     }
 
@@ -29,11 +28,7 @@ angular
                 SegmentStore.flattenRestriction(restriction, restrictions);
             });
         }
-        // else {
-        //     console.log('Segment restrictions null ');
-        //     console.log(segment);
-        //     console.log('============================');
-        // }
+        
         return restrictions;
     }
 
@@ -212,7 +207,6 @@ angular
                 SegmentStore.sanitizeSegmentRestriction(branch.logicalRestriction.restrictions);
             }
         });
-
         return tree;
     }
 
