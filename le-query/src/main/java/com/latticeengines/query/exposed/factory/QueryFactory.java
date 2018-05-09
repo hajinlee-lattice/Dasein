@@ -1,38 +1,13 @@
 package com.latticeengines.query.exposed.factory;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
-import com.latticeengines.query.factory.QueryProvider;
 import com.querydsl.sql.SQLQuery;
 import com.querydsl.sql.SQLQueryFactory;
 
-@Component("queryFactory")
-public class QueryFactory {
+public interface QueryFactory {
 
-    @Autowired
-    private List<QueryProvider> queryProviders;
+    SQLQuery<?> getQuery(AttributeRepository repository);
 
-    public SQLQuery<?> getQuery(AttributeRepository repository) {
-        for (QueryProvider provider : queryProviders) {
-            if (provider.providesQueryAgainst(repository)) {
-                return provider.getQuery(repository);
-            }
-        }
-        throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
-                repository.getCollectionName()));
-    }
+    SQLQueryFactory getSQLQueryFactory(AttributeRepository repository);
 
-    public SQLQueryFactory getSQLQueryFactory(AttributeRepository repository) {
-        for (QueryProvider provider : queryProviders) {
-            if (provider.providesQueryAgainst(repository)) {
-                return provider.getCachedSQLQueryFactory(repository);
-            }
-        }
-        throw new RuntimeException(String.format("Could not find QueryProvider for specified data collection %s",
-                                                 repository.getCollectionName()));
-    }
 }

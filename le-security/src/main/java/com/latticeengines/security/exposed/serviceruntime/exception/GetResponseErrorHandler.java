@@ -41,6 +41,10 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
 
     private boolean interpretAndThrowException(HttpStatus status, HttpHeaders httpHeaders, String body) {
         RemoteLedpException exception;
+        log.info("HTTP Status: " + status.toString());
+        if (httpHeaders != null) {
+            log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
+        }
         try {
             JsonNode node = new ObjectMapper().readTree(body);
             JsonNode stackTrace = node.get("stackTrace");
@@ -48,15 +52,11 @@ public class GetResponseErrorHandler implements ResponseErrorHandler {
             if (stackTrace != null) {
                 stackTraceString = stackTrace.asText();
             }
-
-            if (httpHeaders != null) {
-                log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
-            }
-
             LedpCode code = LedpCode.valueOf(node.get("errorCode").asText());
             String message = node.get("errorMsg").asText();
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
+            log.warn("Failed parse remote exception body " + body);
             return false;
         }
         throw exception;

@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>com.amazon.redshift</groupId>
-            <artifactId>redshift-jdbc42</artifactId>
+            <artifactId>redshift-jdbc42-no-awssdk</artifactId>
             <version>${redshift.jdbc.version}</version>
         </dependency>
         <dependency>

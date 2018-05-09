@@ -1,5 +1,8 @@
 package com.latticeengines.query.factory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
@@ -14,11 +17,21 @@ import com.querydsl.sql.SQLTemplates;
 
 @Component("redshiftQueryProvider")
 public class RedshiftQueryProvider extends QueryProvider {
+    private static final String USER_SEGMENT = "segment";
+    private static final String USER_BATCH = "batch";
+
+    private static final Map<String, DataSource> redshiftDataStores = new HashMap<>();
 
     @PostConstruct
     private void init() {
-        dataSource = BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
-                "redshiftSegmentDataSource");
+        redshiftDataStores.put(
+                USER_BATCH, BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
+                        "redshiftDataSource")
+        );
+        redshiftDataStores.put(
+                USER_SEGMENT, BeanFactoryAnnotationUtils.qualifiedBeanOfType(applicationContext, DataSource.class,
+                        "redshiftSegmentDataSource")
+        );
     }
 
     @Override
@@ -29,8 +42,13 @@ public class RedshiftQueryProvider extends QueryProvider {
 
     @Override
     protected SQLQueryFactory getSQLQueryFactory() {
+        return getSQLQueryFactory(USER_SEGMENT);
+    }
+
+    @Override
+    protected SQLQueryFactory getSQLQueryFactory(String sqlUser) {
         SQLTemplates templates = new PostgreSQLTemplates();
         Configuration configuration = new Configuration(templates);
-        return new SQLQueryFactory(configuration, dataSource);
+        return new SQLQueryFactory(configuration, redshiftDataStores.get(sqlUser));
     }
 }

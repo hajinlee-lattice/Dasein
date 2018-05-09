@@ -22,12 +22,7 @@ public class ErrorUtils {
 
     public static RemoteLedpException handleError(WebClientResponseException webClientException) {
         String body = new String(webClientException.getResponseBodyAsByteArray());
-        RemoteLedpException exception = interpretAndThrowException(webClientException.getStatusCode(),
-                webClientException.getHeaders(), body);
-        if (exception == null) {
-            exception = new RemoteLedpException(body, webClientException.getStatusCode(), LedpCode.LEDP_00007);
-        }
-        return exception;
+        return interpretAndThrowException(webClientException.getStatusCode(), webClientException.getHeaders(), body);
     }
 
     private static RemoteLedpException interpretAndThrowException(HttpStatus status, HttpHeaders httpHeaders,
@@ -49,7 +44,7 @@ public class ErrorUtils {
             String message = node.get("errorMsg").asText();
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
-            return null;
+            exception = new RemoteLedpException(body, status, LedpCode.LEDP_00007, e);
         }
         throw exception;
     }
