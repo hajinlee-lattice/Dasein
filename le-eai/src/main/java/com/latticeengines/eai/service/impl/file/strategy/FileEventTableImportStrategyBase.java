@@ -168,6 +168,8 @@ public class FileEventTableImportStrategyBase extends ImportStrategy {
         }
         if (table.getAttribute(InterfaceName.InternalId.name()) == null) {
             addInternalId(table);
+        } else {
+            table.getAttribute(InterfaceName.InternalId.name()).setNullable(true);
         }
         return table;
     }
