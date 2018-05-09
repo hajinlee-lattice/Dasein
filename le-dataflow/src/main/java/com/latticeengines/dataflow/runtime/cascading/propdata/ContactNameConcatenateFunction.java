@@ -12,8 +12,11 @@ import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ContactNameConcatenateFunction extends BaseOperation implements Function {
+    private static final Logger log = LoggerFactory.getLogger(ContactNameConcatenateFunction.class);
     private Map<String, Integer> positionMap;
     private List<String> concatenateFields;
     private String resultField;
@@ -33,13 +36,24 @@ public class ContactNameConcatenateFunction extends BaseOperation implements Fun
 
         if (arguments.getString(resultField) == null) {
             StringBuilder sb = new StringBuilder();
+            boolean foundValue = false;
             for (String field : concatenateFields) {
-                String fieldValue = arguments.getString(field);
+                String fieldValue = null;
+                try {
+                    fieldValue = arguments.getString(field);
+                } catch (Exception e) {
+                    log.info(String.format("Field [%s] not found in %s.", field, tuple.toString()));
+                }
+
                 if (StringUtils.isNotEmpty(fieldValue)) {
+                    foundValue = true;
                     sb.append(fieldValue).append(" ");
                 }
             }
-            tuple.set(positionMap.get(resultField), sb.toString().trim());
+
+            if (foundValue) {
+                tuple.set(positionMap.get(resultField), sb.toString().trim());
+            }
         } else {
             tuple.set(positionMap.get(resultField), arguments.getString(resultField));
         }

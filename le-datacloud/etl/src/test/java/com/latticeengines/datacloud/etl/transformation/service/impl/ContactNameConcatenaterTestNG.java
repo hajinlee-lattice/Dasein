@@ -46,7 +46,8 @@ public class ContactNameConcatenaterTestNG
             {"Twitter", "San Francisco", "CA", "USA", "twitter.com", "twitter_fname", "twitter_lname"},
             {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname", "amazon_lname"},
             {"Apple", "Cupertino", "CA", "USA", "apple.com", "", "apple_lname"},
-            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname", null}
+            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname", null},
+            {"LinkedIn", "Sunnyvale", "CA", "USA", "linkedin.com", null, null}
     };
 
     private Object[][] expectedData = new Object[][] {
@@ -54,7 +55,8 @@ public class ContactNameConcatenaterTestNG
             {"Twitter", "San Francisco", "CA", "USA", "twitter.com", "twitter_fname twitter_lname"},
             {"Amazon", "Seattle", "WA", "USA", "amazon.com", "amazon_fname amazon_lname"},
             {"Apple", "Cupertino", "CA", "USA", "apple.com", "apple_lname"},
-            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname"}
+            {"Microsoft", "Seattle", "WA", "USA", "microsoft.com", "microsoft_fname"},
+            {"LinkedIn", "Sunnyvale", "CA", "USA", "linkedin.com"}
     };
 
     private Object[][] inputDataWithName = new Object[][] {
@@ -173,10 +175,14 @@ public class ContactNameConcatenaterTestNG
                 Assert.assertTrue(isObjEquals(record.get(retainedFields[2]), expectedResult[2]));
                 Assert.assertTrue(isObjEquals(record.get(retainedFields[3]), expectedResult[3]));
                 Assert.assertTrue(isObjEquals(record.get(retainedFields[4]), expectedResult[4]));
-                Assert.assertTrue(isObjEquals(record.get(RESULT_FIELD_NAME), expectedResult[5]));
+                if (expectedResult.length > 5) {
+                    Assert.assertTrue(isObjEquals(record.get(RESULT_FIELD_NAME), expectedResult[5]));
+                } else {
+                    Assert.assertNull(record.get(RESULT_FIELD_NAME));
+                }
                 rowNum++;
             }
-            Assert.assertEquals(rowNum, 5);
+            Assert.assertEquals(rowNum, 6);
         }
     }
 
