@@ -2,10 +2,12 @@ package com.latticeengines.apps.cdl.controller;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.service.PlayService;
+import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.apps.cdl.workflow.PlayLaunchWorkflowSubmitter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -33,6 +37,10 @@ import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
+import com.latticeengines.domain.exposed.pls.RatingBucketName;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.util.PlayUtils;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
@@ -55,10 +63,16 @@ public class PlayResource {
     private PlayLaunchService playLaunchService;
 
     @Inject
+    private RatingEngineService ratingEngineService;
+
+    @Inject
     private MetadataProxy metadataProxy;
 
     @Inject
     private PlayLaunchWorkflowSubmitter playLaunchWorkflowSubmitter;
+
+    @Inject
+    private RatingEntityPreviewService ratingEntityPreviewService;
 
     @Inject
     public PlayResource(PlayService playService, PlayLaunchService playLaunchService, MetadataProxy metadataProxy,
@@ -132,7 +146,6 @@ public class PlayResource {
     public Play getPlay(//
             @PathVariable String customerSpace, //
             @PathVariable String playName) {
-        Tenant tenant = MultiTenantContext.getTenant();
         return playService.getFullPlayByName(playName);
     }
 
@@ -169,6 +182,8 @@ public class PlayResource {
     public PlayLaunch createPlayLaunch( //
             @PathVariable String customerSpace, //
             @PathVariable("playName") String playName, //
+            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
+            boolean isDryRunMode, //
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Play play = playService.getPlayByName(playName);
@@ -176,13 +191,17 @@ public class PlayResource {
         PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
 
         if (play != null) {
+            validateNonEmptyTargetsForLaunch(play, playName, playLaunch);
             playLaunch.setLaunchState(LaunchState.Launching);
             playLaunch.setPlay(play);
             playLaunch.setTableName(createTable(playLaunch));
             playLaunchService.create(playLaunch);
-            String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
-            playLaunch.setApplicationId(appId);
-            playLaunchService.update(playLaunch);
+            // this dry run flag is useful in writing robust testcases
+            if (!isDryRunMode) {
+                String appId = playLaunchWorkflowSubmitter.submit(playLaunch).toString();
+                playLaunch.setApplicationId(appId);
+                playLaunchService.update(playLaunch);
+            }
         } else {
             log.error("Invalid playName: " + playName);
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -307,5 +326,23 @@ public class PlayResource {
             playId = play.getPid();
         }
         return playId;
+    }
+
+    private void validateNonEmptyTargetsForLaunch(Play play, String playName, PlayLaunch playLaunch) {
+        RatingEngine ratingEngine = play.getRatingEngine();
+        ratingEngine = ratingEngineService.getRatingEngineById(ratingEngine.getId(), false);
+        play.setRatingEngine(ratingEngine);
+
+        DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
+                ratingEngine, 0L, 1L, BusinessEntity.Account, //
+                playLaunch.getExcludeItemsWithoutSalesforceId(), //
+                playLaunch.getBucketsToLaunch().stream() //
+                        .map(RatingBucketName::getName) //
+                        .collect(Collectors.toList()));
+
+        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())
+                || (playLaunch.getTopNCount() != null && playLaunch.getTopNCount() <= 0L)) {
+            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
+        }
     }
 }

@@ -3,9 +3,11 @@ package com.latticeengines.proxy.exposed.cdl;
 import static com.latticeengines.proxy.exposed.ProxyUtils.shortenCustomerSpace;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -20,6 +22,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngineNote;
 import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
@@ -29,6 +33,7 @@ import com.latticeengines.proxy.exposed.ProxyInterface;
 @Component("ratingEngineProxy")
 public class RatingEngineProxy extends MicroserviceRestApiProxy implements ProxyInterface {
 
+    private static final String URL_PARAM_TEMPLATE = "&%s={%s}";
     private static final String URL_PREFIX = "/customerspaces/{customerSpace}/ratingengines";
 
     protected RatingEngineProxy() {
@@ -268,5 +273,63 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
 
     private String createUnlinkSegmentSuffix(Boolean unlinkSegment) {
         return unlinkSegment == Boolean.TRUE ? "?unlink-segment={unlink-segment}" : "";
+    }
+
+    public DataPage getEntityPreview(String ratingEngineId, long offset, long maximum, BusinessEntity entityType,
+            String sortBy, Boolean descending, String bucketFieldName, List<String> lookupFieldNames,
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URL_PREFIX);
+        sb.append("/{ratingEngineId}/entitypreview?offset={offset}&maximum={maximum}&entityType={entityType}");
+        List<Object> paramObjects = new ArrayList<>();
+        paramObjects.addAll(Arrays.asList(ratingEngineId, offset, maximum, entityType));
+
+        addParam("sortBy", sortBy, sb, paramObjects);
+        addParam("bucketFieldName", bucketFieldName, sb, paramObjects);
+        addParam("descending", descending, sb, paramObjects);
+        addParam("lookupFieldNames", lookupFieldNames, sb, paramObjects);
+        addParam("restrictNotNullSalesforceId", restrictNotNullSalesforceId, sb, paramObjects);
+        addParam("freeFormTextSearch", freeFormTextSearch, sb, paramObjects);
+        addParam("selectedBuckets", selectedBuckets, sb, paramObjects);
+
+        String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
+        return get("getEntityPreview", url, DataPage.class);
+    }
+
+    public Long getEntityPreviewCount(String ratingEngineId, BusinessEntity entityType,
+            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URL_PREFIX);
+        sb.append("/{ratingEngineId}/entitypreview/count?entityType={entityType}");
+        List<Object> paramObjects = new ArrayList<>();
+        paramObjects.addAll(Arrays.asList(ratingEngineId, entityType));
+
+        addParam("restrictNotNullSalesforceId", restrictNotNullSalesforceId, sb, paramObjects);
+        addParam("freeFormTextSearch", freeFormTextSearch, sb, paramObjects);
+        addParam("selectedBuckets", selectedBuckets, sb, paramObjects);
+
+        String url = constructUrl(sb.toString(), paramObjects.toArray(new Object[paramObjects.size()]));
+        return get("getEntityPreview", url, Long.class);
+    }
+
+    private void addParam(String paramName, Object value, StringBuilder sb, List<Object> paramObjects) {
+        if (value != null) {
+            if (value instanceof String && StringUtils.isNotBlank((String) value)) {
+                sb.append(String.format(URL_PARAM_TEMPLATE, paramName, paramName));
+                paramObjects.add(((String) value).trim());
+            } else if (value instanceof Boolean) {
+                sb.append(String.format(URL_PARAM_TEMPLATE, paramName, paramName));
+                paramObjects.add(value);
+            } else if (value instanceof List && CollectionUtils.isNotEmpty((List<?>) value)) {
+                ((List<?>) value).stream().forEach(v -> {
+                    sb.append(String.format(URL_PARAM_TEMPLATE, paramName, paramName));
+                    if (v instanceof String) {
+                        paramObjects.add(((String) v).trim());
+                    } else {
+                        paramObjects.add(v);
+                    }
+                });
+            }
+        }
     }
 }

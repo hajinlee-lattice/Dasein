@@ -115,8 +115,8 @@ public class TestPlayCreationHelper {
         Assert.assertNotNull(play);
     }
 
-    public void createPlayLaunch() {
-        playResourceDeploymentTestNG.createPlayLaunch();
+    public void createPlayLaunch(boolean isDryRunMode) {
+        playResourceDeploymentTestNG.createPlayLaunch(isDryRunMode);
         playLaunch = playResourceDeploymentTestNG.getPlayLaunch();
         Assert.assertNotNull(playLaunch);
     }
@@ -125,7 +125,7 @@ public class TestPlayCreationHelper {
         setupTenant();
         setupPlayTestEnv();
         createPlay();
-        createPlayLaunch();
+        createPlayLaunch(true);
     }
 
     public void createPlayOnly() {

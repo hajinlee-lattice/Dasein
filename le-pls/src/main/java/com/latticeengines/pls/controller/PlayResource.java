@@ -1,15 +1,14 @@
 package com.latticeengines.pls.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,20 +18,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
-import com.latticeengines.domain.exposed.exception.LedpCode;
-import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
-import com.latticeengines.domain.exposed.pls.RatingBucketName;
-import com.latticeengines.domain.exposed.pls.RatingEngine;
-import com.latticeengines.domain.exposed.query.BusinessEntity;
-import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.security.Tenant;
-import com.latticeengines.domain.exposed.util.PlayUtils;
-import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.PlayProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 
@@ -53,9 +45,6 @@ public class PlayResource {
 
     @Inject
     private RatingEngineProxy ratingEngineProxy;
-
-    @Inject
-    private RatingEntityPreviewService ratingEntityPreviewService;
 
     @RequestMapping(value = "", method = RequestMethod.GET, headers = "Accept=application/json")
     @ResponseBody
@@ -123,7 +112,10 @@ public class PlayResource {
         return playProxy.getPlay(tenant.getId(), playName);
     }
 
-    @RequestMapping(value = "", method = RequestMethod.POST, headers = "Accept=application/json")
+    @RequestMapping(value = "", method = RequestMethod.POST, //
+            // headers = "Accept=application/json", //
+            consumes = { KryoHttpMessageConverter.KRYO_VALUE, MediaType.APPLICATION_JSON_VALUE,
+                    "application/x-kryo;charset=UTF-8" })
     @ResponseBody
     @ApiOperation(value = "Register a play")
     @PreAuthorize("hasRole('Create_PLS_Plays')")
@@ -155,13 +147,13 @@ public class PlayResource {
     @ApiOperation(value = "Create play launch for a given play")
     public PlayLaunch createPlayLaunch( //
             @PathVariable("playName") String playName, //
+            @RequestParam(value = "dry-run", required = false, defaultValue = "false") //
+            boolean isDryRunMode, //
             @RequestBody PlayLaunch playLaunch, //
             HttpServletResponse response) {
         Tenant tenant = MultiTenantContext.getTenant();
 
-        validateNonEmptyTargetsForLaunch(tenant.getId(), playName, playLaunch);
-
-        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch);
+        return playProxy.createPlayLaunch(tenant.getId(), playName, playLaunch, isDryRunMode);
     }
 
     @RequestMapping(value = "/{playName}/launches", method = RequestMethod.GET)
@@ -205,25 +197,4 @@ public class PlayResource {
         playProxy.deletePlayLaunch(tenant.getId(), playName, launchId);
     }
 
-    private void validateNonEmptyTargetsForLaunch(String customerSpace, String playName, PlayLaunch playLaunch) {
-        Play play = getPlay(playName);
-        PlayUtils.validatePlayBeforeLaunch(play);
-        PlayUtils.validatePlayLaunchBeforeLaunch(customerSpace, playLaunch, play);
-
-        RatingEngine ratingEngine = play.getRatingEngine();
-        ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, ratingEngine.getId());
-        play.setRatingEngine(ratingEngine);
-
-        DataPage previewDataPage = ratingEntityPreviewService.getEntityPreview( //
-                ratingEngine, 0L, 1L, BusinessEntity.Account, //
-                playLaunch.getExcludeItemsWithoutSalesforceId(), //
-                playLaunch.getBucketsToLaunch().stream() //
-                        .map(RatingBucketName::getName) //
-                        .collect(Collectors.toList()));
-
-        if (previewDataPage == null || CollectionUtils.isEmpty(previewDataPage.getData())
-                || (playLaunch.getTopNCount() != null && playLaunch.getTopNCount() <= 0L)) {
-            throw new LedpException(LedpCode.LEDP_18176, new String[] { play.getName() });
-        }
-    }
 }

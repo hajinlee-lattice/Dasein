@@ -26,6 +26,7 @@ import com.latticeengines.apps.cdl.service.RatingCoverageService;
 import com.latticeengines.apps.cdl.service.RatingEngineDashboardService;
 import com.latticeengines.apps.cdl.service.RatingEngineNoteService;
 import com.latticeengines.apps.cdl.service.RatingEngineService;
+import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.apps.cdl.util.ActionContext;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
@@ -44,6 +45,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngineSummary;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingModelAndActionDTO;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.frontend.EventFrontEndQuery;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
@@ -66,15 +69,19 @@ public class RatingEngineResource {
 
     private final RatingEngineDashboardService ratingEngineDashboardService;
 
+    private final RatingEntityPreviewService ratingEntityPreviewService;
+
     @Inject
     public RatingEngineResource(RatingEngineService ratingEngineService, //
             RatingEngineNoteService ratingEngineNoteService, //
             RatingCoverageService ratingCoverageService, //
-            RatingEngineDashboardService ratingEngineDashboardService) {
+            RatingEngineDashboardService ratingEngineDashboardService, //
+            RatingEntityPreviewService ratingEntityPreviewService) {
         this.ratingEngineService = ratingEngineService;
         this.ratingEngineNoteService = ratingEngineNoteService;
         this.ratingCoverageService = ratingCoverageService;
         this.ratingEngineDashboardService = ratingEngineDashboardService;
+        this.ratingEntityPreviewService = ratingEntityPreviewService;
     }
 
     @GetMapping(value = "")
@@ -342,4 +349,42 @@ public class RatingEngineResource {
                 ratingEngineId);
     }
 
+    @RequestMapping(value = "/{ratingEngineId}/entitypreview", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get preview of Account and Contact as related to Rating Engine given its id")
+    public DataPage getEntityPreview( //
+            @PathVariable String ratingEngineId, //
+            @RequestParam(value = "offset", required = true) long offset, //
+            @RequestParam(value = "maximum", required = true) long maximum, //
+            @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
+            @RequestParam(value = "sortBy", required = false) String sortBy, //
+            @RequestParam(value = "bucketFieldName", required = false) String bucketFieldName, //
+            @RequestParam(value = "descending", required = false) Boolean descending, //
+            @RequestParam(value = "lookupFieldNames", required = false) List<String> lookupFieldNames, //
+            @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
+            @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
+
+        descending = descending == null ? false : descending;
+
+        return ratingEntityPreviewService.getEntityPreview(ratingEngine, offset, maximum, entityType, sortBy,
+                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
+                selectedBuckets);
+    }
+
+    @RequestMapping(value = "/{ratingEngineId}/entitypreview/count", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
+    public Long getEntityPreviewCount( //
+            @PathVariable String ratingEngineId, //
+            @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
+            @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
+            @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
+            @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
+        RatingEngine ratingEngine = ratingEngineService.getRatingEngineById(ratingEngineId, false, false);
+
+        return ratingEntityPreviewService.getEntityPreviewCount(ratingEngine, entityType, restrictNotNullSalesforceId,
+                freeFormTextSearch, selectedBuckets);
+    }
 }

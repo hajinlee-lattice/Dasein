@@ -1,4 +1,4 @@
-package com.latticeengines.pls.service.impl;
+package com.latticeengines.apps.cdl.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,6 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+import com.latticeengines.apps.cdl.service.RatingEntityPreviewService;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
@@ -31,7 +32,6 @@ import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountRequest;
 import com.latticeengines.domain.exposed.ratings.coverage.RatingsCountResponse;
-import com.latticeengines.pls.service.RatingEntityPreviewService;
 import com.latticeengines.proxy.exposed.cdl.RatingCoverageProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.objectapi.EntityProxy;
@@ -39,7 +39,7 @@ import com.latticeengines.testframework.service.impl.GlobalAuthCleanupTestListen
 
 @Listeners({ GlobalAuthCleanupTestListener.class })
 @TestExecutionListeners({ DirtiesContextTestExecutionListener.class })
-@ContextConfiguration(locations = { "classpath:test-pls-context.xml" })
+@ContextConfiguration(locations = { "classpath:test-serviceapps-cdl-context.xml" })
 public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTestNGSpringContextTests {
 
     private static final String RATING_BUCKET_FIELD = "RATING_BUCKET_FIELD";
@@ -173,7 +173,7 @@ public class RatingEntityPreviewServiceImplDeploymentTestNG extends AbstractTest
         for (String segmentId : segmentIds) {
             Assert.assertTrue(response.getSegmentIdCoverageMap().containsKey(segmentId));
             Assert.assertNotNull(response.getSegmentIdCoverageMap().get(segmentId));
-            Assert.assertFalse(response.getErrorMap().get(SEGMENT_IDS_ERROR_MAP_KEY).containsKey(segmentId));
+            Assert.assertNull(response.getErrorMap());
             segmentAccountsCount = response.getSegmentIdCoverageMap().get(segmentId).getAccountCount();
         }
     }

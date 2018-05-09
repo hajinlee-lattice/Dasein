@@ -187,12 +187,18 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
+        createPlayLaunch(false);
+    }
+
+    public void createPlayLaunch(boolean isDryRunMode) {
         logInterceptor();
 
-        playLaunch = restTemplate.postForObject(getRestAPIHostPort() + //
-                "/pls/play/" + name + "/launches", createDefaultPlayLaunch(), PlayLaunch.class);
+        playLaunch = restTemplate.postForObject(
+                getRestAPIHostPort() + //
+                        "/pls/play/" + name + "/launches?dry-run=" + isDryRunMode,
+                createDefaultPlayLaunch(), PlayLaunch.class);
 
-        assertPlayLaunch(playLaunch);
+        assertPlayLaunch(playLaunch, isDryRunMode);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
@@ -342,13 +348,17 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         restTemplate.delete(getRestAPIHostPort() + "/pls/play/" + playName + "/launches/" + playLaunchId);
     }
 
-    private void assertPlayLaunch(PlayLaunch playLaunch) {
+    private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
         Assert.assertNotNull(playLaunch);
         Assert.assertNotNull(playLaunch.getLaunchId());
         Assert.assertNotNull(playLaunch.getPid());
         Assert.assertNotNull(playLaunch.getUpdated());
         Assert.assertNotNull(playLaunch.getCreated());
-        Assert.assertNotNull(playLaunch.getApplicationId());
+        if (isDryRunMode) {
+            Assert.assertNull(playLaunch.getApplicationId());
+        } else {
+            Assert.assertNotNull(playLaunch.getApplicationId());
+        }
         Assert.assertNotNull(playLaunch.getLaunchState());
         assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);

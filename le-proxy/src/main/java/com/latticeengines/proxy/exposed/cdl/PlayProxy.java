@@ -141,8 +141,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         delete("Delete a play", url);
     }
 
-    public PlayLaunch createPlayLaunch(String customerSpace, String playName, PlayLaunch playLaunch) {
-        String url = constructUrl(URL_PREFIX + "/{playName}/launches", shortenCustomerSpace(customerSpace), playName);
+    public PlayLaunch createPlayLaunch(String customerSpace, String playName, PlayLaunch playLaunch,
+            boolean isDryRunMode) {
+        String url = constructUrl(URL_PREFIX + "/{playName}/launches?dry-run={isDryRunMode}",
+                shortenCustomerSpace(customerSpace), playName, isDryRunMode);
         log.info("url is " + url);
         return post("create or update play", url, playLaunch, PlayLaunch.class);
     }

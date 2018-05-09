@@ -175,8 +175,8 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
 
     @Test(groups = "deployment", dependsOnMethods = { "getCrud" })
     public void createPlayLaunch() {
-        playLaunch = playProxy.createPlayLaunch(tenant.getId(), name, createDefaultPlayLaunch());
-        assertPlayLaunch(playLaunch);
+        playLaunch = playProxy.createPlayLaunch(tenant.getId(), name, createDefaultPlayLaunch(), false);
+        assertPlayLaunch(playLaunch, false);
     }
 
     @Test(groups = "deployment", dependsOnMethods = { "createPlayLaunch" })
@@ -288,13 +288,17 @@ public class PlayResourceDeploymentTestNG extends CDLDeploymentTestNGBase {
         playProxy.deletePlayLaunch(tenant.getId(), playName, playLaunchId);
     }
 
-    private void assertPlayLaunch(PlayLaunch playLaunch) {
+    private void assertPlayLaunch(PlayLaunch playLaunch, boolean isDryRunMode) {
         Assert.assertNotNull(playLaunch);
         Assert.assertNotNull(playLaunch.getLaunchId());
         Assert.assertNotNull(playLaunch.getPid());
         Assert.assertNotNull(playLaunch.getUpdated());
         Assert.assertNotNull(playLaunch.getCreated());
-        Assert.assertNotNull(playLaunch.getApplicationId());
+        if (isDryRunMode) {
+            Assert.assertNull(playLaunch.getApplicationId());
+        } else {
+            Assert.assertNotNull(playLaunch.getApplicationId());
+        }
         Assert.assertNotNull(playLaunch.getLaunchState());
         assertBucketsToLaunch(playLaunch.getBucketsToLaunch());
         Assert.assertEquals(playLaunch.getLaunchState(), LaunchState.Launching);
