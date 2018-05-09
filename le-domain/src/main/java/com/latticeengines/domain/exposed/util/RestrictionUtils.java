@@ -12,6 +12,7 @@ import com.latticeengines.common.exposed.graph.GraphNode;
 import com.latticeengines.common.exposed.graph.traversal.impl.DepthFirstSearch;
 import com.latticeengines.domain.exposed.datacloud.statistics.Bucket;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.transaction.NullMetricsImputation;
 import com.latticeengines.domain.exposed.query.AggregationFilter;
 import com.latticeengines.domain.exposed.query.AggregationSelector;
 import com.latticeengines.domain.exposed.query.AggregationType;
@@ -27,8 +28,8 @@ import com.latticeengines.domain.exposed.query.TransactionRestriction;
 
 public class RestrictionUtils {
 
-    public static final AttributeLookup TRANSACTION_LOOKUP =
-            new AttributeLookup(BusinessEntity.PurchaseHistory, "HasPurchased");
+    public static final AttributeLookup TRANSACTION_LOOKUP = new AttributeLookup(BusinessEntity.PurchaseHistory,
+            "HasPurchased");
 
     public static Restriction convertBucketRestriction(BucketRestriction bucketRestriction) {
         Restriction restriction;
@@ -66,9 +67,7 @@ public class RestrictionUtils {
                 ComparisonType.GT_AND_LT).contains(concreteRestriction.getRelation())) {
             RangeLookup rangeLookup = (RangeLookup) concreteRestriction.getRhs();
             return convertBinaryValueComparison( //
-                    concreteRestriction.getLhs(),
-                    concreteRestriction.getRelation(),
-                    rangeLookup.getMin(),
+                    concreteRestriction.getLhs(), concreteRestriction.getRelation(), rangeLookup.getMin(),
                     rangeLookup.getMax());
         } else {
             return concreteRestriction;
@@ -105,7 +104,8 @@ public class RestrictionUtils {
         return transactionRestriction;
     }
 
-    private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator, List<Object> values) {
+    private static Restriction convertPurchaseHistoryBucket(AttributeLookup attr, ComparisonType comparator,
+            List<Object> values) {
         String fullAttrName = attr.getAttribute();
         String metricAttr = ActivityMetricsUtils.getDepivotedAttrNameFromFullName(fullAttrName);
         String bundleId = ActivityMetricsUtils.getProductIdFromFullName(fullAttrName);
@@ -114,7 +114,18 @@ public class RestrictionUtils {
         Restriction bundleIdRestriction = Restriction.builder() //
                 .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()) //
                 .eq(bundleId).build();
-        return Restriction.builder().and(bundleIdRestriction, metricRestriction).build();
+        Restriction restriction = Restriction.builder().and(bundleIdRestriction, metricRestriction).build();
+
+        NullMetricsImputation imputation = ActivityMetricsUtils.getNullImputation(fullAttrName);
+        // only handles zero imputation now
+        boolean needImputeNulls = NullMetricsImputation.ZERO.equals(imputation) && containsZero(comparator, values);
+        if (needImputeNulls) {
+            Restriction isNullRestriction = Restriction.builder() //
+                    .let(BusinessEntity.DepivotedPurchaseHistory, InterfaceName.ProductId.name()).isNull().build();
+            restriction = Restriction.builder().or(restriction, isNullRestriction).build();
+        }
+
+        return restriction;
     }
 
     private static Restriction convertValueComparisons(Lookup attr, ComparisonType comparisonType,
@@ -255,5 +266,33 @@ public class RestrictionUtils {
         });
 
         return attributes;
+    }
+
+    private static boolean containsZero(ComparisonType comparator, List<Object> vals) {
+        boolean containsZero = false;
+        if (vals.size() == 2) {
+            Double upperBound = (Double) vals.get(1);
+            Double lowerBound = (Double) vals.get(0);
+            containsZero = lowerBound * upperBound <= 0;
+        } else {
+            Double val = (Double) vals.get(0);
+            switch (comparator) {
+            case GREATER_OR_EQUAL:
+                containsZero = val <= 0;
+                break;
+            case GREATER_THAN:
+                containsZero = val < 0;
+                break;
+            case LESS_OR_EQUAL:
+                containsZero = val >= 0;
+                break;
+            case LESS_THAN:
+                containsZero = val > 0;
+                break;
+            default:
+                break;
+            }
+        }
+        return containsZero;
     }
 }
