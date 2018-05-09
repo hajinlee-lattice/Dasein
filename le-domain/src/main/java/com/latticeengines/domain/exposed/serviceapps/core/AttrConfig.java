@@ -106,7 +106,11 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
     private <T> T getProperty(String key, Class<T> valueClz) {
         AttrConfigProp prop = getProperty(key);
         if (prop != null && prop.getCustomValue() != null) {
-            return valueClz.cast(prop.getCustomValue());
+            if (Boolean.TRUE.equals(prop.isAllowCustomization() && prop.getCustomValue() != null)) {
+                return valueClz.cast(prop.getCustomValue());
+            } else {
+                return valueClz.cast(prop.getSystemValue());
+            }
         }
         return null;
     }
