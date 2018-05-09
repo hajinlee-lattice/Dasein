@@ -122,6 +122,11 @@ public class AbstractAttrConfigServiceUnitTestNG {
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 4, 0L);
         map = propSummary.get(ColumnSelection.Predefined.CompanyProfile.getName());
         Assert.assertEquals(map.get(Boolean.TRUE).longValue() - 4, 0L);
+
+        overview = cdlAttrConfigServiceImpl.getAttrConfigOverview(generatePropertyListWithAllInactive(),
+                Category.INTENT, getPropertyNames(), true);
+        log.info("generatePropertyListWithAllInactive is " + overview);
+        Assert.assertEquals(overview.getTotalAttrs(), new Long(0));
     }
 
     private List<String> getPropertyNames() {
@@ -157,6 +162,19 @@ public class AbstractAttrConfigServiceUnitTestNG {
                 AttrConfigTestUtils.getAttr2(Category.FIRMOGRAPHICS, true), //
                 AttrConfigTestUtils.getAttr3(Category.FIRMOGRAPHICS, true), //
                 AttrConfigTestUtils.getAttr4(Category.FIRMOGRAPHICS, true), //
+                AttrConfigTestUtils.getAttr5(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr6(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr8(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr9(Category.FIRMOGRAPHICS, false));
+        return renderedList;
+    }
+
+    private List<AttrConfig> generatePropertyListWithAllInactive() {
+        List<AttrConfig> renderedList = Arrays.asList(AttrConfigTestUtils.getAttr1(Category.FIRMOGRAPHICS, false),
+                AttrConfigTestUtils.getAttr2(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr3(Category.FIRMOGRAPHICS, false), //
+                AttrConfigTestUtils.getAttr4(Category.FIRMOGRAPHICS, false), //
                 AttrConfigTestUtils.getAttr5(Category.FIRMOGRAPHICS, false), //
                 AttrConfigTestUtils.getAttr6(Category.FIRMOGRAPHICS, false), //
                 AttrConfigTestUtils.getAttr7(Category.FIRMOGRAPHICS, false), //

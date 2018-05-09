@@ -111,16 +111,16 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Override
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
-            List<String> propertyNames, boolean onlyActive) {
+            List<String> propertyNames, boolean activeOnly) {
         Map<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new HashMap<>();
-        log.info("categories are" + categories + ", propertyNames are " + propertyNames);
+        log.info("categories are" + categories + ", propertyNames are " + propertyNames + ", activeOnly " + activeOnly);
         final Tenant tenant = MultiTenantContext.getTenant();
         List<Callable<AttrConfigCategoryOverview<?>>> callables = new ArrayList<>();
         categories.forEach(category -> {
             Callable<AttrConfigCategoryOverview<?>> callable = () -> {
                 MultiTenantContext.setTenant(tenant);
                 AttrConfigCategoryOverview<?> attrConfigCategoryOverview = getAttrConfigOverview(
-                        getRenderedList(category), category, propertyNames, onlyActive);
+                        getRenderedList(category), category, propertyNames, activeOnly);
                 attrConfigOverview.put(category.getName(), attrConfigCategoryOverview);
                 return attrConfigCategoryOverview;
             };

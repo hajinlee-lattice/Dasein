@@ -73,12 +73,12 @@ public class AttrConfigResource {
     @PostMapping(value = "/overview")
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(@PathVariable String customerSpace,
             @RequestParam(value = "category", required = false) List<String> categoryNames, //
-            @RequestParam(value = "onlyActive", required = false, defaultValue = "0") boolean onlyActive, //
+            @RequestParam(value = "activeOnly", required = false, defaultValue = "0") boolean activeOnly, //
             @RequestBody List<String> propertyNames) {
         List<Category> categories = categoryNames != null
                 ? categoryNames.stream().map(this::resolveCategory).collect(Collectors.toList())
                 : Arrays.asList(Category.values());
-        return attrConfigService.getAttrConfigOverview(categories, propertyNames, onlyActive);
+        return attrConfigService.getAttrConfigOverview(categories, propertyNames, activeOnly);
     }
 
     @PostMapping(value = "")
