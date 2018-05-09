@@ -37,9 +37,12 @@ public class RestrictionUtils {
             throw new IllegalArgumentException("cannot convert null bucket restriction");
         }
 
-        Bucket.Transaction transaction = bkt.getTransaction();
-        if (transaction != null) {
-            restriction = convertTxnBucket(transaction);
+        if (bkt.getChange() != null) {
+            bkt = StatsCubeUtils.convertChgBucketToBucket(bkt);
+        }
+
+        if (bkt.getTransaction() != null) {
+            restriction = convertTxnBucket(bkt.getTransaction());
         } else {
             ComparisonType comparisonType = bkt.getComparisonType();
             List<Object> values = bkt.getValues();
