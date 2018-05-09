@@ -449,6 +449,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
                 } else {
                     attribute.setFundamentalType(FundamentalType.NUMERIC);
                 }
+                attribute.setDescription(ActivityMetricsUtils.getDescriptionFromFullName(attribute.getName()));
             }
             attribute.removeAllowedDisplayNames();
         }

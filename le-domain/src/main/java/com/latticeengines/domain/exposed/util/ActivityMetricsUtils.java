@@ -52,6 +52,24 @@ public class ActivityMetricsUtils {
         }
     };
 
+    private static Map<InterfaceName, String> metricsDescription = new HashMap<InterfaceName, String>() {
+        {
+            put(InterfaceName.Margin,
+                    "This curated attribute is calculated by analyzing cost of sell & revenue for a given product of a given account in the specified time window. "
+                            + "The insights are useful to drive sales & marketing campaigns for the accounts where the profit margins are below expected levels.");
+            put(InterfaceName.SpendChange,
+                    "This curated attribute is calculated by comparing average spend for a given product of a given account in the specified time window with that of the range in prior time window.");
+            put(InterfaceName.ShareOfWallet,
+                    "This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment. "
+                            + "This insights are useful to drive sales & marketing campaigns for the accounts where the share of wallet is below the desired range.");
+            put(InterfaceName.AvgSpendOvertime,
+                    "This curated attribute is calculated by aggregating average spend for a given product of a given account over a specified time window.");
+            put(InterfaceName.TotalSpendOvertime,
+                    "This curated attribute is calculated by aggregating total spend for a given product of a given account over a specified time window.");
+            put(InterfaceName.HasPurchased, "Indicates if this product ever was purchased by this account.");
+        }
+    };
+
     @SuppressWarnings("serial")
     private static Map<String, InterfaceName> metricsAbbrRev = new HashMap<String, InterfaceName>() {
         {
@@ -180,6 +198,14 @@ public class ActivityMetricsUtils {
         }
         fullName = fullName.substring(HEADER.length()); // remove header
         return fullName.substring(fullName.indexOf(SEPARATOR) + SEPARATOR.length(), fullName.lastIndexOf(SEPARATOR));
+    }
+
+    public static String getDescriptionFromFullName(String fullName) {
+        if (StringUtils.isBlank(fullName) || !fullName.contains(SEPARATOR)) {
+            return null;
+        }
+        InterfaceName metrics = getMetricsFromFullName(fullName);
+        return metricsDescription.get(metrics);
     }
 
     // <DisplayName, SecondDisplayName>
