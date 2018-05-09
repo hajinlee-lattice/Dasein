@@ -325,7 +325,7 @@ public class StatsCubeUtils {
                 chg.setDirection(Bucket.Change.Direction.INC);
                 chg.setComparisonType(Bucket.Change.ComparisonType.AS_MUCH_AS);
             }
-            absVals.add(Double.valueOf(Math.abs(val)));
+            absVals.add(Math.abs(val));
             break;
         case GREATER_OR_EQUAL:
             val = valObjToDouble(bucket.getValues().get(0));
@@ -336,7 +336,7 @@ public class StatsCubeUtils {
                 chg.setDirection(Bucket.Change.Direction.INC);
                 chg.setComparisonType(Bucket.Change.ComparisonType.AT_LEAST);
             }
-            absVals.add(Double.valueOf(Math.abs(val)));
+            absVals.add(Math.abs(val));
             break;
         case EQUAL:
             val = valObjToDouble(bucket.getValues().get(0));
@@ -346,20 +346,20 @@ public class StatsCubeUtils {
                 chg.setDirection(Bucket.Change.Direction.INC);
             }
             chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
-            absVals.add(Double.valueOf(Math.abs(val)));
-            absVals.add(Double.valueOf(Math.abs(val)));
+            absVals.add(Math.abs(val));
+            absVals.add(Math.abs(val));
             break;
         case GTE_AND_LT:
             Double val1 = valObjToDouble(bucket.getValues().get(0));
             Double val2 = valObjToDouble(bucket.getValues().get(1));
             if (val2 > 0) {
                 chg.setDirection(Bucket.Change.Direction.INC);
-                absVals.add(Double.valueOf(Math.abs(val1)));
-                absVals.add(Double.valueOf(Math.abs(val2)));
+                absVals.add(Math.abs(val1));
+                absVals.add(Math.abs(val2));
             } else {
                 chg.setDirection(Bucket.Change.Direction.DEC);
-                absVals.add(Double.valueOf(Math.abs(val2)));
-                absVals.add(Double.valueOf(Math.abs(val1)));
+                absVals.add(Math.abs(val2));
+                absVals.add(Math.abs(val1));
             }
             chg.setComparisonType(Bucket.Change.ComparisonType.BETWEEN);
             break;
@@ -388,7 +388,7 @@ public class StatsCubeUtils {
                 bucket.setComparisonType(ComparisonType.GREATER_OR_EQUAL);
                 break;
             case AS_MUCH_AS:
-                vals.add(Double.valueOf(0));
+                vals.add(0.0D);
                 vals.add(valObjToDouble(chg.getAbsVals().get(0)));
                 bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
                 break;
@@ -410,7 +410,7 @@ public class StatsCubeUtils {
                 break;
             case AS_MUCH_AS:
                 vals.add(valObjToDouble(chg.getAbsVals().get(0), true));
-                vals.add(Double.valueOf(0));
+                vals.add(0.0D);
                 bucket.setComparisonType(ComparisonType.GTE_AND_LTE);
                 break;
             case BETWEEN:
