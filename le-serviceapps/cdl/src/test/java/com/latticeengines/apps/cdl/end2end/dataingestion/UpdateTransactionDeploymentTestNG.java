@@ -36,7 +36,7 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
 
     @Test(groups = "end2end")
     public void runTest() throws Exception {
-        resumeCheckpoint(UpdateProductDeploymentTestNG.CHECK_POINT);
+        resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
         dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
