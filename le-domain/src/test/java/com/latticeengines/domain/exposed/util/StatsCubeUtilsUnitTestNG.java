@@ -175,7 +175,6 @@ public class StatsCubeUtilsUnitTestNG {
         chg.setAbsVals(absVals);
         chgBkt.setChange(chg);
         Bucket bkt = StatsCubeUtils.convertChgBucketToBucket(chgBkt);
-        System.out.println(JsonUtils.serialize(bkt));
         Assert.assertEquals(bkt.getComparisonType(), cmp);
         Assert.assertEquals(bkt.getValues().get(0), val1);
         if (val2 != null) {
