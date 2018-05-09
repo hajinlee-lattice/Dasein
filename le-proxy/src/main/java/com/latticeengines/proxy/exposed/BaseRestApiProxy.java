@@ -62,7 +62,7 @@ public abstract class BaseRestApiProxy {
             org.apache.http.NoHttpResponseException.class,
             org.springframework.web.client.ResourceAccessException.class);
 
-    private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset by peer");
+    private static final Set<String> DEFAULT_RETRY_MESSAGES = ImmutableSet.of("Connection reset");
 
     private RestTemplate restTemplate;
     private WebClient webClient;
