@@ -171,7 +171,14 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
                 || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))) {
             changed = true;
         }
-        log.info("Data cloud version changed=" + changed);
+        if (changed) {
+            log.info("Data cloud is changed, current LDC build number=" + currentBuildNumber,
+                    " the LDC builder number in data collection=" + dataCollection.getDataCloudBuildNumber());
+        } else {
+            log.info("Data cloud is not changed, current LDC build number=" + currentBuildNumber,
+                    ", the LDC builder number in data collection="
+                            + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
+        }
         return changed;
     }
 
