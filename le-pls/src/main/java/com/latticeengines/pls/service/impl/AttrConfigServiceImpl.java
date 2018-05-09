@@ -336,8 +336,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                     if (applyActivationFilter) {
                         AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                                 .get(ColumnMetadataKey.State);
-                        if (getActualValue(attrConfigProp) == null
-                                || getActualValue(attrConfigProp) == AttrState.Inactive) {
+                        if (!AttrState.Active.equals(getActualValue(attrConfigProp))) {
                             includeCurrentAttr = false;
                         }
                     }

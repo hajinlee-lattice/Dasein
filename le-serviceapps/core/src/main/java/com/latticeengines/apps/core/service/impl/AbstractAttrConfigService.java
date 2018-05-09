@@ -176,15 +176,14 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     if (onlyActiveAttrs) {
                         AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                                 .get(ColumnMetadataKey.State);
-                        if (getActualValue(attrConfigProp) == null
-                                || getActualValue(attrConfigProp) == AttrState.Inactive) {
+                        if (!AttrState.Active.equals(getActualValue(attrConfigProp))) {
                             includeCurrentAttr = false;
                         }
                     }
                     if (includeCurrentAttr) {
-                        totalAttrs++;
                         AttrConfigProp<?> configProp = attrProps.get(propertyName);
                         if (configProp != null) {
+                            log.info("include attribute" + attrConfig.getAttrName());
                             Object actualValue = getActualValue(configProp);
                             if (actualValue == null) {
                                 log.warn(String.format("configProp %s does not have proper value", configProp));
@@ -192,6 +191,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                             }
                             Long count = valueNumberMap.getOrDefault(actualValue, 0L);
                             valueNumberMap.put((T) actualValue, count + 1);
+                            totalAttrs++;
                         } else {
                             log.warn(String.format("Attr %s does not have property %s", attrConfig.getAttrName(),
                                     propertyName));
