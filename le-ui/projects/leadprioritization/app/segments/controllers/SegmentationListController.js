@@ -274,19 +274,20 @@ angular.module('lp.segments.segments', [
     function createOrUpdateSegment(segment) {
         SegmentService.CreateOrUpdateSegment(segment).then(function(result) {
             var errorMsg = result.errorMsg;
-
+            
             if (result.success) {
                 var tileState = vm.tileStates[segment.name];
                 
                 if(tileState){
                     tileState.editSegment = !tileState.editSegment;
+                    $state.go('home.segments', {edit: null}, {reload: false } );
                 } else {
                     $state.go('home.segments', {}, { reload: true } );
                 }
 
                 vm.saveInProgress = false;
                 vm.showAddSegmentError = false;
-                vm.inEditing = {};
+                vm.inEditing = {};    
             } else {
                 vm.saveInProgress = false;
                 vm.addSegmentErrorMessage = errorMsg;

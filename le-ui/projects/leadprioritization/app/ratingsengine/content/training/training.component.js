@@ -163,22 +163,22 @@ angular.module('lp.ratingsengine.wizard.training', [
    
     vm.getSpendConfig = function(){
         return {
-            from: { name: 'from-spend', value: undefined, position: 0, type: 'Spend', min: '0' },
-            to: { name: 'to-spend', value: undefined, position: 1, type: 'Spend', min: '0' }
+            from: { name: 'from-spend', value: undefined, position: 0, type: 'Spend', min: '0', max: '2147483647' },
+            to: { name: 'to-spend', value: undefined, position: 1, type: 'Spend', min: '0', max: '2147483647' }
         };
     }
 
     vm.getQuantityConfig = function(){
         return {
-            from: { name: 'from-quantity', value: undefined, position: 0, type: 'Quantity', min: '0', disabled: true, visible: true},
-            to: { name: 'to-quantity', value: undefined, position: 1, type: 'Quantity', min: '0', disbaled: true, visible: false }
+            from: { name: 'from-quantity', value: undefined, position: 0, type: 'Quantity', min: '0', max: '2147483647', disabled: true, visible: true},
+            to: { name: 'to-quantity', value: undefined, position: 1, type: 'Quantity', min: '0', max: '2147483647', disbaled: true, visible: false }
         };
     }
 
     vm.getPeriodConfig = function(){
         return {
-            from: { name: 'from-period', value: undefined, position: 0, type: 'Period', min: '0' },
-            to: { name: 'to-period', value: undefined, position: 1, type: 'Period', min: '0' }
+            from: { name: 'from-period', value: undefined, position: 0, type: 'Period', min: '0', max: '2147483647' },
+            to: { name: 'to-period', value: undefined, position: 1, type: 'Period', min: '0', max: '2147483647' }
         };
     }
 
