@@ -64,6 +64,7 @@ public class ThreadPoolUtils {
                 } catch (TimeoutException e) {
                     // ignore
                 } catch (InterruptedException | ExecutionException e) {
+                    toBeRemoved.add(future);
                     throw new RuntimeException(e);
                 }
             });
@@ -89,6 +90,7 @@ public class ThreadPoolUtils {
                 } catch (TimeoutException e) {
                     // ignore
                 } catch (InterruptedException | ExecutionException e) {
+                    toBeRemoved.add(future);
                     throw new RuntimeException(e);
                 }
             });
