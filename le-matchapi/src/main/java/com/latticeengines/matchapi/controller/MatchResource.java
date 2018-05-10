@@ -1,10 +1,9 @@
 package com.latticeengines.matchapi.controller;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,8 @@ public class MatchResource {
     )
     public MatchOutput matchRealTime(@RequestBody MatchInput input) {
         matchMonitorService.precheck(input.getDataCloudVersion());
-        if (StringUtils.isNotBlank(input.getLookupId())) {
+        if (input.getKeyMap().containsKey(MatchKey.LookupId) //
+                && !"AccountId".equals(input.getKeyMap().get(MatchKey.LookupId).get(0))) {
             input = mockForCDLLookup(input);
         }
         return realTimeMatchService.match(input);
@@ -75,8 +75,7 @@ public class MatchResource {
     @ApiOperation(value = "Match to derived column selection. Specify input fields and MatchKey -> Field mapping. "
             + "Available match keys are Domain, Name, City, State, Country, DUNS, LatticeAccountID. "
             + "Domain can be anything that can be parsed to a domain, such as website, email, etc. "
-            + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. "
-    )
+            + "When domain is not provided, Name, State, Country must be provided. Country is default to USA. ")
     public BulkMatchOutput bulkMatchRealTime(@RequestBody BulkMatchInput input) {
         long time = System.currentTimeMillis();
         try {
@@ -121,7 +120,7 @@ public class MatchResource {
             + "This parameter is mainly for testing purpose. "
             + "Leave it empty will result in using the pod id defined in camille environment.")
     public BulkMatchWorkflowConfiguration getBulkMatchConfig(@RequestBody MatchInput input,
-                                                             @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
+            @RequestParam(value = "podid", required = false, defaultValue = "") String hdfsPod) {
         try {
             String matchVersion = input.getDataCloudVersion();
             matchMonitorService.precheck(matchVersion);
@@ -158,7 +157,8 @@ public class MatchResource {
         input.setUnionSelection(null);
         input.setPredefinedSelection(ColumnSelection.Predefined.RTS);
         input.setFetchOnly(true);
-        input.setKeyMap(ImmutableMap.of(MatchKey.LatticeAccountID, Collections.singletonList(input.getLookupId())));
+        List<String> idFields = new ArrayList<>(input.getKeyMap().get(MatchKey.LookupId));
+        input.setKeyMap(ImmutableMap.of(MatchKey.LatticeAccountID, idFields));
         input.setSkipKeyResolution(true);
         return input;
     }
