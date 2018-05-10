@@ -81,7 +81,7 @@
         -->
 
         <!-- Rating -->
-        <bar-chart ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
+        <le-bar-chart ng-if="vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List && 
                             vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length && 
                             !vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1
                             && enrichment.Entity === 'Rating'"
@@ -91,7 +91,7 @@
                         bktlist="vm.getData(enrichment.Entity, enrichment.ColumnId)"
                         callback="vm.chartRowClicked"
                         enrichment="enrichment">
-        </bar-chart>
+        </le-bar-chart>
         <div    class="attributes-more noselect" 
                     ng-click="vm.goToEnumPicker(vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId], enrichment)" 
                     ng-if="enrichment.Entity === 'Rating' 
