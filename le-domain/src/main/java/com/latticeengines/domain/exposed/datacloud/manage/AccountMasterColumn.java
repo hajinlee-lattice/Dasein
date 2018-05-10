@@ -392,14 +392,15 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
 
         if (metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
             metadata.setCanEnrich(true);
-            metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
-            metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
         } else {
             metadata.setCanEnrich(false);
         }
 
         if (metadata.isEnabledFor(ColumnSelection.Predefined.Segment)) {
             metadata.setCanSegment(true);
+            metadata.enableGroup(ColumnSelection.Predefined.Segment);
+            metadata.enableGroup(ColumnSelection.Predefined.TalkingPoint);
+            metadata.enableGroup(ColumnSelection.Predefined.CompanyProfile);
         }
 
         if (metadata.getApprovedUsageString().contains("Model")) {
