@@ -1,0 +1,62 @@
+{
+  "account_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": [
+          {
+            "concreteRestriction": {
+              "negate": false,
+              "lhs": {
+                "attribute": {
+                  "entity": "Account",
+                  "attribute": "Country"
+                }
+              },
+              "relation": "EQUAL",
+              "rhs": {
+                "value": {
+                  "value": "USA"
+                }
+              }
+            }
+          },
+          {
+            "transactionRestriction": {
+              "productId": "829Xt1N7sZkyKbaL0cILdmbqfzuEyOQt",
+              "targetProductId": "829Xt1N7sZkyKbaL0cILdmbqfzuEyOQt",
+              "timeFilter": {
+                "Cmp": "EVER",
+                "Vals": [
+                  -1
+                ],
+                "Period": "Month"
+              },
+              "negate": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "contact_restriction": {
+    "restriction": {
+      "logicalRestriction": {
+        "operator": "AND",
+        "restrictions": []
+      }
+    }
+  },
+  "restrict_without_sfdcid": false,
+  "restrict_with_sfdcid": false,
+  "lookups": [],
+  "main_entity": "Account",
+  "period_name": "Week",
+  "period_count": -1,
+  "target_product_ids": [
+    "829Xt1N7sZkyKbaL0cILdmbqfzuEyOQt"
+  ],
+  "calculate_product_revenue": false,
+  "evaluation_period_id": 219,
+  "lagging_period_count": 1
+}

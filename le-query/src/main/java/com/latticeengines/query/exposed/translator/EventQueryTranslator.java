@@ -617,10 +617,14 @@ public class EventQueryTranslator extends TranslatorCommon {
         Map<LogicalRestriction, List<String>> subQueryTableMap = new HashMap<>();
         Restriction rootRestriction = restriction;
 
-        String period = StringUtils.isEmpty(periodName) ? getPeriodFromRestriction(rootRestriction) : periodName;
+        String periodInTxn = getPeriodFromRestriction(rootRestriction);
+
+        String period = StringUtils.isEmpty(periodName) ? periodInTxn : periodName;
 
         if (StringUtils.isEmpty(period)) {
             throw new RuntimeException("No period definition passed for event query.");
+        } else if (StringUtils.isNotEmpty(periodInTxn) && !period.equals(periodInTxn)) {
+            throw new LedpException(LedpCode.LEDP_37016, new String[]{period, periodInTxn});
         }
 
         builder.with(translateAllKeys(queryFactory, repository, period, periodCount));

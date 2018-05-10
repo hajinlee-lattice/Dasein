@@ -1,6 +1,5 @@
 package com.latticeengines.objectapi.service.impl;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -127,6 +126,14 @@ public class EventQueryServiceImplTestNG extends QueryServiceImplTestNGBase {
         long eventCount = countTxnBktForEvent(txn);
         Assert.assertEquals(eventCount, 5374);
     }
+
+    @Test(groups = "functional", expectedExceptions = QueryEvaluationException.class)
+    public void testInconsistentPeriod() {
+        EventFrontEndQuery npeQuery = loadFrontEndQueryFromResource("/inconsistant_period.json");
+        Long count = eventQueryService.getTrainingCount(npeQuery, DataCollection.Version.Blue);
+        Assert.assertNotNull(count);
+    }
+
 
     private long countTxnBktForScoringFromDataPage(Bucket.Transaction txn) {
         AttributeLookup attrLookup = new AttributeLookup(BusinessEntity.Transaction, "AnyThing");
