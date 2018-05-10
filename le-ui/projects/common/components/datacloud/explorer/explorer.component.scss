@@ -1566,6 +1566,27 @@
                 background-color: #33bdb7 !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #33bdb7;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #33bdb7;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-growth-trends {
         &.color {
@@ -1594,6 +1615,27 @@
             }
             li.attribute:hover {
                 background-color: #65b7e6 !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #65b7e6;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #65b7e6;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -1626,6 +1668,27 @@
                 background-color: #f15a5a !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #f15a5a;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #f15a5a;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-online-presence {
         &.color {
@@ -1654,6 +1717,27 @@
             }
             li.attribute:hover {
                 background-color: #8e71b2 !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #8e71b2;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #8e71b2;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -1686,6 +1770,27 @@
                 background-color: #70bf4a !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #70bf4a;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #70bf4a;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-website-keywords {
         &.color {
@@ -1716,6 +1821,27 @@
                 background-color: #fdbc49 !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #fdbc49;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #fdbc49;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-website-profile {
         &.color {
@@ -1744,6 +1870,27 @@
             }
             li.attribute:hover {
                 background-color: #26649b !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #26649b;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #26649b;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -1806,6 +1953,27 @@
                 background-color: #cd80bc !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #cd80bc;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #cd80bc;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
     .category-engagement {
         &.color {
@@ -1866,6 +2034,27 @@
                 background-color: #457EBA !important;
             }
         }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #457EBA;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #457EBA;
+                .free-text {
+                    color: #ffffff;
+                }
+            }
+        }
     }
 
     .category-lattice-ratings {
@@ -1895,6 +2084,27 @@
             }
             li.attribute:hover {
                 background-color: #2E6099 !important;
+            }
+        }
+        &.button {
+            color: #000;
+            background-color: #E2E3E5;
+            border-color: #E2E3E5;
+            border-size: 1px;
+            font-weight: 500;
+            border-style: solid;
+            .free-text {
+                color: #2E6099;
+                margin-right: 5px;
+                transition: all 0ms ease;
+                font-weight: bold;
+            } 
+            &:hover {
+                color: #ffffff;
+                background-color: #2E6099;
+                .free-text {
+                    color: #ffffff;
+                }
             }
         }
     }
@@ -2219,6 +2429,12 @@
             border-bottom: 1px solid #D0D0D0;
         }
     }
+}
+
+.free-text-attribute {
+    font-size:12px; 
+    color: #adadad; 
+    font-weight: bold;
 }
 
 

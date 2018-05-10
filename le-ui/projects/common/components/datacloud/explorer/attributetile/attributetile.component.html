@@ -163,16 +163,14 @@
         <!--  -->
         <div ng-if="vm.cube && (!vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List || 
                                   !vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId].Bkts.List.length) && 
-                                  (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)" class="stats"> 
-                Free Text Attribute
-                <div>
-                    <button class="button gray-button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
-                        <span ng-if="totalcount.length == 0" class="free-text-icon fa fa-plus"></span>
-                        <span ng-if="totalcount.length == 1" class="free-text-icon {{vm.categoryClass(enrichment.Category)}} color fa fa-check"></span>
-                        <span ng-if="totalcount.length > 1" class="free-text-icon {{vm.categoryClass(enrichment.Category)}} color"> {{totalcount.length}} </span>
+                                  (!vm.lookupMode && ['wizard.ratingsengine_segment','edit','team'].indexOf(vm.section) == -1)" class="free-text-attribute"> 
+                {{'Free Text Attribute' | uppercase}}
+                    <button class="{{vm.categoryClass(enrichment.Category)}} button attribute-count show-tooltip delay top left" ng-click="vm.addFreeTextAttribute(enrichment, vm.cube.data[enrichment.Entity].Stats[enrichment.ColumnId])">
+                        <span ng-if="totalcount.length == 0" class="free-text fa fa-plus"></span>
+                        <span ng-if="totalcount.length == 1" class="free-text fa fa-check" ng-class="{'selected': totalcount.length == 1}"></span>
+                        <span ng-if="totalcount.length > 1" class="free-text" ng-class="{'selected': totalcount.length > 1}"> {{totalcount.length}} </span>
                         Add To Query
                     </button>
-                </div>
         </div> 
     </span>
     <ul class="controls noselect" ng-if="!vm.lookupMode">
