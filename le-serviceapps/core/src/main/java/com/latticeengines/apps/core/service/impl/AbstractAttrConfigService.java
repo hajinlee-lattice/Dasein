@@ -519,10 +519,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
             statsProp.setSystemValue(state);
             statsProp.setAllowCustomization(true);
-            if (statsProp.getCustomValue() == null && AttrState.Deprecated.equals(statsProp.getSystemValue())) {
-                statsProp.setAllowCustomization(false);
-                statsProp.setSystemValue(AttrState.Inactive);
-            }
             mergeConfig.putProperty(ColumnMetadataKey.State, statsProp);
 
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
