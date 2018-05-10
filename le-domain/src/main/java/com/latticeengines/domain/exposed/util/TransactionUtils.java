@@ -2,17 +2,22 @@ package com.latticeengines.domain.exposed.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
 import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.Extract;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
@@ -72,5 +77,38 @@ public class TransactionUtils {
         }
 
         return txnTables;
+    }
+
+    public static boolean hasAnalyticProduct(Configuration yarnConfiguration, String filePath,
+            Set<String> analyticProductIds) {
+        filePath = getPath(filePath);
+        String avroPath = filePath + "/*.avro";
+        log.info("Load transactions from " + avroPath);
+        Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroPath);
+        while (records.hasNext()) {
+            GenericRecord record = records.next();
+            if (analyticProductIds.contains(String.valueOf(record.get(InterfaceName.ProductId.name())))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static String getPath(String avroDir) {
+        log.info("Get avro path input " + avroDir);
+        if (!avroDir.endsWith(".avro")) {
+            return avroDir;
+        } else {
+            String[] dirs = avroDir.trim().split("/");
+            avroDir = "";
+            for (int i = 0; i < (dirs.length - 1); i++) {
+                log.info("Get avro path dir " + dirs[i]);
+                if (!dirs[i].isEmpty()) {
+                    avroDir = avroDir + "/" + dirs[i];
+                }
+            }
+        }
+        log.info("Get avro path output " + avroDir);
+        return avroDir;
     }
 }

@@ -5,22 +5,27 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOME
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
 import com.latticeengines.cdl.workflow.steps.rebuild.ProfilePurchaseHistory;
 import com.latticeengines.cdl.workflow.steps.reset.ResetTransaction;
 import com.latticeengines.cdl.workflow.steps.update.CloneTransaction;
+import com.latticeengines.domain.exposed.cdl.PeriodStrategy;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -28,6 +33,7 @@ import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.util.ProductUtils;
+import com.latticeengines.domain.exposed.util.TransactionUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
 import com.latticeengines.workflow.exposed.build.AbstractStep;
 import com.latticeengines.workflow.exposed.build.AbstractWorkflow;
@@ -282,13 +288,40 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
                 throw new IllegalStateException("Cannot find the product table in both versions");
             }
         }
+
         log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
+        Set<String> analyticProductIds = new HashSet<>();
         List<Product> productList = new ArrayList<>(
                 ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
         for (Product product : productList) {
             if (ProductType.Analytic.name().equals(product.getProductType())) {
-                return true;
+                analyticProductIds.add(product.getProductId());
             }
+        }
+        if (analyticProductIds.size() == 0) {
+            log.info("Didn't find Analytic Product in " + productTable.getName());
+            return false;
+        }
+
+        List<Table> periodTables = dataCollectionProxy.getTables(customerSpace,
+                TableRoleInCollection.ConsolidatedPeriodTransaction, active.complement());
+        if (CollectionUtils.isEmpty(periodTables)) {
+            log.info("Did not find period transaction table in inactive version.");
+            periodTables = dataCollectionProxy.getTables(customerSpace,
+                    TableRoleInCollection.ConsolidatedPeriodTransaction, active);
+            if (CollectionUtils.isEmpty(periodTables)) {
+                log.info(
+                        "Did not find period transaction table in both versions. Treated as no transaction existing with Analytic Product");
+                return false;
+            }
+        }
+        Table yearTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, PeriodStrategy.CalendarYear);
+
+        log.info("Checking Analytic Product existence in table " + yearTable.getName() + ". Might take long time.");
+        if (TransactionUtils.hasAnalyticProduct(yarnConfiguration, yearTable.getExtracts().get(0).getPath(),
+                analyticProductIds)) {
+            log.info("Found Analytic Product in table " + yearTable.getName());
+            return true;
         }
         return false;
     }
