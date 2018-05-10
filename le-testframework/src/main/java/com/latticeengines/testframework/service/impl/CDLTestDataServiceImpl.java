@@ -209,9 +209,19 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
         final String finalTenantId = tenantId;
         Flux.fromIterable(engineIds).parallel().runOn(Schedulers.parallel()) //
                 .map(engineId -> {
-                    Map<String, Long> coverage = ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId);
-                    log.info("Updated count of rating engine " + engineId + " to " + JsonUtils.serialize(coverage));
-                    return coverage;
+                    RetryTemplate retryTemplate = new RetryTemplate();
+                    SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy();
+                    retryPolicy.setMaxAttempts(5);
+                    retryTemplate.setRetryPolicy(retryPolicy);
+                    ExponentialBackOffPolicy backOffPolicy = new ExponentialBackOffPolicy();
+                    backOffPolicy.setInitialInterval(1000);
+                    backOffPolicy.setMultiplier(2.0);
+                    retryTemplate.setBackOffPolicy(backOffPolicy);
+                    return retryTemplate.execute(context -> {
+                        Map<String, Long> coverage = ratingEngineProxy.updateRatingEngineCounts(finalTenantId, engineId);
+                        log.info("(Attempt=" + (context.getRetryCount() + 1) +") updated count of rating engine " + engineId + " to " + JsonUtils.serialize(coverage));
+                        return coverage;
+                    });
                 }) //
                 .sequential().collectList().block();
     }
