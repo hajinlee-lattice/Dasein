@@ -48,6 +48,10 @@ public class StartProcessingUnitTestNG {
 
         StartProcessing spy = spy(startProcessing);
         doReturn(null).when(spy).getImpactedEntities();
+        doReturn(null).when(spy).getRatingRelatedActions();
+        doReturn(null).when(spy).getActionImpactedSegmentNames(any());
+        doReturn(null).when(spy).getActionImpactedAIEngineIds(any(), any());
+        doReturn(null).when(spy).getActionImpactedRuleEngineIds(any(), any());
         spy.setGrapherContext();
         ChoreographerContext context = spy.getObjectFromContext(BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY,
                 ChoreographerContext.class);

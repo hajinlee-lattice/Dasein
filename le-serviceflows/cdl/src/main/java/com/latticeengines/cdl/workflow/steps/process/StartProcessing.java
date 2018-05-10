@@ -194,19 +194,19 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return changed;
     }
 
-    private List<Action> getAttrManagementActions() {
+    protected List<Action> getAttrManagementActions() {
         return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
                 .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
                 .collect(Collectors.toList());
     }
 
-    private List<Action> getRatingRelatedActions() {
+    protected List<Action> getRatingRelatedActions() {
         return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
                 .filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
                 .collect(Collectors.toList());
     }
 
-    private List<String> getActionImpactedSegmentNames(List<Action> actions) {
+    protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
         List<String> segmentNames = new ArrayList<>();
         for (Action action : actions) {
             if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
@@ -217,12 +217,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return segmentNames;
     }
 
-    private List<String> getActionImpactedAIEngineIds(List<Action> actions, Collection<String> segments) {
+    protected List<String> getActionImpactedAIEngineIds(List<Action> actions, Collection<String> segments) {
         return getActionImpactedEngineIds(actions, segments,
                 Arrays.asList(RatingEngineType.CUSTOM_EVENT, RatingEngineType.CROSS_SELL));
     }
 
-    private List<String> getActionImpactedRuleEngineIds(List<Action> actions, Collection<String> segments) {
+    protected List<String> getActionImpactedRuleEngineIds(List<Action> actions, Collection<String> segments) {
         return getActionImpactedEngineIds(actions, segments, Collections.singletonList(RatingEngineType.RULE_BASED));
     }
 
