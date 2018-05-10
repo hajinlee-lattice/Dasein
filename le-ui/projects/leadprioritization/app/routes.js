@@ -700,9 +700,7 @@ angular
                     });
 
                     return deferred.promise;
-                }
-            },
-            resolve: {
+                },
                 MarketoCredentials: function($q, MarketoService) {
                     var deferred = $q.defer();
 
