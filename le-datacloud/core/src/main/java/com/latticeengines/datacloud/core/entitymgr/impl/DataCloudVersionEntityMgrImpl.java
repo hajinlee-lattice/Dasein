@@ -80,6 +80,16 @@ public class DataCloudVersionEntityMgrImpl implements DataCloudVersionEntityMgr 
 
     @Override
     @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
+    public void updateRefreshVersion() {
+        DataCloudVersion latestApprovedVersion = currentApprovedVersion();
+        if (latestApprovedVersion != null && latestApprovedVersion.getPid() != null) {
+            latestApprovedVersion.setRefreshVersion(String.valueOf(System.currentTimeMillis() / 1000L));
+            dataCloudVersionDao.update(latestApprovedVersion);
+        }
+    }
+
+    @Override
+    @Transactional(value = "propDataManage", propagation = Propagation.REQUIRES_NEW)
     public List<DataCloudVersion> allVerions() {
         return dataCloudVersionDao.findAll();
     }

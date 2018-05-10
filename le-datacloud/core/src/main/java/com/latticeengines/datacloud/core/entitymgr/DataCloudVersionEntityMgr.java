@@ -17,6 +17,8 @@ public interface DataCloudVersionEntityMgr {
 
     DataCloudVersion createVersion(DataCloudVersion version);
 
+    void updateRefreshVersion();
+
     void deleteVersion(String version);
 
     List<DataCloudVersion> allVerions();

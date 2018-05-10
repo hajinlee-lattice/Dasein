@@ -69,4 +69,8 @@ public class DataCloudVersionServiceImpl implements DataCloudVersionService {
         }
         return tokens[2];
     }
+
+    public void updateRefreshVersion() {
+        versionEntityMgr.updateRefreshVersion();
+    }
 }
