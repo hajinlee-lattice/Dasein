@@ -22,6 +22,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -48,6 +49,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
 
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
+
+    String org1 = "org1_" + CURRENT_TIME_MILLIS;
+    String org2 = "org2_" + CURRENT_TIME_MILLIS;
 
     private String NAME = "play" + CURRENT_TIME_MILLIS;
     private String DISPLAY_NAME = "play Harder";
@@ -84,6 +88,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch1.setLaunchState(LaunchState.Launching);
         playLaunch1.setPlay(play);
         playLaunch1.setBucketsToLaunch(bucketsToLaunch1);
+        playLaunch1.setDestinationAccountId("SFDC_ACC1");
+        playLaunch1.setDestinationOrgId(org1);
+        playLaunch1.setDestinationSysType(CDLExternalSystemType.CRM);
 
         bucketsToLaunch2 = new TreeSet<>();
         bucketsToLaunch2.add(RatingBucketName.A);
@@ -94,6 +101,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         playLaunch2.setLaunchState(LaunchState.Launching);
         playLaunch2.setPlay(play);
         playLaunch2.setBucketsToLaunch(bucketsToLaunch2);
+        playLaunch2.setDestinationAccountId("SFDC_ACC2");
+        playLaunch2.setDestinationOrgId(org2);
+        playLaunch2.setDestinationSysType(CDLExternalSystemType.CRM);
     }
 
     private void cleanupPlayLunches() {
@@ -124,8 +134,9 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateLaunch() throws InterruptedException {
         playLaunchService.create(playLaunch1);
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         playLaunchService.create(playLaunch2);
+        Thread.sleep(1000);
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
@@ -322,10 +333,13 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
         PlayLaunchDashboard dashboardEntries = playLaunchService.getDashboard(playId, states, startTimestamp, offset,
                 max, null, true, endTimestamp, null, null);
 
+        Set<String> orgSet = new HashSet<>(Arrays.asList(org1, org2));
+
         Assert.assertNotNull(dashboardEntries);
         Assert.assertNotNull(dashboardEntries.getCumulativeStats());
         Assert.assertNotNull(dashboardEntries.getLaunchSummaries());
         Assert.assertEquals(dashboardEntries.getLaunchSummaries().size(), expectedCount.longValue());
+        Assert.assertNotNull(dashboardEntries.getUniqueLookupIdMapping());
 
         Set<String> launchIds = new HashSet<>();
         launchIds.add(playLaunch1.getId());
@@ -352,6 +366,10 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                                 matchingPlayLaunch.getAccountsLaunched().longValue());
                         Assert.assertEquals(stats.getSuppressed(),
                                 matchingPlayLaunch.getAccountsSuppressed().longValue());
+                        Assert.assertNotNull(entry.getDestinationOrgId());
+                        Assert.assertNotNull(entry.getDestinationSysType());
+                        Assert.assertTrue(orgSet.contains(entry.getDestinationOrgId()));
+                        Assert.assertNotNull(entry.getDestinationAccountId());
                     });
 
             Set<String> playIdSet = ConcurrentHashMap.newKeySet();
@@ -365,6 +383,20 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
                         Assert.assertFalse(playIdSet.contains(pl.getName()));
                         playIdSet.add(pl.getName());
                     });
+
+            if (expectedCount > 0) {
+                Assert.assertEquals(dashboardEntries.getUniqueLookupIdMapping().size(), 1);
+                Assert.assertEquals(
+                        dashboardEntries.getUniqueLookupIdMapping().get(CDLExternalSystemType.CRM.name()).size(),
+                        orgSet.size());
+                dashboardEntries.getUniqueLookupIdMapping() //
+                        .get(CDLExternalSystemType.CRM.name()).stream() //
+                        .forEach(lookupConfig -> {
+                            Assert.assertNotNull(lookupConfig.getOrgId());
+                            Assert.assertEquals(lookupConfig.getExternalSystemType(), CDLExternalSystemType.CRM);
+                            Assert.assertTrue(orgSet.contains(lookupConfig.getOrgId()));
+                        });
+            }
         }
     }
 
