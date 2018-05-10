@@ -392,7 +392,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                             if (property.equals(ColumnMetadataKey.State)) {
                                 // set the selection status
                                 AttrState actualState = (AttrState) getActualValue(attrConfigProp);
-                                if (AttrState.Active == actualState) {
+                                if (AttrState.Active.equals(actualState)) {
                                     selected++;
                                     attrDetail.setSelected(true);
                                     subcategoryDetail.setSelected(true);
@@ -401,7 +401,7 @@ public class AttrConfigServiceImpl implements AttrConfigService {
                                 }
                             } else if (usagePropertySet.contains(property)) {
                                 Boolean actualState = (Boolean) getActualValue(attrConfigProp);
-                                if (actualState) {
+                                if (Boolean.TRUE.equals(actualState)) {
                                     selected++;
                                     attrDetail.setSelected(true);
                                     subcategoryDetail.setSelected(true);
