@@ -33,27 +33,43 @@ public class StdVisidbAlexaMonthssinceonline implements RealTimeTransform {
 
     public Object transform(Map<String, Object> arguments, Map<String, Object> record) {
         String column = (String) arguments.get("column");
-        if (StringUtils.isBlank(column) || record.get(column) == null) {
+        if (StringUtils.isBlank(column)) {
             return null;
         }
         return calculateStdVisidbAlexaMonthssinceonline(record.get(column));
     }
 
     public static Integer calculateStdVisidbAlexaMonthssinceonline(Object date) {
+        if (date == null) {
+            return null;
+        }
         Date dt = null;
-        if (date instanceof Long) { // from AccountMaster
-            dt = new Date((Long) date);
-        } else if (date instanceof Date) { // from DerivedColumnsCache
+        if (date instanceof Date) { // from matching against DerivedColumnsCache
             dt = (Date) date;
-        } else { // If string from std_visidb_alexa_monthssinceonline.py, needs to match datetime.datetime.strptime(date, '%m/%d/%Y%I:%M:%S %p')
+        } else { // If from std_visidb_alexa_monthssinceonline.py, type is string, needs to match datetime.datetime.strptime(date, '%m/%d/%Y%I:%M:%S %p')
+                 // If from file based scoring, type is string, value is timestamp in milliseconds
+                 // If from matching against AccountMaster, type is long, value is timestamp in milliseconds
                  // Or unknown type from unknown source, parse will fail
-            if (StringUtils.isNotBlank(String.valueOf(date))) {
-                SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy HH:mm:ss a");
+            String dateStr = String.valueOf(date);
+            if (StringUtils.isNotBlank(dateStr)) {
+                boolean parsed = false;
                 try {
-                    dt = format.parse(String.valueOf(date));
-                } catch (ParseException e) {
-                    log.error(String.format("Fail to parse AlexaOnlneSince %s", String.valueOf(date)));
+                    dt = new Date(Long.valueOf(dateStr));
+                    parsed = true;
+                } catch (Exception e) {
                 }
+                if (!parsed) {
+                    try {
+                        SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy HH:mm:ss a");
+                        dt = format.parse(dateStr);
+                        parsed = true;
+                    } catch (ParseException e) {
+                    }
+                }
+                if (!parsed) {
+                    log.error("Fail to parse AlexaOnlineSince " + dateStr);
+                }
+
             }
         }
 
