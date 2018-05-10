@@ -205,23 +205,24 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
     }
 
     private long countRawTransactionInHdfs() {
-        String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                TableRoleInCollection.ConsolidatedRawTransaction, inactive);
-        if (StringUtils.isBlank(rawTableName)) {
-            log.info("Cannot find raw transaction table in version " + inactive);
-            rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
-                    TableRoleInCollection.ConsolidatedRawTransaction, active);
+        try {
+            String rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                    TableRoleInCollection.ConsolidatedRawTransaction, inactive);
             if (StringUtils.isBlank(rawTableName)) {
-                log.info("Cannot find raw transaction table in version " + active);
+                log.info("Cannot find raw transaction table in version " + inactive);
+                rawTableName = dataCollectionProxy.getTableName(customerSpace.toString(),
+                        TableRoleInCollection.ConsolidatedRawTransaction, active);
+                if (StringUtils.isBlank(rawTableName)) {
+                    log.info("Cannot find raw transaction table in version " + active);
+                    return 0L;
+                }
+            }
+            Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
+            if (rawTable == null) {
+                log.error("Cannot find raw transaction table " + rawTableName);
                 return 0L;
             }
-        }
-        Table rawTable = metadataProxy.getTable(customerSpace.toString(), rawTableName);
-        if (rawTable == null) {
-            log.error("Cannot find raw transaction table " + rawTableName);
-            return 0L;
-        }
-        try {
+
             String hdfsPath = rawTable.getExtracts().get(0).getPath();
             if (!hdfsPath.endsWith("*.avro")) {
                 if (hdfsPath.endsWith("/")) {
@@ -232,14 +233,21 @@ public class GenerateProcessingReport extends BaseWorkflowStep<ProcessStepConfig
             }
             return AvroUtils.count(yarnConfiguration, hdfsPath);
         } catch (Exception ex) {
-            log.error(String.format("Fail to count raw transaction table %s", rawTableName), ex);
+            log.error("Fail to count raw transaction table", ex);
             return 0L;
         }
     }
 
     private long countInRedshift(BusinessEntity entity) {
-        if (StringUtils.isBlank(
-                dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(), inactive))) {
+        String servingStore = null;
+        try {
+            servingStore = dataCollectionProxy.getTableName(customerSpace.toString(), entity.getServingStore(),
+                    inactive);
+        } catch (Exception ex) {
+            log.error("Fail to look for serving store for entity " + entity.name(), ex);
+            return 0L;
+        }
+        if (StringUtils.isBlank(servingStore)) {
             log.info("Cannot find serving store for entity " + entity.name() + " with version " + inactive.name());
             return 0L;
         }
