@@ -200,8 +200,8 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         }
         sortedPeriodTableName = renameServingStoreTable(BusinessEntity.PeriodTransaction, sortedPeriodTable);
         exportTableRoleToRedshift(sortedPeriodTableName, BusinessEntity.PeriodTransaction.getServingStore());
-        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedDailyTableName,
-                BusinessEntity.Transaction.getServingStore(), inactive);
+        dataCollectionProxy.upsertTable(customerSpace.toString(), sortedPeriodTableName,
+                BusinessEntity.PeriodTransaction.getServingStore(), inactive);
     }
 
     @Override
