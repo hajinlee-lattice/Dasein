@@ -81,8 +81,7 @@ public class EventQueryServiceImpl implements EventQueryService {
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
             return queryEvaluatorService.getCount(attrRepo, query);
         } catch (Exception e) {
-            log.error("Failed to execute query!", e);
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
@@ -98,8 +97,7 @@ public class EventQueryServiceImpl implements EventQueryService {
             Query query = queryTranslator.translateModelingEvent(frontEndQuery, eventType, timeTranslator);
             return queryEvaluatorService.getData(attrRepo, query);
         } catch (Exception e) {
-            log.error("Failed to execute query!", e);
-            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery));
+            throw new QueryEvaluationException("Failed to execute query " + JsonUtils.serialize(frontEndQuery), e);
         }
     }
 
