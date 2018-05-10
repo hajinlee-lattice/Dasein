@@ -35,6 +35,7 @@ import org.springframework.web.util.UriTemplate;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.common.exposed.converter.KryoHttpMessageConverter;
 import com.latticeengines.common.exposed.util.HttpClientUtils;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.proxy.framework.ErrorUtils;
@@ -339,6 +340,11 @@ public abstract class BaseRestApiProxy {
         });
     }
 
+    protected <T> List<T> getList(final String method, final String url, final Class<T> returnValueClazz) {
+        List list = get(method, url, List.class, false);
+        return JsonUtils.convertList(list, returnValueClazz);
+    }
+
     protected <T> T get(final String method, final String url, final Class<T> returnValueClazz) {
         return get(method, url, returnValueClazz, false);
     }
@@ -492,11 +498,12 @@ public abstract class BaseRestApiProxy {
     }
 
     private <T> Flux<T> appendLogInterceptors(Flux<T> flux, String channel, String url) {
-        // TODO: need to enhance error handling
         return flux //
                 .doOnCancel(() -> log.info(String.format("Cancel reading %s flux from %s", channel, url)))
-                .onErrorResume(throwable -> Flux.error(new RuntimeException(
-                        String.format("Failed to read %s flux from %s", channel, url), throwable)));
+                .onErrorResume(throwable -> {
+                    log.warn("Failed to read %s flux from %s", channel, url);
+                    return Flux.error(throwable);
+                });
     }
 
     private <T> Mono<T> appendLogInterceptors(Mono<T> mono, String channel, String url) {

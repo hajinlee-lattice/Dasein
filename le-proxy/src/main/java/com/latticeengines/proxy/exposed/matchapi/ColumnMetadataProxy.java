@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.cache.exposed.cachemanager.LocalCacheManager;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.common.exposed.util.PropertyUtils;
 import com.latticeengines.domain.exposed.cache.CacheName;
 import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
@@ -22,7 +23,6 @@ import com.latticeengines.domain.exposed.datacloud.statistics.StatsCube;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.statistics.TopNTree;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.network.exposed.propdata.ColumnMetadataInterface;
 import com.latticeengines.proxy.exposed.BaseRestApiProxy;
 
@@ -121,7 +121,7 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
             int numPages = (int) Math.ceil(1.0 * count / pageSize);
             Flux<ColumnMetadata> flux = Flux.range(0, numPages) //
                     .parallel().runOn(parallelFluxThreadPool()) //
-                    .flatMap(page -> requestMetadataPage(dataCloudVersion, page, pageSize))
+                    .flatMap(page -> Flux.fromIterable(requestMetadataPage(dataCloudVersion, page, pageSize)))
                     .doOnError(throwable -> //
                             Flux.error(new RuntimeException("Failed to request a metadata page.", throwable)))
                     .sequential();
@@ -135,12 +135,12 @@ public class ColumnMetadataProxy extends BaseRestApiProxy implements ColumnMetad
         }
     }
 
-    private Flux<ColumnMetadata> requestMetadataPage(String dataCloudVersion, int page, int size) {
+    private List<ColumnMetadata> requestMetadataPage(String dataCloudVersion, int page, int size) {
         String url = constructUrl("/?page={page}&size={size}", page, size);
         if (StringUtils.isNotBlank(dataCloudVersion)) {
             url += "&datacloudversion=" + dataCloudVersion;
         }
-        return getFlux("get metadata page", url, ColumnMetadata.class);
+        return getList("get metadata page", url, ColumnMetadata.class);
     }
 
     private Long getColumnCount(String dataCloudVersion) {
