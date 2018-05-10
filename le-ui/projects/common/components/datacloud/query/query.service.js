@@ -318,6 +318,8 @@ angular.module('common.datacloud.query')
                     bucketRestriction.ignored = bucketRestriction.ignored ? bucketRestriction.ignored : false;
                 }
             } 
+
+            console.log(bucketRestriction.ignored);
             // console.log('Addded restriction ',bucketRestriction);
         }
 

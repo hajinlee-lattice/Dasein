@@ -711,7 +711,9 @@ angular.module('common.datacloud.query.builder.tree.service', [
         }
 
         this.isBucketUsed = function (bucket) {
-            return bucket.bkt && typeof bucket.bkt.Id == "number";
+            // return bucket.ignored === true;
+            // return bucket.bkt && typeof bucket.bkt.Id == "number" || bucket.ignored === true;
+            return bucket.ignored !== true;
         }
 
         this.getBktVals = function (bucketRestriction, type) {

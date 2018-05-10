@@ -89,7 +89,6 @@ angular
 
             vm.isBucketUsed = function(bucket) {
                 var ret = QueryTreeService.isBucketUsed(bucket);//typeof bucket.bkt.Id == "number" && bucket.bkt.Vals && bucket.bkt.Vals.length > 0;
-                // console.log('isBucketUsed', ret);
                 return ret;
             }
 
@@ -182,6 +181,7 @@ angular
                     (vm.type == 'Boolean' || vm.type == 'Numerical' || vm.type == 'Enum' || vm.type == 'TimeSeries' || vm.type == 'String' || vm.type == 'PercentChange')) {
                     if (vm.unused) {
                         vm.unused = false;
+                        vm.tree.bucketRestriction.ignored = false;
                         
                         if (vm.type != 'String') {
                             vm.item.topbkt = angular.copy(vm.item.cube.Bkts.List[0]);
