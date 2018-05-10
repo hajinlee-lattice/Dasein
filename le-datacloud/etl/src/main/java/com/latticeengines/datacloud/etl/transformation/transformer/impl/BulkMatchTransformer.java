@@ -80,6 +80,8 @@ public class BulkMatchTransformer extends AbstractMatchTransformer {
             inputBuffer.setSchema(schema);
         }
         matchInput.setInputBuffer(inputBuffer);
+
+        matchInput.setDataCloudOnly(true);
         return matchInput;
     }
 

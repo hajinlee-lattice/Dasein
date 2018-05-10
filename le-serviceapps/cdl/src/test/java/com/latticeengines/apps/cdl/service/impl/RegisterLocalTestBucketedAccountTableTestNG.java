@@ -158,7 +158,7 @@ public class RegisterLocalTestBucketedAccountTableTestNG extends CDLFunctionalTe
             if (StringUtils.isBlank(unit.getLinkedTenant())) {
                 unit.setLinkedTenant(unit.getTenant());
             }
-            unit.setName(servingStoreName(BusinessEntity.Account));
+            unit.setName(tableName);
             unit.setTenant("LocalTest");
             dataUnitEntityMgr.createOrUpdateByNameAndStorageType("LocalTest", unit);
             log.info("Registered data unit: " + JsonUtils.serialize(unit));

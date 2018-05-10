@@ -8,25 +8,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.inject.Inject;
+
 import org.apache.avro.util.Utf8;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.DomainUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.NameLocationService;
+import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.ColumnMetadataService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.CDLMatchService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.MatchPlanner;
 import com.latticeengines.datacloud.match.service.PublicDomainService;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchKey;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
@@ -35,6 +41,7 @@ import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.datacloud.match.UnionSelection;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 
@@ -42,22 +49,27 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private static Logger log = LoggerFactory.getLogger(MatchPlannerBase.class);
 
-    @Autowired
+    @Inject
     private PublicDomainService publicDomainService;
 
-    @Autowired
+    @Inject
     private BeanDispatcherImpl beanDispatcher;
 
-    @Autowired
+    @Inject
     private NameLocationService nameLocationService;
+
+    @Inject
+    private ZkConfigurationService zkConfigurationService;
+
+    @Inject
+    private CDLMatchService cdlColumnSelectionService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
 
     void setDataCloudVersion(MatchInput input) {
         if (MatchUtils.isValidForRTSBasedMatch(input.getDataCloudVersion())) {
-            log.warn("Found a match request against deprecated RTS source, using input="
-                    + JsonUtils.serialize(input));
+            log.warn("Found a match request against deprecated RTS source, using input=" + JsonUtils.serialize(input));
             input.setDataCloudVersion("1.0.0");
         }
     }
@@ -72,16 +84,47 @@ public abstract class MatchPlannerBase implements MatchPlanner {
     }
 
     public ColumnSelection parseColumnSelection(MatchInput input) {
-        ColumnSelectionService columnSelectionService = beanDispatcher
-                .getColumnSelectionService(input.getDataCloudVersion());
-        if (input.getUnionSelection() != null) {
-            return combineSelections(columnSelectionService, input.getUnionSelection(), input.getDataCloudVersion());
-        } else if (input.getPredefinedSelection() != null) {
-            return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
-                    input.getDataCloudVersion());
+        CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
+        boolean isCdlMatch = !Boolean.TRUE.equals(input.getDataCloudOnly())
+                && zkConfigurationService.isCDLTenant(customerSpace);
+        if (isCdlMatch) {
+            throw new UnsupportedOperationException("Should not call parseColumnSelection for cdl match.");
         } else {
-            return input.getCustomSelection();
+            ColumnSelectionService columnSelectionService = beanDispatcher
+                    .getColumnSelectionService(input.getDataCloudVersion());
+
+            String dataCloudVersion = input.getDataCloudVersion();
+            if (input.getUnionSelection() != null) {
+                return combineSelections(columnSelectionService, input.getUnionSelection(), dataCloudVersion);
+            } else if (input.getPredefinedSelection() != null) {
+                return columnSelectionService.parsePredefinedColumnSelection(input.getPredefinedSelection(),
+                        dataCloudVersion);
+            } else {
+                return input.getCustomSelection();
+            }
         }
+    }
+
+    boolean isCdlMatch(MatchInput input) {
+        CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
+        return  !Boolean.TRUE.equals(input.getDataCloudOnly())
+                && zkConfigurationService.isCDLTenant(customerSpace);
+    }
+
+    @VisibleForTesting
+    List<ColumnMetadata> parseCDLMetadata(MatchInput input) {
+        CustomerSpace customerSpace = CustomerSpace.parse(input.getTenant().getId());
+        boolean isCdlMatch = !Boolean.TRUE.equals(input.getDataCloudOnly())
+                && zkConfigurationService.isCDLTenant(customerSpace);
+        if (isCdlMatch) {
+            return cdlColumnSelectionService.parseMetadata(input);
+        } else {
+            throw new UnsupportedOperationException("Should not call parseCDLMetadata for non-cdl match.");
+        }
+    }
+
+    DynamoDataUnit parseCustomAccount(MatchInput input) {
+        return cdlColumnSelectionService.parseCustomAccountDynamo(input);
     }
 
     @MatchStep(threshold = 100L)
@@ -106,11 +149,13 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         Set<String> domainSet = new HashSet<>();
         Set<NameLocation> nameLocationSet = new HashSet<>();
         Set<String> keyFields = getKeyFields(input);
+        String lookupIdKey = getLookupIdKey(input);
         for (int i = 0; i < input.getData().size(); i++) {
             InternalOutputRecord record = scanInputRecordAndUpdateKeySets(keyFields, input.getData().get(i), i,
-                    input.getFields(), keyPositionMap, domainSet, nameLocationSet, input.getExcludePublicDomain(),
+                    input.getFields(), keyPositionMap, domainSet, nameLocationSet,
                     input.isPublicDomainAsNormalDomain());
             if (record != null) {
+                record.setLookupIdKey(lookupIdKey);
                 record.setColumnMatched(new ArrayList<>());
                 records.add(record);
             }
@@ -132,6 +177,14 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         keyFields.add(InterfaceName.Event.toString());
         keyFields.add(InterfaceName.InternalId.toString());
         return keyFields;
+    }
+
+    private String getLookupIdKey(MatchInput input) {
+        if (MapUtils.isNotEmpty(input.getKeyMap()) && input.getKeyMap().containsKey(MatchKey.LookupId)) {
+            return input.getKeyMap().get(MatchKey.LookupId).get(0);
+        } else {
+            return null;
+        }
     }
 
     @MatchStep(threshold = 100L)
@@ -167,7 +220,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
 
     private InternalOutputRecord scanInputRecordAndUpdateKeySets(Set<String> keyFields, List<Object> inputRecord,
             int rowNum, List<String> fields, Map<MatchKey, List<Integer>> keyPositionMap, Set<String> domainSet,
-            Set<NameLocation> nameLocationSet, boolean excludePublicDomains, boolean treatPublicDomainAsNormal) {
+            Set<NameLocation> nameLocationSet, boolean treatPublicDomainAsNormal) {
         InternalOutputRecord record = new InternalOutputRecord();
         record.setRowNumber(rowNum);
         record.setMatched(false);
@@ -184,6 +237,7 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         parseRecordForNameLocation(inputRecord, keyPositionMap, nameLocationSet, record);
         parseRecordForDuns(inputRecord, keyPositionMap, record);
         parseRecordForLatticeAccountId(inputRecord, keyPositionMap, record);
+        parseRecordForLookupId(inputRecord, keyPositionMap, record);
         profilingInputRecord(keyFields, inputRecord, fields, keyPositionMap, record);
 
         return record;
@@ -372,6 +426,21 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
     }
 
+    private void parseRecordForLookupId(List<Object> inputRecord, Map<MatchKey, List<Integer>> keyPositionMap,
+                                                InternalOutputRecord record) {
+        if (keyPositionMap.containsKey(MatchKey.LookupId)) {
+            List<Integer> idPosList = keyPositionMap.get(MatchKey.LookupId);
+            Integer idPos = idPosList.get(0);
+            try {
+                String lookupId = inputRecord.get(idPos) == null ? null : String.valueOf(inputRecord.get(idPos));
+                record.setLookupIdValue(lookupId);
+            } catch (Exception e) {
+                record.setFailed(true);
+                record.addErrorMessages("Error when cleanup lookup id field: " + e.getMessage());
+            }
+        }
+    }
+
     private static Map<MatchKey, List<Integer>> getKeyPositionMap(MatchInput input) {
         Map<String, Integer> fieldPos = new HashMap<>();
         for (int pos = 0; pos < input.getFields().size(); pos++) {
@@ -412,6 +481,10 @@ public abstract class MatchPlannerBase implements MatchPlanner {
         }
         matchOutput.setOutputFields(fields);
         return matchOutput;
+    }
+
+    void setZkConfigurationService(ZkConfigurationService zkConfigurationService) {
+        this.zkConfigurationService = zkConfigurationService;
     }
 
 }

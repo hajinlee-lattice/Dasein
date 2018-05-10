@@ -23,9 +23,12 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.datastore.DataUnit;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.proxy.exposed.MicroserviceRestApiProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
+import com.latticeengines.proxy.exposed.metadata.DataUnitProxy;
 
 @Component("dataCollectionProxy")
 public class DataCollectionProxy extends MicroserviceRestApiProxy {
@@ -36,6 +39,9 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
 
     @Inject
     private ColumnMetadataProxy columnMetadataProxy;
+
+    @Inject
+    private DataUnitProxy dataUnitProxy;
 
     protected DataCollectionProxy() {
         super("cdl");
@@ -297,6 +303,18 @@ public class DataCollectionProxy extends MicroserviceRestApiProxy {
     //FIXME: to be implemented
     public DataCloudVersion getDataCloudVersion(String customerSpace, DataCollection.Version version) {
         return columnMetadataProxy.latestVersion();
+    }
+
+    public DynamoDataUnit getAccountDynamo(String customerSpace, DataCollection.Version version) {
+        DynamoDataUnit dynamoDataUnit = null;
+        String tableName = getTableName(customerSpace, TableRoleInCollection.ConsolidatedAccount, version);
+        if (StringUtils.isNotBlank(tableName)) {
+            DataUnit dataUnit = dataUnitProxy.getByNameAndType(customerSpace, tableName, DataUnit.StorageType.Dynamo);
+            if (dataUnit != null) {
+                dynamoDataUnit = (DynamoDataUnit) dataUnit;
+            }
+        }
+        return dynamoDataUnit;
     }
 
 }

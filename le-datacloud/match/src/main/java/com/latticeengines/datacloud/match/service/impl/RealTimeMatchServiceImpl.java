@@ -58,9 +58,7 @@ public class RealTimeMatchServiceImpl implements RealTimeMatchService {
         if (StringUtils.isEmpty(input.getRootOperationUid())) {
             input.setRootOperationUid(UUID.randomUUID().toString());
         }
-        MatchContext matchContext = matchPlanner.plan(input, metadatas, skipExecutionPlanning);
-        matchContext.setMatchEngine(MatchContext.MatchEngine.REAL_TIME);
-        return matchContext;
+        return matchPlanner.plan(input, metadatas, skipExecutionPlanning);
     }
 
     private List<MatchContext> doPreProcessing(BulkMatchInput input) {

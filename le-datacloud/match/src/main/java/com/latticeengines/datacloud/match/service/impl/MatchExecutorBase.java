@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -22,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
-import com.latticeengines.datacloud.match.exposed.service.MetadataColumnService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.DisposableEmailService;
 import com.latticeengines.datacloud.match.service.MatchExecutor;
@@ -30,7 +28,6 @@ import com.latticeengines.datacloud.match.service.PublicDomainService;
 import com.latticeengines.datafabric.entitymanager.GenericFabricMessageManager;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.manage.DateTimeUtils;
-import com.latticeengines.domain.exposed.datacloud.manage.MetadataColumn;
 import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchHistory;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
@@ -167,9 +164,6 @@ public abstract class MatchExecutorBase implements MatchExecutor {
     @VisibleForTesting
     @MatchStep
     MatchContext mergeResults(MatchContext matchContext) {
-        MetadataColumnService<MetadataColumn> metadataColumnService = beanDispatcher
-                .getMetadataColumnService(matchContext);
-
         List<InternalOutputRecord> records = matchContext.getInternalResults();
         List<String> columnNames = matchContext.getColumnSelection().getColumnIds();
         List<Column> columns = matchContext.getColumnSelection().getColumns();
@@ -202,20 +196,12 @@ public abstract class MatchExecutorBase implements MatchExecutor {
 
             Map<String, Object> results = internalRecord.getQueryResult();
 
-            List<MetadataColumn> metadataColumns = metadataColumnService.getMetadataColumns(columnNames, matchContext
-                    .getInput().getDataCloudVersion());
-            Map<String, MetadataColumn> metadataColumnMap = new HashMap<>();
-            for (MetadataColumn column : metadataColumns) {
-                metadataColumnMap.put(column.getColumnId(), column);
-            }
-
             boolean matchedRecord = internalRecord.isMatched() || (internalRecord.getLatticeAccountId() != null);
 
             for (int i = 0; i < columns.size(); i++) {
                 Column column = columns.get(i);
 
-                MetadataColumn metadataColumn = metadataColumnMap.get(column.getExternalColumnId());
-                String field = (metadataColumn != null) ? metadataColumn.getColumnId() : column.getColumnName();
+                String field = column.getExternalColumnId() == null ? column.getColumnName() : column.getExternalColumnId();
 
                 Object value = null;
 

@@ -93,8 +93,8 @@ public class ColumnSelectionServiceImpl implements ColumnSelectionService {
                 .watch(AMRelease.name()) //
                 .maximum(10) //
                 .load(selection -> {
-                    List<ExternalColumn> externalColumns = externalColumnService.findByColumnSelection((Predefined) selection,
-                            getCurrentVersion((Predefined) selection));
+                    List<ExternalColumn> externalColumns = externalColumnService
+                            .findByColumnSelection((Predefined) selection, getCurrentVersion((Predefined) selection));
                     ColumnSelection cs = new ColumnSelection();
                     cs.createColumnSelection(externalColumns);
                     return cs;

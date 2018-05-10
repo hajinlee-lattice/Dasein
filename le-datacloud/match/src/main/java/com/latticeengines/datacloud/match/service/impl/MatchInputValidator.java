@@ -8,7 +8,6 @@ import java.util.Set;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericRecord;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,13 +86,11 @@ public class MatchInputValidator {
             throw new IllegalArgumentException("Empty list of fields.");
         }
 
-        if (StringUtils.isNotBlank(input.getLookupId()) && !input.getFields().contains(input.getLookupId())) {
-            throw new IllegalArgumentException(
-                    "Specified lookup id " + input.getLookupId() + " does not exists in the provided fields.");
-        }
-
-        if (input.isLookupOnly() && StringUtils.isBlank(input.getLookupId())) {
-            throw new IllegalArgumentException("Must specify a lookup id field in lookup only mode.");
+        if (input.getKeyMap().containsKey(MatchKey.LookupId)) {
+            if (input.getKeyMap().get(MatchKey.LookupId).size() != 1) {
+                throw new IllegalArgumentException(
+                        "Can only specify one field as lookup id: " + input.getKeyMap().get(MatchKey.LookupId));
+            }
         }
 
         return resolveKeyMap(input);

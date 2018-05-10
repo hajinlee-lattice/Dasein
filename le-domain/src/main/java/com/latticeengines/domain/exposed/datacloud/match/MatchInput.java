@@ -19,6 +19,7 @@ import com.latticeengines.common.exposed.metric.annotation.MetricFieldGroup;
 import com.latticeengines.common.exposed.metric.annotation.MetricTag;
 import com.latticeengines.common.exposed.metric.annotation.MetricTagGroup;
 import com.latticeengines.common.exposed.util.JsonUtils;
+import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection.Predefined;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -90,6 +91,10 @@ public class MatchInput implements Fact, Dimension {
     @JsonProperty("DataCloudVersion")
     private String dataCloudVersion = DEFAULT_DATACLOUD_VERSION;
 
+    // only used by cdl match
+    @JsonProperty("DataCollectionVersion")
+    private DataCollection.Version dataCollectionVersion;
+
     @JsonIgnore
     private Integer numSelectedColumns;
 
@@ -128,10 +133,6 @@ public class MatchInput implements Fact, Dimension {
 
     @JsonProperty("FetchOnly")
     private boolean fetchOnly;
-
-    // do not try fuzzy match if lookup id is provided
-    @JsonProperty("LookupOnly")
-    private boolean lookupOnly;
 
     // only match to LDC even for a CDL tenant
     @JsonProperty("DataCloudOnly")
@@ -215,14 +216,6 @@ public class MatchInput implements Fact, Dimension {
 
     public void setFetchOnly(boolean fetchOnly) {
         this.fetchOnly = fetchOnly;
-    }
-
-    public String getLookupId() {
-        return lookupId;
-    }
-
-    public void setLookupId(String lookupId) {
-        this.lookupId = lookupId;
     }
 
     public Boolean getDataCloudOnly() {
@@ -379,6 +372,14 @@ public class MatchInput implements Fact, Dimension {
         this.dataCloudVersion = dataCloudVersion;
     }
 
+    public DataCollection.Version getDataCollectionVersion() {
+        return dataCollectionVersion;
+    }
+
+    public void setDataCollectionVersion(DataCollection.Version dataCollectionVersion) {
+        this.dataCollectionVersion = dataCollectionVersion;
+    }
+
     public ColumnSelection getCustomSelection() {
         return customSelection;
     }
@@ -503,14 +504,6 @@ public class MatchInput implements Fact, Dimension {
 
     public void setDisableDunsValidation(boolean disableDunsValidation) {
         this.disableDunsValidation = disableDunsValidation;
-    }
-
-    public boolean isLookupOnly() {
-        return lookupOnly;
-    }
-
-    public void setLookupOnly(boolean lookupOnly) {
-        this.lookupOnly = lookupOnly;
     }
 
     public Integer getSplitsPerBlock() {

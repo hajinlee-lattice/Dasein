@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import scala.concurrent.Future;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -29,6 +30,8 @@ public class MatchContext implements Fact, Dimension {
     private List<Map<String, Object>> resultSet;
     private List<InternalOutputRecord> internalResults;
     private boolean seekingIdOnly;
+    private boolean isCDLMatch;
+    private DynamoDataUnit customAccountDataUnit;
     private MatchEngine matchEngine;
 
     @JsonIgnore
@@ -127,6 +130,22 @@ public class MatchContext implements Fact, Dimension {
 
     public void setContextId(String contextId) {
         this.contextId = contextId;
+    }
+
+    public boolean isCDLMatch() {
+        return isCDLMatch;
+    }
+
+    public void setCDLMatch(boolean CDLMatch) {
+        isCDLMatch = CDLMatch;
+    }
+
+    public DynamoDataUnit getCustomAccountDataUnit() {
+        return customAccountDataUnit;
+    }
+
+    public void setCustomAccountDataUnit(DynamoDataUnit customAccountDataUnit) {
+        this.customAccountDataUnit = customAccountDataUnit;
     }
 
     @JsonIgnore

@@ -1,12 +1,14 @@
 package com.latticeengines.datacloud.match.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.datacloud.match.service.MatchPlanner;
+import com.latticeengines.domain.exposed.datacloud.manage.Column;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.MatchOutput;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -26,14 +28,31 @@ public class BulkMatchPlanner extends MatchPlannerBase implements MatchPlanner {
     public MatchContext plan(MatchInput input, List<ColumnMetadata> metadatas, boolean skipExecutionPlanning) {
         MatchContext context = new MatchContext();
         context.setInput(input);
-        ColumnSelection columnSelection = parseColumnSelection(input);
-        logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumnIds().size()));
         if (ColumnSelection.Predefined.ID.equals(input.getPredefinedSelection())) {
             context.setSeekingIdOnly(true);
         }
-        context.setColumnSelection(columnSelection);
         context.setMatchEngine(MatchContext.MatchEngine.BULK);
-        MatchOutput output = initializeMatchOutput(input, columnSelection, null);
+        MatchOutput output;
+        ColumnSelection columnSelection;
+        if (isCdlMatch(input)) {
+            context.setCDLMatch(true);
+            if (metadatas == null) {
+                metadatas = parseCDLMetadata(input);
+            }
+            columnSelection = new ColumnSelection();
+            List<Column> columns = metadatas.stream().map(cm -> new Column(cm.getAttrName())) //
+                    .collect(Collectors.toList());
+            columnSelection.setColumns(columns);
+            context.setColumnSelection(columnSelection);
+            context.setCustomAccountDataUnit(parseCustomAccount(input));
+            output = initializeMatchOutput(input, columnSelection, metadatas);
+        } else {
+            context.setCDLMatch(false);
+            columnSelection = parseColumnSelection(input);
+            output = initializeMatchOutput(input, columnSelection, null);
+        }
+        context.setColumnSelection(columnSelection);
+        logger.info(String.format("Parsed %d columns in column selection", columnSelection.getColumnIds().size()));
         context.setOutput(output);
         context = scanInputData(input, context);
         context = sketchExecutionPlan(context, skipExecutionPlanning);

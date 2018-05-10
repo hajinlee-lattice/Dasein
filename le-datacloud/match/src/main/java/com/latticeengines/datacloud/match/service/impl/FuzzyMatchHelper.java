@@ -9,20 +9,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.latticeengines.common.exposed.util.StringStandardizationUtils;
 import com.latticeengines.datacloud.core.service.ZkConfigurationService;
 import com.latticeengines.datacloud.match.annotation.MatchStep;
 import com.latticeengines.datacloud.match.exposed.service.AccountLookupService;
 import com.latticeengines.datacloud.match.exposed.service.ColumnSelectionService;
 import com.latticeengines.datacloud.match.exposed.util.MatchUtils;
+import com.latticeengines.datacloud.match.service.CDLMatchService;
 import com.latticeengines.datacloud.match.service.DbHelper;
 import com.latticeengines.datacloud.match.service.FuzzyMatchService;
 import com.latticeengines.domain.exposed.datacloud.manage.Column;
@@ -31,6 +35,8 @@ import com.latticeengines.domain.exposed.datacloud.match.MatchConstants;
 import com.latticeengines.domain.exposed.datacloud.match.MatchInput;
 import com.latticeengines.domain.exposed.datacloud.match.NameLocation;
 import com.latticeengines.domain.exposed.dataflow.operations.BitCodeBook;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
+import com.latticeengines.domain.exposed.metadata.datastore.DynamoDataUnit;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 
 import scala.concurrent.Future;
@@ -40,18 +46,20 @@ public class FuzzyMatchHelper implements DbHelper {
 
     private static final Logger log = LoggerFactory.getLogger(FuzzyMatchHelper.class);
 
-    @Autowired
+    @Inject
     private AccountLookupService accountLookupService;
 
-    @Autowired
-    @Qualifier("accountMasterColumnSelectionService")
+    @Resource(name = "accountMasterColumnSelectionService")
     private ColumnSelectionService columnSelectionService;
 
-    @Autowired
+    @Inject
     private FuzzyMatchService fuzzyMatchService;
 
-    @Autowired
+    @Inject
     private ZkConfigurationService zkConfigurationService;
+
+    @Inject
+    private CDLMatchService cdlMatchService;
 
     @Value("${datacloud.match.default.decision.graph}")
     private String defaultGraph;
@@ -73,7 +81,6 @@ public class FuzzyMatchHelper implements DbHelper {
     @Override
     public MatchContext fetch(MatchContext context) {
         fetchInternal(context, true);
-
         fetchMatchResult(context);
         return context;
     }
@@ -85,6 +92,9 @@ public class FuzzyMatchHelper implements DbHelper {
             try {
                 updateDecisionGraph(context.getInput());
                 updateUseRemoteDnB(context.getInput());
+                if (Boolean.TRUE.equals(context.isCDLMatch())) {
+                    preLookup(context);
+                }
                 if (isSync) {
                     fuzzyMatchService.callMatch(context.getInternalResults(), context.getInput());
                 } else {
@@ -94,6 +104,29 @@ public class FuzzyMatchHelper implements DbHelper {
                 }
             } catch (Exception e) {
                 log.error("Failed to run fuzzy match.", e);
+            }
+        }
+    }
+
+    private void preLookup(MatchContext context) {
+        for (InternalOutputRecord record: context.getInternalResults()) {
+            String lookupIdKey = record.getLookupIdKey();
+            String lookupIdValue = record.getLookupIdValue();
+            if (StringUtils.isNotBlank(lookupIdValue)) {
+                DynamoDataUnit dynamoDataUnit = context.getCustomAccountDataUnit();
+                Map<String, Object> customAccount = cdlMatchService.lookup(dynamoDataUnit, lookupIdKey, lookupIdValue);
+                if (MapUtils.isNotEmpty(customAccount)) {
+                    record.setCustomAccount(customAccount);
+                    String latticeAccountId = (String) customAccount.get(InterfaceName.LatticeAccountId.name());
+                    if (StringUtils.isNotBlank(latticeAccountId)) {
+                        String outputId = StringStandardizationUtils.getStandardizedOutputLatticeID(latticeAccountId);
+                        record.setMatchedLatticeAccountId(outputId);
+                        String inputId = StringStandardizationUtils.getStandardizedInputLatticeID(latticeAccountId);
+                        record.setLatticeAccountId(inputId);
+                    }
+                } else {
+                    record.addErrorMessages("Cannot find a custom account by " + lookupIdKey + "=" + lookupIdValue);
+                }
             }
         }
     }
@@ -234,8 +267,15 @@ public class FuzzyMatchHelper implements DbHelper {
 
     private void updateInternalRecordByMatchedAccount(InternalOutputRecord record, ColumnSelection columnSelection,
             String dataCloudVersion) {
-        Map<String, Object> queryResult = parseLatticeAccount(record.getLatticeAccount(), columnSelection,
+        Map<String, Object> queryResult = new HashMap<>();
+        Map<String, Object> latticeAccount = parseLatticeAccount(record.getLatticeAccount(), columnSelection,
                 dataCloudVersion);
+        if (MapUtils.isNotEmpty(latticeAccount)) {
+            queryResult.putAll(latticeAccount);
+        }
+        if (MapUtils.isNotEmpty(record.getCustomAccount())) {
+            queryResult.putAll(record.getCustomAccount());
+        }
         record.setQueryResult(queryResult);
     }
 

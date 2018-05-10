@@ -30,7 +30,12 @@ public class InternalOutputRecord extends OutputRecord {
     private Boolean failed = false;
     private String travelerId;
     private String latticeAccountId;
+
+    private String lookupIdKey;
+    private String lookupIdValue;
+
     private LatticeAccount latticeAccount;
+    private Map<String, Object> customAccount;
     private String originalContextId;
 
     private List<String> debugValues;
@@ -166,12 +171,36 @@ public class InternalOutputRecord extends OutputRecord {
         this.latticeAccountId = latticeAccountId;
     }
 
+    public String getLookupIdKey() {
+        return lookupIdKey;
+    }
+
+    public void setLookupIdKey(String lookupIdKey) {
+        this.lookupIdKey = lookupIdKey;
+    }
+
+    public String getLookupIdValue() {
+        return lookupIdValue;
+    }
+
+    public void setLookupIdValue(String lookupIdValue) {
+        this.lookupIdValue = lookupIdValue;
+    }
+
     public LatticeAccount getLatticeAccount() {
         return latticeAccount;
     }
 
     public void setLatticeAccount(LatticeAccount latticeAccount) {
         this.latticeAccount = latticeAccount;
+    }
+
+    public Map<String, Object> getCustomAccount() {
+        return customAccount;
+    }
+
+    public void setCustomAccount(Map<String, Object> customAccount) {
+        this.customAccount = customAccount;
     }
 
     public String getOriginalContextId() {
