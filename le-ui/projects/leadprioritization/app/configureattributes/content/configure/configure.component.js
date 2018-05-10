@@ -3,8 +3,8 @@ angular.module('lp.configureattributes.configure', [])
     controllerAs: 'vm',
     templateUrl: 'app/configureattributes/content/configure/configure.component.html',
     controller: function(
-        $state, $stateParams, $scope, $timeout, $sce,
-        ResourceUtility, ConfigureAttributesStore
+        $state, $stateParams, $scope, $timeout, $sce, $window,
+        ResourceUtility, ConfigureAttributesStore, ModalStore
     ) {
         var vm = this,
             resolve = $scope.$parent.$resolve,
@@ -24,6 +24,7 @@ angular.module('lp.configureattributes.configure', [])
                 eol: false,
                 IsEOL: false
             };
+
         angular.extend(vm, {
             stateParams: $stateParams,
             steps: {
@@ -231,8 +232,10 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.enableSubmit = function() {
-            var completed = ConfigureAttributesStore.getSaved();
-            return completed.length;
+            var completed = ConfigureAttributesStore.getSaved(),
+                required = Object.keys(vm.steps).length;
+            return completed.length; // for debuging
+            return (required <= completed.length);
         }
 
         var getObj = function(path, obj) {
@@ -297,28 +300,6 @@ angular.module('lp.configureattributes.configure', [])
             }
         }
 
-        function findNested(obj, key, memo) {
-            var i,
-            proto = Object.prototype,
-            ts = proto.toString,
-            hasOwn = proto.hasOwnProperty.bind(obj);
-
-            if ('[object Array]' !== ts.call(memo)) memo = [];
-
-            for (i in obj) {
-                if (hasOwn(i)) {
-                    if (i === key) {
-                        memo.push(obj[i]);
-                    } else if ('[object Array]' === ts.call(obj[i]) || '[object Object]' === ts.call(obj[i])) {
-                        findNested(obj[i], key, memo);
-                    }
-                }
-            }
-
-            return memo;
-        }
-
-
         vm.init = function() {
             var completedSteps = ConfigureAttributesStore.getSaved();
             completedSteps.forEach(function(step) {
@@ -330,6 +311,49 @@ angular.module('lp.configureattributes.configure', [])
                 AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
             };
         };
+
+        vm.initModalWindow = function () {
+            vm.modalConfig = {
+                'name': "configure_attributes",
+                'type': 'sm',
+                'title': 'Warning',
+                'titlelength': 100,
+                'dischargetext': 'Cancel',
+                'dischargeaction': 'cancel',
+                'confirmtext': 'Yes, Confirm',
+                'confirmaction': 'proceed',
+                'icon': 'fa fa-exclamation-triangle',
+                'iconstyle': {'color': 'white'},
+                'confirmcolor': 'blue-button',
+                'showclose': true,
+                'headerconfig': {'background-color':'#FDC151', 'color':'white'},
+                'confirmstyle' : {'background-color':'#FDC151'}
+            };
+
+            vm.modalCallback = function (args) {
+                if (vm.modalConfig.dischargeaction === args.action) {
+                    vm.toggleModal();
+                } else if (vm.modalConfig.confirmaction === args.action) {
+                    vm.toggleModal();
+                }
+                if(args.action === 'proceed') {
+                    console.log('proceed');
+                }
+            }
+
+            vm.toggleModal = function () {
+                var modal = ModalStore.get(vm.modalConfig.name);
+                if (modal) {
+                    modal.toggle();
+                }
+            }
+
+            $scope.$on("$destroy", function () {
+                ModalStore.remove(vm.modalConfig.name);
+            });
+        }
+
+        vm.initModalWindow();
 
         vm.init();
     }

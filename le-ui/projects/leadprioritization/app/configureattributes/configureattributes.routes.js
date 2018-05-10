@@ -7,7 +7,7 @@ angular
         .state('home.configureattributes', {
             url: '/configureattributes',
             onExit: function(ConfigureAttributesStore) {
-               ConfigureAttributesStore.clear();
+                ConfigureAttributesStore.clear();
             },
             resolve: {
                 PurchaseHistory: function($q, ConfigureAttributesStore) {
