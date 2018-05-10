@@ -85,6 +85,8 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
     private Boolean canSegment;
     @JsonProperty("CanInternalEnrich")
     private Boolean canInternalEnrich;
+    @JsonProperty("ShouldDeprecate")
+    private Boolean shouldDeprecate;
     @JsonProperty("DataLicense")
     private String dataLicense;
 
@@ -269,6 +271,14 @@ public class ColumnMetadata implements HasAttributeCustomizations, Serializable 
 
     public void setCanSegment(Boolean canSegment) {
         this.canSegment = canSegment;
+    }
+
+    public Boolean getShouldDeprecate() {
+        return shouldDeprecate;
+    }
+
+    public void setShouldDeprecate(Boolean shouldDeprecate) {
+        this.shouldDeprecate = shouldDeprecate;
     }
 
     public String getDataLicense() {
