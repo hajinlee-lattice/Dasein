@@ -48,6 +48,9 @@ public final class ColumnMetadataUtils {
         }
 
         // usage groups
+        if (overwriter.getShouldDeprecate() != null) {
+            overwritee.setShouldDeprecate(overwriter.getShouldDeprecate());
+        }
         if (MapUtils.isNotEmpty(overwriter.getGroups())) {
             overwritee.setGroups(overwritingGroups(overwriter.getGroups(), overwritee.getGroups()));
         }
