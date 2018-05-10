@@ -387,7 +387,7 @@ public class AccountMasterColumn implements HasPid, Serializable, MetadataColumn
         }
 
         if (isEol()) {
-            metadata.setAttrState(AttrState.Deprecated);
+            metadata.setShouldDeprecate(true);
         }
 
         if (metadata.isEnabledFor(ColumnSelection.Predefined.Enrichment)) {
