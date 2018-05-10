@@ -3,6 +3,7 @@ package com.latticeengines.cdl.workflow.choreographers;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -74,13 +75,13 @@ public class ProcessAccountChoreographerUnitTestNG {
         };
         step.setExecutionContext(new ExecutionContext());
         ChoreographerContext grapherContext = new ChoreographerContext();
-        grapherContext.setJobImpactedEntities(new HashSet<BusinessEntity>(Arrays.asList(BusinessEntity.Contact)));
+        grapherContext.setJobImpactedEntities(new HashSet<>(Collections.singletonList(BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
         choreographer.checkJobImpactedEntity(step);
         Assert.assertEquals(choreographer.jobImpacted, false);
 
         grapherContext.setJobImpactedEntities(
-                new HashSet<BusinessEntity>(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)));
+                new HashSet<>(Arrays.asList(BusinessEntity.Account, BusinessEntity.Contact)));
         step.putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
         choreographer.checkJobImpactedEntity(step);
         Assert.assertEquals(choreographer.jobImpacted, true);

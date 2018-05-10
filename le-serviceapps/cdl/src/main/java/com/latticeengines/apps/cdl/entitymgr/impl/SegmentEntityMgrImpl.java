@@ -25,6 +25,7 @@ import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 
 @Component("segmentEntityMgr")
 public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> implements SegmentEntityMgr {
@@ -107,6 +108,9 @@ public class SegmentEntityMgrImpl extends BaseEntityMgrImpl<MetadataSegment> imp
         Action metadataSegmentAction = new Action();
         metadataSegmentAction.setType(ActionType.METADATA_SEGMENT_CHANGE);
         metadataSegmentAction.setActionInitiator(metadataSegment.getCreatedBy());
+        SegmentActionConfiguration configuration = new SegmentActionConfiguration();
+        configuration.setSegmentName(metadataSegment.getName());
+        metadataSegmentAction.setActionConfiguration(configuration);
         ActionContext.setAction(metadataSegmentAction);
     }
 

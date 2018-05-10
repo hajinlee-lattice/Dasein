@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.As;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = As.WRAPPER_OBJECT, property = "property")
 @JsonSubTypes({ //
         @Type(value = RatingEngineActionConfiguration.class, name = "ratingEngineActionConfiguration"),
+        @Type(value = SegmentActionConfiguration.class, name = "segmentActionConfiguration"),
         @Type(value = ActivityMetricsActionConfiguration.class, name = "activityMetricsActionConfiguration"),
         @Type(value = AttrConfigLifeCycleChangeConfiguration.class, name = "attrConfigLifeCycleChangeConfiguration") })
 public abstract class ActionConfiguration {

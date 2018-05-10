@@ -1,5 +1,6 @@
 package com.latticeengines.cdl.workflow.choreographers;
 
+import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CHOREOGRAPHER_CONTEXT_KEY;
 import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.RATING_MODELS;
 
 import java.util.Collection;
@@ -17,6 +18,7 @@ import com.latticeengines.cdl.workflow.GenerateAIRatingWorkflow;
 import com.latticeengines.cdl.workflow.steps.rating.CloneInactiveServingStores;
 import com.latticeengines.cdl.workflow.steps.rating.IngestRuleBasedRating;
 import com.latticeengines.cdl.workflow.steps.rating.PrepareForRating;
+import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModelContainer;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.BaseProcessEntityStepConfiguration;
@@ -57,6 +59,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean initialized;
     private boolean enforceRebuild = false;
     private boolean hasDataChange = false;
+    private boolean hasActionImpactedAIModels = false;
+    private boolean hasActionImpactedRuleModels = false;
     private boolean hasAIModels = false;
     private boolean hasCrossSellModels = false;
     private boolean hasCustomEventModels = false;
@@ -76,7 +80,8 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             initialize(step);
         }
 
-        log.info("Step namespace = " + getStepNamespace(seq) + " generateAIRatingWorkflow.name()=" + generateAIRatingWorkflow.name());
+        log.info("Step namespace = " + getStepNamespace(seq) + " generateAIRatingWorkflow.name()="
+                + generateAIRatingWorkflow.name());
 
         if (isAIWorkflow(seq)) {
             return !shouldProcessAI;
@@ -94,6 +99,7 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             List<RatingModelContainer> containers = step.getListObjectFromContext(RATING_MODELS,
                     RatingModelContainer.class);
             hasDataChange = hasDataChange();
+            checkActionImpactedEngines(step);
             hasCrossSellModels = hasCrossSellModels(containers);
             hasCustomEventModels = hasCustomEventModels(containers);
             hasAIModels = hasCrossSellModels || hasCustomEventModels;
@@ -101,14 +107,16 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
             shouldProcessAI = shouldProcessAI();
             shouldProcessRuleBased = shouldProcessRuleBased();
             String[] msgs = new String[] { //
-                    "enforced=" + enforceRebuild, //
-                    "hasDataChange=" + hasDataChange, //
-                    "hasCrossSellModels=" + hasCrossSellModels, //
-                    "hasCustomEventModels=" + hasCustomEventModels, //
-                    "hasAIModels=" + hasAIModels, //
-                    "hasRuleModels=" + hasRuleModels, //
-                    "shouldProcessAI=" + shouldProcessAI, //
-                    "shouldProcessRuleBased=" + shouldProcessRuleBased, //
+                    " enforced=" + enforceRebuild, //
+                    " hasDataChange=" + hasDataChange, //
+                    " hasActionImpactedAIModels=" + hasActionImpactedAIModels, //
+                    " hasActionImpactedRuleModels=" + hasActionImpactedRuleModels, //
+                    " hasCrossSellModels=" + hasCrossSellModels, //
+                    " hasCustomEventModels=" + hasCustomEventModels, //
+                    " hasAIModels=" + hasAIModels, //
+                    " hasRuleModels=" + hasRuleModels, //
+                    " shouldProcessAI=" + shouldProcessAI, //
+                    " shouldProcessRuleBased=" + shouldProcessRuleBased, //
             };
             log.info(StringUtils.join(msgs, ", "));
             initialized = true;
@@ -142,17 +150,18 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
 
     private boolean shouldProcessModelOfOneType(boolean hasModels, String modelType) {
         boolean shouldProcess = true;
+        boolean hasActionImpactedEngines = "AI".equalsIgnoreCase(modelType) ? hasActionImpactedAIModels
+                : hasActionImpactedRuleModels;
         if (!hasModels) {
             log.info("Has no " + modelType + " models, skip generating " + modelType + " ratings");
             shouldProcess = false;
         } else if (enforceRebuild) {
+            log.info("enforced to rebuild ratings.");
             shouldProcess = true;
-        } else if (!hasDataChange) {
-            log.warn("Has no underlying data change, should skip generating " + modelType + " ratings");
-            // TODO: (M19) to be turn on when integrated with rating engine actions
-            // for now always process regardless of data change.
-            // log.info("Has no underlying data change, skip generating " + modelType + " ratings");
-            // shouldProcess = false;
+        } else if (!hasDataChange && !hasActionImpactedEngines) {
+            log.warn("Has neither underlying data change nor related actions, should skip generating " + modelType
+                    + " ratings");
+            shouldProcess = false;
         }
         return shouldProcess;
     }
@@ -180,6 +189,13 @@ public class ProcessRatingChoreographer extends BaseChoreographer implements Cho
     private boolean hasDataChange() {
         return accountChoreographer.hasAnyChange() || contactChoreographer.hasAnyChange()
                 || productChoreographer.hasAnyChange() || transactionChoreographer.hasAnyChange();
+    }
+
+    private void checkActionImpactedEngines(AbstractStep<? extends BaseStepConfiguration> step) {
+        ChoreographerContext grapherContext = step.getObjectFromContext(CHOREOGRAPHER_CONTEXT_KEY,
+                ChoreographerContext.class);
+        hasActionImpactedAIModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedAIRatingEngines());
+        hasActionImpactedRuleModels = CollectionUtils.isNotEmpty(grapherContext.getActionImpactedRuleRatingEngines());
     }
 
 }

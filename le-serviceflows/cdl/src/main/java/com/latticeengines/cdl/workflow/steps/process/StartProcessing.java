@@ -36,6 +36,10 @@ import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecutionJobT
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedImport;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
+import com.latticeengines.domain.exposed.pls.RatingEngine;
+import com.latticeengines.domain.exposed.pls.RatingEngineActionConfiguration;
+import com.latticeengines.domain.exposed.pls.RatingEngineType;
+import com.latticeengines.domain.exposed.pls.SegmentActionConfiguration;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.pa.ProcessAnalyzeWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessStepConfiguration;
@@ -49,6 +53,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
+import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.proxy.exposed.pls.InternalResourceRestApiProxy;
 import com.latticeengines.workflow.exposed.build.BaseWorkflowStep;
@@ -73,6 +78,9 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private ActionProxy actionProxy;
+
+    @Inject
+    private RatingEngineProxy ratingEngineProxy;
 
     @Value("${common.pls.url}")
     private String internalResourceHostPort;
@@ -156,6 +164,10 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         grapherContext.setDataCloudChanged(checkDataCloudChange());
         Set<BusinessEntity> impactedEntities = getImpactedEntities();
         grapherContext.setJobImpactedEntities(impactedEntities);
+        List<Action> actions = getRatingRelatedActions();
+        List<String> segments = getActionImpactedSegmentNames(actions);
+        grapherContext.setActionImpactedAIRatingEngines(getActionImpactedAIEngineIds(actions, segments));
+        grapherContext.setActionImpactedRuleRatingEngines(getActionImpactedRuleEngineIds(actions, segments));
         putObjectInContext(CHOREOGRAPHER_CONTEXT_KEY, grapherContext);
     }
 
@@ -186,6 +198,61 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
                 .filter(action -> ActionType.getAttrManagementTypes().contains(action.getType()))
                 .collect(Collectors.toList());
+    }
+
+    private List<Action> getRatingRelatedActions() {
+        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
+                .filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getActionImpactedSegmentNames(List<Action> actions) {
+        List<String> segmentNames = new ArrayList<>();
+        for (Action action : actions) {
+            if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
+                SegmentActionConfiguration configuration = (SegmentActionConfiguration) action.getActionConfiguration();
+                segmentNames.add(configuration.getSegmentName());
+            }
+        }
+        return segmentNames;
+    }
+
+    private List<String> getActionImpactedAIEngineIds(List<Action> actions, Collection<String> segments) {
+        return getActionImpactedEngineIds(actions, segments,
+                Arrays.asList(RatingEngineType.CUSTOM_EVENT, RatingEngineType.CROSS_SELL));
+    }
+
+    private List<String> getActionImpactedRuleEngineIds(List<Action> actions, Collection<String> segments) {
+        return getActionImpactedEngineIds(actions, segments, Collections.singletonList(RatingEngineType.RULE_BASED));
+    }
+
+    private List<String> getActionImpactedEngineIds(List<Action> actions, Collection<String> segments,
+            Collection<RatingEngineType> types) {
+        List<String> engineIds = new ArrayList<>();
+        String customerSpace = configuration.getCustomerSpace().toString();
+        for (Action action : actions) {
+            if (ActionType.RATING_ENGINE_CHANGE.equals(action.getType())) {
+                RatingEngineActionConfiguration configuration = (RatingEngineActionConfiguration) action
+                        .getActionConfiguration();
+                String engineId = configuration.getRatingEngineId();
+                RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
+                if (ratingEngine != null //
+                        && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
+                        && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
+                    if (types.contains(ratingEngine.getType())
+                            || segments.contains(ratingEngine.getSegment().getName())) {
+                        String logMsg = String.format(
+                                "Found a rating engine change action related to %s engine %s (%s): %s",
+                                ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
+                                JsonUtils.serialize(action));
+                        log.info(logMsg);
+                        engineIds.add(ratingEngine.getId());
+                    }
+                }
+            }
+        }
+        log.info("Found action impacted rating engines of type " + types + ": " + engineIds);
+        return engineIds;
     }
 
     private List<Job> getDeleteJobs() {

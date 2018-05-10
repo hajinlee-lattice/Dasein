@@ -34,6 +34,9 @@ public enum ActionType {
             Arrays.asList(DISPLAY_PROPERTY_CHANGE, USAGE_PROPERTY_CHANGE, LIFE_CYCLE_CHANGE,
                     ATTRIBUTE_MANAGEMENT_ACTIVATION, ATTRIBUTE_MANAGEMENT_DEACTIVATION));
 
+    private static final Set<ActionType> RATING_RELATED_TYPES = new HashSet<>(
+            Arrays.asList(RATING_ENGINE_CHANGE, METADATA_SEGMENT_CHANGE));
+
     private static Map<String, ActionType> actionTypeMap = new HashMap<>();
 
     static {
@@ -42,11 +45,7 @@ public enum ActionType {
         }
     }
 
-    private ActionType(String name) {
-        this.name = name;
-    }
-
-    private ActionType(String name, String displayName) {
+    ActionType(String name, String displayName) {
         this.name = name;
         this.displayName = displayName;
     }
@@ -69,5 +68,9 @@ public enum ActionType {
 
     public static Set<ActionType> getAttrManagementTypes() {
         return ATTR_MANAGEMENT_TYPES;
+    }
+
+    public static Set<ActionType> getRatingRelatedTypes() {
+        return RATING_RELATED_TYPES;
     }
 }
