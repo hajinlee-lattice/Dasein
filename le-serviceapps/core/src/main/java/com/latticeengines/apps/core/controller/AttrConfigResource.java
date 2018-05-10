@@ -59,6 +59,7 @@ public class AttrConfigResource {
         return request;
     }
 
+    @Deprecated
     @GetMapping(value = "")
     @ResponseBody
     @ApiOperation("get cdl attribute management overview")
