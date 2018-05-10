@@ -40,7 +40,7 @@ public class LpiPMPlayImpl implements LpiPMPlay {
         // be worth the effort as it is fast enough. Therefore handling
         // pagination in application layer itself
         PlayLaunchDashboard dashboard = playProxy.getPlayLaunchDashboard(
-                MultiTenantContext.getCustomerSpace().toString(), null, null, 0L, 0L, 1L, null, null, null);
+                MultiTenantContext.getCustomerSpace().toString(), null, null, 0L, 0L, 1L, null, null, null, null, null);
         List<Play> plays = dashboard.getUniquePlaysWithLaunches();
 
         return handlePagination(start, offset, maximum, plays);
