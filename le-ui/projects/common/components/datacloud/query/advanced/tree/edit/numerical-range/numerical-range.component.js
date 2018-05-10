@@ -227,12 +227,8 @@ angular
                 }
 
                 $scope.showErrorMessage = function() {
-                    if($scope.fromdisabled === true || $scope.todisabled === true){
-                        return false;
-                    }
                     var ret = false;
                     var show = $scope.showmessage != undefined ? $scope.showmessage : true;
-                    // && (!isValValid(0) || !isValValid(1))) && (fromdisabled === false && todisable === false
 
                     if(show && !$scope.isValValid(0) || !$scope.isValValid(1)){
                         ret = true;
