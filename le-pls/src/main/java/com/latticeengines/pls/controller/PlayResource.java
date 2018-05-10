@@ -67,6 +67,12 @@ public class PlayResource {
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "playName", required = false) String playName, //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "orgId", required = false) String orgId, //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "externalSysType", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
             @ApiParam(value = "Start date in Unix timestamp", required = true) //
@@ -83,7 +89,7 @@ public class PlayResource {
             @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunchDashboard(tenant.getId(), playName, launchStates, startTimestamp, offset, max,
-                sortby, descending, endTimestamp);
+                sortby, descending, endTimestamp, orgId, externalSysType);
     }
 
     @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
@@ -93,6 +99,12 @@ public class PlayResource {
             @ApiParam(value = "Play name for which to load dashboard info. Empty play name means dashboard " //
                     + "should consider play launches across all plays", required = false) //
             @RequestParam(value = "playName", required = false) String playName, //
+            @ApiParam(value = "Org id for which to load dashboard info. Empty org id means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "orgId", required = false) String orgId, //
+            @ApiParam(value = "External system type for which to load dashboard info. Empty external system type means dashboard " //
+                    + "should consider play launches across all org ids and external system type", required = false) //
+            @RequestParam(value = "externalSysType", required = false) String externalSysType, //
             @ApiParam(value = "List of launch states to consider", required = false) //
             @RequestParam(value = "launchStates", required = false) List<LaunchState> launchStates, //
             @ApiParam(value = "Start date in Unix timestamp", required = true) //
@@ -101,7 +113,7 @@ public class PlayResource {
             @RequestParam(value = "endTimestamp", required = false) Long endTimestamp) {
         Tenant tenant = MultiTenantContext.getTenant();
         return playProxy.getPlayLaunchDashboardEntriesCount(tenant.getId(), playName, launchStates, startTimestamp,
-                endTimestamp);
+                endTimestamp, orgId, externalSysType);
     }
 
     @RequestMapping(value = "/{playName}", method = RequestMethod.GET, headers = "Accept=application/json")

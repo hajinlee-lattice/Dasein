@@ -2,6 +2,7 @@ package com.latticeengines.domain.exposed.pls;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class PlayLaunchDashboard {
@@ -11,6 +12,8 @@ public class PlayLaunchDashboard {
     private List<LaunchSummary> launchSummaries;
 
     private List<Play> uniquePlaysWithLaunches;
+
+    private Map<String, List<LookupIdMap>> uniqueLookupIdMapping;
 
     public Stats getCumulativeStats() {
         return cumulativeStats;
@@ -34,6 +37,14 @@ public class PlayLaunchDashboard {
 
     public void setUniquePlaysWithLaunches(List<Play> uniquePlaysWithLaunches) {
         this.uniquePlaysWithLaunches = uniquePlaysWithLaunches;
+    }
+
+    public Map<String, List<LookupIdMap>> getUniqueLookupIdMapping() {
+        return uniqueLookupIdMapping;
+    }
+
+    public void setUniqueLookupIdMapping(Map<String, List<LookupIdMap>> uniqueLookupIdMapping) {
+        this.uniqueLookupIdMapping = uniqueLookupIdMapping;
     }
 
     public static class LaunchSummary {

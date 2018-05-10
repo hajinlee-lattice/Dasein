@@ -1,28 +1,49 @@
 package com.latticeengines.apps.cdl.service.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.service.PlayLaunchService;
+import com.latticeengines.db.exposed.util.MultiTenantContext;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.pls.LaunchState;
+import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.LaunchSummary;
 import com.latticeengines.domain.exposed.pls.PlayLaunchDashboard.Stats;
+import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.cdl.LookupIdMappingProxy;
 
 @Component("playLaunchService")
 public class PlayLaunchServiceImpl implements PlayLaunchService {
 
-    @Autowired
+    private static final String NULL_KEY = "NULL_KEY";
+
+    @Inject
     private PlayLaunchEntityMgr playLaunchEntityMgr;
+
+    @Inject
+    private LookupIdMappingProxy lookupIdMappingProxy;
 
     @Override
     public void create(PlayLaunch entity) {
@@ -73,26 +94,105 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
 
     @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
-            Long offset, Long max, String sortby, boolean descending, Long endTimestamp) {
+            Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
+            String externalSysType) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
-                endTimestamp);
+                endTimestamp, orgId, externalSysType);
 
         List<Play> uniquePlaysWithLaunches = playLaunchEntityMgr.findDashboardPlaysWithLaunches(playId, launchStates,
-                startTimestamp, endTimestamp);
+                startTimestamp, endTimestamp, orgId, externalSysType);
 
         List<LaunchSummary> launchSummaries = playLaunchEntityMgr.findDashboardEntries(playId, launchStates,
-                startTimestamp, offset, max, sortby, descending, endTimestamp);
+                startTimestamp, offset, max, sortby, descending, endTimestamp, orgId, externalSysType);
 
         dashboard.setLaunchSummaries(launchSummaries);
         dashboard.setCumulativeStats(totalCounts);
         dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
+        dashboard.setUniqueLookupIdMapping(calculateUniqueLookupIdMapping(playId, launchStates, startTimestamp,
+                endTimestamp, orgId, externalSysType));
         return dashboard;
     }
 
     @Override
     public Long getDashboardEntriesCount(Long playId, List<LaunchState> launchStates, Long startTimestamp,
-            Long endTimestamp) {
-        return playLaunchEntityMgr.findDashboardEntriesCount(playId, launchStates, startTimestamp, endTimestamp);
+            Long endTimestamp, String orgId, String externalSysType) {
+        return playLaunchEntityMgr.findDashboardEntriesCount(playId, launchStates, startTimestamp, endTimestamp, orgId,
+                externalSysType);
+    }
+
+    private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,
+            Long startTimestamp, Long endTimestamp, String orgId, String externalSysType) {
+        Tenant tenant = MultiTenantContext.getTenant();
+        Map<String, List<LookupIdMap>> allLookupIdMapping = lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(),
+                null, null, true);
+        List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
+                launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
+        Map<String, List<LookupIdMap>> uniqueLookupIdMapping = mergeLookupIdMapping(allLookupIdMapping,
+                uniqueOrgIdList);
+        return uniqueLookupIdMapping;
+    }
+
+    @VisibleForTesting
+    Map<String, List<LookupIdMap>> mergeLookupIdMapping(Map<String, List<LookupIdMap>> allLookupIdMapping,
+            List<Pair<String, String>> uniqueOrgIdList) {
+        // logic is to fist find unique list of org Ids. Then get all existing
+        // mappings. Then retain only those existing mappings for which org id
+        // is present in first list of org ids.
+        // If there are any org ids which are not present in existing mapping
+        // (corner case), simply create new LookupIdMap object with known
+        // details and add them to the list
+        Set<Pair<String, String>> uniqueOrgIdSet = new HashSet<>();
+        if (CollectionUtils.isEmpty(uniqueOrgIdList)) {
+            uniqueOrgIdSet.addAll(uniqueOrgIdList);
+        }
+
+        Map<String, List<LookupIdMap>> uniqueLookupIdMapping = new HashMap<>();
+        if (MapUtils.isNotEmpty(allLookupIdMapping)) {
+            allLookupIdMapping.keySet().stream() //
+                    .filter(k -> CollectionUtils.isNotEmpty(allLookupIdMapping.get(k))) //
+                    .forEach(k -> allLookupIdMapping.get(k).stream()
+                            .filter(mapping -> uniqueOrgIdSet //
+                                    .contains(new ImmutablePair<>(mapping.getOrgId(), k))) //
+                            .forEach(mapping -> {
+                                if (!uniqueLookupIdMapping.containsKey(k)) {
+                                    uniqueLookupIdMapping.put(k, new ArrayList<>());
+                                }
+                                uniqueLookupIdMapping.get(k).add(mapping);
+
+                                // remove this from unique set so that at the
+                                // end of thos stream processing we'll no orphan
+                                // org info
+                                uniqueOrgIdSet.remove(new ImmutablePair<>(mapping.getOrgId(), k));
+                            }));
+        }
+
+        // handle orphan orgs
+        if (CollectionUtils.isNotEmpty(uniqueOrgIdSet)) {
+            uniqueOrgIdSet.stream() //
+                    .forEach(org -> {
+                        String orgId = org.getLeft();
+                        String externalSysType = org.getRight();
+                        LookupIdMap lookupIdMap = new LookupIdMap();
+                        String key = null;
+                        CDLExternalSystemType externalSystemTypeEnum;
+
+                        if (StringUtils.isBlank(externalSysType)
+                                || CDLExternalSystemType.valueOf(externalSysType) == null) {
+                            key = NULL_KEY;
+                            externalSystemTypeEnum = null;
+                        } else {
+                            key = externalSysType;
+                            externalSystemTypeEnum = CDLExternalSystemType.valueOf(externalSysType);
+                        }
+                        if (!uniqueLookupIdMapping.containsKey(key)) {
+                            uniqueLookupIdMapping.put(key, new ArrayList<>());
+                        }
+                        lookupIdMap.setOrgId(orgId);
+                        lookupIdMap.setExternalSystemType(externalSystemTypeEnum);
+                        uniqueLookupIdMapping.get(key).add(lookupIdMap);
+                    });
+        }
+        return uniqueLookupIdMapping;
     }
 }

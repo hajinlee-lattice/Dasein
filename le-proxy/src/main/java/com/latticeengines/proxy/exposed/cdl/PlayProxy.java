@@ -54,7 +54,7 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
 
     public PlayLaunchDashboard getPlayLaunchDashboard(String customerSpace, String playName,
             List<LaunchState> launchStates, Long startTimestamp, Long offset, Long max, String sortby,
-            Boolean descending, Long endTimestamp) {
+            Boolean descending, Long endTimestamp, String orgId, String externalSysType) {
 
         String url = constructUrl(DASHBOARD_URL, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
@@ -92,7 +92,8 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
     }
 
     public Long getPlayLaunchDashboardEntriesCount(String customerSpace, String playName,
-            List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp) {
+            List<LaunchState> launchStates, Long startTimestamp, Long endTimestamp, String orgId,
+            String externalSysType) {
         String url = constructUrl(DASHBOARD_COUNT_URL, shortenCustomerSpace(customerSpace));
         List<String> params = new ArrayList<>();
         if (StringUtils.isNotBlank(playName)) {
@@ -108,6 +109,10 @@ public class PlayProxy extends MicroserviceRestApiProxy implements ProxyInterfac
         }
         if (endTimestamp != null) {
             params.add("end-timestamp=" + endTimestamp);
+        }
+        if (StringUtils.isNotBlank(orgId) && StringUtils.isNotBlank(externalSysType)) {
+            params.add("org-id=" + orgId.trim());
+            params.add("external-sys-type=" + externalSysType.trim());
         }
         if (!params.isEmpty()) {
             url += "?" + StringUtils.join(params, "&");

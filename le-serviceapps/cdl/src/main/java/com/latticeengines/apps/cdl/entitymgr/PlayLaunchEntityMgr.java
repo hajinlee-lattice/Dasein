@@ -3,6 +3,8 @@ package com.latticeengines.apps.cdl.entitymgr;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.latticeengines.db.exposed.entitymgr.BaseEntityMgr;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -27,12 +29,17 @@ public interface PlayLaunchEntityMgr extends BaseEntityMgr<PlayLaunch> {
     List<PlayLaunch> findByState(LaunchState state);
 
     List<LaunchSummary> findDashboardEntries(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
-            Long max, String sortby, boolean descending, Long endTimestamp);
+            Long max, String sortby, boolean descending, Long endTimestamp, String orgId, String externalSysType);
 
-    Long findDashboardEntriesCount(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp);
+    Long findDashboardEntriesCount(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
+            String orgId, String externalSysType);
 
-    Stats findDashboardCumulativeStats(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp);
+    Stats findDashboardCumulativeStats(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
+            String orgId, String externalSysType);
 
     List<Play> findDashboardPlaysWithLaunches(Long playId, List<LaunchState> launchStates, Long startTimestamp,
-            Long endTimestamp);
+            Long endTimestamp, String orgId, String externalSysType);
+
+    List<Pair<String, String>> findDashboardOrgIdWithLaunches(Long playId, List<LaunchState> launchStates,
+            Long startTimestamp, Long endTimestamp, String orgId, String externalSysType);
 }

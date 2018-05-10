@@ -18,6 +18,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.apps.cdl.entitymgr.PlayEntityMgr;
 import com.latticeengines.apps.cdl.entitymgr.PlayLaunchEntityMgr;
 import com.latticeengines.apps.cdl.testframework.CDLFunctionalTestNGBase;
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
 import com.latticeengines.domain.exposed.pls.PlayLaunch;
@@ -41,6 +42,19 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private PlayLaunch playLaunch1;
     private PlayLaunch playLaunch2;
+    private PlayLaunch playLaunch_org1_1;
+    private PlayLaunch playLaunch_org1_2;
+    private PlayLaunch playLaunch_org2_1;
+    private PlayLaunch playLaunch_org2_2;
+
+    List<PlayLaunch> allPlayLaunches;
+
+    private String org1 = "org1";
+    private String destinationAccountIdColumn_1 = "SFDC_ACCOUNT_ID_COL_1";
+    private String org2 = "org2";
+    private String destinationAccountIdColumn_2 = "SFDC_ACCOUNT_ID_COL_2";
+
+    private CDLExternalSystemType externalSystemType = CDLExternalSystemType.CRM;
 
     private long CURRENT_TIME_MILLIS = System.currentTimeMillis();
 
@@ -66,21 +80,17 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         playEntityMgr.create(play);
         play = playEntityMgr.findByName(NAME);
 
-        playLaunch1 = new PlayLaunch();
-        playLaunch1.setTenant(mainTestTenant);
-        playLaunch1.setLaunchState(LaunchState.Launching);
-        playLaunch1.setPlay(play);
+        playLaunch1 = createPlay(null, null, null);
+        playLaunch2 = createPlay(null, null, null);
 
-        playLaunch2 = new PlayLaunch();
-        playLaunch2.setTenant(mainTestTenant);
-        playLaunch2.setLaunchState(LaunchState.Launching);
-        playLaunch2.setPlay(play);
-    }
+        playLaunch_org1_1 = createPlay(org1, externalSystemType, destinationAccountIdColumn_1);
+        playLaunch_org1_2 = createPlay(org1, externalSystemType, destinationAccountIdColumn_1);
 
-    private void cleanupPlayLunches() {
-        for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.Launching)) {
-            playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId());
-        }
+        playLaunch_org2_1 = createPlay(org2, externalSystemType, destinationAccountIdColumn_2);
+        playLaunch_org2_2 = createPlay(org2, externalSystemType, destinationAccountIdColumn_2);
+
+        allPlayLaunches = Arrays.asList(playLaunch1, playLaunch2, playLaunch_org1_1, playLaunch_org1_2,
+                playLaunch_org2_1, playLaunch_org2_2);
     }
 
     @Test(groups = "functional")
@@ -91,7 +101,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
     @Test(groups = "functional", dependsOnMethods = { "testGetPreCreate" })
     public void testCreateLaunch() throws InterruptedException {
         playLaunchEntityMgr.create(playLaunch1);
-        Thread.sleep(2000);
+        Thread.sleep(1000);
         playLaunchEntityMgr.create(playLaunch2);
         long playLaunch1Pid = playLaunch1.getPid();
         long playLaunch2Pid = playLaunch2.getPid();
@@ -99,6 +109,29 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         Assert.assertTrue(playLaunch2Pid > playLaunch1Pid);
         Assert.assertNotNull(playLaunch1.getLaunchId());
         Assert.assertNotNull(playLaunch2.getLaunchId());
+
+        Thread.sleep(1000);
+        playLaunchEntityMgr.create(playLaunch_org1_1);
+        Thread.sleep(1000);
+        playLaunchEntityMgr.create(playLaunch_org1_2);
+        long playLaunch_org1_1_pid = playLaunch_org1_1.getPid();
+        long playLaunch_org1_2_pid = playLaunch_org1_2.getPid();
+        Assert.assertTrue(playLaunch_org1_1_pid > playLaunch2Pid);
+        Assert.assertTrue(playLaunch_org1_2_pid > playLaunch_org1_1_pid);
+        Assert.assertNotNull(playLaunch_org1_1.getLaunchId());
+        Assert.assertNotNull(playLaunch_org1_2.getLaunchId());
+
+        Thread.sleep(1000);
+        playLaunchEntityMgr.create(playLaunch_org2_1);
+        Thread.sleep(1000);
+        playLaunchEntityMgr.create(playLaunch_org2_2);
+        Thread.sleep(1000);
+        long playLaunch_org2_1_pid = playLaunch_org2_1.getPid();
+        long playLaunch_org2_2_pid = playLaunch_org2_2.getPid();
+        Assert.assertTrue(playLaunch_org2_1_pid > playLaunch_org1_2_pid);
+        Assert.assertTrue(playLaunch_org2_2_pid > playLaunch_org2_1_pid);
+        Assert.assertNotNull(playLaunch_org2_1.getLaunchId());
+        Assert.assertNotNull(playLaunch_org2_2.getLaunchId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCreateLaunch" })
@@ -106,6 +139,8 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
         PlayLaunch retreivedPlayLaunch = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
         Assert.assertNotNull(retreivedPlayLaunch);
+        Assert.assertEquals(retreivedPlayLaunch.getLaunchId(), playLaunch2.getLaunchId());
+
         List<LaunchState> states = new ArrayList<>();
         states.add(LaunchState.Launched);
         states.add(LaunchState.Failed);
@@ -113,52 +148,98 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<PlayLaunch> playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
         Assert.assertEquals(playLaunchList.size(), 0);
+        playLaunchList.stream().forEach(l -> {
+            Assert.assertEquals(l.getPlay().getPid(), play.getPid());
+        });
 
         List<LaunchState> states1 = new ArrayList<>();
         states1.add(LaunchState.Launching);
 
         playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states1);
         Assert.assertNotNull(playLaunchList);
-        Assert.assertEquals(playLaunchList.size(), 2);
-        Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
+        Assert.assertEquals(playLaunchList.size(), 6);
+        Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
+        playLaunchList.stream().forEach(l -> {
+            Assert.assertEquals(l.getPlay().getPid(), play.getPid());
+            Assert.assertTrue(states1.contains(l.getLaunchState()));
+        });
 
         states.add(LaunchState.Launching);
 
         playLaunchList = playLaunchEntityMgr.findByPlayId(play.getPid(), states);
         Assert.assertNotNull(playLaunchList);
-        Assert.assertEquals(playLaunchList.size(), 2);
-        Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
+        Assert.assertEquals(playLaunchList.size(), 6);
+        Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
+        playLaunchList.stream().forEach(l -> {
+            Assert.assertEquals(l.getPlay().getPid(), play.getPid());
+            Assert.assertTrue(states1.contains(l.getLaunchState()));
+        });
 
         playLaunchList = playLaunchEntityMgr.findByState(LaunchState.Launching);
         Assert.assertNotNull(playLaunchList);
-        Assert.assertEquals(playLaunchList.size(), 2);
-        Assert.assertEquals(playLaunchList.get(0).getPid(), retreivedPlayLaunch.getPid());
+        Assert.assertEquals(playLaunchList.size(), 6);
+        Assert.assertEquals(playLaunchList.get(4).getPid(), retreivedPlayLaunch.getPid());
+        playLaunchList.stream().forEach(l -> {
+            Assert.assertEquals(l.getLaunchState(), LaunchState.Launching);
+        });
 
         retreivedPlayLaunch = playLaunchEntityMgr.findLatestByPlayId(play.getPid(), states);
         Assert.assertNotNull(retreivedPlayLaunch);
-        Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch2.getPid());
+        Assert.assertEquals(retreivedPlayLaunch.getPid(), playLaunch_org2_2.getPid());
+        Assert.assertTrue(states.contains(retreivedPlayLaunch.getLaunchState()));
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testBasicOperations" })
     public void testUpdateLaunch() throws InterruptedException {
+        List<LaunchState> states = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
 
-        playLaunch1 = playLaunchEntityMgr.findByLaunchId(playLaunch1.getLaunchId());
-        playLaunch1.setLaunchState(LaunchState.Launched);
-        playLaunch1.setAccountsErrored(1L);
-        playLaunch1.setAccountsLaunched(5L);
-        playLaunch1.setAccountsSuppressed(3L);
-        playLaunch1.setContactsLaunched(7L);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 6, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
+                externalSystemType.name());
+        playLaunch1 = updatePlayLaunchWithCounts(playLaunch1, LaunchState.Launched, 1L, 5L, 3L, 7L);
 
-        playLaunch2 = playLaunchEntityMgr.findByLaunchId(playLaunch2.getLaunchId());
-        playLaunch2.setLaunchState(LaunchState.Launched);
-        playLaunch2.setAccountsErrored(2L);
-        playLaunch2.setAccountsLaunched(10L);
-        playLaunch2.setAccountsSuppressed(5L);
-        playLaunch2.setContactsLaunched(8L);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 5, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
+                externalSystemType.name());
+        playLaunch2 = updatePlayLaunchWithCounts(playLaunch2, LaunchState.Launched, 2L, 10L, 5L, 8L);
 
-        playLaunchEntityMgr.update(playLaunch1);
-        playLaunchEntityMgr.update(playLaunch2);
-        Thread.sleep(2000);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 4, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
+                externalSystemType.name());
+        playLaunch_org1_1 = updatePlayLaunchWithCounts(playLaunch_org1_1, LaunchState.Launched, 0L, 12L, 3L, 0L);
+
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 3, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
+                externalSystemType.name());
+        playLaunch_org1_2 = updatePlayLaunchWithCounts(playLaunch_org1_2, LaunchState.Launched, 3L, 8L, 6L, 10L);
+
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 2, org2,
+                externalSystemType.name());
+        playLaunch_org2_1 = updatePlayLaunchWithCounts(playLaunch_org2_1, LaunchState.Launched, 2L, 17L, 2L, 4L);
+
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 1, org2,
+                externalSystemType.name());
+        playLaunch_org2_2 = updatePlayLaunchWithCounts(playLaunch_org2_2, LaunchState.Launched, 5L, 4L, 0L, 18L);
+
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, null, null);
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), states, 0L, System.currentTimeMillis(), 0, org2,
+                externalSystemType.name());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testUpdateLaunch" })
@@ -168,16 +249,35 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
         List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
 
-        checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L);
+        checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, null, null);
+        checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, org1,
+                externalSystemType.name());
+        checkCountForDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, org2,
+                externalSystemType.name());
 
-        checkCountForDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L);
+        checkCountForDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 6L, 6L, null,
+                null);
+        checkCountForDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L, org1,
+                externalSystemType.name());
+        checkCountForDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L, org2,
+                externalSystemType.name());
 
-        checkCountForDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L);
+        checkCountForDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 6L, 6L, null, null);
+        checkCountForDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L, org1,
+                externalSystemType.name());
+        checkCountForDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 2L, org2,
+                externalSystemType.name());
 
         checkCountForDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
-                System.currentTimeMillis(), 0L, 0L);
+                System.currentTimeMillis(), 0L, 0L, null, null);
+        checkCountForDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L, org1, externalSystemType.name());
+        checkCountForDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L, org1, externalSystemType.name());
 
-        checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 2L);
+        checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 6L, null, null);
+        checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 2L, org1, externalSystemType.name());
+        checkCountForDashboard(null, goodStates, badStates, 0L, 1L, 0L, 2L, org2, externalSystemType.name());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCountDashboard" })
@@ -187,24 +287,88 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<LaunchState> goodStates = Arrays.asList(new LaunchState[] { LaunchState.Launched, LaunchState.Launching });
         List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
 
-        checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L);
+        checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L,
+                null, null);
 
-        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L);
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 6L, 6L,
+                null, null);
 
-        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L);
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 6L, 6L, null,
+                null);
 
-        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L);
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L,
+                null, null);
 
-        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L);
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L,
+                null, null);
 
-        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L);
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L, null,
+                null);
 
-        checkForEntriesDashboard(null, goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L);
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L, null,
+                null);
 
         checkForEntriesDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1), 0L, 10L,
-                System.currentTimeMillis(), 0L, 0L);
+                System.currentTimeMillis(), 0L, 0L, null, null);
 
-        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 2L);
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 6L, null, null);
+
+        //
+
+        checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L,
+                org1, externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L,
+                org1, externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L, org1,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L,
+                org1, externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L,
+                org1, externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L, org1,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L, org1,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1), 0L, 10L,
+                System.currentTimeMillis(), 0L, 0L, org1, externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 2L, org1, externalSystemType.name());
+
+        //
+
+        checkForEntriesDashboard(badPlayId, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 0L, 0L,
+                org2, externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L,
+                org2, externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, System.currentTimeMillis(), 2L, 2L, org2,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L,
+                org2, externalSystemType.name());
+
+        checkForEntriesDashboard(play.getPid(), goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L,
+                org2, externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 1L, System.currentTimeMillis(), 1L, 1L, org2,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 1L, 1L, System.currentTimeMillis(), 1L, 1L, org2,
+                externalSystemType.name());
+
+        checkForEntriesDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1), 0L, 10L,
+                System.currentTimeMillis(), 0L, 0L, null, null);
+
+        checkForEntriesDashboard(null, goodStates, badStates, 0L, 0L, 10L, 1L, 0L, 2L, org2, externalSystemType.name());
+
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testEntriesDashboard" })
@@ -215,27 +379,64 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         List<LaunchState> badStates = Arrays.asList(new LaunchState[] { LaunchState.Failed, LaunchState.Launching });
 
         checkForCumulativeStatsDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, 0L,
-                0L, 0L, 0L, 0L, 0L);
+                0L, 0L, 0L, 0L, 0L, null, null);
 
-        checkForCumulativeStatsDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 8L, 3L,
-                15L, 15L, 8L, 3L, 15L, 15L);
+        checkForCumulativeStatsDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 19L, 13L,
+                56L, 47L, 19L, 13L, 56L, 47L, null, null);
 
-        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 8L, 3L, 15L, 15L,
-                8L, 3L, 15L, 15L);
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 19L, 13L, 56L,
+                47L, 19L, 13L, 56L, 47L, null, null);
 
         checkForCumulativeStatsDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
-                System.currentTimeMillis(), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+                System.currentTimeMillis(), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, null, null);
 
-        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 8L, 3L, 15L, 15L);
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 19L, 13L, 56L, 47L, null,
+                null);
+
+        //
+
+        checkForCumulativeStatsDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, 0L,
+                0L, 0L, 0L, 0L, 0L, org1, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 9L, 3L,
+                20L, 10L, 9L, 3L, 20L, 10L, org1, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 9L, 3L, 20L, 10L,
+                9L, 3L, 20L, 10L, org1, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, org1, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 9L, 3L, 20L, 10L, org1,
+                externalSystemType.name());
+
+        //
+
+        checkForCumulativeStatsDashboard(badPlayId, goodStates, badStates, 0L, System.currentTimeMillis(), 0L, 0L, 0L,
+                0L, 0L, 0L, 0L, 0L, org2, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(play.getPid(), goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 7L,
+                21L, 22L, 2L, 7L, 21L, 22L, org2, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, System.currentTimeMillis(), 2L, 7L, 21L, 22L,
+                2L, 7L, 21L, 22L, org2, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, (System.currentTimeMillis() - 1),
+                System.currentTimeMillis(), 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, org2, externalSystemType.name());
+
+        checkForCumulativeStatsDashboard(null, goodStates, badStates, 0L, 1L, 0L, 0L, 0L, 0L, 2L, 7L, 21L, 22L, org2,
+                externalSystemType.name());
+
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testCumulativeStatsDashboard" })
     public void testDelete() {
-
         playLaunchEntityMgr.deleteByLaunchId(playLaunch1.getLaunchId());
-        System.out.println("deleted " + playLaunch1.getLaunchId());
         playLaunchEntityMgr.deleteByLaunchId(playLaunch2.getLaunchId());
-        System.out.println("deleted " + playLaunch2.getLaunchId());
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_1.getLaunchId());
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org1_2.getLaunchId());
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_1.getLaunchId());
+        playLaunchEntityMgr.deleteByLaunchId(playLaunch_org2_2.getLaunchId());
     }
 
     @Test(groups = "functional", dependsOnMethods = { "testDelete" })
@@ -262,19 +463,54 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
         }
     }
 
+    private PlayLaunch createPlay(String org, CDLExternalSystemType externalSystemType,
+            String destinationAccountIdColumn) {
+        PlayLaunch launch = new PlayLaunch();
+        launch.setTenant(mainTestTenant);
+        launch.setLaunchState(LaunchState.Launching);
+        launch.setPlay(play);
+        launch.setDestinationOrgId(org);
+        launch.setDestinationSysType(externalSystemType);
+        launch.setDestinationAccountId(destinationAccountIdColumn);
+        return launch;
+    }
+
+    private void cleanupPlayLunches() {
+        for (PlayLaunch launch : playLaunchEntityMgr.findByState(LaunchState.Launching)) {
+            playLaunchEntityMgr.deleteByLaunchId(launch.getLaunchId());
+        }
+    }
+
+    private PlayLaunch updatePlayLaunchWithCounts(PlayLaunch launch, LaunchState state, long errored,
+            long accountsLaunched, long suppressed, long contactsLaunched) throws InterruptedException {
+        launch = playLaunchEntityMgr.findByLaunchId(launch.getLaunchId());
+        launch.setLaunchState(state);
+        launch.setAccountsErrored(errored);
+        launch.setAccountsLaunched(accountsLaunched);
+        launch.setAccountsSuppressed(suppressed);
+        launch.setContactsLaunched(contactsLaunched);
+        playLaunchEntityMgr.update(launch);
+        Thread.sleep(1000);
+        return launch;
+    }
+
     private void checkCountForDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,
-            Long startTimestamp, Long endTimestamp, long expectedCount, long expectedCountForNullEndTimestmp) {
-        checkCountForDashboard(playId, goodStates, startTimestamp, endTimestamp, expectedCount);
-        checkCountForDashboard(playId, null, startTimestamp, endTimestamp, expectedCount);
-        checkCountForDashboard(playId, goodStates, startTimestamp, null, expectedCountForNullEndTimestmp);
-        checkCountForDashboard(playId, null, startTimestamp, null, expectedCountForNullEndTimestmp);
-        checkCountForDashboard(playId, badStates, startTimestamp, endTimestamp, 0);
+            Long startTimestamp, Long endTimestamp, long expectedCount, long expectedCountForNullEndTimestmp,
+            String orgId, String destinationSystemType) {
+        checkCountForDashboard(playId, goodStates, startTimestamp, endTimestamp, expectedCount, orgId,
+                destinationSystemType);
+        checkCountForDashboard(playId, null, startTimestamp, endTimestamp, expectedCount, orgId, destinationSystemType);
+        checkCountForDashboard(playId, goodStates, startTimestamp, null, expectedCountForNullEndTimestmp, orgId,
+                destinationSystemType);
+        checkCountForDashboard(playId, null, startTimestamp, null, expectedCountForNullEndTimestmp, orgId,
+                destinationSystemType);
+        checkCountForDashboard(playId, badStates, startTimestamp, endTimestamp, 0, orgId, destinationSystemType);
     }
 
     private void checkCountForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
-            long expectedCount) {
+            long expectedCount, String orgId, String destinationSystemType) {
         Long dashboardEntriesCount = playLaunchEntityMgr.findDashboardEntriesCount(playId, states, startTimestamp,
-                endTimestamp);
+                endTimestamp, orgId, destinationSystemType);
         Assert.assertNotNull(dashboardEntriesCount);
         Assert.assertEquals(dashboardEntriesCount.longValue(), expectedCount);
     }
@@ -283,25 +519,26 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
             List<LaunchState> badStates, Long startTimestamp, Long endTimestamp, Long suppressed, Long errors,
             Long recommendationsLaunched, Long contactsWithinRecommendations, Long suppressedWithNullEndTimestamp,
             Long errorsWithNullEndTimestamp, Long recommendationsLaunchedWithNullEndTimestamp,
-            Long contactsWithinRecommendationsWithNullEndTimestamp) {
+            Long contactsWithinRecommendationsWithNullEndTimestamp, String orgId, String destinationSystemType) {
         checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, endTimestamp, suppressed, errors,
-                recommendationsLaunched, contactsWithinRecommendations);
+                recommendationsLaunched, contactsWithinRecommendations, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, null, startTimestamp, endTimestamp, suppressed, errors,
-                recommendationsLaunched, contactsWithinRecommendations);
+                recommendationsLaunched, contactsWithinRecommendations, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, goodStates, startTimestamp, null, suppressedWithNullEndTimestamp,
                 errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
-                contactsWithinRecommendationsWithNullEndTimestamp);
+                contactsWithinRecommendationsWithNullEndTimestamp, orgId, destinationSystemType);
         checkForCumulativeStatsDashboard(playId, null, startTimestamp, null, suppressedWithNullEndTimestamp,
                 errorsWithNullEndTimestamp, recommendationsLaunchedWithNullEndTimestamp,
-                contactsWithinRecommendationsWithNullEndTimestamp);
-        checkForCumulativeStatsDashboard(playId, badStates, startTimestamp, endTimestamp, 0L, 0L, 0L, 0L);
+                contactsWithinRecommendationsWithNullEndTimestamp, orgId, destinationSystemType);
+        checkForCumulativeStatsDashboard(playId, badStates, startTimestamp, endTimestamp, 0L, 0L, 0L, 0L, orgId,
+                destinationSystemType);
     }
 
     private void checkForCumulativeStatsDashboard(Long playId, List<LaunchState> states, Long startTimestamp,
             Long endTimestamp, Long suppressed, Long errors, Long recommendationsLaunched,
-            Long contactsWithinRecommendations) {
+            Long contactsWithinRecommendations, String orgId, String destinationSystemType) {
         Stats cumulativeStats = playLaunchEntityMgr.findDashboardCumulativeStats(playId, states, startTimestamp,
-                endTimestamp);
+                endTimestamp, orgId, destinationSystemType);
         Assert.assertNotNull(cumulativeStats);
         Assert.assertEquals(cumulativeStats.getSuppressed(), suppressed.longValue());
         Assert.assertEquals(cumulativeStats.getErrors(), errors.longValue());
@@ -310,7 +547,7 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 contactsWithinRecommendations.longValue());
 
         List<Play> uniquePlays = playLaunchEntityMgr.findDashboardPlaysWithLaunches(playId, states, startTimestamp,
-                endTimestamp);
+                endTimestamp, null, null);
         Assert.assertNotNull(uniquePlays);
 
         if (recommendationsLaunched > 0L) {
@@ -329,41 +566,50 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
     private void checkForEntriesDashboard(Long playId, List<LaunchState> goodStates, List<LaunchState> badStates,
             Long startTimestamp, Long offset, Long max, Long endTimestamp, long expectedCount,
-            long expectedCountForNullEndTimestmp) {
-        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, endTimestamp, expectedCount);
-        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, endTimestamp, expectedCount);
-        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, null,
-                expectedCountForNullEndTimestmp);
-        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, null, expectedCountForNullEndTimestmp);
-        checkForEntriesDashboard(playId, badStates, startTimestamp, offset, max, endTimestamp, 0);
+            long expectedCountForNullEndTimestmp, String orgId, String destinationSystemType) {
+        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, endTimestamp, expectedCount, orgId,
+                destinationSystemType);
+        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, endTimestamp, expectedCount, orgId,
+                destinationSystemType);
+        checkForEntriesDashboard(playId, goodStates, startTimestamp, offset, max, null, expectedCountForNullEndTimestmp,
+                orgId, destinationSystemType);
+        checkForEntriesDashboard(playId, null, startTimestamp, offset, max, null, expectedCountForNullEndTimestmp,
+                orgId, destinationSystemType);
+        checkForEntriesDashboard(playId, badStates, startTimestamp, offset, max, endTimestamp, 0, orgId,
+                destinationSystemType);
     }
 
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
-            Long max, Long endTimestamp, long expectedCount) {
+            Long max, Long endTimestamp, long expectedCount, String orgId, String destinationSystemType) {
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "created",
-                true, expectedCount);
+                true, expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "created",
-                false, expectedCount);
+                false, expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, null, true,
-                expectedCount);
+                expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, null, false,
-                expectedCount);
+                expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "launchState",
-                true, expectedCount);
+                true, expectedCount, orgId, destinationSystemType);
         checkForEntriesDashboardWithSortOrder(playId, states, startTimestamp, offset, max, endTimestamp, "launchState",
-                false, expectedCount);
+                false, expectedCount, orgId, destinationSystemType);
     }
 
     private void checkForEntriesDashboardWithSortOrder(Long playId, List<LaunchState> states, Long startTimestamp,
-            Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount) {
+            Long offset, Long max, Long endTimestamp, String sortBy, boolean descending, long expectedCount,
+            String orgId, String destinationSystemType) {
         List<LaunchSummary> dashboardEntries = playLaunchEntityMgr.findDashboardEntries(playId, states, startTimestamp,
-                offset, max, sortBy, descending, endTimestamp);
+                offset, max, sortBy, descending, endTimestamp, orgId, destinationSystemType);
         Assert.assertNotNull(dashboardEntries);
         Assert.assertEquals(dashboardEntries.size(), expectedCount);
 
         Set<String> launchIds = new HashSet<>();
         launchIds.add(playLaunch1.getId());
         launchIds.add(playLaunch2.getId());
+        launchIds.add(playLaunch_org1_1.getId());
+        launchIds.add(playLaunch_org1_2.getId());
+        launchIds.add(playLaunch_org2_1.getId());
+        launchIds.add(playLaunch_org2_2.getId());
 
         if (dashboardEntries.size() > 0) {
             dashboardEntries.stream() //
@@ -379,19 +625,55 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
 
             if (descending) {
                 if (dashboardEntries.size() > 0) {
-                    Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
-                            offset == 0 ? playLaunch2.getId() : playLaunch1.getId());
+                    if (orgId == null) {
+                        Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                                offset == 0 ? playLaunch_org2_2.getId() : playLaunch_org2_1.getId());
+                    } else if (org1.equals(orgId)) {
+                        Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                                offset == 0 ? playLaunch_org1_2.getId() : playLaunch_org1_1.getId());
+                    } else if (org2.equals(orgId)) {
+                        Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                                offset == 0 ? playLaunch_org2_2.getId() : playLaunch_org2_1.getId());
+                    }
                 }
-                if (dashboardEntries.size() > 1) {
-                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch1.getId());
+                if (orgId == null) {
+                    if (dashboardEntries.size() >= 6) {
+                        Assert.assertEquals(dashboardEntries.get(5).getLaunchId(), playLaunch1.getId());
+                    }
+                } else if (org1.equals(orgId)) {
+                    if (dashboardEntries.size() >= 2) {
+                        Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch_org1_1.getId());
+                    }
+                } else if (org2.equals(orgId)) {
+                    if (dashboardEntries.size() >= 2) {
+                        Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch_org2_1.getId());
+                    }
                 }
-            } else {
-                if (dashboardEntries.size() > 0) {
+            }
+        } else {
+            if (dashboardEntries.size() > 0) {
+                if (orgId == null) {
                     Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
                             offset == 0 ? playLaunch1.getId() : playLaunch2.getId());
+                } else if (org1.equals(orgId)) {
+                    Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                            offset == 0 ? playLaunch_org1_1.getId() : playLaunch_org1_2.getId());
+                } else if (org2.equals(orgId)) {
+                    Assert.assertEquals(dashboardEntries.get(0).getLaunchId(),
+                            offset == 0 ? playLaunch_org2_1.getId() : playLaunch_org2_2.getId());
                 }
-                if (dashboardEntries.size() > 1) {
-                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch2.getId());
+            }
+            if (orgId == null) {
+                if (dashboardEntries.size() >= 6) {
+                    Assert.assertEquals(dashboardEntries.get(5).getLaunchId(), playLaunch_org2_2.getId());
+                }
+            } else if (org1.equals(orgId)) {
+                if (dashboardEntries.size() >= 2) {
+                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch_org1_2.getId());
+                }
+            } else if (org2.equals(orgId)) {
+                if (dashboardEntries.size() >= 2) {
+                    Assert.assertEquals(dashboardEntries.get(1).getLaunchId(), playLaunch_org2_2.getId());
                 }
             }
         }

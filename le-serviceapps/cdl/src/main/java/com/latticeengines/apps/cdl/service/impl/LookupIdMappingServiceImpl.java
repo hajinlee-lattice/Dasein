@@ -17,6 +17,7 @@ import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemMapping;
 import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.pls.LookupIdMap;
 import com.latticeengines.proxy.exposed.cdl.CDLExternalSystemProxy;
 
@@ -109,10 +110,9 @@ public class LookupIdMappingServiceImpl implements LookupIdMappingService {
             log.error("Ignoring this error for now", ex);
             result = new HashMap<>();
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.CRM) {
-                CDLExternalSystemMapping c1 = new CDLExternalSystemMapping("CRM_Acc_Id_1", "String", "Id CRM_Acc_Id_1");
-                CDLExternalSystemMapping c2 = new CDLExternalSystemMapping("CRM_Acc_Id_2", "String", "Id CRM_Acc_Id_2");
-                CDLExternalSystemMapping c3 = new CDLExternalSystemMapping("CRM_Acc_Id_3", "String", "Id CRM_Acc_Id_3");
-                result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(c1, c2, c3));
+                CDLExternalSystemMapping c1 = new CDLExternalSystemMapping(InterfaceName.SalesforceAccountID.name(),
+                        "String", InterfaceName.SalesforceAccountID.name());
+                result.put(CDLExternalSystemType.CRM.name(), Arrays.asList(c1));
             }
             if (externalSystemType == null || externalSystemType == CDLExternalSystemType.MAP) {
                 CDLExternalSystemMapping m1 = new CDLExternalSystemMapping("MAP_Acc_Id_1", "String", "Id MAP_Acc_Id_1");

@@ -301,7 +301,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private void checkCountForDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long endTimestamp,
             long expectedCount) {
         Long dashboardEntriesCount = playLaunchService.getDashboardEntriesCount(playId, states, startTimestamp,
-                endTimestamp);
+                endTimestamp, null, null);
         Assert.assertNotNull(dashboardEntriesCount);
         Assert.assertEquals(dashboardEntriesCount.longValue(), expectedCount);
     }
@@ -320,7 +320,7 @@ public class PlayLaunchServiceImplTestNG extends CDLFunctionalTestNGBase {
     private void checkForEntriesDashboard(Long playId, List<LaunchState> states, Long startTimestamp, Long offset,
             Long max, Long endTimestamp, Long expectedCount) {
         PlayLaunchDashboard dashboardEntries = playLaunchService.getDashboard(playId, states, startTimestamp, offset,
-                max, null, true, endTimestamp);
+                max, null, true, endTimestamp, null, null);
 
         Assert.assertNotNull(dashboardEntries);
         Assert.assertNotNull(dashboardEntries.getCumulativeStats());
