@@ -19,8 +19,6 @@ public class ValidationMsg {
         public static final String INACTIVE_USAGE = "Inactive attribute: %s Usage group %s should be false.";
         public static final String INVALID_ATTRIBUTE_USAGE_CHANGE = "Usage change is not allowed(Usage group %s ," +
                 "Attribute type %s)";
-        public static final String EXCEED_LICENSE_LIMIT = "You are trying to enable %d %s attributes, Please not choose more than the limit %d";
-        public static final String EXCEED_SYSTEM_LIMIT = "You are trying to enable %d %s attributes, Please not choose more than the limit %d";
-
+        public static final String EXCEED_LIMIT = "You are trying to enable %d %s attributes, Please not choose more than the limit %d";
     }
 }

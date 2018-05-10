@@ -46,27 +46,25 @@ public class LimitationValidator extends AttrValidator {
     public void validate(List<AttrConfig> attrConfigs) {
         String tenantId = MultiTenantContext.getTenantId();
         List<AttrConfig> existingConfigs = attrConfigEntityMgr.findAllByTenantId(tenantId);
-        existingConfigs.addAll(attrConfigs); // append the user selected configs
-                                             // to existing in DB
+        // append the user selected configs to existing in DB
+        existingConfigs.addAll(attrConfigs);
         checkDataLicense(existingConfigs, attrConfigs);
         checkSystemLimit(existingConfigs, attrConfigs);
     }
 
     private void checkDataLicense(List<AttrConfig> configs, List<AttrConfig> userSelectedConfigs) {
         String tenantId = MultiTenantContext.getTenantId();
-        int totalSelected = 0;
         for (DataLicense license : DataLicense.values()) {
             int limit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, license);
             List<AttrConfig> premiumConfigs = configs.stream()
                     .filter(entity -> license.getDataLicense().equals(entity.getDataLicense()))
                     .collect(Collectors.toList());
             int userSelectedNumber = premiumConfigs.size();
-            totalSelected += userSelectedNumber;
             if (limit < userSelectedNumber) {
                 userSelectedConfigs.forEach(e -> {
                     if (license.getDataLicense().equals(e.getDataLicense())) {
                         addErrorMsg(ValidationErrors.Type.EXCEED_DATA_LICENSE,
-                                String.format(ValidationMsg.Errors.EXCEED_LICENSE_LIMIT, userSelectedNumber,
+                                String.format(ValidationMsg.Errors.EXCEED_LIMIT, userSelectedNumber,
                                         license.getDescription(), limit),
                                 e);
                     }
@@ -74,12 +72,12 @@ public class LimitationValidator extends AttrValidator {
             }
         }
         int totalLimit = getMaxPremiumLeadEnrichmentAttributesByLicense(tenantId, null);
-        int selected = totalSelected;
-        if (totalSelected > totalLimit) {
+        int selected = configs.size();
+        if (selected > totalLimit) {
             userSelectedConfigs.forEach(e -> {
                 if (e.getDataLicense() != null) {
-                    addErrorMsg(ValidationErrors.Type.EXCEED_DATA_LICENSE,
-                            String.format(ValidationMsg.Errors.EXCEED_LICENSE_LIMIT, selected, EXPORT, totalLimit), e);
+                    addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
+                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, selected, EXPORT, totalLimit), e);
                 }
             });
         }
@@ -103,7 +101,7 @@ public class LimitationValidator extends AttrValidator {
                 if (type.equals(e.getAttrType()) && subType.equals(e.getAttrSubType())
                         && entity.equals(e.getEntity())) {
                     addErrorMsg(ValidationErrors.Type.EXCEED_SYSTEM_LIMIT,
-                            String.format(ValidationMsg.Errors.EXCEED_SYSTEM_LIMIT, number, entity.name(), limit), e);
+                            String.format(ValidationMsg.Errors.EXCEED_LIMIT, number, entity.name(), limit), e);
                 }
             });
         }

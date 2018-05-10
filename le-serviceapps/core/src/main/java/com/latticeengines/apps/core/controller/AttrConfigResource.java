@@ -84,7 +84,7 @@ public class AttrConfigResource {
 
     @PostMapping(value = "")
     @ResponseBody
-    @ApiOperation("get cdl attribute config request")
+    @ApiOperation("save cdl attribute config request")
     public AttrConfigRequest saveAttrConfig(@PathVariable String customerSpace,
             @RequestBody AttrConfigRequest request) {
         request.fixJsonDeserialization();
@@ -93,7 +93,7 @@ public class AttrConfigResource {
 
     @PostMapping(value = "/validate")
     @ResponseBody
-    @ApiOperation("get cdl attribute config request")
+    @ApiOperation("put cdl attribute config request")
     public AttrConfigRequest validateAttrConfig(@PathVariable String customerSpace,
             @RequestBody AttrConfigRequest request) {
         request.fixJsonDeserialization();
