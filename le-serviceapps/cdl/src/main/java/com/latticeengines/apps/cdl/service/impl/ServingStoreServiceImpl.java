@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.core.AttrState;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.ParallelFlux;
@@ -39,6 +40,11 @@ public class ServingStoreServiceImpl implements ServingStoreService {
             cm.setStatisticalType(null);
             cm.setStats(null);
             cm.setDecodeStrategy(null);
+
+            if (Boolean.TRUE.equals(cm.getShouldDeprecate()) && !AttrState.Inactive.equals(cm.getAttrState())) {
+                cm.setAttrState(AttrState.Deprecated);
+            }
+
             return cm;
         });
     }
