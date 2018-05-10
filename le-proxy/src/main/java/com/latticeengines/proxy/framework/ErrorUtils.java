@@ -27,6 +27,10 @@ public class ErrorUtils {
 
     private static RemoteLedpException interpretAndThrowException(HttpStatus status, HttpHeaders httpHeaders,
             String body) {
+        log.info("HTTP Status: " + status.toString());
+        if (httpHeaders != null) {
+            log.info("HTTP Headers: " + JsonUtils.serialize(httpHeaders));
+        }
         RemoteLedpException exception = null;
         try {
             JsonNode node = new ObjectMapper().readTree(body);
@@ -44,7 +48,7 @@ public class ErrorUtils {
             String message = node.get("errorMsg").asText();
             exception = new RemoteLedpException(stackTraceString, status, code, message);
         } catch (Exception e) {
-            exception = new RemoteLedpException(body, status, LedpCode.LEDP_00007, e);
+            exception = new RemoteLedpException(body, status, LedpCode.LEDP_00007, body);
         }
         throw exception;
     }

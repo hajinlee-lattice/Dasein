@@ -96,7 +96,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
         try {
             testProxy.getMonoAtEndpoint(endPoint).block();
         } catch (Exception e) {
-            log.info(e.getClass() + ": " + e.getMessage());
+            log.info(ExceptionUtils.getStackTrace(e));
             thrown = true;
         }
         assertTrue(thrown);
@@ -105,8 +105,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "endpointProvider")
     public Object[][] provideEndpoints() {
         return new Object[][]{ //
-                { "runtime", 1 }, //
-                { "timeout", 5 }, //
+//                { "runtime", 1 }, //
+//                { "timeout", 5 }, //
+                { "gateway", 1 } //
         };
     }
 
@@ -132,6 +133,10 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
             throw new TimeoutException("Jdbc connection timeout.");
         });
 
+        HttpHandler gatewayHdlr = new ErrorHandler(exchange -> {
+            throw new RuntimeException("Gateway Error!");
+        });
+
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(getKeyManagers(), null, null);
 
@@ -141,6 +146,7 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
                         .addExactPath("/foo/baz/retry", retryHdlr) //
                         .addExactPath("/foo/baz/runtime", runtimeHdlr) //
                         .addExactPath("/foo/baz/timeout", timeoutHdlr) //
+                        .addExactPath("/foo/baz/gateway", gatewayHdlr) //
                 ).build();
     }
 
@@ -178,6 +184,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
             } catch (Exception e) {
                 if(exchange.isResponseChannelAvailable()) {
                     exchange.setStatusCode(500);
+                    if (e.getMessage().contains("Gateway")) {
+                        exchange.setStatusCode(503);
+                    }
                     exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
                     exchange.getResponseSender().send(ExceptionUtils.getStackTrace(e));
                 }
