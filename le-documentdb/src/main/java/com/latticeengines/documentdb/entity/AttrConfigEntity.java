@@ -39,4 +39,11 @@ public class AttrConfigEntity extends BaseMultiTenantDocEntity<AttrConfig>
         return Arrays.asList(getTenantIdField(), "entity");
     }
 
+    @Override
+    public AttrConfig getDocument() {
+        AttrConfig config = super.getDocument();
+        config.fixJsonDeserialization();
+        return config;
+    }
+
 }
