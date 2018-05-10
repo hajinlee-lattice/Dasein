@@ -17,12 +17,22 @@
                                 </h2>
                             </div>
                             <ul class="steps">
-                                <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name, completed: item.completed}" class="{{name}}">
-                                    <strong>{{item.label}}</strong> 
+                                <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name, completed: item.completed}" class="{{name}} show-tooltip bottom middle delay">
+                                    <strong>
+                                        {{item.label}}
+                                    </strong> 
+                                    <div class="tooltip_" ng-if="item.description && vm.step !== 'done'">
+                                        <div class="cover">
+                                            <h3>
+                                                {{item.label}}
+                                            </h3>
+                                            <div ng-bind-html="item.description"></div>
+                                        </div>
+                                    </div>
                                 </li>
                             </ul>
                             <form name="form">
-                                <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"></div>
+                                <div class="step-content step-{{vm.step}}" ng-include="'app/configureattributes/content/configure/content/'+vm.step+'.html'"  ng-init="vm.checkValidDelay(form)"></div>
                                 <div class="save-button" ng-if="['done'].indexOf(vm.step) === -1">
                                     <button type="button" class="button blue-button" ng-click="vm.save(form)" ng-disabled="!vm.enableSave(form)">
                                         Save

@@ -61,6 +61,12 @@ angular.module('lp.configureattributes')
             var key = i,
                 option = options[key];
 
+            for(var j in option) {
+                if(Object.keys(option[j]).length > 1 && option[j].null) { //fixes weird behavior where options can become duplicated or go missing
+                    delete option[j].null;
+                }
+            }
+
             ConfigureAttributesStore.options[key] = options[key];
         }
     }
@@ -74,13 +80,6 @@ angular.module('lp.configureattributes')
         for(var i in _option) {
             for(var j in _option[i]) {
                 var cmp = j;
-                if(Object.keys(_option[i]).length > 1) { //fixes weird behavior where options can become duplicated
-                    if(j !== 'null') {
-                        return false;
-                    } else {
-                        cmp = 'WITHIN';
-                    }
-                }
                 var option = _option[i][cmp],
                     period = {
                         Cmp: (cmp !== 'null' ? cmp : 'WITHIN'),
@@ -122,7 +121,9 @@ angular.module('lp.configureattributes')
                     period.Vals = [periods[0].Vals[0] + 1, periods[0].Vals[0] + period.Vals[0]]; // val1 + 1, val1 + val2
                 }
             }
-            periods.push(period);
+            if(period.Vals && Number.isInteger(period.Vals[0])) { // prevents empty period data from from being saved
+                periods.push(period);
+            }
 
         }
         var timestamp = + new Date(),
@@ -135,7 +136,9 @@ angular.module('lp.configureattributes')
             eol: false,
             IsEOL: false
         };
-        ConfigureAttributesStore.purchaseHistory.push(obj);
+        if(obj.periods.length) {
+            ConfigureAttributesStore.purchaseHistory.push(obj);
+        }
     }
 
     var cleanPurchaseHistory = function() {
@@ -190,11 +193,11 @@ angular.module('lp.configureattributes')
     this.savePurchaseHistory = function() {
         var deferred = $q.defer();
 
-        // ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
-        //     deferred.resolve(result);
-        // });
-        deferred.resolve(this.purchaseHistory);
-        console.log(this.purchaseHistory);
+        ConfigureAttributesService.savePurchaseHistory(this.purchaseHistory).then(function(result) {
+            deferred.resolve(result);
+        });
+        // deferred.resolve(this.purchaseHistory);
+        // console.log(this.purchaseHistory);
         
         return deferred.promise;
     }

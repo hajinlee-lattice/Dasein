@@ -131,6 +131,26 @@
             text-align: center;
         }
         .step-content {
+            .configured-message {
+                position: relative;
+                font-size: 16px;
+                padding-left: 20px;
+                display: inline-block;
+                margin-bottom: 20px;
+                &:before {
+                    position: absolute;
+                    left: 0;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    margin-top: -2px;
+                    @include font-awesome-inline("\f00c");
+                    color: #6abe44;
+                }
+                &._no-data:before {
+                    @include font-awesome-inline("\f00d");
+                    color: red;
+                }
+            }
             .fields {
                 margin-bottom: 50px;
                 font-size: 16px;
@@ -143,6 +163,10 @@
                         padding-left: 30px;
                         margin-right: 30px;
                     }
+                }
+                &._no-data {
+                    opacity: .5;
+                    pointer-events: none;
                 }
             }
             &.step-spend_change {

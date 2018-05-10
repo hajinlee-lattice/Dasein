@@ -1,19 +1,37 @@
-<ul class="fields">
+<div class="configured-message" ng-class="{'_no-data': !vm.steps[vm.step].data.ShareOfWallet}">
+    Spend analytics segment type is <em ng-if="!vm.steps[vm.step].data.ShareOfWallet">not</em> provided
+
+    <span class="more-info show-tooltip top middle delay" ng-if="!vm.steps[vm.step].data.ShareOfWallet">&#105;
+        <div class="tooltip_">
+            <div class="cover">
+                <p>
+                    To configure this attribute, upload the spend analytics segments in your accounts file.
+                </p>
+            </div>
+        </div>
+    </span>
+</div>
+
+<ul class="fields" ng-class="{'_no-data': !vm.steps[vm.step].data.ShareOfWallet}">
     <li>
         <label for="options">% Share of Wallet in last</label>
         <select id="options"
             class="form-control"
             required="true"
             ng-class="{'required': true}"
-            ng-init="vm.options['ShareOfWallet']['WITHIN']['Val'] = vm.getVals('WITHIN', vm.steps[vm.step].data.ShareOfWallet)" 
+            ng-init="vm.initValue('ShareOfWallet.WITHIN.Val', vm.getVals('WITHIN', vm.steps[vm.step].data.ShareOfWallet))" 
             ng-model="vm.options['ShareOfWallet']['WITHIN']['Val']" 
             ng-change="vm.setOptions()"
-            ng-options="option for option in vm.newArray(vm.periods[vm.options['ShareOfWallet']['WITHIN']['Period']])"></select>
+            ng-options="option for option in vm.newArray(vm.periods[vm.options['ShareOfWallet']['WITHIN']['Period']])">
+                <option value="" hidden disabled>Select</option>
+            </select>
         <select id="options"
             class="form-control"
-            ng-init="vm.options['ShareOfWallet']['WITHIN']['Period'] = vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet, null, 's')" 
+            ng-init="vm.initValue('ShareOfWallet.WITHIN.Period', vm.getPeriod('WITHIN', vm.steps[vm.step].data.ShareOfWallet, null, 's'))" 
             ng-model="vm.options['ShareOfWallet']['WITHIN']['Period']" 
             ng-change="vm.setOptions()"
-            ng-options="key as key for (key, value) in vm.periods"></select>
+            ng-options="key as key for (key, value) in vm.periods">
+                <option value="" hidden disabled>Weeks</option>
+            </select>
     </li>
 </ul>

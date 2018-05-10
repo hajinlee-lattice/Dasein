@@ -3,32 +3,49 @@ angular.module('lp.configureattributes.configure', [])
     controllerAs: 'vm',
     templateUrl: 'app/configureattributes/content/configure/configure.component.html',
     controller: function(
-        $state, $stateParams, $scope, $timeout, 
+        $state, $stateParams, $scope, $timeout, $sce,
         ResourceUtility, ConfigureAttributesStore
     ) {
         var vm = this,
             resolve = $scope.$parent.$resolve,
             PurchaseHistory = resolve.PurchaseHistory,
-            totalMonths = 60;
-
+            totalMonths = 60,
+            timestamp = + new Date(),
+            defaultOption = {
+                metrics: null,
+                periods: [{
+                    Cmp: null,
+                    Vals: [0],
+                    Period: null
+                }],
+                type: "PurchaseHistory",
+                created: timestamp,
+                updated: timestamp,
+                eol: false,
+                IsEOL: false
+            };
         angular.extend(vm, {
             stateParams: $stateParams,
             steps: {
                 spend_change: {
                     type: 'SpendChange',
-                    label: '% Spend Change'
+                    label: '% Spend Change',
+                    description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing average spend for a given product of a given account in the specified time window with that of the range in prior time window.</p><p>The insights are useful to drive sales &amp; marketing campaigns for the accounts where the spend is declining.</p>'),
                 },
                 spend_over_time: {
                     type: 'TotalSpendOvertime,AvgSpendOvertime',
-                    label: 'Spend Over Time'
+                    label: 'Spend Over Time',
+                    description: $sce.trustAsHtml('<p>This curated attribute is calulated by aggregating spend for a given product of a given account over a specified time window</p><p>The insights are useful to provide dynamic talking points to the reps when executing x-sell &amp; upsell plays for a set of accounts.</p>'),
                 },
                 share_of_wallet: {
                     type: 'ShareOfWallet',
-                    label: 'Share of Wallet'
+                    label: 'Share of Wallet',
+                    description: $sce.trustAsHtml('<p>This curated attribute is calculated by comparing spend ratio for a given product of a given account with that of other accounts in the same segment.</p><p>This insignts are useful to drive sales &amp; marketing campaigns for the accounts where the share of wallet is below the desired range.</p>'),
                 },
                 margin: {
                     type: 'Margin',
-                    label: '% Margin'
+                    label: '% Margin',
+                    description: $sce.trustAsHtml('<p>This curated attribute is calculated by analyzing cost of sell &amp; revenue for a given product of a given account in the specified time window.</p><p>The insights are useful to drive sales &amp; marketing campaigns for the accounts where the profit margins are below expected levels</p>'),
                 }
             },
             step: $state.current.name.split('.').pop(-1),
@@ -50,7 +67,7 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.getVals = function(type, data, index) {
-            if(!type) {
+            if(!type || !data) {
                 return false;
             }
             var index = index || 0,
@@ -60,7 +77,7 @@ angular.module('lp.configureattributes.configure', [])
                 }),
                 val;
             if (type === 'WITHIN') {
-                val = valObj.Vals[0];
+                val = (valObj ? valObj.Vals[0] : null);
             } else if (type === 'BETWEEN') {
                 var max = Math.max.apply(null, valObj.Vals),
                     min = Math.min.apply(null, valObj.Vals);
@@ -70,7 +87,7 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.getPeriod = function(type, data, index, append) {
-            if(!type) {
+            if(!type || !data) {
                 return false;
             }
 
@@ -84,8 +101,11 @@ angular.module('lp.configureattributes.configure', [])
             return period + (period.slice(-1) !== 's' ? append : '');
         }
 
-        vm.setOptions = function() {
+        vm.setOptions = function(form) {
             ConfigureAttributesStore.setOptions(vm.options);
+            if(form) {
+                vm.checkValid(form);
+            }
         }
 
         vm.addPeriod = function(array, form) {
@@ -198,7 +218,7 @@ angular.module('lp.configureattributes.configure', [])
                     dirty = form.$dirty;
             }
 
-            if(options) {
+            if(options && valid) {
                 var types = vm.steps[vm.step].type.split(',');
                 types.forEach(function(type, key) {
                     if(options[type] && dirty) {
@@ -215,9 +235,89 @@ angular.module('lp.configureattributes.configure', [])
             return completed.length;
         }
 
-        vm.checkValid = function(form) {
-            //console.log(form);
+        var getObj = function(path, obj) {
+            return path.split('.').reduce(function(obj, i) {
+                if(obj && obj[i]) {
+                    return obj[i];
+                }
+            }, obj);
         }
+
+        var setObj = function (path, value, scope) {
+            var levels = path.split('.'),
+            max_level = levels.length - 1,
+            target = scope;
+
+            levels.some(function (level, i) {
+                if (typeof level === 'undefined') {
+                    return true;
+                }
+                if (i === max_level) {
+                    target[level] = value;
+                } else {
+                    var obj = target[level] || {};
+                    target[level] = obj;
+                    target = obj;
+                }
+            });
+        }
+
+        vm.initValue = function(path, value) {
+            var model = getObj(path, vm.options),
+                keys = path.split('.'),
+                key = keys[0],
+                obj = {};
+
+            if(value) {
+                setObj(path, value, obj);
+                angular.merge(vm.options, obj);
+            }
+        }
+
+        vm.checkValidDelay = function(form) {
+            $timeout(function() {
+                vm.checkValid(form);
+            }, 1);
+        };
+
+        vm.checkValid = function(form) {
+            //console.log(form.$valid);
+        }
+
+        vm.validateSection = function(model) {
+            if(!model) {
+                return false;
+            }
+            for(var i in model) {
+                for(var j in model[i]) {
+                    if(model[i][j].Val && model[i][j].Period) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        function findNested(obj, key, memo) {
+            var i,
+            proto = Object.prototype,
+            ts = proto.toString,
+            hasOwn = proto.hasOwnProperty.bind(obj);
+
+            if ('[object Array]' !== ts.call(memo)) memo = [];
+
+            for (i in obj) {
+                if (hasOwn(i)) {
+                    if (i === key) {
+                        memo.push(obj[i]);
+                    } else if ('[object Array]' === ts.call(obj[i]) || '[object Object]' === ts.call(obj[i])) {
+                        findNested(obj[i], key, memo);
+                    }
+                }
+            }
+
+            return memo;
+        }
+
 
         vm.init = function() {
             var completedSteps = ConfigureAttributesStore.getSaved();
@@ -226,8 +326,8 @@ angular.module('lp.configureattributes.configure', [])
             });
             vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
             vm.spendOvertime = {
-                TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime,
-                AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime
+                TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
+                AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
             };
         };
 
