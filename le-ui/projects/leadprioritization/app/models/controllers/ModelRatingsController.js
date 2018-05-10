@@ -305,7 +305,8 @@ angular.module('lp.models.ratings', [
 
         var rating_id = $stateParams.rating_id;
         if(vm.section === 'dashboard.scoring' || vm.section === 'dashboard.ratings') {
-            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, vm.ratingModelId, vm.workingBuckets).then(function(result){
+
+            ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, vm.model.ModelId, vm.workingBuckets).then(function(result){
                 if (result != null && result.success === true) {
                     vm.showSuccess = true;
                     vm.chartNotUpdated = true;
@@ -344,9 +345,6 @@ angular.module('lp.models.ratings', [
                 }
             });
         }
-
-        console.log($stateParams);
-
     }
 
 

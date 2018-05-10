@@ -6,7 +6,7 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         accountids: '<'
     },
     controller: function(
-        $scope, $state, $timeout, 
+        $q, $scope, $state, $timeout, 
         ResourceUtility, BrowserStorageUtility, SfdcService, ModalStore
     ) {
         var vm = this;
@@ -29,16 +29,6 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
                 'confirmstyle' : {'background-color':'#FDC151'}
             };
         
-            vm.modalCallback = function (args) {
-                if('closedForced' === args) {
-                }else if(vm.config.dischargeaction === args){
-                    vm.toggleModal();
-                } else if(vm.config.confirmaction === args){
-                    var modal = ModalStore.get(vm.config.name);
-                    modal.waiting(true);
-                    modal.disableDischargeButton(true);
-                }
-            }
             vm.toggleModal = function () {
                 var modal = ModalStore.get(vm.config.name);
                 if(modal){
@@ -52,8 +42,8 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         }
 
         vm.$onInit = function() {
-            console.log(vm.orgs);
-            console.log(vm.accountids);
+            // console.log(vm.orgs);
+            // console.log(vm.accountids);
 
             vm.initModalWindow();
         }
@@ -61,13 +51,25 @@ angular.module('lp.sfdc.credentials', ['ngAnimate'])
         vm.originalData = angular.copy(vm.orgs);
 
         vm.uiCanExit = function() {
+          var deferred = $q.defer();
+
           if (!angular.equals(vm.orgs, vm.originalData)) {
-            return window.confirm("Data has changed.  Exit anyway and lose changes?");
-            // vm.toggleModal();
+            
+            vm.toggleModal();
+            vm.modalCallback = function (args) {
+                if(vm.config.dischargeaction === args.action){
+                    vm.toggleModal();
+                    deferred.resolve(false);
+                } else if(vm.config.confirmaction === args.action){
+                    vm.toggleModal();
+                    deferred.resolve(true);
+                }
+            }
           }
+          return deferred.promise;
         }
 
-        vm.generateAndEmailSFDCAccessTokenClicked = function() {
+        vm.generateAuthToken = function() {
             var clientSession = BrowserStorageUtility.getClientSession(),
                 emailAddress = clientSession.EmailAddress,
                 tenantId = clientSession.Tenant.Identifier;

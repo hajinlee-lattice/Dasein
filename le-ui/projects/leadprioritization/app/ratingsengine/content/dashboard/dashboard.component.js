@@ -11,6 +11,7 @@ angular.module('lp.ratingsengine.dashboard', [
     angular.extend(vm, {
         dashboard: Dashboard,
         ratingEngine: RatingEngine,
+        modelSummary: Model,
         products: Products,
         barChartConfig: {
             'data': {
@@ -169,6 +170,7 @@ angular.module('lp.ratingsengine.dashboard', [
 
         if(vm.ratingEngine.type === 'CROSS_SELL' || vm.ratingEngine.type === 'CUSTOM_EVENT') {
             vm.ratingEngine.chartConfig = vm.barChartLiftConfig;
+            vm.publishOrActivateButtonLabel = vm.dashboard.summary.bucketMetadata ? 'New Scoring Configuration' : 'Activate Scoring';
         } else {
             vm.ratingEngine.chartConfig = vm.barChartConfig;
         }        

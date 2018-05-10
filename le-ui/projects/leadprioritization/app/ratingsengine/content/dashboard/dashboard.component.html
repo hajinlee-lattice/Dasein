@@ -16,6 +16,15 @@
 
                 <div class="actions pull-right">
                     <!-- ng-model="vm.status_toggle" -->
+
+                    <button
+                        class="button orange-button"
+                        ng-if="!vm.isRulesBased"
+                        ng-click="vm.deactivateRating()"
+                        ng-disabled="vm.ratingEngine.status === 'INACTIVE' || !vm.dashboard.summary.bucketMetadata">
+                        Deactivate Scoring
+                    </button>
+
                     <button
                         class="button"
                         ng-class="{ 'orange-button': !vm.status_toggle, 'gray-button': vm.status_toggle }"
@@ -37,8 +46,8 @@
                         class="button orange-button"
                         ui-sref="home.ratingsengine.dashboard.activatescoring({ modelId: vm.ratingEngine.activeModel.AI.modelSummaryId, ratingEngine: vm.ratingEngine })"
                         ng-if="!vm.isRulesBased"
-                        ng-disabled="vm.modelSummary === null">
-                        Activate Scoring
+                        ng-disabled="!vm.dashboard.summary.bucketMetadata">
+                        {{ vm.publishOrActivateButtonLabel }}
                     </button>
                     <button
                         class="button orange-button"

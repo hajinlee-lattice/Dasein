@@ -28,8 +28,6 @@ angular.module('lp.ratingsengine.activatescoring', [
     vm.init = function() {
         $rootScope.$broadcast('model-details',   { displayName: Model.ModelDetails.DisplayName });
         vm.Math = window.Math;
-
-        console.log($stateParams);
         
         if(vm.model.EventTableProvenance.SourceSchemaInterpretation === "SalesforceLead"){
             vm.modelType = "Leads";
@@ -277,8 +275,10 @@ angular.module('lp.ratingsengine.activatescoring', [
         vm.chartNotUpdated = false;
         vm.savingConfiguration = true;
 
-        var modelId = $stateParams.modelId,
+        var modelId = vm.model.modelId,
             rating_id = $stateParams.rating_id;
+
+        // console.log(vm.model);
             
         ModelRatingsService.CreateABCDBucketsRatingEngine(rating_id, modelId, vm.workingBuckets).then(function(result){
             if (result != null && result.success === true) {
@@ -296,8 +296,6 @@ angular.module('lp.ratingsengine.activatescoring', [
                 vm.showSaveBucketsError = true;
             }
         });
-
-        console.log($stateParams);
 
     }
 
