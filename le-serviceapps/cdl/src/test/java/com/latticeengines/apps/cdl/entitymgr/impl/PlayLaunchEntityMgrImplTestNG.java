@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
@@ -561,6 +562,21 @@ public class PlayLaunchEntityMgrImplTestNG extends CDLFunctionalTestNGBase {
                 Assert.assertFalse(playIdSet.contains(pl.getName()));
                 playIdSet.add(pl.getName());
             });
+        }
+
+        List<Pair<String, String>> dashboardEntries = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId, states,
+                startTimestamp, endTimestamp, orgId, destinationSystemType);
+        Assert.assertNotNull(dashboardEntries);
+        if (recommendationsLaunched > 0) {
+            Assert.assertTrue(dashboardEntries.size() > 0);
+            Set<String> orgSet = new HashSet<>(Arrays.asList(org1, org2));
+            dashboardEntries.stream() //
+                    .forEach(pair -> {
+                        Assert.assertNotNull(pair.getLeft());
+                        Assert.assertNotNull(pair.getRight());
+                        Assert.assertTrue(orgSet.contains(pair.getLeft()));
+                        Assert.assertEquals(CDLExternalSystemType.valueOf(pair.getRight()), CDLExternalSystemType.CRM);
+                    });
         }
     }
 

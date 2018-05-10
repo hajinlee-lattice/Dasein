@@ -143,7 +143,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         // (corner case), simply create new LookupIdMap object with known
         // details and add them to the list
         Set<Pair<String, String>> uniqueOrgIdSet = new HashSet<>();
-        if (CollectionUtils.isEmpty(uniqueOrgIdList)) {
+        if (CollectionUtils.isNotEmpty(uniqueOrgIdList)) {
             uniqueOrgIdSet.addAll(uniqueOrgIdList);
         }
 

@@ -174,6 +174,9 @@ public class PlayLaunchEntityMgrImpl extends BaseEntityMgrImpl<PlayLaunch> imple
         summary.setLaunchState(launch.getLaunchState());
         summary.setLaunchTime(launch.getCreated());
         summary.setSelectedBuckets(launch.getBucketsToLaunch());
+        summary.setDestinationOrgId(launch.getDestinationOrgId());
+        summary.setDestinationSysType(launch.getDestinationSysType());
+        summary.setDestinationAccountId(launch.getDestinationAccountId());
         if (launch.getPlay() != null) {
             summary.setPlayName(launch.getPlay().getName());
             summary.setPlayDisplayName(launch.getPlay().getDisplayName());

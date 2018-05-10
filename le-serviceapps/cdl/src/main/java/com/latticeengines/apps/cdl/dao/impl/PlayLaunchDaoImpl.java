@@ -15,6 +15,7 @@ import org.hibernate.Session;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.apps.cdl.dao.PlayLaunchDao;
+import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.db.exposed.dao.impl.BaseDaoImpl;
 import com.latticeengines.domain.exposed.pls.LaunchState;
 import com.latticeengines.domain.exposed.pls.Play;
@@ -192,16 +193,20 @@ public class PlayLaunchDaoImpl extends BaseDaoImpl<PlayLaunch> implements PlayLa
         String queryStr = "SELECT distinct " + DEST_ORG_ID + ", " + DEST_SYS_TYPE + " ";
         Query query = createQueryForDashboard(playId, states, startTimestamp, null, null, null, true, endTimestamp,
                 session, entityClz, queryStr, null, false, orgId, externalSysType);
-        List<Map<String, Object>> queryResult = query.list();
+        List<Object> queryResult = query.list();
 
         List<Pair<String, String>> result = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(queryResult)) {
             queryResult.stream().forEach(org -> {
-                Object orgIdObj = org.get(DEST_ORG_ID);
+                List<Object> obj = JsonUtils.convertList(JsonUtils.deserialize(JsonUtils.serialize(org), List.class),
+                        Object.class);
+                Object orgIdObj = obj.get(0);
                 String extractedOrgId = orgIdObj == null ? null : orgIdObj.toString();
-                Object sysTypeObj = org.get(DEST_SYS_TYPE);
+                Object sysTypeObj = obj.get(1);
                 String extractedSysType = sysTypeObj == null ? null : sysTypeObj.toString();
-                result.add(new ImmutablePair<String, String>(extractedOrgId, extractedSysType));
+                if (StringUtils.isNotBlank(extractedOrgId) && StringUtils.isNotBlank(extractedSysType)) {
+                    result.add(new ImmutablePair<String, String>(extractedOrgId, extractedSysType));
+                }
             });
         }
         return result;

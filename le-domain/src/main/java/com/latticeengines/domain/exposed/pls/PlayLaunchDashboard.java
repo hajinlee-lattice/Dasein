@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.latticeengines.domain.exposed.cdl.CDLExternalSystemType;
+
 public class PlayLaunchDashboard {
 
     private Stats cumulativeStats;
@@ -62,6 +64,12 @@ public class PlayLaunchDashboard {
 
         private LaunchState launchState;
 
+        private String destinationOrgId;
+
+        private CDLExternalSystemType destinationSysType;
+
+        private String destinationAccountId;
+
         public String getPlayName() {
             return playName;
         }
@@ -116,6 +124,30 @@ public class PlayLaunchDashboard {
 
         public void setSelectedBuckets(Set<RatingBucketName> selectedBuckets) {
             this.selectedBuckets = selectedBuckets;
+        }
+
+        public String getDestinationOrgId() {
+            return destinationOrgId;
+        }
+
+        public void setDestinationOrgId(String destinationOrgId) {
+            this.destinationOrgId = destinationOrgId;
+        }
+
+        public CDLExternalSystemType getDestinationSysType() {
+            return destinationSysType;
+        }
+
+        public void setDestinationSysType(CDLExternalSystemType destinationSysType) {
+            this.destinationSysType = destinationSysType;
+        }
+
+        public String getDestinationAccountId() {
+            return destinationAccountId;
+        }
+
+        public void setDestinationAccountId(String destinationAccountId) {
+            this.destinationAccountId = destinationAccountId;
         }
     }
 
