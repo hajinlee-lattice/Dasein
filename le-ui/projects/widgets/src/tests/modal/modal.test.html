@@ -1,2 +1,20 @@
-<button>Open</button>
-<le-modal></le-modal>
+<button ng-click="$ctrl.openModal()">Small</button>
+<le-modal 
+    config="$ctrl.config" 
+    callback-function="$ctrl.modalCallback(args)">
+    <p>Test</p>
+</le-modal>
+
+<button ng-click="$ctrl.openModalMedium()">Medium</button>
+<le-modal 
+    config="$ctrl.configMedium" 
+    callback-function="$ctrl.modalCallback(args)">
+    <p>Test</p>
+</le-modal>
+
+<button ng-click="$ctrl.openModalLarge()">Large</button>
+<le-modal 
+    config="$ctrl.configLarge" 
+    callback-function="$ctrl.modalCallback(args)">
+    <p>Test</p>
+</le-modal>

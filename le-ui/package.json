@@ -7,7 +7,7 @@
     "url": "https://lesvn.lattice.local/svn/lattice/LEDP/branches/develop/ledp/le-ui"
   },
   "engines": {
-    "node": "4.2.1"
+    "node": "6.9.4"
   },
   "version": "0.0.1",
   "dependencies": {

@@ -1,28 +1,28 @@
-<div class="le_modal" ng-class="opened ? 'opened' : 'closed'">
+<div class="le_modal" ng-class="$ctrl.opened ? 'opened' : 'closed'">
 
-    <div class="le-modal-content" ng-class="modalConfig.type">
-        <div class="le-modal-header" ng-style="modalConfig.headerconfig">
-            <span class="close" ng-if="modalConfig.showclose" ng-click="forceDischarge()">&times;</span>
+    <div class="le-modal-content" ng-class="$ctrl.config.type">
+        <div class="le-modal-header" ng-style="$ctrl.config.headerconfig">
+            <span class="close" ng-if="$ctrl.config.showclose" ng-click="$ctrl.forceDischarge()">&times;</span>
             <div class="le-title-container">
-                <span class="ico-container" ng-style="modalConfig.headerconfig">
-                    <i class="title-icon" ng-class="modalConfig.icon" aria-hidden="true" ng-style="modalConfig.iconstyle"></i>
+                <span class="ico-container" ng-style="$ctrl.config.headerconfig">
+                    <i class="title-icon" ng-class="$ctrl.config.icon" aria-hidden="true" ng-style="$ctrl.config.iconstyle"></i>
                 </span>
                 <p class="le-title">
-                    {{modalConfig.title | cut:true:config.titlelength:' ...'}}
+                    {{$ctrl.config.title | cut:true:config.titlelength:' ...'}}
                 </p>
             </div>
 
         </div>
         <div class="le-modal-body">
-            <div ng-transclude ng-show="!showModalMsg && !showWaiting"></div>
-            <div class="le-modal-message" ng-if="showModalMsg">{{modalMsg}}</div>
-            <div class="le-modal-spinner" ng-if="showWaiting">
+            <div ng-transclude ng-show="!$ctrl.showModalMsg && !$ctrl.showWaiting"></div>
+            <div class="le-modal-message" ng-if="$ctrl.showModalMsg">{{modalMsg}}</div>
+            <div class="le-modal-spinner" ng-if="$ctrl.showWaiting">
                 <i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>
             </div>
         </div>
         <div class="le-modal-footer">
-            <button ng-click="confirm()" class="button" ng-style="modalConfig.confirmstyle" ng-class="modalConfig.confirmcolor" ng-disabled="confirmDisabled">{{modalConfig.confirmtext}}</button>
-            <button ng-click="discharge()" class="button  gray-button" ng-disabled="dischargeDisabled">{{modalConfig.dischargetext}}</button>
+            <button ng-click="$ctrl.confirm()" class="button" ng-style="$ctrl.config.confirmstyle" ng-class="$ctrl.config.confirmcolor" ng-disabled="$ctrl.confirmDisabled">{{$ctrl.config.confirmtext}}</button>
+            <button ng-click="$ctrl.discharge()" class="button  gray-button" ng-disabled="$ctrl.dischargeDisabled">{{$ctrl.config.dischargetext}}</button>
 
         </div>
     </div>
