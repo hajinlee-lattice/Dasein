@@ -180,19 +180,17 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     }
 
     public Table getTable(String customerSpace, String tableName) {
-        //Long columnCount = getTableAttributeCount(customerSpace, tableName);
+        Long columnCount = getTableAttributeCount(customerSpace, tableName);
         
-        //if (ATTRIBUTE_BATCH_SIZE > columnCount) {
+        if (ATTRIBUTE_BATCH_SIZE > columnCount) {
             String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}", customerSpace, tableName);
             return get("getTable", url, Table.class);
-        //}
+        }
         
         // Need to split the attributes into Chunks
-        /*
         Table table = getTableSummary(customerSpace, tableName);
         table.setAttributes(getTableAttributes(customerSpace, tableName, columnCount));
         return table;
-        */
     }
     
     
@@ -231,9 +229,10 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     @SuppressWarnings("unchecked")
     public List<ColumnMetadata> getTableColumns(String customerSpace, String tableName) {
         // This returns all table columns
-        //List<Attribute> attributes = getTableAttributes(customerSpace, tableName, null);
-        Table table = getTable(customerSpace, customerSpace);
-        List<Attribute> attributes = table.getAttributes();
+        List<Attribute> attributes = getTableAttributes(customerSpace, tableName, null);
+        if (attributes == null) {
+            return Collections.emptyList();
+        }
         return attributes.stream().parallel().map(Attribute::getColumnMetadata).collect(Collectors.toList());
     }
     
@@ -251,7 +250,8 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
     
     @SuppressWarnings("unchecked")
     public List<Attribute> getTableAttributes(String customerSpace, String tableName, int page, long size) {
-        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes?page={page}&size={size}", customerSpace, tableName, page, size);
+        String url = constructUrl("/customerspaces/{customerSpace}/tables/{tableName}/attributes", customerSpace, tableName);
+        url = String.format("%s?page=%d&size=%d", url, page, size);
         return JsonUtils.convertList(get("get table columns", url, List.class), Attribute.class);
     }
     
