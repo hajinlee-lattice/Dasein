@@ -29,10 +29,9 @@ angular
         }
     });
 
-	// console.log(vm.job);
+	// console.log(JSON.stringify(vm.job));
 
 	vm.init = function() {
-
 		vm.actions = vm.job.subJobs;
 		vm.reports = vm.job['reports'];
 		vm.reports.forEach(function(report) {
@@ -56,23 +55,26 @@ angular
 
 	}
 
-	// vm.downloadReport = function() {
- //            if (vm.exportId && vm.exportId !== null) {
- //                SegmentService.DownloadExportedSegment(vm.exportId).then(function (result) {
- //                    var contentDisposition = result.headers('Content-Disposition');
- //                    var element = document.createElement("a");
- //                    var fileName = contentDisposition.match(/filename="(.+)"/)[1];
- //                    element.download = fileName;
- //                    var file = new Blob([result.data], {type: 'application/octect-stream'});
- //                    var fileURL = window.URL.createObjectURL(file);
- //                    element.href = fileURL;
- //                    document.body.appendChild(element);
- //                    element.click();
- //                    document.body.removeChild(element);
- //                });
- //            } 
 
- //    }
+	vm.downloadReport = function() {
+		var data, filename, link;
+		filename = 'report' + vm.job.id + '.csv';
+
+		JobsService.generateJobsReport(vm.jobId).then(function(result) {
+			var csv = result.Result;
+	        if (!csv.match(/^data:text\/csv/i)) {
+	            csv = 'data:text/csv;charset=utf-8,' + csv;
+	        }
+	        data = encodeURI(csv);
+
+	        link = document.createElement('a');
+	        link.setAttribute('href', data);
+	        link.setAttribute('download', filename);
+	        link.click();
+	    });
+	}
+
+
 
 
 	vm.init();

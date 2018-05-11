@@ -41,6 +41,25 @@ angular
         return deferred.promise;
     }
 
+    this.generateJobsReport = function(jobId) {
+        var deferred = $q.defer();
+
+        $http({
+            method: 'GET',
+            url: '/pls/jobs/' + jobId + '/report/download' 
+        }).then(
+            function onSuccess(response) {
+                console.log(response);
+                deferred.resolve(response.data);
+            }, function onError(response) {
+                console.log(response);
+                deferred.resolve(response.data);
+            }
+        );
+
+        return deferred.promise;
+    }
+
     this.getScoringResults = function(job) {
         var deferred = $q.defer();
 
