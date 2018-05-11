@@ -208,10 +208,12 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
         List<String> segmentNames = new ArrayList<>();
-        for (Action action : actions) {
-            if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
-                SegmentActionConfiguration configuration = (SegmentActionConfiguration) action.getActionConfiguration();
-                segmentNames.add(configuration.getSegmentName());
+        if (actions != null) {
+            for (Action action : actions) {
+                if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
+                    SegmentActionConfiguration configuration = (SegmentActionConfiguration) action.getActionConfiguration();
+                    segmentNames.add(configuration.getSegmentName());
+                }
             }
         }
         return segmentNames;
@@ -229,24 +231,26 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private List<String> getActionImpactedEngineIds(List<Action> actions, Collection<String> segments,
             Collection<RatingEngineType> types) {
         List<String> engineIds = new ArrayList<>();
-        String customerSpace = configuration.getCustomerSpace().toString();
-        for (Action action : actions) {
-            if (ActionType.RATING_ENGINE_CHANGE.equals(action.getType())) {
-                RatingEngineActionConfiguration configuration = (RatingEngineActionConfiguration) action
-                        .getActionConfiguration();
-                String engineId = configuration.getRatingEngineId();
-                RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
-                if (ratingEngine != null //
-                        && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
-                        && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
-                    if (types.contains(ratingEngine.getType())
-                            || segments.contains(ratingEngine.getSegment().getName())) {
-                        String logMsg = String.format(
-                                "Found a rating engine change action related to %s engine %s (%s): %s",
-                                ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
-                                JsonUtils.serialize(action));
-                        log.info(logMsg);
-                        engineIds.add(ratingEngine.getId());
+        if (actions != null) {
+            String customerSpace = configuration.getCustomerSpace().toString();
+            for (Action action : actions) {
+                if (ActionType.RATING_ENGINE_CHANGE.equals(action.getType())) {
+                    RatingEngineActionConfiguration configuration = (RatingEngineActionConfiguration) action
+                            .getActionConfiguration();
+                    String engineId = configuration.getRatingEngineId();
+                    RatingEngine ratingEngine = ratingEngineProxy.getRatingEngine(customerSpace, engineId);
+                    if (ratingEngine != null //
+                            && !Boolean.TRUE.equals(ratingEngine.getDeleted()) //
+                            && !Boolean.TRUE.equals(ratingEngine.getJustCreated())) {
+                        if (types.contains(ratingEngine.getType())
+                                || segments.contains(ratingEngine.getSegment().getName())) {
+                            String logMsg = String.format(
+                                    "Found a rating engine change action related to %s engine %s (%s): %s",
+                                    ratingEngine.getType().name(), ratingEngine.getId(), ratingEngine.getDisplayName(),
+                                    JsonUtils.serialize(action));
+                            log.info(logMsg);
+                            engineIds.add(ratingEngine.getId());
+                        }
                     }
                 }
             }
