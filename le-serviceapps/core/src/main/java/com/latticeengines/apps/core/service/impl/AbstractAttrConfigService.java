@@ -498,6 +498,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             mergeConfig.setAttrType(type);
             mergeConfig.setAttrSubType(subType);
             mergeConfig.setEntity(metadata.getEntity());
+            mergeConfig.setDataLicense(metadata.getDataLicense());
 
             Map<String, AttrConfigProp<?>> attrProps = mergeConfig.getAttrProps();
             if (attrProps == null) {
