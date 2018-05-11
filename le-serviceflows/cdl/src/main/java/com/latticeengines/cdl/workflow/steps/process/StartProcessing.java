@@ -201,9 +201,13 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     }
 
     protected List<Action> getRatingRelatedActions() {
-        return actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds()).stream()
-                .filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
-                .collect(Collectors.toList());
+        List<Action> actions = actionProxy.getActionsByPids(customerSpace.toString(), configuration.getActionIds());
+        if (actions != null) {
+            return actions.stream().filter(action -> ActionType.getRatingRelatedTypes().contains(action.getType()))
+                    .collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     protected List<String> getActionImpactedSegmentNames(List<Action> actions) {
@@ -211,7 +215,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         if (actions != null) {
             for (Action action : actions) {
                 if (ActionType.METADATA_SEGMENT_CHANGE.equals(action.getType())) {
-                    SegmentActionConfiguration configuration = (SegmentActionConfiguration) action.getActionConfiguration();
+                    SegmentActionConfiguration configuration = (SegmentActionConfiguration) action
+                            .getActionConfiguration();
                     segmentNames.add(configuration.getSegmentName());
                 }
             }
