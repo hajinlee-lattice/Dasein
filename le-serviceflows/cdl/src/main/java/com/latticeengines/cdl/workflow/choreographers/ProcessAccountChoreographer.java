@@ -73,7 +73,7 @@ public class ProcessAccountChoreographer extends AbstractProcessEntityChoreograp
     @Override
     protected boolean shouldRebuild() {
         commonRebuild = super.shouldRebuild();
-        return commonRebuild || dataCloudChanged;
+        return commonRebuild || (dataCloudChanged && !reset);
     }
 
 }
