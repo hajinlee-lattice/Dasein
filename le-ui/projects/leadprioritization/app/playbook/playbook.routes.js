@@ -218,7 +218,9 @@ angular
             params: {
                 pageIcon: 'ico-targets',
                 pageTitle: 'Available Targets',
-                section: 'dashboard.targets'
+                section: 'dashboard.targets',
+                segment: '',
+                play_name: ''
             },
             resolve: {
                 Accounts: ['$q', '$stateParams', 'PlaybookWizardService', 'PlaybookWizardStore', function($q, $stateParams, PlaybookWizardService, PlaybookWizardStore) {
