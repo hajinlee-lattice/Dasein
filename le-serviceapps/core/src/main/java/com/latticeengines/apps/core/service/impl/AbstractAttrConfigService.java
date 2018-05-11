@@ -23,7 +23,6 @@ import org.springframework.lang.NonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
-import com.latticeengines.apps.core.service.ActionService;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.AttrValidationService;
 import com.latticeengines.apps.core.util.AttrTypeResolver;
@@ -60,9 +59,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @Inject
     private AttrValidationService attrValidationService;
-
-    @Inject
-    private ActionService actionService;
 
     @Inject
     private LimitationValidator limitationValidator;
@@ -173,7 +169,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     if (onlyActiveAttrs) {
                         AttrConfigProp<AttrState> attrConfigProp = (AttrConfigProp<AttrState>) attrProps
                                 .get(ColumnMetadataKey.State);
-                        if (!AttrState.Active.equals(getActualValue(attrConfigProp))) {
+                        if (AttrState.Inactive.equals(getActualValue(attrConfigProp))) {
                             includeCurrentAttr = false;
                         }
                     }
