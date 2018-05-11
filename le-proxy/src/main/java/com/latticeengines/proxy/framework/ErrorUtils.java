@@ -60,18 +60,23 @@ public class ErrorUtils {
             reason = cause.getClass().getCanonicalName();
         } else if (e instanceof RemoteLedpException) {
             RemoteLedpException remoteLedpException = (RemoteLedpException) e;
-            String stackTrace = remoteLedpException.getRemoteStackTrace();
-            if (StringUtils.isNotBlank(stackTrace)) {
-                for (Class<? extends Throwable> c : retryExceptions) {
-                    if (stackTrace.contains(c.getCanonicalName())) {
-                        reason = c.getCanonicalName();
-                        break;
+            HttpStatus httpStatus = remoteLedpException.getHttpStatus();
+            if (HttpStatus.BAD_GATEWAY.equals(httpStatus) || HttpStatus.SERVICE_UNAVAILABLE.equals(httpStatus)) {
+                reason = "HttpStatus=" + httpStatus;
+            } else {
+                String stackTrace = remoteLedpException.getRemoteStackTrace();
+                if (StringUtils.isNotBlank(stackTrace)) {
+                    for (Class<? extends Throwable> c : retryExceptions) {
+                        if (stackTrace.contains(c.getCanonicalName())) {
+                            reason = c.getCanonicalName();
+                            break;
+                        }
                     }
-                }
-                for (String msg : retryMessages) {
-                    if (((RemoteLedpException) e).getRemoteStackTrace().contains(msg)) {
-                        reason = msg;
-                        break;
+                    for (String msg : retryMessages) {
+                        if (((RemoteLedpException) e).getRemoteStackTrace().contains(msg)) {
+                            reason = msg;
+                            break;
+                        }
                     }
                 }
             }

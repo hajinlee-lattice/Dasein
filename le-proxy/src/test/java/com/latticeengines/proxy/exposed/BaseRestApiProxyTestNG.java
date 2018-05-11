@@ -105,9 +105,9 @@ public class BaseRestApiProxyTestNG extends AbstractTestNGSpringContextTests {
     @DataProvider(name = "endpointProvider")
     public Object[][] provideEndpoints() {
         return new Object[][]{ //
-//                { "runtime", 1 }, //
-//                { "timeout", 5 }, //
-                { "gateway", 1 } //
+                { "runtime", 1 }, //
+                { "timeout", 5 }, //
+                { "gateway", 5 } //
         };
     }
 

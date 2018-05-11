@@ -11,10 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,7 +38,6 @@ import com.latticeengines.common.exposed.util.HttpClientUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.KryoUtils;
 import com.latticeengines.common.exposed.util.PropertyUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.proxy.framework.ErrorUtils;
 import com.latticeengines.proxy.framework.ProxyRetryTemplate;
 import com.latticeengines.security.exposed.AuthorizationHeaderHttpRequestInterceptor;
@@ -77,7 +73,7 @@ public abstract class BaseRestApiProxy {
     private Set<String> retryMessages;
 
     private long initialWaitMsec = 500;
-    private double multiplier = 2;
+    private double multiplier = 2D;
     private int maxAttempts = 5;
 
     private ConcurrentMap<String, String> headers = new ConcurrentHashMap<>();
@@ -224,7 +220,7 @@ public abstract class BaseRestApiProxy {
         interceptors.removeIf(i -> i instanceof MagicAuthenticationHeaderHttpRequestInterceptor);
         restTemplate.setInterceptors(interceptors);
     }
-    
+
     protected void setErrorHandler(ResponseErrorHandler handler) {
         restTemplate.setErrorHandler(handler);
     }
