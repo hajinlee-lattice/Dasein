@@ -3,10 +3,11 @@ angular.module('lp.configureattributes.configure', [])
     controllerAs: 'vm',
     templateUrl: 'app/configureattributes/content/configure/configure.component.html',
     controller: function(
-        $state, $stateParams, $scope, $timeout, $sce, $window,
-        ResourceUtility, ConfigureAttributesStore, ModalStore
+        $state, $stateParams, $scope, $timeout, $sce, $window, $q,
+        ResourceUtility, ConfigureAttributesStore, ModalStore, StateHistory
     ) {
         var vm = this,
+            forceNextStep = false,
             resolve = $scope.$parent.$resolve,
             PurchaseHistory = resolve.PurchaseHistory,
             totalMonths = 60,
@@ -58,7 +59,8 @@ angular.module('lp.configureattributes.configure', [])
             },
             options: ConfigureAttributesStore.getOptions() || {},
             completed: ConfigureAttributesStore.getSaved(),
-            PurchaseHistory: PurchaseHistory
+            PurchaseHistory: PurchaseHistory,
+            hasChanges: false
         });
 
         vm.steps_count = Object.keys(vm.steps).length;
@@ -188,16 +190,30 @@ angular.module('lp.configureattributes.configure', [])
         }
 
         vm.goto = function(name) {
-            $state.go('home.configureattributes.' + name);
+            if(!forceNextStep) {
+                $state.go('home.configureattributes.' + name);
+            } else {
+                // this doesn't really work when you have null stats, because how would you get to % Margin if you can't configure Share of Wallet?
+                var completed = ConfigureAttributesStore.getSaved(),
+                    steps = Object.keys(vm.steps),
+                    previousStep = steps[steps.indexOf(name) - 1];
+
+                if(steps.indexOf(name) === 0 || vm.steps[name].completed || (vm.steps[previousStep] && vm.steps[previousStep].completed)) {
+                    $state.go('home.configureattributes.' + name);
+                }
+            }
         }
 
         vm.save = function(form) {
+            vm.hasChanges = true;
             ConfigureAttributesStore.saveSteps(vm.step);
             ConfigureAttributesStore.getPurchaseHistory().then(function(result) {
                 vm.saveObj = result;
             });
             vm.steps[vm.step].completed = true;
-            //vm.gotoNextStep(vm.step);
+            if(forceNextStep) {
+                vm.gotoNextStep(vm.step);
+            }
             
             if(form) {
                 form.$setPristine();
@@ -206,6 +222,7 @@ angular.module('lp.configureattributes.configure', [])
 
         vm.submit = function() {
             ConfigureAttributesStore.savePurchaseHistory(vm.step).then(function() {
+                vm.hasChanges = false;
                 $state.go('home.configureattributes.done');
             });
         }
@@ -228,14 +245,30 @@ angular.module('lp.configureattributes.configure', [])
                 });
             }
 
+            if(vm.step === 'spend_over_time') {
+                var types = vm.steps[vm.step].type.split(',');
+                for(var i in types) {
+                    var type = types[i],
+                        option = vm.options[type];
+                    for(var j in option) {
+                        for(var k in option[j]) {
+                            if(Object.keys(option[j][k]).length >= 2) {
+                                hasOptions = true;
+                            }
+                        }
+                    }
+                }
+            }
+
             return (hasOptions ? true : false);
         }
 
         vm.enableSubmit = function() {
             var completed = ConfigureAttributesStore.getSaved(),
                 required = Object.keys(vm.steps).length;
-            return completed.length; // for debuging
-            return (required <= completed.length);
+
+            return completed.length;
+            //return (required <= completed.length); // works but design requirements don't
         }
 
         var getObj = function(path, obj) {
@@ -300,17 +333,30 @@ angular.module('lp.configureattributes.configure', [])
             }
         }
 
-        vm.init = function() {
-            var completedSteps = ConfigureAttributesStore.getSaved();
-            completedSteps.forEach(function(step) {
-                vm.steps[step].completed = true;
-            });
-            vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
-            vm.spendOvertime = {
-                TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
-                AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
-            };
-        };
+        vm.uiCanExit = function(Transition) {
+            var deferred = $q.defer();
+
+            var goingTo = Transition.targetState().identifier(),
+                goingToBase = goingTo.substr(0, goingTo.lastIndexOf(".")),
+                comingFrom = $state.current.name,model,
+                comingFromBase = comingFrom.substr(0, comingFrom.lastIndexOf("."));
+
+            if(goingToBase === comingFromBase || !vm.hasChanges) {
+                deferred.resolve(true);
+            } else {
+                vm.toggleModal();
+
+                vm.modalCallback = function(args) {
+                    if(args.action === 'proceed') {
+                        deferred.resolve(true);
+                    } else {
+                        vm.toggleModal();
+                        deferred.resolve(false);
+                    }
+                }
+            }
+            return deferred.promise;
+        }
 
         vm.initModalWindow = function () {
             vm.modalConfig = {
@@ -330,17 +376,6 @@ angular.module('lp.configureattributes.configure', [])
                 'confirmstyle' : {'background-color':'#FDC151'}
             };
 
-            vm.modalCallback = function (args) {
-                if (vm.modalConfig.dischargeaction === args.action) {
-                    vm.toggleModal();
-                } else if (vm.modalConfig.confirmaction === args.action) {
-                    vm.toggleModal();
-                }
-                if(args.action === 'proceed') {
-                    console.log('proceed');
-                }
-            }
-
             vm.toggleModal = function () {
                 var modal = ModalStore.get(vm.modalConfig.name);
                 if (modal) {
@@ -353,8 +388,17 @@ angular.module('lp.configureattributes.configure', [])
             });
         }
 
-        vm.initModalWindow();
-
-        vm.init();
+        vm.$onInit = function() {
+            vm.initModalWindow();
+            var completedSteps = ConfigureAttributesStore.getSaved();
+            completedSteps.forEach(function(step) {
+                vm.steps[step].completed = true;
+            });
+            vm.steps = ConfigureAttributesStore.getSteps(ConfigureAttributesStore.purchaseHistory, vm.steps);
+            vm.spendOvertime = {
+                TotalSpendOvertime: vm.steps.spend_over_time.data.TotalSpendOvertime || [defaultOption],
+                AvgSpendOvertime: vm.steps.spend_over_time.data.AvgSpendOvertime || [defaultOption]
+            };
+        }
     }
 });

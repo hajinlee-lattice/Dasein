@@ -26,7 +26,7 @@ angular
             url: '/spend_change',
             views: {
                 'main@': {
-                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                    component: 'configureAttributesConfigure'
                 }
             },
         })
@@ -34,7 +34,7 @@ angular
             url: '/spend_over_time',
             views: {
                 'main@': {
-                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                    component: 'configureAttributesConfigure'
                 }
             },
         })
@@ -42,7 +42,7 @@ angular
             url: '/share_of_wallet',
             views: {
                 'main@': {
-                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                    component: 'configureAttributesConfigure'
                 }
             },
         })
@@ -50,7 +50,7 @@ angular
             url: '/margin',
             views: {
                 'main@': {
-                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                    component: 'configureAttributesConfigure'
                 }
             },
         })
@@ -58,7 +58,7 @@ angular
             url: '/done',
             views: {
                 'main@': {
-                    template: '<configure-attributes-configure></configure-attributes-configure>'
+                    component: 'configureAttributesConfigure'
                 }
             },
         });

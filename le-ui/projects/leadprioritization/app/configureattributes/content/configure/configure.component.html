@@ -1,4 +1,4 @@
-<section class="container">
+<section class="container" ng-class="{'_no-data': !vm.PurchaseHistory.length}">{{vm.PurchaseHistory.length}}
     <div class="row">
         <le-modal-window config="vm.modalConfig" callback-function="vm.modalCallback(args)">
             <br />
@@ -24,7 +24,7 @@
                                 </h2>
                             </div>
                             <ul class="steps">
-                                <li ui-sref="home.configureattributes.{{name}}" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name, completed: item.completed}" class="{{name}} show-tooltip bottom middle delay">
+                                <li ng-click="vm.goto(name)" ng-repeat="(name,item) in vm.steps" ng-class="{active: vm.step == name, completed: item.completed}" class="{{name}} show-tooltip bottom middle delay">
                                     <strong>
                                         {{item.label}}
                                     </strong> 
@@ -57,7 +57,7 @@
                     <div class="pull-left">
                     </div>
                     <div class="pull-right">
-                        <button ng-if="vm.step !== 'done'" type="button" class="button white-button" ng-click="vm.submit()" ng-disabled="!vm.enableSubmit()">
+                        <button ng-if="vm.step !== 'done'" type="button" class="button blue-button" ng-click="vm.submit()" ng-disabled="!vm.enableSubmit()">
                             Submit
                         </button>
                         <button ng-if="vm.step === 'done'" type="button" class="button blue-button" ui-sref="home.jobs.data">
