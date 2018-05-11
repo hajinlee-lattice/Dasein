@@ -15,6 +15,8 @@ public interface TableEntityMgr {
 
     Table findByName(String name, boolean inflate);
     
+    Table findByName(String name, boolean inflate, boolean includeAttributes);
+    
     void create(Table entity);
     
     void addAttributes(String name, List<Attribute> attributes);
@@ -30,8 +32,14 @@ public interface TableEntityMgr {
     Table rename(String oldName, String newName);
 
     static void inflateTable(Table table) {
+        inflateTable(table, true);
+    }
+    
+    static void inflateTable(Table table, boolean includeAttributes) {
         if (table != null) {
-            Hibernate.initialize(table.getAttributes());
+            if (includeAttributes) {
+                Hibernate.initialize(table.getAttributes());
+            }
             Hibernate.initialize(table.getExtracts());
             Hibernate.initialize(table.getPrimaryKey());
             Hibernate.initialize(table.getLastModifiedKey());
@@ -43,4 +51,5 @@ public interface TableEntityMgr {
     void addExtract(Table table, Extract extract);
 
     void deleteTableAndCleanupByName(String name);
+
 }

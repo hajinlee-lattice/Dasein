@@ -24,7 +24,7 @@
         <springfox.swagger.version>2.8.0</springfox.swagger.version>
         <apache.http.version>4.4.1</apache.http.version>
         <sqljdbc.version>6.2.2.jre8</sqljdbc.version>
-        <mysql.connector.version>5.1.30</mysql.connector.version>
+        <mysql.connector.version>5.1.38</mysql.connector.version>
         <log4j.extras.version>1.2.17</log4j.extras.version>
         <commons.lang3.version>3.6</commons.lang3.version>
         <reflections.version>0.9.9</reflections.version>

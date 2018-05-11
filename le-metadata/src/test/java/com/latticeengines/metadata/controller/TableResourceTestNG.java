@@ -11,10 +11,12 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -23,6 +25,7 @@ import org.testng.annotations.Test;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMetadata;
@@ -117,7 +120,33 @@ public class TableResourceTestNG extends MetadataFunctionalTestNGBase {
         assertEquals(attrMetadata.getFundamentalType(), "numeric");
         assertEquals(attrMetadata.getTags().get(0), "External");
     }
-
+    
+    @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTable" })
+    public void getTableColumnsPageable() {
+        addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);
+        restTemplate.setInterceptors(Arrays.asList(new ClientHttpRequestInterceptor[] { addMagicAuthHeader }));
+        String url = String.format("%s/metadata/customerspaces/%s/tables/%s/attributes", //
+                getRestAPIHostPort(), customerSpace1, TABLE1);
+        Attribute[] attributeArr = restTemplate.getForObject(url, Attribute[].class, new HashMap<>());
+        assertNotNull(attributeArr);
+        log.info("Column Metadata Count for CustomerSpace-Table: {}-{} : {}", customerSpace1, TABLE1, attributeArr.length);
+        
+        int pageSize = Math.min(10,  attributeArr.length);
+        if (pageSize > 0) {
+            log.info("Testing TableColumns with PageSize: {}", pageSize);
+            url = String.format("%s/metadata/customerspaces/%s/tables/%s/attributes?page={page}&size={size}&sort_dir={sort_dir}&sort_col={sort_col}", //
+                    getRestAPIHostPort(), customerSpace1, TABLE1);
+            Map<String, Object> uriVars = new HashMap<>();
+            uriVars.put("page", 1);
+            uriVars.put("size", pageSize);
+            uriVars.put("sort_dir", "ASC");
+            uriVars.put("sort_col", "displayName");
+            attributeArr = restTemplate.getForObject(url, Attribute[].class, uriVars);
+            assertNotNull(attributeArr);
+            assertEquals(attributeArr.length, pageSize);
+        }
+    }
+    
     @Test(groups = "functional", enabled = true, dependsOnMethods = { "getTable" })
     public void cloneTable() {
         addMagicAuthHeader.setAuthValue(Constants.INTERNAL_SERVICE_HEADERVALUE);

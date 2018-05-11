@@ -12,12 +12,14 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.LastModifiedKey;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
@@ -48,16 +50,28 @@ public class TableResourceHelper {
         return tableNames;
     }
 
-    public Table getTable(String customerSpace, String tableName) {
-        log.info(String.format("getTable(%s, %s)", customerSpace, tableName));
+    public Table getTable(String customerSpace, String tableName, Boolean includeAttributes) {
+        log.info(String.format("getTable(%s, %s, %s)", customerSpace, tableName, includeAttributes));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        return mdService.getTable(space, tableName);
+        return mdService.getTable(space, tableName, includeAttributes);
     }
 
+    public Long getTableAttributeCount(String customerSpace, String tableName) {
+        log.info(String.format("getTableAttributeCount(%s, %s)", customerSpace, tableName));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.getTableAttributeCount(space, tableName);
+    }
+
+    public List<Attribute> getTableAttributes(String customerSpace, String tableName, Pageable pageable) {
+        log.info(String.format("getTableAttributes(%s, %s, %s)", customerSpace, tableName, pageable));
+        CustomerSpace space = CustomerSpace.parse(customerSpace);
+        return mdService.getTableAttributes(space, tableName, pageable);
+    }
+    
     public ModelingMetadata getTableMetadata(String customerSpace, String tableName) {
         log.info(String.format("getTableMetadata(%s, %s)", customerSpace, tableName));
         CustomerSpace space = CustomerSpace.parse(customerSpace);
-        Table table = mdService.getTable(space, tableName);
+        Table table = mdService.getTable(space, tableName, true);
         return table.getModelingMetadata();
     }
 

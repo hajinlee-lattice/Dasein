@@ -1,6 +1,7 @@
 package com.latticeengines.apps.cdl.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import com.google.common.collect.ImmutableMap;
 import com.latticeengines.apps.cdl.testframework.CDLDeploymentTestNGBase;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
+import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
 import com.latticeengines.domain.exposed.pls.ActionType;
@@ -38,6 +40,7 @@ import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLAttrConfigProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
 import com.latticeengines.proxy.exposed.cdl.SegmentProxy;
+import com.latticeengines.proxy.exposed.metadata.MetadataProxy;
 import com.latticeengines.testframework.exposed.service.CDLTestDataService;
 
 
@@ -56,7 +59,9 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
     private CDLAttrConfigProxy cdlAttrConfigProxy;
     @Inject
     private ActionProxy actionProxy;
-
+    @Inject
+    private MetadataProxy metadataProxy;
+    
     private RatingEngine re;
 
     @Inject
@@ -96,6 +101,17 @@ public class CDLAttrConfigResourceDeploymentTestNG extends CDLDeploymentTestNGBa
         Assert.assertNotNull(request.getAttrConfigs());
     }
 
+    @Test(groups = "deployment")
+    public void testVerifyGetTable() {
+        List<Table> tables = metadataProxy.getTables(mainTestTenant.getId());
+        assertNotNull(tables);
+        tables.stream().forEach(table -> {
+            assertNotNull(table);
+            Long attributeCount = metadataProxy.getTableAttributeCount(mainTestTenant.getId(), table.getName());
+            assertEquals(attributeCount.intValue(), table.getAttributes().size());
+        });
+    }
+    
     @Test(groups = "deployment")
     public void testPartialUpdate() throws InterruptedException {
         AttrConfigRequest request = new AttrConfigRequest();

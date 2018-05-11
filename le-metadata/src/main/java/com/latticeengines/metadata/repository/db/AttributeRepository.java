@@ -15,7 +15,7 @@ public interface AttributeRepository extends BaseJpaRepository<Attribute, Long> 
     long countByTable_Pid(Long tablePid);
 
     List<Attribute> findByTable_Pid(Long tablePid, Pageable pageable);
-
+    
     List<Attribute> findByTable_Pid(Long tablePid);
 
 }

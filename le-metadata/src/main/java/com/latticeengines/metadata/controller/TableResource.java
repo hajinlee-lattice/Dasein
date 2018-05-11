@@ -1,9 +1,13 @@
 package com.latticeengines.metadata.controller;
 
-import java.util.Collections;
 import java.util.List;
 
+import javax.inject.Inject;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,12 +19,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.latticeengines.common.exposed.rest.controller.BaseRestResource;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
+import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
+import com.latticeengines.metadata.service.MetadataService;
 import com.latticeengines.metadata.service.impl.TableResourceHelper;
 
 import io.swagger.annotations.Api;
@@ -29,8 +36,10 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "metadata", description = "REST resource for data tables")
 @RestController
 @RequestMapping("/customerspaces/{customerSpace}")
-public class TableResource {
+public class TableResource extends BaseRestResource {
 
+    private static final Logger log = Logger.getLogger(BaseRestResource.class);
+    
     @Autowired
     private TableResourceHelper tableResourceHelper;
 
@@ -44,20 +53,28 @@ public class TableResource {
     @GetMapping(value = "/tables/{tableName}")
     @ResponseBody
     @ApiOperation(value = "Get table by name")
-    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
-        return tableResourceHelper.getTable(customerSpace, tableName);
+    public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName,
+            @RequestParam(value = "include_attributes", required = false, defaultValue = "true") Boolean includeAttributes) {
+        return tableResourceHelper.getTable(customerSpace, tableName, includeAttributes);
     }
 
-    @GetMapping(value = "/tables/{tableName}/columns")
+    @GetMapping(value = "/tables/{tableName}/attribute_count")
     @ResponseBody
     @ApiOperation(value = "Get table columns by name")
-    public List<ColumnMetadata> getTableColumns(@PathVariable String customerSpace, @PathVariable String tableName) {
-        Table table = tableResourceHelper.getTable(customerSpace, tableName);
-        if (table != null) {
-            return table.getColumnMetadata();
-        } else {
-            return Collections.emptyList();
-        }
+    public Long getTableColumnCount(@PathVariable String customerSpace, @PathVariable String tableName) {
+        return tableResourceHelper.getTableAttributeCount(customerSpace, tableName);
+    }
+    
+    @GetMapping(value = "/tables/{tableName}/attributes")
+    @ResponseBody
+    @ApiOperation(value = "Get table columns by name")
+    public List<Attribute> getTableAttributes(@PathVariable String customerSpace, @PathVariable String tableName,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", required = false) Integer size,
+            @RequestParam(value = "sort_dir", required = false) Direction sortDirection,
+            @RequestParam(value = "sort_col", required = false) String sortColumn) {
+        Pageable pageRequest = getPageRequest(page, size, sortDirection, sortColumn);
+        return tableResourceHelper.getTableAttributes(customerSpace, tableName, pageRequest);
     }
 
     @GetMapping(value = "/tables/{tableName}/metadata")

@@ -25,6 +25,7 @@ public enum LedpCode {
     LEDP_10010("User type {0} is not an accepted type."), //
     LEDP_10011("File {0} cannot be found."), //
     LEDP_10012("Found unsupported character in \"{0}\" in Pivot Mapping File."), //
+    
     // Metadata service: 11000-11999
     LEDP_11000("Could not load driver class {0}."), //
     LEDP_11001("Failed connecting to db."), //
@@ -34,7 +35,8 @@ public enum LedpCode {
     LEDP_11005("SQL column name {0} is different from the avro column name {1}."), //
     LEDP_11006("Tables {0} do not exist. A DataCollection must reference an existing table."), //
     LEDP_11007("Default query source already exists"), //
-
+    LEDP_11008("Cannot find table named {0} in tenant {1}."),
+    
     // Runtime service: 12000-12999
     LEDP_12000("Parameter PRIORITY undefined for analytics job."), //
     LEDP_12001("Could not create runtime configuration."), //
@@ -711,7 +713,7 @@ public enum LedpCode {
 
     // le-db
     LEDP_50000("Object {0} is not soft deletable."); //
-
+    
     private String message;
 
     private String externalCode;

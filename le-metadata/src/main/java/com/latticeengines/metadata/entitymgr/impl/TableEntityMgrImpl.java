@@ -243,9 +243,15 @@ public class TableEntityMgrImpl implements TableEntityMgr {
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
     public Table findByName(String name, boolean inflate) {
+        return findByName(name, true, true);
+    }
+    
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Table findByName(String name, boolean inflate, boolean includeAttributes) {
         Table table = tableDao.findByName(name);
         if (inflate) {
-            TableEntityMgr.inflateTable(table);
+            TableEntityMgr.inflateTable(table, includeAttributes);
         }
         return table;
     }

@@ -46,7 +46,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
         if (dataFeedTask == null) {
             dataFeedTask = new DataFeedTask();
             dataFeedTask.setDataFeed(dataFeed);
-            Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName);
+            Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
             dataFeedTask.setUniqueId(NamingUtils.uuid("DataFeedTask"));
             dataFeedTask.setImportTemplate(metaData);
             dataFeedTask.setStatus(DataFeedTask.Status.Active);
@@ -60,7 +60,7 @@ public class DataFeedTaskServiceImpl implements DataFeedTaskService {
             dataFeedTaskEntityMgr.create(dataFeedTask);
         } else {
             if (!dataFeedTask.getImportTemplate().getName().equals(tableName)) {
-                Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName);
+                Table metaData = mdService.getTable(CustomerSpace.parse(customerSpace), tableName, true);
                 dataFeedTask.setImportTemplate(metaData);
                 dataFeedTask.setStatus(DataFeedTask.Status.Updated);
                 dataFeedTaskEntityMgr.updateDataFeedTask(dataFeedTask);

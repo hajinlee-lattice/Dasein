@@ -4,16 +4,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
+
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.modeling.ModelingMetadata;
 
 public interface MetadataService {
 
-    Table getTable(CustomerSpace customerSpace, String name);
+    Table getTable(CustomerSpace parse, String tableName);
+    
+    Table getTable(CustomerSpace customerSpace, String name, Boolean includeAttributes);
 
     List<Table> getTables(CustomerSpace customerSpace);
 
@@ -41,4 +46,9 @@ public interface MetadataService {
     void setStorageMechanism(CustomerSpace customerSpace, String tableName, StorageMechanism storageMechanism);
 
     Boolean addAttributes(CustomerSpace space, String tableName, List<Attribute> attributes);
+
+    List<Attribute> getTableAttributes(CustomerSpace customerSpace, String tableName, Pageable pageable);
+
+    Long getTableAttributeCount(CustomerSpace space, String tableName);
+
 }

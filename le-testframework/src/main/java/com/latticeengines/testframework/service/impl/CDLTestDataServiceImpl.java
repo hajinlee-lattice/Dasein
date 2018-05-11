@@ -365,6 +365,7 @@ public class CDLTestDataServiceImpl implements CDLTestDataService {
             table.setName(tableName);
             table.setDisplayName(entity.getServingStore().name());
             metadataProxy.createTable(customerSpace, tableName, table);
+            log.info("Metadata Table: {}, created with attributes: {}", tableName, table.getAttributes().size());
             DataCollection.Version activeVersion = dataCollectionProxy.getActiveVersion(customerSpace);
             dataCollectionProxy.upsertTable(customerSpace, tableName, entity.getServingStore(), activeVersion);
         }

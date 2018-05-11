@@ -40,7 +40,7 @@ public class ImportTableResource {
     @ResponseBody
     @ApiOperation(value = "Get table by name")
     public Table getTable(@PathVariable String customerSpace, @PathVariable String tableName) {
-        return tableResourceHelper.getTable(customerSpace, tableName);
+        return tableResourceHelper.getTable(customerSpace, tableName, true);
     }
 
     @RequestMapping(value = "/importtables/{tableName}/metadata", method = RequestMethod.GET, headers = "Accept=application/json")

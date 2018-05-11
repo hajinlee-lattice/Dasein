@@ -1,14 +1,19 @@
 package com.latticeengines.metadata.service.impl;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.collections4.Closure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.latticeengines.common.exposed.exception.AnnotationValidationError;
@@ -19,6 +24,7 @@ import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.exception.LedpCode;
 import com.latticeengines.domain.exposed.exception.LedpException;
 import com.latticeengines.domain.exposed.metadata.Attribute;
+import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.StorageMechanism;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableType;
@@ -27,6 +33,8 @@ import com.latticeengines.domain.exposed.modeling.ModelingMetadata.AttributeMeta
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.metadata.entitymgr.TableEntityMgr;
 import com.latticeengines.metadata.entitymgr.impl.TableTypeHolder;
+import com.latticeengines.metadata.repository.db.AttributeRepository;
+import com.latticeengines.metadata.repository.db.TableRepository;
 import com.latticeengines.metadata.service.MetadataService;
 
 @Component("mdService")
@@ -40,9 +48,24 @@ public class MetadataServiceImpl implements MetadataService {
     @Autowired
     private TableTypeHolder tableTypeHolder;
 
+    @Inject
+    private AttributeRepository attributeRepository;
+
+    @Inject
+    private TableRepository tableRepository;
+    
     @Override
     public Table getTable(CustomerSpace customerSpace, String name) {
-        return tableEntityMgr.findByName(name);
+        return getTable(customerSpace, name, true);
+    }
+    
+    @Override
+    public Table getTable(CustomerSpace customerSpace, String name, Boolean includeAttributes) {
+        Table table = tableEntityMgr.findByName(name, true, includeAttributes);
+        if (!includeAttributes) {
+            table.setAttributes(Collections.emptyList());
+        }
+        return table;
     }
 
     @Override
@@ -68,6 +91,28 @@ public class MetadataServiceImpl implements MetadataService {
         } finally {
             tableTypeHolder.setTableType(TableType.DATATABLE);
         }
+    }
+
+    @Override
+    public Long getTableAttributeCount(CustomerSpace customerSpace, String tableName) {
+        Long tablePid = tableRepository.findPidByTenantIdAndName(customerSpace.toString(), tableName);
+        if (tablePid == null) {
+            throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
+        }
+        return attributeRepository.countByTable_Pid(tablePid);
+    }
+
+    @Override
+    public List<Attribute> getTableAttributes(CustomerSpace customerSpace, String tableName, Pageable pageable) {
+        Long tablePid = tableRepository.findPidByTenantIdAndName(customerSpace.toString(), tableName);
+        if (tablePid == null) {
+            throw new LedpException(LedpCode.LEDP_11008, new String[] {tableName, customerSpace.toString()});
+        }
+        List<Attribute> attributes = attributeRepository.findByTable_Pid(tablePid, pageable);
+        if (attributes == null) {
+            return Collections.emptyList();
+        }
+        return attributes;
     }
 
     @Override
@@ -181,4 +226,5 @@ public class MetadataServiceImpl implements MetadataService {
         
         return true;
     }
+
 }

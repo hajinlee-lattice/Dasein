@@ -41,6 +41,10 @@
             <artifactId>commons-validator</artifactId>
             <version>${commons.validator.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
         <dependency> <!-- better exclude when depends on le-domain -->
             <groupId>io.swagger</groupId>
             <artifactId>swagger-annotations</artifactId>

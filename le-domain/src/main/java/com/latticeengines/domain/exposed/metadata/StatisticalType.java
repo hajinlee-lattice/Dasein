@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
+
 public enum StatisticalType {
 
     INTERVAL("interval"), NOMINAL("nominal"), ORDINAL("ordinal"), RATIO("ratio");
@@ -32,7 +35,7 @@ public enum StatisticalType {
     public String getName() { return this.name; }
 
     public static StatisticalType fromName(String name) {
-        if (name == null) {
+        if (StringUtils.isBlank(name)) {
             return null;
         }
         if (values.contains(name.toUpperCase())) {

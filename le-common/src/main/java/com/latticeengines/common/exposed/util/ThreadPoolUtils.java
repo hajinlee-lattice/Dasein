@@ -33,7 +33,11 @@ public class ThreadPoolUtils {
         return Executors.newCachedThreadPool(threadFac);
     }
 
-    public static ForkJoinPool getForkJoinThreadPool(String name, int size) {
+    public static ForkJoinPool getForkJoinThreadPool(String name) {
+        return getForkJoinThreadPool(name, null);
+    }
+    
+    public static ForkJoinPool getForkJoinThreadPool(String name, Integer size) {
         // custom workerThreadFactory for ensuring specified thread name prefix
         ForkJoinWorkerThreadFactory workerThreadFactory = //
                 pool -> {
@@ -42,6 +46,7 @@ public class ThreadPoolUtils {
                     thread.setName(String.format("%s-%d", name, thread.getPoolIndex()));
                     return thread;
                 };
+        size = size == null ? Runtime.getRuntime().availableProcessors() : size;
         return new ForkJoinPool(size, workerThreadFactory, null, false);
     }
 

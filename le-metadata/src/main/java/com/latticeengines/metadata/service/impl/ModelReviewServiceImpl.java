@@ -31,7 +31,7 @@ public class ModelReviewServiceImpl implements ModelReviewService {
 
     @Override
     public ModelReviewData getReviewData(String customerSpace, String modelId, String eventTableName) {
-        Table eventTable = metadataService.getTable(CustomerSpace.parse(customerSpace), eventTableName);
+        Table eventTable = metadataService.getTable(CustomerSpace.parse(customerSpace), eventTableName, false);
         List<DataRule> rules = eventTable.getDataRules();
 
         List<ColumnRuleResult> columnResults = ruleResultService.findColumnResults(modelId);
