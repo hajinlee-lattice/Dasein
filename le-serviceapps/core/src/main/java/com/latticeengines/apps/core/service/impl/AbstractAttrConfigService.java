@@ -3,11 +3,12 @@ package com.latticeengines.apps.core.service.impl;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,8 +35,6 @@ import com.latticeengines.documentdb.entity.AttrConfigEntity;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
-import com.latticeengines.domain.exposed.pls.Action;
-import com.latticeengines.domain.exposed.pls.ActionType;
 import com.latticeengines.domain.exposed.pls.DataLicense;
 import com.latticeengines.domain.exposed.propdata.manage.ColumnSelection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
@@ -79,7 +78,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         String tenantId = MultiTenantContext.getTenantId();
         List<AttrConfig> renderedList;
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(entity);
             if (render) {
                 renderedList = render(columns, customConfig);
@@ -112,24 +111,23 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @Override
     public Map<String, AttrConfigCategoryOverview<?>> getAttrConfigOverview(List<Category> categories,
             List<String> propertyNames, boolean activeOnly) {
-        Map<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new HashMap<>();
+        ConcurrentMap<String, AttrConfigCategoryOverview<?>> attrConfigOverview = new ConcurrentHashMap<>();
         log.info("categories are" + categories + ", propertyNames are " + propertyNames + ", activeOnly " + activeOnly);
         final Tenant tenant = MultiTenantContext.getTenant();
-        List<Callable<AttrConfigCategoryOverview<?>>> callables = new ArrayList<>();
+
+        List<Runnable> runnables = new ArrayList<>();
         categories.forEach(category -> {
-            Callable<AttrConfigCategoryOverview<?>> callable = () -> {
+            Runnable runnable = () -> {
                 MultiTenantContext.setTenant(tenant);
                 AttrConfigCategoryOverview<?> attrConfigCategoryOverview = getAttrConfigOverview(
                         getRenderedList(category), category, propertyNames, activeOnly);
                 attrConfigOverview.put(category.getName(), attrConfigCategoryOverview);
-                return attrConfigCategoryOverview;
             };
-            callables.add(callable);
+            runnables.add(runnable);
         });
-
         // fork join execution
-        ExecutorService threadPool = ThreadPoolUtils.getForkJoinThreadPool("attr-config-overview", 4);
-        ThreadPoolUtils.runCallablesInParallel(threadPool, callables, 30, 1);
+        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("attr-config-overview", 4);
+        ThreadPoolUtils.runRunnablesInParallel(threadPool, runnables, 30, 1);
         new Thread(threadPool::shutdown).run();
         return attrConfigOverview;
     }
@@ -138,7 +136,6 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
     @VisibleForTesting
     <T extends Serializable> AttrConfigCategoryOverview<T> getAttrConfigOverview(@NonNull List<AttrConfig> renderedList,
             Category category, List<String> propertyNames, boolean onlyActiveAttrs) {
-
         AttrConfigCategoryOverview<T> overview = new AttrConfigCategoryOverview<T>();
         Map<String, Map<T, Long>> propSummary = new HashMap<>();
         overview.setPropSummary(propSummary);
@@ -182,9 +179,15 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
                     }
                     if (includeCurrentAttr) {
                         AttrConfigProp<?> configProp = attrProps.get(propertyName);
+                        String attrName = attrConfig.getAttrName();
                         if (configProp != null) {
-                            log.info("include attribute" + attrConfig.getAttrName());
-                            Object actualValue = getActualValue(configProp);
+                            Object actualValue;
+                            try {
+                                actualValue = getActualValue(configProp);
+                            } catch (Exception e) {
+                                throw new RuntimeException("Failed to get the actual value of " + propertyName
+                                        + " in attribute " + attrName + ": " + JsonUtils.serialize(configProp), e);
+                            }
                             if (actualValue == null) {
                                 log.warn(String.format("configProp %s does not have proper value", configProp));
                                 continue;
@@ -260,10 +263,8 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
 
     @VisibleForTesting
     <T extends Serializable> Object getActualValue(AttrConfigProp<T> configProp) {
-        if (configProp.isAllowCustomization()) {
-            if (configProp.getCustomValue() != null) {
-                return configProp.getCustomValue();
-            }
+        if (configProp.isAllowCustomization() && configProp.getCustomValue() != null) {
+            return configProp.getCustomValue();
         }
         return configProp.getSystemValue();
     }
@@ -274,9 +275,13 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         String tenantId = MultiTenantContext.getTenantId();
         BusinessEntity entity = CategoryUtils.getEntity(category);
         try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
+            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntityInReader(tenantId, entity);
             List<ColumnMetadata> columns = getSystemMetadata(category);
-            renderedList = render(columns, customConfig);
+            Set<String> columnsInSystem = columns.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
+            List<AttrConfig> customConfigInCategory = customConfig.stream() //
+                    .filter(attrConfig -> columnsInSystem.contains(attrConfig.getAttrName()))
+                    .collect(Collectors.toList());
+            renderedList = render(columns, customConfigInCategory);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);
@@ -509,7 +514,7 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             subCateProp.setAllowCustomization(attrSpec == null || attrSpec.categoryNameChange());
             mergeConfig.putProperty(ColumnMetadataKey.Subcategory, subCateProp);
 
-            AttrConfigProp<AttrState> statsProp = (AttrConfigProp<AttrState>) attrProps
+            AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrProps
                     .getOrDefault(ColumnMetadataKey.State, new AttrConfigProp<AttrState>());
             AttrState state;
             if (metadata.getAttrState() == null) {
@@ -517,9 +522,10 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             } else {
                 state = metadata.getAttrState();
             }
-            statsProp.setSystemValue(state);
-            statsProp.setAllowCustomization(true);
-            mergeConfig.putProperty(ColumnMetadataKey.State, statsProp);
+            stateProp.setSystemValue(state);
+            stateProp.setAllowCustomization(true);
+            mergeConfig.putProperty(ColumnMetadataKey.State, stateProp);
+            modifyDeprecatedAttrState(mergeConfig, metadata);
 
             AttrConfigProp<String> displayNameProp = (AttrConfigProp<String>) attrProps
                     .getOrDefault(ColumnMetadataKey.DisplayName, new AttrConfigProp<String>());
@@ -556,11 +562,46 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
         return new ArrayList<>(map.values());
     }
 
+    @SuppressWarnings("unchecked")
+    private void modifyDeprecatedAttrState(AttrConfig attrConfig, ColumnMetadata metadata) {
+        AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) attrConfig
+                .getProperty(ColumnMetadataKey.State);
+        AttrState systemVal = stateProp.getSystemValue();
+        AttrState customVal = stateProp.getCustomValue();
+        boolean deprecate = Boolean.TRUE.equals(metadata.getShouldDeprecate());
+        AttrState finalVal = attrConfig.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
+        if (deprecate) {
+            // freeze the attribute in either case
+            stateProp.setAllowCustomization(false);
+            if (AttrState.Active.equals(finalVal)) {
+                // should be deprecated but is active
+                if (AttrState.Active.equals(customVal)) {
+                    // activated by user -> this value will be changed back to
+                    // Active when saved to database
+                    customVal = AttrState.Deprecated;
+                } else {
+                    // activated by system -> this value won't be saved to
+                    // database
+                    systemVal = AttrState.Deprecated;
+                }
+            }
+        }
+        stateProp.setSystemValue(systemVal);
+        stateProp.setCustomValue(customVal);
+        attrConfig.putProperty(ColumnMetadataKey.State, stateProp);
+    }
+
+    @SuppressWarnings("unchecked")
     public List<AttrConfig> trim(List<AttrConfig> customConfig) {
         List<AttrConfig> results = new ArrayList<>();
         for (AttrConfig config : customConfig) {
             AttrState state = config.getPropertyFinalValue(ColumnMetadataKey.State, AttrState.class);
             if (AttrState.Active.equals(state)) {
+                AttrConfigProp<AttrState> stateProp = (AttrConfigProp<AttrState>) config
+                        .getProperty(ColumnMetadataKey.State);
+                if (AttrState.Deprecated.equals(stateProp.getCustomValue())) {
+                    stateProp.setCustomValue(AttrState.Active);
+                }
                 config.getAttrProps().values().removeIf(v -> (v.getCustomValue() == null));
                 if (config.getAttrProps().size() != 0) {
                     config.getAttrProps().values().forEach(prop -> {
@@ -572,36 +613,5 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             }
         }
         return results;
-    }
-
-    private void registerAction(Map<String, List<String>> diffProps) {
-        if (diffProps == null) {
-            return;
-        }
-        Set<ActionType> actionTypes = new HashSet<>();
-        for (List<String> props : diffProps.values()) {
-            for (String propName : props) {
-                if (ColumnMetadataKey.DisplayName.equals(propName)) {
-                    actionTypes.add(ActionType.DISPLAY_PROPERTY_CHANGE);
-                } else if (ColumnMetadataKey.State.equals(propName)) {
-                    actionTypes.add(ActionType.LIFE_CYCLE_CHANGE);
-                } else if (ColumnSelection.Predefined.getNames().contains(propName)) {
-                    actionTypes.add(ActionType.USAGE_PROPERTY_CHANGE);
-                }
-                if (actionTypes.size() == ActionType.getAttrManagementTypes().size()) {
-                    break;
-                }
-            }
-            if (actionTypes.size() == ActionType.getAttrManagementTypes().size()) {
-                break;
-            }
-        }
-        actionTypes.forEach(this::registerAction);
-    }
-
-    private void registerAction(ActionType actionType) {
-        Action action = new Action();
-        action.setType(actionType);
-        actionService.create(action);
     }
 }

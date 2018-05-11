@@ -114,10 +114,8 @@ public class SystemMetadataStoreImpl extends
 
                     servingStore = servingStore //
                             .map(cm -> {
-                                if (cm.getCategory() == null) {
-                                    cm.setCategory(category);
-                                }
                                 cm.setEntity(entity);
+                                cm.setCategory(category);
 
                                 if (internalAttributes.contains(cm.getAttrName())) {
                                     cm.setGroups(null);

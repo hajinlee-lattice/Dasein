@@ -12,6 +12,7 @@ import com.latticeengines.apps.cdl.service.ServingStoreService;
 import com.latticeengines.apps.core.entitymgr.AttrConfigEntityMgr;
 import com.latticeengines.apps.core.service.AttrConfigService;
 import com.latticeengines.apps.core.service.impl.AbstractAttrConfigService;
+import com.latticeengines.common.exposed.timer.PerformanceTimer;
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
@@ -19,7 +20,6 @@ import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceapps.core.AttrConfig;
 import com.latticeengines.domain.exposed.util.CategoryUtils;
-import com.latticeengines.common.exposed.timer.PerformanceTimer;
 
 @Service("cdlAttrConfigService")
 public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implements AttrConfigService {
@@ -61,22 +61,6 @@ public class CDLAttrConfigServiceImpl extends AbstractAttrConfigService implemen
             } else {
                 renderedList = customConfig;
             }
-            int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
-            String msg = String.format("Rendered %d attr configs", count);
-            timer.setTimerMessage(msg);
-        }
-        return renderedList;
-    }
-
-    @Override
-    public List<AttrConfig> getRenderedList(Category category) {
-        List<AttrConfig> renderedList;
-        String tenantId = MultiTenantContext.getTenantId();
-        BusinessEntity entity = CategoryUtils.getEntity(category);
-        try (PerformanceTimer timer = new PerformanceTimer()) {
-            List<AttrConfig> customConfig = attrConfigEntityMgr.findAllForEntity(tenantId, entity);
-            List<ColumnMetadata> columns = getSystemMetadata(category);
-            renderedList = render(columns, customConfig);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
             String msg = String.format("Rendered %d attr configs", count);
             timer.setTimerMessage(msg);

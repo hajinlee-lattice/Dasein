@@ -17,6 +17,7 @@ public enum ActionType {
     // Attribute Management related type
     ATTRIBUTE_MANAGEMENT_ACTIVATION("attributeManagementActivation", "Attributes Activated"), //
     ATTRIBUTE_MANAGEMENT_DEACTIVATION("attributeManagementDeactivation", "Attributes Deactivated"), //
+
     @Deprecated
     DISPLAY_PROPERTY_CHANGE("displayPropertyChange", "Display Property Change"), //
     @Deprecated
