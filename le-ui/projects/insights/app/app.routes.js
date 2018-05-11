@@ -1,7 +1,7 @@
 angular.module('insightsApp')
 .run(function($transitions) {
     $transitions.onStart({}, function(trans) {
-        ShowSpinner(LoadingString);
+        ShowSpinner('Loading Insight Data');
         trans.injector().get('ServiceErrorUtility').hideBanner();
     });
 })
