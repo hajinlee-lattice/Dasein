@@ -271,11 +271,11 @@ public class RestrictionUtils {
     private static boolean containsZero(ComparisonType comparator, List<Object> vals) {
         boolean containsZero = false;
         if (vals.size() == 2) {
-            Double upperBound = (Double) vals.get(1);
-            Double lowerBound = (Double) vals.get(0);
+            Double upperBound = toDouble(vals.get(1));
+            Double lowerBound = toDouble(vals.get(0));
             containsZero = lowerBound * upperBound <= 0;
         } else {
-            Double val = (Double) vals.get(0);
+            Double val = toDouble(vals.get(0));
             switch (comparator) {
             case GREATER_OR_EQUAL:
                 containsZero = val <= 0;
@@ -294,5 +294,15 @@ public class RestrictionUtils {
             }
         }
         return containsZero;
+    }
+
+    private static Double toDouble(Object val) {
+        if (val == null) {
+            return null;
+        } else if (val instanceof Double) {
+            return (Double) val;
+        } else {
+            return Double.valueOf(val.toString());
+        }
     }
 }
