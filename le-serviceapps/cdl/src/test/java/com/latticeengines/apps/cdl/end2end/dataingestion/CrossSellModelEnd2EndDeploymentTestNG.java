@@ -58,21 +58,34 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
     private static final String trainingProductId = TRAINING_PRODUCT;
     private long targetCount;
 
-    @BeforeClass(groups = { "end2end", "manual" })
+    @BeforeClass(groups = { "end2end", "manual", "precheckin" })
     public void setup() {
+    }
+
+    /**
+     * This test is part of trunk health
+     */
+    @Test(groups = "precheckin")
+    public void testFirstPurchase() throws Exception {
+        setupEnd2EndTestEnvironment();
+        resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
+        attachProtectedProxy(modelSummaryProxy);
+        setupBusinessCalendar();
+        setupTestSegment(E2E_TEST_USE_TRANSACTION_RESTRICTION);
+        setupAndRunModeling(E2E_TEST_USE_TRANSACTION_RESTRICTION, false);
     }
 
     /**
      * This test is part of CD pipeline
      */
     @Test(groups = "end2end")
-    public void runTest() throws Exception {
+    public void testRepeatedPurchase() throws Exception {
         setupEnd2EndTestEnvironment();
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         attachProtectedProxy(modelSummaryProxy);
         setupBusinessCalendar();
         setupTestSegment(E2E_TEST_USE_TRANSACTION_RESTRICTION);
-        setupAndRunModeling(E2E_TEST_USE_TRANSACTION_RESTRICTION);
+        setupAndRunModeling(E2E_TEST_USE_TRANSACTION_RESTRICTION, true);
     }
 
     /**
@@ -93,12 +106,12 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         setupBusinessCalendar();
 
         setupTestSegment(MANUAL_TEST_USE_TRANSACTION_RESTRICTION);
-        setupAndRunModeling(MANUAL_TEST_USE_TRANSACTION_RESTRICTION);
+        setupAndRunModeling(MANUAL_TEST_USE_TRANSACTION_RESTRICTION, true);
     }
 
-    private void setupAndRunModeling(boolean txnRestrictionsUsed) {
-        setupTestRatingEngine();
-        verifyCounts(txnRestrictionsUsed);
+    private void setupAndRunModeling(boolean txnRestrictionsUsed, boolean repeatPurchase) {
+        setupTestRatingEngine(repeatPurchase);
+        verifyCounts(txnRestrictionsUsed, repeatPurchase);
         log.info("Start modeling ...");
         verifyBucketMetadataNotGenerated();
         String modelingWorkflowApplicationId = ratingEngineProxy.modelRatingEngine(mainTestTenant.getId(),
@@ -134,18 +147,17 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
 
     private void setupTestSegment(boolean useTrxRestrictions) {
         targetSegment = useTrxRestrictions ? targetSegmentWithTrxRestrictions() : constructTargetSegment();
-
         targetSegment = segmentProxy.createOrUpdateSegment(mainTestTenant.getId(), targetSegment);
     }
 
-    private void setupTestRatingEngine() {
-        log.info("Setting up test artifacts for tenant " + mainTestTenant.getId());
+    private void setupTestRatingEngine(boolean repeatPurchase) {
+        ModelingStrategy strategy = repeatPurchase ? ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE : ModelingStrategy.CROSS_SELL_FIRST_PURCHASE;
+        log.info("Setting up test artifacts for a "  + strategy + " model in tenant " + mainTestTenant.getId());
         RatingEngine ratingEngine = constructRatingEngine(RatingEngineType.CROSS_SELL, targetSegment);
-        CrossSellRatingConfig ratingConfig = new CrossSellRatingConfig(ModelingStrategy.CROSS_SELL_REPEAT_PURCHASE);
+        CrossSellRatingConfig ratingConfig = new CrossSellRatingConfig(strategy);
         ratingEngine.setAdvancedRatingConfig(ratingConfig);
         testRatingEngine = ratingEngineProxy.createOrUpdateRatingEngine(mainTestTenant.getId(), ratingEngine);
         log.info("Created rating engine " + testRatingEngine.getId());
-
         testAIModel = (AIModel) testRatingEngine.getActiveModel();
         configureCrossSellModel(testAIModel, PredictionType.EXPECTED_VALUE, targetProductId, trainingProductId);
 
@@ -155,7 +167,7 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
         log.info("/ratingengines/" + testRatingEngine.getId() + "/ratingmodels/" + testAIModel.getId());
     }
 
-    private void verifyCounts(boolean txnRestrictionsUsed) {
+    private void verifyCounts(boolean txnRestrictionsUsed, boolean repeatPurchase) {
         targetCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
                 testRatingEngine.getId(), testAIModel.getId(), ModelingQueryType.TARGET);
         long trainingCount = ratingEngineProxy.getModelingQueryCountByRatingId(mainTestTenant.getId(),
@@ -167,8 +179,10 @@ public class CrossSellModelEnd2EndDeploymentTestNG extends DataIngestionEnd2EndD
                 + " eventCount=" + eventCount;
         log.info(errorMsg);
 
-        Assert.assertEquals(targetCount, txnRestrictionsUsed ? 55 : 81, errorMsg);
-        Assert.assertEquals(trainingCount, txnRestrictionsUsed ? 298 : 557, errorMsg);
-        Assert.assertEquals(eventCount, txnRestrictionsUsed ? 35 : 53, errorMsg);
+        if (repeatPurchase) {
+            Assert.assertEquals(targetCount, txnRestrictionsUsed ? 55 : 81, errorMsg);
+            Assert.assertEquals(trainingCount, txnRestrictionsUsed ? 298 : 557, errorMsg);
+            Assert.assertEquals(eventCount, txnRestrictionsUsed ? 35 : 53, errorMsg);
+        }
     }
 }
