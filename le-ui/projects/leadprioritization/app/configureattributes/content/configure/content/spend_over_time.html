@@ -28,7 +28,7 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime, form)" ng-disabled="!vm.validateSection(vm.options['TotalSpendOvertime']) || vm.spendOvertime.TotalSpendOvertime.length >= 5">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.TotalSpendOvertime, form)" ng-disabled="!vm.validateSendOvertime('TotalSpendOvertime') || vm.spendOvertime.TotalSpendOvertime.length >= 5">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>
@@ -64,7 +64,7 @@
                 </select>
         </li>
         <li>
-            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime, form)" ng-disabled="!vm.validateSection(vm.options['AvgSpendOvertime']) || vm.spendOvertime.AvgSpendOvertime.length >= 5">
+            <button type="button" class="add button white-button" ng-click="vm.addPeriod(vm.spendOvertime.AvgSpendOvertime, form)" ng-disabled="!vm.validateSendOvertime('AvgSpendOvertime') || vm.spendOvertime.AvgSpendOvertime.length >= 5">
                 <i class="fa fa-plus"></i> Add &amp; configure up to 5 time periods
             </button>
         </li>

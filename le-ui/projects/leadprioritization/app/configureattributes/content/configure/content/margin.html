@@ -1,5 +1,5 @@
-<div class="configured-message" ng-class="{'_no-data': !vm.steps[vm.step].data.Margin}">
-    Cost is <em ng-if="!vm.steps[vm.step].data.Margin">not</em> provided
+<div class="configured-message" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.Margin)}">
+    Cost is <em ng-if="!vm.dataCheckWrapper(vm.steps[vm.step].data.Margin)">not</em> provided
 
     <span class="more-info show-tooltip top middle delay" ng-if="!vm.steps[vm.step].data.Margin">&#105;
         <div class="tooltip_">
@@ -12,7 +12,7 @@
     </span>
 </div>
 
-<ul class="fields" ng-class="{'_no-data': !vm.steps[vm.step].data.Margin}">
+<ul class="fields" ng-class="{'_no-data': !vm.dataCheckWrapper(vm.steps[vm.step].data.Margin)}">
     <li>
         <label for="options">% Margin in last</label>
         <select id="options"

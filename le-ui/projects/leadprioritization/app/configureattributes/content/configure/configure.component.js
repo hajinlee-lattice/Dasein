@@ -320,17 +320,33 @@ angular.module('lp.configureattributes.configure', [])
             //console.log(form.$valid);
         }
 
-        vm.validateSection = function(model) {
+        vm.validateSendOvertime = function(name) {
+            var model = vm.options[name] || {},
+                spendOvertime = vm.spendOvertime[name] || [];
+
             if(!model) {
                 return false;
             }
+            if(Object.keys(model).length !== spendOvertime.length) {
+                return false;
+            }
+
+            var valid = [];
             for(var i in model) {
                 for(var j in model[i]) {
                     if(model[i][j].Val && model[i][j].Period) {
-                        return true;
+                        valid.push(true);
+                    } else {
+                        valid.push(false);
                     }
                 }
             }
+            return (valid.indexOf(false) === -1);
+        }
+
+        vm.dataCheckWrapper = function(data) {
+            return true; //subverting for PLS-8323
+            return (data);
         }
 
         vm.uiCanExit = function(Transition) {
