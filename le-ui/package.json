@@ -45,8 +45,8 @@
   "scripts": {
     "install": "npm run InstallDev",
     "postinstall": "npm run build",
-    "InstallProduction": "concurrently \"npm run InstallCommon\" \"npm run InstallLogin\" \"npm run InstallLP\" \"npm run InstallInsights\" \"npm run InstallPD\" \"npm run InstallAdmin\" \"npm run InstallLP2\" \"npm run InstallWidgets\"",
-    "InstallDev": "concurrently \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevLP\" \"npm run InstallDevInsights\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\" \"npm run InstallDevLP2\" \"npm run InstallWidgets\"",
+    "InstallProduction": "concurrently \"npm run InstallCommon\" \"npm run InstallLogin\" \"npm run InstallLP\" \"npm run InstallInsights\" \"npm run InstallPD\" \"npm run InstallAdmin\" \"npm run InstallLP2\"",
+    "InstallDev": "concurrently \"npm run InstallDevCommon\" \"npm run InstallDevLogin\" \"npm run InstallDevLP\" \"npm run InstallDevInsights\" \"npm run InstallDevPD\" \"npm run InstallDevAdmin\" \"npm run InstallDevLP2\"",
     "dev": "npm run sass && concurrently -kr \"grunt dev\" \"npm run sentry\"",
     "dev_lp": "npm run commonsass && npm run lpsass && concurrently -kr \"grunt dev\" \"npm run commonsentry\" \"npm run lpsentry\" \"npm run insightssentry\"",
     "dev_login": "npm run commonsass && npm run loginsass && concurrently -kr \"grunt dev\" \"npm run commonsentry\" \"npm run loginsentry\"",
@@ -64,7 +64,7 @@
     "prod": "grunt prod",
     "proddev": "grunt proddev",
     "devallnowatch": "grunt devallnowatch",
-    "build": "npm run build-libs && concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run insightsbuild\" \"npm run adminbuild\" \"npm run lp2build\"",
+    "build": "concurrently \"npm run commonbuild\" \"npm run loginbuild\" \"npm run lpbuild\" \"npm run insightsbuild\" \"npm run adminbuild\" \"npm run lp2build\"",
     "sass": "concurrently \"npm run commonsass\" \"npm run loginsass\" \"npm run lpsass\" \"npm run insightssass\"",
     "sentry": "concurrently \"npm run commonsentry\" \"npm run loginsentry\" \"npm run lpsentry\" \"npm run insightssentry\"",
     "precommit": "npm run lint_admin",
@@ -84,7 +84,6 @@
     "InstallDevInsights": "cd projects/insights/ && npm install",
     "InstallDevLogin": "cd projects/login/ && npm install",
     "InstallDevAdmin": "cd projects/tenantconsole/ && npm install",
-    "InstallWidgets": "cd projects/widgets/ && npm install",
     "commonbuild": "cd projects/common/ && grunt build",
     "pdbuild": "cd projects/prospectdiscovery/ && grunt build",
     "lpbuild": "cd projects/leadprioritization/ && grunt build",
@@ -104,7 +103,6 @@
     "insightssentry": "cd projects/insights/ && grunt sentry",
     "loginsentry": "cd projects/login/ && grunt sentry",
     "adminsentry": "cd projects/tenantconsole/ && grunt sentry",
-    "lint_admin": "cd projects/tenantconsole/ && grunt lint || true",
-    "build-libs": "cd projects/widgets && npm run build-prod"
+    "lint_admin": "cd projects/tenantconsole/ && grunt lint || true"
   }
 }

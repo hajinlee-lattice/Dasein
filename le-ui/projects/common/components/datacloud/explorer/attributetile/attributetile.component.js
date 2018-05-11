@@ -1,5 +1,5 @@
 angular
-    .module('common.datacloud.explorer.attributetile', ['mainApp.appCommon.utilities.NumberUtility', 'le.widgets.barchart'])
+    .module('common.datacloud.explorer.attributetile', ['mainApp.appCommon.utilities.NumberUtility', 'common.datacloud.explorer.attributetile.bar.chart'])
     .directive('explorerAttributeTile', function () {
         return {
             restrict: 'A',
