@@ -286,7 +286,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     void mockVdbImport(BusinessEntity entity, int offset, int limit) throws IOException {
         CustomerSpace customerSpace = CustomerSpace.parse(mainTestTenant.getId());
 
-        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), "VisiDB", "Query",
+        DataFeedTask dataFeedTask = dataFeedProxy.getDataFeedTask(customerSpace.toString(), SourceType.VISIDB.getName(), "Query",
                 entity.name());
         Table importTemplate;
         if (dataFeedTask == null) {
@@ -371,7 +371,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         logger.info("Importing S3 file " + s3FileName + " for " + entity + " is finished.");
     }
 
-    private synchronized ApplicationId submitImport(String customerSpace, String entity, String feedType,
+    private ApplicationId submitImport(String customerSpace, String entity, String feedType,
             SourceFile templateSourceFile, SourceFile dataSourceFile, String email) {
         String source = SourceType.FILE.getName();
         CSVImportConfig metaData = generateImportConfig(customerSpace, templateSourceFile, dataSourceFile, email);
@@ -427,7 +427,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     }
 
     private void registerImportAction(DataFeedTask dataFeedTask) {
-        logger.info(String.format("Regsitering action for dataFeedTask=%s", dataFeedTask));
+        logger.info(String.format("Registering action for dataFeedTask=%s", dataFeedTask));
         Action action = new Action();
         action.setType(ActionType.METADATA_CHANGE);
         action.setActionInitiator(INITIATOR);

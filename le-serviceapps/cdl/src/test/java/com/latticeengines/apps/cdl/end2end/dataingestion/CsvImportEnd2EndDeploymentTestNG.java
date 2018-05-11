@@ -4,12 +4,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -21,7 +19,6 @@ import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
-import com.latticeengines.common.exposed.util.ThreadPoolUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.eai.SourceType;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -36,18 +33,13 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
     private String localDir = "datafeed";
     private String downloadDir = localDir + "/download";
     private String uploadDir = localDir + "/upload";
-
-    private List<BusinessEntity> importingEntities;
+    private BusinessEntity importingEntity;
 
     @BeforeClass(groups = { "manual" })
     public void setup() throws Exception {
         setupEnd2EndTestEnvironment();
-        // mainTestTenant = new Tenant("LETest1525470484058");
         testBed.excludeTestTenantsForCleanup(Collections.singletonList(mainTestTenant));
-        importingEntities = Arrays.asList( //
-                BusinessEntity.Account, //
-                BusinessEntity.Product //
-        );
+        importingEntity = BusinessEntity.Account;
     }
 
     @Test(groups = "manual")
@@ -60,36 +52,30 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
 
         FileUtils.deleteQuietly(new File(uploadDir));
         FileUtils.forceMkdirParent(new File(uploadDir));
-        collectAvroFiles();
-        saveImportTemplates();
+        collectAvroFilesForEntity(importingEntity);
+        saveImportTemplate(importingEntity);
     }
 
     private void importData() {
         dataFeedProxy.updateDataFeedStatus(mainTestTenant.getId(), DataFeed.Status.Initialized.getName());
-        ExecutorService threadPool = ThreadPoolUtils.getFixedSizeThreadPool("datafeed-import", 2);
-        // import first batch of csv files
-        List<Runnable> importTasks = new ArrayList<>();
-        if (importingEntities.contains(BusinessEntity.Account)) {
-            importTasks.add(runImportData(BusinessEntity.Account, "Account_0_350.csv"));
-            importTasks.add(runImportData(BusinessEntity.Account, "Account_350_500.csv"));
-        }
-        if (importingEntities.contains(BusinessEntity.Product)) {
-            importTasks.add(runImportData(BusinessEntity.Product, "ProductBundles.csv"));
-            importTasks.add(runImportData(BusinessEntity.Product, "ProductHierarchies.csv"));
-            importTasks.add(runImportData(BusinessEntity.Product, "ProductVDB.csv"));
-        }
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, importTasks, 60, 3);
 
-        // import second batch of csv files
-        importTasks.clear();
-        if (importingEntities.contains(BusinessEntity.Account)) {
-            importTasks.add(runImportData(BusinessEntity.Account, "Account_400_1000.csv"));
+        if (importingEntity.equals(BusinessEntity.Account)) {
+            importData(BusinessEntity.Account, "Account_0_350.csv");
+            importData(BusinessEntity.Account, "Account_350_500.csv");
+            importData(BusinessEntity.Account, "Account_400_1000.csv");
         }
-        ThreadPoolUtils.runRunnablesInParallel(threadPool, importTasks, 60, 3);
-    }
 
-    private Runnable runImportData(BusinessEntity entity, String s3FileName) {
-        return () -> importData(entity, s3FileName);
+        if (importingEntity.equals(BusinessEntity.Contact)) {
+            importData(BusinessEntity.Contact, "Contact_0_350.csv");
+            importData(BusinessEntity.Contact, "Contact_350_500.csv");
+            importData(BusinessEntity.Contact, "Contact_400_1000.csv");
+        }
+
+        if (importingEntity.equals(BusinessEntity.Product)) {
+            importData(BusinessEntity.Product, "ProductBundles.csv");
+            importData(BusinessEntity.Product, "ProductHierarchies.csv");
+            importData(BusinessEntity.Product, "ProductVDB.csv");
+        }
     }
 
     private void downloadData() throws IOException {
@@ -102,14 +88,8 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
         crcFiles.forEach(FileUtils::deleteQuietly);
     }
 
-    private void collectAvroFiles() throws IOException {
-        for (BusinessEntity entity: importingEntities) {
-            collectAvroFilesForEntity(entity);
-        }
-    }
-
     private void collectAvroFilesForEntity(BusinessEntity entity) throws IOException {
-        File rootDir = new File(downloadDir + "/DataFeed1-" + entity + "/Extracts");
+        File rootDir = new File(downloadDir + "/DataFeed1-Account/Extracts");
         if (rootDir.exists()) {
             List<File> files = new ArrayList<>(FileUtils.listFiles(rootDir, new String[] { "avro" }, true));
             files.sort(Comparator.comparing(File::getPath));
@@ -121,12 +101,6 @@ public class CsvImportEnd2EndDeploymentTestNG extends DataIngestionEnd2EndDeploy
             log.info("Copied " + files.size() + " " + entity + " extracts to upload folder.");
         } else {
             log.info("No " + entity + " extracts to be copied.");
-        }
-    }
-
-    private void saveImportTemplates() throws IOException {
-        for (BusinessEntity entity: importingEntities) {
-            saveImportTemplate(entity);
         }
     }
 
