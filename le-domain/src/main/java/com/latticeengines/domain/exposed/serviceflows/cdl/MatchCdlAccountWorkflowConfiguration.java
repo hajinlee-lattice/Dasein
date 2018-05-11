@@ -152,5 +152,11 @@ public class MatchCdlAccountWorkflowConfiguration extends BaseCDLWorkflowConfigu
             ldcConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
+
+        public Builder matchType(String matchType) {
+            ldcConfigurationBuilder.matchType(matchType);
+            return this;
+        }
+
     }
 }

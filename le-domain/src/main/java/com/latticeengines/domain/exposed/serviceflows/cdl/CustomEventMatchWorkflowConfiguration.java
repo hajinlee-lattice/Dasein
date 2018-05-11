@@ -199,6 +199,8 @@ public class CustomEventMatchWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public CustomEventMatchWorkflowConfiguration build() {
+            matchAccountWithIdBuilder.matchType(MatchStepConfiguration.LDC);
+            matchAccountWithoutIdBuilder.matchType(MatchStepConfiguration.LDC);
             matchDataCloudWorkflowBuilder.matchType(MatchStepConfiguration.LDC);
 
             configuration.setContainerConfiguration("customEventMatchWorkflow", configuration.getCustomerSpace(),
