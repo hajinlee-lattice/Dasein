@@ -42,6 +42,7 @@ import com.latticeengines.domain.exposed.pls.frontend.FieldMapping;
 import com.latticeengines.domain.exposed.pls.frontend.FieldMappingDocument;
 import com.latticeengines.domain.exposed.pls.frontend.LatticeSchemaField;
 import com.latticeengines.domain.exposed.pls.frontend.RequiredType;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.validation.ReservedField;
 import com.latticeengines.pls.metadata.resolution.MetadataResolver;
 import com.latticeengines.pls.service.ModelingFileMetadataService;
@@ -166,7 +167,9 @@ public class ModelingFileMetadataServiceImpl implements ModelingFileMetadataServ
             String source, String feedType) {
         decodeFieldMapping(fieldMappingDocument);
         fulfillFieldMapping(fieldMappingDocument);
-        setCDLExternalSystems(fieldMappingDocument);
+        if (BusinessEntity.getByName(entity).equals(BusinessEntity.Account)) {
+            setCDLExternalSystems(fieldMappingDocument);
+        }
         SourceFile sourceFile = getSourceFile(sourceFileName);
         Table table;
         CustomerSpace customerSpace = MultiTenantContext.getCustomerSpace();
