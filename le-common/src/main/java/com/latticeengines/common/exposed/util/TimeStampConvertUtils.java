@@ -15,7 +15,7 @@ public class TimeStampConvertUtils {
     public static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public static long convertToLong(String date) {
-        LogManager.getLogger(Parser.class).setLevel(Level.ERROR);
+        LogManager.getLogger(Parser.class).setLevel(Level.OFF);
         Parser parser = new Parser();
         List<DateGroup> groups = parser.parse(date);
         List<Date> dates = groups.get(0).getDates();
