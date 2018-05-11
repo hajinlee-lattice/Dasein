@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.latticeengines.domain.exposed.metadata.Category;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadata;
 import com.latticeengines.domain.exposed.metadata.ColumnMetadataKey;
 import com.latticeengines.domain.exposed.metadata.IsColumnMetadata;
@@ -183,6 +184,16 @@ public class AttrConfig implements IsColumnMetadata, Cloneable {
             }
             if (prop.getSystemValue() != null && prop.getSystemValue() instanceof String) {
                 prop.setSystemValue(AttrState.valueOf((String) prop.getSystemValue()));
+            }
+        }
+
+        if (attrProps.containsKey(ColumnMetadataKey.Category)) {
+            AttrConfigProp prop = attrProps.get(ColumnMetadataKey.Category);
+            if (prop.getCustomValue() != null && prop.getCustomValue() instanceof String) {
+                prop.setCustomValue(Category.valueOf((String) prop.getCustomValue()));
+            }
+            if (prop.getSystemValue() != null && prop.getSystemValue() instanceof String) {
+                prop.setSystemValue(Category.valueOf((String) prop.getSystemValue()));
             }
         }
     }

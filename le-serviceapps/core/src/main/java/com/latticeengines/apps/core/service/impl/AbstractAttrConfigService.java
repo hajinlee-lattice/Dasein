@@ -279,7 +279,9 @@ public abstract class AbstractAttrConfigService implements AttrConfigService {
             List<ColumnMetadata> columns = getSystemMetadata(category);
             Set<String> columnsInSystem = columns.stream().map(ColumnMetadata::getAttrName).collect(Collectors.toSet());
             List<AttrConfig> customConfigInCategory = customConfig.stream() //
-                    .filter(attrConfig -> columnsInSystem.contains(attrConfig.getAttrName()))
+                    .filter(attrConfig -> category
+                            .equals(attrConfig.getPropertyFinalValue(ColumnMetadataKey.Category, Category.class))
+                            || columnsInSystem.contains(attrConfig.getAttrName()))
                     .collect(Collectors.toList());
             renderedList = render(columns, customConfigInCategory);
             int count = CollectionUtils.isNotEmpty(renderedList) ? renderedList.size() : 0;
