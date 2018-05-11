@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.text.SimpleDateFormat;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,14 @@ import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.workflow.Report;
+import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.latticeengines.baton.exposed.service.BatonService;
@@ -209,6 +218,134 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
             jobs.add(unstartedPnAJob);
         }
         return jobs;
+    }
+
+    @Override
+    public String generateCSVReport(String jobId) {
+        Job job = this.find(jobId, true);
+        if (job == null || job.getJobStatus() != JobStatus.COMPLETED || !job.getJobType().equals("processAnalyzeWorkflow")) {
+            throw new NullPointerException("Job cannot be null or incomplete.");
+        }
+        List<Job> subjobs = job.getSubJobs();
+        Report report = job.getReports().stream()
+                                .filter(r -> r.getPurpose() == ReportPurpose.PROCESS_ANALYZE_RECORDS_SUMMARY)
+                                .collect(Collectors.toList()).get(0);
+
+        String columnDelimiter = ",";
+        StringBuilder sb = new StringBuilder("Summary Stats\n , Accounts, Contacts, Product Hierarchies, Product Bundles, Transactions \n");
+        try {
+            ObjectMapper om = JsonUtils.getObjectMapper();
+            ObjectNode jsonReport = (ObjectNode) om.readTree(report.getJson().getPayload());
+            ObjectNode entitiesSummaryNode = (ObjectNode) jsonReport.get(ReportPurpose.ENTITIES_SUMMARY.getKey());
+            String[] reportConstants = { ReportConstants.NEW, ReportConstants.UPDATE, ReportConstants.DELETE,
+                    ReportConstants.UNMATCH, "REPLACE" };
+            BusinessEntity[] entities = { BusinessEntity.Account, BusinessEntity.Contact, BusinessEntity.Product,
+                    BusinessEntity.Transaction };
+
+            for (String reportConstant : reportConstants) {
+                sb.append(StringUtils.capitalize(reportConstant.toLowerCase()) + columnDelimiter);
+                for (BusinessEntity entity : entities) {
+                    ObjectNode entityNode = (ObjectNode) entitiesSummaryNode.get(entity.name());
+                    ObjectNode consolidateSummaryNode = (ObjectNode) entityNode
+                            .get(ReportPurpose.CONSOLIDATE_RECORDS_SUMMARY.getKey());
+
+                    if (entity == BusinessEntity.Product) {
+                        sb.append(reportConstant.equals("REPLACE") ? consolidateSummaryNode.get(ReportConstants.PRODUCT_HIERARCHY).toString() : "NA");
+                        sb.append(columnDelimiter);
+                        sb.append(reportConstant.equals("REPLACE") ? consolidateSummaryNode.get(ReportConstants.PRODUCT_BUNDLE).toString() : "NA");
+                    } else {
+                        sb.append(consolidateSummaryNode.get(reportConstant) != null ? consolidateSummaryNode.get(reportConstant).toString() : "NA");
+                    }
+                    sb.append(columnDelimiter);
+                }
+                sb.append("\n");
+            }
+
+            sb.append("\n\n\nFiles Processed \n");
+            sb.append("Start Time, Actions, Validation, Record Found, Record Failed, Record Uploaded, User \n");
+
+            for (Job subjob : subjobs) {
+                SimpleDateFormat df = new SimpleDateFormat("MM/dd/yyyy h:mma");
+                sb.append(df.format(subjob.getStartTimestamp()) + columnDelimiter);
+                String sourceDisplayName = subjob.getInputs() != null ? subjob.getInputs().get(WorkflowContextConstants.Inputs.SOURCE_DISPLAY_NAME) : null;
+                if (sourceDisplayName != null) {
+                    sb.append(getActionType(subjob.getJobType()) + sourceDisplayName.replace(",", "-") + columnDelimiter);
+                } else {
+                    sb.append(subjob.getName() + columnDelimiter);
+                }
+                ObjectNode subjobPayload = (ObjectNode) om.readTree(subjob.getReports().get(0)
+                                                                                        .getJson()
+                                                                                        .getPayload());
+                sb.append(getValidation(subjob.getJobStatus(), subjobPayload) + columnDelimiter);
+                sb.append(getRecordsFound(subjobPayload, getImpactedBusinessEntity(subjob)) + columnDelimiter);
+                sb.append(getPayloadValue(subjobPayload, "total_failed_rows") + columnDelimiter);
+                sb.append(getPayloadValue(subjobPayload, "imported_rows") + columnDelimiter);
+                sb.append(subjob.getUser());
+                sb.append("\n");
+            }
+            
+            if (jsonReport.has(ReportPurpose.SYSTEM_ACTIONS.getKey())) {
+                sb.append("\n\n\nSystem Actions\n");
+                ArrayNode systemActions = (ArrayNode) jsonReport.get(ReportPurpose.SYSTEM_ACTIONS.getKey());
+                for (int i = 0; i < systemActions.size(); i++) {
+                    sb.append(systemActions.get(i).toString() + "\n");
+                }
+            }
+
+        } catch (Exception e) {
+            log.error("Failed to generate report for job " + jobId);
+        }
+        return sb.toString();
+    }
+
+    String getRecordsFound(ObjectNode payload, String impactedEntity) {
+        if (payload.has("total_rows")) {
+            return getPayloadValue(payload, "total_rows");
+        } else if (payload.has(impactedEntity + "_Deleted")) {
+            return getPayloadValue(payload, impactedEntity + "_Deleted");
+        } else {
+            return "-";
+        }
+    }
+
+    String getPayloadValue(ObjectNode subjobPayload, String key) {
+        return subjobPayload != null && subjobPayload.has(key) ? subjobPayload.get(key).toString() : "-";
+    }
+
+    String getImpactedBusinessEntity (Job job){
+        String str = job.getOutputs() != null ? job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES) : "";
+        if (StringUtils.isEmpty(str)) {
+            return "";
+        }
+        List<?> entityList = JsonUtils.deserialize(str, List.class);
+        return JsonUtils.convertList(entityList, BusinessEntity.class).get(0).name();
+    }
+
+    String getValidation(JobStatus jobStatus, ObjectNode subjobPayload) {
+        switch (jobStatus) {
+            case PENDING:
+            case RUNNING:
+                return "In Progress";
+            case COMPLETED:
+                if (subjobPayload.has("total_rows") && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
+                    return "Partial Success";
+                } else {
+                    return "Success";
+                }
+            default:
+                return jobStatus.getName();
+        }
+    }
+
+    String getActionType (String jobType) {
+        switch (jobType) {
+            case "cdlDataFeedImportWorkflow":
+                return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";
+            case "cdlOperationWorkflow":
+                return ActionType.CDL_OPERATION_WORKFLOW.getDisplayName() + ": ";
+            default:
+                return jobType;
+        }
     }
 
     @VisibleForTesting

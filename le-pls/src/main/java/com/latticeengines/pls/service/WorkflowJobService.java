@@ -33,4 +33,6 @@ public interface WorkflowJobService {
 
     List<Job> findAll();
 
+    String generateCSVReport(String jobId);
+
 }

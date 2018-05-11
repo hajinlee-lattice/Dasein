@@ -89,4 +89,11 @@ public class JobResource {
     public ResponseDocument<String> restart(@PathVariable Long jobId) {
         return ResponseDocument.successResponse(workflowJobService.restart(jobId).toString());
     }
+
+    @RequestMapping(value = "/{jobId}/report/download", method = RequestMethod.GET, headers = "Accept=application/json")
+    @ResponseBody
+    @ApiOperation(value = "Generate P&A job report")
+    public ResponseDocument<String> downloadReport(@PathVariable String jobId) {
+        return ResponseDocument.successResponse(workflowJobService.generateCSVReport(jobId));
+    }
 }
