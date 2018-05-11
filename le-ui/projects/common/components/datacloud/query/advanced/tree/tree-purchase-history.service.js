@@ -408,7 +408,10 @@ angular.module('common.datacloud.query.builder.tree.purchasehistory.service', []
         }
 
         this.changeBktValue = function (bucketRestriction, value, position) {
-            bucketRestriction.bkt.Vals[position] = value;
+            // var cmp = bucketRestriction.bkt.Cmp;
+            // var vals = bucketRestriction.bkt.Vals;
+            setValsBasedOnPosition(bucketRestriction.bkt.Cmp, bucketRestriction.bkt.Vals, position, value);
+            // bucketRestriction.bkt.Vals[position] = value;
         }
 
         this.changeValue = function (bucketRestriction, type, value, position, subType) {
