@@ -95,7 +95,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     @Override
     public PlayLaunchDashboard getDashboard(Long playId, List<LaunchState> launchStates, Long startTimestamp,
             Long offset, Long max, String sortby, boolean descending, Long endTimestamp, String orgId,
-            String externalSysType) {
+            String externalSysType, boolean skipLoadingAllLookupIdMapping) {
         PlayLaunchDashboard dashboard = new PlayLaunchDashboard();
         Stats totalCounts = playLaunchEntityMgr.findDashboardCumulativeStats(playId, launchStates, startTimestamp,
                 endTimestamp, orgId, externalSysType);
@@ -110,7 +110,7 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
         dashboard.setCumulativeStats(totalCounts);
         dashboard.setUniquePlaysWithLaunches(uniquePlaysWithLaunches);
         dashboard.setUniqueLookupIdMapping(calculateUniqueLookupIdMapping(playId, launchStates, startTimestamp,
-                endTimestamp, orgId, externalSysType));
+                endTimestamp, orgId, externalSysType,  skipLoadingAllLookupIdMapping));
         return dashboard;
     }
 
@@ -122,10 +122,11 @@ public class PlayLaunchServiceImpl implements PlayLaunchService {
     }
 
     private Map<String, List<LookupIdMap>> calculateUniqueLookupIdMapping(Long playId, List<LaunchState> launchStates,
-            Long startTimestamp, Long endTimestamp, String orgId, String externalSysType) {
+            Long startTimestamp, Long endTimestamp, String orgId, String externalSysType,
+            boolean skipLoadingAllLookupIdMapping) {
         Tenant tenant = MultiTenantContext.getTenant();
-        Map<String, List<LookupIdMap>> allLookupIdMapping = lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(),
-                null, null, true);
+        Map<String, List<LookupIdMap>> allLookupIdMapping = skipLoadingAllLookupIdMapping ? null
+                : lookupIdMappingProxy.getLookupIdsMapping(tenant.getId(), null, null, true);
         List<Pair<String, String>> uniqueOrgIdList = playLaunchEntityMgr.findDashboardOrgIdWithLaunches(playId,
                 launchStates, startTimestamp, endTimestamp, orgId, externalSysType);
         Map<String, List<LookupIdMap>> uniqueLookupIdMapping = mergeLookupIdMapping(allLookupIdMapping,

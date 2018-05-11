@@ -125,7 +125,7 @@ public class PlayResource {
             @ApiParam(value = "End date in Unix timestamp", required = false) //
             @RequestParam(value = "end-timestamp", required = false) Long endTimestamp) {
         return playLaunchService.getDashboard(getPlayId(playName), launchStates, startTimestamp, offset, max, sortby,
-                descending, endTimestamp, orgId, externalSysType);
+                descending, endTimestamp, orgId, externalSysType, false);
     }
 
     @RequestMapping(value = "/launches/dashboard/count", method = RequestMethod.GET, headers = "Accept=application/json")
