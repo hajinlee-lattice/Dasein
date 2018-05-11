@@ -543,9 +543,14 @@ public class BatonServiceImpl implements BatonService {
         Path productsPath = PathBuilder.buildCustomerSpacePath(CamilleEnvironment.getPodId(), contractId, tenantId,
                 CustomerSpace.BACKWARDS_COMPATIBLE_SPACE_ID).append("SpaceConfiguration").append("Products");
         try {
-            String data = CamilleEnvironment.getCamille().get(productsPath).getData();
-            List<String> productStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
-            return productStrs != null && productStrs.stream().anyMatch(product.getName()::equals);
+            Camille camille = CamilleEnvironment.getCamille();
+            if (camille.exists(productsPath)) {
+                String data = CamilleEnvironment.getCamille().get(productsPath).getData();
+                List<String> productStrs = JsonUtils.convertList(JsonUtils.deserialize(data, List.class), String.class);
+                return productStrs != null && productStrs.stream().anyMatch(product.getName()::equals);
+            } else {
+                return false;
+            }
         } catch (Exception e) {
             throw new RuntimeException("Failed to get products for customer " + tenantId, e);
         }
