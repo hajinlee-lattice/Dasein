@@ -60,11 +60,11 @@ public class GenerateAIRatingWorkflow extends AbstractWorkflow<GenerateAIRatingW
         boolean isLPI = CustomEventModelingType.LPI.equals(config.getCustomEventModelingType());
         if (!isLPI) {
             builder.next(createScoringTargetTable) //
-                    .next(createCdlEventTable) //
-                    .next(matchDataCloud) //
-                    .next(addStandardAttributes); //
+                    .next(createCdlEventTable); //
         }
-        builder.next(scoreEventTable);
+        builder.next(matchDataCloud) //
+                .next(addStandardAttributes) //
+                .next(scoreEventTable); //
         if (!isLPI) {
             builder.next(scoreAggregate); //
         }

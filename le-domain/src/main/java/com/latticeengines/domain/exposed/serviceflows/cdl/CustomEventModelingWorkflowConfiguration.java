@@ -140,6 +140,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             ldcOnlyAttributes.setInternalResourceHostPort(internalResourceHostPort);
             configuration.setInternalResourceHostPort(internalResourceHostPort);
             setConfigForScoring.setInternalResourceHostPort(internalResourceHostPort);
+            generateAIRating.internalResourceHostPort(internalResourceHostPort);
             return this;
         }
 
@@ -290,6 +291,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
             customEventMatchWorkflowConfigurationBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
             addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
             modelWorkflowBuilder.sourceSchemaInterpretation(sourceSchemaInterpretation);
+            generateAIRating.sourceSchemaInterpretation(sourceSchemaInterpretation);
             return this;
         }
 
@@ -299,6 +301,7 @@ public class CustomEventModelingWorkflowConfiguration extends BaseCDLWorkflowCon
 
         public Builder skipStandardTransform(boolean skipTransform) {
             addStandardAttributes.setSkipStep(skipTransform);
+            generateAIRating.skipStandardTransform(skipTransform);
             return this;
         }
 

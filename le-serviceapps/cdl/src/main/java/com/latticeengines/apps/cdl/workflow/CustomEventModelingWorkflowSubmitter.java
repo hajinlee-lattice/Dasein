@@ -163,6 +163,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
         List<TransformDefinition> stdTransformDefns = UpdateTransformDefinitionsUtils
                 .getTransformDefinitions(schemaInterpretation, transformationGroup);
         DataCollection.Version version = dataCollectionProxy.getActiveVersion(getCustomerSpace().toString());
+        boolean isLPI = CustomEventModelingType.LPI.equals(parameters.getCustomEventModelingType());
         return new CustomEventModelingWorkflowConfiguration.Builder() //
                 .microServiceHostPort(microserviceHostPort) //
                 .customer(getCustomerSpace()) //
@@ -182,7 +183,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                         !parameters.getExcludePropDataColumns() && FeatureFlagUtils.isMatchDebugEnabled(flags)) //
                 .matchRequestSource(MatchRequestSource.MODELING) //
                 .matchQueue(LedpQueueAssigner.getModelingQueueNameForSubmission()) //
-                .fetchOnly(true) //
+                .fetchOnly(!isLPI) //
                 .skipStandardTransform(parameters.getTransformationGroup() == TransformationGroup.NONE) //
                 // null means latest
                 .dataCloudVersion(getDataCloudVersion(parameters, flags)) //
@@ -223,7 +224,7 @@ public class CustomEventModelingWorkflowSubmitter extends WorkflowSubmitter {
                 .setModelIdFromRecord(false) //
                 .saveBucketMetadata() //
                 .idColumnName(trainingTable.getPrimaryKey().getAttributes().get(0)) //
-                .cdlMultiModel(CustomEventModelingType.CDL.equals(parameters.getCustomEventModelingType())) //
+                .cdlMultiModel(!isLPI) //
                 .dataCollectionVersion(version) //
                 .build();
     }

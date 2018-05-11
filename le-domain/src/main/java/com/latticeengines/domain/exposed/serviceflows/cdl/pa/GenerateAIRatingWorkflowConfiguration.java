@@ -2,10 +2,13 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
+import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
+import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -90,6 +93,11 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
             return this;
         }
 
+        public Builder internalResourceHostPort(String internalResourceHostPort) {
+            addStandardAttributes.setInternalResourceHostPort(internalResourceHostPort);
+            return this;
+        }
+
         public Builder dataCloudVersion(String dataCloudVersion) {
             match.dataCloudVersion(dataCloudVersion);
             return this;
@@ -162,6 +170,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         public Builder inputTableName(String tableName) {
+            match.matchInputTableName(tableName);
             combineInputWithScores.setDataFlowParams(new CombineInputTableWithScoreParameters(null, tableName));
             return this;
         }
@@ -180,6 +189,16 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
 
         public Builder scoreField(String scoreField) {
             computeLift.setScoreField(scoreField);
+            return this;
+        }
+
+        public Builder sourceSchemaInterpretation(String sourceSchemaInterpretation) {
+            addStandardAttributes.setSourceSchemaInterpretation(sourceSchemaInterpretation);
+            return this;
+        }
+
+        public Builder skipStandardTransform(boolean skipTransform) {
+            addStandardAttributes.setSkipStep(skipTransform);
             return this;
         }
 
@@ -206,7 +225,9 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         private void setAddStandardAttributesConfig() {
-            addStandardAttributes.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
+            if (!CustomEventModelingType.LPI.equals(configuration.getCustomEventModelingType())) {
+                addStandardAttributes.setSourceSchemaInterpretation(SchemaInterpretation.SalesforceAccount.toString());
+            }
         }
 
         private void setMatchConfig() {
