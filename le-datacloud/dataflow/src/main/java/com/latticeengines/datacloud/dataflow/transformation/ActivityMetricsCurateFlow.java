@@ -97,11 +97,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         }
 
         Node toReturn = join(base, toJoin);
-        if (!config.isReduced()) {
-            // ShareOfWallet node returns less rows then base, but null
-            // imputation for it null, so no need to call imputeNull
-            toReturn = imputeNullDepivoted(toReturn);
-        }
+        toReturn = imputeNullDepivoted(toReturn);
         toReturn = assignCompositeKey(toReturn);
         return toReturn;
     }
@@ -155,8 +151,7 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
                 // Read one row to identify which period table it is
                 GenericRecord record = recordIterator.next();
                 if (periodMetrics.containsKey(String.valueOf(record.get(InterfaceName.PeriodName.name())))) {
-                    // Transaction table has both AnalyticProduct and
-                    // SpendProduct. Should only leave with AnalyticProduct
+                    // Transaction table has both AnalyticProduct and SpendProduct. Should only leave with AnalyticProduct
                     if (config.getType() == ActivityType.PurchaseHistory) {
                         List<String> retainFields = new ArrayList<>(periodTable.getFieldNames());
                         periodTable = periodTable
@@ -181,20 +176,32 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
             base = account.join(new FieldList("_DUMMY_"), product, new FieldList("_DUMMY_"), JoinType.INNER)
                     .retain(new FieldList(config.getGroupByFields()));
         } else {
-            // Choose smaller period table
-            List<String> periods = Arrays.asList(PeriodStrategy.Template.Year.name(),
-                    PeriodStrategy.Template.Quarter.name(), PeriodStrategy.Template.Month.name(),
-                    PeriodStrategy.Template.Week.name());
-            for (String period : periods) {
-                if (periodTables.containsKey(period)) {
-                    base = periodTables.get(period);
-                    break;
-                }
+            base = findSmallestPeriodTable();
+            if (config.getType() == ActivityType.PurchaseHistory) {
+                base = base.retain(new FieldList(InterfaceName.AccountId.name()))
+                        .groupByAndLimit(new FieldList(InterfaceName.AccountId.name()), 1)
+                        .addColumnWithFixedValue("_DUMMY_", null, String.class);
+                product = product.addColumnWithFixedValue("_DUMMY_", null, String.class);
+                base = base.join(new FieldList("_DUMMY_"), product, new FieldList("_DUMMY_"), JoinType.INNER)
+                        .retain(new FieldList(config.getGroupByFields()));
+            } else {
+                base = base.retain(new FieldList(config.getGroupByFields()))
+                        .groupByAndLimit(new FieldList(config.getGroupByFields()), 1);
             }
-            base = base.retain(new FieldList(config.getGroupByFields()))
-                    .groupByAndLimit(new FieldList(config.getGroupByFields()), 1);
         }
         return base.renamePipe("_base_node_");
+    }
+
+    private Node findSmallestPeriodTable() {
+        List<String> periods = Arrays.asList(PeriodStrategy.Template.Year.name(),
+                PeriodStrategy.Template.Quarter.name(), PeriodStrategy.Template.Month.name(),
+                PeriodStrategy.Template.Week.name());
+        for (String period : periods) {
+            if (periodTables.containsKey(period)) {
+                return periodTables.get(period);
+            }
+        }
+        throw new RuntimeException("Fail to find smallest period table");
     }
 
     private List<Node> generateMetrics(Node periodTable, List<ActivityMetrics> metrics) {

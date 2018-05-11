@@ -62,6 +62,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
 
     private List<ActivityMetrics> metricsList;
 
+    private String AID_NO_TXN = "AID_NO_TXN";
+
     @Test(groups = "functional")
     public void testTransformation() {
         prepareAccount();
@@ -226,6 +228,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID6", "SEG6" }, //
             { "AID7", null }, //
             { "AID8", "SEG8" }, //
+            { AID_NO_TXN, "SEG_NO_TXN" }, // AID not exists in Transaction
     };
 
     private Object[][] accountDataNoSegment = new Object[][] { //
@@ -439,36 +442,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
             { "AID8", "PID2", null, null, 0.0, 0.0, 0, false }, //
             { "AID8", "PID3", null, null, 0.0, 0.0, 0, false }, //
             { "AID8", "PID4", null, null, 0.0, 0.0, 0, false }, //
-    };
-    
-    // Schema: AccountId, ProductId, W_1__MG, W_1__SW, W_1__AS, W_1__TS, W_1__W_2_2__SC, EVER__HP
-    private Object[][] reducedDepivotedMetricsData = new Object[][] { //
-            { "AID1", "PID1", 50, 85, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID2", 50, 85, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID3", 50, 122, 45.0, 45.0, 125, true }, //
-            { "AID1", "PID4", 50, 122, 45.0, 45.0, 125, true }, //
 
-            { "AID2", "PID1", 33, 169, 20.0, 20.0, 100, true }, //
-            { "AID2", "PID2", 33, 169, 20.0, 20.0, 0, true }, //
-            { "AID2", "PID3", null, null, 0.0, 0.0, -100, true }, //
-
-            { "AID3", "PID1", -56, 150, 20.0, 20.0, 0, true }, //
-            { "AID3", "PID2", null, null, 0.0, 0.0, 0, false }, //
-            { "AID3", "PID3", null, null, 0.0, 0.0, 0, false }, //
-
-            { "AID4", "PID1", 300, 90, 60.0, 60.0, 100, true }, //
-            { "AID4", "PID2", null, 120, 20.0, 20.0, 100, true }, //
-            { "AID4", "PID3", null, 120, 20.0, 20.0, 100, true }, //
-
-            { "AID5", "PID1", null, null, 0.0, 0.0, 0, false }, //
-            { "AID5", "PID2", null, null, 0.0, 0.0, 0, false }, //
-
-            { "AID6", "PID1", 100, 100, 10.0, 10.0, 100, true }, //
-            { "AID6", "PID2", 100, 100, 10.0, 10.0, 100, true }, //
-
-            { "AID7", "PID1", 100, null, 10.0, 10.0, 100, true }, //
-
-            { "AID8", "PID1", null, null, 0.0, 0.0, -100, true }, //
+            { AID_NO_TXN, "PID1", null, null, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID2", null, null, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID3", null, null, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, "PID4", null, null, 0.0, 0.0, 0, false }, //
     };
 
     // Schema: AccountId
@@ -517,6 +495,11 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                     null, null, 0.0, 0.0, 0, false, //
                     null, null, 0.0, 0.0, 0, false, //
                     null, null, 0.0, 0.0, 0, false }, //
+            { AID_NO_TXN, //
+                    null, null, 0.0, 0.0, 0, false, //
+                    null, null, 0.0, 0.0, 0, false, //
+                    null, null, 0.0, 0.0, 0, false, //
+                    null, null, 0.0, 0.0, 0, false }, //
 
     };
 
@@ -546,13 +529,13 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         try {
             switch (source) {
             case "DepivotedMetrics":
-                verifyDepivotedMetrics(records, depivotedMetricsData);
+                verifyDepivotedMetrics(records, depivotedMetricsData, false);
                 break;
             case "PivotMetrics":
                 verifyPivotMetrics(records, pivotMetricsData);
                 break;
             case "ReducedDepivotedMetrics":
-                verifyDepivotedMetrics(records, reducedDepivotedMetricsData);
+                verifyDepivotedMetrics(records, depivotedMetricsData, true);
                 break;
             case "ExpandedPivotMetrics":
                 verifyPivotMetrics(records, pivotMetricsData);
@@ -568,7 +551,8 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         }
     }
 
-    private void verifyDepivotedMetrics(Iterator<GenericRecord> records, Object[][] depivotedMetricsData) {
+    private void verifyDepivotedMetrics(Iterator<GenericRecord> records, Object[][] depivotedMetricsData,
+            boolean reduced) {
         log.info("Verifying depivoted metrics");
         Map<String, Object[]> expectedMetrics = new HashMap<>();
         for (Object[] ent : depivotedMetricsData) {
@@ -599,7 +583,19 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
                     expected[7]));
             cnt++;
         }
-        Assert.assertEquals(cnt, depivotedMetricsData.length);
+
+        int analyticProductNum = 0;
+        for (Object[] p : productData) {
+            if (ProductType.Analytic.name().equalsIgnoreCase(String.valueOf(p[1]))) {
+                analyticProductNum++;
+            }
+        }
+        if (reduced) {
+            Assert.assertEquals(cnt, depivotedMetricsData.length - analyticProductNum);
+        } else {
+            Assert.assertEquals(cnt, depivotedMetricsData.length);
+        }
+
     }
 
     private void verifyPivotMetrics(Iterator<GenericRecord> records, Object[][] pivotMetricsData) {
