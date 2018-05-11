@@ -35,6 +35,8 @@ import com.latticeengines.domain.exposed.pls.RatingEngineType;
 import com.latticeengines.domain.exposed.pls.RatingModel;
 import com.latticeengines.domain.exposed.pls.RatingRule;
 import com.latticeengines.domain.exposed.pls.RuleBasedModel;
+import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.query.DataPage;
 import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.pls.functionalframework.PlsDeploymentTestNGBase;
@@ -117,7 +119,61 @@ public class PlayResourceDeploymentTestNG extends PlsDeploymentTestNGBase {
         }
 
         ratingEngine1 = ratingEngineProxy.getRatingEngine(tenant.getId(), ratingEngine1.getId());
+
+        checkAccountPreviewForRating(ratingEngine1);
+        checkContactPreviewForRating(ratingEngine1);
         return ratingEngine1;
+    }
+
+    private void checkAccountPreviewForRating(RatingEngine re) {
+        String bucketFieldName = "b_" + System.currentTimeMillis();
+        Long count = ratingEngineProxy.getEntityPreviewCount(tenant.getId(), re.getId(), BusinessEntity.Account, false,
+                "", null);
+        Assert.assertNotNull(count);
+        Assert.assertTrue(count > 0L);
+        DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
+                BusinessEntity.Account, InterfaceName.LDC_Name.name(), false, bucketFieldName, null, false, "", null);
+        Assert.assertNotNull(dataPage);
+        Assert.assertNotNull(dataPage.getData());
+        Assert.assertFalse(dataPage.getData().isEmpty());
+        dataPage.getData().stream() //
+                .forEach(d -> {
+                    String row = JsonUtils.serialize(d);
+                    Assert.assertTrue(d.containsKey(bucketFieldName), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.SalesforceAccountID.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.Website.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.LDC_Name.name()), row);
+                });
+    }
+
+    private void checkContactPreviewForRating(RatingEngine re) {
+        Long count = ratingEngineProxy.getEntityPreviewCount(tenant.getId(), re.getId(), BusinessEntity.Contact, false,
+                "", null);
+        Assert.assertNotNull(count);
+        Assert.assertTrue(count > 0L);
+        DataPage dataPage = ratingEngineProxy.getEntityPreview(tenant.getId(), re.getId(), 0L, 10L,
+                BusinessEntity.Contact, InterfaceName.ContactId.name(), false, null, null, false, "", null);
+        Assert.assertNotNull(dataPage);
+        Assert.assertNotNull(dataPage.getData());
+        Assert.assertFalse(dataPage.getData().isEmpty());
+        dataPage.getData().stream() //
+                .forEach(d -> {
+                    String row = JsonUtils.serialize(d);
+                    Assert.assertTrue(d.containsKey(InterfaceName.AccountId.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.ContactId.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.CompanyName.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.Email.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.ContactName.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.City.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.State.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.Country.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.PostalCode.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.PhoneNumber.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.Title.name()), row);
+                    Assert.assertTrue(d.containsKey(InterfaceName.Address_Street_1.name()), row);
+                });
     }
 
     MetadataSegment createSegment() {
