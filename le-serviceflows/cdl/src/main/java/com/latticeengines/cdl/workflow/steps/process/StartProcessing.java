@@ -139,8 +139,8 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
 
         createReportJson();
-        setGrapherContext();
         setupInactiveVersion();
+        setGrapherContext();
         // clearPhaseForRetry();
     }
 
@@ -179,19 +179,24 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
         boolean changed = false;
         String currentBuildNumber = configuration.getDataCloudBuildNumber();
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
-        if (dataCollection != null && (dataCollection.getDataCloudBuildNumber() == null
-                || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))) {
+        if (dataCollection != null
+                && (dataCollection.getDataCloudBuildNumber() == null
+                        || !dataCollection.getDataCloudBuildNumber().equals(currentBuildNumber))
+                && hasAccountBatchStore()) {
             changed = true;
         }
-        if (changed) {
-            log.info("Data cloud is changed, current LDC build number=" + currentBuildNumber,
-                    " the LDC builder number in data collection=" + dataCollection.getDataCloudBuildNumber());
-        } else {
-            log.info("Data cloud is not changed, current LDC build number=" + currentBuildNumber,
-                    ", the LDC builder number in data collection="
-                            + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
-        }
+        log.info("Data cloud changed?=" + changed + " current LDC build number=" + currentBuildNumber
+                + ", the LDC builder number in data collection="
+                + (dataCollection == null ? "" : dataCollection.getDataCloudBuildNumber()));
         return changed;
+    }
+
+    boolean hasAccountBatchStore() {
+        String accountTableName = dataCollectionProxy.getTableName(customerSpace.toString(), //
+                TableRoleInCollection.ConsolidatedAccount, activeVersion);
+        boolean hasBatchStore = StringUtils.isNotBlank(accountTableName);
+        log.info("Account batch store exist=" + hasBatchStore);
+        return hasBatchStore;
     }
 
     protected List<Action> getAttrManagementActions() {
