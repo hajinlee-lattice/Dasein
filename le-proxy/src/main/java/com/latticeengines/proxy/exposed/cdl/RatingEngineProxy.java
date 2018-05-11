@@ -275,14 +275,16 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return unlinkSegment == Boolean.TRUE ? "?unlink-segment={unlink-segment}" : "";
     }
 
-    public DataPage getEntityPreview(String ratingEngineId, long offset, long maximum, BusinessEntity entityType,
-            String sortBy, Boolean descending, String bucketFieldName, List<String> lookupFieldNames,
-            Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
+    public DataPage getEntityPreview(String customerSpace, String ratingEngineId, long offset, long maximum,
+            BusinessEntity entityType, String sortBy, Boolean descending, String bucketFieldName,
+            List<String> lookupFieldNames, Boolean restrictNotNullSalesforceId, String freeFormTextSearch,
+            List<String> selectedBuckets) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview?offset={offset}&maximum={maximum}&entityType={entityType}");
         List<Object> paramObjects = new ArrayList<>();
-        paramObjects.addAll(Arrays.asList(ratingEngineId, offset, maximum, entityType));
+        paramObjects.addAll(
+                Arrays.asList(shortenCustomerSpace(customerSpace), ratingEngineId, offset, maximum, entityType));
 
         addParam("sortBy", sortBy, sb, paramObjects);
         addParam("bucketFieldName", bucketFieldName, sb, paramObjects);
@@ -296,13 +298,13 @@ public class RatingEngineProxy extends MicroserviceRestApiProxy implements Proxy
         return get("getEntityPreview", url, DataPage.class);
     }
 
-    public Long getEntityPreviewCount(String ratingEngineId, BusinessEntity entityType,
+    public Long getEntityPreviewCount(String customerSpace, String ratingEngineId, BusinessEntity entityType,
             Boolean restrictNotNullSalesforceId, String freeFormTextSearch, List<String> selectedBuckets) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL_PREFIX);
         sb.append("/{ratingEngineId}/entitypreview/count?entityType={entityType}");
         List<Object> paramObjects = new ArrayList<>();
-        paramObjects.addAll(Arrays.asList(ratingEngineId, entityType));
+        paramObjects.addAll(Arrays.asList(shortenCustomerSpace(customerSpace), ratingEngineId, entityType));
 
         addParam("restrictNotNullSalesforceId", restrictNotNullSalesforceId, sb, paramObjects);
         addParam("freeFormTextSearch", freeFormTextSearch, sb, paramObjects);

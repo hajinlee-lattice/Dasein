@@ -353,6 +353,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get preview of Account and Contact as related to Rating Engine given its id")
     public DataPage getEntityPreview( //
+            @PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @RequestParam(value = "offset", required = true) long offset, //
             @RequestParam(value = "maximum", required = true) long maximum, //
@@ -377,6 +378,7 @@ public class RatingEngineResource {
     @ResponseBody
     @ApiOperation(value = "Get total count of Account and Contact as related to Rating Engine given its id")
     public Long getEntityPreviewCount( //
+            @PathVariable String customerSpace, //
             @PathVariable String ratingEngineId, //
             @RequestParam(value = "entityType", required = true) BusinessEntity entityType, //
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //

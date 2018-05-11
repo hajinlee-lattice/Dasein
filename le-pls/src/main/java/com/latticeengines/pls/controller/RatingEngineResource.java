@@ -124,9 +124,11 @@ public class RatingEngineResource {
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
         descending = descending == null ? false : descending;
+        Tenant tenant = MultiTenantContext.getTenant();
 
-        return ratingEngineProxy.getEntityPreview(ratingEngineId, offset, maximum, entityType, sortBy, descending,
-                bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets);
+        return ratingEngineProxy.getEntityPreview(tenant.getId(), ratingEngineId, offset, maximum, entityType, sortBy,
+                descending, bucketFieldName, lookupFieldNames, restrictNotNullSalesforceId, freeFormTextSearch,
+                selectedBuckets);
     }
 
     @GetMapping(value = "/{ratingEngineId}/entitypreview/count")
@@ -138,8 +140,9 @@ public class RatingEngineResource {
             @RequestParam(value = "restrictNotNullSalesforceId", required = false) Boolean restrictNotNullSalesforceId, //
             @RequestParam(value = "freeFormTextSearch", required = false) String freeFormTextSearch, //
             @RequestParam(value = "selectedBuckets", required = false) List<String> selectedBuckets) {
-        return ratingEngineProxy.getEntityPreviewCount(ratingEngineId, entityType, restrictNotNullSalesforceId,
-                freeFormTextSearch, selectedBuckets);
+        Tenant tenant = MultiTenantContext.getTenant();
+        return ratingEngineProxy.getEntityPreviewCount(tenant.getId(), ratingEngineId, entityType,
+                restrictNotNullSalesforceId, freeFormTextSearch, selectedBuckets);
     }
 
     @GetMapping(value = "/{ratingEngineId}/dashboard")
