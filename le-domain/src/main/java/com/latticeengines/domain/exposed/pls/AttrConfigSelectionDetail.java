@@ -72,7 +72,7 @@ public class AttrConfigSelectionDetail {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SubcategoryDetail {
 
-        @JsonProperty("SubCategory")
+        @JsonProperty("DisplayName")
         private String subCategory;
 
         @JsonProperty("Selected")
