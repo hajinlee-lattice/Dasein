@@ -11,8 +11,9 @@
     overflow: auto;
     background-color: rgb(0, 0, 0);
     background-color: rgba(0, 0, 0, 0.5);
+  
     .le-orange-style {
-        background-color: orange;
+      background-color: orange;
     }
     /* Modal Content Box */
     .le-modal-content {
@@ -27,6 +28,7 @@
         width: 50%;
         max-height: 80vh;
         border-radius: 5px;
+  
         border: 1px solid #999999;
         border: 1px solid rgba(0, 0, 0, 0.2);
         border-radius: 6px;
@@ -40,7 +42,8 @@
             width: 80%;
         }
         .le-modal-header {
-            height: 10%; // min-height: 50px;
+            height: 10%;
+            // min-height: 50px;
             display: flex;
             flex-direction: row-reverse;
             align-items: center;
@@ -66,14 +69,15 @@
                 padding: 17px;
                 display: flex;
                 align-items: center;
-                .ico-container {
-                    background-color: white;
+  
+                .ico-container{
+                  background-color: white;
                 }
                 .title-icon {
                     // padding-right: 10px;
                 }
                 .le-title {
-                    margin-left: 20px;
+                  margin-left: 20px;
                 }
             }
         }
@@ -84,16 +88,18 @@
             padding: 10px;
             max-height: 80%;
             padding: 0 20px 0 20px;
-            .le-modal-message {
-                display: flex;
-                font-size: 26px;
-                font-family: 'ProximaNova-Regular', Arial, sans-serif;
+  
+            .le-modal-message{
+              display: flex;
+              font-size: 26px;
+              font-family: 'ProximaNova-Regular', Arial, sans-serif;
+  
             }
-            .le-modal-spinner {
-                display: flex;
-                justify-content: center;
-                height: 100%;
-                padding: 20px;
+            .le-modal-spinner{
+              display: flex;
+              justify-content: center;
+              height: 100%;
+              padding: 20px;
             }
         }
         .le-modal-footer {
@@ -112,16 +118,19 @@
         animation-iteration-count: 1;
         animation-timing-function: ease-in;
         animation-duration: .12s;
+        
     }
     &.closed {
         display: none;
     }
-    @keyframes fadeInOpacity {
+  
+      @keyframes fadeInOpacity {
         0% {
-            opacity: 0;
+          opacity: 0;
         }
         100% {
-            opacity: 1;
+          opacity: 1;
         }
-    }
-}
+      }
+    
+  }

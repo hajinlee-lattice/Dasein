@@ -41,18 +41,18 @@ angular.module('le.widgets.modal', [])
 
         }
     })
-    .component('leModal', {
-        
+    .component('modal', {
+        template: template,
 
         bindings: {
             config: '=',
             callback: '&callbackFunction'
         },
-        template: template,
+        replace: true,
         transclude: true,
 
-        controller: ['ModalStore', function (ModalStore) {
-            var self = this;
+        controller: function () {
+
             this.$onInit = function () {
 
 
@@ -71,10 +71,9 @@ angular.module('le.widgets.modal', [])
             if (!this.config) {
                 this.config = {};
             }
-            var date = Date.now();
-            var name = this.config['name'] || date;
+            var name = this.config['name'] || Date().now();
 
-            ModalStore.set(name, this);
+            modalStore.set(name, this);
             // console.log('Color', this.config.headerconfig )
             this.modalConfig = {
                 "type": this.config.type || "md",
@@ -142,13 +141,13 @@ angular.module('le.widgets.modal', [])
             }
 
             function resetWindow() {
-                self.showModalMsg = false;
-                self.dischargeDisabled = false;
-                self.confirmDisabled = false;
-                self.showWaiting = false;
-                self.modalMsg = '';
+                this.showModalMsg = false;
+                this.dischargeDisabled = false;
+                this.confirmDisabled = false;
+                this.showWaiting = false;
+                this.modalMsg = '';
             }
-        }]
+        }
 
     });
 
