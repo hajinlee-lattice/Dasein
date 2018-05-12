@@ -61,7 +61,8 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
 
         dataCache = new LocalCacheManager<>(CacheName.EntityDataCache, str -> {
             String[] tokens = str.split("\\|");
-            return getDataBySerializedKeyFromObjectApi(String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
+            return getDataBySerializedKeyFromObjectApi(
+                    String.format("%s|%s", shortenCustomerSpace(tokens[0]), tokens[1]));
         }, 200); //
 
         ratingCache = new LocalCacheManager<>(CacheName.EntityRatingCountCache, str -> {
@@ -98,6 +99,7 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
                 String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString()));
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Map<String, Long> getRatingCount(String customerSpace, RatingEngineFrontEndQuery frontEndQuery) {
         frontEndQuery = normalizeRatingCountQuery(frontEndQuery);
@@ -116,7 +118,8 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         optimizeRestrictions(frontEndQuery);
         frontEndQuery.setPageFilter(null);
         frontEndQuery.setSort(null);
-        return String.valueOf(getCountFromObjectApi(String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString())));
+        return String.valueOf(getCountFromObjectApi(
+                String.format("%s|%s", shortenCustomerSpace(customerSpace), frontEndQuery.toString())));
     }
 
     @Override
@@ -150,7 +153,6 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         return frontEndQuery;
     }
 
-
     private Long getCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
@@ -175,15 +177,16 @@ public class EntityProxyImpl extends MicroserviceRestApiProxy implements EntityP
         return getDataFromObjectApi(tenantId, frontEndQuery);
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     private Map<String, Long> getRatingCountFromObjectApi(String serializedKey) {
         String tenantId = serializedKey.substring(0, serializedKey.indexOf("|"));
         String serializedQuery = serializedKey.substring(tenantId.length() + 1);
-        RatingEngineFrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery, RatingEngineFrontEndQuery.class);
+        RatingEngineFrontEndQuery frontEndQuery = JsonUtils.deserialize(serializedQuery,
+                RatingEngineFrontEndQuery.class);
         return getRatingCountMonoFromApi(tenantId, frontEndQuery).block(Duration.ofHours(1));
     }
 
-    private Mono<Map<String, Long>> getRatingCountMonoFromApi(String tenantId, RatingEngineFrontEndQuery frontEndQuery) {
+    private Mono<Map<String, Long>> getRatingCountMonoFromApi(String tenantId,
+            RatingEngineFrontEndQuery frontEndQuery) {
         String url = constructUrl("/{customerSpace}/entity/ratingcount", tenantId);
         return postMapMono("getRatingCount", url, frontEndQuery);
     }
