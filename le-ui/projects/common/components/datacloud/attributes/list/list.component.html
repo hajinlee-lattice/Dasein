@@ -1,0 +1,106 @@
+<div class="attr-admin attr-list container">
+    <ul class="controls">
+        <li class="attr-text">
+            <span>
+                {{$ctrl.params.category}} Attributes ({{$ctrl.config.TotalAttrs|number}})
+            </span>
+        </li>
+
+        <li class="attr-activate-deactivate-button pull-right">
+            <button class="button icon-button blue-button" ng-click="$ctrl.save()" ng-disabled="$ctrl.isChanged()">
+                SAVE {{$ctrl.options.section == 'enable' ? 'CONFIGURATION' : 'ACTIVATION' }}
+            </button>
+        </li>
+
+        <li class="attr-text pull-right">
+            <span>
+                {{$ctrl.selected.length|number}} <span class="attr-tiny-uppercase">{{$ctrl.limit >= 0 ? '/ '+$ctrl.limit+' ' : ''}}selected</span>
+            </span>
+        </li>
+    </ul>
+
+    <ul class="filters">
+        <li class="query">
+            <div class="ng-search">
+                <a class="button icon-button white-button" ng-click="$ctrl.queryText.length ? $ctrl.queryText = null : ''">
+                    <span class="fa fa-search" ng-show="!$ctrl.query.length && !$ctrl.queryInProgress"></span>
+                    <span class="fa fa-times" ng-show="$ctrl.query.length && !$ctrl.queryInProgress"></span>
+                    <span class="fa fa-spinner fa-pulse fa-fw" ng-show="$ctrl.queryInProgress"></span>
+                </a>
+                <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.queryText" ng-change="$ctrl.page = 1" />
+            </div>
+        </li>
+
+        <li class="sort pull-right">
+            <button class="button icon-button white-button" ng-init="$ctrl.sortPrefix = '+';" ng-click="$ctrl.sortPrefix = $ctrl.sortPrefix == '+' ? '-' : '+'">
+                <span class="fa fa-sort-amount-{{$ctrl.sortPrefix == '+' ? 'asc' : 'desc'}}"></span>
+            </button>
+        </li>
+
+        <li class="filter pull-right">
+            <button class="button icon-button white-button" disabled="true">
+                <i class="fa fa-filter"></i>
+            </button>
+        </li>
+    </ul>
+
+    <attr-categories ng-if="$ctrl.categories" categories="$ctrl.categories"></attr-categories>
+
+    <div class="attr-results-container">
+        <ul class="attr-pagination-top" ng-if="$ctrl.subcategory || filteredList.length > $ctrl.pagesize">
+            <li class="attr-back-text pull-left" ng-if="$ctrl.subcategory">
+                <a href="#" ng-click="$ctrl.back()">Back</a> | {{$ctrl.subcategory}}
+            </li>
+
+            <li class="attr-pagination" ng-if="filteredList.length > $ctrl.pagesize">
+                <pd-pagination-controls
+                        current="$ctrl.page"
+                        max="$ctrl.max = filteredList.length / $ctrl.pagesize">
+                </pd-pagination-controls>
+            </li>
+        </ul>
+
+        <div class="attr-list-noresults" ng-if="!filteredList || filteredList.length === 0">
+            No Results.
+        </div>
+
+        <ul class="attr-list-results noselect-children">
+            <li ng-if="filteredList && filteredList.length > 0">
+                <div class="attr-result-checkbox" ng-click="$ctrl.toggleAll()">
+                    <input ng-checked="$ctrl.isAllChecked()" name="{{$ctrl.checkboxName()}}" type="checkbox" />
+                </div>
+                <div class="attr-result-label" ng-click="$ctrl.toggleAll()">
+                    <label for="check_all">Attribute</label>
+                    <span>({{$ctrl.getCount()|number}})</span>
+                </div>
+            </li>
+            <li ng-repeat="item in (filteredList = ($ctrl.getResults()
+                            | filter: { 'DisplayName': $ctrl.queryText }))
+                            | orderBy: [ $ctrl.sortPrefix + 'Attribute', $ctrl.sortPrefix + 'SubCategory' ]
+                            | startFrom: ($ctrl.page - 1) * $ctrl.pagesize
+                            | limitTo: $ctrl.pagesize"
+                ng-class="{ 'category': item.Attributes }">
+                <div class="attr-result-checkbox" ng-click="$ctrl.checked(item)">
+                    <input  ng-checked="$ctrl.isChecked(item)" 
+                            ng-disabled="$ctrl.isDisabled(item)"
+                            name="{{item.SubCategory || item.Attribute}}" 
+                            type="checkbox" />
+                </div>
+                <div class="attr-result-label" ng-click="$ctrl.click(item)">
+                    <label for="{{item.SubCategory || item.Attribute}}">{{item.SubCategory || item.DisplayName}}</label>
+                    <span ng-if="item.TotalAttrs">({{item.TotalAttrs|number}})</span>
+                    <i class="fa fa-chevron-right" ng-if="item.SubCategory"></i>
+                </div>
+            </li>
+        </ul>
+
+        <ul class="attr-pagination-bottom" ng-if="filteredList.length > $ctrl.pagesize">
+            <li class="attr-pagination pull-right">
+                <pd-pagination-controls
+                        current="$ctrl.page"
+                        max="$ctrl.max = filteredList.length / $ctrl.pagesize">
+                </pd-pagination-controls>
+            </li>
+        </ul>
+    </div>
+</div>

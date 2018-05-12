@@ -580,7 +580,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                 line-height: 0.8em;
 
                 span.ico-container {
-                    background: #E2E3E5;
+                    background: transparent;
                     width: 36px;
                     margin: 0;
 
@@ -590,7 +590,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
                     background-color: #f9f9f9;
 
                     span.ico-container {
-                        background: #d9d9d9;
+                        background: #E2E3E5;
                     }
                 }
 
@@ -641,16 +641,17 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
     .header-back-name,
     .model-name {
         display: inline-block;
-        color: #222;
-        font-size: 18px;
-        margin-top: 16px;
-        margin-left: .5em;
+        font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+        font-size: 15px;
+        letter-spacing: 0px;
         vertical-align: middle;
+        text-transform: uppercase;
+        color: #555;
+        margin-top: 17px;
+        margin-left: 1em;
+        padding-top: 6px;
         transition: none;
         animation: none;
-        text-transform: uppercase;
-        letter-spacing: 2px;
-        padding-top: 5px;
     }
     &.model-details-page {
         .page-icon,
@@ -663,7 +664,7 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
         }
     }
     .page-icon {
-        margin-left: 1em;
+        margin-left: 1.5em;
         background-color: rgba(239, 106, 48, 1);
         span {
             -webkit-transition: all 250ms linear, transform 0s linear;
@@ -758,13 +759,15 @@ html:not(.no-cssmask) .secondary-nav ul.secondary-nav-grid > li .jobs-nav-gear s
             }
             .pd-header-username {
                 font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+                color: #555;
                 font-size: 14px;
                 text-overflow: ellipsis;
                 overflow: hidden;
                 margin-top: .4em;
             }
             .tenant-name {
-                font-family: 'ProximaNova-Regular','Open Sans',sans-serif;
+                font-family: 'ProximaNova-Semibold','Open Sans',sans-serif;
+                color: #555;
                 font-size: 12px;
                 margin-top: .25em;
                 text-overflow: ellipsis;

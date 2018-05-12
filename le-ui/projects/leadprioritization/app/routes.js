@@ -1502,11 +1502,12 @@ angular
             }
         });
 });
-function ShowSpinner(LoadingString, type) {
+function ShowSpinner(LoadingString, selector) {
     // state change spinner
-    var element = $('#mainContentView'),
-        LoadingString = LoadingString || '',
-        type = type || 'lattice';
+    selector = selector || '#mainContentView';
+    LoadingString = LoadingString || '';
+    
+    var element = $(selector);
 
     // jump to top of page during state change
     angular.element(window).scrollTop(0,0);
@@ -1521,7 +1522,7 @@ function ShowSpinner(LoadingString, type) {
         })
         .prepend(
             $(
-                '<section class="loading-spinner ' + type + '">' +
+                '<section class="loading-spinner lattice">' +
                 '<h2 class="text-center">' + LoadingString + '</h2>' +
                 '<div class="meter"><span class="indeterminate"></span></div>' +
                 '</section>'

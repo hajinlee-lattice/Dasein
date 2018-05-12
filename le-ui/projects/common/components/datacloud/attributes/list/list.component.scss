@@ -1,0 +1,125 @@
+.attr-list {
+    margin-top: 2em;
+
+    .controls,
+    .filters {
+        display: block;
+        height: 2.2em;
+        vertical-align: bottom;
+        margin-bottom: 1em;
+        li.attr-back-text,
+        li.attr-text {
+            position: relative;
+            top: 0.1em;
+            font-size: 16px;
+        }
+        
+        > * {
+            display: inline-block;
+        }
+
+        .attr-tiny-uppercase {
+            text-transform: uppercase;
+            font-size: 9px;
+            position: relative;
+            bottom: 0;
+        }
+
+        button {
+            margin-left: 1em;
+        }
+    }
+    
+    ul.attr-list-results {
+        li {
+            border-bottom: 1px solid #ccc;
+            height: 40px;
+            vertical-align: middle;
+            display: flex;
+            align-items: center;
+            
+            &:first-child {
+                font-weight: bold;
+                
+                label {
+                    font-weight: bold;
+                }
+            }
+
+            & > div:hover {
+            }
+            
+            div.attr-result-checkbox { 
+                height: 100%;
+                width: 40px;
+                line-height: 45px;
+                text-align: center;
+                vertical-align: middle;
+                
+                input {
+                    display: inline-block;
+                    pointer-events: none;
+                }
+            }
+
+            &:not(.category):hover {
+                background: #fff;
+                transition: none;
+            }
+            
+            &.category div.attr-result-checkbox {
+                &:hover {
+                    background: #fff; //#457eba;
+                    transition: none;
+                }
+            }
+
+            div.attr-result-label {
+                position: relative;
+                height: 100%;
+                width: 100%;
+                line-height: 40px;
+                vertical-align: middle;
+                
+                label {
+                    display: inline;
+                    padding-left: 1em;
+                }
+
+                i {
+                    position: relative;
+                    float: right;
+                    top: 1.1em;
+                    right: 2em;
+                    font-size: 12px;
+                }
+            
+                &:hover {
+                    background: #fff;
+                }
+            }
+            
+            &.category div.attr-result-label {
+                &:hover {
+                    background: #fff;
+                    transition: none;
+                }
+            }
+        }
+    }
+
+    .attr-pagination-top {
+        height: 2.2em;
+        margin-bottom: 1em;
+        text-align: right;
+        
+        .attr-pagination {
+            display: inline-block;
+        }
+    }
+
+    .attr-pagination-bottom {
+        height: 2.2em;
+        margin-top: 1em;
+    }
+}

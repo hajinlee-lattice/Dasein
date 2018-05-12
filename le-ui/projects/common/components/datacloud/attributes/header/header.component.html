@@ -1,0 +1,11 @@
+<section class="attr-admin-tabs tabs interior one-line container">
+    <ul class="noselect-children">
+        <li ng-repeat="tab in $ctrl.tabs" 
+            ui-sref="{{tab.sref}}" 
+            ng-class="{ 'active': $ctrl.isActive(tab.sref) }">
+            <div class="tab-container">
+                <h2>{{tab.label}}</h2>
+            </div>
+        </li>
+    </ul>
+</section>

@@ -40,6 +40,7 @@
         }
     }
 }
+attr-categories,
 .enrichment-wizard-container {
     position: relative;
     $box-width: calc(99.99%/3); //99.99 is because of IE and rounding errors at 100%/3 (or any odd number)
@@ -380,6 +381,7 @@
                 padding-right: 0;
             }
             &.active {
+                pointer-events: none;
                 cursor: default;
             }
             .box-inner {
@@ -2470,7 +2472,7 @@
     }
     i {
         float: right;
-}
     }
+}
 
 

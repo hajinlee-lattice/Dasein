@@ -33,6 +33,7 @@ body {
     opacity: 1;
   }
   .inactive-disabled {
+    display: block;
     opacity: .666;
     pointer-events: none;
     -webkit-transition: opacity 500ms ease-out, filter 3s ease-out, -webkit-filter 3s ease-out;

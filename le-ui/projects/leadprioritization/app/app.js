@@ -12,6 +12,7 @@ var mainApp = angular.module('mainApp', [
     'mainApp.appCommon.Widgets',
 
     'common.modules',
+    'common.attributes',
     'common.datacloud',
 
     //'lp.header',
