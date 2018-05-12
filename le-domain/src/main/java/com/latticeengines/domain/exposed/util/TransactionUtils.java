@@ -90,6 +90,11 @@ public class TransactionUtils {
             if (analyticProductIds.contains(String.valueOf(record.get(InterfaceName.ProductId.name())))) {
                 return true;
             }
+            /*
+            if (ProductType.Analytic.name().equals(String.valueOf(record.get(InterfaceName.ProductType.name())))) {
+                return true;
+            }
+            */
         }
         return false;
     }

@@ -32,6 +32,9 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
     @JsonProperty("AccountHasSegment")
     private boolean accountHasSegment = false;
 
+    @JsonProperty("PeriodTableCount")
+    private Integer periodTableCnt = 4;
+
     public List<ActivityMetrics> getMetrics() {
         return metrics;
     }
@@ -86,6 +89,14 @@ public class ActivityMetricsCuratorConfig extends TransformerConfig {
 
     public void setAccountHasSegment(boolean accountHasSegment) {
         this.accountHasSegment = accountHasSegment;
+    }
+
+    public Integer getPeriodTableCnt() {
+        return periodTableCnt;
+    }
+
+    public void setPeriodTableCnt(Integer periodTableCnt) {
+        this.periodTableCnt = periodTableCnt;
     }
 
 }

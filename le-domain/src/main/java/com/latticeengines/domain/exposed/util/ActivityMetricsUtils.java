@@ -423,35 +423,40 @@ public class ActivityMetricsUtils {
         return bounds;
     }
 
-    // Serve the API before UI has finished metrics configuration for tenant
-    public static List<ActivityMetrics> fakeMetrics(Tenant tenant) {
-        ActivityMetrics margin = createFakedMetrics(tenant);
+    // For testing purpose
+    public static List<ActivityMetrics> fakePurchaseMetrics(Tenant tenant) {
+        ActivityMetrics margin = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         margin.setMetrics(InterfaceName.Margin);
         margin.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
-        ActivityMetrics shareOfWallet = createFakedMetrics(tenant);
+        ActivityMetrics shareOfWallet = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         shareOfWallet.setMetrics(InterfaceName.ShareOfWallet);
-        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name())));
+        shareOfWallet.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Week.name())));
 
-        ActivityMetrics avgSpendOvertime = createFakedMetrics(tenant);
+        ActivityMetrics spendChange = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
+        spendChange.setMetrics(InterfaceName.SpendChange);
+        spendChange.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name()),
+                TimeFilter.between(2, 3, PeriodStrategy.Template.Quarter.name())));
+
+        ActivityMetrics avgSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
         avgSpendOvertime.setMetrics(InterfaceName.AvgSpendOvertime);
         avgSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Quarter.name())));
 
-        ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant);
-        totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
-        totalSpendOvertime.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
-
-        ActivityMetrics spendChange = createFakedMetrics(tenant);
-        spendChange.setMetrics(InterfaceName.SpendChange);
-        spendChange.setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Month.name()),
-                TimeFilter.between(2, 3, PeriodStrategy.Template.Month.name())));
-
-        return Arrays.asList(margin, shareOfWallet, avgSpendOvertime, totalSpendOvertime, spendChange);
+        return Arrays.asList(margin, shareOfWallet, spendChange, avgSpendOvertime);
     }
 
-    private static ActivityMetrics createFakedMetrics(Tenant tenant) {
+    public static List<ActivityMetrics> fakeUpdatedPurchaseMetrics(Tenant tenant) {
+        ActivityMetrics totalSpendOvertime = createFakedMetrics(tenant, ActivityType.PurchaseHistory);
+        totalSpendOvertime.setMetrics(InterfaceName.TotalSpendOvertime);
+        totalSpendOvertime
+                .setPeriodsConfig(Arrays.asList(TimeFilter.within(1, PeriodStrategy.Template.Year.name())));
+
+        return Arrays.asList(totalSpendOvertime);
+    }
+
+    private static ActivityMetrics createFakedMetrics(Tenant tenant, ActivityType type) {
         ActivityMetrics metrics = new ActivityMetrics();
-        metrics.setType(ActivityType.PurchaseHistory);
+        metrics.setType(type);
         metrics.setTenant(tenant);
         metrics.setEOL(false);
         metrics.setDeprecated(null);

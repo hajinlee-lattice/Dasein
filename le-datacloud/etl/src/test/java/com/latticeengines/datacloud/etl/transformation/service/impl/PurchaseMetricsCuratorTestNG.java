@@ -198,6 +198,7 @@ public class PurchaseMetricsCuratorTestNG extends PipelineTransformationTestNGBa
         conf.setType(ActivityType.PurchaseHistory);
         conf.setReduced(reduced);
         conf.setAccountHasSegment(accountHasSegment);
+        conf.setPeriodTableCnt(1);
         return JsonUtils.serialize(conf);
     }
 

@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
-import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
 import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.common.exposed.util.NamingUtils;
@@ -49,6 +48,7 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.etl.TransformationWorkflowConfiguration;
+import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
@@ -330,8 +330,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
-                InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
+                // InterfaceName.ProductType.name(), //
+                InterfaceName.ContactId.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
@@ -386,8 +387,9 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setPeriodStrategy(strategy);
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
-                InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
+                // InterfaceName.ProductType.name(), //
+                InterfaceName.ContactId.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.PeriodId.name()));
         step.setConfiguration(JsonUtils.serialize(config));

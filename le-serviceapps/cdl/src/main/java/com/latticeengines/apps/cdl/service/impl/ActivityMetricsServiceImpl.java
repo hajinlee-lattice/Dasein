@@ -8,11 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.latticeengines.apps.cdl.entitymgr.ActivityMetricsEntityMgr;
 import com.latticeengines.apps.cdl.service.ActivityMetricsService;
-import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
-import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
-import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 
 @Service("activityMetricsService")
 public class ActivityMetricsServiceImpl implements ActivityMetricsService {
@@ -21,8 +18,7 @@ public class ActivityMetricsServiceImpl implements ActivityMetricsService {
 
     @Override
     public List<ActivityMetrics> findWithType(ActivityType type) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return ActivityMetricsUtils.fakeMetrics(tenant);
+        return entityMgr.findWithType(type);
     }
 
     @Override

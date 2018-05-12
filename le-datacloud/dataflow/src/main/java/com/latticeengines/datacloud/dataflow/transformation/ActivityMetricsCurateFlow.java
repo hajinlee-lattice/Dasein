@@ -72,14 +72,14 @@ public class ActivityMetricsCurateFlow extends ActivityMetricsBaseFlow<ActivityM
         config = getTransformerConfig(parameters);
 
         List<Node> periodTableList = new ArrayList<>();
-        for (int i = 0; i < config.getPeriodStrategies().size(); i++) {
+        for (int i = 0; i < config.getPeriodTableCnt(); i++) {
             periodTableList.add(addSource(parameters.getBaseTables().get(i)));
         }
         if (shouldLoadAccount()) {
-            account = addSource(parameters.getBaseTables().get(config.getPeriodStrategies().size()));
+            account = addSource(parameters.getBaseTables().get(config.getPeriodTableCnt()));
         }
         if (shouldLoadProduct()) {
-            product = addSource(parameters.getBaseTables().get(config.getPeriodStrategies().size() + 1));
+            product = addSource(parameters.getBaseTables().get(config.getPeriodTableCnt() + 1));
             product = product.filter(String.format("\"%s\".equalsIgnoreCase(%s)", ProductType.Analytic.name(),
                     InterfaceName.ProductType.name()), new FieldList(InterfaceName.ProductType.name()));
         }

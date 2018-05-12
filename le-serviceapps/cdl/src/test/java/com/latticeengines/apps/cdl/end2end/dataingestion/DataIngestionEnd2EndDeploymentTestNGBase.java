@@ -70,6 +70,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.TableType;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedTask;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.modeling.CustomEventModelingType;
 import com.latticeengines.domain.exposed.pls.AIModel;
 import com.latticeengines.domain.exposed.pls.Action;
@@ -99,14 +100,17 @@ import com.latticeengines.domain.exposed.query.Restriction;
 import com.latticeengines.domain.exposed.query.TimeFilter;
 import com.latticeengines.domain.exposed.query.TransactionRestriction;
 import com.latticeengines.domain.exposed.query.frontend.FrontEndRestriction;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.BusinessCalendar;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
 import com.latticeengines.domain.exposed.util.MetadataConverter;
 import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.Report;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
+import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 import com.latticeengines.proxy.exposed.cdl.CDLProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
@@ -212,6 +216,9 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
     @Inject
     private ActionProxy actionProxy;
 
+    @Inject
+    private ActivityMetricsProxy activityMetricsProxy;
+
     @Value("${camille.zk.pod.id}")
     private String podId;
 
@@ -244,6 +251,7 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
         createDataFeed();
         updateDataCloudBuildNumber();
         setupBusinessCalendar();
+        setupPurchaseHistoryMetrics();
 
         attachProtectedProxy(fileUploadProxy);
         attachProtectedProxy(testMetadataSegmentProxy);
@@ -978,6 +986,11 @@ public abstract class DataIngestionEnd2EndDeploymentTestNGBase extends CDLDeploy
 
     void setupBusinessCalendar() {
         periodProxy.saveBusinessCalendar(mainTestTenant.getId(), createBusinessCalendar());
+    }
+
+    void setupPurchaseHistoryMetrics() {
+        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakePurchaseMetrics(mainTestTenant);
+        activityMetricsProxy.save(mainCustomerSpace, ActivityType.PurchaseHistory, metrics);
     }
 
 }

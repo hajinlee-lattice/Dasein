@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.latticeengines.cdl.utils.PeriodStrategyUtils;
 import com.latticeengines.cdl.workflow.RebuildTransactionWorkflow;
 import com.latticeengines.cdl.workflow.UpdateTransactionWorkflow;
 import com.latticeengines.cdl.workflow.steps.merge.MergeTransaction;
@@ -32,6 +31,7 @@ import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.transaction.Product;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TransactionUtils;
 import com.latticeengines.domain.exposed.workflow.BaseStepConfiguration;
@@ -290,15 +290,18 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         }
 
         log.info(String.format("productTableName for customer %s is %s", customerSpace, productTable.getName()));
-        Set<String> analyticProductIds = new HashSet<>();
+        boolean foundAnalyticProduct = false;
         List<Product> productList = new ArrayList<>(
                 ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
+        Set<String> analyticProductIds = new HashSet<>();
         for (Product product : productList) {
             if (ProductType.Analytic.name().equals(product.getProductType())) {
+                foundAnalyticProduct = true;
                 analyticProductIds.add(product.getProductId());
+                // break;
             }
         }
-        if (analyticProductIds.size() == 0) {
+        if (!foundAnalyticProduct) {
             log.info("Didn't find Analytic Product in " + productTable.getName());
             return false;
         }

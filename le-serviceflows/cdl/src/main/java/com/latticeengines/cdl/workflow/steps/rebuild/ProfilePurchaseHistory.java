@@ -13,8 +13,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -60,6 +62,7 @@ import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
 import com.latticeengines.domain.exposed.serviceapps.cdl.ReportConstants;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.domain.exposed.util.PeriodStrategyUtils;
 import com.latticeengines.domain.exposed.util.ProductUtils;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.workflow.ReportPurpose;
@@ -184,17 +187,18 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
             throw new IllegalStateException("Cannot find period strategies");
         }
 
-        periodTableNames = getPeriodTableNames();
-        if (CollectionUtils.isEmpty(periodTableNames)) {
-            throw new IllegalStateException("Cannot find period stores");
-        }
-
         purchaseMetrics = metricsProxy.getActivityMetrics(customerSpace.toString(), ActivityType.PurchaseHistory);
         if (purchaseMetrics == null) {
             purchaseMetrics = new ArrayList<>();
         }
         // HasPurchased is the default metrics to calculate
         purchaseMetrics.add(createHasPurchasedMetrics());
+
+        periodTableNames = getPeriodTableNames();
+        if (CollectionUtils.isEmpty(periodTableNames)) {
+            throw new IllegalStateException("Cannot find period stores");
+        }
+        periodTableNames = selectPeriodTables(periodTableNames, purchaseMetrics);
 
         curatedMetricsTablePrefix = TableRoleInCollection.CalculatedDepivotedPurchaseHistory.name();
     }
@@ -261,6 +265,14 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         return periodTables;
     }
 
+    private List<String> selectPeriodTables(List<String> periodTables, List<ActivityMetrics> metrics) {
+        Set<String> periods = new HashSet<>();
+        metrics.forEach(m -> {
+            periods.add(m.getPeriodsConfig().get(0).getPeriod());
+        });
+        return PeriodStrategyUtils.filterPeriodTablesByPeriods(periodTables, periods);
+    }
+
     private String findEvaluationDate() {
         String evaluationDate = getStringValueFromContext(CDL_EVALUATION_DATE);
         if (StringUtils.isBlank(evaluationDate)) {
@@ -321,6 +333,7 @@ public class ProfilePurchaseHistory extends BaseSingleEntityProfileStep<ProcessT
         conf.setType(ActivityType.PurchaseHistory);
         conf.setReduced(true);
         conf.setAccountHasSegment(accountHasSegment);
+        conf.setPeriodTableCnt(periodTableNames.size());
 
         step.setConfiguration(JsonUtils.serialize(conf));
         return step;
