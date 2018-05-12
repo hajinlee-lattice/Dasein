@@ -15,6 +15,7 @@ import com.latticeengines.dataflow.exposed.builder.Node;
 import com.latticeengines.dataflow.exposed.builder.common.FieldList;
 import com.latticeengines.dataflow.exposed.builder.common.JoinType;
 import com.latticeengines.dataflow.runtime.cascading.propdata.ConsolidateDataFuction;
+import com.latticeengines.domain.exposed.datacloud.DataCloudConstants;
 import com.latticeengines.domain.exposed.datacloud.dataflow.TransformationFlowParameters;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.ConsolidateDataTransformerConfig;
 import com.latticeengines.domain.exposed.datacloud.transformation.configuration.impl.TransformerConfig;
@@ -30,7 +31,7 @@ import cascading.tuple.Fields;
 public class ConsolidateDataFlow extends ConsolidateBaseFlow<ConsolidateDataTransformerConfig> {
 
     public static final String DATAFLOW_BEAN_NAME = "consolidateDataFlow";
-    public static final String TRANSFORMER_NAME = "consolidateDataTransformer";
+    public static final String TRANSFORMER_NAME = DataCloudConstants.TRANSFORMER_CONSOLIDATE_DATA;
 
     private static final String UUID = "__Id__";
 
