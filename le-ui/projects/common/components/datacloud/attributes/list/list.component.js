@@ -226,7 +226,7 @@ angular.module('common.attributes.list', [
                 vm.allChecked = !vm.allChecked;
 
                 Object.keys(vm.attributes)
-                    .sort()
+                    .sort(vm.sortSubcategories)
                     .forEach(function(key) {
                         vm.setIndeterminate(key, false);
                         vm.attributes[key].checked = vm.attributes[key].TotalAttrs;
@@ -264,11 +264,11 @@ angular.module('common.attributes.list', [
         };
 
         vm.sortAttributes = function(a, b) {
-            return a.Attribute.localeCompare(b.Attribute);
+            return a.Attribute.toLowerCase().localeCompare(b.Attribute.toLowerCase());
         };
 
         vm.sortSubcategories = function(a, b) {
-            return a.SubCategory.localeCompare(b.SubCategory);
+            return a.toLowerCase().localeCompare(b.toLowerCase());
         };
 
         vm.save = function() {
