@@ -2,13 +2,10 @@ package com.latticeengines.domain.exposed.serviceflows.cdl.pa;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableSet;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
-import com.latticeengines.domain.exposed.datacloud.MatchClientDocument;
-import com.latticeengines.domain.exposed.datacloud.MatchCommandType;
 import com.latticeengines.domain.exposed.datacloud.match.MatchRequestSource;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
@@ -21,6 +18,7 @@ import com.latticeengines.domain.exposed.serviceflows.cdl.steps.CreateCdlEventTa
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.GenerateRatingStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.ScoreAggregateFlowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.core.steps.AddStandardAttributesConfiguration;
+import com.latticeengines.domain.exposed.serviceflows.core.steps.MatchStepConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.datacloud.MatchDataCloudWorkflowConfiguration;
 import com.latticeengines.domain.exposed.serviceflows.scoring.dataflow.CombineInputTableWithScoreParameters;
 import com.latticeengines.domain.exposed.serviceflows.scoring.steps.CombineInputTableWithScoreDataFlowConfiguration;
@@ -231,6 +229,7 @@ public class GenerateAIRatingWorkflowConfiguration extends BaseCDLWorkflowConfig
         }
 
         private void setMatchConfig() {
+            match.matchType(MatchStepConfiguration.LDC);
             match.excludePublicDomains(false);
             match.matchRequestSource(MatchRequestSource.SCORING);
             match.matchColumnSelection(ColumnSelection.Predefined.RTS, "");

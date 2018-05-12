@@ -118,6 +118,7 @@ public class ProcessorContext {
     private boolean useProxy = false;
     private String decisionGraph;
     private int splits = 1;
+    private boolean datacloudOnly = false;
 
     private BlockDivider divider;
     private String blockRootDir;
@@ -318,6 +319,8 @@ public class ProcessorContext {
 
         CustomerSpace space = jobConfiguration.getCustomerSpace();
         tenant = new Tenant(space.toString());
+        datacloudOnly = Boolean.TRUE.equals(jobConfiguration.getMatchInput().getDataCloudOnly())
+                || !zkConfigurationService.isCDLTenant(space);
 
         if (jobConfiguration.getMatchInput().getUnionSelection() != null
                 || jobConfiguration.getMatchInput().getCustomSelection() != null) {
@@ -455,29 +458,33 @@ public class ProcessorContext {
 
     @MatchStep
     private Schema constructOutputSchema(String recordName, String dataCloudVersion) {
-        Schema outputSchema;
-        ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
-        if (columnSelection == null) {
-            log.info("Generating output schema using predefined selection " + predefinedSelection);
-            outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+        if (datacloudOnly) {
+            Schema outputSchema;
+            ColumnMetadataService columnMetadataService = beanDispatcher.getColumnMetadataService(dataCloudVersion);
+            if (columnSelection == null) {
+                log.info("Generating output schema using predefined selection " + predefinedSelection);
+                outputSchema = columnMetadataService.getAvroSchema(predefinedSelection, recordName, dataCloudVersion);
+            } else {
+                log.info("Generating output schema using custom/union selection with "
+                        + columnSelection.getColumns().size() + " columns");
+                List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
+                outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
+                        dataCloudVersion);
+            }
+            log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
+            if (inputSchema == null) {
+                inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
+                log.info("Using extracted input schema: \n"
+                        + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+            } else {
+                log.info("Using provided input schema: \n"
+                        + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
+            }
+            inputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
+            return (Schema) AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
         } else {
-            log.info("Generating output schema using custom/union selection with " + columnSelection.getColumns().size()
-                    + " columns");
-            List<ColumnMetadata> metadatas = columnMetadataService.fromSelection(columnSelection, dataCloudVersion);
-            outputSchema = columnMetadataService.getAvroSchemaFromColumnMetadatas(metadatas, recordName,
-                    dataCloudVersion);
+            throw new UnsupportedOperationException("Cannot support cdl bulk match yet.");
         }
-        log.info("Output schema has " + outputSchema.getFields().size() + " fields from data cloud.");
-        if (inputSchema == null) {
-            inputSchema = AvroUtils.getSchemaFromGlob(yarnConfiguration, avroPath);
-            log.info("Using extracted input schema: \n"
-                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-        } else {
-            log.info("Using provided input schema: \n"
-                    + JsonUtils.pprint(JsonUtils.deserialize(inputSchema.toString(), JsonNode.class)));
-        }
-        inputSchema = prefixFieldName(inputSchema, outputSchema, "Source_");
-        return (Schema) AvroUtils.combineSchemas(inputSchema, outputSchema)[0];
     }
 
     private Schema prefixFieldName(Schema schema, Schema offendingSchema, String prefix) {
