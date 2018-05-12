@@ -57,7 +57,12 @@ public class CreateCdlTableHelper {
         Table filterTable = null;
         log.info("Table Name:" + tableName);
         if (StringUtils.isNotBlank(tableName)) {
-            filterTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+            try {
+                filterTable = metadataProxy.getTable(customerSpace.toString(), tableName);
+            } catch (Exception e) {
+                // we create the table later if it doesn't exist, so ignore the
+                // exception
+            }
             if (filterTable != null) {
                 log.info("Filter table is null.");
                 return filterTable;
