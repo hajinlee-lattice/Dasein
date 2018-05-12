@@ -547,7 +547,7 @@ public class MergeProduct extends BaseSingleEntityMergeImports<ProcessProductSte
             return currentTable;
         }
 
-        log.info("There is no ConsoidatedProduct table with version " + active + " and " + inactive);
+        log.info("There is no ConsolidatedProduct table with version " + active + " and " + inactive);
         return null;
     }
 
