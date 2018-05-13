@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.camille.exposed.CamilleEnvironment;
 import com.latticeengines.camille.exposed.paths.PathBuilder;
+import com.latticeengines.cdl.service.ZKComponentService;
 import com.latticeengines.common.exposed.util.AvroUtils;
 import com.latticeengines.common.exposed.util.CompressionUtils;
 import com.latticeengines.common.exposed.util.HdfsUtils;
@@ -59,6 +60,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
     protected MetadataProxy metadataProxy;
 
     @Inject
+    private ZKComponentService zkComponentService;
+
+    @Inject
     private Configuration yarnConfiguration;
 
     private DataCollection.Version active;
@@ -86,8 +90,9 @@ public class AwsApsGeneratorStep extends BaseAwsPythonBatchStep<AWSPythonBatchCo
             log.warn("Aps generation is disabled or there's not metadata table for period aggregated table!");
             return;
         }
-        // TODO: use Monthly period for now
-        Table periodTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, PeriodStrategy.CalendarMonth);
+        PeriodStrategy rollingPeriod = zkComponentService.getRollingPeriod(config.getCustomerSpace());
+        log.info("Rolling Period=" + rollingPeriod.getName());
+        Table periodTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, rollingPeriod);
         config.setRunInAws(apsInAws);
         List<String> inputPaths = getInputPaths(periodTable);
         config.setInputPaths(inputPaths);
