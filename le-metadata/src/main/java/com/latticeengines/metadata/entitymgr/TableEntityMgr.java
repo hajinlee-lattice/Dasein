@@ -3,6 +3,7 @@ package com.latticeengines.metadata.entitymgr;
 import java.util.List;
 
 import org.hibernate.Hibernate;
+import org.springframework.data.domain.Pageable;
 
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.Attribute;
@@ -51,5 +52,9 @@ public interface TableEntityMgr {
     void addExtract(Table table, Extract extract);
 
     void deleteTableAndCleanupByName(String name);
+
+    Long countAttributesByTable_Pid(Long tablePid);
+
+    List<Attribute> findAttributesByTable_Pid(Long tablePid, Pageable pageable);
 
 }

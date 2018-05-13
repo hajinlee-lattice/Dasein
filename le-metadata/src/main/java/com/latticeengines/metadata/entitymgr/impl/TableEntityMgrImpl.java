@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -146,17 +147,10 @@ public class TableEntityMgrImpl implements TableEntityMgr {
         }
         
         Long tenantId = existingTable.getTenantId();
-        int batchSize = attributeDao.getBatchSize();
-        int counter = 0;
         for(Attribute attr: attributes) {
-            counter++;
             attr.setTable(existingTable);
             attr.setTenantId(tenantId);
             attributeDao.create(attr);
-            if (counter % batchSize == 0) {
-                attributeDao.flushSession();
-                attributeDao.clearSession();
-            }
         }
     }
     
@@ -436,4 +430,17 @@ public class TableEntityMgrImpl implements TableEntityMgr {
             }
         }
     }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public Long countAttributesByTable_Pid(Long tablePid) {
+        return attributeDao.countByTablePid(tablePid);
+    }
+
+    @Override
+    @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRES_NEW, readOnly = true)
+    public List<Attribute> findAttributesByTable_Pid(Long tablePid, Pageable pageable) {
+        return attributeDao.findByTablePid(tablePid, pageable);
+    }
+
 }

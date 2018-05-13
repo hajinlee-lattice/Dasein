@@ -110,6 +110,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         List<Attribute> attributes = null;
         try {
             if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+                log.info("CreateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(null);
             }
@@ -146,6 +147,7 @@ public class MetadataProxy extends MicroserviceRestApiProxy {
         List<Attribute> attributes = null;
         try {
             if (table.getAttributes() != null && table.getAttributes().size() > ATTRIBUTE_BATCH_SIZE) {
+                log.info("UpdateTable request for table: {} - Attributes: {} ", tableName, table.getAttributes().size());
                 attributes = table.getAttributes();
                 table.setAttributes(null);
             }

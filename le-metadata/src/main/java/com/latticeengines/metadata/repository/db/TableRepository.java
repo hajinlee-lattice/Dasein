@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public interface TableRepository extends BaseJpaRepository<Attribute, Long> {
 
-    @Query("select t.pid from Table t where t.tenant.id = ?1 and t.name = ?2 and t.tableTypeCode = 0")
+    @Query("select t.pid from Table t where t.tenant.id = ?1 and t.name = ?2")
     Long findPidByTenantIdAndName(String tenantId, String tableName);
 
 }
