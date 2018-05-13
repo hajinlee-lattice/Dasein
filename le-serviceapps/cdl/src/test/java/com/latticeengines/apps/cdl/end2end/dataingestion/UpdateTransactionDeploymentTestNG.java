@@ -6,7 +6,10 @@ import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointServic
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_1;
 import static com.latticeengines.apps.cdl.end2end.dataingestion.CheckpointService.TRANSACTION_IMPORT_SIZE_2;
 
+import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,9 +18,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
+import com.latticeengines.domain.exposed.metadata.transaction.ActivityType;
 import com.latticeengines.domain.exposed.pls.RatingBucketName;
 import com.latticeengines.domain.exposed.pls.RatingEngine;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
+import com.latticeengines.domain.exposed.serviceapps.cdl.ActivityMetrics;
+import com.latticeengines.domain.exposed.util.ActivityMetricsUtils;
+import com.latticeengines.proxy.exposed.cdl.ActivityMetricsProxy;
 
 
 public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeploymentTestNGBase {
@@ -27,9 +34,15 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
     static final String CHECK_POINT = "update3";
     private RatingEngine ratingEngine;
 
+    @Inject
+    private ActivityMetricsProxy activityMetricsProxy;
+
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(UpdateContactDeploymentTestNG.CHECK_POINT);
+
+        // To test deprecating curated metrics
+        setupPurchaseHistoryMetrics();
 
         long numAccounts = ACCOUNT_IMPORT_SIZE_TOTAL;
         long numContacts = CONTACT_IMPORT_SIZE_TOTAL;
@@ -88,5 +101,10 @@ public class UpdateTransactionDeploymentTestNG extends DataIngestionEnd2EndDeplo
         );
         // TODO: Rating engine needs to be activated
         // verifyRatingEngineCount(ratingEngine.getId(), ratingCounts);
+    }
+
+    void setupPurchaseHistoryMetrics() {
+        List<ActivityMetrics> metrics = ActivityMetricsUtils.fakeUpdatedPurchaseMetrics(mainTestTenant);
+        activityMetricsProxy.save(mainCustomerSpace, ActivityType.PurchaseHistory, metrics);
     }
 }
