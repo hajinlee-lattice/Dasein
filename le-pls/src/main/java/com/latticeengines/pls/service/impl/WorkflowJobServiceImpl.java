@@ -224,7 +224,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
     public String generateCSVReport(String jobId) {
         Job job = this.find(jobId, true);
         if (job == null || job.getJobStatus() != JobStatus.COMPLETED || !job.getJobType().equals("processAnalyzeWorkflow")) {
-            throw new NullPointerException("Job cannot be null or incomplete.");
+            throw new LedpException(LedpCode.LEDP_18184);
         }
         List<Job> subjobs = job.getSubJobs();
         Report report = job.getReports().stream()
@@ -273,9 +273,15 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
                 } else {
                     sb.append(subjob.getName() + columnDelimiter);
                 }
-                ObjectNode subjobPayload = (ObjectNode) om.readTree(subjob.getReports().get(0)
-                                                                                        .getJson()
-                                                                                        .getPayload());
+                ObjectNode subjobPayload;
+                if (subjob.getReports() != null) {
+                    subjobPayload = (ObjectNode) om.readTree(subjob.getReports().get(0)
+                                                                                .getJson()
+                                                                                .getPayload());
+                } else {
+                    subjobPayload = null;
+                }
+
                 sb.append(getValidation(subjob.getJobStatus(), subjobPayload) + columnDelimiter);
                 sb.append(getRecordsFound(subjobPayload, getImpactedBusinessEntity(subjob)) + columnDelimiter);
                 sb.append(getPayloadValue(subjobPayload, "total_failed_rows") + columnDelimiter);
@@ -298,21 +304,21 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return sb.toString();
     }
 
-    String getRecordsFound(ObjectNode payload, String impactedEntity) {
-        if (payload.has("total_rows")) {
+    private String getRecordsFound(ObjectNode payload, String impactedEntity) {
+        if (payload != null && payload.has("total_rows")) {
             return getPayloadValue(payload, "total_rows");
-        } else if (payload.has(impactedEntity + "_Deleted")) {
+        } else if (payload != null && payload.has(impactedEntity + "_Deleted")) {
             return getPayloadValue(payload, impactedEntity + "_Deleted");
         } else {
             return "-";
         }
     }
 
-    String getPayloadValue(ObjectNode subjobPayload, String key) {
+    private String getPayloadValue(ObjectNode subjobPayload, String key) {
         return subjobPayload != null && subjobPayload.has(key) ? subjobPayload.get(key).toString() : "-";
     }
 
-    String getImpactedBusinessEntity (Job job){
+    private String getImpactedBusinessEntity (Job job){
         String str = job.getOutputs() != null ? job.getOutputs().get(WorkflowContextConstants.Outputs.IMPACTED_BUSINESS_ENTITIES) : "";
         if (StringUtils.isEmpty(str)) {
             return "";
@@ -321,13 +327,13 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         return JsonUtils.convertList(entityList, BusinessEntity.class).get(0).name();
     }
 
-    String getValidation(JobStatus jobStatus, ObjectNode subjobPayload) {
+    private String getValidation(JobStatus jobStatus, ObjectNode subjobPayload) {
         switch (jobStatus) {
             case PENDING:
             case RUNNING:
                 return "In Progress";
             case COMPLETED:
-                if (subjobPayload.has("total_rows") && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
+                if (subjobPayload != null && subjobPayload.has("total_rows") && subjobPayload.get("total_rows").asInt() != subjobPayload.get("imported_rows").asInt()) {
                     return "Partial Success";
                 } else {
                     return "Success";
@@ -337,7 +343,7 @@ public class WorkflowJobServiceImpl implements WorkflowJobService {
         }
     }
 
-    String getActionType (String jobType) {
+    private String getActionType (String jobType) {
         switch (jobType) {
             case "cdlDataFeedImportWorkflow":
                 return ActionType.CDL_DATAFEED_IMPORT_WORKFLOW.getDisplayName() + ": ";

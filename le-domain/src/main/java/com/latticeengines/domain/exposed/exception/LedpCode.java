@@ -305,6 +305,7 @@ public enum LedpCode {
     LEDP_18181("The current Rating Engine {0} is not inactive thus it cannot be deleted."), //
     LEDP_18182("Submit ProcessAnalyze job failed: {0}"), //
     LEDP_18183("Column name {0} has potential conflict with system defined name, Please don't begin with {1}"), //
+    LEDP_18184("Job cannot be null or incomplete"), //
 
     // le-security 19000-19100
     LEDP_19000("Failed to send an email."), //
