@@ -1,5 +1,6 @@
 package com.latticeengines.pls.controller.datacollection;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
-import com.latticeengines.domain.exposed.security.Tenant;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionStatusProxy;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,13 +20,16 @@ import io.swagger.annotations.ApiOperation;
 @RequestMapping("/datacollection/status")
 public class DataCollectionStatusResource {
 
+    @Inject
+    private DataCollectionStatusProxy dataCollectionStatusProxy;
     @RequestMapping(value = "", //
             method = RequestMethod.GET, //
             headers = "Accept=application/json")
     @ResponseBody
     @ApiOperation(value = "Get attr data collection status")
     public DataCollectionStatusDetail getCollectionStatus(HttpServletRequest request) {
-        Tenant tenant = MultiTenantContext.getTenant();
-        return new DataCollectionStatusDetail();
+        DataCollectionStatusDetail detail = dataCollectionStatusProxy
+                .getOrCreateDataCollectionStatus(MultiTenantContext.getCustomerSpace().toString());
+        return detail;
     }
 }

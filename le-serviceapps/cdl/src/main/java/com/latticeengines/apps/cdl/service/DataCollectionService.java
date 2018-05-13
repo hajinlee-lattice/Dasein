@@ -3,6 +3,7 @@ package com.latticeengines.apps.cdl.service;
 import java.util.List;
 
 import com.latticeengines.domain.exposed.metadata.DataCollection;
+import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
@@ -47,5 +48,9 @@ public interface DataCollectionService {
     String updateDataCloudBuildNumber(String customerSpace, String collectionName, String dataCloudBuildNumber);
 
     void clearCache(String customerSpace);
+
+    DataCollectionStatusDetail getOrCreateDataCollectionStatus(String customerSpace);
+
+    void saveOrUpdateStatus(String customerSpace, DataCollectionStatusDetail status);
 
 }

@@ -7,5 +7,6 @@ public interface DataCollectionStatusEntityMgr {
 
     DataCollectionStatus findByTenant(Tenant tenant);
 
-    void saveStatus(DataCollectionStatus status);
+    void saveOrUpdateStatus(DataCollectionStatus status);
+
 }

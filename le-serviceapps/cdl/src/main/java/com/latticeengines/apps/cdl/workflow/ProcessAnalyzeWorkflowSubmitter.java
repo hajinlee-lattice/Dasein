@@ -49,6 +49,7 @@ import com.latticeengines.domain.exposed.workflow.Job;
 import com.latticeengines.domain.exposed.workflow.JobStatus;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionStatusProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.matchapi.ColumnMetadataProxy;
 import com.latticeengines.proxy.exposed.workflowapi.WorkflowProxy;
@@ -80,16 +81,18 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
 
     private final BatonService batonService;
 
+    private final DataCollectionStatusProxy dataCollectionStatusProxy;
     @Inject
     public ProcessAnalyzeWorkflowSubmitter(DataCollectionProxy dataCollectionProxy, DataFeedProxy dataFeedProxy, //
             WorkflowProxy workflowProxy, ColumnMetadataProxy columnMetadataProxy, ActionService actionService,
-            BatonService batonService) {
+            BatonService batonService, DataCollectionStatusProxy dataCollectionStatusProxy) {
         this.dataCollectionProxy = dataCollectionProxy;
         this.dataFeedProxy = dataFeedProxy;
         this.workflowProxy = workflowProxy;
         this.columnMetadataProxy = columnMetadataProxy;
         this.actionService = actionService;
         this.batonService = batonService;
+        this.dataCollectionStatusProxy = dataCollectionStatusProxy;
     }
 
     @WithWorkflowJobPid
@@ -103,6 +106,7 @@ public class ProcessAnalyzeWorkflowSubmitter extends WorkflowSubmitter {
             throw new LedpException(LedpCode.LEDP_37014);
         }
 
+        dataCollectionStatusProxy.getOrCreateDataCollectionStatus(customerSpace);
         DataFeed datafeed = dataFeedProxy.getDataFeed(customerSpace);
         Status datafeedStatus = datafeed.getStatus();
         log.info(String.format("data feed %s status: %s", datafeed.getName(), datafeedStatus.getName()));

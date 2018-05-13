@@ -11,7 +11,6 @@ import com.latticeengines.apps.cdl.entitymgr.DataCollectionStatusEntityMgr;
 import com.latticeengines.apps.cdl.repository.writer.DataCollectionStatusRepositoy;
 import com.latticeengines.db.exposed.dao.BaseDao;
 import com.latticeengines.db.exposed.entitymgr.impl.BaseEntityMgrRepositoryImpl;
-import com.latticeengines.db.exposed.entitymgr.impl.JpaEntityMgrRepositoryImpl;
 import com.latticeengines.db.exposed.repository.BaseJpaRepository;
 import com.latticeengines.domain.exposed.metadata.DataCollectionStatus;
 import com.latticeengines.domain.exposed.security.Tenant;
@@ -44,9 +43,10 @@ public class DataCollectionStatusEntityMgrImpl extends BaseEntityMgrRepositoryIm
 
     @Override
     @Transactional(transactionManager = "transactionManager", propagation = Propagation.REQUIRED)
-    public void saveStatus(DataCollectionStatus status) {
+    public void saveOrUpdateStatus(DataCollectionStatus status) {
         getDao().createOrUpdate(status);
     }
+
 
 
 
