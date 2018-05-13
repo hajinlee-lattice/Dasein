@@ -15,15 +15,13 @@ import org.springframework.stereotype.Component;
 
 import com.latticeengines.db.exposed.util.MultiTenantContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.statistics.AttributeRepository;
 import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.query.BusinessEntity;
 import com.latticeengines.domain.exposed.security.Tenant;
 import com.latticeengines.domain.exposed.ulysses.PeriodTransaction;
 import com.latticeengines.domain.exposed.ulysses.ProductHierarchy;
 import com.latticeengines.objectapi.service.PurchaseHistoryService;
-import com.latticeengines.objectapi.util.QueryServiceUtils;
-import com.latticeengines.query.exposed.evaluator.QueryEvaluatorService;
+import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
 
 @Component("purchaseHistoryService")
 public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
@@ -34,7 +32,7 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     private JdbcTemplate redshiftJdbcTemplate;
 
     @Inject
-    private QueryEvaluatorService queryEvaluatorService;
+    private DataCollectionProxy dataCollectionProxy;
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -42,9 +40,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
             DataCollection.Version version, ProductType productType) {
         List<PeriodTransaction> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(MultiTenantContext.getCustomerSpace(),
-                version, queryEvaluatorService);
-        String tableName = attrRepo.getTableName(BusinessEntity.PeriodTransaction.getServingStore());
+        String tableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.PeriodTransaction.getServingStore());
         log.info(String.format(
                 "Get Period Transaction table %s for %s with account %s and periodName %s, productType %s, version %s",
                 tableName, tenant.getId(), accountId, periodName, productType, version));
@@ -78,9 +75,8 @@ public class PurchaseHistoryServiceImpl implements PurchaseHistoryService {
     public List<ProductHierarchy> getProductHierarchy(DataCollection.Version version) {
         List<ProductHierarchy> resultList = new ArrayList<>();
         Tenant tenant = MultiTenantContext.getTenant();
-        AttributeRepository attrRepo = QueryServiceUtils.checkAndGetAttrRepo(MultiTenantContext.getCustomerSpace(),
-                version, queryEvaluatorService);
-        String tableName = attrRepo.getTableName(BusinessEntity.ProductHierarchy.getServingStore());
+        String tableName = dataCollectionProxy.getTableName(tenant.getId(),
+                BusinessEntity.ProductHierarchy.getServingStore());
         log.info(String.format("Get product Hierarchy table %s for %s", tableName, tenant.getId()));
         List<Map<String, Object>> retList = redshiftJdbcTemplate
                 .queryForList("SELECT productid, productline, productfamily, productcategory FROM " + tableName);
