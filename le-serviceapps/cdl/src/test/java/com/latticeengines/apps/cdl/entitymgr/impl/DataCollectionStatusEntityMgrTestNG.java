@@ -31,7 +31,7 @@ public class DataCollectionStatusEntityMgrTestNG extends CDLFunctionalTestNGBase
         status.setDataCollection(dataCollection);
         status.setVersion(DataCollection.Version.Blue);
         status.setDetail(detail);
-        dataCollectionStatusEntityMgr.saveOrUpdateStatus(status);
+        dataCollectionStatusEntityMgr.saveStatus(status);
         // wait 500 replication lag
         Thread.sleep(500);
 
@@ -39,9 +39,9 @@ public class DataCollectionStatusEntityMgrTestNG extends CDLFunctionalTestNGBase
         DataCollectionStatusDetail retrievedDetail = retrievedStatus.getDetail();
         Assert.assertTrue(retrievedDetail.getAccountCount() == 0L);
 
-        retrievedDetail.setAccountCount(10L);
-        status.setDetail(retrievedDetail);
-        dataCollectionStatusEntityMgr.saveOrUpdateStatus(status);
+        detail.setAccountCount(10L);
+        status.setDetail(detail);
+        dataCollectionStatusEntityMgr.saveStatus(status);
         // wait 500 replication lag
         Thread.sleep(500);
         retrievedStatus = dataCollectionStatusEntityMgr.findByTenant(mainTestTenant);

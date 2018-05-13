@@ -29,7 +29,6 @@ import com.latticeengines.common.exposed.util.JsonUtils;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.cdl.ChoreographerContext;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeed;
 import com.latticeengines.domain.exposed.metadata.datafeed.DataFeedExecution;
@@ -52,7 +51,6 @@ import com.latticeengines.domain.exposed.workflow.ReportPurpose;
 import com.latticeengines.domain.exposed.workflow.WorkflowContextConstants;
 import com.latticeengines.proxy.exposed.cdl.ActionProxy;
 import com.latticeengines.proxy.exposed.cdl.DataCollectionProxy;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionStatusProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.proxy.exposed.cdl.PeriodProxy;
 import com.latticeengines.proxy.exposed.cdl.RatingEngineProxy;
@@ -68,9 +66,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
     @Inject
     private DataCollectionProxy dataCollectionProxy;
-
-    @Inject
-    private DataCollectionStatusProxy dataCollectionStatusProxy;
 
     @Inject
     private DataFeedProxy dataFeedProxy;
@@ -142,11 +137,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
 
         String evaluationDate = periodProxy.getEvaluationDate(customerSpace.toString());
         putStringValueInContext(CDL_EVALUATION_DATE, evaluationDate);
-        DataCollectionStatusDetail detail = dataCollectionStatusProxy
-                .getOrCreateDataCollectionStatus(customerSpace.toString());
-        detail.setEvaluationDate(evaluationDate);
-        log.info("StartProxessing step: dataCollection Status is " + JsonUtils.serialize(detail));
-        dataCollectionStatusProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail);
 
         createReportJson();
         setupInactiveVersion();
@@ -188,12 +178,6 @@ public class StartProcessing extends BaseWorkflowStep<ProcessStepConfiguration> 
     private boolean checkDataCloudChange() {
         boolean changed = false;
         String currentBuildNumber = configuration.getDataCloudBuildNumber();
-        DataCollectionStatusDetail detail = dataCollectionStatusProxy
-                .getOrCreateDataCollectionStatus(customerSpace.toString());
-        detail.setDataCloudBuildNumber(currentBuildNumber);
-        log.info("StartProxessing step: dataCollection Status is " + JsonUtils.serialize(detail));
-        dataCollectionStatusProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail);
-
         DataCollection dataCollection = dataCollectionProxy.getDefaultDataCollection(customerSpace.toString());
         if (dataCollection != null
                 && (dataCollection.getDataCloudBuildNumber() == null

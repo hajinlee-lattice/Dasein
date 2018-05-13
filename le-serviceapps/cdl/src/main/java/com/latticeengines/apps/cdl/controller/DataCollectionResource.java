@@ -25,7 +25,6 @@ import com.latticeengines.domain.exposed.ResponseDocument;
 import com.latticeengines.domain.exposed.SimpleBooleanResponse;
 import com.latticeengines.domain.exposed.camille.CustomerSpace;
 import com.latticeengines.domain.exposed.metadata.DataCollection;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.MetadataSegment;
 import com.latticeengines.domain.exposed.metadata.StatisticsContainer;
@@ -74,23 +73,6 @@ public class DataCollectionResource {
         DataCollection.Version version1 = dataCollectionService.switchDataCollectionVersion(customerSpace, null,
                 version);
         return ResponseDocument.successResponse(version1);
-    }
-
-    @GetMapping(value = "/status")
-    @ResponseBody
-    @ApiOperation(value = "Get or create data collection status")
-    public DataCollectionStatusDetail getDataCollectionStatus(@PathVariable String customerSpace) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        return dataCollectionService.getOrCreateDataCollectionStatus(customerSpace);
-    }
-
-    @PostMapping(value = "/status")
-    @ResponseBody
-    @ApiOperation(value = "Save or update data collection status")
-    public void saveDataCollectionStatus(@PathVariable String customerSpace,
-            @RequestBody DataCollectionStatusDetail detail) {
-        customerSpace = CustomerSpace.parse(customerSpace).toString();
-        dataCollectionService.saveOrUpdateStatus(customerSpace, detail);
     }
 
     @PutMapping(value = "/datacloudbuildnumber/{dataCloudBuildNumber:.+}")

@@ -1,6 +1,7 @@
 package com.latticeengines.domain.exposed.metadata;
 
 import java.io.Serializable;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -13,11 +14,11 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class DataCollectionStatusDetail implements Serializable {
     private static final long serialVersionUID = -2375077678460293618L;
     @JsonProperty("MinTxnDate")
-    private Integer minTxnDate = 0;
+    private Date minTxnDate = new Date(0);
     @JsonProperty("MaxTxnDate")
-    private Integer maxTxnDate = 0;
+    private Date maxTxnDate = new Date(0);
     @JsonProperty("EvaluationDate")
-    private String evaluationDate = "not set";
+    private Date evaluationDate = new Date(0);
     @JsonProperty("DataCloudBuildNumber")
     private String dataCloudBuildNumber = "not set";
     @JsonProperty("AccountCount")
@@ -27,27 +28,27 @@ public class DataCollectionStatusDetail implements Serializable {
     @JsonProperty("TransactionCount")
     private Long transactionCount = 0L;
 
-    public Integer getMinTxnDate() {
+    public Date getMinTxnDate() {
         return minTxnDate;
     }
 
-    public void setMinTxnDate(Integer minTxnDate) {
+    public void setMinTxnDate(Date minTxnDate) {
         this.minTxnDate = minTxnDate;
     }
 
-    public Integer getMaxTxnDate() {
+    public Date getMaxTxnDate() {
         return maxTxnDate;
     }
 
-    public void setMaxTxnDate(Integer maxTxnDate) {
+    public void setMaxTxnDate(Date maxTxnDate) {
         this.maxTxnDate = maxTxnDate;
     }
 
-    public String getEvaluationDate() {
+    public Date getEvaluationDate() {
         return evaluationDate;
     }
 
-    public void setEvaluationDate(String evaluationDate) {
+    public void setEvaluationDate(Date evaluationDate) {
         this.evaluationDate = evaluationDate;
     }
 
@@ -82,7 +83,6 @@ public class DataCollectionStatusDetail implements Serializable {
     public void setTransactionCount(Long transactionCount) {
         this.transactionCount = transactionCount;
     }
-
 
 
 }

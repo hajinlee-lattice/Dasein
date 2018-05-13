@@ -20,11 +20,6 @@ CREATE PROCEDURE `UpdateCDLTables`()
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_ACC_ID` varchar(255);
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_ORG_ID` varchar(255);
     ALTER TABLE `PLS_MultiTenant`.`PLAY_LAUNCH` add column `DESTINATION_SYS_TYPE` varchar(255);
-    
-    create table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` (`PID` bigint not null auto_increment, `DETAIL` JSON, `VERSION` varchar(255) not null, `FK_COLLECTION_ID` bigint not null, `TENANT_ID` bigint not null, primary key (`PID`)) engine=InnoDB;
-
-    alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` add constraint `FK_METADATADATACOLLECTIONSTATUS_FKCOLLECTIONID_METADATADATACOLLE` foreign key (`FK_COLLECTION_ID`) references `METADATA_DATA_COLLECTION` (`PID`) on delete cascade;
-    alter table `PLS_MultiTenant`.`METADATA_DATA_COLLECTION_STATUS` add constraint `FK_METADATADATACOLLECTIONSTATUS_TENANTID_TENANT` foreign key (`TENANT_ID`) references `TENANT` (`TENANT_PID`) on delete cascade;
 //
 DELIMITER ;
 

@@ -34,7 +34,6 @@ import com.latticeengines.domain.exposed.datacloud.transformation.step.SourceTab
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TargetTable;
 import com.latticeengines.domain.exposed.datacloud.transformation.step.TransformationStepConfig;
 import com.latticeengines.domain.exposed.metadata.Attribute;
-import com.latticeengines.domain.exposed.metadata.DataCollectionStatusDetail;
 import com.latticeengines.domain.exposed.metadata.Extract;
 import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
@@ -45,7 +44,6 @@ import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 import com.latticeengines.domain.exposed.serviceflows.cdl.steps.process.ProcessTransactionStepConfiguration;
 import com.latticeengines.domain.exposed.util.TableUtils;
 import com.latticeengines.domain.exposed.util.TimeSeriesUtils;
-import com.latticeengines.proxy.exposed.cdl.DataCollectionStatusProxy;
 import com.latticeengines.proxy.exposed.cdl.DataFeedProxy;
 import com.latticeengines.scheduler.exposed.LedpQueueAssigner;
 import com.latticeengines.serviceflows.workflow.util.TableCloneUtils;
@@ -63,8 +61,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
 
     @Inject
     private DataFeedProxy dataFeedProxy;
-    @Inject
-    private DataCollectionStatusProxy dataCollectionStatusProxy;
 
     List<String> stringFields;
     List<String> longFields;
@@ -382,12 +378,6 @@ public class MergeTransaction extends BaseMergeImports<ProcessTransactionStepCon
         Integer newLatest = currentLatest == null || latestDayPeriod > currentLatest ? latestDayPeriod : currentLatest;
         if (newEarliest != currentEarliest || newLatest != currentLatest) {
             dataFeedProxy.updateEarliestLatestTransaction(customerSpace.toString(), newEarliest, newLatest);
-            DataCollectionStatusDetail detail = dataCollectionStatusProxy
-                    .getOrCreateDataCollectionStatus(customerSpace.toString());
-            detail.setMaxTxnDate(newLatest);
-            detail.setMinTxnDate(newEarliest);
-            log.info("MergeTransaction step : dataCollection Status is " + JsonUtils.serialize(detail));
-            dataCollectionStatusProxy.saveOrUpdateDataCollectionStatus(customerSpace.toString(), detail);
         }
     }
 
