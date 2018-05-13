@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.avro.generic.GenericRecord;
 import org.apache.hadoop.conf.Configuration;
@@ -21,6 +20,7 @@ import com.latticeengines.domain.exposed.metadata.InterfaceName;
 import com.latticeengines.domain.exposed.metadata.Table;
 import com.latticeengines.domain.exposed.metadata.TableRoleInCollection;
 import com.latticeengines.domain.exposed.metadata.standardschemas.SchemaRepository;
+import com.latticeengines.domain.exposed.metadata.transaction.ProductType;
 import com.latticeengines.domain.exposed.pls.SchemaInterpretation;
 
 public class TransactionUtils {
@@ -79,22 +79,16 @@ public class TransactionUtils {
         return txnTables;
     }
 
-    public static boolean hasAnalyticProduct(Configuration yarnConfiguration, String filePath,
-            Set<String> analyticProductIds) {
+    public static boolean hasAnalyticProduct(Configuration yarnConfiguration, String filePath) {
         filePath = getPath(filePath);
         String avroPath = filePath + "/*.avro";
         log.info("Load transactions from " + avroPath);
         Iterator<GenericRecord> records = AvroUtils.iterator(yarnConfiguration, avroPath);
         while (records.hasNext()) {
             GenericRecord record = records.next();
-            if (analyticProductIds.contains(String.valueOf(record.get(InterfaceName.ProductId.name())))) {
-                return true;
-            }
-            /*
             if (ProductType.Analytic.name().equals(String.valueOf(record.get(InterfaceName.ProductType.name())))) {
                 return true;
             }
-            */
         }
         return false;
     }

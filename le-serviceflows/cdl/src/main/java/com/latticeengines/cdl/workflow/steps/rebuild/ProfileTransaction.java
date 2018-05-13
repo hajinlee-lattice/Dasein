@@ -331,8 +331,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
-                // InterfaceName.ProductType.name(), //
-                InterfaceName.ContactId.name(), //
+                InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
@@ -388,8 +387,7 @@ public class ProfileTransaction extends ProfileStepBase<ProcessTransactionStepCo
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
                 InterfaceName.ProductId.name(), //
-                // InterfaceName.ProductType.name(), //
-                InterfaceName.ContactId.name(), //
+                InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.PeriodId.name()));
         step.setConfiguration(JsonUtils.serialize(config));

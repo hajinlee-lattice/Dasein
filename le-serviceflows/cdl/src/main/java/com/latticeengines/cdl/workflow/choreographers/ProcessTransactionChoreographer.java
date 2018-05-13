@@ -5,9 +5,7 @@ import static com.latticeengines.workflow.exposed.build.BaseWorkflowStep.CUSTOME
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -293,12 +291,10 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         boolean foundAnalyticProduct = false;
         List<Product> productList = new ArrayList<>(
                 ProductUtils.loadProducts(yarnConfiguration, productTable.getExtracts().get(0).getPath()));
-        Set<String> analyticProductIds = new HashSet<>();
         for (Product product : productList) {
             if (ProductType.Analytic.name().equals(product.getProductType())) {
                 foundAnalyticProduct = true;
-                analyticProductIds.add(product.getProductId());
-                // break;
+                break;
             }
         }
         if (!foundAnalyticProduct) {
@@ -321,8 +317,7 @@ public class ProcessTransactionChoreographer extends AbstractProcessEntityChoreo
         Table yearTable = PeriodStrategyUtils.findPeriodTableFromStrategy(periodTables, PeriodStrategy.CalendarYear);
 
         log.info("Checking Analytic Product existence in table " + yearTable.getName() + ". Might take long time.");
-        if (TransactionUtils.hasAnalyticProduct(yarnConfiguration, yearTable.getExtracts().get(0).getPath(),
-                analyticProductIds)) {
+        if (TransactionUtils.hasAnalyticProduct(yarnConfiguration, yearTable.getExtracts().get(0).getPath())) {
             log.info("Found Analytic Product in table " + yearTable.getName());
             return true;
         }

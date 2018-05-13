@@ -308,8 +308,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setCountOutputField(Collections.singletonList(InterfaceName.TransactionCount.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
-                InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
+                InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.TransactionDate.name(), //
                 InterfaceName.TransactionDayPeriod.name()));
@@ -361,8 +361,8 @@ public class ProcessTransactionDiff extends BaseProcessDiffStep<ProcessTransacti
         config.setSumLongOutputFields(Collections.singletonList(InterfaceName.TotalQuantity.name()));
         config.setGroupByFields(Arrays.asList( //
                 InterfaceName.AccountId.name(), //
-                InterfaceName.ContactId.name(), //
                 InterfaceName.ProductId.name(), //
+                InterfaceName.ProductType.name(), //
                 InterfaceName.TransactionType.name(), //
                 InterfaceName.PeriodId.name()));
         step.setConfiguration(appendEngineConf(config, lightEngineConfig()));

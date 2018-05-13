@@ -25,15 +25,10 @@ public class UpdateAccountDeploymentTestNG extends DataIngestionEnd2EndDeploymen
 
     static final String CHECK_POINT = "update1";
 
-    private static final long DEPIVOTED_METRICS_SIZE = 7871L;
-
     @Test(groups = "end2end")
     public void runTest() throws Exception {
         resumeCheckpoint(ProcessTransactionDeploymentTestNG.CHECK_POINT);
         Assert.assertEquals(countInRedshift(BusinessEntity.Account), ACCOUNT_IMPORT_SIZE_1);
-
-        // For the test scenario of non-1st profile purchase history
-        dataFeedProxy.updateEarliestLatestTransaction(mainTestTenant.getId(), EARLIEST_TRANSACTION, LATEST_TRANSACTION);
 
         new Thread(this::createTestSegment1).start();
 
